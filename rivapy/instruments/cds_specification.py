@@ -9,7 +9,8 @@ class CDSSpecification:
                 notional: float = 1.0, 
                 expiry: datetime=None, 
                 recovery: float = None, 
-                issuer: str = '', cash_settled: bool = True):
+                issuer: str = '', 
+                cash_settled: bool = True):
         """Constructor for credit default swap
 
         Args:
@@ -32,6 +33,7 @@ class CDSSpecification:
             self.expiry = premium_pay_dates[-1]
         self.recovery = recovery
         self.issuer = issuer
+        self.cash_settled = cash_settled
         self.validate()
 
     def validate(self):
