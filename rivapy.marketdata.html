@@ -164,8 +164,31 @@
 <span id="curves"></span><h2>Curves<a class="headerlink" href="#module-rivapy.marketdata.curves" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="rivapy.marketdata.curves.DiscountCurve">
-<em class="property">class </em><code class="sig-prename descclassname">rivapy.marketdata.curves.</code><code class="sig-name descname">DiscountCurve</code><span class="sig-paren">(</span><em class="sig-param">id: str, refdate: Union[datetime.datetime, datetime.date], dates: List[Union[datetime.datetime, datetime.date]], df: List[float], interpolation: rivapy.marketdata.curves.DiscountCurve.InterpolationMethod = &lt;InterpolationMethod.HAGAN_DF: 1&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.curves.DiscountCurve" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">rivapy.marketdata.curves.</code><code class="sig-name descname">DiscountCurve</code><span class="sig-paren">(</span><em class="sig-param">id: str, refdate: Union[datetime.datetime, datetime.date], dates: List[Union[datetime.datetime, datetime.date]], df: List[float], interpolation: pyvacon._enum_creator.InterpolationType = &lt;InterpolationType.HAGAN_DF: 5&gt;, extrapolation: pyvacon._enum_creator.ExtrapolationType = &lt;ExtrapolationType.NONE: 0&gt;, daycounter: pyvacon._enum_creator.Type = &lt;Type.Act365Fixed: 2&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.curves.DiscountCurve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Discountcurve</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>str</em>) – Identifier of the discount curve.</p></li>
+<li><p><strong>refdate</strong> (<em>Union</em><em>[</em><em>datetime</em><em>, </em><em>date</em><em>]</em>) – Reference date of the discount curve.</p></li>
+<li><p><strong>dates</strong> (<em>List</em><em>[</em><em>Union</em><em>[</em><em>datetime</em><em>, </em><em>date</em><em>]</em><em>]</em>) – List of dates belonging to the list of discount factors. All dates must be distinct and equal or after the refdate, otherwise an exception will be thrown.</p></li>
+<li><p><strong>df</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – List of discount factors. Length of list of discount factors must equal to length of list of dates, otherwise an exception will be thrown.</p></li>
+<li><p><strong>interpolation</strong> (<em>enums.InterpolationType</em><em>, </em><em>optional</em>) – Defaults to InterpolationType.HAGAN_DF.</p></li>
+<li><p><strong>extrapolation</strong> (<em>enums.ExtrapolationType</em><em>, </em><em>optional</em>) – Defaults to ExtrapolationType.NONE which does not allow to compute a discount factor for a date past all given dates given to this constructor.</p></li>
+<li><p><strong>daycounter</strong> (<em>enums.DayCounterType</em><em>, </em><em>optional</em>) – Daycounter used within the interpolation formula to compute a discount factor between two dates from the dates-list above. Defaults to DayCounterType.Act365Fixed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>Exception</strong> – [description]</p></li>
+<li><p><strong>Exception</strong> – [description]</p></li>
+<li><p><strong>Exception</strong> – [description]</p></li>
+<li><p><strong>Exception</strong> – [description]</p></li>
+<li><p><strong>Exception</strong> – [description]</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py class">
 <dt id="rivapy.marketdata.curves.DiscountCurve.InterpolationMethod">
 <em class="property">class </em><code class="sig-name descname">InterpolationMethod</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.curves.DiscountCurve.InterpolationMethod" title="Permalink to this definition">¶</a></dt>
@@ -213,8 +236,19 @@
 
 <dl class="py method">
 <dt id="rivapy.marketdata.curves.DiscountCurve.plot">
-<code class="sig-name descname">plot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.curves.DiscountCurve.plot" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">days</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">10</span></em>, <em class="sig-param"><span class="n">discount_factors</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.curves.DiscountCurve.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the discount curve using matplotlibs plot function.
+The timegrid includes the dates of the discount curve. Here either the discount factors or the zero rates (continuously compounded, ACT365 yearfraction) are plotted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>days</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of days between two plotted rates/discount factors. Defaults to 10.</p></li>
+<li><p><strong>discount_factors</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, discount factors will be plotted, otherwise the rates. Defaults to False.</p></li>
+<li><p><strong>**kwargs</strong> – optional arguments that will be directly passed to the matplotlib plto function</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="rivapy.marketdata.curves.DiscountCurve.value">
