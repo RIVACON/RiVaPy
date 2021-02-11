@@ -11,7 +11,8 @@ Welcome to rivapy's documentation!
    :caption: Contents:
 
    rivapy.instruments
-   
+   rivapy.pricing
+   rivapy.marketdata
 
 Indices and tables
 ==================
