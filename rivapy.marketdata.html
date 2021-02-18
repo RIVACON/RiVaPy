@@ -88,6 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="rivapy.instruments.html">instruments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rivapy.pricing.html">pricing</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Marketdata</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#equity">Equity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-rivapy.marketdata.curves">Curves</a></li>
 </ul>
 </li>
@@ -160,6 +161,32 @@
             
   <div class="section" id="marketdata">
 <h1>Marketdata<a class="headerlink" href="#marketdata" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="equity">
+<h2>Equity<a class="headerlink" href="#equity" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="rivapy.marketdata.DividendTable">
+<em class="property">class </em><code class="sig-prename descclassname">rivapy.marketdata.</code><code class="sig-name descname">DividendTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">id</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">refdate</span><span class="p">:</span> <span class="n">datetime.datetime</span></em>, <em class="sig-param"><span class="n">ex_dates</span><span class="p">:</span> <span class="n">List<span class="p">[</span>datetime.datetime<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">pay_dates</span><span class="p">:</span> <span class="n">List<span class="p">[</span>datetime.datetime<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">div_yield</span><span class="p">:</span> <span class="n">List<span class="p">[</span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">div_cash</span><span class="p">:</span> <span class="n">List<span class="p">[</span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">tax_factors</span><span class="p">:</span> <span class="n">List<span class="p">[</span>float<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.DividendTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>[summary]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>str</em>) – [description]</p></li>
+<li><p><strong>refdate</strong> (<em>datetime</em>) – [description]</p></li>
+<li><p><strong>ex_dates</strong> (<em>List</em><em>[</em><em>datetime</em><em>]</em>) – [description]</p></li>
+<li><p><strong>pay_dates</strong> (<em>List</em><em>[</em><em>datetime</em><em>]</em>) – [description]</p></li>
+<li><p><strong>div_yield</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – [description]</p></li>
+<li><p><strong>div_cash</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – [description]</p></li>
+<li><p><strong>tax_factors</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – [description]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Yields</dt>
+<dd class="field-even"><p><em>[type]</em> – [description]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
 <div class="section" id="module-rivapy.marketdata.curves">
 <span id="curves"></span><h2>Curves<a class="headerlink" href="#module-rivapy.marketdata.curves" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
@@ -189,23 +216,6 @@
 </ul>
 </dd>
 </dl>
-<dl class="py class">
-<dt id="rivapy.marketdata.curves.DiscountCurve.InterpolationMethod">
-<em class="property">class </em><code class="sig-name descname">InterpolationMethod</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.curves.DiscountCurve.InterpolationMethod" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
-<p>Enum of different interpolation methods that can be used in the discount curve</p>
-<dl class="py attribute">
-<dt id="rivapy.marketdata.curves.DiscountCurve.InterpolationMethod.HAGAN_DF">
-<code class="sig-name descname">HAGAN_DF</code><em class="property"> = 1</em><a class="headerlink" href="#rivapy.marketdata.curves.DiscountCurve.InterpolationMethod.HAGAN_DF" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="rivapy.marketdata.curves.DiscountCurve.InterpolationMethod.LINEAR">
-<code class="sig-name descname">LINEAR</code><em class="property"> = 2</em><a class="headerlink" href="#rivapy.marketdata.curves.DiscountCurve.InterpolationMethod.LINEAR" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 <dl class="py method">
 <dt id="rivapy.marketdata.curves.DiscountCurve.get_dates">
 <code class="sig-name descname">get_dates</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>datetime.datetime<span class="p">]</span><a class="headerlink" href="#rivapy.marketdata.curves.DiscountCurve.get_dates" title="Permalink to this definition">¶</a></dt>
@@ -269,6 +279,44 @@ The timegrid includes the dates of the discount curve. Here either the discount 
 </dd>
 </dl>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="rivapy.marketdata.curves.EquityForwardCurve">
+<em class="property">class </em><code class="sig-prename descclassname">rivapy.marketdata.curves.</code><code class="sig-name descname">EquityForwardCurve</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">spot</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">funding_curve</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#rivapy.marketdata.curves.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve">rivapy.marketdata.curves.DiscountCurve</a></span></em>, <em class="sig-param"><span class="n">borrow_curve</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#rivapy.marketdata.curves.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve">rivapy.marketdata.curves.DiscountCurve</a></span></em>, <em class="sig-param"><span class="n">div_table</span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.curves.EquityForwardCurve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Equity Forward Curve</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spot</strong> (<em>float</em>) – Current spot</p></li>
+<li><p><strong>discount_curve</strong> (<a class="reference internal" href="#rivapy.marketdata.curves.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><em>DiscountCurve</em></a>) – [description]</p></li>
+<li><p><strong>funding_curve</strong> (<a class="reference internal" href="#rivapy.marketdata.curves.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><em>DiscountCurve</em></a>) – [description]</p></li>
+<li><p><strong>borrow_curve</strong> (<a class="reference internal" href="#rivapy.marketdata.curves.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><em>DiscountCurve</em></a>) – [description]</p></li>
+<li><p><strong>div_table</strong> (<a class="reference internal" href="#rivapy.marketdata.DividendTable" title="rivapy.marketdata.DividendTable"><code class="xref py py-class docutils literal notranslate"><span class="pre">rivapy.marketdata.DividendTable</span></code></a>) – [description]</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="rivapy.marketdata.curves.EquityForwardCurve.plot">
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">days</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">10</span></em>, <em class="sig-param"><span class="n">days_end</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">3650</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.curves.EquityForwardCurve.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the forward curve using matplotlibs plot function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>days</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of days between two plotted rates/discount factors. Defaults to 10.</p></li>
+<li><p><strong>days_end</strong> (<em>int. optional</em>) – Number of days when plotting will end. Defaults to 10*365 (10yr)</p></li>
+<li><p><strong>**kwargs</strong> – optional arguments that will be directly passed to the matplotlib plto function</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="rivapy.marketdata.curves.EquityForwardCurve.value">
+<code class="sig-name descname">value</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">refdate</span></em>, <em class="sig-param"><span class="n">expiry</span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.curves.EquityForwardCurve.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
