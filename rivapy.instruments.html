@@ -347,9 +347,9 @@
 <li><p><strong>sec_lvl</strong> (<em>str</em><em>, </em><em>optional</em>) – Securitization level. Can be selected from rivapy.enums.SecuritizationLevel. Defaults to SecuritizationLevel.COLLATERALIZED.</p></li>
 <li><p><strong>curr</strong> (<em>str</em><em>, </em><em>optional</em>) – Currency (ISO-4217 Code). Must not be set if pricing data is manually defined. Can be selected from rivapy.enums.Currency. Defaults to Currency.EUR.</p></li>
 <li><p><strong>udl_id</strong> (<em>str</em><em>, </em><em>optional</em>) – Underlying Id. Only used if pricing data is manually defined. Defaults to ‘’.</p></li>
-<li><p><strong>share_ratio</strong> (<em>float</em><em>, </em><em>optional</em>) – [description]. Defaults to 1.0.</p></li>
-<li><p><strong>ex_settle</strong> (<em>int</em><em>, </em><em>optional</em>) – . Defaults to 0.</p></li>
-<li><p><strong>trade_settle</strong> (<em>int</em><em>, </em><em>optional</em>) – [description]. Defaults to 0.</p></li>
+<li><p><strong>share_ratio</strong> (<em>float</em><em>, </em><em>optional</em>) – Ratio of covered shares of the underlying by a single option contract. Defaults to 1.0.</p></li>
+<li><p><strong>ex_settle</strong> (<em>int</em><em>, </em><em>optional</em>) – Days between expiry date and settlement (to delivery of cash or shares). Defaults to 0.</p></li>
+<li><p><strong>trade_settle</strong> (<em>int</em><em>, </em><em>optional</em>) – Days between trade date and settlement date. Defaults to 0.</p></li>
 </ul>
 </dd>
 </dl>
