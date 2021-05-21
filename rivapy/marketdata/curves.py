@@ -217,7 +217,8 @@ class EquityForwardCurve:
         plt.ylabel('forward value')
 
 class BootstrapHazardCurve:
-    def __init__(self, 
+    def __init__(self,
+                    id: str, 
                     ref_date: datetime, 
                     trade_date: datetime,
                     dc: DiscountCurve,
@@ -241,6 +242,7 @@ class BootstrapHazardCurve:
         self.trade_date=trade_date
         self.dc=dc
         self.RR=RR
+        self.id=id
         #self.payment_dates_bootstrapp=None
         self.market_spreads=market_spreads
         self.payment_cycle= payment_cycle
@@ -312,15 +314,17 @@ class BootstrapHazardCurve:
         PV_protection=(((1-self.RR))*risk_adj_factor_protection)
         
         par_spread_i=(PV_protection)/((PV_premium+PV_accrued))
+        #print(par_spread_i)
         return par_spread_i
 
-    def create_survival(self, refdate, dates: List[datetime], hazard_rates: List[float]):
-        return _SurvivalCurve('survival_curve', refdate, dates, hazard_rates)
+    def create_survival(self, dates: List[datetime], hazard_rates: List[float]):
+        return _SurvivalCurve(self.id, self.ref_date, dates, hazard_rates)
     
-    def calibration_error(self, x, mkt_par_spread, ref_date, payment_dates, dates, hazard_rates):
+    def calibration_error(self, x, mkt_par_spread, payment_dates, dates, hazard_rates):
         hazard_rates[-1] = x
         maturity_date = dates[-1]
-        dc_surv = self.create_survival(ref_date, dates, hazard_rates)
+        dc_surv = self.create_survival(dates, hazard_rates)
+        #print(mkt_par_spread - self.par_spread(dc_surv, maturity_date, payment_dates))
         return  mkt_par_spread - self.par_spread(dc_surv, maturity_date, payment_dates)
 
     def calibrate_hazard_rate(self):
@@ -332,13 +336,13 @@ class BootstrapHazardCurve:
             mkt_par_spread_iter = self.market_spreads[i]
             sc_dates.append(payment_dates_iter[-1])
             hazard_rates.append(hazard_rates[-1])
-            sol=scipy.optimize.root_scalar(self.calibration_error,args=(mkt_par_spread_iter, self.ref_date, 
+            sol=scipy.optimize.root_scalar(self.calibration_error,args=(mkt_par_spread_iter, 
                             payment_dates_iter, sc_dates, hazard_rates),method='brentq',bracket=[0,3],xtol=1e-8,rtol=1e-8)
             hazard_rates[-1] = sol.root
-        return hazard_rates,  self.create_survival(self.ref_date, sc_dates, hazard_rates)
+            #print(sol.root)
+        return hazard_rates,  self.create_survival(sc_dates, hazard_rates)
 
     def get_hazard_rates(self):
-        #hazard_rates_value=[]
         hazard_rates_value=self.calibrate_hazard_rate()[0]
         return hazard_rates_value
 
