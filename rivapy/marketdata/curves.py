@@ -248,6 +248,35 @@ class BootstrapHazardCurve:
         self._pyvacon_obj = None
         #self.hazard_rates_value = None
 
+    def payment_dates(self, maturity_date, payment_cycle):
+        date=maturity_date-relativedelta.relativedelta(months=+payment_cycle)
+        payment_dates=[maturity_date]
+        
+        if maturity_date<date:
+            payment_dates.append(maturity_date)
+        while date>=self.trade_date:
+            payment_dates.append(date)
+            date=date-relativedelta.relativedelta(months=+payment_cycle)
+        return sorted(payment_dates)
+    
+    def get_payment_dates(self):
+        maturity_dates=[]
+        date=self.trade_date
+        for i in range (len(self.maturities)):
+            if self.maturities[i]>=12:
+                date=self.trade_date+relativedelta.relativedelta(years=(self.maturities[i]/12))
+                maturity_dates.append(date)
+            elif self.maturities[i]<12:
+                date=self.trade_date+relativedelta.relativedelta(month=self.maturities[i])
+                maturity_dates.append(date)
+        maturity_dates_sorted=sorted(maturity_dates)
+
+        payment_dates_bootstrapp=[]
+        for i  in range(len(maturity_dates_sorted)):
+            payment_dates_bootstrapp.append(self.payment_dates(maturity_dates_sorted[i], self.payment_cycle))
+        payment_dates_bootstrapp=sorted(payment_dates_bootstrapp, key=lambda x: x[-1])
+        return(payment_dates_bootstrapp)
+    
     def par_spread(self, dc_survival, maturity_date, payment_dates: List[datetime]):
         integration_step= relativedelta.relativedelta(days=365)
         premium_period_start = self.ref_date
@@ -298,44 +327,15 @@ class BootstrapHazardCurve:
         sc_dates=[self.ref_date]
         hazard_rates=[0.0]
         payment_dates_bootstrapp=self.get_payment_dates()
-        for i in range(len(self.payment_dates_bootstrapp)):
-            payment_dates_iter = self.payment_dates_bootstrapp[i]
+        for i in range(len(payment_dates_bootstrapp)):
+            payment_dates_iter = payment_dates_bootstrapp[i]
             mkt_par_spread_iter = self.market_spreads[i]
             sc_dates.append(payment_dates_iter[-1])
             hazard_rates.append(hazard_rates[-1])
             sol=scipy.optimize.root_scalar(self.calibration_error,args=(mkt_par_spread_iter, self.ref_date, 
                             payment_dates_iter, sc_dates, hazard_rates),method='brentq',bracket=[0,3],xtol=1e-8,rtol=1e-8)
             hazard_rates[-1] = sol.root
-        return hazard_rates,  self.create_survival(self.ref_date, sc_dates, hazard_rates) 
-
-    def payment_dates(trade_date,maturity_date,payment_cycle):
-        date=maturity_date-relativedelta.relativedelta(months=+payment_cycle)
-        payment_dates=[maturity_date]
-        
-        if maturity_date<date:
-            payment_dates.append(maturity_date)
-        while date>=trade_date:
-            payment_dates.append(date)
-            date=date-relativedelta.relativedelta(months=+payment_cycle)
-        return sorted(payment_dates)
-    
-    def get_payment_dates(self):
-        maturity_dates=[]
-        date=self.trade_date
-        for i in range (len(self.maturities)):
-            if self.maturities[i]>=12:
-                date=self.trade_date+relativedelta.relativedelta(years=(self.maturities[i]/12))
-                maturity_dates.append(date)
-            elif self.maturities[i]<12:
-                date=self.trade_date+relativedelta.relativedelta(month=self.maturities[i])
-                maturity_dates.append(date)
-        maturity_dates_sorted=sorted(maturity_dates)
-
-        payment_dates_bootstrapp=[]
-        for i  in range(len(maturity_dates_sorted)):
-            payment_dates_bootstrapp.append(self.payment_dates(self.trade_date, maturity_dates_sorted[i], self.payment_cycle))
-        payment_dates_bootstrapp=sorted(payment_dates_bootstrapp, key=lambda x: x[-1])
-        return(payment_dates_bootstrapp)
+        return hazard_rates,  self.create_survival(self.ref_date, sc_dates, hazard_rates)
 
     def get_hazard_rates(self):
         #hazard_rates_value=[]
