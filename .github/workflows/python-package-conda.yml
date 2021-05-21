@@ -1,5 +1,12 @@
 name: build
-on: [push, workflow_dispatch]
+on: 
+  workflow_dispatch:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
 
 jobs:
   build-linux:
@@ -20,7 +27,7 @@ jobs:
         # $CONDA is an environment variable pointing to the root of the miniconda directory
         $CONDA/bin/conda env update --file environment.yml --name base
     - name: Install pyvacon from pypi test
-      run: $CONDA/bin/python -m pip install --index-url https://test.pypi.org/simple/ pyvacon 
+      run: $CONDA/bin/python -m pip install pyvacon 
     - name: Lint with flake8
       run: |
         $CONDA/bin/conda install flake8
@@ -31,3 +38,32 @@ jobs:
     - name: Test with unittest
       run: $CONDA/bin/python -m unittest discover tests
       shell: bash
+      
+    - name: Install rtd theme for sphinx doc from pypi
+      run: $CONDA/bin/python -m pip install sphinx_rtd_theme 
+    - name: Build docs with sphinx
+      run: $CONDA/bin/sphinx-build -b html docs/source/ docs/build
+    - name: Store doc as artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: DocumentationHTML
+        path: docs/build/
+        
+    - name: Commit documentation changes
+      run: |
+        git clone https://github.com/RIVACON/RiVaPy.git --branch gh-pages --single-branch gh-pages
+        cp -r docs/build/* gh-pages/
+        cd gh-pages
+        touch .nojekyll
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "Update documentation" -a || true
+        # The above command will fail if no changes were present, so we ignore
+        # that.
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        branch: gh-pages
+        directory: gh-pages
+        github_token: ${{ secrets.GITHUB_TOKEN }}

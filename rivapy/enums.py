@@ -4,73 +4,65 @@ Created on Thu Dec  1 17:51:16 2016
 
 @author: oeltz
 """
+from pyvacon.finance.definition import DayCounter as _DayCounter
+DayCounterType = _DayCounter.Type
 
-class DBUdl:
-    DAX = '4517'
-    STOXX50E = '2676'
-    BASF = '123'
-    APPLE = '91'
-    EON = '48'
-    EXXON = '1'
-    DOWJOWNS = '4612' 
-    SPX= '13'
-    NASDAX = '17'
-    ADS = '600' #ADIDAS
-    ALV = '66' # Allianz
-    BASF = '123'
-    BAYER = '150'
-    BEIERSDORF = '1356'
-    BMW = '374'
-    COMMERZBANK = '273'
-    CONTINENTAL = '428'
-    DAIMLER = '109'
-    DBK = '80'
-    DEUTSCHE_BOERSE = '414'
-    DB11 = '20261'
-    DEUTSCHE_POST = '314'
-    DTE = '113'
-    EON = '48'
-    FRESENIUS = '14880'
-    FRESENIUS_MEDICAL_CARE = '748'
-    HEIDELBER_CEMENT = '1578'
-    HENKEL = '797'
-    INFINEON = '697'
-    LINDE = '665'
-    LUFTHANSA = '1117'
-    MERCK = '1073'
-    MUV = '180'
-    PRO_SIEBEN = '1539'
-    RWE = '129'
-    SAP = '131'
-    SIEMENS = '61'
-    THYSSEN = '439'
-    VW = '4623'
-    VONOVIA = '18078'
-    DAX_list = {'DAX':DAX,
-                        'ADS':ADS, 'ALV':ALV, 'BASF':BASF, 
-                        'BAYER':BAYER, 'BEIERSDORF':BEIERSDORF, 
-                        'BMW':BMW, 'COMMERZBANK':COMMERZBANK, 'CONTINENTAL':CONTINENTAL, 
-                        'DAIMLER':DAIMLER,  'DBK':DBK, 'DEUTSCHE_BOERSE':DEUTSCHE_BOERSE,
-                        'DB11': DB11,
-                        'DEUTSCHE_POST':DEUTSCHE_POST, 'DTE':DTE, 'EON':EON, 'FRESENIUS':FRESENIUS,
-                         'FRESENIUS_MEDICAL_CARE':FRESENIUS_MEDICAL_CARE, 'HEIDELBER_CEMENT':HEIDELBER_CEMENT, 
-                         'HENKEL':HENKEL, 'INFINEON':INFINEON, 'LINDE':LINDE, 'LUFTHANSA':LUFTHANSA,
-                        'MERCK':MERCK, 'MUV':MUV, 'PRO_SIEBEN':PRO_SIEBEN, 'RWE':RWE, 'SAP':SAP,  
-                        'SIEMENS':SIEMENS, 'THYSSEN':THYSSEN, 'VW': VW, 'VONOVIA':VONOVIA}
+from pyvacon.numerics.interpolation import InterpolationType
+from pyvacon.numerics.extrapolation import ExtrapolationType
 
-class InterpolationType:
-    CONSTANT = "CONSTANT"
-    LINEAR = "LINEAR"
-    LINEARLOG = "LINEARLOG"
-    CONSTRAINED_SPLINE = "CONSTRAINED_SPLINE"
-    HAGAN = "HAGAN"
-    HAGAN_DF = "HAGAN_DF"
+# class DBUdl:
+#     DAX = '4517'
+#     STOXX50E = '2676'
+#     BASF = '123'
+#     APPLE = '91'
+#     EON = '48'
+#     EXXON = '1'
+#     DOWJOWNS = '4612' 
+#     SPX= '13'
+#     NASDAX = '17'
+#     ADS = '600' #ADIDAS
+#     ALV = '66' # Allianz
+#     BASF = '123'
+#     BAYER = '150'
+#     BEIERSDORF = '1356'
+#     BMW = '374'
+#     COMMERZBANK = '273'
+#     CONTINENTAL = '428'
+#     DAIMLER = '109'
+#     DBK = '80'
+#     DEUTSCHE_BOERSE = '414'
+#     DB11 = '20261'
+#     DEUTSCHE_POST = '314'
+#     DTE = '113'
+#     EON = '48'
+#     FRESENIUS = '14880'
+#     FRESENIUS_MEDICAL_CARE = '748'
+#     HEIDELBER_CEMENT = '1578'
+#     HENKEL = '797'
+#     INFINEON = '697'
+#     LINDE = '665'
+#     LUFTHANSA = '1117'
+#     MERCK = '1073'
+#     MUV = '180'
+#     PRO_SIEBEN = '1539'
+#     RWE = '129'
+#     SAP = '131'
+#     SIEMENS = '61'
+#     THYSSEN = '439'
+#     VW = '4623'
+#     VONOVIA = '18078'
+#     DAX_list = {'DAX':DAX,
+#                         'ADS':ADS, 'ALV':ALV, 'BASF':BASF, 
+#                         'BAYER':BAYER, 'BEIERSDORF':BEIERSDORF, 
+#                         'BMW':BMW, 'COMMERZBANK':COMMERZBANK, 'CONTINENTAL':CONTINENTAL, 
+#                         'DAIMLER':DAIMLER,  'DBK':DBK, 'DEUTSCHE_BOERSE':DEUTSCHE_BOERSE,
+#                         'DB11': DB11,
+#                         'DEUTSCHE_POST':DEUTSCHE_POST, 'DTE':DTE, 'EON':EON, 'FRESENIUS':FRESENIUS,
+#                          'FRESENIUS_MEDICAL_CARE':FRESENIUS_MEDICAL_CARE, 'HEIDELBER_CEMENT':HEIDELBER_CEMENT, 
+#                          'HENKEL':HENKEL, 'INFINEON':INFINEON, 'LINDE':LINDE, 'LUFTHANSA':LUFTHANSA,
+#                         'MERCK':MERCK, 'MUV':MUV, 'PRO_SIEBEN':PRO_SIEBEN, 'RWE':RWE, 'SAP':SAP,  
+#                         'SIEMENS':SIEMENS, 'THYSSEN':THYSSEN, 'VW': VW, 'VONOVIA':VONOVIA}
 
-class ExtrapolationType:
-    NONE = "NONE"
-    CONSTANT = "CONSTANT"
-    LINEAR = "LINEAR"
-    LINEARLOG = "LINEARLOG"
 
 class SecuritizationLevel:
     NONE = 'NONE'
@@ -119,14 +111,6 @@ class RollConvention:
     MODIFIED_PRECEDING = 'ModifiedPreceding'
     UNADJUSTED = 'Unadjusted'
     
-class DayCounter:
-    ACTACT = 'ActAct'
-    ACT365_FIXED = 'ACT365FIXED'
-    ACT360 = 'Act360'
-    ThirtyU360 = '30U360'
-    ThirtyE360 = '30E360'
-    ACT252 = 'Act252'
-
 class VolatilityStickyness:
     NONE = 'NONE'
     StickyStrike = 'StickyStrike'
@@ -138,3 +122,177 @@ class InflationInterpolation:
     GERMAN = 'GERMAN'
     JAPAN = 'JAPAN'
     CONSTANT = 'CONSTANT'
+    
+class Currency:
+    AED =  'AED'
+    AFN =  'AFN'
+    ALL =  'ALL'
+    AMD =  'AMD'
+    ANG =  'ANG'
+    AOA =  'AOA'
+    ARS =  'ARS'
+    AUD =  'AUD'
+    AWG =  'AWG'
+    AZN =  'AZN'
+    BAM =  'BAM'
+    BBD =  'BBD'
+    BDT =  'BDT'
+    BGN =  'BGN'
+    BHD =  'BHD'
+    BIF =  'BIF'
+    BMD =  'BMD'
+    BND =  'BND'
+    BOB =  'BOB'
+    BRL =  'BRL'
+    BSD =  'BSD'
+    BTN =  'BTN'
+    BWP =  'BWP'
+    BYR =  'BYR'
+    BZD =  'BZD'
+    CAD =  'CAD'
+    CDF =  'CDF'
+    CHF =  'CHF'
+    CLP =  'CLP'
+    CNH =  'CNH'
+    CNY =  'CNY'
+    COP =  'COP'
+    CRC =  'CRC'
+    CUC =  'CUC'
+    CUP =  'CUP'
+    CVE =  'CVE'
+    CZK =  'CZK'
+    DJF =  'DJF'
+    DKK =  'DKK'
+    DOP =  'DOP'
+    DZD =  'DZD'
+    EGP =  'EGP'
+    ERN =  'ERN'
+    ETB =  'ETB'
+    EUR =  'EUR'
+    FJD =  'FJD'
+    FKP =  'FKP'
+    GBP =  'GBP'
+    GEL =  'GEL'
+    GGP =  'GGP'
+    GHS =  'GHS'
+    GIP =  'GIP'
+    GMD =  'GMD'
+    GNF =  'GNF'
+    GTQ =  'GTQ'
+    GYD =  'GYD'
+    HKD =  'HKD'
+    HNL =  'HNL'
+    HRK =  'HRK'
+    HTG =  'HTG'
+    HUF =  'HUF'
+    IDR =  'IDR'
+    ILS =  'ILS'
+    IMP =  'IMP'
+    INR =  'INR'
+    IQD =  'IQD'
+    IRR =  'IRR'
+    ISK =  'ISK'
+    JEP =  'JEP'
+    JMD =  'JMD'
+    JOD =  'JOD'
+    JPY =  'JPY'
+    KES =  'KES'
+    KGS =  'KGS'
+    KHR =  'KHR'
+    KMF =  'KMF'
+    KPW =  'KPW'
+    KRW =  'KRW'
+    KWD =  'KWD'
+    KYD =  'KYD'
+    KZT =  'KZT'
+    LAK =  'LAK'
+    LBP =  'LBP'
+    LKR =  'LKR'
+    LRD =  'LRD'
+    LSL =  'LSL'
+    LTL =  'LTL'
+    LVL =  'LVL'
+    LYD =  'LYD'
+    MAD =  'MAD'
+    MDL =  'MDL'
+    MGA =  'MGA'
+    MKD =  'MKD'
+    MMK =  'MMK'
+    MNT =  'MNT'
+    MOP =  'MOP'
+    MRO =  'MRO'
+    MUR =  'MUR'
+    MVR =  'MVR'
+    MWK =  'MWK'
+    MXN =  'MXN'
+    MYR =  'MYR'
+    MZN =  'MZN'
+    NAD =  'NAD'
+    NGN =  'NGN'
+    NIO =  'NIO'
+    NOK =  'NOK'
+    NPR =  'NPR'
+    NZD =  'NZD'
+    OMR =  'OMR'
+    PAB =  'PAB'
+    PEN =  'PEN'
+    PGK =  'PGK'
+    PHP =  'PHP'
+    PKR =  'PKR'
+    PLN =  'PLN'
+    PYG =  'PYG'
+    QAR =  'QAR'
+    RON =  'RON'
+    RSD =  'RSD'
+    RUB =  'RUB'
+    RWF =  'RWF'
+    SAR =  'SAR'
+    SBD =  'SBD'
+    SCR =  'SCR'
+    SDG =  'SDG'
+    SEK =  'SEK'
+    SGD =  'SGD'
+    SHP =  'SHP'
+    SLL =  'SLL'
+    SOS =  'SOS'
+    SPL =  'SPL'
+    SRD =  'SRD'
+    STD =  'STD'
+    SVC =  'SVC'
+    SYP =  'SYP'
+    SZL =  'SZL'
+    THB =  'THB'
+    TJS =  'TJS'
+    TMT =  'TMT'
+    TND =  'TND'
+    TOP =  'TOP'
+    TRY =  'TRY'
+    TTD =  'TTD'
+    TVD =  'TVD'
+    TWD =  'TWD'
+    TZS =  'TZS'
+    UAH =  'UAH'
+    UGX =  'UGX'
+    USD =  'USD'
+    UYU =  'UYU'
+    UZS =  'UZS'
+    VEF =  'VEF'
+    VND =  'VND'
+    VUV =  'VUV'
+    WST =  'WST'
+    XAF =  'XAF'
+    XAG =  'XAG'
+    XAU =  'XAU'
+    XPD =  'XPD'
+    XPT =  'XPT'
+    XCD =  'XCD'
+    XDR =  'XDR'
+    XOF =  'XOF'
+    XPF =  'XPF'
+    YER =  'YER'
+    ZAR =  'ZAR'
+    ZMW =  'ZMW'
+    ZWD =  'ZWD'
+
+
+

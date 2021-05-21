@@ -4,6 +4,8 @@ from dateutil import relativedelta
 from datetime import datetime, timedelta
 
 import rivapy
+from rivapy.marketdata import DiscountCurve, DatedCurve, SurvivalCurve
+from rivapy import enums
 
 class CDSTest(unittest.TestCase):
     def test_pricing(self):
@@ -18,15 +20,17 @@ class CDSTest(unittest.TestCase):
         rates = [-0.0065, 0.0003, 0.0059, 0.0086, 0.0101, 0.012, 0.016, 0.02]
         dates = [refdate + timedelta(days=d) for d in days_to_maturity]
         dsc_fac = [math.exp(-rates[i]*days_to_maturity[i]/360) for i in range(len(days_to_maturity))]
-        dc = rivapy.marketdata.DiscountCurve('CDS_interest_rate', refdate, dates, 
-                                            dsc_fac, rivapy.enums.DayCounter.ACT360, rivapy.enums.InterpolationType.LINEAR, 
-                                            rivapy.enums.ExtrapolationType.LINEAR)
+        dc = DiscountCurve('CDS_interest_rate', refdate, 
+                                            dates, 
+                                            dsc_fac,
+                                            enums.InterpolationType.LINEAR)
         hazard_rates = [0, 0.001, 0.0015, 0.002, 0.0025, 0.003, 0.0035, 0.005]
-        sc = rivapy.marketdata.SurvivalCurve('Survival',refdate,dates,hazard_rates)
+        sc = SurvivalCurve('Survival', refdate, dates, hazard_rates)
 
         recoveries = [0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6]
-        recovery = rivapy.marketdata.DatedCurve('Recovery',refdate,dates,recoveries, rivapy.enums.DayCounter.ACT360, 
-                                                rivapy.enums.InterpolationType.LINEAR, rivapy.enums.ExtrapolationType.LINEAR)
+        recovery = DatedCurve('Recovery', refdate, dates, recoveries,
+                                                enums.DayCounterType.Act365Fixed.name,
+                                                enums.InterpolationType.LINEAR.name)
 
         payment_dates = [refdate + relativedelta.relativedelta(years=i) for i in range(10)]
         spec = rivapy.instruments.CDSSpecification(premium = 0.0012, protection_start=refdate, premium_pay_dates = payment_dates, notional = 1000000.0)

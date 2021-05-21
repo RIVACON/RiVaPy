@@ -10,9 +10,9 @@ Welcome to rivapy's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-.. automodule:: rivapy
-   :members:
-   :undoc-members:
+   rivapy.instruments
+   rivapy.pricing
+   rivapy.marketdata
 
 Indices and tables
 ==================

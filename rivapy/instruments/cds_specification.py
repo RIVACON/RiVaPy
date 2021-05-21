@@ -40,6 +40,7 @@ class CDSSpecification:
         """Some simple validation
         """
         if len(self.premium_pay_dates) == 0:
-            raise Exception('Premium payment dates mut not be empty.')
+            raise Exception('Premium payment dates must not be empty.')
+        
         
         

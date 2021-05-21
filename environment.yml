@@ -13,6 +13,7 @@ dependencies:
   - numpy
   - pandas
   - scipy
+  - sphinx
   - pip:
     - python-dateutil
     - --index-url https://test.pypi.org/simple/ pyvacon_depp
