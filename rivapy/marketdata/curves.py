@@ -15,6 +15,7 @@ from rivapy.enums import DayCounterType, InterpolationType, ExtrapolationType
 from pyvacon.finance.marketdata import SurvivalCurve as _SurvivalCurve
 
 
+
 from pyvacon.finance.marketdata import DiscountCurve as _DiscountCurve
 import pyvacon as _pyvacon
 
@@ -252,14 +253,14 @@ class BootstrapHazardCurve:
 
     def payment_dates(self, maturity_date, payment_cycle):
         date=maturity_date-relativedelta.relativedelta(months=+payment_cycle)
-        payment_dates=[maturity_date]
+        payment_dates_Instr=[maturity_date]
         
         if maturity_date<date:
-            payment_dates.append(maturity_date)
+            payment_dates_Instr.append(maturity_date)
         while date>=self.trade_date:
-            payment_dates.append(date)
+            payment_dates_Instr.append(date)
             date=date-relativedelta.relativedelta(months=+payment_cycle)
-        return sorted(payment_dates)
+        return sorted(payment_dates_Instr)
     
     def get_payment_dates(self):
         maturity_dates=[]
@@ -284,7 +285,7 @@ class BootstrapHazardCurve:
         premium_period_start = self.ref_date
         prev_date=self.ref_date
         current_date=min(prev_date+integration_step, maturity_date)
-        dc_valuation_date=self.dc.value(self.ref_date, maturity_date)
+        #dc_valuation_date=self.dc.value(self.ref_date, maturity_date)
         risk_adj_factor_protection=0
         risk_adj_factor_premium=0
         risk_adj_factor_accrued=0
@@ -297,12 +298,13 @@ class BootstrapHazardCurve:
         
         if prev_date < maturity_date and current_date > maturity_date:
             default_prob = dc_survival.value(self.ref_date, prev_date)-dc_survival.value(self.ref_date, maturity_date)
-            risk_adj_factor_protection += self.dc.value(self.ref_date, maturity_date)  * default_prob
+            risk_adj_factor_protection += self.dc.value(self.ref_date, maturity_date) * default_prob
 
         for premium_payment in payment_dates:
             if premium_payment >= self.ref_date:
                 period_length = ((premium_payment-premium_period_start).days)/360
-                survival_prob = (dc_survival.value(self.ref_date, premium_period_start)+dc_survival.value(self.ref_date, premium_payment))/2
+                #survival_prob = (dc_survival.value(self.ref_date, premium_period_start)+dc_survival.value(self.ref_date, premium_payment))/2
+                survival_prob = dc_survival.value(self.ref_date, premium_payment)
                 df = self.dc.value(self.ref_date, premium_payment)
                 risk_adj_factor_premium += period_length*survival_prob*df
                 default_prob = dc_survival.value(self.ref_date, premium_period_start)-dc_survival.value(self.ref_date, premium_payment)
@@ -311,7 +313,7 @@ class BootstrapHazardCurve:
 
         PV_accrued=((1/2)*risk_adj_factor_accrued)
         PV_premium=(1)*risk_adj_factor_premium
-        PV_protection=(((1-self.RR))*risk_adj_factor_protection)
+        PV_protection=((1-self.RR)*risk_adj_factor_protection)
         
         par_spread_i=(PV_protection)/((PV_premium+PV_accrued))
         #print(par_spread_i)
@@ -324,7 +326,8 @@ class BootstrapHazardCurve:
         hazard_rates[-1] = x
         maturity_date = dates[-1]
         dc_surv = self.create_survival(dates, hazard_rates)
-        #print(mkt_par_spread - self.par_spread(dc_surv, maturity_date, payment_dates))
+        #print("Market Spread=",mkt_par_spread,"-","Par-Spread=",self.par_spread(dc_surv, maturity_date, payment_dates),"=",
+        #mkt_par_spread - self.par_spread(dc_surv, maturity_date, payment_dates))
         return  mkt_par_spread - self.par_spread(dc_surv, maturity_date, payment_dates)
 
     def calibrate_hazard_rate(self):
@@ -339,8 +342,8 @@ class BootstrapHazardCurve:
             sol=scipy.optimize.root_scalar(self.calibration_error,args=(mkt_par_spread_iter, 
                             payment_dates_iter, sc_dates, hazard_rates),method='brentq',bracket=[0,3],xtol=1e-8,rtol=1e-8)
             hazard_rates[-1] = sol.root
-            #print(sol.root)
-        return hazard_rates,  self.create_survival(sc_dates, hazard_rates)
+            #print("Hazard Rate:", sol.root)
+        return hazard_rates, self.create_survival(sc_dates, hazard_rates)
 
     def get_hazard_rates(self):
         hazard_rates_value=self.calibrate_hazard_rate()[0]
