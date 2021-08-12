@@ -303,7 +303,6 @@ class BootstrapHazardCurve:
         for premium_payment in payment_dates:
             if premium_payment >= self.ref_date:
                 period_length = ((premium_payment-premium_period_start).days)/360
-                #survival_prob = (dc_survival.value(self.ref_date, premium_period_start)+dc_survival.value(self.ref_date, premium_payment))/2
                 survival_prob = dc_survival.value(self.ref_date, premium_payment)
                 df = self.dc.value(self.ref_date, premium_payment)
                 risk_adj_factor_premium += period_length*survival_prob*df
