@@ -147,7 +147,7 @@ class CDSPricingData:
 
         PV_accrued=((1/2)*accrued)
         PV_premium=(1)*risk_adj_factor_premium
-        PV_protection=(((1-recovery))*pv_protection)
+        PV_protection=(pv_protection)
         
         par_spread_i=(PV_protection)/((PV_premium+PV_accrued))
         return par_spread_i
