@@ -15,9 +15,11 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Models" href="rivapy.models.html" />
     <link rel="prev" title="pricing" href="rivapy.pricing.html" /> 
 </head>
 
@@ -41,10 +43,11 @@
 <li class="toctree-l1"><a class="reference internal" href="rivapy.instruments.html">instruments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rivapy.pricing.html">pricing</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Marketdata</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#equity">Equity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-rivapy.marketdata.__init__">Equity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-rivapy.marketdata.curves">Curves</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="rivapy.models.html">Models</a></li>
 </ul>
 
         </div>
@@ -73,11 +76,11 @@
              
   <section id="marketdata">
 <h1>Marketdata<a class="headerlink" href="#marketdata" title="Permalink to this headline"></a></h1>
-<section id="equity">
-<h2>Equity<a class="headerlink" href="#equity" title="Permalink to this headline"></a></h2>
+<section id="module-rivapy.marketdata.__init__">
+<span id="equity"></span><h2>Equity<a class="headerlink" href="#module-rivapy.marketdata.__init__" title="Permalink to this headline"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="rivapy.marketdata.DividendTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata.</span></span><span class="sig-name descname"><span class="pre">DividendTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime.datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ex_dates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pay_dates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">div_yield</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">div_cash</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tax_factors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.DividendTable" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="rivapy.marketdata.__init__.DividendTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata.__init__.</span></span><span class="sig-name descname"><span class="pre">DividendTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime.datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ex_dates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pay_dates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">div_yield</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">div_cash</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tax_factors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.__init__.DividendTable" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>[summary]</p>
 <dl class="field-list simple">
@@ -96,6 +99,239 @@
 <dd class="field-even"><p><em>[type]</em> – [description]</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.marketdata.__init__.VolatilityGridParametrization">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata.__init__.</span></span><span class="sig-name descname"><span class="pre">VolatilityGridParametrization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expiries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strikes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.__init__.VolatilityGridParametrization" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Grid parametrization
+This parametrization stores a set of strike-vol grids for a given list of expiries and computes a volatility by
+- search for the neighboring expiries
+- apply a splien interpolation in each expiry to get the respective volatility
+- apply a linear interpolation (in total variance)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expiries</strong> (<em>np.array</em>) – An array of the expiries.</p></li>
+<li><p><strong>strikes</strong> (<em>np.ndarray</em>) – </p></li>
+<li><p><strong>vols</strong> (<em>np.ndarray</em>) – Two dimensional array of volatilities where each row i contains the values for expiry i</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata.__init__.VolatilityGridParametrization.calc_implied_vol">
+<span class="sig-name descname"><span class="pre">calc_implied_vol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ttm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strike</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.__init__.VolatilityGridParametrization.calc_implied_vol" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate implied volatility for given expiry and strike</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ttm</strong> (<em>[</em><em>float</em><em>]</em>) – Expiry.</p></li>
+<li><p><strong>strike</strong> (<em>[</em><em>float</em><em>]</em>) – Strike.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Implied volatility.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>[float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.marketdata.__init__.VolatilityParametrizationFlat">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata.__init__.</span></span><span class="sig-name descname"><span class="pre">VolatilityParametrizationFlat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.__init__.VolatilityParametrizationFlat" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Flat volatility parametrization</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>vol</strong> (<em>float</em>) – Constant volatility.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.marketdata.__init__.VolatilityParametrizationSABR">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata.__init__.</span></span><span class="sig-name descname"><span class="pre">VolatilityParametrizationSABR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expiries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sabr_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.__init__.VolatilityParametrizationSABR" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">rivapy.marketdata.__init__._VolatilityParametrizationExpiry</span></code></p>
+<p>SABR parametrization
+<a class="reference external" href="https://bsic.it/sabr-stochastic-volatility-model-volatility-smile/">https://bsic.it/sabr-stochastic-volatility-model-volatility-smile/</a></p>
+<p>The SABR model assumes that the forward rate and the instantaneous volatility are driven by two correlated Brownian motions:</p>
+<div class="math notranslate nohighlight">
+\[df_t = \alpha_t f_t^\beta dW_t^1\]</div>
+<div class="math notranslate nohighlight">
+\[d\alpha_t = \nu\alpha_t dW_t^2\]</div>
+<div class="math notranslate nohighlight">
+\[E\bigl[dW_t^1 dW_T^2\bigr] = \rho dt\]</div>
+<p>The expression that the implied volatility must satisfy is</p>
+<div class="math notranslate nohighlight">
+\[\sigma_B(K,f) = \frac{\alpha\biggl\{1+\biggl[\frac {(1-\beta)^2}{24}\frac {\alpha^2}{(fK)^{1-\beta}}+\frac {1}{4}\frac {\rho\beta\nu\alpha}{(FK)^{(1-\beta)/2}}+\frac {2-3\rho^2}{24}\nu^2\biggr ]T\biggr \}}{(fK)^{(1-\beta)/2}\biggl[1+\frac {(1-\beta)^2}{24}{ln}^2\frac {f}{K}+\frac {(1-\beta)^4}{1920}{ln}^4\frac {f}{K}\biggr]} \frac {z}{\chi(z)}\]</div>
+<div class="math notranslate nohighlight">
+\[z = \frac {\nu }{\alpha }(fK)^{(1-\beta )/2} ln \frac {f}{K}\]</div>
+<div class="math notranslate nohighlight">
+\[\chi(z) = ln \bigl[ \frac {\sqrt{1-2 \rho z+z^2}+z-\rho }{1- \rho} \bigr]\]</div>
+<p>When <span class="math notranslate nohighlight">\(f = K\)</span> (for ATM options), the above formula for implied volatility simplifies to:</p>
+<div class="math notranslate nohighlight">
+\[\sigma_{ATM} = \sigma_B(f,f)=\frac{\alpha\biggl\{1+\biggl[\frac{(1-\beta)^2}{24}\frac{\alpha^2}{f^{2-2\beta}}+\frac{1}{4}\frac{\rho\beta\nu\alpha}{f^{1-\beta}}\frac{2-3\rho^2}{24}\nu^2\biggr]T\biggr\}}{f^{1-\beta}}\]</div>
+<p>where</p>
+<p>&gt; <span class="math notranslate nohighlight">\(\alpha\)</span> is the instantaneous vol;</p>
+<p>&gt; <span class="math notranslate nohighlight">\(\nu\)</span> is the vol of vol;</p>
+<p>&gt; <span class="math notranslate nohighlight">\(\rho\)</span> is the correlation between the Brownian motions driving the forward rate and the instantaneous vol;</p>
+<p>&gt; <span class="math notranslate nohighlight">\(\beta\)</span> is the CEV component for forward rate (determines shape of forward rates, leverage effect and backbond of ATM vol).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expiries</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – List of expiries (sorted from nearest to farest).</p></li>
+<li><p><strong>sabr_params</strong> (<em>List</em><em>[</em><em>Tuple</em><em>]</em>) – List of SABR parameters (one Tuple for each expiry). Tuple in the order (alpha, nu, beta, rho).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.marketdata.__init__.VolatilityParametrizationSSVI">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata.__init__.</span></span><span class="sig-name descname"><span class="pre">VolatilityParametrizationSSVI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expiries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwd_atm_vols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.__init__.VolatilityParametrizationSSVI" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>SSVI volatility parametrization
+<a class="reference external" href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2033323">https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2033323</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expiries</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – List of expiries (sorted from nearest to farest).</p></li>
+<li><p><strong>fwd_atm_vols</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – List of at-the-money volatilities.</p></li>
+<li><p><strong>rho</strong> (<em>float</em>) – Responsible for the skewness of the volatility surface.</p></li>
+<li><p><strong>eta</strong> (<em>float</em>) – Responsible for the curvature.</p></li>
+<li><p><strong>gamma</strong> (<em>float</em>) – Responsible for the “rate of decay”.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata.__init__.VolatilityParametrizationSSVI.calc_implied_vol">
+<span class="sig-name descname"><span class="pre">calc_implied_vol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ttm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strike</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.__init__.VolatilityParametrizationSSVI.calc_implied_vol" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate implied volatility for given expiry and strike</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ttm</strong> (<em>[</em><em>float</em><em>]</em>) – Expiry.</p></li>
+<li><p><strong>strike</strong> (<em>[</em><em>float</em><em>]</em>) – Strike.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Implied volatility.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>[float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata.__init__.VolatilityParametrizationSSVI.get_eta">
+<span class="sig-name descname"><span class="pre">get_eta</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.__init__.VolatilityParametrizationSSVI.get_eta" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata.__init__.VolatilityParametrizationSSVI.get_fwd_atm_vols">
+<span class="sig-name descname"><span class="pre">get_fwd_atm_vols</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.__init__.VolatilityParametrizationSSVI.get_fwd_atm_vols" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata.__init__.VolatilityParametrizationSSVI.get_gamma">
+<span class="sig-name descname"><span class="pre">get_gamma</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.__init__.VolatilityParametrizationSSVI.get_gamma" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata.__init__.VolatilityParametrizationSSVI.get_rho">
+<span class="sig-name descname"><span class="pre">get_rho</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.__init__.VolatilityParametrizationSSVI.get_rho" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.marketdata.__init__.VolatilityParametrizationSVI">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata.__init__.</span></span><span class="sig-name descname"><span class="pre">VolatilityParametrizationSVI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expiries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">svi_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.__init__.VolatilityParametrizationSVI" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">rivapy.marketdata.__init__._VolatilityParametrizationExpiry</span></code></p>
+<p>Raw SVI parametrization (definition 3.1 in  <a class="reference external" href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2033323">https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2033323</a>)</p>
+<div class="math notranslate nohighlight">
+\[w(k) = a + b(\rho (k-m) + \sqrt{(k-m)^2+\sigma^2 })\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expiries</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – List of expiries (sorted from nearest to farest).</p></li>
+<li><p><strong>svi_params</strong> (<em>List</em><em>[</em><em>Tuple</em><em>]</em>) – List of SVI parameters (one Tuple for each expiry). Tuple in the order (a, b, rho, m, sigma).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.marketdata.__init__.VolatilityParametrizationTerm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata.__init__.</span></span><span class="sig-name descname"><span class="pre">VolatilityParametrizationTerm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expiries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwd_atm_vols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.__init__.VolatilityParametrizationTerm" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Term volatility parametrization</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expiries</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – List of expiries (sorted from nearest to farest).</p></li>
+<li><p><strong>fwd_atm_vols</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – List of at-the-money volatilities.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.marketdata.__init__.VolatilitySurface">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata.__init__.</span></span><span class="sig-name descname"><span class="pre">VolatilitySurface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime.datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward_curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daycounter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vol_param</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.__init__.VolatilitySurface" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Volatility surface</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>str</em>) – Identifier (name) of the volatility surface.</p></li>
+<li><p><strong>refdate</strong> (<em>datetime</em>) – Valuation date.</p></li>
+<li><p><strong>forward_curve</strong> (<em>rivapy.market_data.EquityForwardCurve</em>) – Forward curve.</p></li>
+<li><p><strong>daycounter</strong> (<em>enums.DayCounterType</em>) – [description]</p></li>
+<li><p><strong>vol_param</strong> (<em>[</em><a class="reference internal" href="#rivapy.marketdata.__init__.VolatilityParametrizationFlat" title="rivapy.marketdata.__init__.VolatilityParametrizationFlat"><em>VolatilityParametrizationFlat</em></a><em>,</em><a class="reference internal" href="#rivapy.marketdata.__init__.VolatilityParametrizationTerm" title="rivapy.marketdata.__init__.VolatilityParametrizationTerm"><em>VolatilityParametrizationTerm</em></a><em>,</em><a class="reference internal" href="#rivapy.marketdata.__init__.VolatilityParametrizationSSVI" title="rivapy.marketdata.__init__.VolatilityParametrizationSSVI"><em>VolatilityParametrizationSSVI</em></a><em>]</em>) – Volatility parametrization.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata.__init__.VolatilitySurface.calc_implied_vol">
+<span class="sig-name descname"><span class="pre">calc_implied_vol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expiry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime.datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strike</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward_curve</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#rivapy.marketdata.__init__.VolatilitySurface.calc_implied_vol" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate implied volatility</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>refdate</strong> (<em>datetime</em>) – Valuation date.</p></li>
+<li><p><strong>expiry</strong> (<em>datetime</em>) – Expiration date.</p></li>
+<li><p><strong>strike</strong> (<em>float</em>) – Strike price.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>Exception</strong> – [description]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Implied volatility.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata.__init__.VolatilitySurface.load">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.__init__.VolatilitySurface.load" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata.__init__.VolatilitySurface.set_stickyness">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_stickyness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vol_stickyness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rivapy.enums.VolatilityStickyness</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.__init__.VolatilitySurface.set_stickyness" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </section>
@@ -245,7 +481,7 @@ The timegrid includes the dates of the discount curve. Here either the discount 
 <li><p><strong>discount_curve</strong> (<a class="reference internal" href="#rivapy.marketdata.curves.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><em>DiscountCurve</em></a>) – [description]</p></li>
 <li><p><strong>funding_curve</strong> (<a class="reference internal" href="#rivapy.marketdata.curves.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><em>DiscountCurve</em></a>) – [description]</p></li>
 <li><p><strong>borrow_curve</strong> (<a class="reference internal" href="#rivapy.marketdata.curves.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><em>DiscountCurve</em></a>) – [description]</p></li>
-<li><p><strong>div_table</strong> (<a class="reference internal" href="#rivapy.marketdata.DividendTable" title="rivapy.marketdata.DividendTable"><code class="xref py py-class docutils literal notranslate"><span class="pre">rivapy.marketdata.DividendTable</span></code></a>) – [description]</p></li>
+<li><p><strong>div_table</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rivapy.marketdata.DividendTable</span></code>) – [description]</p></li>
 </ul>
 </dd>
 </dl>
@@ -279,6 +515,7 @@ The timegrid includes the dates of the discount curve. Here either the discount 
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="rivapy.pricing.html" class="btn btn-neutral float-left" title="pricing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="rivapy.models.html" class="btn btn-neutral float-right" title="Models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

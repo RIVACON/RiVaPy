@@ -3,11 +3,11 @@ Marketdata
 
 Equity
 -------------------------------
-.. autoclass:: rivapy.marketdata.DividendTable
+
+.. automodule:: rivapy.marketdata.__init__
    :members:
    :undoc-members:
    :show-inheritance:
-
 
 
 Curves
