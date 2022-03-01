@@ -123,9 +123,46 @@ is_call (bool): if option is call or put</p></li>
 <dd></dd></dl>
 
 <span class="target" id="module-rivapy.pricing.pricing_data"></span><dl class="py class">
-<dt class="sig sig-object py" id="rivapy.pricing.pricing_data.Black76PricingData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.pricing.pricing_data.</span></span><span class="sig-name descname"><span class="pre">Black76PricingData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vol_surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pricing_request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rivapy.pricing.pricing_data.ResultType" title="rivapy.pricing.pricing_data.ResultType"><span class="pre">rivapy.pricing.pricing_data.ResultType</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.pricing.pricing_data.Black76PricingData" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="rivapy.pricing.pricing_data.AmericanPdePricingData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.pricing.pricing_data.</span></span><span class="sig-name descname"><span class="pre">AmericanPdePricingData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime.datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vol_surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pricing_request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rivapy.pricing.pricing_data.ResultType" title="rivapy.pricing.pricing_data.ResultType"><span class="pre">rivapy.pricing.pricing_data.ResultType</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_steps_year</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spot_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.pricing.pricing_data.AmericanPdePricingData" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Constructor for AmericanPdePricingDate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val_date</strong> (<em>[</em><em>datetime</em><em>]</em>) – Valuation date.</p></li>
+<li><p><strong>spec</strong> (<em>[</em><em>type</em><em>]</em>) – Specification</p></li>
+<li><p><strong>discount_curve</strong> (<em>[</em><em>type</em><em>]</em>) – Discount curve.</p></li>
+<li><p><strong>vol_surface</strong> (<em>[</em><em>type</em><em>]</em>) – Volatility surface.</p></li>
+<li><p><strong>pricing_request</strong> (<em>Iterable</em><em>[</em><a class="reference internal" href="#rivapy.pricing.pricing_data.ResultType" title="rivapy.pricing.pricing_data.ResultType"><em>ResultType</em></a><em>]</em>) – Pricing request. Can be selected from rivapy.pricing.ResultType.</p></li>
+<li><p><strong>time_steps_year</strong> (<em>int</em><em>, </em><em>optional</em>) – [description]. Defaults to 60.</p></li>
+<li><p><strong>spot_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – [description]. Defaults to 200.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.pricing_data.AmericanPdePricingData.price">
+<span class="sig-name descname"><span class="pre">price</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.pricing.pricing_data.AmericanPdePricingData.price" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.pricing.pricing_data.Black76PricingData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.pricing.pricing_data.</span></span><span class="sig-name descname"><span class="pre">Black76PricingData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime.datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vol_surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pricing_request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rivapy.pricing.pricing_data.ResultType" title="rivapy.pricing.pricing_data.ResultType"><span class="pre">rivapy.pricing.pricing_data.ResultType</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.pricing.pricing_data.Black76PricingData" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Constructor for Black76PricingDate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val_date</strong> (<em>[</em><em>datetime</em><em>]</em>) – Valuation date.</p></li>
+<li><p><strong>spec</strong> (<em>[</em><em>type</em><em>]</em>) – Specification.</p></li>
+<li><p><strong>discount_curve</strong> (<em>[</em><em>type</em><em>]</em>) – Discount curve.</p></li>
+<li><p><strong>vol_surface</strong> (<em>[</em><em>type</em><em>]</em>) – Volatility surface.</p></li>
+<li><p><strong>pricing_request</strong> (<em>Iterable</em><em>[</em><a class="reference internal" href="#rivapy.pricing.pricing_data.ResultType" title="rivapy.pricing.pricing_data.ResultType"><em>ResultType</em></a><em>]</em>) – Pricing request. Can be selected from rivapy.pricing.ResultType.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="rivapy.pricing.pricing_data.Black76PricingData.price">
 <span class="sig-name descname"><span class="pre">price</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.pricing.pricing_data.Black76PricingData.price" title="Permalink to this definition"></a></dt>
