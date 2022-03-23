@@ -61,7 +61,7 @@ class Black76PricingData:
         return _pyvacon.finance.pricing.BasePricer.price(self._get_pyvacon_obj())
 class CDSPricingData:
     def __init__(self, spec: CDSSpecification, val_date, discount_curve, survival_curve, 
-                recovery_curve=None, integration_step = relativedelta(days=30)):
+                recovery_curve=None, integration_step = relativedelta(months=3)):
         self.spec = spec
         self.val_date = val_date
         self.discount_curve = discount_curve
