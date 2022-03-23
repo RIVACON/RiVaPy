@@ -14,6 +14,7 @@ from rivapy import enums
 import rivapy.instruments as instruments
 import rivapy.pricing as pricing
 import rivapy.marketdata as marketdata
+import rivapy.credit as credit
 #import rivapy
 
 
