@@ -1,4 +1,5 @@
 from __future__ import division
+from turtle import position
 import pandas as pd
 import numpy as np
 from scipy.stats import norm
@@ -117,7 +118,8 @@ class creditMetricsModel():
         Returns:
             DataFrame: Dataframe including expected values.
         """
-        positions = self.mergePositionsIssuer()
+        # positions = self.mergePositionsIssuer()
+        positions = self.get_issuer_groups()
         exposure = np.matrix(positions["Exposure"]).T
         # print(exposure)
         idx = positions["RatingID"]
@@ -135,17 +137,24 @@ class creditMetricsModel():
         Returns:
             DataFrame: Dataframe with all possible present values.
         """
-        positions = self.mergePositionsIssuer()
+        positions = self.get_issuer_groups()
         LGD = 1-self.RR
         recover = self.RR
         credit_spread = self.get_credit_spreads(LGD)
-        cp = np.tile(credit_spread.T,[positions["InstrumentID"].nunique(),1])
+        cp = np.tile(credit_spread.T,[positions["IssuerID"].nunique(),1])
         exposure = np.matrix(positions["Exposure"]).T
         state = np.multiply(exposure,np.exp(-(self.r+cp)*self.t))
         state = np.append(state,np.multiply(exposure,recover),axis=1) #last column is default case
         states = np.fliplr(state) # keep in same order as credit cutoff
 
         return states
+    
+    def get_issuer_groups(self):
+        df_positions_grouped = self.mergePositionsIssuer()
+        df_positions_grouped = df_positions_grouped[['IssuerID', 'IssuerName', 'RecoveryRate', 'Rating', 'RatingID','Exposure']]
+        df_positions_grouped = df_positions_grouped.groupby(['IssuerID', 'IssuerName', 'RecoveryRate', 'Rating', 'RatingID'], as_index=False).sum()
+
+        return df_positions_grouped
     
     def mc_calculation(self):
         """Monte-Carlo simulation of portfolio based on positions, issuer, correlation and transition matrix. 
@@ -161,37 +170,57 @@ class creditMetricsModel():
         """
         # c = get_cholesky_distribution(rho, n_issuer)
         # cut = get_cut_ratings(transition_matrix, position_data)
-        positions = self.mergePositionsIssuer()
+        # positions = self.mergePositionsIssuer()
+        positions = self.get_issuer_groups()
+        issuer = self.issuer_data
         correlation = self.get_correlation()
         cutOffs = self.get_cutoffs_rating()
         states = self.get_states ()
         EV = self.get_expected_value ()
-        n_positions = positions["InstrumentID"].nunique()
-        Loss = np.zeros((self.n_simulation,n_positions))
+        # n_positions = positions["InstrumentID"].nunique()
+        n_issuer = positions["IssuerID"].nunique()
+        Loss = np.zeros((self.n_simulation,n_issuer))
         np.random.seed(self.seed)
 
         for i in range(0,self.n_simulation):
             YY = norm.ppf(np.random.rand())
             # rr=c*YY.T
             # rr = YY*self.rho
-            for j in range (0,n_positions):
-                rho = correlation[positions.loc[j,'IssuerName']]
+            for k in range (0, n_issuer):
+                # n_positions_issuer = positions['InstrumentID'][positions['IssuerID']==issuer.loc[k,"IssuerID"]].nunique()
+                # positions_issuer = positions[positions['IssuerID']==issuer.loc[k,"IssuerID"]]
+                # positions_issuer.reset_index(inplace = True, drop = True)
+                rho = correlation[positions.loc[k,'IssuerName']]
                 rr = YY*rho
                 YY_ido = norm.ppf(np.random.rand())
                 #corr_idio=np.sqrt((1-(c*c)))
                 rr_idio=np.sqrt(1-(rho**2))*YY_ido
                 # print(rr_idio)
                 rr_all=rr+rr_idio
-                # print(rr_all)
-                rating = np.array(rr_all<np.matrix(cutOffs[:,positions.loc[j,"RatingID"]]).T)
+                # print(rr)
+                # for j in range (0,n_positions_issuer):
+                    # rho = correlation[positions.loc[j,'IssuerName']]
+                    # rr = YY*rho
+                    # YY_ido = norm.ppf(np.random.rand())
+                    # #corr_idio=np.sqrt((1-(c*c)))
+                    # rr_idio=np.sqrt(1-(rho**2))*YY_ido
+                    # print(j)
+                    # print(n_positions_issuer)
+                    # print(positions_issuer)
+                    # rr_all=rr+rr_idio
+                    # print(rr_all)
+                rating = np.array(rr_all<np.matrix(cutOffs[:,positions.loc[k,"RatingID"]]).T)
+                # print(rating)
                 rate_idx = len(rating) - np.sum(rating,0)
                 # print(rate_idx)
                 col_idx = rate_idx
-                V_t = states[j,col_idx] # retrieve the corresponding state value of the exposure
-                Loss_t = V_t-EV.item(j)
+                V_t = states[k,col_idx] # retrieve the corresponding state value of the exposure
+                Loss_t = V_t-EV.item(k)
                 # print(Loss_t)
-                Loss[i,j] = Loss_t
-                # print(Loss)
+                Loss[i,k] = Loss_t
+                    # print(j)
+                    # print(k)
+                    # print(Loss)
 
         # Portfolio_MC_Loss = np.sum(Loss,1)
         return Loss 
