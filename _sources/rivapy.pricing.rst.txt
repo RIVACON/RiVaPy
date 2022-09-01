@@ -1,4 +1,4 @@
-pricing
+Pricing
 ===========================
 
 .. automodule:: rivapy.pricing.analytics

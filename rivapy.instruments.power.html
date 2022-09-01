@@ -14,11 +14,12 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="pricing" href="rivapy.pricing.html" />
+    <link rel="next" title="Pricing" href="rivapy.pricing.html" />
     <link rel="prev" title="Credit Instruments" href="rivapy.instruments.credit.html" /> 
 </head>
 
@@ -39,7 +40,9 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="rivapy.instruments.html">instruments</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="rivapy.marketdata.html">Marketdata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rivapy.models.html">Models</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="rivapy.instruments.html">Instruments</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="rivapy.instruments.equity.html">Equity Instruments</a></li>
 <li class="toctree-l2"><a class="reference internal" href="rivapy.instruments.credit.html">Credit Instruments</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Power Instruments</a><ul>
@@ -49,7 +52,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="rivapy.pricing.html">pricing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rivapy.pricing.html">Pricing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rivapy.marketdata.html">Marketdata</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rivapy.models.html">Models</a></li>
 </ul>
@@ -68,7 +71,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="rivapy.instruments.html">instruments</a> &raquo;</li>
+          <li><a href="rivapy.instruments.html">Instruments</a> &raquo;</li>
       <li>Power Instruments</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/rivapy.instruments.power.rst.txt" rel="nofollow"> View page source</a>
@@ -80,13 +83,13 @@
            <div itemprop="articleBody">
              
   <section id="power-instruments">
-<h1>Power Instruments<a class="headerlink" href="#power-instruments" title="Permalink to this headline"></a></h1>
+<h1>Power Instruments<a class="headerlink" href="#power-instruments" title="Permalink to this heading"></a></h1>
 <p>This secton contains all contracts w.r.t. power.</p>
 <section id="power-purchase-agreement">
-<h2>Power Purchase Agreement<a class="headerlink" href="#power-purchase-agreement" title="Permalink to this headline"></a></h2>
+<h2>Power Purchase Agreement<a class="headerlink" href="#power-purchase-agreement" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="rivapy.instruments.PPASpecification">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.instruments.</span></span><span class="sig-name descname"><span class="pre">PPASpecification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amount</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schedule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rivapy.instruments.SimpleSchedule" title="rivapy.instruments.ppa_specification.SimpleSchedule"><span class="pre">rivapy.instruments.ppa_specification.SimpleSchedule</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.instruments.PPASpecification" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.instruments.</span></span><span class="sig-name descname"><span class="pre">PPASpecification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amount</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schedule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rivapy.instruments.SimpleSchedule" title="rivapy.instruments.ppa_specification.SimpleSchedule"><span class="pre">SimpleSchedule</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.instruments.PPASpecification" title="Permalink to this definition"></a></dt>
 <dd><p>Specification for a power purchase agreement (PPA).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -100,10 +103,10 @@
 
 </section>
 <section id="schedules">
-<h2>Schedules<a class="headerlink" href="#schedules" title="Permalink to this headline"></a></h2>
+<h2>Schedules<a class="headerlink" href="#schedules" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="rivapy.instruments.SimpleSchedule">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.instruments.</span></span><span class="sig-name descname"><span class="pre">SimpleSchedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime.datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime.datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'1H'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weekdays</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hours</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.instruments.SimpleSchedule" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.instruments.</span></span><span class="sig-name descname"><span class="pre">SimpleSchedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'1H'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weekdays</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hours</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.instruments.SimpleSchedule" title="Permalink to this definition"></a></dt>
 <dd><p>Simple schedule of fixed datetime points.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -138,7 +141,7 @@ By default, the resulting datetime points are timezone-naive. See documentation 
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="rivapy.instruments.SimpleSchedule.get_schedule">
-<span class="sig-name descname"><span class="pre">get_schedule</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#rivapy.instruments.SimpleSchedule.get_schedule" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_schedule</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#rivapy.instruments.SimpleSchedule.get_schedule" title="Permalink to this definition"></a></dt>
 <dd><p>Return list of datetime values belonging to the schedule.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -160,7 +163,7 @@ By default, the resulting datetime points are timezone-naive. See documentation 
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="rivapy.instruments.credit.html" class="btn btn-neutral float-left" title="Credit Instruments" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="rivapy.pricing.html" class="btn btn-neutral float-right" title="pricing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="rivapy.pricing.html" class="btn btn-neutral float-right" title="Pricing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

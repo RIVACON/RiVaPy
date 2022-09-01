@@ -14,10 +14,13 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Instruments" href="rivapy.instruments.html" />
     <link rel="prev" title="Marketdata" href="rivapy.marketdata.html" /> 
 </head>
 
@@ -38,11 +41,28 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="rivapy.instruments.html">instruments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rivapy.pricing.html">pricing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rivapy.marketdata.html">Marketdata</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Models</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#equity">Equity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#equity">Equity</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#local-volatility-model">Local Volatility Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#heston-model">Heston Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scott-chesney">Scott Chesney</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stochastic-local-volatility-model">Stochastic Local Volatility Model</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rivapy.instruments.html">Instruments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rivapy.pricing.html">Pricing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rivapy.marketdata.html">Marketdata</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#equity">Equity</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#local-volatility-model">Local Volatility Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#heston-model">Heston Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scott-chesney">Scott Chesney</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stochastic-local-volatility-model">Stochastic Local Volatility Model</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -72,16 +92,29 @@
            <div itemprop="articleBody">
              
   <section id="models">
-<h1>Models<a class="headerlink" href="#models" title="Permalink to this headline"></a></h1>
+<h1>Models<a class="headerlink" href="#models" title="Permalink to this heading"></a></h1>
 <section id="equity">
-<h2>Equity<a class="headerlink" href="#equity" title="Permalink to this headline"></a></h2>
+<h2>Equity<a class="headerlink" href="#equity" title="Permalink to this heading"></a></h2>
+<section id="local-volatility-model">
+<h3>Local Volatility Model<a class="headerlink" href="#local-volatility-model" title="Permalink to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="rivapy.models.LocalVol">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">LocalVol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vol_param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_strikes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.LocalVol" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">LocalVol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vol_param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_strikes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">call_prices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_vol_grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.LocalVol" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Local Volatility Class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vol_param</strong> – a grid or a parametrisation of the volatility</p></li>
+<li><p><strong>x_strikes</strong> (<em>np.array</em>) – strikes</p></li>
+<li><p><strong>time_grid</strong> (<em>np.array</em>) – time_grid</p></li>
+<li><p><strong>call_param</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – A grid of call prices. Not compatible with vol_param. Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="rivapy.models.LocalVol.apply_mc_step">
-<span class="sig-name descname"><span class="pre">apply_mc_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.LocalVol.apply_mc_step" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">apply_mc_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.LocalVol.apply_mc_step" title="Permalink to this definition"></a></dt>
 <dd><p>Apply a MC-Euler step for the LV Model for n different paths.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -97,12 +130,232 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="rivapy.models.LocalVol.compute_local_var">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_local_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vol_param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_strikes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.LocalVol.compute_local_var" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_local_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vol_param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_strikes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">call_param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_lv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_lv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.LocalVol.compute_local_var" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the local variance from vol_param or call_param for x_strikes on time_grid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vol_param</strong> – a grid or a parametrisation of the volatility</p></li>
+<li><p><strong>x_strikes</strong> (<em>np.array</em>) – strikes</p></li>
+<li><p><strong>time_grid</strong> (<em>np.array</em>) – time_grid</p></li>
+<li><p><strong>call_param</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – A grid of call prices. Not compatible with vol_param. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>local volatility surface on the grid</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
-<span class="target" id="module-rivapy.models.HestonModel"></span><span class="target" id="module-rivapy.models.HestonLocalVol"></span><span class="target" id="module-0"></span></section>
+</section>
+<section id="heston-model">
+<h3>Heston Model<a class="headerlink" href="#heston-model" title="Permalink to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.HestonModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">HestonModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">long_run_variance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_reversion_speed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vol_of_vol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_variance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlation</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.HestonModel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>_summary_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>long_run_variance</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>mean_reversion_speed</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>vol_of_vol</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>initial_variance</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>correlation</strong> (<em>_type_</em>) – _description_</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.HestonModel.apply_mc_step">
+<span class="sig-name descname"><span class="pre">apply_mc_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.HestonModel.apply_mc_step" title="Permalink to this definition"></a></dt>
+<dd><p>Apply a MC-Euler step for the Heston Model for n different paths.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – 2-d array containing the start values for the spot and variance. The first column contains the spot, the second the variance values.</p></li>
+<li><p><strong>t0</strong> (<em>float</em>) – The current time.</p></li>
+<li><p><strong>t1</strong> (<em>float</em>) – The next timestep to be computed.</p></li>
+<li><p><strong>rnd</strong> (<em>np.ndarray</em>) – Two-dimensional array of shape (n_sims,2) containing the normal random numbers. Each row of the array is used to compute the correlated random numbers for the respective simulation.</p></li>
+<li><p><strong>slv</strong> (<em>np.ndarray</em>) – Stochastic local variance (for each path) to be multiplied with the heston variance. This is used by the StochasticVolatilityModel and can be ignored.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.HestonModel.call_price">
+<span class="sig-name descname"><span class="pre">call_price</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#rivapy.models.HestonModel.call_price" title="Permalink to this definition"></a></dt>
+<dd><p>Computes a call price for the Heston model via integration over characteristic function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s0</strong> (<em>float</em>) – current spot</p></li>
+<li><p><strong>v0</strong> (<em>float</em>) – current variance</p></li>
+<li><p><strong>K</strong> (<em>float</em>) – strike</p></li>
+<li><p><strong>ttm</strong> (<em>float</em>) – time to maturity</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.HestonModel.feller_condition">
+<span class="sig-name descname"><span class="pre">feller_condition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.HestonModel.feller_condition" title="Permalink to this definition"></a></dt>
+<dd><p>Return True if the model parameter fulfill the Feller condition
+..:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True-&gt;Feller condition is fullfilled</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.HestonModel.get_initial_value">
+<span class="sig-name descname"><span class="pre">get_initial_value</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#rivapy.models.HestonModel.get_initial_value" title="Permalink to this definition"></a></dt>
+<dd><p>Return the initial value (x0, v0)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Initial value.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="scott-chesney">
+<h3>Scott Chesney<a class="headerlink" href="#scott-chesney" title="Permalink to this heading"></a></h3>
+<p>Scott Chesney Model is a stochastic volatility model of the form</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[dS =  e^y S dW_S\]</div>
+<div class="math notranslate nohighlight">
+\[dy = \kappa (\theta-y)dt \alpha dW_y\]</div>
+<div class="math notranslate nohighlight">
+\[E[dW_S\dot dW_y] = \rho dt\]</div>
+</div></blockquote>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.ScottChesneyModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">ScottChesneyModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kappa</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.ScottChesneyModel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Scott-Chesney Model
+Generates a timeseries according to</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[dS =  e^y S dW_S\]</div>
+<div class="math notranslate nohighlight">
+\[dy = `{\kappa}` (`{   heta}`-y)dt `{lpha}` dW_y\]</div>
+<div class="math notranslate nohighlight">
+\[E[dW_s\dot dW_y] = \rho dt\]</div>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kappa</strong> (<em>float</em>) – speed of mean reversion</p></li>
+<li><p><strong>theta</strong> (<em>float</em>) – mean reversion level</p></li>
+<li><p><strong>alpha</strong> (<em>float</em>) – vol of (log)vol</p></li>
+<li><p><strong>correlation</strong> (<em>float</em>) – correlation between (log)vol and spot</p></li>
+<li><p><strong>y0</strong> – start value (float): (log) vol</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.ScottChesneyModel.apply_mc_step">
+<span class="sig-name descname"><span class="pre">apply_mc_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.ScottChesneyModel.apply_mc_step" title="Permalink to this definition"></a></dt>
+<dd><p>Apply a MC-Euler step for the Scott-Chesney Model for n different paths.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – 2-d array containing the start values for the spot and variance. The first column contains the spot, the second the variance values.</p></li>
+<li><p><strong>t0</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p></li>
+<li><p><strong>t1</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p></li>
+<li><p><strong>rnd</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p></li>
+<li><p><strong>slv</strong> (<em>np.ndarray</em>) – Stochastic local variance (for each path) to be multiplied with the heston variance. This is used by the StochasticVolatilityModel.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="stochastic-local-volatility-model">
+<h3>Stochastic Local Volatility Model<a class="headerlink" href="#stochastic-local-volatility-model" title="Permalink to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.StochasticLocalVol">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">StochasticLocalVol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stoch_vol_model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.StochasticLocalVol" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Stochastic Local Volatility model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>stochastic_vol_model</strong> (<em>StochasticVolModel</em>) – The underlying stochastic vol model</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.StochasticLocalVol.apply_mc_step">
+<span class="sig-name descname"><span class="pre">apply_mc_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.StochasticLocalVol.apply_mc_step" title="Permalink to this definition"></a></dt>
+<dd><p>Apply a MC-Euler step for the Heston Local Vol Model for n different paths.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – 2-d array containing the start values for the spot and variance. The first column contains the spot, the second the variance values.</p></li>
+<li><p><strong>t0</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p></li>
+<li><p><strong>t1</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p></li>
+<li><p><strong>rnd</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.StochasticLocalVol.calibrate_MC">
+<span class="sig-name descname"><span class="pre">calibrate_MC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vol_param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_strikes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sims</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">call_prices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.StochasticLocalVol.calibrate_MC" title="Permalink to this definition"></a></dt>
+<dd><p>Calibrate the Heston Local Volatility Model using kernel regression.</p>
+<p>This method calibrates the local volatility part of the Heston Model given a volatility parametrization so that the
+respective implied volatilities from the given vol parametrization are reproduced by the Heston Local Volatility model.
+The calibration is based on kernel regression as described in <a class="reference external" href="https://www.frontiersin.org/articles/10.3389/frai.2019.00004/full">Applied Machine Learning for Stochastic Local Volatility Calibration</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vol_param</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p></li>
+<li><p><strong>x_strikes</strong> (<em>np.array</em>) – [description]</p></li>
+<li><p><strong>time_grid</strong> (<em>np.array</em>) – [description]</p></li>
+<li><p><strong>n_sims</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p></li>
+<li><p><strong>local_var</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – [description]. Defaults to None.</p></li>
+<li><p><strong>call_prices</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.StochasticLocalVol.get_initial_value">
+<span class="sig-name descname"><span class="pre">get_initial_value</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#rivapy.models.StochasticLocalVol.get_initial_value" title="Permalink to this definition"></a></dt>
+<dd><p>Return the initial value (x0, v0)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Initial value.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
 </section>
 
 
@@ -110,6 +363,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="rivapy.marketdata.html" class="btn btn-neutral float-left" title="Marketdata" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="rivapy.instruments.html" class="btn btn-neutral float-right" title="Instruments" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

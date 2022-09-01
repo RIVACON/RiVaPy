@@ -1,4 +1,4 @@
-instruments
+Instruments
 ===========================
 .. autoclass:: rivapy.instruments.ComboSpecification
    :members:
