@@ -41,8 +41,6 @@
 <li class="toctree-l1"><a class="reference internal" href="rivapy.models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rivapy.instruments.html">Instruments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rivapy.pricing.html">Pricing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rivapy.marketdata.html">Marketdata</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rivapy.models.html">Models</a></li>
 </ul>
 
         </div>
@@ -87,6 +85,7 @@
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
  
 </div>
 <h2 id="A">A</h2>
@@ -132,7 +131,15 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="rivapy.marketdata.html#rivapy.marketdata.VolatilitySurface.calc_implied_vol">calc_implied_vol() (rivapy.marketdata.VolatilitySurface method)</a>
+      <li><a href="rivapy.marketdata.html#rivapy.marketdata.VolatilityGridParametrization.calc_implied_vol">calc_implied_vol() (rivapy.marketdata.VolatilityGridParametrization method)</a>
+
+      <ul>
+        <li><a href="rivapy.marketdata.html#rivapy.marketdata.VolatilityParametrizationSSVI.calc_implied_vol">(rivapy.marketdata.VolatilityParametrizationSSVI method)</a>
+</li>
+        <li><a href="rivapy.marketdata.html#rivapy.marketdata.VolatilitySurface.calc_implied_vol">(rivapy.marketdata.VolatilitySurface method)</a>
+</li>
+      </ul></li>
+      <li><a href="rivapy.models.html#rivapy.models.WindPowerModel.calibrate">calibrate() (rivapy.models.WindPowerModel static method)</a>
 </li>
       <li><a href="rivapy.marketdata.html#rivapy.marketdata.curves.BootstrapHazardCurve.calibrate_hazard_rate">calibrate_hazard_rate() (rivapy.marketdata.curves.BootstrapHazardCurve method)</a>
 </li>
@@ -144,13 +151,17 @@
 </li>
       <li><a href="rivapy.pricing.html#rivapy.pricing.pricing_data.CDSPricingData">CDSPricingData (class in rivapy.pricing.pricing_data)</a>
 </li>
-      <li><a href="rivapy.instruments.credit.html#rivapy.instruments.cds_specification.CDSSpecification">CDSSpecification (class in rivapy.instruments.cds_specification)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="rivapy.instruments.credit.html#rivapy.instruments.cds_specification.CDSSpecification">CDSSpecification (class in rivapy.instruments.cds_specification)</a>
+</li>
       <li><a href="rivapy.instruments.html#rivapy.instruments.ComboSpecification">ComboSpecification (class in rivapy.instruments)</a>
 </li>
+      <li><a href="rivapy.models.html#rivapy.models.SupplyFunction.compute">compute() (rivapy.models.SupplyFunction method)</a>
+</li>
       <li><a href="rivapy.pricing.html#rivapy.pricing.analytics.compute_european_price_Buehler">compute_european_price_Buehler() (in module rivapy.pricing.analytics)</a>
+</li>
+      <li><a href="rivapy.instruments.power.html#rivapy.instruments.PPASpecification.compute_flows">compute_flows() (rivapy.instruments.PPASpecification method)</a>
 </li>
       <li><a href="rivapy.pricing.html#rivapy.pricing.analytics.compute_implied_vol_Buehler">compute_implied_vol_Buehler() (in module rivapy.pricing.analytics)</a>
 </li>
@@ -210,8 +221,14 @@
 </li>
       <li><a href="rivapy.marketdata.html#rivapy.marketdata.curves.DiscountCurve.get_dates">get_dates() (rivapy.marketdata.curves.DiscountCurve method)</a>
 </li>
-      <li><a href="rivapy.marketdata.html#rivapy.marketdata.curves.DiscountCurve.get_df">get_df() (rivapy.marketdata.curves.DiscountCurve method)</a>
+      <li><a href="rivapy.instruments.power.html#rivapy.instruments.SimpleSchedule.get_df">get_df() (rivapy.instruments.SimpleSchedule method)</a>
+
+      <ul>
+        <li><a href="rivapy.marketdata.html#rivapy.marketdata.curves.DiscountCurve.get_df">(rivapy.marketdata.curves.DiscountCurve method)</a>
 </li>
+        <li><a href="rivapy.marketdata.html#rivapy.marketdata.curves.PowerPriceForwardCurve.get_df">(rivapy.marketdata.curves.PowerPriceForwardCurve method)</a>
+</li>
+      </ul></li>
       <li><a href="rivapy.instruments.equity.html#rivapy.instruments.BarrierSpecification.get_dictionary">get_dictionary() (rivapy.instruments.BarrierSpecification method)</a>
 
       <ul>
@@ -222,12 +239,22 @@
         <li><a href="rivapy.instruments.equity.html#rivapy.instruments.RainbowSpecification.get_dictionary">(rivapy.instruments.RainbowSpecification method)</a>
 </li>
       </ul></li>
+      <li><a href="rivapy.marketdata.html#rivapy.marketdata.VolatilityParametrizationSSVI.get_eta">get_eta() (rivapy.marketdata.VolatilityParametrizationSSVI method)</a>
+</li>
+      <li><a href="rivapy.marketdata.html#rivapy.marketdata.VolatilityParametrizationSSVI.get_fwd_atm_vols">get_fwd_atm_vols() (rivapy.marketdata.VolatilityParametrizationSSVI method)</a>
+</li>
+      <li><a href="rivapy.marketdata.html#rivapy.marketdata.VolatilityParametrizationSSVI.get_gamma">get_gamma() (rivapy.marketdata.VolatilityParametrizationSSVI method)</a>
+</li>
       <li><a href="rivapy.models.html#rivapy.models.HestonModel.get_initial_value">get_initial_value() (rivapy.models.HestonModel method)</a>
 
       <ul>
         <li><a href="rivapy.models.html#rivapy.models.StochasticLocalVol.get_initial_value">(rivapy.models.StochasticLocalVol method)</a>
 </li>
       </ul></li>
+      <li><a href="rivapy.instruments.power.html#rivapy.instruments.SimpleSchedule.get_params">get_params() (rivapy.instruments.SimpleSchedule method)</a>
+</li>
+      <li><a href="rivapy.marketdata.html#rivapy.marketdata.VolatilityParametrizationSSVI.get_rho">get_rho() (rivapy.marketdata.VolatilityParametrizationSSVI method)</a>
+</li>
       <li><a href="rivapy.instruments.power.html#rivapy.instruments.SimpleSchedule.get_schedule">get_schedule() (rivapy.instruments.SimpleSchedule method)</a>
 </li>
       <li><a href="rivapy.instruments.equity.html#rivapy.instruments.BarrierSpecification.getCategory">getCategory() (rivapy.instruments.BarrierSpecification method)</a>
@@ -366,6 +393,8 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="rivapy.models.html#rivapy.models.LoadModel">LoadModel (class in rivapy.models)</a>
+</li>
       <li><a href="rivapy.models.html#rivapy.models.LocalVol">LocalVol (class in rivapy.models)</a>
 </li>
   </ul></td>
@@ -410,11 +439,15 @@
       <ul>
         <li><a href="rivapy.marketdata.html#rivapy.marketdata.curves.EquityForwardCurve.plot">(rivapy.marketdata.curves.EquityForwardCurve method)</a>
 </li>
+        <li><a href="rivapy.models.html#rivapy.models.SupplyFunction.plot">(rivapy.models.SupplyFunction method)</a>
+</li>
       </ul></li>
-      <li><a href="rivapy.instruments.power.html#rivapy.instruments.PPASpecification">PPASpecification (class in rivapy.instruments)</a>
+      <li><a href="rivapy.marketdata.html#rivapy.marketdata.curves.PowerPriceForwardCurve">PowerPriceForwardCurve (class in rivapy.marketdata.curves)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="rivapy.instruments.power.html#rivapy.instruments.PPASpecification">PPASpecification (class in rivapy.instruments)</a>
+</li>
       <li><a href="rivapy.pricing.html#rivapy.pricing.pricing_data.ResultType.PRICE">PRICE (rivapy.pricing.pricing_data.ResultType attribute)</a>
 </li>
       <li><a href="rivapy.pricing.html#rivapy.pricing.pricing_data.AmericanPdePricingData.price">price() (rivapy.pricing.pricing_data.AmericanPdePricingData method)</a>
@@ -440,6 +473,8 @@
       <li><a href="rivapy.instruments.equity.html#rivapy.instruments.RainbowSpecification">RainbowSpecification (class in rivapy.instruments)</a>
 </li>
       <li><a href="rivapy.pricing.html#rivapy.pricing.pricing_data.BondPricingData.recovery_curve">recovery_curve (rivapy.pricing.pricing_data.BondPricingData property)</a>
+</li>
+      <li><a href="rivapy.models.html#rivapy.models.ResidualDemandModel">ResidualDemandModel (class in rivapy.models)</a>
 </li>
       <li><a href="rivapy.pricing.html#rivapy.pricing.pricing_data.ResultType">ResultType (class in rivapy.pricing.pricing_data)</a>
 </li>
@@ -493,15 +528,35 @@
       </ul></li>
       <li><a href="rivapy.models.html#rivapy.models.ScottChesneyModel">ScottChesneyModel (class in rivapy.models)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="rivapy.instruments.power.html#rivapy.instruments.PPASpecification.set_amount">set_amount() (rivapy.instruments.PPASpecification method)</a>
+</li>
       <li><a href="rivapy.pricing.html#rivapy.pricing.pricing_data.PricingResults.set_price">set_price() (rivapy.pricing.pricing_data.PricingResults method)</a>
 </li>
       <li><a href="rivapy.marketdata.html#rivapy.marketdata.VolatilitySurface.set_stickyness">set_stickyness() (rivapy.marketdata.VolatilitySurface static method)</a>
 </li>
+      <li><a href="rivapy.models.html#rivapy.models.SimpleRenewableModel">SimpleRenewableModel (class in rivapy.models)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="rivapy.instruments.power.html#rivapy.instruments.SimpleSchedule">SimpleSchedule (class in rivapy.instruments)</a>
 </li>
+      <li><a href="rivapy.models.html#rivapy.models.LoadModel.simulate">simulate() (rivapy.models.LoadModel method)</a>
+
+      <ul>
+        <li><a href="rivapy.models.html#rivapy.models.ResidualDemandModel.simulate">(rivapy.models.ResidualDemandModel method)</a>
+</li>
+        <li><a href="rivapy.models.html#rivapy.models.SimpleRenewableModel.simulate">(rivapy.models.SimpleRenewableModel method)</a>
+</li>
+        <li><a href="rivapy.models.html#rivapy.models.SolarPowerModel.simulate">(rivapy.models.SolarPowerModel method)</a>
+</li>
+        <li><a href="rivapy.models.html#rivapy.models.WindPowerModel.simulate">(rivapy.models.WindPowerModel method)</a>
+</li>
+      </ul></li>
+      <li><a href="rivapy.models.html#rivapy.models.SolarPowerModel">SolarPowerModel (class in rivapy.models)</a>
+</li>
       <li><a href="rivapy.models.html#rivapy.models.StochasticLocalVol">StochasticLocalVol (class in rivapy.models)</a>
+</li>
+      <li><a href="rivapy.models.html#rivapy.models.SupplyFunction">SupplyFunction (class in rivapy.models)</a>
 </li>
       <li><a href="rivapy.pricing.html#rivapy.pricing.pricing_data.BondPricingData.survival_curve">survival_curve (rivapy.pricing.pricing_data.BondPricingData property)</a>
 </li>
@@ -538,18 +593,36 @@
       <ul>
         <li><a href="rivapy.marketdata.html#rivapy.marketdata.curves.EquityForwardCurve.value">(rivapy.marketdata.curves.EquityForwardCurve method)</a>
 </li>
+        <li><a href="rivapy.marketdata.html#rivapy.marketdata.curves.PowerPriceForwardCurve.value">(rivapy.marketdata.curves.PowerPriceForwardCurve method)</a>
+</li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="rivapy.pricing.html#rivapy.pricing.pricing_data.ResultType.VANNA">VANNA (rivapy.pricing.pricing_data.ResultType attribute)</a>
 </li>
       <li><a href="rivapy.pricing.html#rivapy.pricing.pricing_data.ResultType.VEGA">VEGA (rivapy.pricing.pricing_data.ResultType attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="rivapy.marketdata.html#rivapy.marketdata.VolatilityGridParametrization">VolatilityGridParametrization (class in rivapy.marketdata)</a>
+</li>
       <li><a href="rivapy.marketdata.html#rivapy.marketdata.VolatilityParametrizationFlat">VolatilityParametrizationFlat (class in rivapy.marketdata)</a>
+</li>
+      <li><a href="rivapy.marketdata.html#rivapy.marketdata.VolatilityParametrizationSABR">VolatilityParametrizationSABR (class in rivapy.marketdata)</a>
+</li>
+      <li><a href="rivapy.marketdata.html#rivapy.marketdata.VolatilityParametrizationSSVI">VolatilityParametrizationSSVI (class in rivapy.marketdata)</a>
+</li>
+      <li><a href="rivapy.marketdata.html#rivapy.marketdata.VolatilityParametrizationSVI">VolatilityParametrizationSVI (class in rivapy.marketdata)</a>
 </li>
       <li><a href="rivapy.marketdata.html#rivapy.marketdata.VolatilityParametrizationTerm">VolatilityParametrizationTerm (class in rivapy.marketdata)</a>
 </li>
       <li><a href="rivapy.marketdata.html#rivapy.marketdata.VolatilitySurface">VolatilitySurface (class in rivapy.marketdata)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="rivapy.models.html#rivapy.models.WindPowerModel">WindPowerModel (class in rivapy.models)</a>
 </li>
   </ul></td>
 </tr></table>

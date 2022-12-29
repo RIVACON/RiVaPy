@@ -50,21 +50,19 @@
 <li class="toctree-l3"><a class="reference internal" href="#stochastic-local-volatility-model">Stochastic Local Volatility Model</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#power">Power</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#residualdemandmodel">ResidualDemandModel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simplerenewablemodel">SimpleRenewableModel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#windpowermodel">WindPowerModel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#solarpowermodel">SolarPowerModel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#loadmodel">LoadModel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#supplyfunction">SupplyFunction</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="rivapy.instruments.html">Instruments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rivapy.pricing.html">Pricing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rivapy.marketdata.html">Marketdata</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Models</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#equity">Equity</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#local-volatility-model">Local Volatility Model</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#heston-model">Heston Model</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scott-chesney">Scott Chesney</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#stochastic-local-volatility-model">Stochastic Local Volatility Model</a></li>
-</ul>
-</li>
-</ul>
-</li>
 </ul>
 
         </div>
@@ -351,6 +349,218 @@ The calibration is based on kernel regression as described in <a class="referenc
 </dd>
 </dl>
 </dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="power">
+<h2>Power<a class="headerlink" href="#power" title="Permalink to this heading"></a></h2>
+<section id="residualdemandmodel">
+<h3>ResidualDemandModel<a class="headerlink" href="#residualdemandmodel" title="Permalink to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.ResidualDemandModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">ResidualDemandModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wind_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity_wind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solar_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity_solar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supply_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.ResidualDemandModel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Residual demand model to model power prices.</p>
+<p>This model is based on the paper by Wagner<a class="footnote-reference brackets" href="#footcite-wagner2012" id="id1">1</a> and models power (spot) prices <span class="math notranslate nohighlight">\(p_t\)</span> depending (by a deterministic function <span class="math notranslate nohighlight">\(f\)</span>) on the residual demand
+<span class="math notranslate nohighlight">\(R_t\)</span>,</p>
+<div class="math notranslate nohighlight">
+\[p_t = f(R_t) = f(L_t - IC^w\cdot E_t^w - IC_t^s\cdot E_t^s)\]</div>
+<p>where</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(L_t\)</span> is the demand (load) at time <span class="math notranslate nohighlight">\(t\)</span>,</p></li>
+<li><p><span class="math notranslate nohighlight">\(IC^w\)</span> denotes the installed capacity of wind (in contrast to the paper this is not time dependent),</p></li>
+<li><p><span class="math notranslate nohighlight">\(E_t^w\)</span> is the wind efficiency at time <span class="math notranslate nohighlight">\(t\)</span>,</p></li>
+<li><p><span class="math notranslate nohighlight">\(IC^s\)</span> denotes the installed capacity of solar (in contrast to the paper this is not time dependent),</p></li>
+<li><p><span class="math notranslate nohighlight">\(E_t^s\)</span> is the solar efficiency at time <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wind_model</strong> (<em>object</em>) – Model for wind efficiency (needs to implement a method simulate in order to work with this model).
+See <a class="reference internal" href="#rivapy.models.WindPowerModel" title="rivapy.models.WindPowerModel"><code class="xref py py-func docutils literal notranslate"><span class="pre">rivapy.models.WindPowerModel()</span></code></a> as an example for a wind model.</p></li>
+<li><p><strong>capacity_wind</strong> (<em>object</em>) – The capacity of wind power. This is multiplied with the simulated efficiency to obtain the simulated absolute amount of wind.</p></li>
+<li><p><strong>solar_model</strong> (<em>object</em>) – Model for solar efficiency (needs to implement a method simulate in order to work with this model).
+See <a class="reference internal" href="#rivapy.models.SolarPowerModel" title="rivapy.models.SolarPowerModel"><code class="xref py py-func docutils literal notranslate"><span class="pre">rivapy.models.SolarPowerModel()</span></code></a> as an example for a solar model.</p></li>
+<li><p><strong>capacity_solar</strong> (<em>object</em>) – The capacity of solar power. This is multiplied with the simulated efficiency to obtain the simulated absolute amount of solar.</p></li>
+<li><p><strong>load_model</strong> (<em>object</em>) – Model for load. See <a class="reference internal" href="#rivapy.models.LoadModel" title="rivapy.models.LoadModel"><code class="xref py py-func docutils literal notranslate"><span class="pre">rivapy.models.LoadModel()</span></code></a> as an example for a load model.</p></li>
+<li><p><strong>supply_curve</strong> (<em>object</em>) – The total demand, see <a class="reference internal" href="#rivapy.models.SupplyFunction" title="rivapy.models.SupplyFunction"><code class="xref py py-func docutils literal notranslate"><span class="pre">rivapy.models.SupplyFunction()</span></code></a> for an example.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.ResidualDemandModel.simulate">
+<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timegrid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DateTimeGrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_value_wind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_value_solar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_value_load</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd_wind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd_solar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd_load</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.ResidualDemandModel.simulate" title="Permalink to this definition"></a></dt>
+<dd><p>Simulate the residual demand model on a given datetimegrid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timegrid</strong> (<em>DateTimeGrid</em>) – _description_</p></li>
+<li><p><strong>start_value_wind</strong> (<em>float</em>) – _description_</p></li>
+<li><p><strong>start_value_solar</strong> (<em>float</em>) – _description_</p></li>
+<li><p><strong>start_value_load</strong> (<em>float</em>) – _description_</p></li>
+<li><p><strong>n_sims</strong> (<em>int</em>) – _description_</p></li>
+<li><p><strong>rnd_wind</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>rnd_solar</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>rnd_load</strong> (<em>float</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>rnd_state</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="simplerenewablemodel">
+<h3>SimpleRenewableModel<a class="headerlink" href="#simplerenewablemodel" title="Permalink to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.SimpleRenewableModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">SimpleRenewableModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wind_model_onshore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity_wind_onhore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_wind_onhore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DateTimeFunction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wind_model_offshore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity_wind_offore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_wind_offhore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solar_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity_solar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_solar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.SimpleRenewableModel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Simple model to simulate power prices together with renewables</p>
+<p>This model is inspried by the paper by Biegler-König <em>et al.</em><a class="footnote-reference brackets" href="#footcite-bieglerkoenig2022" id="id2">2</a> and models power (spot) prices together with renewables</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>capacity_wind</strong> (<em>interfaces.DateTimeFunction</em>) – The capacity of wind power. This is multiplied with the simulated efficiency to obtain the simulated absolute amount of wind.</p></li>
+<li><p><strong>solar_model</strong> (<em>object</em>) – Model for solar efficiency (needs to implement a method simulate in order to work with this model).
+See <a class="reference internal" href="#rivapy.models.SolarPowerModel" title="rivapy.models.SolarPowerModel"><code class="xref py py-func docutils literal notranslate"><span class="pre">rivapy.models.SolarPowerModel()</span></code></a> as an example for a solar model.</p></li>
+<li><p><strong>capacity_solar</strong> (<em>object</em>) – The capacity of solar power. This is multiplied with the simulated efficiency to obtain the simulated absolute amount of solar.</p></li>
+<li><p><strong>power_model</strong> (<em>object</em>) – The total demand, see <a class="reference internal" href="#rivapy.models.SupplyFunction" title="rivapy.models.SupplyFunction"><code class="xref py py-func docutils literal notranslate"><span class="pre">rivapy.models.SupplyFunction()</span></code></a> for an example.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.SimpleRenewableModel.simulate">
+<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timegrid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DateTimeGrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_value_wind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_value_solar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_value_load</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd_wind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd_solar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd_load</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.SimpleRenewableModel.simulate" title="Permalink to this definition"></a></dt>
+<dd><p>Simulate the residual demand model on a given datetimegrid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timegrid</strong> (<em>DateTimeGrid</em>) – _description_</p></li>
+<li><p><strong>start_value_wind</strong> (<em>float</em>) – _description_</p></li>
+<li><p><strong>start_value_solar</strong> (<em>float</em>) – _description_</p></li>
+<li><p><strong>start_value_load</strong> (<em>float</em>) – _description_</p></li>
+<li><p><strong>n_sims</strong> (<em>int</em>) – _description_</p></li>
+<li><p><strong>rnd_wind</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>rnd_solar</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>rnd_load</strong> (<em>float</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>rnd_state</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="windpowermodel">
+<h3>WindPowerModel<a class="headerlink" href="#windpowermodel" title="Permalink to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.WindPowerModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">WindPowerModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deviation_process</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seasonal_function</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Wind_Germany'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.WindPowerModel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Wind Power Model to model the efficiency of wind power production.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>speed_of_mean_reversion</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>Callable</em><em>]</em>) – _description_</p></li>
+<li><p><strong>volatility</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>Callable</em><em>]</em>) – _description_</p></li>
+<li><p><strong>mean_level</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>Callable</em><em>]</em>) – _description_</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.WindPowerModel.calibrate">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calibrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deviation_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seasonality_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_efficiency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_efficiency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.WindPowerModel.calibrate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.WindPowerModel.simulate">
+<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timegrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.WindPowerModel.simulate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<div class="docutils container" id="id3">
+<dl class="footnote brackets">
+<dt class="label" id="footcite-wagner2012"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Andreas Wagner. Residual demand modeling and application to electricity pricing. <em>SSRN Electronic Journal</em>, 2012. <a class="reference external" href="https://doi.org/10.2139/ssrn.2018908">doi:10.2139/ssrn.2018908</a>.</p>
+</dd>
+<dt class="label" id="footcite-bieglerkoenig2022"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>Richard Biegler-König, Tobias Pfingsten, and Björn Fischbach. Modelling green PPAs in power markets - pricing, hedging and risk management of green power purchase agreements in electricity markets. <em>SSRN Electronic Journal</em>, 2022. <a class="reference external" href="https://doi.org/10.2139/ssrn.4280606">doi:10.2139/ssrn.4280606</a>.</p>
+</dd>
+</dl>
+</div>
+</section>
+<section id="solarpowermodel">
+<h3>SolarPowerModel<a class="headerlink" href="#solarpowermodel" title="Permalink to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.SolarPowerModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">SolarPowerModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daily_maximum_process</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_level</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Solar_Germany'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.SolarPowerModel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.SolarPowerModel.simulate">
+<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timegrid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DateTimeGrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.SolarPowerModel.simulate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="loadmodel">
+<h3>LoadModel<a class="headerlink" href="#loadmodel" title="Permalink to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.LoadModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">LoadModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deviation_process</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_profile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.LoadModel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Model the power load.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>deviation_process</strong> (<em>object</em>) – _description_</p></li>
+<li><p><strong>load_profile</strong> (<em>object</em>) – _description_</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.LoadModel.simulate">
+<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timegrid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DateTimeGrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.LoadModel.simulate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="supplyfunction">
+<h3>SupplyFunction<a class="headerlink" href="#supplyfunction" title="Permalink to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.SupplyFunction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">SupplyFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">floor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peak</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offpeak</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peak_hours</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">set</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.SupplyFunction" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.SupplyFunction.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.SupplyFunction.compute" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.SupplyFunction.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_demand_low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_demand_high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.SupplyFunction.plot" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 

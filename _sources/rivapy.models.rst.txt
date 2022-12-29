@@ -37,3 +37,55 @@ Stochastic Local Volatility Model
     :members:
     :undoc-members:
     :show-inheritance:
+
+
+Power
+----------------------------------
+
+ResidualDemandModel
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: rivapy.models.ResidualDemandModel
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+SimpleRenewableModel
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: rivapy.models.SimpleRenewableModel
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+WindPowerModel
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: rivapy.models.WindPowerModel
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. footbibliography::
+
+
+SolarPowerModel
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: rivapy.models.SolarPowerModel
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+LoadModel
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: rivapy.models.LoadModel
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+SupplyFunction
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: rivapy.models.SupplyFunction
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. footbibliography::

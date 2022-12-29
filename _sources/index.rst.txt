@@ -10,13 +10,14 @@ Welcome to rivapy's documentation!
    :maxdepth: 3
    :caption: Contents:
 
+   
    rivapy.marketdata
    rivapy.models
    rivapy.instruments
    rivapy.pricing
-   rivapy.marketdata
-   rivapy.models
-
+   rivapy.interfaces
+   
+  
 
 Indices and tables
 ==================
