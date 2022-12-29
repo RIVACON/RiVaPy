@@ -60,8 +60,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Pricing</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Pricing</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/rivapy.pricing.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -119,11 +119,6 @@ is_call (bool): if option is call or put</p></li>
 </dl>
 </dd></dl>
 
-<span class="target" id="module-rivapy.pricing.pricer"></span><dl class="py function">
-<dt class="sig sig-object py" id="rivapy.pricing.pricer.price">
-<span class="sig-prename descclassname"><span class="pre">rivapy.pricing.pricer.</span></span><span class="sig-name descname"><span class="pre">price</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pr_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.pricing.pricer.price" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
 <span class="target" id="module-rivapy.pricing.pricing_data"></span><dl class="py class">
 <dt class="sig sig-object py" id="rivapy.pricing.pricing_data.AmericanPdePricingData">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.pricing.pricing_data.</span></span><span class="sig-name descname"><span class="pre">AmericanPdePricingData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vol_surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pricing_request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rivapy.pricing.pricing_data.ResultType" title="rivapy.pricing.pricing_data.ResultType"><span class="pre">ResultType</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_steps_year</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spot_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.pricing.pricing_data.AmericanPdePricingData" title="Permalink to this definition"></a></dt>
@@ -150,6 +145,40 @@ is_call (bool): if option is call or put</p></li>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="rivapy.pricing.pricing_data.BasePricingData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.pricing.pricing_data.</span></span><span class="sig-name descname"><span class="pre">BasePricingData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pricer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pricing_request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PricingRequest</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.pricing.pricing_data.BasePricingData" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.pricing.pricing_data.BasePricingData.pricer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pricer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.pricing.pricing_data.BasePricingData.pricer" title="Permalink to this definition"></a></dt>
+<dd><p>Getter for configured pricer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Configured pricer.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.pricing.pricing_data.BasePricingData.pricing_request">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pricing_request</span></span><a class="headerlink" href="#rivapy.pricing.pricing_data.BasePricingData.pricing_request" title="Permalink to this definition"></a></dt>
+<dd><p>Getter for configured pricing request.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Configured pricing request.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>PricingRequest</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="rivapy.pricing.pricing_data.Black76PricingData">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.pricing.pricing_data.</span></span><span class="sig-name descname"><span class="pre">Black76PricingData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vol_surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pricing_request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rivapy.pricing.pricing_data.ResultType" title="rivapy.pricing.pricing_data.ResultType"><span class="pre">ResultType</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.pricing.pricing_data.Black76PricingData" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -168,6 +197,52 @@ is_call (bool): if option is call or put</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="rivapy.pricing.pricing_data.Black76PricingData.price">
 <span class="sig-name descname"><span class="pre">price</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.pricing.pricing_data.Black76PricingData.price" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.pricing.pricing_data.BondPricingData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.pricing.pricing_data.</span></span><span class="sig-name descname"><span class="pre">BondPricingData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bond</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Bond</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valuation_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">date</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">datetime</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="rivapy.marketdata.html#rivapy.marketdata.curves.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixing_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="rivapy.marketdata.html#rivapy.marketdata.curves.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BondPricingParameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pricing_request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BondPricingRequest</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pricer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'BondPricer'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">past_fixing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">survival_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">SurvivalCurve</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recovery_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">BaseDatedCurve</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.pricing.pricing_data.BondPricingData" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rivapy.pricing.pricing_data.BasePricingData" title="rivapy.pricing.pricing_data.BasePricingData"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePricingData</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.pricing.pricing_data.BondPricingData.bond">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bond</span></span><a class="headerlink" href="#rivapy.pricing.pricing_data.BondPricingData.bond" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.pricing.pricing_data.BondPricingData.discount_curve">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">discount_curve</span></span><a class="headerlink" href="#rivapy.pricing.pricing_data.BondPricingData.discount_curve" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.pricing.pricing_data.BondPricingData.fixing_curve">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fixing_curve</span></span><a class="headerlink" href="#rivapy.pricing.pricing_data.BondPricingData.fixing_curve" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.pricing.pricing_data.BondPricingData.parameters">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#rivapy.pricing.pricing_data.BondPricingData.parameters" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.pricing.pricing_data.BondPricingData.past_fixing">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">past_fixing</span></span><a class="headerlink" href="#rivapy.pricing.pricing_data.BondPricingData.past_fixing" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.pricing.pricing_data.BondPricingData.recovery_curve">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">recovery_curve</span></span><a class="headerlink" href="#rivapy.pricing.pricing_data.BondPricingData.recovery_curve" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.pricing.pricing_data.BondPricingData.survival_curve">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">survival_curve</span></span><a class="headerlink" href="#rivapy.pricing.pricing_data.BondPricingData.survival_curve" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.pricing.pricing_data.BondPricingData.valuation_date">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">valuation_date</span></span><a class="headerlink" href="#rivapy.pricing.pricing_data.BondPricingData.valuation_date" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
