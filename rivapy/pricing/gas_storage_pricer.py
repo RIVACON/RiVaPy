@@ -16,6 +16,14 @@ class _PolynomialRegressionFunction:
 
 class PricingParameter:
     def __init__(self, n_time_steps:int, n_actions: int, n_vol_levels: int, regression: object = _PolynomialRegressionFunction):
+        """The pricing parameters needed for the gas storage valuation.
+
+        Args:
+            n_time_steps (int): number of time steps
+            n_actions (int): number of possible actions
+            n_vol_levels (int): number of discretized volume levels
+            regression (object, optional): regression for continuous value. Defaults to _PolynomialRegressionFunction.
+        """
         self.n_time_steps = n_time_steps    
         self.n_actions = n_actions         
         self.n_vol_levels = n_vol_levels
@@ -48,7 +56,7 @@ def pricing_lsmc(storage: GasStorageSpecification,
                 pricing_parameters: PricingParameter,
                 prices: np.ndarray, 
                 nb_sims: int,
-                penalty_func: Callable = _penalty_func) -> Union[np.ndarray, np.ndarray]:
+                penalty_func: Callable = _penalty_func) -> Union[float, np.ndarray]:
     """ Least-Squares Monte Carlo Method for Pricing the Gas Storage
 
     Args:
@@ -56,9 +64,10 @@ def pricing_lsmc(storage: GasStorageSpecification,
         pricing_parameters (PricingParameter): the parameters
         prices (np.ndarray): the prices
         nb_sims (int): number of simulations
+        penalty_func (Callable): the penalty function for the end. Defaults to _penalty_func.
 
     Returns:
-        np.ndarray: the accumulated cash flows
+        float: the optimal price
         np.ndarray: the optimal volume levels
     """
     
@@ -119,7 +128,8 @@ def pricing_lsmc(storage: GasStorageSpecification,
             ind_level[t+1,m] = total_vol_levels[t,ind_level[t,m],m]
             total_volume[t+1,m] = v[ind_level[t+1,m]]
 
-    return acc_cashflows, total_volume
+    price = acc_cashflows[0,0,0]
+    return price, total_volume
 
 if __name__=='__main__':
     def create_contract_dates(startdate: dt.datetime, enddate: dt.datetime, datestep:dt.timedelta)->list:
@@ -142,11 +152,7 @@ if __name__=='__main__':
             self.mu = mu
             self.sigma = sigma
 
-        def create_gbm(self, X0: float, seed=None) -> np.array:
-
-            if seed is not None:
-                np.random.seed(seed)
-
+        def create_gbm(self, X0: float) -> np.array:
             dtt = []
             for i in range(len(self.timegrid)-1):
                 dti = self.timegrid[i+1] - self.timegrid[i]
@@ -161,7 +167,7 @@ if __name__=='__main__':
     nomination = 1 #daily nomination
     num_sims = 20 #number of independent price paths simulated
     S0 = 1.0 #starting value
-    sigma = 0.00945
+    sigma = 0.01
     mu = 0.2
 
     n_vol_levels = 11 #101
@@ -181,12 +187,14 @@ if __name__=='__main__':
     # Simulate M independent price paths S^b(1), S^b(T+1) for b = 1...M starting at S(0)
     gbm_sim = GeometricBrownianMotionSimulator(contractdates, mu, sigma)
     gbm = np.empty((len(contractdates), num_sims))
+    np.random.seed(0)
     for i in range(num_sims):
-        gbm[:,i] = gbm_sim.create_gbm(S0, seed=i) 
+        gbm[:,i] = gbm_sim.create_gbm(S0) 
 
     params = PricingParameter(n_time_steps = 0, n_actions = 0, n_vol_levels = n_vol_levels)#, regression = _PolynomialRegressionFunction)
     store = GasStorageSpecification(contractdates, storage_capacity, max_withdrawal, 
                                     max_injection, end_level=end_level, 
                                     min_level=min_level, start_level=start_level)  
-    gas_cashflows, vol_levels = pricing_lsmc(store, params, gbm, num_sims)#, _penalty_func)
-    #avg_gas_cashflow = np.average(gas_cashflows, axis=2)
+    price, vol_levels = pricing_lsmc(store, params, gbm, num_sims)#, _penalty_func)
+
+    print(price)
