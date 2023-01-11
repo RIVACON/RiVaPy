@@ -121,15 +121,15 @@ def pricing_lsmc(storage: GasStorageSpecification,
     #forward sweep for optimal path
     ind_level = np.empty((len(storage.timegrid), nb_sims), dtype=int)
     total_volume = np.empty((len(storage.timegrid), nb_sims))
-    ind_level[0,:] = 0 #on the grid, index of startLevel = 0 TODO: Use index of volume level that is closest to the start level
+    ind_level[0,:] = np.argmin(np.abs(v-storage.start_level)) # index of volume level that is closest to the start level
     total_volume[0,:] = v[ind_level[0,:]]
     for t in range(0,len(storage.timegrid)-1):
         for m in range(nb_sims):
             ind_level[t+1,m] = total_vol_levels[t,ind_level[t,m],m]
             total_volume[t+1,m] = v[ind_level[t+1,m]]
 
-    price = acc_cashflows[0,0,0]
-    return price, total_volume
+    #price = acc_cashflows[0,0,0]
+    return acc_cashflows, total_volume
 
 if __name__=='__main__':
     def create_contract_dates(startdate: dt.datetime, enddate: dt.datetime, datestep:dt.timedelta)->list:
@@ -163,7 +163,34 @@ if __name__=='__main__':
             R = X0 * np.cumprod(Y) 
             return np.insert(R, 0, X0) #add start value X0
 
-            ## Setting the parameters
+    class OrnsteinUhlenbeckSimulator:
+
+        def __init__(self, timegrid: list, speed_of_mean_reversion: float, volatility: float, mean_reversion_level: float):
+
+            self.timegrid = timegrid
+            self.speed_of_mean_reversion = speed_of_mean_reversion
+            self.volatility = volatility
+            self.mean_reversion_level = mean_reversion_level
+
+        def create_ou(self, X0: float) -> np.array:
+            dtt = []
+            for i in range(len(self.timegrid)-1):
+                dti = self.timegrid[i+1] - self.timegrid[i]
+                dtt.append(dti.days/365.0)
+            delta_t = np.array(dtt)
+            rnd = np.random.normal(size=(delta_t.shape[0]+1))
+            result = np.empty((delta_t.shape[0]+1))
+            result[0] = X0
+            
+            for j in range(delta_t.shape[0]):
+                result[j+1] = (result[j] * np.exp(-self.speed_of_mean_reversion*delta_t[j])
+                            + self.mean_reversion_level * (1 - np.exp(-self.speed_of_mean_reversion*delta_t[j])) 
+                            + self.volatility* np.sqrt((1 - np.exp(-2*self.speed_of_mean_reversion*delta_t[j])) / 
+                            (2*self.speed_of_mean_reversion)) * rnd[j])
+
+            return result
+
+    ## Setting the parameters
     nomination = 1 #daily nomination
     num_sims = 20 #number of independent price paths simulated
     S0 = 1.0 #starting value
@@ -182,19 +209,31 @@ if __name__=='__main__':
     enddate = dt.datetime.fromisoformat('2021-12-31')
     dateStep = dt.timedelta(days=nomination)
     contractdates = create_contract_dates(startdate, enddate, dateStep)
-    #fwd_times = [(date - contractdates)/n for date in contractDates]
 
     # Simulate M independent price paths S^b(1), S^b(T+1) for b = 1...M starting at S(0)
-    gbm_sim = GeometricBrownianMotionSimulator(contractdates, mu, sigma)
-    gbm = np.empty((len(contractdates), num_sims))
+    #gbm_sim = GeometricBrownianMotionSimulator(contractdates, mu, sigma)
+    #gbm = np.empty((len(contractdates), num_sims))
+    #np.random.seed(0)
+    #for i in range(num_sims):
+    #    gbm[:,i] = gbm_sim.create_gbm(S0) 
+
+    ou_sim = OrnsteinUhlenbeckSimulator(contractdates, speed_of_mean_reversion=0.1, volatility=sigma, mean_reversion_level=0.0)
+    ou = np.empty((len(contractdates), num_sims))
     np.random.seed(0)
     for i in range(num_sims):
-        gbm[:,i] = gbm_sim.create_gbm(S0) 
+        ou[:,i] = ou_sim.create_ou(S0) 
 
     params = PricingParameter(n_time_steps = 0, n_actions = 0, n_vol_levels = n_vol_levels)#, regression = _PolynomialRegressionFunction)
-    store = GasStorageSpecification(contractdates, storage_capacity, max_withdrawal, 
-                                    max_injection, end_level=end_level, 
-                                    min_level=min_level, start_level=start_level)  
-    price, vol_levels = pricing_lsmc(store, params, gbm, num_sims)#, _penalty_func)
+    store = GasStorageSpecification(contractdates, storage_capacity, max_withdrawal, max_injection, end_level=end_level, min_level=min_level, start_level=start_level)  
+    cashflow, vol_levels = pricing_lsmc(store, params, ou, num_sims)#, _penalty_func)
+    
+    price = cashflow[0,0,0]
+    mean_cashflow = np.mean(cashflow, axis=2)
+    
+    import matplotlib.pyplot as plt
+    #for i in range(mean_cashflow.shape[1]):
+    plt.figure()
+    plt.plot(mean_cashflow[:-10,:])
+    plt.show() 
 
     print(price)
