@@ -2,6 +2,8 @@ import numpy as np
 import datetime as dt
 from typing import Callable, Union
 
+from rivapy.models.ornstein_uhlenbeck import OrnsteinUhlenbeck
+from rivapy.models.gbm import GeometricBrownianMotion
 from rivapy.instruments.gasstorage_specification import GasStorageSpecification
 
 class _PolynomialRegressionFunction:
@@ -132,67 +134,15 @@ def pricing_lsmc(storage: GasStorageSpecification,
     return acc_cashflows, total_volume
 
 if __name__=='__main__':
+
     def create_contract_dates(startdate: dt.datetime, enddate: dt.datetime, datestep:dt.timedelta)->list:
         dates=[startdate]
         while dates[-1] <= enddate-datestep:
             dates.append(dates[-1]+datestep)
-
-        #dates=[startdate]*n #nb_timesteps 
-        #for i in range(1,n):
-        #    dates[i] = dates[i-1] + dateStep
-
         return dates
 
-    class GeometricBrownianMotionSimulator:
-        """Simulate a 1D Geometric Brownian Motion for a datetime timegrid"""
-
-        def __init__(self, timegrid: list, mu: float, sigma: float):
-
-            self.timegrid = timegrid
-            self.mu = mu
-            self.sigma = sigma
-
-        def create_gbm(self, X0: float) -> np.array:
-            dtt = []
-            for i in range(len(self.timegrid)-1):
-                dti = self.timegrid[i+1] - self.timegrid[i]
-                dtt.append(dti.days/365.0)
-            dt = np.array(dtt)
-            rnd = np.random.normal(size=(len(self.timegrid)-1))
-            Y = np.exp((self.mu - self.sigma**2 / 2) * dt + self.sigma * np.sqrt(dt) * rnd)
-            R = X0 * np.cumprod(Y) 
-            return np.insert(R, 0, X0) #add start value X0
-
-    class OrnsteinUhlenbeckSimulator:
-
-        def __init__(self, timegrid: list, speed_of_mean_reversion: float, volatility: float, mean_reversion_level: float):
-
-            self.timegrid = timegrid
-            self.speed_of_mean_reversion = speed_of_mean_reversion
-            self.volatility = volatility
-            self.mean_reversion_level = mean_reversion_level
-
-        def create_ou(self, X0: float) -> np.array:
-            dtt = []
-            for i in range(len(self.timegrid)-1):
-                dti = self.timegrid[i+1] - self.timegrid[i]
-                dtt.append(dti.days/365.0)
-            delta_t = np.array(dtt)
-            rnd = np.random.normal(size=(delta_t.shape[0]+1))
-            result = np.empty((delta_t.shape[0]+1))
-            result[0] = X0
-            
-            for j in range(delta_t.shape[0]):
-                result[j+1] = (result[j] * np.exp(-self.speed_of_mean_reversion*delta_t[j])
-                            + self.mean_reversion_level * (1 - np.exp(-self.speed_of_mean_reversion*delta_t[j])) 
-                            + self.volatility* np.sqrt((1 - np.exp(-2*self.speed_of_mean_reversion*delta_t[j])) / 
-                            (2*self.speed_of_mean_reversion)) * rnd[j])
-
-            return result
-
     ## Setting the parameters
-    nomination = 1 #daily nomination
-    num_sims = 20 #number of independent price paths simulated
+    num_sims = 1000 #number of independent price paths simulated
     S0 = 1.0 #starting value
     sigma = 0.01
     mu = 0.2
@@ -207,33 +157,28 @@ if __name__=='__main__':
 
     startdate = dt.datetime.fromisoformat('2021-01-01')
     enddate = dt.datetime.fromisoformat('2021-12-31')
-    dateStep = dt.timedelta(days=nomination)
+    dateStep = dt.timedelta(days=1) #daily nomination
     contractdates = create_contract_dates(startdate, enddate, dateStep)
+    timegrid = np.array([(contractdates[i] - contractdates[0]).days/365.0 for i in range(len(contractdates))])
+    rnd = np.random.normal(size=(timegrid.shape[0], num_sims))
 
     # Simulate M independent price paths S^b(1), S^b(T+1) for b = 1...M starting at S(0)
-    #gbm_sim = GeometricBrownianMotionSimulator(contractdates, mu, sigma)
-    #gbm = np.empty((len(contractdates), num_sims))
-    #np.random.seed(0)
-    #for i in range(num_sims):
-    #    gbm[:,i] = gbm_sim.create_gbm(S0) 
+    gbm_sim = GeometricBrownianMotion(mu, sigma)
+    gbm = gbm_sim.simulate(timegrid, S0, rnd) 
+    ou_sim = OrnsteinUhlenbeck(speed_of_mean_reversion=0.1, volatility=sigma, mean_reversion_level=1.0)
+    ou = ou_sim.simulate(timegrid=timegrid, start_value=S0, rnd=rnd)
 
-    ou_sim = OrnsteinUhlenbeckSimulator(contractdates, speed_of_mean_reversion=0.1, volatility=sigma, mean_reversion_level=0.0)
-    ou = np.empty((len(contractdates), num_sims))
-    np.random.seed(0)
-    for i in range(num_sims):
-        ou[:,i] = ou_sim.create_ou(S0) 
-
+    path = ou
     params = PricingParameter(n_time_steps = 0, n_actions = 0, n_vol_levels = n_vol_levels)#, regression = _PolynomialRegressionFunction)
     store = GasStorageSpecification(contractdates, storage_capacity, max_withdrawal, max_injection, end_level=end_level, min_level=min_level, start_level=start_level)  
-    cashflow, vol_levels = pricing_lsmc(store, params, ou, num_sims)#, _penalty_func)
+    cashflow, vol_levels = pricing_lsmc(store, params, path, num_sims)#, _penalty_func)
     
     price = cashflow[0,0,0]
-    mean_cashflow = np.mean(cashflow, axis=2)
-    
-    import matplotlib.pyplot as plt
-    #for i in range(mean_cashflow.shape[1]):
-    plt.figure()
-    plt.plot(mean_cashflow[:-10,:])
-    plt.show() 
+    dispatch = np.mean(vol_levels, axis=1)    # 'mean timetable' of facility
 
     print(price)
+
+    import matplotlib.pyplot as plt
+    plt.figure()
+    plt.plot(dispatch)
+    plt.show()
