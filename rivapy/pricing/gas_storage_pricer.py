@@ -72,12 +72,12 @@ def pricing_lsmc(storage: GasStorageSpecification,
         float: the optimal price
         np.ndarray: the optimal volume levels
     """
-    
+
     #discretization of possible volume levels
     v = np.linspace(storage.min_level, storage.storage_capacity, pricing_parameters.n_vol_levels) 
     
     # Assign a value to the contract at maturity according to the final condition
-    acc_cashflows = np.empty((len(storage.timegrid), len(v), nb_sims)) # acc_cashflows[t, i,j]: expected accumulated cashflow (of optimal policy) for j-th path at t arriving at t at vollevel i 
+    acc_cashflows = np.empty((len(prices), len(v), nb_sims)) # acc_cashflows[t, i,j]: expected accumulated cashflow (of optimal policy) for j-th path at t arriving at t at vollevel i 
 
     # For t=T+1: final condition
     for i in range(nb_sims):    
@@ -86,9 +86,9 @@ def pricing_lsmc(storage: GasStorageSpecification,
     # Apply backward induction for t=T...1 
     # For each t, step over N allowed volume levels v(t,n) 
     regression = pricing_parameters.regression(deg=1)
-    total_vol_levels = np.empty((len(storage.timegrid), len(v), nb_sims), dtype=int) # total_vol_levels[t,i,j] gives the index of the next optimal volume level in t+1 starting from the i-th volume for the j-th path
+    total_vol_levels = np.empty((len(prices), len(v), nb_sims), dtype=int) # total_vol_levels[t,i,j] gives the index of the next optimal volume level in t+1 starting from the i-th volume for the j-th path
     total_vol_levels[-1,0,0] = 0 # TODO 
-    for t in range(len(storage.timegrid)-2,-1,-1):
+    for t in range(len(prices)-2,-1,-1):
         for vol_t in range(len(v)):
             dec_func = np.empty((len(v), nb_sims))
             for vol_tplus1 in range(len(v)): #for all volumes by themselves
@@ -121,11 +121,11 @@ def pricing_lsmc(storage: GasStorageSpecification,
             acc_cashflows[t,vol_t,:] = np.max(dec_func, axis=0) #no disc. factor
     
     #forward sweep for optimal path
-    ind_level = np.empty((len(storage.timegrid), nb_sims), dtype=int)
-    total_volume = np.empty((len(storage.timegrid), nb_sims))
+    ind_level = np.empty((len(prices), nb_sims), dtype=int)
+    total_volume = np.empty((len(prices), nb_sims))
     ind_level[0,:] = np.argmin(np.abs(v-storage.start_level)) # index of volume level that is closest to the start level
     total_volume[0,:] = v[ind_level[0,:]]
-    for t in range(0,len(storage.timegrid)-1):
+    for t in range(0,len(prices)-1):
         for m in range(nb_sims):
             ind_level[t+1,m] = total_vol_levels[t,ind_level[t,m],m]
             total_volume[t+1,m] = v[ind_level[t+1,m]]
@@ -170,7 +170,10 @@ if __name__=='__main__':
 
     path = ou
     params = PricingParameter(n_time_steps = 0, n_actions = 0, n_vol_levels = n_vol_levels)#, regression = _PolynomialRegressionFunction)
-    store = GasStorageSpecification(contractdates, storage_capacity, max_withdrawal, max_injection, end_level=end_level, min_level=min_level, start_level=start_level)  
+
+    store = GasStorageSpecification(storage_capacity=storage_capacity, withdrawal_rate=max_withdrawal, injection_rate=max_injection, end_level=end_level, min_level=min_level, start_level=start_level)  
+
+
     cashflow, vol_levels = pricing_lsmc(store, params, path, num_sims)#, _penalty_func)
     
     price = cashflow[0,0,0]
