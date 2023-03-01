@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Energy and Weather &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Pricing" href="../rivapy.pricing.html" />
+    <link rel="prev" title="Equity" href="equity.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Module Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../marketdata/index.html">Marketdata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../instruments/index.html">Instruments</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Models</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="stochastic_processes.html">Stochastic Processes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="equity.html">Equity</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Energy and Weather</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#wind">Wind</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#solar">Solar</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#power">Power</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../rivapy.pricing.html">Pricing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rivapy.tools.html">Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rivapy.interfaces.html">Interfaces</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sample_data/index.html">Sample and Test Data</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module Documentation</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Models</a></li>
+      <li class="breadcrumb-item active">Energy and Weather</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/rivapy/models/energy_weather.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="energy-and-weather">
+<h1>Energy and Weather<a class="headerlink" href="#energy-and-weather" title="Permalink to this heading"></a></h1>
+<section id="wind">
+<h2>Wind<a class="headerlink" href="#wind" title="Permalink to this heading"></a></h2>
+<p>The WindPowerModels model the total production of power from wind in percentage of the total wind capacity. That means that all simulated values that will be returned by these models are between 0 and 1.</p>
+<section id="instantenous-production-models-spot-models">
+<h3>Instantenous Production Models (Spot Models)<a class="headerlink" href="#instantenous-production-models-spot-models" title="Permalink to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.WindPowerModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">WindPowerModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deviation_process</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seasonal_function</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Wind_Germany'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.WindPowerModel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Wind Power Model to model the efficiency of wind power production.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>speed_of_mean_reversion</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>Callable</em><em>]</em>) – _description_</p></li>
+<li><p><strong>volatility</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>Callable</em><em>]</em>) – _description_</p></li>
+<li><p><strong>mean_level</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>Callable</em><em>]</em>) – _description_</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.WindPowerModel.calibrate">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calibrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deviation_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seasonality_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_efficiency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_efficiency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.WindPowerModel.calibrate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.WindPowerModel.simulate">
+<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timegrid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DateTimeGrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.WindPowerModel.simulate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="forecast-models-forward-models">
+<h3>Forecast Models (Forward Models)<a class="headerlink" href="#forecast-models-forward-models" title="Permalink to this heading"></a></h3>
+<section id="windpowerforecastmodel">
+<h4>WindPowerForecastModel<a class="headerlink" href="#windpowerforecastmodel" title="Permalink to this heading"></a></h4>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.WindPowerForecastModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">WindPowerForecastModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">region</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">speed_of_mean_reversion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">volatility</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.WindPowerForecastModel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseFwdModel</span></code></p>
+<p>Simple model to simulate forecasts of wind efficiencies (power production by wind as percentage of total wind capacity) based on the Ornstein-Uhlenbeck process.</p>
+<p>The base model used within this model is the Ornstein-Uhlenbeck process and uses internally the class <a class="reference internal" href="stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck" title="rivapy.models.OrnsteinUhlenbeck"><code class="xref py py-class docutils literal notranslate"><span class="pre">rivapy.models.OrnsteinUhlenbeck</span></code></a> with a mean level of zero to simulate the forecast.
+Here, the forecast of wind efficiency <span class="math notranslate nohighlight">\(w_{t,T}\)</span> at time <span class="math notranslate nohighlight">\(T\)</span> is computed as the expected value of the standard logistic function (sigmoid) applied to the Ornstein-Uhlenbeck process conditioned on current simulated value,
+i.e.</p>
+<div class="math notranslate nohighlight">
+\[w_{t, T} = \frac{1}{1+e^{-(X_{t,T}+\nu(T))}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(X_{t,T}:=E[X_T\mid X_t]\)</span> with</p>
+<div class="math notranslate nohighlight">
+\[dX = -\lambda X dt + \sigma dW_t, X(0) = 0\]</div>
+<p>and <span class="math notranslate nohighlight">\(\nu(T)\)</span> is a correction term to ensure that the initial value of <span class="math notranslate nohighlight">\(w_{t,T}\)</span> is equal to
+a given initial forecast <span class="math notranslate nohighlight">\(\bar{w}_{0,T}\)</span>. It is computed by</p>
+<div class="math notranslate nohighlight">
+\[\nu(T) := \log\frac{\bar{w}_{0,T}}{(1.0-\bar{w}_{0,T})}.\]</div>
+<p>The sigmoid function is applied to ensure that the forecast is between 0 and 1 (as percentage of total wind capacity)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>speed_of_mean_reversion</strong> (<em>float</em>) – The speed of mean reversion of the underlying Ornstein-Uhlenbeck process (<a class="reference internal" href="stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck" title="rivapy.models.OrnsteinUhlenbeck"><code class="xref py py-class docutils literal notranslate"><span class="pre">rivapy.models.OrnsteinUhlenbeck</span></code></a>).</p></li>
+<li><p><strong>volatility</strong> (<em>float</em>) – The volatility of the underlying Ornstein-Uhlenbeck process (<a class="reference internal" href="stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck" title="rivapy.models.OrnsteinUhlenbeck"><code class="xref py py-class docutils literal notranslate"><span class="pre">rivapy.models.OrnsteinUhlenbeck</span></code></a>).</p></li>
+<li><p><strong>region</strong> (<em>str</em>) – The name of the respective wind region.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.WindPowerForecastModel.ForwardSimulationResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ForwardSimulationResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wind_forecast_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timegrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_forecasts</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.WindPowerForecastModel.ForwardSimulationResult" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ForwardSimulationResult</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.WindPowerForecastModel.ForwardSimulationResult.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forecast_timepoints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#rivapy.models.WindPowerForecastModel.ForwardSimulationResult.get" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.WindPowerForecastModel.ForwardSimulationResult.n_forwards">
+<span class="sig-name descname"><span class="pre">n_forwards</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#rivapy.models.WindPowerForecastModel.ForwardSimulationResult.n_forwards" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.WindPowerForecastModel.ForwardSimulationResult.udls">
+<span class="sig-name descname"><span class="pre">udls</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#rivapy.models.WindPowerForecastModel.ForwardSimulationResult.udls" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.WindPowerForecastModel.get_forward">
+<span class="sig-name descname"><span class="pre">get_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ou_additive_forward_correction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.WindPowerForecastModel.get_forward" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.WindPowerForecastModel.rnd_shape">
+<span class="sig-name descname"><span class="pre">rnd_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_sims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_timesteps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#rivapy.models.WindPowerForecastModel.rnd_shape" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.WindPowerForecastModel.simulate">
+<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timegrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_forecasts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#rivapy.models.WindPowerForecastModel.ForwardSimulationResult" title="rivapy.models.residual_demand_fwd_model.WindPowerForecastModel.ForwardSimulationResult"><span class="pre">ForwardSimulationResult</span></a></span></span><a class="headerlink" href="#rivapy.models.WindPowerForecastModel.simulate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.WindPowerForecastModel.udls">
+<span class="sig-name descname"><span class="pre">udls</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#rivapy.models.WindPowerForecastModel.udls" title="Permalink to this definition"></a></dt>
+<dd><p>Return the name of all underlyings modeled</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Set of the modeled underlyings.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Set[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="multiregionwindforecastmodel">
+<h4>MultiRegionWindForecastModel<a class="headerlink" href="#multiregionwindforecastmodel" title="Permalink to this heading"></a></h4>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.MultiRegionWindForecastModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">MultiRegionWindForecastModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region_forecast_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rivapy.models.MultiRegionWindForecastModel.Region" title="rivapy.models.residual_demand_fwd_model.MultiRegionWindForecastModel.Region"><span class="pre">Region</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.MultiRegionWindForecastModel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseFwdModel</span></code></p>
+<p>Simple model to simulate power forecasts for more then one wind region and a total efficiency over all regions.</p>
+<p>This model relates the wind models for the different regions within the simulation by just using a linear sum of normal random variates, i.e.
+for a region <span class="math notranslate nohighlight">\(r\)</span> we have weights <span class="math notranslate nohighlight">\(w_{r,i}\)</span>,  <span class="math notranslate nohighlight">\(1\leq i\leq N\)</span>, so that within the simulation based on <span class="math notranslate nohighlight">\(n\)</span> different normal random
+variates <span class="math notranslate nohighlight">\(X_i\)</span> we compute the random variate for the region by</p>
+<div class="math notranslate nohighlight">
+\[X_{r,i} = \frac{\sum_i w_{r,i} X_i}{\sqrt{\sum_i w_{r,i}^2}}.\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the overall region.</p></li>
+<li><p><strong>region_forecast_models</strong> (<em>List</em><em>[</em><a class="reference internal" href="#rivapy.models.MultiRegionWindForecastModel.Region" title="rivapy.models.MultiRegionWindForecastModel.Region"><em>Region</em></a><em>]</em>) – List of regions that will be simulated.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">wind_onshore</span> <span class="o">=</span> <span class="n">WindPowerForecastModel</span><span class="p">(</span><span class="n">region</span><span class="o">=</span><span class="s1">&#39;Onshore&#39;</span><span class="p">,</span> <span class="n">speed_of_mean_reversion</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">volatility</span><span class="o">=</span><span class="mf">4.80</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wind_offshore</span> <span class="o">=</span> <span class="n">WindPowerForecastModel</span><span class="p">(</span><span class="n">region</span><span class="o">=</span><span class="s1">&#39;Offshore&#39;</span><span class="p">,</span> <span class="n">speed_of_mean_reversion</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">volatility</span><span class="o">=</span><span class="mf">4.80</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">regions</span> <span class="o">=</span> <span class="p">[</span> <span class="n">MultiRegionWindForecastModel</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span>
+<span class="go">                        wind_onshore,</span>
+<span class="go">                        capacity=1000.0,</span>
+<span class="go">                        rnd_weights=[0.8,0.2]</span>
+<span class="go">                    ),</span>
+<span class="go">                MultiRegionWindForecastModel.Region(</span>
+<span class="go">                                            wind_offshore,</span>
+<span class="go">                                            capacity=100.0,</span>
+<span class="go">                                            rnd_weights=[0.2,0.8]</span>
+<span class="go">                                        )</span>
+<span class="go">                ]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wind</span> <span class="o">=</span> <span class="n">MultiRegionWindForecastModel</span><span class="p">(</span><span class="s1">&#39;Wind_Germany&#39;</span><span class="p">,</span> <span class="n">regions</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># after model setup we simulate forecasts</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">days</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">timegrid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">days</span><span class="o">*</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">365.0</span><span class="p">,</span> <span class="n">days</span><span class="o">*</span><span class="mi">24</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">forward_expiries</span> <span class="o">=</span> <span class="p">[</span><span class="n">timegrid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">i</span><span class="o">/</span><span class="p">(</span><span class="mf">365.0</span><span class="o">*</span><span class="mf">24.0</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rnd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">wind</span><span class="o">.</span><span class="n">rnd_shape</span><span class="p">(</span><span class="n">n_sims</span><span class="p">,</span> <span class="n">timegrid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">results</span> <span class="o">=</span> <span class="n">wind</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">rnd</span><span class="p">,</span> <span class="n">expiries</span><span class="o">=</span><span class="n">forward_expiries</span><span class="p">,</span>
+<span class="go">                           initial_forecasts={&#39;Onshore&#39;: [0.8, 0.7,0.6,0.5],</span>
+<span class="go">                                              &#39;Offshore&#39;: [0.6, 0.6, 0.5, 0.5]}</span>
+<span class="go">                   )</span>
+</pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.MultiRegionWindForecastModel.ForwardSimulationResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ForwardSimulationResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regions_result</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.MultiRegionWindForecastModel.ForwardSimulationResult" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ForwardSimulationResult</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.MultiRegionWindForecastModel.ForwardSimulationResult.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forecast_timepoints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#rivapy.models.MultiRegionWindForecastModel.ForwardSimulationResult.get" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.MultiRegionWindForecastModel.ForwardSimulationResult.n_forwards">
+<span class="sig-name descname"><span class="pre">n_forwards</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#rivapy.models.MultiRegionWindForecastModel.ForwardSimulationResult.n_forwards" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.MultiRegionWindForecastModel.ForwardSimulationResult.udls">
+<span class="sig-name descname"><span class="pre">udls</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#rivapy.models.MultiRegionWindForecastModel.ForwardSimulationResult.udls" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.MultiRegionWindForecastModel.Region">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Region</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rivapy.models.WindPowerForecastModel" title="rivapy.models.residual_demand_fwd_model.WindPowerForecastModel"><span class="pre">WindPowerForecastModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd_weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.MultiRegionWindForecastModel.Region" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FactoryObject</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.MultiRegionWindForecastModel.Region.n_random">
+<span class="sig-name descname"><span class="pre">n_random</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.MultiRegionWindForecastModel.Region.n_random" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.MultiRegionWindForecastModel.Region.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.MultiRegionWindForecastModel.Region.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.MultiRegionWindForecastModel.Region.udls">
+<span class="sig-name descname"><span class="pre">udls</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#rivapy.models.MultiRegionWindForecastModel.Region.udls" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.MultiRegionWindForecastModel.region_names">
+<span class="sig-name descname"><span class="pre">region_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#rivapy.models.MultiRegionWindForecastModel.region_names" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.MultiRegionWindForecastModel.region_relative_capacity">
+<span class="sig-name descname"><span class="pre">region_relative_capacity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">region</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.MultiRegionWindForecastModel.region_relative_capacity" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.MultiRegionWindForecastModel.rnd_shape">
+<span class="sig-name descname"><span class="pre">rnd_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_sims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_timesteps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#rivapy.models.MultiRegionWindForecastModel.rnd_shape" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.MultiRegionWindForecastModel.simulate">
+<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timegrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_forecasts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.MultiRegionWindForecastModel.simulate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.MultiRegionWindForecastModel.total_capacity">
+<span class="sig-name descname"><span class="pre">total_capacity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.MultiRegionWindForecastModel.total_capacity" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.MultiRegionWindForecastModel.udls">
+<span class="sig-name descname"><span class="pre">udls</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#rivapy.models.MultiRegionWindForecastModel.udls" title="Permalink to this definition"></a></dt>
+<dd><p>Return the name of all underlyings modeled</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Set of the modeled underlyings.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Set[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+<section id="solar">
+<h2>Solar<a class="headerlink" href="#solar" title="Permalink to this heading"></a></h2>
+<section id="solarpowermodel">
+<h3>SolarPowerModel<a class="headerlink" href="#solarpowermodel" title="Permalink to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.SolarPowerModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">SolarPowerModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daily_maximum_process</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_level</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Solar_Germany'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.SolarPowerModel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.SolarPowerModel.simulate">
+<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timegrid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DateTimeGrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.SolarPowerModel.simulate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="power">
+<h2>Power<a class="headerlink" href="#power" title="Permalink to this heading"></a></h2>
+<section id="residualdemandmodel">
+<h3>ResidualDemandModel<a class="headerlink" href="#residualdemandmodel" title="Permalink to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.ResidualDemandModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">ResidualDemandModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wind_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity_wind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solar_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity_solar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supply_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.ResidualDemandModel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Residual demand model to model power prices.</p>
+<p>This model is based on the paper by Wagner<a class="footnote-reference brackets" href="#footcite-wagner2012" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> and models power (spot) prices <span class="math notranslate nohighlight">\(p_t\)</span> depending (by a deterministic function <span class="math notranslate nohighlight">\(f\)</span>) on the residual demand
+<span class="math notranslate nohighlight">\(R_t\)</span>,</p>
+<div class="math notranslate nohighlight">
+\[p_t = f(R_t) = f(L_t - IC^w\cdot E_t^w - IC_t^s\cdot E_t^s)\]</div>
+<p>where</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(L_t\)</span> is the demand (load) at time <span class="math notranslate nohighlight">\(t\)</span>,</p></li>
+<li><p><span class="math notranslate nohighlight">\(IC^w\)</span> denotes the installed capacity of wind (in contrast to the paper this is not time dependent),</p></li>
+<li><p><span class="math notranslate nohighlight">\(E_t^w\)</span> is the wind efficiency at time <span class="math notranslate nohighlight">\(t\)</span>,</p></li>
+<li><p><span class="math notranslate nohighlight">\(IC^s\)</span> denotes the installed capacity of solar (in contrast to the paper this is not time dependent),</p></li>
+<li><p><span class="math notranslate nohighlight">\(E_t^s\)</span> is the solar efficiency at time <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wind_model</strong> (<em>object</em>) – Model for wind efficiency (needs to implement a method simulate in order to work with this model).
+See <a class="reference internal" href="#rivapy.models.WindPowerModel" title="rivapy.models.WindPowerModel"><code class="xref py py-func docutils literal notranslate"><span class="pre">rivapy.models.WindPowerModel()</span></code></a> as an example for a wind model.</p></li>
+<li><p><strong>capacity_wind</strong> (<em>object</em>) – The capacity of wind power. This is multiplied with the simulated efficiency to obtain the simulated absolute amount of wind.</p></li>
+<li><p><strong>solar_model</strong> (<em>object</em>) – Model for solar efficiency (needs to implement a method simulate in order to work with this model).
+See <a class="reference internal" href="#rivapy.models.SolarPowerModel" title="rivapy.models.SolarPowerModel"><code class="xref py py-func docutils literal notranslate"><span class="pre">rivapy.models.SolarPowerModel()</span></code></a> as an example for a solar model.</p></li>
+<li><p><strong>capacity_solar</strong> (<em>object</em>) – The capacity of solar power. This is multiplied with the simulated efficiency to obtain the simulated absolute amount of solar.</p></li>
+<li><p><strong>load_model</strong> (<em>object</em>) – Model for load. See <a class="reference internal" href="#rivapy.models.LoadModel" title="rivapy.models.LoadModel"><code class="xref py py-func docutils literal notranslate"><span class="pre">rivapy.models.LoadModel()</span></code></a> as an example for a load model.</p></li>
+<li><p><strong>supply_curve</strong> (<em>object</em>) – The total demand, see <a class="reference internal" href="#rivapy.models.SupplyFunction" title="rivapy.models.SupplyFunction"><code class="xref py py-func docutils literal notranslate"><span class="pre">rivapy.models.SupplyFunction()</span></code></a> for an example.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.ResidualDemandModel.simulate">
+<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timegrid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DateTimeGrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_value_wind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_value_solar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_value_load</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd_wind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd_solar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd_load</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.ResidualDemandModel.simulate" title="Permalink to this definition"></a></dt>
+<dd><p>Simulate the residual demand model on a given datetimegrid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timegrid</strong> (<em>DateTimeGrid</em>) – _description_</p></li>
+<li><p><strong>start_value_wind</strong> (<em>float</em>) – _description_</p></li>
+<li><p><strong>start_value_solar</strong> (<em>float</em>) – _description_</p></li>
+<li><p><strong>start_value_load</strong> (<em>float</em>) – _description_</p></li>
+<li><p><strong>n_sims</strong> (<em>int</em>) – _description_</p></li>
+<li><p><strong>rnd_wind</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>rnd_solar</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>rnd_load</strong> (<em>float</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>rnd_state</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="simplerenewablemodel">
+<h3>SimpleRenewableModel<a class="headerlink" href="#simplerenewablemodel" title="Permalink to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.ResidualDemandForwardModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">ResidualDemandForwardModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wind_power_forecast</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highest_price_ou_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supply_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forecast_hours</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.ResidualDemandForwardModel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseFwdModel</span></code></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.ResidualDemandForwardModel.ForwardSimulationResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ForwardSimulationResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highest_price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wind_results</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.ResidualDemandForwardModel.ForwardSimulationResult" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ForwardSimulationResult</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.ResidualDemandForwardModel.ForwardSimulationResult.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forecast_timepoints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#rivapy.models.ResidualDemandForwardModel.ForwardSimulationResult.get" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.ResidualDemandForwardModel.ForwardSimulationResult.n_forwards">
+<span class="sig-name descname"><span class="pre">n_forwards</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#rivapy.models.ResidualDemandForwardModel.ForwardSimulationResult.n_forwards" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.ResidualDemandForwardModel.ForwardSimulationResult.udls">
+<span class="sig-name descname"><span class="pre">udls</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#rivapy.models.ResidualDemandForwardModel.ForwardSimulationResult.udls" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.ResidualDemandForwardModel.get_technology">
+<span class="sig-name descname"><span class="pre">get_technology</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#rivapy.models.ResidualDemandForwardModel.get_technology" title="Permalink to this definition"></a></dt>
+<dd><p>Return name of the technology modeled.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Name of instrument.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.ResidualDemandForwardModel.rnd_shape">
+<span class="sig-name descname"><span class="pre">rnd_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_sims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_timesteps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#rivapy.models.ResidualDemandForwardModel.rnd_shape" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.ResidualDemandForwardModel.simulate">
+<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timegrid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_forecasts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.ResidualDemandForwardModel.simulate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.ResidualDemandForwardModel.udls">
+<span class="sig-name descname"><span class="pre">udls</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#rivapy.models.ResidualDemandForwardModel.udls" title="Permalink to this definition"></a></dt>
+<dd><p>Return the name of all underlyings modeled</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Set of the modeled underlyings.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Set[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="loadmodel">
+<h3>LoadModel<a class="headerlink" href="#loadmodel" title="Permalink to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.LoadModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">LoadModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deviation_process</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_profile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.LoadModel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Model the power load.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>deviation_process</strong> (<em>object</em>) – _description_</p></li>
+<li><p><strong>load_profile</strong> (<em>object</em>) – _description_</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.LoadModel.simulate">
+<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timegrid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DateTimeGrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.LoadModel.simulate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="supplyfunction">
+<h3>SupplyFunction<a class="headerlink" href="#supplyfunction" title="Permalink to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.models.SupplyFunction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.models.</span></span><span class="sig-name descname"><span class="pre">SupplyFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">floor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peak</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offpeak</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peak_hours</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">set</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.SupplyFunction" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.SupplyFunction.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.SupplyFunction.compute" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.SupplyFunction.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_demand_low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_demand_high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.SupplyFunction.plot" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<div class="docutils container" id="id2">
+<aside class="footnote brackets" id="footcite-wagner2012" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Andreas Wagner. Residual demand modeling and application to electricity pricing. <em>SSRN Electronic Journal</em>, 2012. <a class="reference external" href="https://doi.org/10.2139/ssrn.2018908">doi:10.2139/ssrn.2018908</a>.</p>
+</aside>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="equity.html" class="btn btn-neutral float-left" title="Equity" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../rivapy.pricing.html" class="btn btn-neutral float-right" title="Pricing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

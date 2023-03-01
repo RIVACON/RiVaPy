@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Equity Instruments &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Credit Instruments" href="credit.html" />
+    <link rel="prev" title="Instruments" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Module Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../marketdata/index.html">Marketdata</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Instruments</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Equity Instruments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#barrierspecification">BarrierSpecification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#europeanvanillaspecification">EuropeanVanillaSpecification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#americanvanillaspecification">AmericanVanillaSpecification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rainbowspecification">RainbowSpecification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#memoryexpressspecification">MemoryExpressSpecification</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="credit.html">Credit Instruments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="power.html">Power Instruments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="components.html">Components</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../models/index.html">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rivapy.pricing.html">Pricing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rivapy.tools.html">Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rivapy.interfaces.html">Interfaces</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sample_data/index.html">Sample and Test Data</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module Documentation</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Instruments</a></li>
+      <li class="breadcrumb-item active">Equity Instruments</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/rivapy/instruments/equity.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="equity-instruments">
+<h1>Equity Instruments<a class="headerlink" href="#equity-instruments" title="Permalink to this heading"></a></h1>
+<section id="barrierspecification">
+<h2>BarrierSpecification<a class="headerlink" href="#barrierspecification" title="Permalink to this heading"></a></h2>
+</section>
+<section id="europeanvanillaspecification">
+<h2>EuropeanVanillaSpecification<a class="headerlink" href="#europeanvanillaspecification" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.instruments.EuropeanVanillaSpecification">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.instruments.</span></span><span class="sig-name descname"><span class="pre">EuropeanVanillaSpecification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strike</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_lvl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">SecuritizationLevel.COLLATERALIZED</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Currency.EUR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">udl_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">share_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.instruments.EuropeanVanillaSpecification" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor for european vanilla option</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>str</em>) – Identifier (name) of the european vanilla specification.</p></li>
+<li><p><strong>type</strong> (<em>str</em>) – Type of the european vanilla option (‘PUT’,’CALL’).</p></li>
+<li><p><strong>expiry</strong> (<em>datetime</em>) – Expiration date.</p></li>
+<li><p><strong>strike</strong> (<em>float</em>) – Strike price.</p></li>
+<li><p><strong>issuer</strong> (<em>str</em><em>, </em><em>optional</em>) – Issuer Id. Must not be set if pricing data is manually defined. Defaults to ‘’.</p></li>
+<li><p><strong>sec_lvl</strong> (<em>str</em><em>, </em><em>optional</em>) – Securitization level. Can be selected from rivapy.enums.SecuritizationLevel. Defaults to SecuritizationLevel.COLLATERALIZED.</p></li>
+<li><p><strong>curr</strong> (<em>str</em><em>, </em><em>optional</em>) – Currency (ISO-4217 Code). Must not be set if pricing data is manually defined. Can be selected from rivapy.enums.Currency. Defaults to Currency.EUR.</p></li>
+<li><p><strong>udl_id</strong> (<em>str</em><em>, </em><em>optional</em>) – Underlying Id. Must not be set if pricing data is manually defined. Defaults to ‘’.</p></li>
+<li><p><strong>share_ratio</strong> (<em>float</em><em>, </em><em>optional</em>) – Ratio of covered shares of the underlying by a single option contract. Defaults to 1.0.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="americanvanillaspecification">
+<h2>AmericanVanillaSpecification<a class="headerlink" href="#americanvanillaspecification" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.instruments.AmericanVanillaSpecification">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.instruments.</span></span><span class="sig-name descname"><span class="pre">AmericanVanillaSpecification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strike</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_lvl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">SecuritizationLevel.COLLATERALIZED</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Currency.EUR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">udl_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">share_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exercise_before_ex_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.instruments.AmericanVanillaSpecification" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor for american vanilla option</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>str</em>) – Identifier (name) of the american vanilla specification.</p></li>
+<li><p><strong>type</strong> (<em>str</em>) – Type of the american vanilla option (‘PUT’,’CALL’).</p></li>
+<li><p><strong>expiry</strong> (<em>datetime</em>) – Expiration date.</p></li>
+<li><p><strong>strike</strong> (<em>float</em>) – Strike price.</p></li>
+<li><p><strong>issuer</strong> (<em>str</em><em>, </em><em>optional</em>) – Issuer Id. Must not be set if pricing data is manually defined. Defaults to ‘’.</p></li>
+<li><p><strong>sec_lvl</strong> (<em>str</em><em>, </em><em>optional</em>) – Securitization level. Can be selected from rivapy.enums.SecuritizationLevel. Defaults to SecuritizationLevel.COLLATERALIZED.</p></li>
+<li><p><strong>curr</strong> (<em>str</em><em>, </em><em>optional</em>) – Currency (ISO-4217 Code). Must not be set if pricing data is manually defined. Can be selected from rivapy.enums.Currency. Defaults to Currency.EUR.</p></li>
+<li><p><strong>udl_id</strong> (<em>str</em><em>, </em><em>optional</em>) – Underlying Id. Must not be set if pricing data is manually defined. Defaults to ‘’.</p></li>
+<li><p><strong>share_ratio</strong> (<em>float</em><em>, </em><em>optional</em>) – Ratio of covered shares of the underlying by a single option contract. Defaults to 1.0.</p></li>
+<li><p><strong>exercise_before_ex_date</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if option can be exercised within two days before dividend ex-date. Defaults to False.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="rainbowspecification">
+<h2>RainbowSpecification<a class="headerlink" href="#rainbowspecification" title="Permalink to this heading"></a></h2>
+</section>
+<section id="memoryexpressspecification">
+<h2>MemoryExpressSpecification<a class="headerlink" href="#memoryexpressspecification" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Instruments" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="credit.html" class="btn btn-neutral float-right" title="Credit Instruments" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tools &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Interfaces" href="rivapy.interfaces.html" />
+    <link rel="prev" title="Pricing" href="rivapy.pricing.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Module Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="marketdata/index.html">Marketdata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="instruments/index.html">Instruments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models/index.html">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rivapy.pricing.html">Pricing</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#date-tools">Date Tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#enums">Enums</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="rivapy.interfaces.html">Interfaces</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sample_data/index.html">Sample and Test Data</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module Documentation</a></li>
+      <li class="breadcrumb-item active">Tools</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/rivapy/rivapy.tools.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tools">
+<h1>Tools<a class="headerlink" href="#tools" title="Permalink to this heading"></a></h1>
+<section id="date-tools">
+<h2>Date Tools<a class="headerlink" href="#date-tools" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.tools.Period">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.</span></span><span class="sig-name descname"><span class="pre">Period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">years</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">months</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.Period" title="Permalink to this definition"></a></dt>
+<dd><p>Time Period expressed in years, months and days.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>years</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of years in time period. Defaults to 0.</p></li>
+<li><p><strong>months</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of months in time period. Defaults to 0.</p></li>
+<li><p><strong>days</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of days in time period. Defaults to 0.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.tools.Period.days">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">days</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#rivapy.tools.Period.days" title="Permalink to this definition"></a></dt>
+<dd><p>Getter for number of days in time period.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of days for specified time period.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.tools.Period.from_string">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.Period.from_string" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a Period from a string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>period</strong> (<em>str</em>) – The string defining the period. The string must be defined by the number of days/months/years followed by one of the letters ‘Y’/’M’/’D’, i.e. ‘6M’ means 6 months.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The resulting period</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rivapy.tools.Period" title="rivapy.tools.Period">Period</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Period</span><span class="p">(</span><span class="s1">&#39;6M&#39;</span><span class="p">)</span>  <span class="c1"># period of 6 months</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Period</span><span class="p">(</span><span class="s1">&#39;1Y&#39;</span><span class="p">)</span> <span class="c1">#period of 1 year</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.tools.Period.months">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">months</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#rivapy.tools.Period.months" title="Permalink to this definition"></a></dt>
+<dd><p>Getter for months of period.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of months for specified time period.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.tools.Period.years">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">years</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#rivapy.tools.Period.years" title="Permalink to this definition"></a></dt>
+<dd><p>Getter for years of period.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of years for specified time period.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.tools.Schedule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.</span></span><span class="sig-name descname"><span class="pre">Schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_day</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">date</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">datetime</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_day</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">date</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">datetime</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rivapy.tools.Period" title="rivapy.tools.datetools.Period"><span class="pre">Period</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backwards</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stub</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">business_day_convention</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rivapy.tools.enums.RollConvention" title="rivapy.tools.enums.RollConvention"><span class="pre">RollConvention</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">RollConvention.MODIFIED_FOLLOWING</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calendar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">HolidayBase</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.Schedule" title="Permalink to this definition"></a></dt>
+<dd><p>A schedule is a list of dates, e.g. of coupon payments, fixings, etc., which is defined by its fist (= start
+day) and last (= end day) day, by its distance between two consecutive dates (= time period) and by the
+procedure for rolling out the schedule, more precisely by the direction (backwards/forwards) and the dealing
+with incomplete periods (stubs). Moreover, the schedule ensures to comply to business day conventions with
+respect to a specified holiday calendar.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_day</strong> (<em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – Schedule’s first day - beginning of the schedule.</p></li>
+<li><p><strong>end_day</strong> (<em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – Schedule’s last day - end of the schedule.</p></li>
+<li><p><strong>time_period</strong> (<em>_Union</em><em>[</em><a class="reference internal" href="#rivapy.tools.Period" title="rivapy.tools.Period"><em>Period</em></a><em>, </em><em>str</em><em>]</em>) – Time distance between two consecutive dates.</p></li>
+<li><p><strong>backwards</strong> (<em>bool</em><em>, </em><em>optional</em>) – Defines direction for rolling out the schedule. True means the schedule will be
+rolled out (backwards) from end day to start day. Defaults to True.</p></li>
+<li><p><strong>stub</strong> (<em>bool</em><em>, </em><em>optional</em>) – Defines if the first/last period is accepted (True), even though it is shorter than
+the others, or if it remaining days are added to the neighbouring period (False).
+Defaults to True.</p></li>
+<li><p><strong>business_day_convention</strong> (<em>_Union</em><em>[</em><a class="reference internal" href="#rivapy.tools.enums.RollConvention" title="rivapy.tools.enums.RollConvention"><em>RollConvention</em></a><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Set of rules defining the adjustment of
+days to ensure each date being a business
+day with respect to a given holiday
+calendar. Defaults to
+RollConvention.MODIFIED_FOLLOWING</p></li>
+<li><p><strong>calendar</strong> (<em>_Union</em><em>[</em><em>_HolidayBase</em><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Holiday calendar defining the bank holidays of a country or
+province (but not all non-business days as for example
+Saturdays and Sundays).
+Defaults (through constructor) to holidays.ECB
+(= Target2 calendar) between start_day and end_day.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rivapy.tools</span> <span class="kn">import</span> <span class="n">schedule</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">21</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2021</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">21</span><span class="p">),</span> <span class="n">Period</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">UNADJUSTED</span><span class="p">,</span> <span class="n">holidays_de</span><span class="p">)</span><span class="o">.</span><span class="n">generate_dates</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span>
+<span class="go">       [date(2020, 8, 21), date(2020, 11, 21), date(2021, 2, 21), date(2021, 5, 21), date(2021, 8, 21)])</span>
+</pre></div>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.tools.Schedule.backwards">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">backwards</span></span><a class="headerlink" href="#rivapy.tools.Schedule.backwards" title="Permalink to this definition"></a></dt>
+<dd><p>Getter for schedule’s roll out direction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True, if rolled out from end day to start day.
+False, if rolled out from start day to end day.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.tools.Schedule.business_day_convention">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">business_day_convention</span></span><a class="headerlink" href="#rivapy.tools.Schedule.business_day_convention" title="Permalink to this definition"></a></dt>
+<dd><p>Getter for schedule’s business day convention.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Business day convention of specified schedule.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.tools.Schedule.calendar">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calendar</span></span><a class="headerlink" href="#rivapy.tools.Schedule.calendar" title="Permalink to this definition"></a></dt>
+<dd><p>Getter for schedule’s holiday calendar.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Holiday calendar of specified schedule.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.tools.Schedule.end_day">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end_day</span></span><a class="headerlink" href="#rivapy.tools.Schedule.end_day" title="Permalink to this definition"></a></dt>
+<dd><p>Getter for schedule’s end date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>End date of specified schedule.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.tools.Schedule.generate_dates">
+<span class="sig-name descname"><span class="pre">generate_dates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ends_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">date</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#rivapy.tools.Schedule.generate_dates" title="Permalink to this definition"></a></dt>
+<dd><p>Generate list of schedule days according to the schedule specification, in particular with regards to business
+day convention and calendar given.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ends_only</strong> (<em>bool</em>) – Flag to indicate if period beginnings shall be included, e.g. for defining accrual
+periods: True, if only period ends shall be included, e.g. for defining payment dates.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of schedule dates (including start and end date) adjusted to rolling convention.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[date]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.tools.Schedule.start_day">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_day</span></span><a class="headerlink" href="#rivapy.tools.Schedule.start_day" title="Permalink to this definition"></a></dt>
+<dd><p>Getter for schedule’s start date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Start date of specified schedule.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.tools.Schedule.stub">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stub</span></span><a class="headerlink" href="#rivapy.tools.Schedule.stub" title="Permalink to this definition"></a></dt>
+<dd><p>Getter for potential existence of short periods (stubs).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True, if a shorter period is allowed.
+False, if only a longer period is allowed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.tools.Schedule.time_period">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_period</span></span><a class="headerlink" href="#rivapy.tools.Schedule.time_period" title="Permalink to this definition"></a></dt>
+<dd><p>Getter for schedule’s time period.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Time period of specified schedule.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="enums">
+<h2>Enums<a class="headerlink" href="#enums" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.tools.enums.InterpolationType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.enums.</span></span><span class="sig-name descname"><span class="pre">InterpolationType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.enums.InterpolationType" title="Permalink to this definition"></a></dt>
+<dd><p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.InterpolationType.CONSTANT">
+<span class="sig-name descname"><span class="pre">CONSTANT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CONSTANT'</span></em><a class="headerlink" href="#rivapy.tools.enums.InterpolationType.CONSTANT" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.InterpolationType.CONSTRAINED_SPLINE">
+<span class="sig-name descname"><span class="pre">CONSTRAINED_SPLINE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CONSTRAINED_SPLINE'</span></em><a class="headerlink" href="#rivapy.tools.enums.InterpolationType.CONSTRAINED_SPLINE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.InterpolationType.HAGAN">
+<span class="sig-name descname"><span class="pre">HAGAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'HAGAN'</span></em><a class="headerlink" href="#rivapy.tools.enums.InterpolationType.HAGAN" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.InterpolationType.HAGAN_DF">
+<span class="sig-name descname"><span class="pre">HAGAN_DF</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'HAGAN_DF'</span></em><a class="headerlink" href="#rivapy.tools.enums.InterpolationType.HAGAN_DF" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.InterpolationType.LINEAR">
+<span class="sig-name descname"><span class="pre">LINEAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LINEAR'</span></em><a class="headerlink" href="#rivapy.tools.enums.InterpolationType.LINEAR" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.InterpolationType.LINEAR_LOG">
+<span class="sig-name descname"><span class="pre">LINEAR_LOG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LINEARLOG'</span></em><a class="headerlink" href="#rivapy.tools.enums.InterpolationType.LINEAR_LOG" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.tools.enums.ExtrapolationType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.enums.</span></span><span class="sig-name descname"><span class="pre">ExtrapolationType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.enums.ExtrapolationType" title="Permalink to this definition"></a></dt>
+<dd><p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.ExtrapolationType.CONSTANT">
+<span class="sig-name descname"><span class="pre">CONSTANT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CONSTANT'</span></em><a class="headerlink" href="#rivapy.tools.enums.ExtrapolationType.CONSTANT" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.ExtrapolationType.LINEAR">
+<span class="sig-name descname"><span class="pre">LINEAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LINEAR'</span></em><a class="headerlink" href="#rivapy.tools.enums.ExtrapolationType.LINEAR" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.ExtrapolationType.LINEAR_LOG">
+<span class="sig-name descname"><span class="pre">LINEAR_LOG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LINEARLOG'</span></em><a class="headerlink" href="#rivapy.tools.enums.ExtrapolationType.LINEAR_LOG" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.ExtrapolationType.NONE">
+<span class="sig-name descname"><span class="pre">NONE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'NONE'</span></em><a class="headerlink" href="#rivapy.tools.enums.ExtrapolationType.NONE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.tools.enums.SecuritizationLevel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.enums.</span></span><span class="sig-name descname"><span class="pre">SecuritizationLevel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.enums.SecuritizationLevel" title="Permalink to this definition"></a></dt>
+<dd><p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.SecuritizationLevel.COLLATERALIZED">
+<span class="sig-name descname"><span class="pre">COLLATERALIZED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'COLLATERALIZED'</span></em><a class="headerlink" href="#rivapy.tools.enums.SecuritizationLevel.COLLATERALIZED" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.SecuritizationLevel.EQUITY">
+<span class="sig-name descname"><span class="pre">EQUITY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'EQUITY'</span></em><a class="headerlink" href="#rivapy.tools.enums.SecuritizationLevel.EQUITY" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.SecuritizationLevel.MEZZANINE">
+<span class="sig-name descname"><span class="pre">MEZZANINE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MEZZANINE'</span></em><a class="headerlink" href="#rivapy.tools.enums.SecuritizationLevel.MEZZANINE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.SecuritizationLevel.NONE">
+<span class="sig-name descname"><span class="pre">NONE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'NONE'</span></em><a class="headerlink" href="#rivapy.tools.enums.SecuritizationLevel.NONE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.SecuritizationLevel.NON_PREFERRED_SENIOR">
+<span class="sig-name descname"><span class="pre">NON_PREFERRED_SENIOR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'NON_PREFERRED_SENIOR'</span></em><a class="headerlink" href="#rivapy.tools.enums.SecuritizationLevel.NON_PREFERRED_SENIOR" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.SecuritizationLevel.PREFERRED_SENIOR">
+<span class="sig-name descname"><span class="pre">PREFERRED_SENIOR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PREFERRED_SENIOR'</span></em><a class="headerlink" href="#rivapy.tools.enums.SecuritizationLevel.PREFERRED_SENIOR" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.SecuritizationLevel.SENIOR_SECURED">
+<span class="sig-name descname"><span class="pre">SENIOR_SECURED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SENIOR_SECURED'</span></em><a class="headerlink" href="#rivapy.tools.enums.SecuritizationLevel.SENIOR_SECURED" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.SecuritizationLevel.SENIOR_UNSECURED">
+<span class="sig-name descname"><span class="pre">SENIOR_UNSECURED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SENIOR_UNSECURED'</span></em><a class="headerlink" href="#rivapy.tools.enums.SecuritizationLevel.SENIOR_UNSECURED" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.SecuritizationLevel.SUBORDINATED">
+<span class="sig-name descname"><span class="pre">SUBORDINATED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SUBORDINATED'</span></em><a class="headerlink" href="#rivapy.tools.enums.SecuritizationLevel.SUBORDINATED" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.tools.enums.RollConvention">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.enums.</span></span><span class="sig-name descname"><span class="pre">RollConvention</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.enums.RollConvention" title="Permalink to this definition"></a></dt>
+<dd><p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.RollConvention.FOLLOWING">
+<span class="sig-name descname"><span class="pre">FOLLOWING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Following'</span></em><a class="headerlink" href="#rivapy.tools.enums.RollConvention.FOLLOWING" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.RollConvention.MODIFIED_FOLLOWING">
+<span class="sig-name descname"><span class="pre">MODIFIED_FOLLOWING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ModifiedFollowing'</span></em><a class="headerlink" href="#rivapy.tools.enums.RollConvention.MODIFIED_FOLLOWING" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.RollConvention.MODIFIED_FOLLOWING_BIMONTHLY">
+<span class="sig-name descname"><span class="pre">MODIFIED_FOLLOWING_BIMONTHLY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ModifiedFollowingBimonthly'</span></em><a class="headerlink" href="#rivapy.tools.enums.RollConvention.MODIFIED_FOLLOWING_BIMONTHLY" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.RollConvention.MODIFIED_FOLLOWING_EOM">
+<span class="sig-name descname"><span class="pre">MODIFIED_FOLLOWING_EOM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ModifiedFollowingEOM'</span></em><a class="headerlink" href="#rivapy.tools.enums.RollConvention.MODIFIED_FOLLOWING_EOM" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.RollConvention.MODIFIED_PRECEDING">
+<span class="sig-name descname"><span class="pre">MODIFIED_PRECEDING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ModifiedPreceding'</span></em><a class="headerlink" href="#rivapy.tools.enums.RollConvention.MODIFIED_PRECEDING" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.RollConvention.NEAREST">
+<span class="sig-name descname"><span class="pre">NEAREST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Nearest'</span></em><a class="headerlink" href="#rivapy.tools.enums.RollConvention.NEAREST" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.RollConvention.PRECEDING">
+<span class="sig-name descname"><span class="pre">PRECEDING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Preceding'</span></em><a class="headerlink" href="#rivapy.tools.enums.RollConvention.PRECEDING" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.RollConvention.UNADJUSTED">
+<span class="sig-name descname"><span class="pre">UNADJUSTED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Unadjusted'</span></em><a class="headerlink" href="#rivapy.tools.enums.RollConvention.UNADJUSTED" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.tools.enums.DayCounterType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.enums.</span></span><span class="sig-name descname"><span class="pre">DayCounterType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.enums.DayCounterType" title="Permalink to this definition"></a></dt>
+<dd><p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.DayCounterType.ACT252">
+<span class="sig-name descname"><span class="pre">ACT252</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Act252'</span></em><a class="headerlink" href="#rivapy.tools.enums.DayCounterType.ACT252" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.DayCounterType.ACT360">
+<span class="sig-name descname"><span class="pre">ACT360</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Act360'</span></em><a class="headerlink" href="#rivapy.tools.enums.DayCounterType.ACT360" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.DayCounterType.ACT_ACT">
+<span class="sig-name descname"><span class="pre">ACT_ACT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ActAct'</span></em><a class="headerlink" href="#rivapy.tools.enums.DayCounterType.ACT_ACT" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.DayCounterType.Act365Fixed">
+<span class="sig-name descname"><span class="pre">Act365Fixed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Act365Fixed'</span></em><a class="headerlink" href="#rivapy.tools.enums.DayCounterType.Act365Fixed" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.DayCounterType.ThirtyE360">
+<span class="sig-name descname"><span class="pre">ThirtyE360</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'30E360'</span></em><a class="headerlink" href="#rivapy.tools.enums.DayCounterType.ThirtyE360" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.DayCounterType.ThirtyU360">
+<span class="sig-name descname"><span class="pre">ThirtyU360</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'30U360'</span></em><a class="headerlink" href="#rivapy.tools.enums.DayCounterType.ThirtyU360" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.tools.enums.InflationInterpolation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.enums.</span></span><span class="sig-name descname"><span class="pre">InflationInterpolation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.enums.InflationInterpolation" title="Permalink to this definition"></a></dt>
+<dd><p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.InflationInterpolation.CONSTANT">
+<span class="sig-name descname"><span class="pre">CONSTANT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CONSTANT'</span></em><a class="headerlink" href="#rivapy.tools.enums.InflationInterpolation.CONSTANT" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.InflationInterpolation.GERMAN">
+<span class="sig-name descname"><span class="pre">GERMAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'GERMAN'</span></em><a class="headerlink" href="#rivapy.tools.enums.InflationInterpolation.GERMAN" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.InflationInterpolation.JAPAN">
+<span class="sig-name descname"><span class="pre">JAPAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'JAPAN'</span></em><a class="headerlink" href="#rivapy.tools.enums.InflationInterpolation.JAPAN" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.InflationInterpolation.UNDEFINED">
+<span class="sig-name descname"><span class="pre">UNDEFINED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'UNDEFINED'</span></em><a class="headerlink" href="#rivapy.tools.enums.InflationInterpolation.UNDEFINED" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.tools.enums.VolatilityStickyness">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.enums.</span></span><span class="sig-name descname"><span class="pre">VolatilityStickyness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.enums.VolatilityStickyness" title="Permalink to this definition"></a></dt>
+<dd><p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.VolatilityStickyness.NONE">
+<span class="sig-name descname"><span class="pre">NONE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'NONE'</span></em><a class="headerlink" href="#rivapy.tools.enums.VolatilityStickyness.NONE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.VolatilityStickyness.StickyFwdMoneyness">
+<span class="sig-name descname"><span class="pre">StickyFwdMoneyness</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'StickyFwdMoneyness'</span></em><a class="headerlink" href="#rivapy.tools.enums.VolatilityStickyness.StickyFwdMoneyness" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.VolatilityStickyness.StickyStrike">
+<span class="sig-name descname"><span class="pre">StickyStrike</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'StickyStrike'</span></em><a class="headerlink" href="#rivapy.tools.enums.VolatilityStickyness.StickyStrike" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.VolatilityStickyness.StickyXStrike">
+<span class="sig-name descname"><span class="pre">StickyXStrike</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'StickyXStrike'</span></em><a class="headerlink" href="#rivapy.tools.enums.VolatilityStickyness.StickyXStrike" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="rivapy.pricing.html" class="btn btn-neutral float-left" title="Pricing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="rivapy.interfaces.html" class="btn btn-neutral float-right" title="Interfaces" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

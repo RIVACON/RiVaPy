@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sample and Test Data &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Logging" href="../logging.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Sample and Test Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#spreadcurves">Spreadcurves</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#credit-default-data">Credit Default Data</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Sample and Test Data</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/sample_data/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sample-and-test-data">
+<h1>Sample and Test Data<a class="headerlink" href="#sample-and-test-data" title="Permalink to this heading"></a></h1>
+<p>The package provides some functionality to create test data for the different classes.
+For example, for first simple tests of some fancy calibration method one would like to have a
+bunch of instruments together with certain prices.
+Here, the methods for the creation may be of special use.</p>
+<p>Some classes provide a _create_sample method. This method can be used to create a sample of the respective classes.</p>
+<section id="spreadcurves">
+<h2>Spreadcurves<a class="headerlink" href="#spreadcurves" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.sample_data.market_data.spread_curves.SpreadCurveSampler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.sample_data.market_data.spread_curves.</span></span><span class="sig-name descname"><span class="pre">SpreadCurveSampler</span></span><a class="headerlink" href="#rivapy.sample_data.market_data.spread_curves.SpreadCurveSampler" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class samples spreadcurves used to price bonds. It creates different curves according to</p>
+<ul class="simple">
+<li><p>issuer rating (for all ratings defined in <code class="xref py py-class docutils literal notranslate"><span class="pre">rivapy.tools.enums.Rating</span></code>)</p></li>
+<li><p>currency (for all currencies defined in <code class="xref py py-class docutils literal notranslate"><span class="pre">rivapy.tools.enums.Currency</span></code>)</p></li>
+<li><p>esg rating (for all ratings defined in <code class="xref py py-class docutils literal notranslate"><span class="pre">rivapy.tools.enums.ESGRating</span></code>)</p></li>
+<li><p>sector (for all sectors defined in <code class="xref py py-class docutils literal notranslate"><span class="pre">rivapy.tools.enums.Sector</span></code>)</p></li>
+<li><p>securitization level (only SENIOR_SECURED, SENIOR_UNSECURED and SUBORDINATED are currently handled)</p></li>
+</ul>
+<p>Note that this does not include securitization levels at the moment.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.sample_data.market_data.spread_curves.SpreadCurveSampler.get_curve">
+<span class="sig-name descname"><span class="pre">get_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">issuer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy/instruments/components.html#rivapy.instruments.components.Issuer" title="rivapy.instruments.components.Issuer"><span class="pre">Issuer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">bond</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy/instruments/credit.html#rivapy.instruments.bond_specifications.PlainVanillaCouponBondSpecification" title="rivapy.instruments.bond_specifications.PlainVanillaCouponBondSpecification"><span class="pre">PlainVanillaCouponBondSpecification</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.sample_data.market_data.spread_curves.SpreadCurveSampler.get_curve" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.sample_data.market_data.spread_curves.SpreadCurveSampler.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.sample_data.market_data.spread_curves.SpreadCurveSampler.sample" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="credit-default-data">
+<h2>Credit Default Data<a class="headerlink" href="#credit-default-data" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.sample_data.market_data.credit_default.CreditDefaultData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.sample_data.market_data.credit_default.</span></span><span class="sig-name descname"><span class="pre">CreditDefaultData</span></span><a class="headerlink" href="#rivapy.sample_data.market_data.credit_default.CreditDefaultData" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.sample_data.market_data.credit_default.CreditDefaultData.sample">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#rivapy.sample_data.market_data.credit_default.CreditDefaultData.sample" title="Permalink to this definition"></a></dt>
+<dd><p>Sample credit default data.</p>
+<p>Return a pandas DataFrame that contains some credit features together with the default probability
+and an indicator if the default occured (1) or if the credit did not default (0). The data is generated by a logistic regression
+where the pd for a credit is computed by logistic regression (with fixed coefficients). The following features
+are used</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(x_{\mbox{age}}\)</span> age of lender, sampled from beta distribution (a=2, b=5)</p></li>
+<li><p><span class="math notranslate nohighlight">\(x_{\mbox{income}}\)</span> income of lender, sampled from beta distribution (a=2.0, b=2.0)</p></li>
+<li><p><span class="math notranslate nohighlight">\(x_{\mbox{savings}}\)</span> savings of lender, sampled from beta distribution (a=5.0, b=1.0)</p></li>
+<li><p><span class="math notranslate nohighlight">\(x_{\mbox{amount}}\)</span> amount of credit, sampled from  beta distribution (a=0.5, b=0.5)</p></li>
+<li><p><span class="math notranslate nohighlight">\(x_{\mbox{region}}\)</span> one hot encoded feature indicating  one of three regions the lender lives in. The region are uniformly distributed</p></li>
+</ul>
+<p>The single features (exception is the region that is drawn independently of the other features) are related via a Gaussian copula. The following figure showsthe distributions and pairplots for a
+generated sample of features.</p>
+<a class="reference internal image-reference" href="../_images/credit_default_features.png"><img alt="../_images/credit_default_features.png" class="align-center" src="../_images/credit_default_features.png" style="width: 400px;" /></a>
+<p>After the features have been generated, logistic regression is used to compute default probabilities (pd) via the formula</p>
+<div class="math notranslate nohighlight">
+\[pd = \frac{1}{1+e^{x_{\mbox{age}}}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_data</strong> (<em>int</em>) – Number of data sampled (number of rows of final DataFrame).</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – The seed used internally, if None, no seed will be set. Defaults to None.</p></li>
+<li><p><strong>constant</strong> (<em>float</em><em>, </em><em>optional</em>) – Constant used in logistic regression that determines the overall level of the pd. Defaults to -1.0.</p></li>
+<li><p><strong>cov</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – Covariance matrix used in the Gaussian copula. Defaults to None (thena flat covariance of 0.95 is used).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame with features, default probabilities and default indicator.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../logging.html" class="btn btn-neutral float-left" title="Logging" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
