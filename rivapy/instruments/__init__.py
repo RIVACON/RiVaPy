@@ -5,7 +5,7 @@ from rivapy.instruments.cds_specification import CDSSpecification
 from rivapy.instruments.ppa_specification import SimpleSchedule
 from rivapy.instruments.ppa_specification import PPASpecification, GreenPPASpecification
 from rivapy.instruments.bond_specifications import ZeroCouponBondSpecification, FixedRateBondSpecification, PlainVanillaCouponBondSpecification, FloatingRateNoteSpecification, FixedToFloatingRateNoteSpecification
-
+from rivapy.instruments.gasstorage_specification import GasStorageSpecification
 
 
 def _add_to_factory(cls):
@@ -20,5 +20,6 @@ _add_to_factory(GreenPPASpecification)
 _add_to_factory(ZeroCouponBondSpecification)
 _add_to_factory(FixedRateBondSpecification)
 _add_to_factory(PlainVanillaCouponBondSpecification)
+_add_to_factory(GasStorageSpecification)
 
 

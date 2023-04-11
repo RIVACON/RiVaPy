@@ -1,6 +1,7 @@
 import numpy as np
+import rivapy.tools.interfaces as interfaces
 
-class GasStorageSpecification:
+class GasStorageSpecification(interfaces.FactoryObject):
     def __init__(self, 
                 storage_capacity: float, 
                 withdrawal_rate: float, 
@@ -25,10 +26,22 @@ class GasStorageSpecification:
         """
         
         self.storage_capacity = storage_capacity
-        self.min_level = min_level
-        self.start_level = start_level
-        self.end_level = end_level
         self.withdrawal_rate = withdrawal_rate
         self.injection_rate = injection_rate
         self.withdrawal_cost = withdrawal_cost
         self.injection_cost = injection_cost
+        self.min_level = min_level
+        self.start_level = start_level
+        self.end_level = end_level
+        
+    def _to_dict(self) -> dict:
+        result = {'storage_capacity': self.storage_capacity, 
+                  'withdrawal_rate': self.withdrawal_rate,
+                  'injection_rate': self.injection_rate,
+                  'withdrawal_cost': self.withdrawal_cost,
+                  'injection_cost': self.injection_cost,
+                  'min_level': self.min_level,
+                  'start_level': self.start_level,
+                  'end_level': self.end_level
+                  }
+        return super()._to_dict()
