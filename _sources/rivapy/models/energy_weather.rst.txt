@@ -46,6 +46,8 @@ SolarPowerModel
 Power
 ----------------------------------------
 
+
+
 ResidualDemandModel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. autoclass:: rivapy.models.ResidualDemandModel

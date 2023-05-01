@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lucia-Schwartz Model &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Module Documentation" href="../../rivapy/index.html" />
+    <link rel="prev" title="Ornstein-Uhlenbeck Model" href="ornstein_uhlenbeck.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Example Notebooks</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#stochastic-processes">Stochastic Processes</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ornstein_uhlenbeck.html">Ornstein-Uhlenbeck Model</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Lucia-Schwartz Model</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Simulation-of-Spot">Simulation of Spot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Forward-Values">Forward Values</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sample_data/index.html">Sample and Test Data</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Example Notebooks</a></li>
+      <li class="breadcrumb-item active">Lucia-Schwartz Model</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/models/lucia_schwartz.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Lucia-Schwartz-Model">
+<h1>Lucia-Schwartz Model<a class="headerlink" href="#Lucia-Schwartz-Model" title="Permalink to this heading"></a></h1>
+<p>The Lucia-Schwartz two-factor model for power prices is a mathematical model used to explain the behavior of electricity prices. The model assumes that electricity prices are determined by two factors: a short-term factor and a long-term factor.</p>
+<p>The short-term factor is related to the current supply and demand conditions in the electricity market. This factor is influenced by factors such as weather conditions, maintenance schedules, and unexpected events such as power plant failures. The short-term factor is modeled using a mean-reverting process, which means that prices tend to move back towards their long-term average over time.</p>
+<p>The long-term factor is related to the overall trends in the economy and the energy market. This factor is influenced by factors such as changes in fuel prices, technological advances, and government policies. The long-term factor is modeled using a random walk process, which means that prices tend to move in a random and unpredictable manner over time. Overall, the Lucia-Schwartz two-factor model provides a useful framework for understanding the complex factors that influence electricity
+prices. By separating short-term and long-term factors, the model can help energy traders and analysts make more informed decisions about their trading strategies and risk management.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;../../../..&#39;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">rivapy</span>
+
+<span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+C:\Users\doeltz\development\RiVaPy\docs\source\notebooks\models\../../../..\rivapy\__init__.py:11: UserWarning: The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.
+  warnings.warn(&#39;The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.&#39;)
+</pre></div></div>
+</div>
+<section id="Simulation-of-Spot">
+<h2>Simulation of Spot<a class="headerlink" href="#Simulation-of-Spot" title="Permalink to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ls_model</span> <span class="o">=</span> <span class="n">rivapy</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">LuciaSchwartz</span><span class="p">(</span><span class="n">rho</span><span class="o">=-</span><span class="mf">.81</span><span class="p">,</span> <span class="n">kappa</span> <span class="o">=</span> <span class="mf">0.077</span><span class="p">,</span> <span class="n">sigma1</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">mu</span><span class="o">=-</span><span class="mf">0.29</span><span class="p">,</span> <span class="n">sigma2</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">n_sims</span> <span class="o">=</span> <span class="mi">10_000</span>
+<span class="n">timegrid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">365</span><span class="p">)</span>
+<span class="n">rnd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">ls_model</span><span class="o">.</span><span class="n">rnd_shape</span><span class="p">(</span><span class="n">n_sims</span><span class="p">,</span> <span class="n">timegrid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">paths</span> <span class="o">=</span> <span class="n">ls_model</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">start_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">]),</span> <span class="n">rnd</span><span class="o">=</span><span class="n">rnd</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">paths</span><span class="p">[:,</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;-r&#39;</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_models_lucia_schwartz_5_0.png" src="../../_images/notebooks_models_lucia_schwartz_5_0.png" />
+</div>
+</div>
+</section>
+<section id="Forward-Values">
+<h2>Forward Values<a class="headerlink" href="#Forward-Values" title="Permalink to this heading"></a></h2>
+<p>In commodity markets the (liquidly) traded products are most often Forward contracts that fix a price (the forward value) for the delivery of product over a certain time intervall. The forward value may be approximated by the integral of a forward function <span class="math notranslate nohighlight">\(F(t,T)\)</span> that describes the forward price for delivery at exactly one time point <span class="math notranslate nohighlight">\(T\)</span></p>
+<div class="math notranslate nohighlight">
+\[F(t,T_1,T_2) = \frac{\int_{T_1}^{T_2}F(t,T)}{T_2-T_1}.\]</div>
+<p>This forward value can be computed for the Lucia-Schwartz Model via the method compute_fwd_value.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[104]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ls_model</span> <span class="o">=</span> <span class="n">rivapy</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">LuciaSchwartz</span><span class="p">(</span><span class="n">rho</span><span class="o">=-</span><span class="mf">.1</span><span class="p">,</span> <span class="n">kappa</span> <span class="o">=</span> <span class="mf">0.077</span><span class="p">,</span> <span class="n">sigma1</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">sigma2</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[98]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Forward value for T1=0.2, T2=0.5:&#39;</span><span class="p">,</span> <span class="n">ls_model</span><span class="o">.</span><span class="n">compute_fwd_value</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]),</span> <span class="n">T1</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">T2</span><span class="o">=</span><span class="mf">0.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Forward value for T1=0.2, T2=0.5: 0.0
+</pre></div></div>
+</div>
+<p>We can also simulate the forward values via the method simulate by specifying the respective forward periods.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[107]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_sims</span> <span class="o">=</span> <span class="mi">100_000</span>
+<span class="n">timegrid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="mi">365</span><span class="p">)</span>
+<span class="n">rnd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">ls_model</span><span class="o">.</span><span class="n">rnd_shape</span><span class="p">(</span><span class="n">n_sims</span><span class="p">,</span> <span class="n">timegrid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">forwards</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="o">+</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">365.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">1.5</span><span class="p">,</span><span class="mf">2.0</span><span class="p">)]</span>
+<span class="n">paths</span> <span class="o">=</span> <span class="n">ls_model</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">start_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">]),</span> <span class="n">rnd</span><span class="o">=</span><span class="n">rnd</span><span class="p">,</span> <span class="n">forwards</span><span class="o">=</span><span class="n">forwards</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[102]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">label_fwd1</span> <span class="o">=</span> <span class="s1">&#39;T1=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">forwards</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;, T2=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">forwards</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">label_fwd2</span> <span class="o">=</span> <span class="s1">&#39;T1=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">forwards</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;, T2=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">forwards</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">paths</span><span class="p">[:,</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;-r&#39;</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label_fwd1</span><span class="p">)</span>
+    <span class="n">label_fwd1</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">paths</span><span class="p">[:,</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="s1">&#39;-b&#39;</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label_fwd2</span><span class="p">)</span>
+    <span class="c1">#plt.plot(timegrid, paths[:,i,0],&#39;-b&#39;,alpha=0.5, label=label_fwd2)</span>
+    <span class="n">label_fwd2</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_models_lucia_schwartz_12_0.png" src="../../_images/notebooks_models_lucia_schwartz_12_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ornstein_uhlenbeck.html" class="btn btn-neutral float-left" title="Ornstein-Uhlenbeck Model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../rivapy/index.html" class="btn btn-neutral float-right" title="Module Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

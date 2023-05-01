@@ -16,8 +16,8 @@ these instruments.
    :caption: Contents:
  
    install
+   notebooks/index
    rivapy/index
    logging
    sample_data/index
    
-

@@ -15,6 +15,11 @@ Spreadcurves
    :undoc-members:
    :show-inheritance:
 
+.. autoclass:: rivapy.sample_data.market_data.spread_curves.SpreadCurveCollection
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Credit Default Data
 ---------------------------------------
 .. autoclass:: rivapy.sample_data.market_data.credit_default.CreditDefaultData
