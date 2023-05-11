@@ -7,6 +7,7 @@
   <title>Ornstein-Uhlenbeck Model &mdash; rivapy  documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
@@ -23,8 +24,8 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Lucia-Schwartz Model" href="lucia_schwartz.html" />
-    <link rel="prev" title="Example Notebooks" href="../index.html" /> 
+    <link rel="next" title="Multiregion Windpower Model" href="residual_demand_forward_model_multi_region.html" />
+    <link rel="prev" title="Lucia-Schwartz Model" href="lucia_schwartz.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -49,16 +50,16 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Example Notebooks</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../index.html#stochastic-processes">Stochastic Processes</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Ornstein-Uhlenbeck Model</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#Simulation-of-Spot">Simulation of Spot</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Calibration">Calibration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Notebook Gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="lucia_schwartz.html">Lucia-Schwartz Model</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Ornstein-Uhlenbeck Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Simulation-of-Spot">Simulation of Spot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Calibration">Calibration</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="lucia_schwartz.html">Lucia-Schwartz Model</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="residual_demand_forward_model_multi_region.html">Multiregion Windpower Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="residual_demand_forward_model_multi_region.html#Residual-Demand-Forward-Model">Residual Demand Forward Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="residual_demand_forward_model_multi_region.html#PPA-Hedging">PPA Hedging</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../rivapy/index.html">Module Documentation</a></li>
@@ -80,7 +81,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../index.html">Example Notebooks</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Notebook Gallery</a></li>
       <li class="breadcrumb-item active">Ornstein-Uhlenbeck Model</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/notebooks/models/ornstein_uhlenbeck.ipynb.txt" rel="nofollow"> View page source</a>
@@ -103,8 +104,8 @@
 <li><p><span class="math notranslate nohighlight">\(\sigma\)</span> is the volatiity of the process.</p></li>
 </ul>
 <p>The OU model has several properties that make it useful for modeling real-world phenomena. For example, it is a stationary process, meaning that its statistical properties do not change over time. It is also Markovian, meaning that its future behavior depends only on its current state, not on its past history.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
@@ -115,31 +116,37 @@
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/doeltz/doeltz/development/RiVaPy/rivapy/__init__.py:11: UserWarning: The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.
+  warnings.warn(&#39;The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.&#39;)
+2023-05-11 07:25:05.860283: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library &#39;libcudart.so.11.0&#39;; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2023-05-11 07:25:05.860298: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+</pre></div></div>
+</div>
 <section id="Simulation-of-Spot">
 <h2>Simulation of Spot<a class="headerlink" href="#Simulation-of-Spot" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">timegrid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">15.0</span><span class="p">,</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">365.0</span><span class="p">)</span> <span class="c1"># simulate on daily timegrid over 5yrs horizon</span>
-
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rnd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">timegrid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">10_000</span><span class="p">))</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
-<span class="n">ou_model</span> <span class="o">=</span> <span class="n">rivapy</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">OrnsteinUhlenbeck</span><span class="p">(</span><span class="n">speed_of_mean_reversion</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span> <span class="n">volatility</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
-<span class="n">rnd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">timegrid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">1</span><span class="p">))</span>
-<span class="n">sim</span> <span class="o">=</span> <span class="n">ou_model</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">start_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">rnd</span><span class="o">=</span><span class="n">rnd</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sim</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;-r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$\lambda$=10., $\sigma$=0.3&#39;</span><span class="p">)</span>
-<span class="n">ou_model</span> <span class="o">=</span> <span class="n">rivapy</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">OrnsteinUhlenbeck</span><span class="p">(</span><span class="n">speed_of_mean_reversion</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">volatility</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
-<span class="n">sim</span> <span class="o">=</span> <span class="n">ou_model</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">start_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">rnd</span><span class="o">=</span><span class="n">rnd</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sim</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$\lambda$=0.1, $\sigma$=0.3&#39;</span><span class="p">)</span>
-<span class="n">ou_model</span> <span class="o">=</span> <span class="n">rivapy</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">OrnsteinUhlenbeck</span><span class="p">(</span><span class="n">speed_of_mean_reversion</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span> <span class="n">volatility</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-<span class="n">sim</span> <span class="o">=</span> <span class="n">ou_model</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">start_value</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span><span class="n">rnd</span><span class="o">=</span><span class="n">rnd</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sim</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$\lambda$=10.0, $\sigma$=1.0&#39;</span><span class="p">)</span>
-<span class="n">ou_model</span> <span class="o">=</span> <span class="n">rivapy</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">OrnsteinUhlenbeck</span><span class="p">(</span><span class="n">speed_of_mean_reversion</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">volatility</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-<span class="n">sim</span> <span class="o">=</span> <span class="n">ou_model</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">start_value</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span><span class="n">rnd</span><span class="o">=</span><span class="n">rnd</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sim</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$\lambda$=0.1, $\sigma$=1.0&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;days&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+<span class="k">for</span> <span class="n">mr_speed</span><span class="p">,</span> <span class="n">volatility</span> <span class="ow">in</span> <span class="p">[(</span><span class="mf">10.0</span><span class="p">,</span><span class="mf">0.3</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.3</span><span class="p">),</span> <span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)]:</span>
+    <span class="n">ou_model</span> <span class="o">=</span> <span class="n">rivapy</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">OrnsteinUhlenbeck</span><span class="p">(</span><span class="n">speed_of_mean_reversion</span> <span class="o">=</span> <span class="n">mr_speed</span><span class="p">,</span> <span class="n">volatility</span><span class="o">=</span><span class="n">volatility</span><span class="p">)</span>
+    <span class="n">sim</span> <span class="o">=</span> <span class="n">ou_model</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">start_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">rnd</span><span class="o">=</span><span class="n">rnd</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span><span class="n">sim</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$\lambda$=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">mr_speed</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;, $\sigma$=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">volatility</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;time [years]&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">sim</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
+             <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$\lambda$=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">mr_speed</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;, $\sigma$=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">volatility</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="s1">&#39;simulated value at final time&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -156,7 +163,7 @@
 <p>The model may be calibrated to data. Here, the data must be given on a uniform grid. The calibration can either be done by maximum likelihood or by minimum least square.</p>
 <p>Here, to test the calibration, we simulate paths of an Ornstein-Uhlenbeck process and calibrate to this simulated data.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">timegrid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">365.0</span><span class="p">)</span> <span class="c1"># simulate on daily timegrid over 5yrs horizon</span>
@@ -210,8 +217,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../index.html" class="btn btn-neutral float-left" title="Example Notebooks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="lucia_schwartz.html" class="btn btn-neutral float-right" title="Lucia-Schwartz Model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="lucia_schwartz.html" class="btn btn-neutral float-left" title="Lucia-Schwartz Model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="residual_demand_forward_model_multi_region.html" class="btn btn-neutral float-right" title="Multiregion Windpower Model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

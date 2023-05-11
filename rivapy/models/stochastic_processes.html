@@ -7,6 +7,7 @@
   <title>Stochastic Processes &mdash; rivapy  documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -48,7 +49,7 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/index.html">Example Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/index.html">Notebook Gallery</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Module Documentation</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../marketdata/index.html">Marketdata</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../instruments/index.html">Instruments</a></li>
@@ -136,6 +137,31 @@ so-called mean reversion level <span class="math notranslate nohighlight">\(\the
 <li><p><strong>dt</strong> (<em>float</em>) – Time step size between two datapoints from data (uniform timegrid is assumed.</p></li>
 <li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – Determines if maximum likelihood (‘maximum_likelihood’) or minimum least square (‘minimum_least_square’) is used for calibration. Defaults to ‘maximum_likelihood’.</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.models.OrnsteinUhlenbeck.compute_call_price">
+<span class="sig-name descname"><span class="pre">compute_call_price</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.OrnsteinUhlenbeck.compute_call_price" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the price of a call option with strike K and time to maturity ttm for a spot following the Ornstein-Uhlenbeck process.</p>
+<p>It works only for constant speed of mean reversion, volatility and mean reversion level and throws a NotImplementedError otherwise. It does not encounter dividends or interest rates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X0</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>np.ndarray</em><em>]</em>) – Start value of the process.</p></li>
+<li><p><strong>K</strong> (<em>float</em>) – Strike of the call option.</p></li>
+<li><p><strong>ttm</strong> (<em>float</em>) – Time to maturity of the call option.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>NotImplementedError</strong> – If speed of mean reversion, volatility or mean reversion level are not constant.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Price of the call option.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
