@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Interfaces" href="rivapy.interfaces.html" />
-    <link rel="prev" title="Pricing" href="rivapy.pricing.html" /> 
+    <link rel="prev" title="PricingRequest" href="pricing/pricing_request.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -52,9 +52,10 @@
 <li class="toctree-l2"><a class="reference internal" href="marketdata/index.html">Marketdata</a></li>
 <li class="toctree-l2"><a class="reference internal" href="instruments/index.html">Instruments</a></li>
 <li class="toctree-l2"><a class="reference internal" href="models/index.html">Models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="rivapy.pricing.html">Pricing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pricing/index.html">Pricing</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Tools</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#date-tools">Date Tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#datetimegrid">DateTimeGrid</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#enums">Enums</a></li>
 </ul>
 </li>
@@ -63,6 +64,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
 </ul>
 
         </div>
@@ -309,6 +311,39 @@ False, if only a longer period is allowed.</p>
 </dd>
 </dl>
 </dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="datetimegrid">
+<h2>DateTimeGrid<a class="headerlink" href="#datetimegrid" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.tools.DateTimeGrid">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.</span></span><span class="sig-name descname"><span class="pre">DateTimeGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datetime_grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">DatetimeIndex</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Timestamp</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Timestamp</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'1H'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daycounter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#rivapy.tools.enums.DayCounterType" title="rivapy.tools.enums.DayCounterType"><span class="pre">DayCounterType</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DayCounterType.Act365Fixed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclusive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'left'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.DateTimeGrid" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rivapy.tools.DateTimeGrid.get_daily_subgrid">
+<span class="sig-name descname"><span class="pre">get_daily_subgrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.DateTimeGrid.get_daily_subgrid" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.tools.DateTimeGrid.get_day_of_week">
+<span class="sig-name descname"><span class="pre">get_day_of_week</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.DateTimeGrid.get_day_of_week" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.tools.DateTimeGrid.get_day_of_year">
+<span class="sig-name descname"><span class="pre">get_day_of_year</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.DateTimeGrid.get_day_of_year" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.tools.DateTimeGrid.get_hour_of_day">
+<span class="sig-name descname"><span class="pre">get_hour_of_day</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.DateTimeGrid.get_hour_of_day" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.tools.DateTimeGrid.get_minute_of_day">
+<span class="sig-name descname"><span class="pre">get_minute_of_day</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.DateTimeGrid.get_minute_of_day" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -569,7 +604,7 @@ False, if only a longer period is allowed.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="rivapy.pricing.html" class="btn btn-neutral float-left" title="Pricing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pricing/pricing_request.html" class="btn btn-neutral float-left" title="PricingRequest" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="rivapy.interfaces.html" class="btn btn-neutral float-right" title="Interfaces" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

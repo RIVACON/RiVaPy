@@ -72,7 +72,10 @@
     "ExecuteTime": {
      "end_time": "2023-05-11T05:28:39.140055Z",
      "start_time": "2023-05-11T05:28:36.327259Z"
-    }
+    },
+    "tags": [
+     "nbsphinx-thumbnail"
+    ]
    },
    "outputs": [
     {
@@ -186,6 +189,7 @@
   }
  ],
  "metadata": {
+  "celltoolbar": "Tags",
   "hide_input": false,
   "kernelspec": {
    "display_name": "Python 3 (ipykernel)",

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Powerprice and Wind Modeling &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Multiregion Windpower Model" href="residual_demand_forward_model_multi_region.html" />
+    <link rel="prev" title="Wind Power Forecast Model" href="windpower_forecast_model.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Notebook Gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#market-data">Market Data</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#models">Models</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="lucia_schwartz.html">Lucia-Schwartz Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ornstein_uhlenbeck.html">Ornstein-Uhlenbeck Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="windpower_forecast_model.html">Wind Power Forecast Model</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Powerprice and Wind Modeling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Simulation-of-Powerprices-and-Wind">Simulation of Powerprices and Wind</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Simulation-with-forecasts-at-discrete-timepoints-only">Simulation with forecasts at discrete timepoints only</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="residual_demand_forward_model_multi_region.html">Multiregion Windpower Model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#pricing">Pricing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Notebook Gallery</a></li>
+      <li class="breadcrumb-item active">Powerprice and Wind Modeling</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/models/powerprice_wind_model.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Powerprice-and-Wind-Modeling">
+<h1>Powerprice and Wind Modeling<a class="headerlink" href="#Powerprice-and-Wind-Modeling" title="Permalink to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;../../../..&#39;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.datetime_grid</span> <span class="kn">import</span> <span class="n">DateTimeGrid</span>
+
+<span class="kn">from</span> <span class="nn">rivapy.models</span> <span class="kn">import</span> <span class="n">OrnsteinUhlenbeck</span>
+<span class="kn">from</span> <span class="nn">rivapy.models.residual_demand_model</span> <span class="kn">import</span> <span class="n">WindPowerForecastModel</span><span class="p">,</span> <span class="n">WindPowerForecastModelParameter</span><span class="p">,</span> <span class="n">MultiRegionWindForecastModel</span><span class="p">,</span> <span class="n">LinearDemandForwardModel</span>
+
+<span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+<span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+C:\Users\doeltz\development\RiVaPy\docs\source\notebooks\models\../../../..\rivapy\__init__.py:11: UserWarning: The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.
+  warnings.warn(&#39;The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.&#39;)
+</pre></div></div>
+</div>
+<section id="Simulation-of-Powerprices-and-Wind">
+<h2>Simulation of Powerprices and Wind<a class="headerlink" href="#Simulation-of-Powerprices-and-Wind" title="Permalink to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">params</span> <span class="o">=</span> <span class="n">WindPowerForecastModelParameter</span><span class="p">(</span><span class="n">n_call_strikes</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">min_strike</span><span class="o">=-</span><span class="mf">7.0</span><span class="p">,</span> <span class="n">max_strike</span><span class="o">=</span><span class="mf">7.0</span><span class="p">)</span>
+<span class="c1"># setup</span>
+<span class="n">wind_region_model</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">vols</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">]</span>
+<span class="n">mean_reversion_speed</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">]</span>
+<span class="n">capacities</span> <span class="o">=</span> <span class="p">[</span><span class="mf">10_000.0</span><span class="p">]</span>
+<span class="n">rnd_weights</span> <span class="o">=</span> <span class="p">[</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span>
+              <span class="p">]</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">regions</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vols</span><span class="p">)):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">WindPowerForecastModel</span><span class="p">(</span><span class="n">region</span><span class="o">=</span><span class="s1">&#39;Region_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                                            <span class="n">speed_of_mean_reversion</span><span class="o">=</span><span class="n">mean_reversion_speed</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                            <span class="n">volatility</span><span class="o">=</span><span class="n">vols</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+    <span class="n">regions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MultiRegionWindForecastModel</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span>
+                                    <span class="n">model</span><span class="p">,</span>
+                                    <span class="n">capacity</span><span class="o">=</span><span class="n">capacities</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                    <span class="n">rnd_weights</span><span class="o">=</span><span class="n">rnd_weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                                <span class="p">)</span> <span class="p">)</span>
+<span class="n">wind</span> <span class="o">=</span> <span class="n">MultiRegionWindForecastModel</span><span class="p">(</span><span class="s1">&#39;Wind_Germany&#39;</span><span class="p">,</span> <span class="n">regions</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">LinearDemandForwardModel</span><span class="p">(</span><span class="n">wind_power_forecast</span><span class="o">=</span><span class="n">wind</span><span class="p">,</span>
+                                    <span class="n">x_mean_reversion_speed</span><span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+                                     <span class="n">x_volatility</span><span class="o">=</span><span class="mf">10.5</span><span class="p">,</span>
+                                    <span class="n">power_name</span><span class="o">=</span> <span class="s1">&#39;Power_Germany&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">timegrid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">365</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">rnd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">rnd_shape</span><span class="p">(</span><span class="mi">10_000</span><span class="p">,</span> <span class="n">timegrid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">rnd</span><span class="p">,</span> <span class="n">expiries</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">],</span>
+                         <span class="n">power_fwd_prices</span><span class="o">=</span><span class="p">[</span><span class="mf">100.0</span><span class="p">],</span>
+                         <span class="n">initial_forecasts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Region_0&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.8</span><span class="p">]})</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Keys of simulated values: &#39;</span><span class="p">,</span> <span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="n">simulated_wind</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Wind_Germany_FWD0&#39;</span><span class="p">)</span>
+<span class="n">simulated_power</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Power_Germany_FWD0&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;final mean power price: &#39;</span><span class="p">,</span><span class="n">simulated_power</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Keys of simulated values:  {&#39;Wind_Germany_FWD0&#39;, &#39;Power_Germany_FWD0&#39;, &#39;Region_0_FWD0&#39;}
+final mean power price:  99.78492806280833
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">timepoint</span> <span class="o">=</span> <span class="mi">180</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">t</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:1.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timegrid</span><span class="p">[</span><span class="n">timepoint</span><span class="p">])</span> <span class="c1"># current time as string for axis labels</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">simulated_wind</span><span class="p">[</span><span class="n">timepoint</span><span class="p">,:],</span> <span class="n">simulated_power</span><span class="p">[</span><span class="n">timepoint</span><span class="p">,:],</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;wind forecast at t=&#39;</span><span class="o">+</span><span class="n">t</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;power forward at t=&#39;</span><span class="o">+</span><span class="n">t</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;power forward vs wind forecast&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">simulated_power</span><span class="p">[</span><span class="n">timepoint</span><span class="p">,:],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;power forward at t=&#39;</span><span class="o">+</span><span class="n">t</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;distribution of power forward price at t=&#39;</span><span class="o">+</span><span class="n">t</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_models_powerprice_wind_model_7_0.png" src="../../_images/notebooks_models_powerprice_wind_model_7_0.png" />
+</div>
+</div>
+</section>
+<section id="Simulation-with-forecasts-at-discrete-timepoints-only">
+<h2>Simulation with forecasts at discrete timepoints only<a class="headerlink" href="#Simulation-with-forecasts-at-discrete-timepoints-only" title="Permalink to this heading"></a></h2>
+<p>In real life, forecasts arrive at discrete times only. This effect can be handled by simply defining the list of timegridpoints where new forecasts come. This list can then be handed over to the get method of the results.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[56]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Keys of simulated values: &#39;</span><span class="p">,</span> <span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="n">forecast_points</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">timegrid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">10</span><span class="p">)]</span> <span class="c1"># list of time indices where forecasts arrive</span>
+<span class="n">simulated_wind_disc</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Wind_Germany_FWD0&#39;</span><span class="p">,</span> <span class="n">forecast_timepoints</span><span class="o">=</span><span class="n">forecast_points</span><span class="p">)</span> <span class="c1">#forecast at</span>
+<span class="n">simulated_power_disc</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Power_Germany_FWD0&#39;</span><span class="p">,</span><span class="n">forecast_timepoints</span><span class="o">=</span><span class="n">forecast_points</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;final mean power price: &#39;</span><span class="p">,</span><span class="n">simulated_power</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Keys of simulated values:  {&#39;Wind_Germany_FWD0&#39;, &#39;Power_Germany_FWD0&#39;, &#39;Region_0_FWD0&#39;}
+final mean power price:  99.78492806280833
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[57]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">simulated_power_disc</span><span class="p">[:,</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;-r&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;power forward price&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">simulated_wind_disc</span><span class="p">[:,</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;-b&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Wind_Germany_FWD0&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;simulated power forwards and wind forecasts&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_models_powerprice_wind_model_11_0.png" src="../../_images/notebooks_models_powerprice_wind_model_11_0.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="windpower_forecast_model.html" class="btn btn-neutral float-left" title="Wind Power Forecast Model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="residual_demand_forward_model_multi_region.html" class="btn btn-neutral float-right" title="Multiregion Windpower Model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

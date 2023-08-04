@@ -22,7 +22,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Lucia-Schwartz Model" href="models/lucia_schwartz.html" />
+    <link rel="next" title="Discount Curves" href="marketdata/discount_curves.html" />
     <link rel="prev" title="Installation" href="../install.html" /> 
 </head>
 
@@ -49,16 +49,31 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Notebook Gallery</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="models/lucia_schwartz.html">Lucia-Schwartz Model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models/ornstein_uhlenbeck.html">Ornstein-Uhlenbeck Model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models/residual_demand_forward_model_multi_region.html">Multiregion Windpower Model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models/residual_demand_forward_model_multi_region.html#Residual-Demand-Forward-Model">Residual Demand Forward Model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models/residual_demand_forward_model_multi_region.html#PPA-Hedging">PPA Hedging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#market-data">Market Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="marketdata/discount_curves.html">Discount Curves</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#models">Models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models/lucia_schwartz.html">Lucia-Schwartz Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models/ornstein_uhlenbeck.html">Ornstein-Uhlenbeck Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models/windpower_forecast_model.html">Wind Power Forecast Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models/powerprice_wind_model.html">Powerprice and Wind Modeling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="models/residual_demand_forward_model_multi_region.html">Multiregion Windpower Model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pricing">Pricing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pricing/green_ppa_expected_value.html">Green PPA Pricing - Expected Value</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pricing/green_ppa_deep_hedging.html">Deep Hedging of Green PPAs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pricing/green_ppa_deep_hedging.html#Residual-Demand-Forward-Model">Residual Demand Forward Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pricing/green_ppa_deep_hedging.html#PPA-Hedging">PPA Hedging</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../rivapy/index.html">Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
 </ul>
 
         </div>
@@ -87,6 +102,19 @@
              
   <section id="notebook-gallery">
 <h1>Notebook Gallery<a class="headerlink" href="#notebook-gallery" title="Permalink to this heading"></a></h1>
+<section id="market-data">
+<h2>Market Data<a class="headerlink" href="#market-data" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<div class="nbsphinx-gallery">
+<a class="reference internal" href="marketdata/discount_curves.html">
+  <div><img alt="" src="../_images/notebooks_marketdata_discount_curves_24_1.png"></div>
+  <div>Discount Curves</div>
+</a>
+</div>
+</div>
+</section>
+<section id="models">
+<h2>Models<a class="headerlink" href="#models" title="Permalink to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <div class="nbsphinx-gallery">
 <a class="reference internal" href="models/lucia_schwartz.html">
@@ -94,15 +122,39 @@
   <div>Lucia-Schwartz Model</div>
 </a>
 <a class="reference internal" href="models/ornstein_uhlenbeck.html">
-  <div><img alt="" src="../_images/notebooks_models_ornstein_uhlenbeck_7_0.png"></div>
+  <div><img alt="" src="../_images/notebooks_models_ornstein_uhlenbeck_4_0.png"></div>
   <div>Ornstein-Uhlenbeck Model</div>
 </a>
+<a class="reference internal" href="models/windpower_forecast_model.html">
+  <div><img alt="" src="../_images/notebooks_models_windpower_forecast_model_7_0.png"></div>
+  <div>Wind Power Forecast Model</div>
+</a>
+<a class="reference internal" href="models/powerprice_wind_model.html">
+  <div><img alt="" src="../_static/nbsphinx-broken-thumbnail.svg"></div>
+  <div>Powerprice and Wind Modeling</div>
+</a>
 <a class="reference internal" href="models/residual_demand_forward_model_multi_region.html">
-  <div><img alt="" src="../_images/notebooks_models_residual_demand_forward_model_multi_region_33_1.png"></div>
+  <div><img alt="" src="../_images/notebooks_models_residual_demand_forward_model_multi_region_12_0.png"></div>
   <div>Multiregion Windpower Model</div>
 </a>
 </div>
 </div>
+</section>
+<section id="pricing">
+<h2>Pricing<a class="headerlink" href="#pricing" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<div class="nbsphinx-gallery">
+<a class="reference internal" href="pricing/green_ppa_expected_value.html">
+  <div><img alt="" src="../_static/nbsphinx-no-thumbnail.svg"></div>
+  <div>Green PPA Pricing - Expected Value</div>
+</a>
+<a class="reference internal" href="pricing/green_ppa_deep_hedging.html">
+  <div><img alt="" src="../_images/notebooks_pricing_green_ppa_deep_hedging_20_1.png"></div>
+  <div>Deep Hedging of Green PPAs</div>
+</a>
+</div>
+</div>
+</section>
 </section>
 
 
@@ -110,7 +162,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../install.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="models/lucia_schwartz.html" class="btn btn-neutral float-right" title="Lucia-Schwartz Model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="marketdata/discount_curves.html" class="btn btn-neutral float-right" title="Discount Curves" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

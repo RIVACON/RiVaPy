@@ -20,4 +20,7 @@ these instruments.
    rivapy/index
    logging
    sample_data/index
+   glossary
+   genindex
+   search
    

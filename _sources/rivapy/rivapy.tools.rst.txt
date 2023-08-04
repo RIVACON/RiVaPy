@@ -11,6 +11,12 @@ Date Tools
    :members:
    :undoc-members:
 
+DateTimeGrid
+-------------------------------
+.. autoclass:: rivapy.tools.DateTimeGrid
+   :members:
+   :undoc-members:
+
 Enums
 ----------------------------------------------------
 .. autoclass:: rivapy.tools.enums.InterpolationType

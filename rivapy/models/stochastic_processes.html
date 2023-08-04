@@ -60,16 +60,17 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="equity.html">Equity</a></li>
-<li class="toctree-l3"><a class="reference internal" href="energy_weather.html">Energy and Weather</a></li>
+<li class="toctree-l3"><a class="reference internal" href="energy/index.html">Energy and Weather</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../rivapy.pricing.html">Pricing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pricing/index.html">Pricing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../rivapy.tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../rivapy.interfaces.html">Interfaces</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 </ul>
 
         </div>
@@ -184,8 +185,9 @@ so-called mean reversion level <span class="math notranslate nohighlight">\(\the
 <dl class="py method">
 <dt class="sig sig-object py" id="rivapy.models.OrnsteinUhlenbeck.simulate">
 <span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timegrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.OrnsteinUhlenbeck.simulate" title="Permalink to this definition"></a></dt>
-<dd><dl>
-<dt>Simulate the Ornstein Uhlenbeck process on the given timegrid using simple explicit euler scheme:</dt><dd><blockquote>
+<dd><p>Simulate the Ornstein Uhlenbeck process on the given timegrid using simple explicit euler scheme:</p>
+<blockquote>
+<div><blockquote>
 <div><div class="math notranslate nohighlight">
 \[X_{t+\delta t} = X_t + \theta (\mu(t) - X_t )\delta t +\sigma(t) \varepsilon \sqrt{\delta t}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\varepsilon\)</span> is a (0,1)-normal random variate.</p>
@@ -196,8 +198,7 @@ start_value (Union[float, np.ndarray]): Either a float or an array (for each pat
 rnd (np.ndarray): Array of random normal (variance equal to one) variates used within the discretization (:math:<a href="#id1"><span class="problematic" id="id2">`</span></a></p>
 </dd>
 </dl>
-</dd>
-</dl>
+</div></blockquote>
 <p>arepsilon` in the above description). Here, shape[0] equals the number of timestes and shape[1] teh number of simulations.</p>
 <blockquote>
 <div><dl class="simple">

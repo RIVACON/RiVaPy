@@ -7,6 +7,6 @@ Module Documentation
    marketdata/index
    instruments/index
    models/index
-   rivapy.pricing
+   pricing/index
    rivapy.tools
    rivapy.interfaces

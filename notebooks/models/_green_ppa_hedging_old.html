@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Green PPA Hedging &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Notebook Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Green PPA Hedging</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/models/_green_ppa_hedging_old.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Green-PPA-Hedging">
+<h1>Green PPA Hedging<a class="headerlink" href="#Green-PPA-Hedging" title="Permalink to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;../../../..&#39;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.datetime_grid</span> <span class="kn">import</span> <span class="n">DateTimeGrid</span>
+
+<span class="kn">from</span> <span class="nn">rivapy.models.residual_demand_fwd_model</span> <span class="kn">import</span> <span class="n">WindPowerForecastModel</span><span class="p">,</span> <span class="n">MultiRegionWindForecastModel</span><span class="p">,</span> <span class="n">LinearDemandForwardModel</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments</span> <span class="kn">import</span> <span class="n">GreenPPASpecification</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing.green_ppa_pricing</span> <span class="kn">import</span> <span class="n">GreenPPADeepHedgingPricer</span>
+
+<span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+<span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The autoreload extension is already loaded. To reload it, use:
+  %reload_ext autoreload
+</pre></div></div>
+</div>
+<section id="Setup-Model-for-Wind-and-Power-Prices">
+<h2>Setup Model for Wind and Power Prices<a class="headerlink" href="#Setup-Model-for-Wind-and-Power-Prices" title="Permalink to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[58]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># setup</span>
+<span class="n">wind_region_model</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">vols</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">3.0</span><span class="p">,</span><span class="mf">6.0</span><span class="p">]</span>
+<span class="n">mean_reversion_speed</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">2.0</span><span class="p">,</span><span class="mf">6.0</span><span class="p">]</span>
+<span class="n">capacities</span> <span class="o">=</span> <span class="p">[</span><span class="mf">10_000.0</span><span class="p">,</span> <span class="mf">120_000.0</span><span class="p">,</span> <span class="mf">75_000.0</span><span class="p">]</span>
+<span class="n">rnd_weights</span> <span class="o">=</span> <span class="p">[</span> <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.2</span><span class="p">],</span>
+               <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.2</span><span class="p">],</span>
+               <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.2</span><span class="p">]</span>
+              <span class="p">]</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">regions</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vols</span><span class="p">)):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">WindPowerForecastModel</span><span class="p">(</span><span class="n">region</span><span class="o">=</span><span class="s1">&#39;Region_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                                            <span class="n">speed_of_mean_reversion</span><span class="o">=</span><span class="n">mean_reversion_speed</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                            <span class="n">volatility</span><span class="o">=</span><span class="n">vols</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">regions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MultiRegionWindForecastModel</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span>
+                                    <span class="n">model</span><span class="p">,</span>
+                                    <span class="n">capacity</span><span class="o">=</span><span class="n">capacities</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                    <span class="n">rnd_weights</span><span class="o">=</span><span class="n">rnd_weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                                <span class="p">)</span> <span class="p">)</span>
+<span class="n">wind</span> <span class="o">=</span> <span class="n">MultiRegionWindForecastModel</span><span class="p">(</span><span class="s1">&#39;Wind_Germany&#39;</span><span class="p">,</span> <span class="n">regions</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[63]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">?</span>MultiRegionWindForecastModel
+</pre></div>
+</div>
+</div>
+<p>After setting up three regions we just simulate the weather forecast over the next ten days for the following four hours.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wind_onshore</span> <span class="o">=</span> <span class="n">WindPowerForecastModel</span><span class="p">(</span><span class="n">region</span><span class="o">=</span><span class="s1">&#39;Onshore&#39;</span><span class="p">,</span> <span class="n">speed_of_mean_reversion</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">volatility</span><span class="o">=</span><span class="mf">4.80</span><span class="p">)</span>
+<span class="n">wind_offshore</span> <span class="o">=</span> <span class="n">WindPowerForecastModel</span><span class="p">(</span><span class="n">region</span><span class="o">=</span><span class="s1">&#39;Offshore&#39;</span><span class="p">,</span> <span class="n">speed_of_mean_reversion</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">volatility</span><span class="o">=</span><span class="mf">4.80</span><span class="p">)</span>
+<span class="n">regions</span> <span class="o">=</span> <span class="p">[</span> <span class="n">MultiRegionWindForecastModel</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span>
+                                    <span class="n">wind_onshore</span><span class="p">,</span>
+                                    <span class="n">capacity</span><span class="o">=</span><span class="mf">1000.0</span><span class="p">,</span>
+                                    <span class="n">rnd_weights</span><span class="o">=</span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.2</span><span class="p">]</span>
+                                <span class="p">),</span>
+           <span class="n">MultiRegionWindForecastModel</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span>
+                                    <span class="n">wind_offshore</span><span class="p">,</span>
+                                    <span class="n">capacity</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span>
+                                    <span class="n">rnd_weights</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.8</span><span class="p">]</span>
+                                <span class="p">)</span>
+
+          <span class="p">]</span>
+<span class="n">wind</span> <span class="o">=</span> <span class="n">MultiRegionWindForecastModel</span><span class="p">(</span><span class="s1">&#39;Wind_Germany&#39;</span><span class="p">,</span> <span class="n">regions</span><span class="p">)</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">LinearDemandForwardModel</span><span class="p">(</span><span class="n">wind_power_forecast</span><span class="o">=</span><span class="n">wind</span><span class="p">,</span>
+                                    <span class="n">x_mean_reversion_speed</span><span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+                                     <span class="n">x_volatility</span><span class="o">=</span><span class="mf">10.5</span><span class="p">,</span>
+                                    <span class="n">power_name</span><span class="o">=</span> <span class="s1">&#39;Power_Germany&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="Setup-Green-PPA-Specification">
+<h1>Setup Green PPA Specification<a class="headerlink" href="#Setup-Green-PPA-Specification" title="Permalink to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">val_date</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">strike</span> <span class="o">=</span> <span class="mf">0.3</span> <span class="c1">#0.22</span>
+<span class="c1"># For illustration purposes the schedule contains just one timepoint</span>
+<span class="n">spec</span> <span class="o">=</span> <span class="n">GreenPPASpecification</span><span class="p">(</span><span class="n">udl</span><span class="o">=</span><span class="s1">&#39;Power_Germany&#39;</span><span class="p">,</span>
+                            <span class="n">technology</span> <span class="o">=</span> <span class="s1">&#39;Wind&#39;</span><span class="p">,</span>
+                             <span class="n">location</span> <span class="o">=</span> <span class="s1">&#39;Onshore&#39;</span><span class="p">,</span> <span class="c1"># must be the same as the region in the wind model</span>
+                             <span class="n">schedule</span> <span class="o">=</span> <span class="p">[</span><span class="n">val_date</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">3</span><span class="p">)],</span>
+                             <span class="n">fixed_price</span><span class="o">=</span><span class="n">strike</span><span class="p">,</span>
+                             <span class="n">max_capacity</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="PPA-Hedging">
+<h1>PPA Hedging<a class="headerlink" href="#PPA-Hedging" title="Permalink to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="c1">#with open(&#39;hedge_results.json&#39;,&#39;r&#39;) as f:</span>
+<span class="c1">#    results = json.load(f)</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.interfaces</span> <span class="kn">import</span> <span class="n">FactoryObject</span>
+
+<span class="k">def</span> <span class="nf">compute_pnl_figures</span><span class="p">(</span><span class="n">pricing_results</span><span class="p">):</span>
+    <span class="n">pnl</span> <span class="o">=</span> <span class="n">pricing_results</span><span class="o">.</span><span class="n">hedge_model</span><span class="o">.</span><span class="n">compute_pnl</span><span class="p">(</span><span class="n">pricing_results</span><span class="o">.</span><span class="n">paths</span><span class="p">,</span> <span class="n">pricing_results</span><span class="o">.</span><span class="n">payoff</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;mean&#39;</span><span class="p">:</span> <span class="n">pnl</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="s1">&#39;var&#39;</span><span class="p">:</span> <span class="n">pnl</span><span class="o">.</span><span class="n">var</span><span class="p">,</span> <span class="s1">&#39;1%&#39;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">pnl</span><span class="p">,</span><span class="mf">1.0</span><span class="p">),</span>
+            <span class="s1">&#39;99%&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">pnl</span><span class="p">,</span><span class="mf">99.0</span><span class="p">),}</span>
+
+<span class="k">def</span> <span class="nf">run_hedge_experiment</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">ppa_spec</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">params</span><span class="p">[</span><span class="s1">&#39;ppa_spec&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ppa_spec</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+    <span class="n">params</span><span class="p">[</span><span class="s1">&#39;ppa_spec_hash&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ppa_spec</span><span class="o">.</span><span class="n">hash</span><span class="p">()</span>
+    <span class="n">params</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+    <span class="n">params</span><span class="p">[</span><span class="s1">&#39;model_hash&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">hash</span><span class="p">()</span>
+    <span class="n">params</span><span class="p">[</span><span class="s1">&#39;pricing_param&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span>
+    <span class="n">hash_key</span> <span class="o">=</span> <span class="n">FactoryObject</span><span class="o">.</span><span class="n">hash_for_dict</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+    <span class="c1">#if hash_key in results:</span>
+    <span class="n">pricing_result</span> <span class="o">=</span>  <span class="n">GreenPPADeepHedgingPricer</span><span class="o">.</span><span class="n">price</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span>
+                                  <span class="n">ppa_spec</span><span class="p">,</span>
+                                  <span class="n">model</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="c1">#pricing_results.hedge_model.save(&#39;depp&#39;)</span>
+    <span class="c1"># model = DeepHedgeModel.load(&#39;depp&#39;)</span>
+    <span class="k">return</span> <span class="n">pricing_result</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pricing_results</span> <span class="o">=</span> <span class="n">run_hedge_experiment</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span>
+                                        <span class="n">spec</span><span class="p">,</span>
+                                        <span class="n">model</span><span class="p">,</span>
+                                        <span class="n">initial_forecasts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Onshore&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.8</span><span class="p">],</span>
+                                                    <span class="s1">&#39;Offshore&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.6</span><span class="p">]},</span>
+                                        <span class="n">forecast_hours</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">18</span><span class="p">],</span>
+                                        <span class="n">power_fwd_prices</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">],</span>
+                                        <span class="n">additional_states</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Offshore&#39;</span><span class="p">],</span>
+                                        <span class="n">depth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">nb_neurons</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">n_sims</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span>
+                                        <span class="n">regularization</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span>
+                                        <span class="n">epochs</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                        <span class="n">tensorboard_logdir</span> <span class="o">=</span> <span class="s1">&#39;logs/&#39;</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">T%H%M%S&quot;</span><span class="p">),</span>
+                                        <span class="n">initial_lr</span><span class="o">=</span><span class="mf">5e-4</span><span class="p">,</span>
+                                        <span class="n">decay_steps</span><span class="o">=</span><span class="mi">8_000</span><span class="p">,</span>
+                                        <span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                                        <span class="n">decay_rate</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+                                        <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Epoch 1/200
+100/100 [==============================] - 17s 9ms/step - loss: -56.0748
+Epoch 2/200
+100/100 [==============================] - 1s 10ms/step - loss: -57.1345
+Epoch 3/200
+100/100 [==============================] - 1s 10ms/step - loss: -57.2935
+Epoch 4/200
+100/100 [==============================] - 1s 10ms/step - loss: -57.3058
+Epoch 5/200
+100/100 [==============================] - 1s 10ms/step - loss: -57.4609
+Epoch 6/200
+100/100 [==============================] - 1s 10ms/step - loss: -57.2791
+Epoch 7/200
+100/100 [==============================] - 1s 10ms/step - loss: -57.5345
+Epoch 8/200
+100/100 [==============================] - 1s 10ms/step - loss: -57.5680
+Epoch 9/200
+100/100 [==============================] - 1s 10ms/step - loss: -57.5070
+Epoch 10/200
+100/100 [==============================] - 1s 11ms/step - loss: -57.6425
+Epoch 11/200
+100/100 [==============================] - 1s 10ms/step - loss: -57.7022
+Epoch 12/200
+100/100 [==============================] - 1s 11ms/step - loss: -57.6431
+Epoch 13/200
+100/100 [==============================] - 1s 11ms/step - loss: -57.8447
+Epoch 14/200
+100/100 [==============================] - 1s 11ms/step - loss: -57.8181
+Epoch 15/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.0594
+Epoch 16/200
+100/100 [==============================] - 1s 11ms/step - loss: -57.7443
+Epoch 17/200
+100/100 [==============================] - 1s 11ms/step - loss: -57.8472
+Epoch 18/200
+100/100 [==============================] - 1s 11ms/step - loss: -57.7625
+Epoch 19/200
+100/100 [==============================] - 1s 11ms/step - loss: -57.6200
+Epoch 20/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.0329
+Epoch 21/200
+100/100 [==============================] - 1s 8ms/step - loss: -58.0984
+Epoch 22/200
+100/100 [==============================] - 1s 8ms/step - loss: -58.1440
+Epoch 23/200
+100/100 [==============================] - 1s 9ms/step - loss: -58.0437
+Epoch 24/200
+100/100 [==============================] - 1s 9ms/step - loss: -58.1623
+Epoch 25/200
+100/100 [==============================] - 1s 8ms/step - loss: -58.1652
+Epoch 26/200
+100/100 [==============================] - 1s 9ms/step - loss: -58.1461
+Epoch 27/200
+100/100 [==============================] - 1s 9ms/step - loss: -58.0795
+Epoch 28/200
+100/100 [==============================] - 1s 9ms/step - loss: -58.1315
+Epoch 29/200
+100/100 [==============================] - 1s 8ms/step - loss: -58.4154
+Epoch 30/200
+100/100 [==============================] - 1s 9ms/step - loss: -58.0741
+Epoch 31/200
+100/100 [==============================] - 1s 8ms/step - loss: -58.4873
+Epoch 32/200
+100/100 [==============================] - 1s 9ms/step - loss: -58.0742
+Epoch 33/200
+100/100 [==============================] - 1s 9ms/step - loss: -58.1776
+Epoch 34/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.3237
+Epoch 35/200
+100/100 [==============================] - 1s 11ms/step - loss: -58.4545
+Epoch 36/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.1950
+Epoch 37/200
+100/100 [==============================] - 1s 8ms/step - loss: -58.5764
+Epoch 38/200
+100/100 [==============================] - 1s 8ms/step - loss: -58.5523
+Epoch 39/200
+100/100 [==============================] - 1s 8ms/step - loss: -58.5614
+Epoch 40/200
+100/100 [==============================] - 1s 8ms/step - loss: -58.4321
+Epoch 41/200
+100/100 [==============================] - 1s 8ms/step - loss: -58.5292
+Epoch 42/200
+100/100 [==============================] - 1s 8ms/step - loss: -58.1725
+Epoch 43/200
+100/100 [==============================] - 1s 9ms/step - loss: -58.3911
+Epoch 44/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.4417
+Epoch 45/200
+100/100 [==============================] - 1s 11ms/step - loss: -58.3296
+Epoch 46/200
+100/100 [==============================] - 1s 11ms/step - loss: -58.5636
+Epoch 47/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.6052
+Epoch 48/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.7038
+Epoch 49/200
+100/100 [==============================] - 1s 8ms/step - loss: -58.0396
+Epoch 50/200
+100/100 [==============================] - 1s 8ms/step - loss: -58.6065
+Epoch 51/200
+100/100 [==============================] - 1s 8ms/step - loss: -58.4872
+Epoch 52/200
+100/100 [==============================] - 1s 8ms/step - loss: -58.7104
+Epoch 53/200
+100/100 [==============================] - 1s 9ms/step - loss: -58.5281
+Epoch 54/200
+100/100 [==============================] - 1s 9ms/step - loss: -58.5578
+Epoch 55/200
+100/100 [==============================] - 1s 9ms/step - loss: -58.7209
+Epoch 56/200
+100/100 [==============================] - 1s 9ms/step - loss: -58.6060
+Epoch 57/200
+100/100 [==============================] - 1s 9ms/step - loss: -58.8431
+Epoch 58/200
+100/100 [==============================] - 1s 9ms/step - loss: -58.5013
+Epoch 59/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.6965
+Epoch 60/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.5682
+Epoch 61/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.8205
+Epoch 62/200
+100/100 [==============================] - 1s 11ms/step - loss: -58.6114
+Epoch 63/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.7481
+Epoch 64/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.6208
+Epoch 65/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.7421
+Epoch 66/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.8608
+Epoch 67/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.6763
+Epoch 68/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.6972
+Epoch 69/200
+100/100 [==============================] - 1s 9ms/step - loss: -58.7149
+Epoch 70/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.8701
+Epoch 71/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.7835
+Epoch 72/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.5113
+Epoch 73/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.8753
+Epoch 74/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.8921
+Epoch 75/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.8704
+Epoch 76/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.7734
+Epoch 77/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.6486
+Epoch 78/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.9483
+Epoch 79/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.8145
+Epoch 80/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.0546
+Epoch 81/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.2094
+Epoch 82/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.8848
+Epoch 83/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.7014
+Epoch 84/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.0036
+Epoch 85/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.2027
+Epoch 86/200
+100/100 [==============================] - 1s 10ms/step - loss: -58.7719
+Epoch 87/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.2104
+Epoch 88/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.1077
+Epoch 89/200
+100/100 [==============================] - 1s 8ms/step - loss: -59.1913
+Epoch 90/200
+100/100 [==============================] - 1s 8ms/step - loss: -59.1187
+Epoch 91/200
+100/100 [==============================] - 1s 8ms/step - loss: -58.8045
+Epoch 92/200
+100/100 [==============================] - 1s 8ms/step - loss: -59.1866
+Epoch 93/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.1433
+Epoch 94/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.1358
+Epoch 95/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.0606
+Epoch 96/200
+100/100 [==============================] - 1s 11ms/step - loss: -58.8327
+Epoch 97/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.3395
+Epoch 98/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.2071
+Epoch 99/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.0840
+Epoch 100/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.2641
+Epoch 101/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.3255
+Epoch 102/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.1076
+Epoch 103/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.3887
+Epoch 104/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.3459
+Epoch 105/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.2896
+Epoch 106/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.0486
+Epoch 107/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.1720
+Epoch 108/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.3628
+Epoch 109/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.2567
+Epoch 110/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.4963
+Epoch 111/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.3636
+Epoch 112/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.2849
+Epoch 113/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.1848
+Epoch 114/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.4218
+Epoch 115/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.5415
+Epoch 116/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.4086
+Epoch 117/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.4688
+Epoch 118/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.3316
+Epoch 119/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.5377
+Epoch 120/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.5881
+Epoch 121/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.2610
+Epoch 122/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.1884
+Epoch 123/200
+100/100 [==============================] - 1s 11ms/step - loss: -59.5057
+Epoch 124/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.6652
+Epoch 125/200
+100/100 [==============================] - 1s 8ms/step - loss: -59.4807
+Epoch 126/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.5941
+Epoch 127/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.4402
+Epoch 128/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.5899
+Epoch 129/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.6717
+Epoch 130/200
+100/100 [==============================] - 1s 8ms/step - loss: -59.7818
+Epoch 131/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.5089
+Epoch 132/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.6811
+Epoch 133/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.4734
+Epoch 134/200
+100/100 [==============================] - 1s 8ms/step - loss: -59.6051
+Epoch 135/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.6378
+Epoch 136/200
+100/100 [==============================] - 1s 8ms/step - loss: -59.6876
+Epoch 137/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.5723
+Epoch 138/200
+100/100 [==============================] - 1s 11ms/step - loss: -59.7550
+Epoch 139/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.7149
+Epoch 140/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.6651
+Epoch 141/200
+100/100 [==============================] - 1s 11ms/step - loss: -59.7251
+Epoch 142/200
+100/100 [==============================] - 1s 11ms/step - loss: -59.8088
+Epoch 143/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.6272
+Epoch 144/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.6373
+Epoch 145/200
+100/100 [==============================] - 1s 11ms/step - loss: -59.8107
+Epoch 146/200
+100/100 [==============================] - 1s 11ms/step - loss: -59.8617
+Epoch 147/200
+100/100 [==============================] - 1s 12ms/step - loss: -59.8905
+Epoch 148/200
+100/100 [==============================] - 1s 11ms/step - loss: -59.9687
+Epoch 149/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.6024
+Epoch 150/200
+100/100 [==============================] - 1s 12ms/step - loss: -59.7846
+Epoch 151/200
+100/100 [==============================] - 1s 11ms/step - loss: -59.8150
+Epoch 152/200
+100/100 [==============================] - 1s 9ms/step - loss: -60.0052
+Epoch 153/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.9283
+Epoch 154/200
+100/100 [==============================] - 1s 9ms/step - loss: -60.0504
+Epoch 155/200
+100/100 [==============================] - 1s 9ms/step - loss: -59.8670
+Epoch 156/200
+100/100 [==============================] - 1s 9ms/step - loss: -60.0604
+Epoch 157/200
+100/100 [==============================] - 1s 10ms/step - loss: -60.0452
+Epoch 158/200
+100/100 [==============================] - 1s 10ms/step - loss: -59.9956
+Epoch 159/200
+100/100 [==============================] - 1s 8ms/step - loss: -59.8637
+Epoch 160/200
+100/100 [==============================] - 1s 10ms/step - loss: -60.0492
+Epoch 161/200
+100/100 [==============================] - 1s 12ms/step - loss: -60.2419
+Epoch 162/200
+100/100 [==============================] - 1s 14ms/step - loss: -60.0192
+Epoch 163/200
+100/100 [==============================] - 1s 11ms/step - loss: -60.1573
+Epoch 164/200
+100/100 [==============================] - 1s 9ms/step - loss: -60.0064
+Epoch 165/200
+100/100 [==============================] - 1s 9ms/step - loss: -60.1912
+Epoch 166/200
+100/100 [==============================] - 1s 9ms/step - loss: -60.0800
+Epoch 167/200
+100/100 [==============================] - 1s 9ms/step - loss: -60.0389
+Epoch 168/200
+100/100 [==============================] - 1s 9ms/step - loss: -60.2700
+Epoch 169/200
+100/100 [==============================] - 1s 10ms/step - loss: -60.3217
+Epoch 170/200
+100/100 [==============================] - 1s 9ms/step - loss: -60.3196
+Epoch 171/200
+100/100 [==============================] - 1s 10ms/step - loss: -60.0230
+Epoch 172/200
+100/100 [==============================] - 1s 12ms/step - loss: -60.2097
+Epoch 173/200
+100/100 [==============================] - 1s 10ms/step - loss: -60.0778
+Epoch 174/200
+100/100 [==============================] - 1s 10ms/step - loss: -60.2015
+Epoch 175/200
+100/100 [==============================] - 1s 10ms/step - loss: -60.2222
+Epoch 176/200
+100/100 [==============================] - 1s 15ms/step - loss: -60.2063
+Epoch 177/200
+100/100 [==============================] - 1s 11ms/step - loss: -60.3632
+Epoch 178/200
+100/100 [==============================] - 1s 9ms/step - loss: -60.3876
+Epoch 179/200
+100/100 [==============================] - 1s 10ms/step - loss: -60.4047
+Epoch 180/200
+100/100 [==============================] - 1s 10ms/step - loss: -60.2296
+Epoch 181/200
+100/100 [==============================] - 1s 10ms/step - loss: -60.4032
+Epoch 182/200
+100/100 [==============================] - 1s 10ms/step - loss: -60.4609
+Epoch 183/200
+100/100 [==============================] - 1s 10ms/step - loss: -60.3455
+Epoch 184/200
+100/100 [==============================] - 1s 10ms/step - loss: -60.0272
+Epoch 185/200
+100/100 [==============================] - 1s 9ms/step - loss: -60.2886
+Epoch 186/200
+100/100 [==============================] - 1s 11ms/step - loss: -60.3880
+Epoch 187/200
+100/100 [==============================] - 1s 11ms/step - loss: -60.4071
+Epoch 188/200
+100/100 [==============================] - 1s 10ms/step - loss: -60.4448
+Epoch 189/200
+100/100 [==============================] - 1s 12ms/step - loss: -60.3125
+Epoch 190/200
+100/100 [==============================] - 1s 9ms/step - loss: -60.4197
+Epoch 191/200
+100/100 [==============================] - 1s 12ms/step - loss: -60.6435
+Epoch 192/200
+100/100 [==============================] - 1s 11ms/step - loss: -60.4093
+Epoch 193/200
+100/100 [==============================] - 1s 10ms/step - loss: -60.4141
+Epoch 194/200
+100/100 [==============================] - 1s 9ms/step - loss: -60.5205
+Epoch 195/200
+100/100 [==============================] - 1s 8ms/step - loss: -60.6082
+Epoch 196/200
+100/100 [==============================] - 1s 8ms/step - loss: -60.6875
+Epoch 197/200
+100/100 [==============================] - 1s 8ms/step - loss: -60.5896
+Epoch 198/200
+100/100 [==============================] - 1s 9ms/step - loss: -60.4946
+Epoch 199/200
+100/100 [==============================] - 1s 9ms/step - loss: -60.4706
+Epoch 200/200
+100/100 [==============================] - 1s 8ms/step - loss: -60.8107
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="mi">48</span>
+<span class="n">p</span><span class="o">=</span><span class="mf">10.0</span>
+<span class="n">projection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span><span class="mf">1.1</span><span class="p">,</span> <span class="mi">250</span><span class="p">)</span>
+<span class="n">projected_key</span> <span class="o">=</span> <span class="s1">&#39;Onshore_FWD0&#39;</span>
+<span class="k">for</span> <span class="n">selected</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">400</span><span class="p">]:</span>
+<span class="c1">#selected = 2</span>
+    <span class="c1">#key = &#39;Power_Germany_FWD0&#39;</span>
+    <span class="c1">#x = np.percentile(pricing_results.paths[key][-1,:],p)</span>
+    <span class="c1">#selected = np.abs(x-pricing_results.paths[key][-1,:]).argmin()</span>
+    <span class="n">paths</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">T</span> <span class="o">=</span> <span class="n">pricing_results</span><span class="o">.</span><span class="n">hedge_model</span><span class="o">.</span><span class="n">timegrid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">ttm</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span><span class="o">-</span><span class="n">pricing_results</span><span class="o">.</span><span class="n">hedge_model</span><span class="o">.</span><span class="n">timegrid</span><span class="p">[</span><span class="n">t</span><span class="p">])</span><span class="o">/</span><span class="n">T</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">pricing_results</span><span class="o">.</span><span class="n">paths</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="n">projected_key</span><span class="p">:</span>
+            <span class="n">paths</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">projection</span><span class="o">*</span><span class="n">v</span><span class="p">[</span><span class="n">t</span><span class="p">,</span><span class="n">selected</span><span class="p">]</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">projection</span><span class="o">*</span><span class="n">v</span><span class="p">[</span><span class="n">t</span><span class="p">,</span><span class="n">selected</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">paths</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">projection</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">v</span><span class="p">[</span><span class="n">t</span><span class="p">,</span><span class="n">selected</span><span class="p">])</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">pricing_results</span><span class="o">.</span><span class="n">hedge_model</span><span class="o">.</span><span class="n">compute_delta</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">ttm</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">projected_key</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;delta&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+8/8 [==============================] - 0s 2ms/step
+8/8 [==============================] - 0s 2ms/step
+8/8 [==============================] - 0s 2ms/step
+8/8 [==============================] - 0s 2ms/step
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_models__green_ppa_hedging_old_12_1.png" src="../../_images/notebooks_models__green_ppa_hedging_old_12_1.png" />
+</div>
+</div>
+<section id="Hedge-PnL-Distribution">
+<h2>Hedge PnL Distribution<a class="headerlink" href="#Hedge-PnL-Distribution" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pnl</span> <span class="o">=</span> <span class="n">pricing_results</span><span class="o">.</span><span class="n">hedge_model</span><span class="o">.</span><span class="n">compute_pnl</span><span class="p">(</span><span class="n">pricing_results</span><span class="o">.</span><span class="n">paths</span><span class="p">,</span> <span class="n">pricing_results</span><span class="o">.</span><span class="n">payoff</span><span class="p">)</span>
+
+<span class="c1">#plt.hist(pricing_results.payoff, bins=100, alpha=0.5, density=True)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">pnl</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">pnl</span><span class="p">,</span><span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+313/313 [==============================] - 7s 3ms/step
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_models__green_ppa_hedging_old_14_1.png" src="../../_images/notebooks_models__green_ppa_hedging_old_14_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pnl</span> <span class="o">=</span> <span class="n">pricing_results</span><span class="o">.</span><span class="n">hedge_model</span><span class="o">.</span><span class="n">compute_pnl</span><span class="p">(</span><span class="n">pricing_results</span><span class="o">.</span><span class="n">paths</span><span class="p">,</span> <span class="n">pricing_results</span><span class="o">.</span><span class="n">payoff</span><span class="p">)</span>
+
+<span class="c1">#plt.hist(pricing_results.payoff, bins=100, alpha=0.5, density=True)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">pnl</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">pnl</span><span class="p">,</span><span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+313/313 [==============================] - 3s 4ms/step
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_models__green_ppa_hedging_old_15_1.png" src="../../_images/notebooks_models__green_ppa_hedging_old_15_1.png" />
+</div>
+</div>
+</section>
+<section id="Delta-vs-Volume">
+<h2>Delta vs Volume<a class="headerlink" href="#Delta-vs-Volume" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[57]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pricing_results</span><span class="o">.</span><span class="n">hedge_model</span><span class="o">.</span><span class="n">compute_delta</span><span class="p">(</span><span class="n">pricing_results</span><span class="o">.</span><span class="n">paths</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+313/313 [==============================] - 1s 4ms/step
+313/313 [==============================] - 1s 3ms/step
+313/313 [==============================] - 1s 3ms/step
+313/313 [==============================] - 2s 5ms/step
+313/313 [==============================] - 2s 5ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 5ms/step
+313/313 [==============================] - 2s 5ms/step
+313/313 [==============================] - 2s 5ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 5ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 5ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 5ms/step
+313/313 [==============================] - 2s 5ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 5ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 5ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 5ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 5ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 5ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 5ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 5ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 5ms/step
+313/313 [==============================] - 2s 5ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+313/313 [==============================] - 2s 6ms/step
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[57]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([[[ -4.96342516],
+        [ -4.96342516],
+        [ -4.96342516],
+        ...,
+        [ -4.96342516],
+        [ -4.96342516],
+        [ -4.96342516]],
+
+       [[ -4.9541502 ],
+        [ -4.93505478],
+        [ -4.96750641],
+        ...,
+        [ -4.94349718],
+        [ -4.9708209 ],
+        [ -4.9377141 ]],
+
+       [[ -4.94514942],
+        [ -4.93932056],
+        [ -4.97665215],
+        ...,
+        [ -4.89261341],
+        [ -4.98755884],
+        [ -4.91135311]],
+
+       ...,
+
+       [[-30.4707756 ],
+        [-20.53898621],
+        [-17.6346302 ],
+        ...,
+        [-25.44033623],
+        [-10.54989147],
+        [-25.69465256]],
+
+       [[-31.26119041],
+        [-20.7964592 ],
+        [-21.15811348],
+        ...,
+        [-26.18714333],
+        [-11.7241621 ],
+        [-25.53804398]],
+
+       [[-31.61169815],
+        [-20.44512558],
+        [-27.17195511],
+        ...,
+        [-27.64533424],
+        [ -6.50994349],
+        [-25.93655777]]])
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pricing_results</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;Power_Germany_FWD0&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(73, 10000)
+</pre></div></div>
+</div>
+</section>
+<section id="Path-Plots">
+<h2>Path Plots<a class="headerlink" href="#Path-Plots" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">12</span><span class="p">))</span>
+<span class="n">n_x</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">n_y</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">i</span><span class="o">=</span><span class="mi">1</span>
+<span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">pricing_results</span><span class="o">.</span><span class="n">paths</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">l</span><span class="p">,</span><span class="n">w</span> <span class="ow">in</span> <span class="n">pricing_results</span><span class="o">.</span><span class="n">paths</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">n_x</span><span class="p">,</span><span class="n">n_y</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">k</span><span class="o">==</span><span class="n">l</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">t</span><span class="p">,:],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="s1">&#39;, t=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">t</span><span class="p">,:],</span> <span class="n">w</span><span class="p">[</span><span class="n">t</span><span class="p">,:],</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="s1">&#39;, t=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">l</span><span class="o">+</span><span class="s1">&#39;, t=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_models__green_ppa_hedging_old_20_0.png" src="../../_images/notebooks_models__green_ppa_hedging_old_20_0.png" />
+</div>
+</div>
+</section>
+<section id="Delta-Plots">
+<h2>Delta Plots<a class="headerlink" href="#Delta-Plots" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[64]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">n_x</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">n_y</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">24</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+<span class="n">delta</span> <span class="o">=</span> <span class="n">pricing_results</span><span class="o">.</span><span class="n">hedge_model</span><span class="o">.</span><span class="n">compute_delta</span><span class="p">(</span><span class="n">pricing_results</span><span class="o">.</span><span class="n">paths</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+<span class="n">i</span><span class="o">=</span><span class="mi">1</span>
+<span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">pricing_results</span><span class="o">.</span><span class="n">paths</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">n_x</span><span class="p">,</span> <span class="n">n_y</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">t</span><span class="p">,:],</span> <span class="n">delta</span><span class="p">,</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="s1">&#39;, t=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;delta&#39;</span><span class="p">)</span>
+    <span class="n">i</span><span class="o">+=</span> <span class="mi">1</span>
+
+<span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">pricing_results</span><span class="o">.</span><span class="n">paths</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">n_x</span><span class="p">,</span> <span class="n">n_y</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">t</span><span class="p">,:],</span> <span class="n">v</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:],</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="s1">&#39;, t=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="s1">&#39;, final&#39;</span><span class="p">)</span>
+    <span class="n">i</span><span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+313/313 [==============================] - 1s 2ms/step
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_models__green_ppa_hedging_old_22_1.png" src="../../_images/notebooks_models__green_ppa_hedging_old_22_1.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

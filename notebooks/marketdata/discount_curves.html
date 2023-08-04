@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Discount Curves &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Lucia-Schwartz Model" href="../models/lucia_schwartz.html" />
+    <link rel="prev" title="Notebook Gallery" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Notebook Gallery</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#market-data">Market Data</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Discount Curves</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Definition-of-Discount-Curves">Definition of Discount Curves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Creating-Discount-Curves">Creating Discount Curves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Compute-Discount-Factors">Compute Discount Factors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Plotting-Discount-Curves">Plotting Discount Curves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#pricing">Pricing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Notebook Gallery</a></li>
+      <li class="breadcrumb-item active">Discount Curves</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/marketdata/discount_curves.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <p><img alt="image0" src="notebooks/images/rivacon_frontmark_combined_header.png" /></p>
+<section id="Discount-Curves">
+<h1>Discount Curves<a class="headerlink" href="#Discount-Curves" title="Permalink to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">rivapy.marketdata.curves</span> <span class="kn">import</span> <span class="n">DiscountCurve</span>
+<span class="kn">from</span> <span class="nn">rivapy.enums</span> <span class="kn">import</span> <span class="n">DayCounterType</span><span class="p">,</span> <span class="n">InterpolationType</span><span class="p">,</span> <span class="n">ExtrapolationType</span>
+
+
+<span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+<span class="c1">#the next lin is a jupyter internal command to show the matplotlib graphs within the notebook</span>
+<span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+<section id="Definition-of-Discount-Curves">
+<h2>Definition of Discount Curves<a class="headerlink" href="#Definition-of-Discount-Curves" title="Permalink to this heading"></a></h2>
+<p>A discount curve - stores discount factors for different maturities, - has an interpolation to compute discount factors for arbitrary maturities, - has an extrapolation to compute discount factors for arbitrary maturities after the latest given maturity, - has a day counter to convert dates to year fractions to apply the inter- and extrapolation.</p>
+<p>Under the assumption of continuous compounding, the discount factor <span class="math notranslate nohighlight">\(df\)</span> for a cashflow at maturity <span class="math notranslate nohighlight">\(T\)</span> based on a constant discount rate <span class="math notranslate nohighlight">\(r\)</span> is defined as</p>
+<div class="math notranslate nohighlight">
+\[df(T) = e^{-rT}\]</div>
+<p>where <span class="math notranslate nohighlight">\(T\)</span> is the time to maturity as year fraction.</p>
+</section>
+<section id="Creating-Discount-Curves">
+<h2>Creating Discount Curves<a class="headerlink" href="#Creating-Discount-Curves" title="Permalink to this heading"></a></h2>
+<section id="Setup-the-specification">
+<h3>Setup the specification<a class="headerlink" href="#Setup-the-specification" title="Permalink to this heading"></a></h3>
+<p>To setup a discount curve, we need the following information:</p>
+<p><strong>Object id</strong></p>
+<p>Nearly every structure in the analytics library has an object id. An object id allows for nice logging and exceptions (which object created the message/error) and is also used as identifier for retrieving objects from containers.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">object_id</span> <span class="o">=</span> <span class="s2">&quot;Test_DC&quot;</span>
+</pre></div>
+</div>
+</div>
+<p><strong>Reference date</strong></p>
+<p>A reference date is needed for all objects representing market data. Dates entering analytics objects must be analytics ptimes.</p>
+<p>Most of the functions provided by market data objects also get a calculation/valuation date and some logic is applied if this date is after the reference date. For a discount curve, if the valuation date is after the reference date, the forward discount factor is returned.</p>
+<p>The help function provides information about the function mentioned in its arguments (in parentheses). Uncomment the line to see the information about the analytics.ptime function.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refdate</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2017</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p><strong>Dates and corresponding discount factors</strong></p>
+<p>We need a list of dates and a list of discount factors. Here, we must use the analytics (C++ swigged) vectors to create the list of dates. We use a helper method which just gets a list of number of days and a reference date and returns the resulting dates from adding the number of days to the reference date. To view the created list of dates, uncomment the 4th and 5th line of the following code.</p>
+<p>To calculate the discount factors from a constant rate, we need to provide the constant rate and calculate the discount factors according to the desired compounding frequency.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">days_to_maturity</span> <span class="o">=</span>  <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">365</span><span class="p">,</span> <span class="mi">720</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="mi">365</span><span class="p">,</span> <span class="mi">4</span><span class="o">*</span><span class="mi">365</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="mi">365</span><span class="p">]</span>
+<span class="n">dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">]</span>
+<span class="n">discount_rate</span> <span class="o">=</span> <span class="mf">0.03</span>
+<span class="n">df</span> <span class="o">=</span> <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">d</span><span class="o">/</span><span class="mf">365.0</span><span class="o">*</span><span class="n">discount_rate</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p><strong>Day count convention</strong></p>
+<p>Additionally, we need to provide the discount curve with a day count convention. The different options are provided in the enums module. Here, we apply the ACT365FIXED day count convention where the number of days between two dates is divided by 365. For other examples please refer to the <a class="reference external" href="daycounter_rollconventions_schedules.ipynb">Roll conventions, day counters and schedule generation</a> notebook.</p>
+<p><strong>Interpolation type and extrapolation type</strong></p>
+<p>The interpolation is necessary to compute discount factors for arbitrary maturities until the last maturity provided; the extrapolation is necessary to compute discount factors for arbitrary maturities after the last given maturity. Here, we use HAGAN_DF as interpolation type and use no extrapolation. For an overview of interpolation and extrapolation types please refer to the <em>enums</em> module.</p>
+<p>The main advantage of the The HAGAN_DF interpolation, also called the monotone convex method (unameliorated version), is that in contrast to the other methods, it ensures forward rates to be positive and is, hence, the probably most suitable interpolation method for financial problems. The method is described in depth in: Hagan, West, “Methods for Constructing a Yield Curve”, 2008.</p>
+<p>The following diagrams show the differences between the linear and HAGAN_DF interpolation for a newly created discount curve.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refdate</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2017</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">days_to_maturity</span> <span class="o">=</span>  <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">365</span><span class="p">,</span> <span class="mi">720</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="mi">365</span><span class="p">,</span> <span class="mi">4</span><span class="o">*</span><span class="mi">365</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="mi">365</span><span class="p">]</span>
+<span class="n">rates</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.0065</span><span class="p">,</span> <span class="mf">0.0003</span><span class="p">,</span> <span class="mf">0.0059</span><span class="p">,</span> <span class="mf">0.0086</span><span class="p">,</span> <span class="mf">0.0101</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">]</span>
+<span class="n">dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">]</span>
+<span class="n">dsc_fac</span> <span class="o">=</span> <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">rates</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="o">*</span><span class="n">days_to_maturity</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="o">/</span><span class="mi">365</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rates</span><span class="p">))]</span>
+
+<span class="n">dc_linear</span> <span class="o">=</span> <span class="n">DiscountCurve</span><span class="p">(</span><span class="s1">&#39;dc_linear&#39;</span><span class="p">,</span> <span class="n">refdate</span><span class="p">,</span> <span class="n">dates</span><span class="p">,</span> <span class="n">dsc_fac</span><span class="p">,</span> <span class="n">InterpolationType</span><span class="o">.</span><span class="n">LINEAR</span><span class="p">,</span>
+                          <span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">Act365Fixed</span><span class="p">)</span>
+<span class="n">dc_hagan</span> <span class="o">=</span> <span class="n">DiscountCurve</span><span class="p">(</span><span class="s1">&#39;dc_hagan&#39;</span><span class="p">,</span> <span class="n">refdate</span><span class="p">,</span> <span class="n">dates</span><span class="p">,</span> <span class="n">dsc_fac</span><span class="p">,</span> <span class="n">InterpolationType</span><span class="o">.</span><span class="n">HAGAN_DF</span><span class="p">,</span>
+                        <span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">Act365Fixed</span><span class="p">)</span>
+
+
+<span class="n">dc_linear</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">discount_factors</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">dc_hagan</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">discount_factors</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;year&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;zero rate&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_marketdata_discount_curves_12_0.png" src="../../_images/notebooks_marketdata_discount_curves_12_0.png" />
+</div>
+</div>
+</section>
+<section id="Setup-the-discount-curve">
+<h3>Setup the discount curve<a class="headerlink" href="#Setup-the-discount-curve" title="Permalink to this heading"></a></h3>
+<p>Our discount curve is given the name <em>dc</em> and is defined as an analytics.DiscountCurve object which we provide with the information described before.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dc</span> <span class="o">=</span> <span class="n">DiscountCurve</span><span class="p">(</span><span class="n">object_id</span><span class="p">,</span> <span class="n">refdate</span><span class="p">,</span><span class="n">dates</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span>
+                            <span class="n">InterpolationType</span><span class="o">.</span><span class="n">HAGAN_DF</span><span class="p">,</span>
+                            <span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+                             <span class="n">DayCounterType</span><span class="o">.</span><span class="n">Act365Fixed</span><span class="p">)</span>
+<span class="c1">#help(analytics.DiscountCurve)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="Compute-Discount-Factors">
+<h2>Compute Discount Factors<a class="headerlink" href="#Compute-Discount-Factors" title="Permalink to this heading"></a></h2>
+<p>This section is only to manually derive some discount factors from the recently created discount curve.</p>
+<p><strong>a. Maturity in 180 days from the reference date</strong></p>
+<p>The value function returning a discount factor needs two arguments: the calculation date (here we use the current reference date) and the maturity for which the discount factor shall be computed. Hence, in a first step, the maturity in 180 days has to be converted into a date. Subsequently, the discount factor is computed using the value function. Finally, the print function gives us the computed discount factor of the value function.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df1</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">180</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DF for T=180 days: &quot;</span><span class="p">,</span> <span class="n">df1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+DF for T=180 days:  0.9853143806656076
+</pre></div></div>
+</div>
+<p><strong>b. Forward discount factor for a maturity in 180 days in 90 days</strong></p>
+<p>If the valuation date given is in the future, the value function returns the forward discount factor. The following example gives us the forward discount factor for a maturity in 180 days in 90 days.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fwd_df</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">90</span><span class="p">),</span> <span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">180</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fwd-DF for T=180 days in 90 days: &quot;</span><span class="p">,</span> <span class="n">fwd_df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Fwd-DF for T=180 days in 90 days:  0.9926300321180352
+</pre></div></div>
+</div>
+<p>A check proves that the result equally the forward discount curve.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df2</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">90</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fwd-DF (manual calculation): &quot;</span><span class="p">,</span> <span class="n">df1</span><span class="o">/</span><span class="n">df2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Fwd-DF (manual calculation):  0.9926300321180352
+</pre></div></div>
+</div>
+<p><strong>c. Valuation dates before the reference date</strong></p>
+<p>Valuation dates before the curves reference date result in an exception (uncomment the following code to see the exception).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#dc.value(refdate + dt.timedelta(days=-90), refdate + dt.timedelta(days=90))</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Plotting-Discount-Curves">
+<h2>Plotting Discount Curves<a class="headerlink" href="#Plotting-Discount-Curves" title="Permalink to this heading"></a></h2>
+<p>To plot a curve one can simply call the curve’s <em>plot</em> method. This method plots either the discoutn factors or the rates (depending on the argument <em>discount_factors</em>). The granularity of the timegrid on which the curve is plotted can be determined by the argument <em>days</em>. Arguments to matplotlibs plot function can be given using the respective <strong>kwargs</strong>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Example with coarse timegrid</span>
+<span class="n">dc_hagan</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="c1">#Example with fine timegrid</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">dc_hagan</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_marketdata_discount_curves_24_0.png" src="../../_images/notebooks_marketdata_discount_curves_24_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_marketdata_discount_curves_24_1.png" src="../../_images/notebooks_marketdata_discount_curves_24_1.png" />
+</div>
+</div>
+</section>
+<section id="Exercises">
+<h2>Exercises<a class="headerlink" href="#Exercises" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Create a second discount curve with non-flat rate structure.</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>Plot the second discount curve and the first discount curve together in one figure.</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>Create a third discount curve exactly as the second but with interpolation LINEARLOG and compare the differences of results using different interpolation schemes (note that finding the correct ensemble of dates and discount factors, forward rates may not be smoothly interpolated with LINEARLOG).</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>Write a function computing a simply (continuously) compounded rate for a given discount factor and year fraction.</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>Write a function computing an annually compounded rate for a given discount factor and year fraction.</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>Find and modify the plot function from above so that the user can additionally choose which compounding rate is used when plotting the rate.</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<hr class="docutils" />
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="Notebook Gallery" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../models/lucia_schwartz.html" class="btn btn-neutral float-right" title="Lucia-Schwartz Model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
