@@ -3,6 +3,7 @@ import abc
 from typing import List, Tuple
 import datetime as dt
 import numpy as np
+import pandas as pd
 import json
 import hashlib
 from rivapy.tools.datetime_grid import DateTimeGrid
@@ -17,18 +18,37 @@ class _JSONDecoder(json.JSONDecoder):
         json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
 
     def object_hook(self, obj):
-        ret = {}
-        for key, value in obj.items():
-            if key in {'timestamp', 'whatever'}:
-                ret[key] = dt.fromisoformat(value) 
-            else:
-                ret[key] = value
-        return ret
+        if '__class__'  in obj:
+            if obj['__class__'] == 'datetime':
+                res = pd.Timestamp(dt.datetime.strptime(obj['__value__'], "%Y-%m-%d %H:%M:%S"))
+                if '__tz__' in obj:
+                    if not obj['__tz__'] is None:
+                        # saved as UTC
+                        res = res.tz_localize('UTC')
+                        res = res.tz_convert(obj['__tz__'])
+                return res
+            elif obj['__class__'] == 'date':
+                res = dt.datetime.strptime(obj['__value__'], "%Y-%m-%d").date()
+                return res
+        return obj
 
 class _JSONEncoder(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, (dt.date, dt.datetime)):#, pd.Timestamp)):
-            return obj.isoformat()
+        if isinstance(obj, dt.datetime) or isinstance(obj, pd.Timestamp):
+            if obj.tzinfo is None:
+                mytz = None
+            else:
+                # saving as UTC
+                mytz = str(obj.tzinfo)
+                obj = pd.Timestamp(obj).tz_convert('UTC')
+            return  {'__class__': 'datetime',
+                    '__tz__'   : mytz,
+                    '__value__' : obj.strftime("%Y-%m-%d %H:%M:%S")
+                }
+        elif isinstance(obj, dt.date):
+            return  {'__class__': 'date',
+                    '__value__': str(obj)
+                }               
         return json.JSONEncoder.default(obj)
         
 class FactoryObject(abc.ABC):
