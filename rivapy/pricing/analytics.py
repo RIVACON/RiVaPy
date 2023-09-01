@@ -30,15 +30,15 @@ def compute_implied_vol_Buehler(strike: float, maturity:float, price:float,
     """Computes the implied volatility for a given cal/putl price using brentq from scipy. It throws an exception if no implied vol can be determined.
 
     Args:
-        strike (float): [description]
-        maturity (float): [description]
-        price (float): [description]
-        min_vol (float, optional): [description]. Defaults to 0.05.
-        max_vol (float, optional): [description]. Defaults to 2.0.
+        strike (float): Strike of option.
+        maturity (float): Option expiry.
+        price (float): Price.
+        min_vol (float, optional): Minimum vol. Defaults to 0.05.
+        max_vol (float, optional): Maximum vol. Defaults to 2.0.
         is_call (bool): if option is call or put
 
     Returns:
-        float: [description]
+        float: Implied volatility.
     """
     def error(vol:float):
         result = price - compute_european_price_Buehler(strike, maturity, vol, is_call= is_call)
