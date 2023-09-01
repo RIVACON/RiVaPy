@@ -35,7 +35,7 @@ def compute_implied_vol_Buehler(strike: float, maturity:float, price:float,
         price (float): [description]
         min_vol (float, optional): [description]. Defaults to 0.05.
         max_vol (float, optional): [description]. Defaults to 2.0.
-         is_call (bool): if option is call or put
+        is_call (bool): if option is call or put
 
     Returns:
         float: [description]
