@@ -11,5 +11,6 @@ and a reference date.
    discountcurves
    equity
    power
+   utils
 
 
