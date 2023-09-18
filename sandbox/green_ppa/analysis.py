@@ -87,6 +87,8 @@ class Repo:
         experiments = []
         for k,v in self.results.items():
             tmp = copy.deepcopy(v['pricing_param'])
+            for l,w in tmp['initial_forecasts'].items():
+                tmp['Forecast_'+l] = w[0]
             del tmp['initial_forecasts']
             del tmp['power_fwd_prices']
             tmp['n_forecast_hours'] = len( tmp['forecast_hours'])
@@ -98,6 +100,9 @@ class Repo:
             d = v['result']
             tmp.update( {x: d[x] for x in  d if x not in ['seed']})
             tmp['key'] = k
+            # get relevant model params
+            tmp['vol_onshore'] = v['model']['wind_power_forecast']['region_forecast_models'][0]['model']['volatility']
+            tmp['ppa_strike'] = v['ppa_spec']['fixed_price']
             experiments.append(tmp)
         
 
@@ -113,8 +118,10 @@ class Repo:
         })
         exp.display()
     
-def plot_paths(paths: ForwardSimulationResult, forecast_points):
-    plt.figure(figsize=(14,5))
+def plot_paths(paths: ForwardSimulationResult, 
+               forecast_points, 
+               result_dir:str = None):
+    plt.figure(figsize=(16,5))
     i_ = 1
     for i in ['Power_Germany_FWD0', 'Onshore_FWD0', 'Offshore_FWD0']:
         plt.subplot(1,3,i_)
@@ -123,8 +130,10 @@ def plot_paths(paths: ForwardSimulationResult, forecast_points):
         for j in range(200):
             plt.plot(paths_[:,j], '-r', alpha=0.1)
         plt.ylabel(i)
-
-    plt.figure(figsize=(14,14))
+        plt.xlabel('hour')
+    if result_dir is not None:
+        plt.savefig(result_dir+'paths.png', dpi=300)
+    plt.figure(figsize=(16,16))
     i_ = 1
     for i in ['Power_Germany_FWD0', 'Onshore_FWD0', 'Offshore_FWD0']:
         paths_1 = paths.get(i, forecast_points)
@@ -133,12 +142,14 @@ def plot_paths(paths: ForwardSimulationResult, forecast_points):
             plt.subplot(3,3,i_)
             i_ += 1
             if i==j:
-                plt.hist(paths_1[-1,:], bins=100)
+                plt.hist(paths_1[-1,:], bins=100, density=True)
                 plt.xlabel(i)
             else:
                 plt.plot(paths_1[-1,:], paths_2[-1,:],'.')
                 plt.xlabel(i)
                 plt.ylabel(j)
+    if result_dir is not None:
+        plt.savefig(result_dir+'paths_final_scatter.png', dpi=300)
 
 #from rivapy.tools.interfaces import FactoryObject
 

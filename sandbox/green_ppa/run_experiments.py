@@ -54,17 +54,17 @@ spec = GreenPPASpecification(udl='Power_Germany',
                              max_capacity = 1.0)
 repo = analysis.Repo('./experiments/')
 
-for regularization in [0.0, 0.1, 0.5, 1.0]:
-    for seed in [42, 2876, 121, 87]:
+for regularization in [0.0]:
+    for seed in [42]:#, 2876, 121, 87]:
         pricing_results = repo.run(val_date, 
                                 spec, model, 
-                                initial_forecasts={'Onshore': [0.8],
+                                initial_forecasts={'Onshore': [0.1],
                                                 'Offshore': [0.6]},
                                 power_fwd_prices=[1.0],
-                                forecast_hours=[10, 14, 18],
+                                forecast_hours=[10,14,18],#[8, 10, 12, 14, 16, 18, 20],
                                 additional_states=['Offshore'],
                                 depth=3, 
-                                nb_neurons=64, 
+                                nb_neurons=128, 
                                 n_sims=100_000, 
                                 regularization=regularization,
                                 epochs=200, 

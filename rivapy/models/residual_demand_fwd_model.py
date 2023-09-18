@@ -375,7 +375,8 @@ class MultiRegionWindForecastModel(BaseFwdModel):
 
 class LinearDemandForwardModel(BaseFwdModel):
     class ForwardSimulationResult(ForwardSimulationResult):
-        def __init__(self, model, highest_price, wind_results, additive_correction):
+        def __init__(self, model, highest_price, wind_results, 
+                     additive_correction):
             self._model = model
             self._highest_price = highest_price
             self._wind = wind_results
@@ -405,20 +406,22 @@ class LinearDemandForwardModel(BaseFwdModel):
     def __init__(self, wind_power_forecast: MultiRegionWindForecastModel,
                         x_volatility: float,
                         x_mean_reversion_speed: float,
-                        power_name:str = None):
+                        power_name:str = None, 
+                        additive_correction: bool=True):
         self.wind_power_forecast = _create(wind_power_forecast)
         self.highest_price_ou_model: OrnsteinUhlenbeck = OrnsteinUhlenbeck(x_mean_reversion_speed, x_volatility, 0.0)
         if power_name is not None:
             self.power_name = power_name
         else:
             self.power_name = 'POWER'    
+        self.additive_correction = additive_correction
         #self.region_to_capacity = region_to_capacity
         
     def _to_dict(self)->dict:
         return {'wind_power_forecast': self.wind_power_forecast.to_dict(),
                 'x_volatility': self.highest_price_ou_model.volatility,
                 'x_mean_reversion_speed': self.highest_price_ou_model.speed_of_mean_reversion,
-                'power_name': self.power_name,
+                'power_name': self.power_name
                 }
 
     def rnd_shape(self, n_sims: int, n_timesteps: int)->tuple:
@@ -448,6 +451,8 @@ class LinearDemandForwardModel(BaseFwdModel):
                 result[i] = power_fwd_prices[i]/(1.0-tmp) - self.highest_price_ou_model.compute_expected_value(startvalue, expiries[i])
         return result
     
+    
+    
     def simulate(self, timegrid: np.ndarray, 
                 rnd: np.ndarray, 
                 expiries: List[float],
@@ -456,7 +461,8 @@ class LinearDemandForwardModel(BaseFwdModel):
         additive_correction = self._compute_additive_correction(expiries, power_fwd_prices, initial_forecasts, startvalue=0.0)
         highest_prices = self.highest_price_ou_model.simulate(timegrid, 0.0, rnd[0,:])
         simulated_wind = self.wind_power_forecast.simulate(timegrid, rnd[1:,:], expiries, initial_forecasts)
-        return LinearDemandForwardModel.ForwardSimulationResult(self, highest_prices, simulated_wind, additive_correction)
+        return LinearDemandForwardModel.ForwardSimulationResult(self, highest_prices, 
+                                                                simulated_wind, additive_correction)
     
     def udls(self)->Set[str]:
         result = self.wind_power_forecast.udls()
