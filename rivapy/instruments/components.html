@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Components &mdash; rivapy  documentation</title>
@@ -104,7 +104,7 @@
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_create_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rating_probs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">country_probs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector_probs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">esg_rating_probs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="headerlink" href="#rivapy.instruments.components.Issuer._create_sample" title="Permalink to this definition"></a></dt>
 <dd><p>Just sample some test data</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>n_samples</strong> (<em>int</em>) – Number of samples.</p></li>
 <li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – If set, the seed is set, if None, no seed is explicitely set. Defaults to None.</p></li>
@@ -112,13 +112,13 @@
 <li><p><strong>rating_probs</strong> (<em>np.ndarray</em>) – Numpy array defining the probability for each rating (ratings ordererd from AAA (first) to D (last array element)). If None, all ratings are chosen with equal probabilities.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dt class="field-even">Raises</dt>
 <dd class="field-even"><p><strong>Exception</strong> – _description_</p>
 </dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>List of sampled issuers.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>List</p>
 </dd>
 </dl>
@@ -129,10 +129,10 @@
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">country</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.components.Issuer.country" title="Permalink to this definition"></a></dt>
 <dd><p>Getter for issuer’s country.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Issuer’s country.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>Country</p>
 </dd>
 </dl>
@@ -143,10 +143,10 @@
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">esg_rating</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.components.Issuer.esg_rating" title="Permalink to this definition"></a></dt>
 <dd><p>Getter for issuer’s rating.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Issuer’s rating.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>Rating</p>
 </dd>
 </dl>
@@ -157,10 +157,10 @@
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.components.Issuer.name" title="Permalink to this definition"></a></dt>
 <dd><p>Getter for issuer name.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Issuer name.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>str</p>
 </dd>
 </dl>
@@ -171,10 +171,10 @@
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">obj_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.components.Issuer.obj_id" title="Permalink to this definition"></a></dt>
 <dd><p>Getter for issuer id.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Issuer id.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>str</p>
 </dd>
 </dl>
@@ -185,10 +185,10 @@
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rating</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.components.Issuer.rating" title="Permalink to this definition"></a></dt>
 <dd><p>Getter for issuer’s rating.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Issuer’s rating.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>Rating</p>
 </dd>
 </dl>
@@ -199,10 +199,10 @@
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sector</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.components.Issuer.sector" title="Permalink to this definition"></a></dt>
 <dd><p>Getter for issuer’s sector.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Issuer’s sector.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>Sector</p>
 </dd>
 </dl>

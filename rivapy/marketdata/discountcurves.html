@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Discount Curve &mdash; rivapy  documentation</title>
@@ -109,7 +109,7 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Discountcurve</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>id</strong> (<em>str</em>) – Identifier of the discount curve.</p></li>
 <li><p><strong>refdate</strong> (<em>Union</em><em>[</em><em>datetime</em><em>, </em><em>date</em><em>]</em>) – Reference date of the discount curve.</p></li>
@@ -126,10 +126,10 @@
 <span class="sig-name descname"><span class="pre">get_dates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#rivapy.marketdata.DiscountCurve.get_dates" title="Permalink to this definition"></a></dt>
 <dd><p>Return list of dates of curve</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>List of dates</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>Tuple[datetime]</p>
 </dd>
 </dl>
@@ -140,10 +140,10 @@
 <span class="sig-name descname"><span class="pre">get_df</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#rivapy.marketdata.DiscountCurve.get_df" title="Permalink to this definition"></a></dt>
 <dd><p>Return list of discount factors</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>List of discount factors</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>Tuple[float]</p>
 </dd>
 </dl>
@@ -155,7 +155,7 @@
 <dd><p>Plots the discount curve using matplotlibs plot function.
 The timegrid includes the dates of the discount curve. Here either the discount factors or the zero rates (continuously compounded, ACT365 yearfraction) are plotted.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>days</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of days between two plotted rates/discount factors. Defaults to 10.</p></li>
 <li><p><strong>discount_factors</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, discount factors will be plotted, otherwise the rates. Defaults to False.</p></li>
@@ -170,16 +170,16 @@ The timegrid includes the dates of the discount curve. Here either the discount 
 <span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">date</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">datetime</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">date</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">datetime</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#rivapy.marketdata.DiscountCurve.value" title="Permalink to this definition"></a></dt>
 <dd><p>Return discount factor for a given date</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>refdate</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The reference date. If the reference date is in the future (compared to the curves reference date), the forward discount factor will be returned.</p></li>
 <li><p><strong>d</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The date for which the discount factor will be returned</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>discount factor</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -196,12 +196,12 @@ The timegrid includes the dates of the discount curve. Here either the discount 
 <dt class="sig sig-object py" id="rivapy.marketdata.NelsonSiegel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata.</span></span><span class="sig-name descname"><span class="pre">NelsonSiegel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.NelsonSiegel" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FactoryObject</span></code></p>
-<p>Nelson-Siegel parametrization for rates and yields, see Nelson and Siegel<a class="footnote-reference brackets" href="#footcite-nelson1987" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.</p>
+<p>Nelson-Siegel parametrization for rates and yields, see Nelson and Siegel<a class="footnote-reference brackets" href="#footcite-nelson1987" id="id1">1</a>.</p>
 <p>This parametrization is mostly used to parametrize rate curves and can be used in conjunction with <a class="reference internal" href="#rivapy.marketdata.DiscountCurveParametrized" title="rivapy.marketdata.DiscountCurveParametrized"><code class="xref py py-class docutils literal notranslate"><span class="pre">rivapy.marketdata.DiscountCurveParametrized</span></code></a>. It is defined by</p>
 <div class="math notranslate nohighlight">
 \[f(t) = \beta_0 + (\beta_1+\beta_2)\frac{1-e^{-t/\tau}}{t/\tau} -\beta_2e^{t/\tau}\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>beta0</strong> (<em>float</em>) – This parameter is the asymptotic (for arbitrary large maturities) rate, see formula above.</p></li>
 <li><p><strong>beta1</strong> (<em>float</em>) – beta0 + beta1 give the short term rate, see formula above.</p></li>
@@ -224,7 +224,7 @@ The timegrid includes the dates of the discount curve. Here either the discount 
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#rivapy.marketdata.NelsonSiegel.compute" title="Permalink to this definition"></a></dt>
 <dd><p>_summary_</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>beta0</strong> (<em>float</em>) – longrun</p></li>
 <li><p><strong>beta1</strong> (<em>float</em>) – beta0 + beta1 = shortrun</p></li>
@@ -233,10 +233,10 @@ The timegrid includes the dates of the discount curve. Here either the discount 
 <li><p><strong>T</strong> (<em>float</em>) – _description_</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>_description_</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -248,12 +248,12 @@ The timegrid includes the dates of the discount curve. Here either the discount 
 <dt class="sig sig-object py" id="rivapy.marketdata.NelsonSiegelSvensson">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata.</span></span><span class="sig-name descname"><span class="pre">NelsonSiegelSvensson</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta3</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.NelsonSiegelSvensson" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#rivapy.marketdata.NelsonSiegel" title="rivapy.marketdata.curves.NelsonSiegel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NelsonSiegel</span></code></a></p>
-<p>Nelson-Siegel parametrization for rates and yields, see Nelson and Siegel<a class="footnote-reference brackets" href="#footcite-nelson1987" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.</p>
+<p>Nelson-Siegel parametrization for rates and yields, see Nelson and Siegel<a class="footnote-reference brackets" href="#footcite-nelson1987" id="id2">1</a>.</p>
 <p>This parametrization is mostly used to parametrize rate curves and can be used in conjunction with <a class="reference internal" href="#rivapy.marketdata.DiscountCurveParametrized" title="rivapy.marketdata.DiscountCurveParametrized"><code class="xref py py-class docutils literal notranslate"><span class="pre">rivapy.marketdata.DiscountCurveParametrized</span></code></a>. It is defined by</p>
 <div class="math notranslate nohighlight">
 \[f(t) = \beta_0 + (\beta_1+\beta_2)\frac{1-e^{-t/\tau}}{t/\tau} -\beta_2e^{t/\tau}\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>beta0</strong> (<em>float</em>) – This parameter is the asymptotic (for arbitrary large maturities) rate, see formula above.</p></li>
 <li><p><strong>beta1</strong> (<em>float</em>) – beta0 + beta1 give the short term rate, see formula above.</p></li>
@@ -276,7 +276,7 @@ The timegrid includes the dates of the discount curve. Here either the discount 
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.marketdata.NelsonSiegelSvensson.compute" title="Permalink to this definition"></a></dt>
 <dd><p>_summary_</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>beta0</strong> (<em>float</em>) – longrun</p></li>
 <li><p><strong>beta1</strong> (<em>float</em>) – beta0 + beta1 = shortrun</p></li>
@@ -285,10 +285,10 @@ The timegrid includes the dates of the discount curve. Here either the discount 
 <li><p><strong>T</strong> (<em>float</em>) – _description_</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>_description_</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -302,7 +302,7 @@ The timegrid includes the dates of the discount curve. Here either the discount 
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FactoryObject</span></code></p>
 <p>Continuously compounded flat rate object that can be used  in conjunction with <a class="reference internal" href="#rivapy.marketdata.DiscountCurveParametrized" title="rivapy.marketdata.DiscountCurveParametrized"><code class="xref py py-class docutils literal notranslate"><span class="pre">rivapy.marketdata.DiscountCurveParametrized</span></code></a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>rate</strong> (<em>float</em>) – The constant rate.</p>
 </dd>
 </dl>
@@ -316,7 +316,7 @@ The timegrid includes the dates of the discount curve. Here either the discount 
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FactoryObject</span></code></p>
 <p>_summary_</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>obj_id</strong> (<em>str</em>) – _description_</p></li>
 <li><p><strong>refdate</strong> (<em>Union</em><em>[</em><em>datetime</em><em>, </em><em>date</em><em>]</em>) – _description_</p></li>
@@ -330,16 +330,16 @@ The timegrid includes the dates of the discount curve. Here either the discount 
 <span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">date</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">datetime</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">date</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">datetime</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#rivapy.marketdata.DiscountCurveParametrized.value" title="Permalink to this definition"></a></dt>
 <dd><p>Return discount factor for a given date</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>refdate</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The reference date. If the reference date is in the future (compared to the curves reference date), the forward discount factor will be returned.</p></li>
 <li><p><strong>d</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The date for which the discount factor will be returned</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>discount factor</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -350,16 +350,16 @@ The timegrid includes the dates of the discount curve. Here either the discount 
 <span class="sig-name descname"><span class="pre">value_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">date</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">datetime</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">date</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">datetime</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#rivapy.marketdata.DiscountCurveParametrized.value_rate" title="Permalink to this definition"></a></dt>
 <dd><p>Return the continuous rate for a given date</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>refdate</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The reference date. If the reference date is in the future (compared to the curves reference date), the forward discount factor will be returned.</p></li>
 <li><p><strong>d</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The date for which the discount factor will be returned</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>continuous rate</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>

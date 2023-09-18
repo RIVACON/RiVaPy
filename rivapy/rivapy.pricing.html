@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pricing &mdash; rivapy  documentation</title>
@@ -91,10 +91,10 @@
 :param is_call: if option is call or put
 :type is_call: bool</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Black-Scholes call price</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>float</p>
 </dd>
 </dl>
@@ -105,7 +105,7 @@
 <span class="sig-prename descclassname"><span class="pre">rivapy.pricing.analytics.</span></span><span class="sig-name descname"><span class="pre">compute_implied_vol_Buehler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strike</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maturity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_vol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_vol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_call</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#rivapy.pricing.analytics.compute_implied_vol_Buehler" title="Permalink to this definition"></a></dt>
 <dd><p>Computes the implied volatility for a given cal/putl price using brentq from scipy. It throws an exception if no implied vol can be determined.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>strike</strong> (<em>float</em>) – [description]</p></li>
 <li><p><strong>maturity</strong> (<em>float</em>) – [description]</p></li>
@@ -115,10 +115,10 @@
 is_call (bool): if option is call or put</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>[description]</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -130,7 +130,7 @@ is_call (bool): if option is call or put</p></li>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Constructor for AmericanPdePricingDate</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>val_date</strong> (<em>[</em><em>datetime</em><em>]</em>) – Valuation date.</p></li>
 <li><p><strong>spec</strong> (<em>[</em><em>type</em><em>]</em>) – Specification</p></li>
@@ -158,10 +158,10 @@ is_call (bool): if option is call or put</p></li>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pricer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.pricing.pricing_data.BasePricingData.pricer" title="Permalink to this definition"></a></dt>
 <dd><p>Getter for configured pricer.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Configured pricer.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>str</p>
 </dd>
 </dl>
@@ -172,10 +172,10 @@ is_call (bool): if option is call or put</p></li>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pricing_request</span></span><a class="headerlink" href="#rivapy.pricing.pricing_data.BasePricingData.pricing_request" title="Permalink to this definition"></a></dt>
 <dd><p>Getter for configured pricing request.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Configured pricing request.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>PricingRequest</p>
 </dd>
 </dl>
@@ -189,7 +189,7 @@ is_call (bool): if option is call or put</p></li>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Constructor for Black76PricingDate</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>val_date</strong> (<em>[</em><em>datetime</em><em>]</em>) – Valuation date.</p></li>
 <li><p><strong>spec</strong> (<em>[</em><em>type</em><em>]</em>) – Specification.</p></li>

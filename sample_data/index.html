@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sample and Test Data &mdash; rivapy  documentation</title>
@@ -152,7 +152,7 @@ by a linear combination of different spreadcurves that belong to certain bond fe
 </ul>
 </div></blockquote>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ref_date</strong> (<em>dt.datetime</em>) – _description_</p></li>
 <li><p><strong>rating_curve</strong> (<em>Tuple</em><em>[</em><em>Union</em><em>[</em><em>FactoryObject</em><em>, </em><em>dict</em><em>, </em><em>float</em><em>]</em><em>, </em><em>Union</em><em>[</em><em>FactoryObject</em><em>, </em><em>dict</em><em>, </em><em>float</em><em>]</em><em>]</em>) – _description_</p></li>
@@ -181,7 +181,7 @@ by a linear combination of different spreadcurves that belong to certain bond fe
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="rivapy.sample_data.market_data.credit_default.CreditDefaultData.sample">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#rivapy.sample_data.market_data.credit_default.CreditDefaultData.sample" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0)"><span class="pre">DataFrame</span></a></span></span><a class="headerlink" href="#rivapy.sample_data.market_data.credit_default.CreditDefaultData.sample" title="Permalink to this definition"></a></dt>
 <dd><p>Sample credit default data.</p>
 <p>Return a pandas DataFrame that contains some credit features together with the default probability
 and an indicator if the default occured (1) or if the credit did not default (0). The data is generated by a logistic regression
@@ -201,7 +201,7 @@ generated sample of features.</p>
 <div class="math notranslate nohighlight">
 \[pd = \frac{1}{1+e^{x_{\mbox{age}}}\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>n_data</strong> (<em>int</em>) – Number of data sampled (number of rows of final DataFrame).</p></li>
 <li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – The seed used internally, if None, no seed will be set. Defaults to None.</p></li>
@@ -209,10 +209,10 @@ generated sample of features.</p>
 <li><p><strong>cov</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – Covariance matrix used in the Gaussian copula. Defaults to None (thena flat covariance of 0.95 is used).</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>DataFrame with features, default probabilities and default indicator.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>

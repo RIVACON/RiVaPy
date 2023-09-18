@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tools &mdash; rivapy  documentation</title>
@@ -101,7 +101,7 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.</span></span><span class="sig-name descname"><span class="pre">Period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">years</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">months</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.Period" title="Permalink to this definition"></a></dt>
 <dd><p>Time Period expressed in years, months and days.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>years</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of years in time period. Defaults to 0.</p></li>
 <li><p><strong>months</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of months in time period. Defaults to 0.</p></li>
@@ -114,10 +114,10 @@
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">days</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#rivapy.tools.Period.days" title="Permalink to this definition"></a></dt>
 <dd><p>Getter for number of days in time period.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Number of days for specified time period.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>int</p>
 </dd>
 </dl>
@@ -128,13 +128,13 @@
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.Period.from_string" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a Period from a string</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>period</strong> (<em>str</em>) – The string defining the period. The string must be defined by the number of days/months/years followed by one of the letters ‘Y’/’M’/’D’, i.e. ‘6M’ means 6 months.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The resulting period</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#rivapy.tools.Period" title="rivapy.tools.Period">Period</a></p>
 </dd>
 </dl>
@@ -150,10 +150,10 @@
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">months</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#rivapy.tools.Period.months" title="Permalink to this definition"></a></dt>
 <dd><p>Getter for months of period.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Number of months for specified time period.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>int</p>
 </dd>
 </dl>
@@ -164,10 +164,10 @@
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">years</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#rivapy.tools.Period.years" title="Permalink to this definition"></a></dt>
 <dd><p>Getter for years of period.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Number of years for specified time period.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>int</p>
 </dd>
 </dl>
@@ -184,7 +184,7 @@ procedure for rolling out the schedule, more precisely by the direction (backwar
 with incomplete periods (stubs). Moreover, the schedule ensures to comply to business day conventions with
 respect to a specified holiday calendar.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>start_day</strong> (<em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – Schedule’s first day - beginning of the schedule.</p></li>
 <li><p><strong>end_day</strong> (<em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – Schedule’s last day - end of the schedule.</p></li>
@@ -219,7 +219,7 @@ Defaults (through constructor) to holidays.ECB
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">backwards</span></span><a class="headerlink" href="#rivapy.tools.Schedule.backwards" title="Permalink to this definition"></a></dt>
 <dd><p>Getter for schedule’s roll out direction.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>True, if rolled out from end day to start day.
 False, if rolled out from start day to end day.</p>
 </dd>
@@ -231,7 +231,7 @@ False, if rolled out from start day to end day.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">business_day_convention</span></span><a class="headerlink" href="#rivapy.tools.Schedule.business_day_convention" title="Permalink to this definition"></a></dt>
 <dd><p>Getter for schedule’s business day convention.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Business day convention of specified schedule.</p>
 </dd>
 </dl>
@@ -242,7 +242,7 @@ False, if rolled out from start day to end day.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calendar</span></span><a class="headerlink" href="#rivapy.tools.Schedule.calendar" title="Permalink to this definition"></a></dt>
 <dd><p>Getter for schedule’s holiday calendar.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Holiday calendar of specified schedule.</p>
 </dd>
 </dl>
@@ -253,7 +253,7 @@ False, if rolled out from start day to end day.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end_day</span></span><a class="headerlink" href="#rivapy.tools.Schedule.end_day" title="Permalink to this definition"></a></dt>
 <dd><p>Getter for schedule’s end date.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>End date of specified schedule.</p>
 </dd>
 </dl>
@@ -265,14 +265,14 @@ False, if rolled out from start day to end day.</p>
 <dd><p>Generate list of schedule days according to the schedule specification, in particular with regards to business
 day convention and calendar given.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>ends_only</strong> (<em>bool</em>) – Flag to indicate if period beginnings shall be included, e.g. for defining accrual
 periods: True, if only period ends shall be included, e.g. for defining payment dates.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>List of schedule dates (including start and end date) adjusted to rolling convention.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>List[date]</p>
 </dd>
 </dl>
@@ -283,7 +283,7 @@ periods: True, if only period ends shall be included, e.g. for defining payment 
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_day</span></span><a class="headerlink" href="#rivapy.tools.Schedule.start_day" title="Permalink to this definition"></a></dt>
 <dd><p>Getter for schedule’s start date.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Start date of specified schedule.</p>
 </dd>
 </dl>
@@ -294,7 +294,7 @@ periods: True, if only period ends shall be included, e.g. for defining payment 
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stub</span></span><a class="headerlink" href="#rivapy.tools.Schedule.stub" title="Permalink to this definition"></a></dt>
 <dd><p>Getter for potential existence of short periods (stubs).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>True, if a shorter period is allowed.
 False, if only a longer period is allowed.</p>
 </dd>
@@ -306,7 +306,7 @@ False, if only a longer period is allowed.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_period</span></span><a class="headerlink" href="#rivapy.tools.Schedule.time_period" title="Permalink to this definition"></a></dt>
 <dd><p>Getter for schedule’s time period.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Time period of specified schedule.</p>
 </dd>
 </dl>
@@ -319,8 +319,25 @@ False, if only a longer period is allowed.</p>
 <h2>DateTimeGrid<a class="headerlink" href="#datetimegrid" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="rivapy.tools.DateTimeGrid">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.</span></span><span class="sig-name descname"><span class="pre">DateTimeGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datetime_grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">DatetimeIndex</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Timestamp</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Timestamp</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'1H'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daycounter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#rivapy.tools.enums.DayCounterType" title="rivapy.tools.enums.DayCounterType"><span class="pre">DayCounterType</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DayCounterType.Act365Fixed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclusive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'left'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.DateTimeGrid" title="Permalink to this definition"></a></dt>
-<dd><dl class="py method">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.</span></span><span class="sig-name descname"><span class="pre">DateTimeGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datetime_grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v2.1.0)"><span class="pre">DatetimeIndex</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v2.1.0)"><span class="pre">Timestamp</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v2.1.0)"><span class="pre">Timestamp</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'1H'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daycounter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#rivapy.tools.enums.DayCounterType" title="rivapy.tools.enums.DayCounterType"><span class="pre">DayCounterType</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DayCounterType.Act365Fixed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclusive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'left'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.DateTimeGrid" title="Permalink to this definition"></a></dt>
+<dd><p>Object to handle datetimes together with their respective timegridpoints (according to a given daycount convention)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datetime_grid</strong> (<em>pd.DatetimeIndex</em><em>, </em><em>optional</em>) – A grid of datetime values that is then transformed to datapoints. Defaults to None. Note that either this or a start and end date together with a frequency must be given. If a start date and a datetimegrid are specified at the same time, an exception will be thrown.</p></li>
+<li><p><strong>start</strong> (<em>Union</em><em>[</em><em>dt.datetime</em><em>, </em><em>pd.Timestamp</em><em>]</em><em>, </em><em>optional</em>) – Start date of the datetime grid. Defaults to None.</p></li>
+<li><p><strong>end</strong> (<em>Union</em><em>[</em><em>dt.datetime</em><em>, </em><em>pd.Timestamp</em><em>]</em><em>, </em><em>optional</em>) – Enddate of the datetimegrid. The parameter inclusive specifies whether the end date will be included into the grid or not.. Defaults to None.</p></li>
+<li><p><strong>freq</strong> (<em>str</em><em>, </em><em>optional</em>) – A frequency string. Defaults to ‘1H’. See the documentation for the pandas function <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v2.1.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a> for more details of this string.</p></li>
+<li><p><strong>daycounter</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="#rivapy.tools.enums.DayCounterType" title="rivapy.tools.enums.DayCounterType"><em>DayCounterType</em></a><em>]</em><em>, </em><em>optional</em>) – String or daycounterType used to compute the timepoints internally. Defaults to DayCounterType.Act365Fixed.</p></li>
+<li><p><strong>tz</strong> (<em>str</em><em>, </em><em>optional</em>) – Time zone name for returning localized DatetimeIndex, see the pandas function <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v2.1.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a> for more details. Defaults to None.</p></li>
+<li><p><strong>inclusive</strong> (<em>str</em><em>, </em><em>optional</em>) – Defines which boundary is included into the grid, see the pandas function :<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v2.1.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>. Defaults to ‘left’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If both, datetime_grid and start, are either None or not None.</p>
+</dd>
+</dl>
+<dl class="py method">
 <dt class="sig sig-object py" id="rivapy.tools.DateTimeGrid.get_daily_subgrid">
 <span class="sig-name descname"><span class="pre">get_daily_subgrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.tools.DateTimeGrid.get_daily_subgrid" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>

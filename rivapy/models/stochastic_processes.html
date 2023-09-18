@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Stochastic Processes &mdash; rivapy  documentation</title>
@@ -114,7 +114,7 @@
 so-called mean reversion level <span class="math notranslate nohighlight">\(\theta(t)\)</span> and <span class="math notranslate nohighlight">\(\sigma\)</span> is the volatility of the process. The higher
 <span class="math notranslate nohighlight">\(\lambda\)</span>, the faster the process return to the mean level, which can be seen in the following figure</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>speed_of_mean_reversion</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>Callable</em><em>]</em>) – The</p></li>
 <li><p><strong>volatility</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>Callable</em><em>]</em>) – _description_</p></li>
@@ -132,7 +132,7 @@ so-called mean reversion level <span class="math notranslate nohighlight">\(\the
 <span class="sig-name descname"><span class="pre">calibrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'maximum_likelihood'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.OrnsteinUhlenbeck.calibrate" title="Permalink to this definition"></a></dt>
 <dd><p>Calibrate the Ornstein Uhlenbeck model with constant parameters to the given data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<em>np.ndarray</em>) – Array of values the model is fitted to (uniform timegrid is assumed).</p></li>
 <li><p><strong>dt</strong> (<em>float</em>) – Time step size between two datapoints from data (uniform timegrid is assumed.</p></li>
@@ -148,20 +148,20 @@ so-called mean reversion level <span class="math notranslate nohighlight">\(\the
 <dd><p>Computes the price of a call option with strike K and time to maturity ttm for a spot following the Ornstein-Uhlenbeck process.</p>
 <p>It works only for constant speed of mean reversion, volatility and mean reversion level and throws a NotImplementedError otherwise. It does not encounter dividends or interest rates.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X0</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>np.ndarray</em><em>]</em>) – Start value of the process.</p></li>
 <li><p><strong>K</strong> (<em>float</em>) – Strike of the call option.</p></li>
 <li><p><strong>ttm</strong> (<em>float</em>) – Time to maturity of the call option.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dt class="field-even">Raises</dt>
 <dd class="field-even"><p><strong>NotImplementedError</strong> – If speed of mean reversion, volatility or mean reversion level are not constant.</p>
 </dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Price of the call option.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>float</p>
 </dd>
 </dl>
@@ -214,7 +214,7 @@ rnd (np.ndarray): Array of random normal (variance equal to one) variates used w
 <section id="lucia-schwartz">
 <h2>Lucia-Schwartz<a class="headerlink" href="#lucia-schwartz" title="Permalink to this heading"></a></h2>
 <p>The Lucia-Schwartz two-factor model for power prices is a mathematical model used to explain the behavior of electricity prices. The model assumes that electricity prices are determined by two
-factors: a short-term factor and a long-term factor. It was introduced in discussed in Lucia and Schwartz<a class="footnote-reference brackets" href="#footcite-lucia2002" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.
+factors: a short-term factor and a long-term factor. It was introduced in discussed in Lucia and Schwartz<a class="footnote-reference brackets" href="#footcite-lucia2002" id="id3">1</a>.
 The short-term factor is related to the current supply and demand conditions in the electricity market. This factor is influenced by factors such as weather conditions, maintenance schedules, and unexpected events such as power plant failures.
 The short-term factor is modeled using a mean-reverting process, which means that prices tend to move back towards their long-term average over time.
 The long-term factor is related to the overall trends in the economy and the energy market. This factor is influenced by factors such as changes in
@@ -235,7 +235,7 @@ the first process that may be interpreted as the long-term factor and <span clas
 The second factor <span class="math notranslate nohighlight">\(X_2\)</span> may be interpreted as a short-term factor that is influenced by  <span class="math notranslate nohighlight">\(W_2\)</span>
 and has drift <span class="math notranslate nohighlight">\(\mu\)</span>. <span class="math notranslate nohighlight">\(X_1\)</span> and <span class="math notranslate nohighlight">\(X_2\)</span> may be correlated with correlation <span class="math notranslate nohighlight">\(\rho\)</span>. Note that this class just simulates</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>kappa</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>Callable</em><em>]</em>) – The speed of mean reversion for the first factor <span class="math notranslate nohighlight">\(X_1\)</span>. Can be either constant or time dependent.</p></li>
 <li><p><strong>sigma1</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>Callable</em><em>]</em>) – The volatility of the first factor <span class="math notranslate nohighlight">\(X_1\)</span>. Can be either constant or time dependent.</p></li>
@@ -251,16 +251,16 @@ and has drift <span class="math notranslate nohighlight">\(\mu\)</span>. <span c
 <span class="sig-name descname"><span class="pre">compute_expected_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#rivapy.models.LuciaSchwartz.compute_expected_value" title="Permalink to this definition"></a></dt>
 <dd><p>Computes the expected value of the model.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x0</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>np.ndarray</em><em>]</em>) – Start value, either onedimensional (containing just the start value for X0 or X1) or twodimensional (different start values for X0 and X1 from e.g. a MC simulation).</p></li>
 <li><p><strong>T</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>np.ndarray</em><em>]</em>) – Terminal time.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Expected value.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>Union[float, np.ndarray]</p>
 </dd>
 </dl>
@@ -276,7 +276,7 @@ and has drift <span class="math notranslate nohighlight">\(\mu\)</span>. <span c
 <p>where <span class="math notranslate nohighlight">\(F(t,s)\)</span> is the expected spot price at time <span class="math notranslate nohighlight">\(T\)</span>. The expectation is
 taken under the risk neutral measure <span class="math notranslate nohighlight">\(Q^M\)</span>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>T1</strong> (<em>float</em>) – Start point of period.</p></li>
 <li><p><strong>T2</strong> (<em>float</em>) – End point of period. If None, the expected value of the spot price <span class="math notranslate nohighlight">\(F(t,T_1)\)</span> at T1 is returned.</p></li>
@@ -284,10 +284,10 @@ taken under the risk neutral measure <span class="math notranslate nohighlight">
 <li><p><strong>**qm_kwargs</strong> – Keyword arguments for the quadrature method.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Forward value.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -303,7 +303,7 @@ taken under the risk neutral measure <span class="math notranslate nohighlight">
 <span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timegrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forwards</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward_start_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rivapy.models.LuciaSchwartz.simulate" title="Permalink to this definition"></a></dt>
 <dd><p>Simulates the model.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>timegrid</strong> (<em>np.ndarray</em>) – Timegrid for simulation.</p></li>
 <li><p><strong>start_value</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>np.ndarray</em><em>]</em>) – Start value for simulation.</p></li>
@@ -320,10 +320,11 @@ the initial values will be computed with the method compute_fwd_value.</p></li>
 </dd></dl>
 
 <div class="docutils container" id="id4">
-<aside class="footnote brackets" id="footcite-lucia2002" role="note">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">1</a><span class="fn-bracket">]</span></span>
-<p>Julio J. Lucia and Eduardo S. Schwartz. Electricity prices and power derivatives: evidence from the nordic power exchange. <em>Review of Derivatives Research</em>, 5(1):5–50, 2002. <a class="reference external" href="https://doi.org/10.1023/a:1013846631785">doi:10.1023/a:1013846631785</a>.</p>
-</aside>
+<dl class="footnote brackets">
+<dt class="label" id="footcite-lucia2002"><span class="brackets"><a class="fn-backref" href="#id3">1</a></span></dt>
+<dd><p>Julio J. Lucia and Eduardo S. Schwartz. Electricity prices and power derivatives: evidence from the nordic power exchange. <em>Review of Derivatives Research</em>, 5(1):5–50, 2002. <a class="reference external" href="https://doi.org/10.1023/a:1013846631785">doi:10.1023/a:1013846631785</a>.</p>
+</dd>
+</dl>
 </div>
 </section>
 </section>
