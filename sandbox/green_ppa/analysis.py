@@ -3,10 +3,11 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
+import hiplot as hip
 from rivapy.tools.interfaces import _JSONEncoder, _JSONDecoder, FactoryObject
 from rivapy.models.residual_demand_fwd_model import LinearDemandForwardModel, ForwardSimulationResult
 from rivapy.instruments import GreenPPASpecification
-from rivapy.pricing.green_ppa_pricing import GreenPPADeepHedgingPricer, PPAHedgeModel, DeepHedgeModel
+from rivapy.pricing.green_ppa_pricing import GreenPPADeepHedgingPricer, DeepHedgeModel #,PPAHedgeModel
 
 class Repo:
     def __init__(self, repo_dir):
@@ -21,7 +22,13 @@ class Repo:
     @staticmethod
     def compute_pnl_figures(pricing_results):
         pnl = pricing_results.hedge_model.compute_pnl(pricing_results.paths, pricing_results.payoff)
-        return {'mean': pnl.mean(), 'var': pnl.var(), '1%':np.percentile(pnl,1), '99%': np.percentile(pnl,99)}
+        inputs = pricing_results.hedge_model._create_inputs(pricing_results.paths)
+        loss = pricing_results.hedge_model.evaluate(inputs, pricing_results.payoff)
+
+        return {'mean': pnl.mean(), 'var': pnl.var(), 
+                'loss': loss,
+                '1%':np.percentile(pnl,1), '99%': np.percentile(pnl,99),
+                '5%':np.percentile(pnl,5), '95%': np.percentile(pnl,95)}
 
     def run(self, val_date, ppa_spec, model, **kwargs):
         params = {}
@@ -46,7 +53,7 @@ class Repo:
         params['result'] = Repo.compute_pnl_figures(pricing_result)
         self.results[hash_key] = params
         with open(self.repo_dir+'/results.json','w') as f:
-            json.dump(params, f, cls=_JSONEncoder)
+            json.dump(self.results, f, cls=_JSONEncoder)
         pricing_result.hedge_model.save(self.repo_dir+'/'+hash_key+'/')
         return pricing_result
     
@@ -70,9 +77,51 @@ class Repo:
                                         power_fwd_prices=res['pricing_param']['power_fwd_prices'])
         return model_result, forecast_points
     
+    def plot_hiplot(self, error = 'mean_rmse_scaled_recalib', error_train='mean_rmse_train_scaled'):
+        """Plot errorsw.r.t parameters from the given result file with HiPlot
 
-def plot_paths(paths: ForwardSimulationResult, forecast_points):
-    plt.figure(figsize=(14,5))
+        Args:
+            result_file (str): Reultfile
+        """
+        
+        experiments = []
+        for k,v in self.results.items():
+            tmp = copy.deepcopy(v['pricing_param'])
+            for l,w in tmp['initial_forecasts'].items():
+                tmp['Forecast_'+l] = w[0]
+            del tmp['initial_forecasts']
+            del tmp['power_fwd_prices']
+            tmp['n_forecast_hours'] = len( tmp['forecast_hours'])
+            del tmp['forecast_hours']
+            tmp['n_additional_states'] = len( tmp['additional_states'])
+            del tmp['additional_states']
+            if 'tensorboard_logdir' in tmp.keys():
+                del tmp['tensorboard_logdir']
+            d = v['result']
+            tmp.update( {x: d[x] for x in  d if x not in ['seed']})
+            tmp['key'] = k
+            # get relevant model params
+            tmp['vol_onshore'] = v['model']['wind_power_forecast']['region_forecast_models'][0]['model']['volatility']
+            tmp['ppa_strike'] = v['ppa_spec']['fixed_price']
+            experiments.append(tmp)
+        
+
+        exp = hip.Experiment.from_iterable(experiments)
+        exp.display_data(hip.Displays.TABLE).update({
+                # In the table, order rows by default
+                'order_by': [['mean', 'asc']],
+                #'order': ['test loss']
+        })#exp.display_data(hip.Displays.PARALLEL_PLOT)
+        exp.display_data(hip.Displays.PARALLEL_PLOT).update({
+                #'order': ['stdev test loss', 'train loss', 'test loss'], 
+
+        })
+        exp.display()
+    
+def plot_paths(paths: ForwardSimulationResult, 
+               forecast_points, 
+               result_dir:str = None):
+    plt.figure(figsize=(16,5))
     i_ = 1
     for i in ['Power_Germany_FWD0', 'Onshore_FWD0', 'Offshore_FWD0']:
         plt.subplot(1,3,i_)
@@ -81,8 +130,10 @@ def plot_paths(paths: ForwardSimulationResult, forecast_points):
         for j in range(200):
             plt.plot(paths_[:,j], '-r', alpha=0.1)
         plt.ylabel(i)
-
-    plt.figure(figsize=(14,14))
+        plt.xlabel('hour')
+    if result_dir is not None:
+        plt.savefig(result_dir+'paths.png', dpi=300)
+    plt.figure(figsize=(16,16))
     i_ = 1
     for i in ['Power_Germany_FWD0', 'Onshore_FWD0', 'Offshore_FWD0']:
         paths_1 = paths.get(i, forecast_points)
@@ -91,12 +142,14 @@ def plot_paths(paths: ForwardSimulationResult, forecast_points):
             plt.subplot(3,3,i_)
             i_ += 1
             if i==j:
-                plt.hist(paths_1[-1,:], bins=100)
+                plt.hist(paths_1[-1,:], bins=100, density=True)
                 plt.xlabel(i)
             else:
                 plt.plot(paths_1[-1,:], paths_2[-1,:],'.')
                 plt.xlabel(i)
                 plt.ylabel(j)
+    if result_dir is not None:
+        plt.savefig(result_dir+'paths_final_scatter.png', dpi=300)
 
 #from rivapy.tools.interfaces import FactoryObject
 

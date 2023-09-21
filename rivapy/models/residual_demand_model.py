@@ -348,43 +348,4 @@ class ResidualDemandModel(BaseModel):
         raise NotImplementedError()
     
 if __name__=='__main__':
-    from rivapy.models.residual_demand_model import MultiRegionWindForecastModel
-    forward_expiries = [(24.0+23.0)/365.0, 24.0*2/365.0]
-    regions = [ MultiRegionWindForecastModel.Region( 
-                                    WindPowerForecastModel(speed_of_mean_reversion=0.5, 
-                                                           volatility=1.80, 
-                                                            expiries=forward_expiries,
-                                                            forecasts = [0.8, 0.8],#*len(forward_expiries)
-                                                            region = 'Onshore'
-                                                            ),
-                                    capacity=1000.0,
-                                    rnd_weights=[0.7,0.3]
-                                ),
-           MultiRegionWindForecastModel.Region( 
-                                    WindPowerForecastModel(speed_of_mean_reversion=0.5, 
-                                                           volatility=1.80, 
-                                                            expiries=forward_expiries,
-                                                            forecasts = [0.6, 0.7],#*len(forward_expiries)
-                                                            region = 'Offshore'
-                                                            ),
-                                    capacity=500.0,
-                                    rnd_weights=[0.3,0.7]
-                                )
-           
-          ]
-    days = 2 
-    timegrid = np.linspace(0.0, days*1.0/365.0, days*24)
-    multi_region_model = MultiRegionWindForecastModel(regions)
-    highest_price = OrnsteinUhlenbeck(speed_of_mean_reversion=1.0, volatility=0.01, mean_reversion_level=1.0)
-    supply_curve = SmoothstepSupplyCurve(1.0, 0)
-    rdm = ResidualDemandForwardModel(
-                                    #wind_forecast_model, 
-                                    multi_region_model,
-                                    highest_price,
-                                    supply_curve,
-                                    max_price = 1.0,
-                                    forecast_hours=None,#[6, 10, 14, 18], 
-                                    #region_to_capacity=None
-                                    )
-    rnd = np.random.normal(size=rdm.rnd_shape(1000, timegrid.shape[0]))
-    result = rdm._simulate_multi_region_new(timegrid, rnd, [10,20])
+   pass

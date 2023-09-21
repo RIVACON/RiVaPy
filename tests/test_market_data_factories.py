@@ -1,5 +1,6 @@
 import unittest
 import rivapy.instruments as instruments
+from rivapy.tools.interfaces import FactoryObject
 from rivapy.marketdata.factory import _factory, create
 
 class FactoryTestsMeta(type):
@@ -17,6 +18,7 @@ class FactoryTestsMeta(type):
                 mkt = target_class._create_sample(4, seed=42)
                 for i in range(len(mkt)):
                     b = create(mkt[i].to_dict())
+                    b = FactoryObject.from_dict(b.to_json())
                     self.assertEqual(b.hash(), mkt[i].hash())
             except AttributeError as e:
                 self.assertEqual(0,1, msg = '_create_sample not implemented for class ' + target_class.__name__)            

@@ -17,11 +17,11 @@ class DateTimeGrid:
                 freq: str='1H', 
                 daycounter:Union[str, DayCounterType]=DayCounterType.Act365Fixed, 
                 tz=None,
-                closed = 'left'):
+                inclusive = 'left'):
         if (start is not None) and (datetime_grid is not None):
             raise ValueError('Either datetime_grid or start must be None.')
         if start is not None:
-            self.dates = pd.date_range(start, end, freq=freq, tz=tz, closed=closed).to_pydatetime()
+            self.dates = pd.date_range(start, end, freq=freq, tz=tz, inclusive=inclusive).to_pydatetime()
         else:
             self.dates = datetime_grid
         if self.dates is not None:

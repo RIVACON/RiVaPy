@@ -419,6 +419,7 @@ class LinearDemandForwardModel(BaseFwdModel):
             self.power_name = power_name
         else:
             self.power_name = 'POWER'    
+        self.additive_correction = additive_correction
         #self.region_to_capacity = region_to_capacity
         
     def _to_dict(self)->dict:
@@ -471,6 +472,8 @@ class LinearDemandForwardModel(BaseFwdModel):
             print(expiries[i],result[i])
             
         return result
+    
+    
     
     def simulate(self, timegrid: np.ndarray, 
                 rnd: np.ndarray, 

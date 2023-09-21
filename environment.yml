@@ -2,7 +2,7 @@
 name: rivapy
 
 dependencies:
-  - python=3.8
+  - python=3.11.*
   - pip
   - ipywidgets
   - matplotlib
@@ -22,5 +22,6 @@ dependencies:
     - nbsphinx
     - coverage
     - sphinx_gallery
+    - tensorflow==2.12.*
     #- --index-url https://test.pypi.org/simple/ pyvacon_depp
     #- jupyter-contrib-nbextensions==0.5.1

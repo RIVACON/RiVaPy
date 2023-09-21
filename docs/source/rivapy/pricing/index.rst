@@ -5,4 +5,5 @@ Pricing
    :caption: Contents:
    
    pricing_request
+   deep_hedging
    
