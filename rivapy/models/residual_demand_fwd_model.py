@@ -377,7 +377,7 @@ class LinearDemandForwardModel(BaseFwdModel):
     class ForwardSimulationResult(ForwardSimulationResult):
         def __init__(self, model, highest_price, wind_results, 
                      additive_correction, 
-                     multiplicative_correction: float):
+                     multiplicative_correction: List[float]):
             self._model = model
             self._highest_price = highest_price
             self._wind = wind_results
@@ -410,8 +410,13 @@ class LinearDemandForwardModel(BaseFwdModel):
                         x_mean_reversion_speed: float,
                         power_name:str = None,
                         additive_correction:bool = True,
-                        startvalue: float=1.0):
+                        startvalue: float=None):
         self.wind_power_forecast = _create(wind_power_forecast)
+        if startvalue is None:
+            if additive_correction:
+                startvalue=0.0
+            else:
+                startvalue = 1.0
         self.startvalue = startvalue
         self.highest_price_ou_model: OrnsteinUhlenbeck = OrnsteinUhlenbeck(x_mean_reversion_speed, x_volatility, self.startvalue)
         self._additive_correction = additive_correction
@@ -419,7 +424,6 @@ class LinearDemandForwardModel(BaseFwdModel):
             self.power_name = power_name
         else:
             self.power_name = 'POWER'    
-        self.additive_correction = additive_correction
         #self.region_to_capacity = region_to_capacity
         
     def _to_dict(self)->dict:
@@ -428,7 +432,7 @@ class LinearDemandForwardModel(BaseFwdModel):
                 'x_mean_reversion_speed': self.highest_price_ou_model.speed_of_mean_reversion,
                 'power_name': self.power_name,
                 'additive_correction': self._additive_correction,
-                'startvalue': self.startvalue
+                'startvalue': self.startvalue,
                 }
 
     def rnd_shape(self, n_sims: int, n_timesteps: int)->tuple:
@@ -448,6 +452,8 @@ class LinearDemandForwardModel(BaseFwdModel):
     def _compute_additive_correction(self, expiries: List[float],
                                      power_fwd_prices: List[float],
                 initial_forecasts: Dict[str,List[float]]):
+        if not self._additive_correction:
+            return np.zeros(shape=(len(expiries),))
         result = np.empty((len(expiries)))
         for i in range(len(expiries)):
             tmp = 0
@@ -455,12 +461,12 @@ class LinearDemandForwardModel(BaseFwdModel):
                 tmp += v[i]*self.wind_power_forecast.region_relative_capacity(k)
                 if abs(1.0-tmp) < 1e-5:
                     raise Exception('Initial forecasts sum to 1.0. Cannot compute additive correction.')
-            result[i] = power_fwd_prices[i]/(1.0-tmp) - self.highest_price_ou_model.compute_expected_value(self.startvalue, expiries[i])
+            result[i] = 1.0/(1.0-tmp) - self.highest_price_ou_model.compute_expected_value(self.startvalue, expiries[i])
         return result
     
     def _compute_multiplicative_correction(self, expiries: List[float],
                                      power_fwd_prices: List[float],
-                initial_forecasts: Dict[str,List[float]]):
+                                    initial_forecasts: Dict[str,List[float]]):
         result = np.empty((len(expiries)))
         for i in range(len(expiries)):
             tmp = 0
@@ -468,9 +474,10 @@ class LinearDemandForwardModel(BaseFwdModel):
                 tmp += v[i]*self.wind_power_forecast.region_relative_capacity(k)
                 if abs(1.0-tmp) < 1e-5:
                     raise Exception('Initial forecasts sum to 1.0. Cannot compute multiplicative correction.')   
-            result[i] = power_fwd_prices[i]/((1.0-tmp) * self.highest_price_ou_model.compute_expected_value(self.startvalue, expiries[i]))
-            print(expiries[i],result[i])
-            
+            if not self._additive_correction:
+                result[i] = power_fwd_prices[i]/((1.0-tmp) * self.highest_price_ou_model.compute_expected_value(self.startvalue, expiries[i]))
+            else:
+                result[i] =  power_fwd_prices[i]
         return result
     
     
@@ -482,16 +489,15 @@ class LinearDemandForwardModel(BaseFwdModel):
                 initial_forecasts: Dict[str, List[float]]):
         additive_correction = np.zeros(shape=(len(expiries),))
         multiplicative_correction = np.ones(shape=(len(expiries),))
-        if self._additive_correction:
-            additive_correction = self._compute_additive_correction(expiries, power_fwd_prices, 
+        additive_correction = self._compute_additive_correction(expiries, power_fwd_prices, 
                                                                     initial_forecasts)
-        else:
-            multiplicative_correction = self._compute_multiplicative_correction(expiries, power_fwd_prices, 
+        multiplicative_correction = self._compute_multiplicative_correction(expiries, power_fwd_prices, 
                                                                                 initial_forecasts)
         highest_prices = self.highest_price_ou_model.simulate(timegrid, self.startvalue, rnd[0,:])
         simulated_wind = self.wind_power_forecast.simulate(timegrid, rnd[1:,:], expiries, initial_forecasts)
         return LinearDemandForwardModel.ForwardSimulationResult(self, highest_prices, simulated_wind, 
-                                                                additive_correction, multiplicative_correction)
+                                                                additive_correction, 
+                                                                multiplicative_correction)
     
     def udls(self)->Set[str]:
         result = self.wind_power_forecast.udls()
