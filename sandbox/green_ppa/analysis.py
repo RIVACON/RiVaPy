@@ -30,7 +30,7 @@ class Repo:
                 '1%':np.percentile(pnl,1), '99%': np.percentile(pnl,99),
                 '5%':np.percentile(pnl,5), '95%': np.percentile(pnl,95)}
 
-    def run(self, val_date, ppa_spec, model, **kwargs):
+    def run(self, val_date, ppa_spec, model, rerun=False, **kwargs):
         params = {}
         params['val_date'] = val_date
         params['ppa_spec'] = ppa_spec.to_dict()
@@ -44,7 +44,7 @@ class Repo:
         params['ppa_spec_hash'] = ppa_spec.hash()
         params['model_hash'] = model.hash()
         #params['pricing_params_hash'] = FactoryObject.hash_for_dict(kwargs)
-        if hash_key in self.results.keys():
+        if (hash_key in self.results.keys()) and (not rerun):
             return self.results[hash_key]
         pricing_result =  GreenPPADeepHedgingPricer.price(val_date, 
                                       ppa_spec, 
@@ -57,6 +57,10 @@ class Repo:
         pricing_result.hedge_model.save(self.repo_dir+'/'+hash_key+'/')
         return pricing_result
     
+    def save(self):
+        with open(self.repo_dir+'/results.json','w') as f:
+            json.dump(self.results, f, cls=_JSONEncoder)
+
     def get_hedge_model(self, hashkey:str)->DeepHedgeModel:
         return DeepHedgeModel.load(self.repo_dir+'/'+hashkey+'/')
         
@@ -87,10 +91,12 @@ class Repo:
         experiments = []
         for k,v in self.results.items():
             tmp = copy.deepcopy(v['pricing_param'])
+            tmp['loss_type'] = tmp['loss']
             for l,w in tmp['initial_forecasts'].items():
                 tmp['Forecast_'+l] = w[0]
             del tmp['initial_forecasts']
             del tmp['power_fwd_prices']
+            tmp['dtm'] = (v['ppa_spec']['schedule'][0]-v['val_date']).days
             tmp['n_forecast_hours'] = len( tmp['forecast_hours'])
             del tmp['forecast_hours']
             tmp['n_additional_states'] = len( tmp['additional_states'])
@@ -102,7 +108,9 @@ class Repo:
             tmp['key'] = k
             # get relevant model params
             tmp['vol_onshore'] = v['model']['wind_power_forecast']['region_forecast_models'][0]['model']['volatility']
+            tmp['idiosyncratic_vol'] = v['model']['x_volatility']
             tmp['ppa_strike'] = v['ppa_spec']['fixed_price']
+            tmp['power_fwd'] = v['pricing_param']['power_fwd_prices'][0]
             experiments.append(tmp)
         
 
