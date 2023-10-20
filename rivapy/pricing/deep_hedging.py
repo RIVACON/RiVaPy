@@ -20,6 +20,7 @@ class DeepHedgeModel(tf.keras.Model):
                         regularization: float, 
                         depth: int,
                         n_neurons: int,
+                        loss: str,
                         model: tf.keras.Model=None,
                         **kwargs):
         """ Class for Deep Hedging Model.
@@ -31,6 +32,7 @@ class DeepHedgeModel(tf.keras.Model):
             regularization (float): The training of the hedge model is based on minimizing the loss function defined by the variance of the pnl minus this regularization term multiplied by the mean of the pnl (mean-variance optimal hedging)
             depth (int): If no model (neural network) is specified, the model is build as a fully connected neural network with this depth.
             n_neurons (int): If no model (neural network) is specified, the model is build as a fully connected neural network with this number of neurons per layer.
+            loss (str): Determines whether mean variance or exponential utility are optimized.
             model (tf.keras.Model, optional): The model (neural network) used. If it is None, a fully connected neural network using the parameter depth and n_neurons. The network Input must equal the number of hedge instruments plus the number of additional states plus one input for the time to maturity. The output dimension must equal the number of hedge instruments. Defaults to None.
         """
         super().__init__(**kwargs)
@@ -47,6 +49,7 @@ class DeepHedgeModel(tf.keras.Model):
         self.regularization = regularization
         self._prev_q = None
         self._forecast_ids = None
+        self._loss = loss
         
     def __call__(self, x, training=True):
         return self._compute_pnl(x, training) #+ self.price
@@ -116,6 +119,8 @@ class DeepHedgeModel(tf.keras.Model):
 
     @tf.function
     def custom_loss(self, y_true, y_pred):
+        if self._loss == 'exponential_utility':
+            return tf.keras.backend.mean(tf.keras.backend.exp(-self.regularization*(y_pred+y_true)))
         return - self.regularization*tf.keras.backend.mean(y_pred+y_true) + tf.keras.backend.var(y_pred+y_true)
         #return tf.keras.backend.mean(tf.keras.backend.exp(-self.lamda*y_pred))
 
@@ -165,6 +170,7 @@ class DeepHedgeModel(tf.keras.Model):
         params['timegrid'] =[x for x in self.timegrid]
         params['additional_states'] = self.additional_states
         params['hedge_instruments'] = self.hedge_instruments
+        params['loss'] = self._loss
         with open(folder+'/params.json','w') as f:
             json.dump(params, f)
 
@@ -174,6 +180,8 @@ class DeepHedgeModel(tf.keras.Model):
             params = json.load(f)
         base_model = tf.keras.models.load_model(folder+'/delta_model')
         params['timegrid'] = np.array(params['timegrid'])
+        if not ('loss' in params.keys()):
+            params['loss']='mean_variance' 
         return DeepHedgeModel(depth=None,n_neurons=None, model=base_model, **params)
 
     
