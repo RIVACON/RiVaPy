@@ -35,6 +35,7 @@ if _pyvacon_available:
     InterestRateSwapSpecification = _spec.InterestRateSwapSpecification
     InterestRateBasisSwapSpecification = _spec.InterestRateBasisSwapSpecification
     DepositSpecification = _spec.DepositSpecification
+    ForwardRateAgreementSpecification = _spec.ForwardRateAgreementSpecification
     InterestRateFutureSpecification = _spec.InterestRateFutureSpecification
         
     InflationLinkedBondSpecification = _spec.InflationLinkedBondSpecification
