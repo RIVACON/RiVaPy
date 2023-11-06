@@ -12,6 +12,7 @@ from rivapy import _pyvacon_available
 from scipy.optimize import least_squares
 from rivapy.marketdata.curves import *
 from rivapy.marketdata.factory import _factory
+from rivapy.marketdata.pfc_shifter import PFCShifter
 
 if _pyvacon_available:
     import pyvacon.finance.marketdata as _mkt_data
@@ -465,6 +466,7 @@ _add_to_factory(ConstantRate)
 _add_to_factory(LinearRate)
 _add_to_factory(DiscountCurveParametrized)
 _add_to_factory(DiscountCurveComposition)
+_add_to_factory(PFCShifter)
 
 if __name__=='__main__':
     svi = VolatilityParametrizationSVI(expiries=np.array([1.0/365.0, 1.0]), svi_params=[
