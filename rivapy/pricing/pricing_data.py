@@ -379,3 +379,162 @@ class CDSPricingData:
         pr_results.set_price(pr_results.pv_protection-pr_results.premium_leg-pr_results.accrued)
         return pr_results
 
+
+class AnalyticSwaptionPricingData:
+    def __init__(self, val_date: datetime, spec, discount_curve, vol_cube, pricing_request: Iterable[ResultType]):
+        """Constructor for AnalyticSwaptionPricingData
+
+        Args:
+            val_date ([datetime]): Valuation date.
+            spec: Swaptions specification
+            discount_curve: Discount curve.
+            vol_cube: Volatility cube.
+            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.
+        """
+
+        self.val_date = val_date
+        self.spec = spec
+        self.discount_curve = discount_curve
+        self.vol_cube = vol_cube
+        self.pricing_request = pricing_request
+        self._pyvacon_obj = None
+
+    def _get_pyvacon_obj(self):
+        if self._pyvacon_obj is None:
+            self._pyvacon_obj = _pyvacon.finance.pricing.AnalyticSwaptionPricingData()
+            self._pyvacon_obj.valDate = self.val_date
+            self._pyvacon_obj.spec = self.spec
+            self._pyvacon_obj.dsc = self.discount_curve._get_pyvacon_obj()
+            self._pyvacon_obj.volCube = self.vol_cube
+            self._pyvacon_obj.pricingRequest = _create_pricing_request(self.pricing_request)
+            self._pyvacon_obj.pricer = 'AnalyticSwaptionPricer'
+        return self._pyvacon_obj
+
+    def price(self):
+        return _pyvacon.finance.pricing.BasePricer.price(self._get_pyvacon_obj())
+
+class AnalyticCapPricingData:
+    def __init__(self, val_date: datetime, spec, discount_curve, vol_surface, pricing_request: Iterable[ResultType]):
+        """Constructor for AnalyticCapPricingData
+
+        Args:
+            val_date ([datetime]): Valuation date.
+            spec: Specification
+            discount_curve: Discount curve.
+            vol_surface ([type]): Volatility surface.
+            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.
+        """
+
+        self.val_date = val_date
+        self.spec = spec
+        self.discount_curve = discount_curve
+        self.vol_surface = vol_surface
+        self.pricing_request = pricing_request
+        self._pyvacon_obj = None
+
+    def _get_pyvacon_obj(self):
+        if self._pyvacon_obj is None:
+            self._pyvacon_obj = _pyvacon.finance.pricing.AnalyticCapPricingData()
+            self._pyvacon_obj.valDate = self.val_date
+            self._pyvacon_obj.spec = self.spec
+            self._pyvacon_obj.dscCurve = self.discount_curve._get_pyvacon_obj()
+            self._pyvacon_obj.volSurface = self.vol_surface
+            self._pyvacon_obj.pricingRequest = _create_pricing_request(self.pricing_request)
+            self._pyvacon_obj.pricer = 'AnalyticCapPricer'
+        return self._pyvacon_obj
+
+    def price(self):
+        return _pyvacon.finance.pricing.BasePricer.price(self._get_pyvacon_obj())
+
+
+class InterestRateSwapPricingData:
+    def __init__(self, val_date: datetime, spec, ccy, leg_pricing_data, pricing_request: Iterable[ResultType]):
+        """Constructor for AnalyticCapPricingData
+
+        Args:
+            val_date ([datetime]): Valuation date.
+            spec: Specification
+            discount_curve: Discount curve.
+            vol_surface ([type]): Volatility surface.
+            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.
+        """
+
+
+        self.val_date = val_date
+        self.spec = spec
+        self.ccy = ccy
+        self.leg_pricing_data = leg_pricing_data
+        self.pricing_request = pricing_request
+        self._pyvacon_obj = None
+
+    def _get_pyvacon_obj(self):
+        if self._pyvacon_obj is None:
+            self._pyvacon_obj = _pyvacon.finance.pricing.InterestRateSwapPricingData()
+            self._pyvacon_obj.pricer = 'InterestRateSwapPricer'
+            self._pyvacon_obj.pricingRequest = _create_pricing_request(self.pricing_request)
+            self._pyvacon_obj.valDate = self.val_date
+            self._pyvacon_obj.setCurr(self.ccy)
+            for leg_data in self.leg_pricing_data:
+                self._pyvacon_obj.addLegData(leg_data._get_pyvacon_obj())
+        return self._pyvacon_obj
+
+    def price(self):
+        return _pyvacon.finance.pricing.BasePricer.price(self._get_pyvacon_obj())
+
+
+
+class InterestRateSwapLegPricingData:
+    def __init__(self, spec, discount_curve, fx_rate: float, weight: float):
+        """Constructor for AnalyticCapPricingData
+
+        Args:
+            val_date ([datetime]): Valuation date.
+            spec: Specification
+            discount_curve: Discount curve.
+            vol_surface ([type]): Volatility surface.
+            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.
+        """
+
+        self.discount_curve = discount_curve
+        self.spec = spec
+        self.fx_rate = fx_rate
+        self.weight = weight
+        self._pyvacon_obj = None
+
+    def _get_pyvacon_obj(self):
+        if self._pyvacon_obj is None:
+            self._pyvacon_obj = _pyvacon.finance.pricing.InterestRateSwapLegPricingData()
+            self._pyvacon_obj.discountCurve = self.discount_curve._get_pyvacon_obj()
+            self._pyvacon_obj.spec = self.spec
+            self._pyvacon_obj.fxRate = self.fx_rate
+            self._pyvacon_obj.weight = self.weight
+        return self._pyvacon_obj
+
+class InterestRateSwapFloatLegPricingData:
+    def __init__(self, spec, discount_curve, fx_rate: float, weight: float, fixing_curve=None):
+        """Constructor for AnalyticCapPricingData
+
+        Args:
+            val_date ([datetime]): Valuation date.
+            spec: Specification
+            discount_curve: Discount curve.
+            vol_surface ([type]): Volatility surface.
+            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.
+        """
+
+        self.discount_curve = discount_curve
+        self.fixing_curve = fixing_curve
+        self.spec = spec
+        self.fx_rate = fx_rate
+        self.weight = weight
+        self._pyvacon_obj = None
+
+    def _get_pyvacon_obj(self):
+        if self._pyvacon_obj is None:
+            self._pyvacon_obj = _pyvacon.finance.pricing.InterestRateSwapFloatLegPricingData()
+            self._pyvacon_obj.discountCurve = self.discount_curve._get_pyvacon_obj()
+            self._pyvacon_obj.fixingCurve = self.fixing_curve._get_pyvacon_obj()
+            self._pyvacon_obj.spec = self.spec
+            self._pyvacon_obj.fxRate = self.fx_rate
+            self._pyvacon_obj.weight = self.weight
+        return self._pyvacon_obj
