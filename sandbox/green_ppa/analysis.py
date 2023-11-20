@@ -1,3 +1,4 @@
+from typing import List, Tuple, Union
 import copy
 import json
 import numpy as np
@@ -8,6 +9,37 @@ from rivapy.tools.interfaces import _JSONEncoder, _JSONDecoder, FactoryObject
 from rivapy.models.residual_demand_fwd_model import LinearDemandForwardModel, ForwardSimulationResult
 from rivapy.instruments import GreenPPASpecification
 from rivapy.pricing.green_ppa_pricing import GreenPPADeepHedgingPricer, DeepHedgeModel #,PPAHedgeModel
+
+def _get_entry(path: str, x: dict):
+    path_entry = path.split('.')
+    y = x
+    for i in range(len(path_entry)-1):
+        y = y[path_entry[i]]
+    return y[path_entry[-1]]
+
+def _fulfills(conditions: List[Tuple[str, Union[str, float, int,Tuple]]], x:dict):
+    
+    def __fulfills(path, target_value: Union[str, float, int,Tuple], x: dict):
+        try:
+            entry = _get_entry(path, x)
+        except:
+            return False
+        if isinstance(target_value, tuple):
+            return target_value[0] <=entry <= target_value[1]
+        return target_value == entry
+    fulfills = True
+    for condition in conditions:
+        fulfills = __fulfills(condition[0], condition[1], x) and fulfills
+    return fulfills
+    
+def _select(conditions: List[Tuple[str, Union[str, float, int,Tuple]]], x:dict)->dict:
+    result = {}
+    for k,v in x.items():
+        if not _fulfills(conditions, v):
+            continue
+        result[k] = v
+    return result
+
 
 class Repo:
     def __init__(self, repo_dir):
@@ -81,15 +113,21 @@ class Repo:
                                         power_fwd_prices=res['pricing_param']['power_fwd_prices'])
         return model_result, forecast_points
     
-    def plot_hiplot(self, error = 'mean_rmse_scaled_recalib', error_train='mean_rmse_train_scaled'):
+    def select(self, conditions: List[Tuple[str, Union[str, float, int,Tuple]]])->dict:
+        return _select(conditions, self.results)
+    
+    def plot_hiplot(self, error = 'mean_rmse_scaled_recalib', error_train='mean_rmse_train_scaled', conditions: List[Tuple[str, Union[str, float, int,Tuple]]]=None):
         """Plot errorsw.r.t parameters from the given result file with HiPlot
 
         Args:
             result_file (str): Reultfile
         """
-        
+        if conditions is None: 
+            conditions = []
         experiments = []
         for k,v in self.results.items():
+            if not _fulfills(conditions, v):
+                continue
             tmp = copy.deepcopy(v['pricing_param'])
             tmp['loss_type'] = tmp['loss']
             for l,w in tmp['initial_forecasts'].items():
@@ -110,6 +148,7 @@ class Repo:
             tmp['vol_onshore'] = v['model']['wind_power_forecast']['region_forecast_models'][0]['model']['volatility']
             tmp['idiosyncratic_vol'] = v['model']['x_volatility']
             tmp['ppa_strike'] = v['ppa_spec']['fixed_price']
+            tmp['max_capacity'] = v['ppa_spec']['max_capacity']
             tmp['power_fwd'] = v['pricing_param']['power_fwd_prices'][0]
             experiments.append(tmp)
         

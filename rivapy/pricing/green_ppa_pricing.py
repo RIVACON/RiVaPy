@@ -64,7 +64,7 @@ class GreenPPADeepHedgingPricer:
         for k,v in hedge_ins.items(): #TODO: We assume that each hedge instruments corresponds to the spot price at the last time step. Make this more explicit!
             expiry = k.split('_')[-1]
             forecast_key = green_ppa.location+'_'+expiry
-            payoff += (v[-1,:] -green_ppa.fixed_price)*(additional_states[forecast_key][-1,:])
+            payoff += (v[-1,:] -green_ppa.fixed_price)*(additional_states[forecast_key][-1,:])*green_ppa.max_capacity
         return payoff
 
     @staticmethod
