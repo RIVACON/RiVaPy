@@ -129,6 +129,7 @@ class Repo:
             if not _fulfills(conditions, v):
                 continue
             tmp = copy.deepcopy(v['pricing_param'])
+            tmp['x_volatility'] = v['model']['x_volatility'] 
             tmp['loss_type'] = tmp['loss']
             for l,w in tmp['initial_forecasts'].items():
                 tmp['Forecast_'+l] = w[0]
@@ -150,6 +151,10 @@ class Repo:
             tmp['ppa_strike'] = v['ppa_spec']['fixed_price']
             tmp['max_capacity'] = v['ppa_spec']['max_capacity']
             tmp['power_fwd'] = v['pricing_param']['power_fwd_prices'][0]
+            region_forecast_models = v['model']['wind_power_forecast']['region_forecast_models']
+            for r in region_forecast_models:
+                if r['model']['region'] == 'onshore':
+                    tmp['vol_onshore'] = r['model']['volatility']
             experiments.append(tmp)
         
 
