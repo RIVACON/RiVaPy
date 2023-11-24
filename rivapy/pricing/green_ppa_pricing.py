@@ -127,6 +127,12 @@ class GreenPPADeepHedgingPricer:
             loss (str, optional): Either 'mean_variance' or 'exponential_utility'.
         Returns:
             _type_: _description_
+
+        .. seealso::
+        
+           DeepHedgeModel
+                The general deep hedging model used internally in this pricing method.
+
         """
         #print(locals())
         #if paths is None and power_wind_model is None:

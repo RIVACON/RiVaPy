@@ -5,5 +5,6 @@ Pricing
    :caption: Contents:
    
    pricing_request
+   green_ppa
    deep_hedging
    
