@@ -121,6 +121,9 @@ class DeepHedgeModel(tf.keras.Model):
     def custom_loss(self, y_true, y_pred):
         if self._loss == 'exponential_utility':
             return tf.keras.backend.mean(tf.keras.backend.exp(-self.regularization*(y_pred+y_true)))
+        elif self._loss == 'expected_shortfall':
+            es, _ = tf.nn.top_k(-(y_pred+y_true), tf.cast(self.regularization*y_true.shape[0], tf.int32))
+            return tf.reduce_mean(es)
         return - self.regularization*tf.keras.backend.mean(y_pred+y_true) + tf.keras.backend.var(y_pred+y_true)
         #return tf.keras.backend.mean(tf.keras.backend.exp(-self.lamda*y_pred))
 

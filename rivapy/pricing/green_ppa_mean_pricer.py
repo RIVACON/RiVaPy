@@ -1,7 +1,5 @@
 import datetime as dt
 import numpy as np
-import sys
-sys.path.append('C:/Users/doeltz/development/RiVaPy/')
 from rivapy.instruments import GreenPPASpecification
 from rivapy.pricing.pricing_request import GreenPPAPricingRequest
 from rivapy.pricing.pricing_results import PricingResultKeys as PRK

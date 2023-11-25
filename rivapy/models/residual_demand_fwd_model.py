@@ -9,7 +9,7 @@ from scipy.special import comb
 from rivapy.tools.interfaces import FactoryObject
 from rivapy.models.factory import create as _create
 from rivapy.models.ornstein_uhlenbeck import OrnsteinUhlenbeck
-from rivapy.models.base_model import BaseFwdModel
+from rivapy.models.base_model import BaseFwdModel, ForwardSimulationResult
 
 def _logit(x):
     return np.log(x/(1-x))
@@ -17,25 +17,7 @@ def _logit(x):
 def _inv_logit(x):
     return 1.0/(1+np.exp(-x))
 
-class ForwardSimulationResult(abc.ABC):
-    @abc.abstractmethod
-    def n_forwards(self)->float:
-        pass
 
-    @abc.abstractmethod
-    def udls(self)->Set[str]:
-        pass
-
-    def keys(self)->List[str]:
-        result = set()
-        for udl in self.udls():
-            for i in range(self.n_forwards()):
-                result.add(BaseFwdModel.get_key(udl, i))
-        return result
-
-    @abc.abstractmethod
-    def get(self, key: str)->np.ndarray:
-        pass
     
 class WindPowerForecastModelParameter(FactoryObject):
         def __init__(self, n_call_strikes:int = 20, min_strike: float=-5.0, max_strike: float=5.0):
@@ -72,7 +54,7 @@ class WindPowerForecastModel(BaseFwdModel):
             self.initial_forecasts = initial_forecasts
             self._ou_additive_forward_corrections = wind_forecast_model._compute_ou_additive_forward_correction(self.expiries, self.initial_forecasts)
 
-        def n_forwards(self)->float:
+        def n_forwards(self)->int:
             return len(self.expiries)
 
         def udls(self)->Set[str]:
