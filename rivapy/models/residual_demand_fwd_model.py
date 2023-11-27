@@ -198,7 +198,7 @@ class WindPowerForecastModel(BaseFwdModel):
     def rnd_shape(self, n_sims: int, n_timesteps: int)->tuple:
         return (n_timesteps-1, n_sims)
     
-    def simulate(self, timegrid, 
+    def simulate(self, timegrid: np.ndarray, 
                 rnd: np.ndarray,
                 expiries: List[float],
                 initial_forecasts: List[float],
