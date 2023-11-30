@@ -6,4 +6,5 @@ Energy and Weather
    :caption: Contents:
 
    energy_weather
+   gas_fwd_model
 
