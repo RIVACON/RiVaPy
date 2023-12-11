@@ -6,3 +6,4 @@ docs/build/*
 notebooks/test_data/*
 rivapy/user_settings.py
 docs/source/notebooks/models/geo_data/*
+notebooks/tools/data/*
