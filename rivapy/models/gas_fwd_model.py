@@ -6,7 +6,7 @@ from rivapy.models.base_model import BaseFwdModel, ForwardSimulationResult
 
 class GasFwdModel2Factor(BaseFwdModel):
 
-    class ForwardimulationResult(abc.ABC):
+    class ForwardSimulationResult(abc.ABC):
         def __init__(self, paths:np.ndarray, expiries:List[float], udl: str, simulate_spot: bool):
             self._paths = paths
             self._expiries = expiries
@@ -157,7 +157,7 @@ class GasFwdModel2Factor(BaseFwdModel):
                 expiries: List[float],
                 fwd0: List[float])->ForwardSimulationResult:
         result =  self._simulate_simple(timegrid, rnd, expiries, fwd0)
-        return GasFwdModel2Factor.ForwardimulationResult(result, expiries, self.udl, simulate_spot=self._simulate_spot)
+        return GasFwdModel2Factor.ForwardSimulationResult(result, expiries, self.udl, simulate_spot=self._simulate_spot)
         result = np.zeros((rnd.shape[0], rnd.shape[1], len(expiries)))
         if isinstance(self.vol1, float):
             pass
