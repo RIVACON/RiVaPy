@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import rivapy.tools.interfaces as interfaces
 from rivapy.instruments import EnergyFutureSpecifications
-from typing import Dict
+from typing import Dict, Set, List
 
 class PFCShifter(interfaces.FactoryObject):
     def __init__(self, shape: pd.DataFrame, contracts: Dict[str, EnergyFutureSpecifications]) -> None:
@@ -23,19 +23,29 @@ class PFCShifter(interfaces.FactoryObject):
         date_diff = expected_dates - contract_scheduled_dates
         if len(date_diff) != 0:
             raise ValueError("The contract dates do not cover each date provided by the shape DataFrame!")
-        
         return None
         
+    def _get_contract_start_end_dates(self) -> List:
+        dates = set()
+        for contract_schedule in self.contracts.values():
+            dates.update(contract_schedule.get_start_end())
+        return sorted(list(dates))
+    
     def generate_transition_matrix(self) -> pd.DataFrame:
-        transition_dfs = []
-        for contract_name, contract_schedule in self.contracts.items():
-            schedule = contract_schedule.get_schedule()
-            transition_df = pd.DataFrame(columns=schedule, index=[contract_name])
-            transition_df.iloc[0,:] = 1
-            transition_dfs.append(transition_df)
+        contract_start_and_end_dates = np.array(self._get_contract_start_end_dates())
         
-        transition_matrix = pd.concat(transition_dfs, axis=0).fillna(0)
-        return transition_matrix
+        transition_df = pd.DataFrame(data=np.zeros((len(self.contracts.keys()), len(contract_start_and_end_dates)-1)), 
+                                     index=list(self.contracts.keys()), columns=contract_start_and_end_dates[:-1])
+        
+        for contract_name, constract_schedule in self.contracts.items():
+            idx = contract_start_and_end_dates[:-1].searchsorted(list(constract_schedule.get_start_end()), "right") - 1
+
+            if idx[0] == idx[1]: 
+                transition_df.iloc[transition_df.index == contract_name, idx[0]] = 1
+            else:
+                transition_df.iloc[transition_df.index == contract_name, idx[0]:idx[1]] = 1
+
+        return transition_df
     
     def detect_redundant_contracts(self, transition_matrix: pd.DataFrame) -> pd.DataFrame:
         potential_redundant_contracts = []
