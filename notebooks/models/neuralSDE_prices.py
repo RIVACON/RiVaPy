@@ -305,7 +305,7 @@ bm_vis = torchsde.BrownianInterval(
 
 
 
-num_iters = 1000
+num_iters = 10
 for global_step in tqdm.tqdm(range(1, num_iters + 1)):
     latent_sde.zero_grad()
     log_pxs, log_ratio = latent_sde(xs, ts, noise_std, adjoint, method)
@@ -317,8 +317,14 @@ for global_step in tqdm.tqdm(range(1, num_iters + 1)):
     kl_scheduler.step()
 
 
-g = latent_sde.g(t=ts,y=xs )
-g_data = g.cpu().numpy
+f_ten = torch.empty(int(t1), dtype=torch.float32)
+h_ten = torch.empty(int(t1), dtype=torch.float32)
+g_ten = torch.empty(int(t1), dtype=torch.float32)
+for i in range(24):
+    f_ten[i] = latent_sde.f(t=ts[i],y=xs[i] )
+    h_ten[i] = latent_sde.h(t=ts[i],y=xs[i] )
+    g_ten[i] = latent_sde.g(t=ts[i],y=xs[i] )
+
 
 xs_l = latent_sde.sample(batch_size=xs.size(1), ts=ts, bm=bm_vis)
 
@@ -329,12 +335,16 @@ fig = plt.figure(figsize=(20, 9))
 
 input_data = xs.cpu().numpy()
 output_data = xs_l.cpu().numpy()
+f_data = f_ten.detach().numpy()
+h_data = h_ten.detach().numpy()
+g_data = g_ten.detach().numpy()
 tt = ts.numpy()
 plt.plot(tt,input_data[:,0,0], label = 'data')
 plt.plot(tt,output_data[:,0,0], label = 'model')
-plt.plot(tt,g_data,label='g')
+plt.plot(tt,f_data[:],label = 'f')
+plt.plot(tt,h_data[:],label = 'h')
+plt.plot(tt,g_data[:],label = 'g')
 plt.legend()
-#plt.plot(bla[:,1,0])
 
 
 # Left plot: data.
