@@ -242,7 +242,7 @@ class LatentSDE(nn.Module):
     def h(self, t, y): # (prior) Drift
         return self.h_net(y)
 
-    def g(self, t, y):  # Diagonal diffusion. independent on time
+    def g(self, t, y):  # Diagonal diffusion. 
         y = torch.split(y, split_size_or_sections=1, dim=1)
         out = [g_net_i(y_i) for (g_net_i, y_i) in zip(self.g_nets, y)]
         return torch.cat(out, dim=1)
@@ -317,8 +317,8 @@ for global_step in tqdm.tqdm(range(1, num_iters + 1)):
     kl_scheduler.step()
 
 
-bla = latent_sde.g(t=ts,y=xs )
-print(bla)
+g = latent_sde.g(t=ts,y=xs )
+g_data = g.cpu().numpy
 
 xs_l = latent_sde.sample(batch_size=xs.size(1), ts=ts, bm=bm_vis)
 
@@ -332,6 +332,7 @@ output_data = xs_l.cpu().numpy()
 tt = ts.numpy()
 plt.plot(tt,input_data[:,0,0], label = 'data')
 plt.plot(tt,output_data[:,0,0], label = 'model')
+plt.plot(tt,g_data,label='g')
 plt.legend()
 #plt.plot(bla[:,1,0])
 
