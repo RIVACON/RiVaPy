@@ -40,20 +40,43 @@ from scipy.interpolate import RegularGridInterpolator
 from sys import exit
 
 
+
+
+
+# data ---------------------------------------------------
+spot_data = pd.read_pickle('df.pickle')
+#demand_data = pd.read_pickle('demand.pickle')
+#wind_solar_data = pd.read_pickle('wind_solar.pickle')
+#spot_data = spot_data.dropna()
+#demand_data = demand_data.dropna()
+#wind_solar_data = wind_solar_data.dropna()
+
+sel = spot_data[(spot_data['Month'] >=3) & (spot_data['Month'] <= 5) & (spot_data['Day_of_week'] <= 5) & (spot_data['GWL'] == 9.)]
+
+sel = sel.sort_values(by='Datetime')
+
+
+spot = np.array(sel['Spot'])
+#demand = np.array(demand_data['Demand'])
+#wind = np.array(wind_solar_data['Wind'])
+
+
+
+
 # parameters ---------------------------------------------
 data_size = 1
-batch_size=1#512#1024
-ts_len = 100
+ts_len = 24*5
+batch_size=int(len(sel)/(ts_len))#512#1024
 latent_size=1
 context_size=1
 hidden_size=2#128
-lr_init=1e-3
+lr_init=1e-2
 t0=0.
 t1=float(ts_len)
 lr_gamma=0.997
 kl_anneal_iters=1000
 pause_every=1
-noise_std=.1
+noise_std=.5
 adjoint=False
 train_dir='./'
 method="milstein"
@@ -62,38 +85,25 @@ num_samples=batch_size
 
 
 
-# data ---------------------------------------------------
-spot_data = pd.read_pickle('spot.pickle')
-demand_data = pd.read_pickle('demand.pickle')
-wind_solar_data = pd.read_pickle('wind_solar.pickle')
-spot_data = spot_data.dropna()
-demand_data = demand_data.dropna()
-wind_solar_data = wind_solar_data.dropna()
-
-spot = np.array(spot_data['Spot'])
-demand = np.array(demand_data['Demand'])
-wind = np.array(wind_solar_data['Wind'])
-
-
+# data preparation---------------------------------------------------
 spot_r1y = np.resize(spot[0:ts_len*batch_size],(ts_len,batch_size))
-demand_r1y = np.resize(demand[0:ts_len*batch_size],(ts_len,batch_size))
-wind_r1y = np.resize(wind[0:ts_len*batch_size],(ts_len,batch_size))
+#demand_r1y = np.resize(demand[0:ts_len*batch_size],(ts_len,batch_size))
+#wind_r1y = np.resize(wind[0:ts_len*batch_size],(ts_len,batch_size))
 
 spot_mean = np.mean(spot_r1y[0,:])
-demand_mean = np.mean(demand_r1y[0,:])
-wind_mean = np.mean(wind_r1y[0,:])
+#demand_mean = np.mean(demand_r1y[0,:])
+#wind_mean = np.mean(wind_r1y[0,:])
 spot_std = np.std(spot_r1y[0,:])
-demand_std = np.std(demand_r1y[0,:])
-wind_std = np.std(wind_r1y[0,:])
+#demand_std = np.std(demand_r1y[0,:])
+#wind_std = np.std(wind_r1y[0,:])
 
 spot_r1y = (spot_r1y - spot_mean) / spot_std
-demand_r1y = (demand_r1y - demand_mean) / demand_std
-wind_r1y = (wind_r1y - wind_mean) / wind_std
+#demand_r1y = (demand_r1y - demand_mean) / demand_std
+#wind_r1y = (wind_r1y - wind_mean) / wind_std
 
-
-
-exit()
-
+#for i in range(6):
+#    plt.plot(spot_r1y[:,i])
+#plt.show()
 
 
 
@@ -102,16 +112,10 @@ xs = torch.empty((int(t1), batch_size, data_size), dtype=torch.float32)
 ts = torch.empty(int(t1), dtype=torch.float32)
 x0 = torch.empty((batch_size, latent_size), dtype=torch.float32)
 
-#xs[:,:,0] = torch.tensor(spot_r1y)
+xs[:,:,0] = torch.tensor(spot_r1y)
 #xs[:,:,1] = torch.tensor(demand_r1y)
 #xs[:,:,2] = torch.tensor(wind_r1y)
 
-xs[:,0,0] = torch.tensor(X[0,:])
-#xs[:,1,0] = torch.tensor(X[1,:])
-#xs[:,0,1] = torch.tensor(X[2,:])
-#xs[:,1,1] = torch.tensor(X[3,:])
-#xs[:,0,2] = torch.tensor(X[4,:])
-#xs[:,1,2] = torch.tensor(X[5,:])
 
 for i in range(ts_len):
     ts[i] = float(i)
@@ -294,13 +298,13 @@ for global_step in tqdm.tqdm(range(1, num_iters + 1)):
 
 
 
-f_ten = torch.empty(int(t1), dtype=torch.float32)
-h_ten = torch.empty(int(t1), dtype=torch.float32)
-g_ten = torch.empty(int(t1), dtype=torch.float32)
-for i in range(ts_len):
-    f_ten[i] = latent_sde.f(t=ts[i],y=xs[i] )
-    h_ten[i] = latent_sde.h(t=ts[i],y=xs[i] )
-    g_ten[i] = latent_sde.g(t=ts[i],y=xs[i] )
+#f_ten = torch.empty(int(t1), dtype=torch.float32)
+#h_ten = torch.empty(int(t1), dtype=torch.float32)
+#g_ten = torch.empty(int(t1), dtype=torch.float32)
+#for i in range(ts_len):
+#    f_ten[i] = latent_sde.f(t=ts[i],y=xs[i] )
+#    h_ten[i] = latent_sde.h(t=ts[i],y=xs[i] )
+#    g_ten[i] = latent_sde.g(t=ts[i],y=xs[i] )
 
 
 xs_l = latent_sde.sample(batch_size=xs.size(1), ts=ts, bm=bm_vis)
@@ -312,15 +316,21 @@ fig = plt.figure(figsize=(20, 9))
 
 input_data = xs.cpu().numpy()
 output_data = xs_l.cpu().numpy()
-f_data = f_ten.detach().numpy()
-h_data = h_ten.detach().numpy()
-g_data = g_ten.detach().numpy()
+#f_data = f_ten.detach().numpy()
+#h_data = h_ten.detach().numpy()
+#g_data = g_ten.detach().numpy()
 tt = ts.numpy()
-plt.plot(tt,input_data[:,0,0], label = 'data')
-plt.plot(tt,output_data[:,0,0], label = 'model')
-plt.plot(tt,f_data[:],label = 'f')
-plt.plot(tt,h_data[:],label = 'h')
-plt.plot(tt,g_data[:],label = 'g')
+for i in range(batch_size-1):
+    plt.plot(tt,input_data[:,i,0], label = 'data',color='blue')
+    plt.plot(tt,output_data[:,i,0], label = 'model',color='green')
+plt.plot(tt,input_data[:,batch_size-1,0], label = 'data',color='blue')
+plt.plot(tt,output_data[:,batch_size-1,0], label = 'model',color='green')
+#plt.plot(tt,f_data[:],label = 'f')
+#plt.plot(tt,h_data[:],label = 'h')
+#plt.plot(tt,g_data[:],label = 'g')
+plt.title('Thursdays between 10/2018 and today in March-May with GWL = 9')
+plt.xlabel('time [h]')
+plt.ylabel('spot price')
 plt.legend()
 
 
