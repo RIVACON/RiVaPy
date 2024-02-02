@@ -92,7 +92,7 @@ wind_r1y = (wind_r1y - wind_mean) / wind_std
 
 
 
-
+exit()
 
 
 
