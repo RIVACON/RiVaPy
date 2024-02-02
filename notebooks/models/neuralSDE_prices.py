@@ -43,11 +43,11 @@ from sys import exit
 # parameters ---------------------------------------------
 data_size = 1
 batch_size=1#512#1024
-ts_len = 24
+ts_len = 100
 latent_size=1
 context_size=1
-hidden_size=1#128
-lr_init=1e-2
+hidden_size=2#128
+lr_init=1e-3
 t0=0.
 t1=float(ts_len)
 lr_gamma=0.997
@@ -92,31 +92,7 @@ wind_r1y = (wind_r1y - wind_mean) / wind_std
 
 
 
-# idealized OU -------------------------------------------
-np.random.seed(seed=42)
 
-N = 24  # time steps
-paths = 3*1  # number of paths
-T = 24
-T_vec, dt = np.linspace(0, T, N, retstep=True)
-
-kappa = 3
-theta = 0.#0.5
-sigma = 0.1
-std_asy = np.sqrt(sigma**2 / (2 * kappa))  # asymptotic standard deviation
-
-X0 = 0.5
-X = np.zeros((paths, N))
-X[:, 0] = X0
-W = ss.norm.rvs(loc=0, scale=1, size=(paths, N - 1))
-
-# Uncomment for Euler Maruyama
-# for t in range(0,N-1):
-#    X[:,t+1] = X[:,t] + kappa*(theta - X[:,t])*dt + sigma * np.sqrt(dt) * W[:,t]
-
-std_dt = np.sqrt(sigma**2 / (2 * kappa) * (1 - np.exp(-2 * kappa * dt)))
-for t in range(0, N - 1):
-    X[:, t + 1] = theta + np.exp(-kappa * dt) * (X[:, t] - theta) + std_dt * W[:, t]
 
 
 
@@ -305,7 +281,7 @@ bm_vis = torchsde.BrownianInterval(
 
 
 
-num_iters = 10
+num_iters = 1000
 for global_step in tqdm.tqdm(range(1, num_iters + 1)):
     latent_sde.zero_grad()
     log_pxs, log_ratio = latent_sde(xs, ts, noise_std, adjoint, method)
@@ -317,10 +293,11 @@ for global_step in tqdm.tqdm(range(1, num_iters + 1)):
     kl_scheduler.step()
 
 
+
 f_ten = torch.empty(int(t1), dtype=torch.float32)
 h_ten = torch.empty(int(t1), dtype=torch.float32)
 g_ten = torch.empty(int(t1), dtype=torch.float32)
-for i in range(24):
+for i in range(ts_len):
     f_ten[i] = latent_sde.f(t=ts[i],y=xs[i] )
     h_ten[i] = latent_sde.h(t=ts[i],y=xs[i] )
     g_ten[i] = latent_sde.g(t=ts[i],y=xs[i] )
