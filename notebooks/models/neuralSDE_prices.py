@@ -45,66 +45,50 @@ from sys import exit
 
 # data ---------------------------------------------------
 spot_data = pd.read_pickle('df.pickle')
-#demand_data = pd.read_pickle('demand.pickle')
-#wind_solar_data = pd.read_pickle('wind_solar.pickle')
-#spot_data = spot_data.dropna()
-#demand_data = demand_data.dropna()
-#wind_solar_data = wind_solar_data.dropna()
 
-sel = spot_data[(spot_data['Month'] >=3) & (spot_data['Month'] <= 5) & (spot_data['Day_of_week'] <= 5) & (spot_data['GWL'] == 9.)]
+sel = spot_data[(spot_data['Month'] >=9) & (spot_data['Month'] <= 11) & (spot_data['Day_of_week'] == 3) & (spot_data['GWL'] == 9.)]
 
 sel = sel.sort_values(by='Datetime')
 
 
 spot = np.array(sel['Spot'])
-#demand = np.array(demand_data['Demand'])
-#wind = np.array(wind_solar_data['Wind'])
-
 
 
 
 # parameters ---------------------------------------------
 data_size = 1
-ts_len = 24*5
+ts_len = 24
 batch_size=int(len(sel)/(ts_len))#512#1024
 latent_size=1
 context_size=1
-hidden_size=2#128
+hidden_size=64
 lr_init=1e-2
 t0=0.
 t1=float(ts_len)
-lr_gamma=0.997
-kl_anneal_iters=1000
-pause_every=1
-noise_std=.5
+lr_gamma=0.999
+kl_anneal_iters=100
+noise_std=5.
 adjoint=False
-train_dir='./'
 method="milstein"
 
 num_samples=batch_size
+num_iters = 1000
 
 
 
 # data preparation---------------------------------------------------
 spot_r1y = np.resize(spot[0:ts_len*batch_size],(ts_len,batch_size))
-#demand_r1y = np.resize(demand[0:ts_len*batch_size],(ts_len,batch_size))
-#wind_r1y = np.resize(wind[0:ts_len*batch_size],(ts_len,batch_size))
 
 spot_mean = np.mean(spot_r1y[0,:])
-#demand_mean = np.mean(demand_r1y[0,:])
-#wind_mean = np.mean(wind_r1y[0,:])
 spot_std = np.std(spot_r1y[0,:])
-#demand_std = np.std(demand_r1y[0,:])
-#wind_std = np.std(wind_r1y[0,:])
 
 spot_r1y = (spot_r1y - spot_mean) / spot_std
-#demand_r1y = (demand_r1y - demand_mean) / demand_std
-#wind_r1y = (wind_r1y - wind_mean) / wind_std
 
-#for i in range(6):
+#for i in range(batch_size):
 #    plt.plot(spot_r1y[:,i])
 #plt.show()
 
+#exit()
 
 
 # torch tensors -------------------------------------------
@@ -113,8 +97,6 @@ ts = torch.empty(int(t1), dtype=torch.float32)
 x0 = torch.empty((batch_size, latent_size), dtype=torch.float32)
 
 xs[:,:,0] = torch.tensor(spot_r1y)
-#xs[:,:,1] = torch.tensor(demand_r1y)
-#xs[:,:,2] = torch.tensor(wind_r1y)
 
 
 for i in range(ts_len):
@@ -139,9 +121,23 @@ class LinearScheduler(object):
     @property
     def val(self):
         return self._val
+    
+class EMAMetric(object):
+    def __init__(self, gamma: Optional[float] = .99):
+        super(EMAMetric, self).__init__()
+        self._val = 0.
+        self._gamma = gamma
+
+    def step(self, x: Union[torch.Tensor, np.ndarray]):
+        x = x.detach().cpu().numpy() if torch.is_tensor(x) else x
+        self._val = self._gamma * self._val + (1 - self._gamma) * x
+        return self._val
+
+    @property
+    def val(self):
+        return self._val
 
 
-#Encoder 
 class Encoder(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super(Encoder, self).__init__()
@@ -168,30 +164,28 @@ class LatentSDE(nn.Module):
         self.encoder = Encoder(input_size=data_size, hidden_size=hidden_size, output_size=context_size)
         self.qz0_net = nn.Linear(context_size, latent_size + latent_size)
 
-        # Decoder.
-        # corresponding (posterior) drift
         self.f_net = nn.Sequential(
             nn.Linear(latent_size + context_size, hidden_size),
-            nn.Softplus(),
-            nn.Linear(hidden_size, hidden_size),
-            nn.Softplus(),
+            #nn.Softplus(),
+            #nn.Linear(hidden_size, hidden_size),
+            nn.Tanh(),#Softplus(),
             nn.Linear(hidden_size, latent_size),
         )
-        # corresponding to prior drift to calculate KL divergence (section 5 in Scalable Gradients for SDEs by Li et al., 2020) to reduce overfitting
+
         self.h_net = nn.Sequential(
             nn.Linear(latent_size, hidden_size),
-            nn.Softplus(),
-            nn.Linear(hidden_size, hidden_size),
-            nn.Softplus(),
+            #nn.Softplus(),
+            #nn.Linear(hidden_size, hidden_size),
+            nn.Tanh(),#Softplus(),
             nn.Linear(hidden_size, latent_size),
         )
-        # Diffusion: This needs to be an element-wise function for the SDE to satisfy diagonal noise.
+
         self.g_nets = nn.ModuleList(
             [
                 nn.Sequential(
-                    nn.Linear(1, hidden_size),
-                    nn.Softplus(),
-                    nn.Linear(hidden_size, 1),
+                    nn.Linear(latent_size, hidden_size),
+                    nn.Tanh(),#Softplus(),
+                    nn.Linear(hidden_size, latent_size),
                     nn.Sigmoid()
                 )
                 for _ in range(latent_size)
@@ -201,9 +195,9 @@ class LatentSDE(nn.Module):
         #Decoder: 
         self.projector =nn.Sequential(
             nn.Linear(latent_size, hidden_size),
-            nn.Softplus(),
-            nn.Linear(hidden_size, hidden_size),
-            nn.Softplus(),
+            #nn.Softplus(),
+            #nn.Linear(hidden_size, hidden_size),
+            nn.Tanh(),#Softplus(),
             nn.Linear(hidden_size, data_size),
         )
         self.pz0_mean = nn.Parameter(torch.zeros(1, latent_size))
@@ -244,7 +238,7 @@ class LatentSDE(nn.Module):
             zs, log_ratio = torchsde.sdeint_adjoint(
                 self, z0, ts, adjoint_params=adjoint_params, dt=1, logqp=True, method=method)
         else:
-            zs, log_ratio = torchsde.sdeint(self, z0, ts, dt=1, logqp=True, method=method)
+            zs, log_ratio = torchsde.sdeint(self, z0, ts, dt=1, logqp=True, method=method, rtol = 1e-3, atol = 1e-3)
 
         _xs = self.projector(zs)
         xs_dist = Normal(loc=_xs, scale=noise_std)
@@ -276,8 +270,12 @@ latent_sde = LatentSDE(
     ).to(device)
 
 optimizer = optim.Adam(params=latent_sde.parameters(), lr=lr_init)
-scheduler = torch.optim.lr_scheduler.LinearLR(optimizer=optimizer)#ExponentialLR(optimizer=optimizer, gamma=lr_gamma)
+scheduler = torch.optim.lr_scheduler.LinearLR(optimizer=optimizer)#ExponentialLR(optimizer=optimizer, gamma=lr_gamma)#
 kl_scheduler = LinearScheduler(iters=kl_anneal_iters)
+
+#logpy_metric = EMAMetric()
+#kl_metric = EMAMetric()
+#loss_metric = EMAMetric()
 
 # Fix the same Brownian motion for visualization.
 bm_vis = torchsde.BrownianInterval(
@@ -285,7 +283,7 @@ bm_vis = torchsde.BrownianInterval(
 
 
 
-num_iters = 1000
+
 for global_step in tqdm.tqdm(range(1, num_iters + 1)):
     latent_sde.zero_grad()
     log_pxs, log_ratio = latent_sde(xs, ts, noise_std, adjoint, method)
@@ -297,12 +295,20 @@ for global_step in tqdm.tqdm(range(1, num_iters + 1)):
     kl_scheduler.step()
 
 
+    #logpy_metric.step(log_pxs)
+    #kl_metric.step(log_ratio)
+    #loss_metric.step(loss)
 
-#f_ten = torch.empty(int(t1), dtype=torch.float32)
+
+    
+
+
+
+#f_ten = torch.empty((int(t1),1), dtype=torch.float32)
 #h_ten = torch.empty(int(t1), dtype=torch.float32)
 #g_ten = torch.empty(int(t1), dtype=torch.float32)
 #for i in range(ts_len):
-#    f_ten[i] = latent_sde.f(t=ts[i],y=xs[i] )
+#    f_ten[i,0] = latent_sde.f(t=ts[i],y=xs[i] )
 #    h_ten[i] = latent_sde.h(t=ts[i],y=xs[i] )
 #    g_ten[i] = latent_sde.g(t=ts[i],y=xs[i] )
 
@@ -334,32 +340,8 @@ plt.ylabel('spot price')
 plt.legend()
 
 
-# Left plot: data.
-#z1, z2, z3 = np.split(xs.cpu().numpy(), indices_or_sections=3, axis=-1)
-#[ax00.plot(z1[:, i, 0], z2[:, i, 0], z3[:, i, 0]) for i in range(num_samples)]
-#ax00.scatter(z1[0, :num_samples, 0], z2[0, :num_samples, 0], z3[0, :num_samples, 0], marker='x')
-#ax00.set_xlabel('$norm. price$', labelpad=0., fontsize=16)
-#ax00.set_ylabel('$norm. demand$', labelpad=.5, fontsize=16)
-#ax00.set_zlabel('$norm. wind$', labelpad=0., horizontalalignment='center', fontsize=16)
-#ax00.set_title('Data', fontsize=20)
-#xlim = ax00.get_xlim()
-#ylim = ax00.get_ylim()
-#zlim = ax00.get_zlim()
-
-# Right plot: model.
-#z1, z2, z3 = np.split(xs_l.cpu().numpy(), indices_or_sections=3, axis=-1)
-#[ax01.plot(z1[:, i, 0], z2[:, i, 0], z3[:, i, 0]) for i in range(num_samples)]
-#ax01.scatter(z1[0, :num_samples, 0], z2[0, :num_samples, 0], z3[0, :num_samples, 0], marker='x')
-#ax01.set_xlabel('$norm. price$', labelpad=0., fontsize=16)
-#ax01.set_ylabel('$norm. demand$', labelpad=.5, fontsize=16)
-#ax01.set_zlabel('$norm. wind$', labelpad=0., horizontalalignment='center', fontsize=16)
-#ax01.set_title('Samples', fontsize=20)
-#ax01.set_xlim(xlim)
-#ax01.set_ylim(ylim)
-#ax01.set_zlim(zlim)
 
 plt.show()
-#plt.savefig('test.png')
 
     
 
