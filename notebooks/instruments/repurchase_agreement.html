@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Repurchase Agreements &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Module Documentation" href="../../rivapy/index.html" />
+    <link rel="prev" title="Deep Hedging of Green PPAs" href="../pricing/green_ppa_deep_hedging.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Notebook Gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#market-data">Market Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#pricing">Pricing</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#financial-instruments">Financial Instruments</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Repurchase Agreements</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Basic-Idea">Basic Idea</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#The-Repo-Market">The Repo Market</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Different-Types-of-Collateral">Different Types of Collateral</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Risks">Risks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Collateral---Coupons-and-Dividends">Collateral - Coupons and Dividends</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Collateral---Voting-Rights">Collateral - Voting Rights</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Different-Types-of-Repos">Different Types of Repos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Sources:">Sources:</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Notebook Gallery</a></li>
+      <li class="breadcrumb-item active">Repurchase Agreements</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/instruments/repurchase_agreement.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Repurchase-Agreements">
+<h1>Repurchase Agreements<a class="headerlink" href="#Repurchase-Agreements" title="Permalink to this heading"></a></h1>
+<section id="Basic-Idea">
+<h2>Basic Idea<a class="headerlink" href="#Basic-Idea" title="Permalink to this heading"></a></h2>
+<p>Repurchase Agreements (repos) can be viewed as a collateralized loan. Generally, the borrower (in repo terms called <em>seller</em>) agrees to sell an asset to the lender (in repo terms called <em>buyer</em>) for a specific amount of cash. The seller also agrees to buy the sold asset back at expiry of the contract for a larger amount of cash. The price for which the asset is sold is called the <em>purchase price</em>, while the price at which the asset is bought back is called <em>repurchase price</em>. Effectively, the
+seller borrowed collateralized cash from the buyer. The interest rate (repo rate) paid for the borrowed cash is implicit in the repurchase price and is quoted as a percentage per annum rate.</p>
+<p>From the perspective of the buyer, the transaction described above is called a <em>reverse repo</em>.</p>
+<p>The following image ([1]) illustrates the basic life cycle of a (reverse) repo transaction.</p>
+<p><img alt="Repo schema" src="../../_images/repo_schema.png" /></p>
+</section>
+<section id="The-Repo-Market">
+<h2>The Repo Market<a class="headerlink" href="#The-Repo-Market" title="Permalink to this heading"></a></h2>
+<section id="Economic-Functions">
+<h3>Economic Functions<a class="headerlink" href="#Economic-Functions" title="Permalink to this heading"></a></h3>
+<p>The repo market plays a key role in facilitating the flow of cash and securities in the financial system. Additionally, repos and reverse repos are often carried out by central banks in order to temporarily provide liquidity to (or remove liquidity from) the financial system to support implementation of monetary policy and to promote financial stability.</p>
+<p>A few economic functions of the repo market are ([1,2]):</p>
+<ol class="arabic">
+<li><div class="line-block">
+<div class="line"><strong>Providing a low-risk option for cash investment &amp; an efficient source of short term funding:</strong></div>
+<div class="line">Due to the capacity of high-quality liquid assets (HQLAs) collateralised (reverse) repos to lower credit and liquidity risk, repos are used by different market participants such as money market funds, banks or other financial institutions as secure and liquid investment. Institutional inverstors also use repo contracts to meet temporary liquidity requirements without having to liquidate strategic long-term investments.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line"><strong>Facilitating central bank operations:</strong></div>
+<div class="line">As shortly mentioned at the begining of this section, repos are a widely-used instrument for central bank open market operations. Due to the collateralization, the central banks credit risk is reduced. The repo market enables central banks to implement monetary policies more efficiently under normal market conditions.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line"><strong>Financing leverage investors and covering short positions:</strong></div>
+<div class="line">Institutional investors, like hedge funds, borrow cash via the repo market to fund leveraged investment strategies and also borrow securities which allow them to cover short positions. These funds play an important role in feeding market liquidity and price efficiency of underlying cash markets through trading and exploitation of pricing discrepancies (arbitrage).</div>
+</div>
+</li>
+</ol>
+</section>
+<section id="The-Size-of-the-European-Repo-Market">
+<h3>The Size of the European Repo Market<a class="headerlink" href="#The-Size-of-the-European-Repo-Market" title="Permalink to this heading"></a></h3>
+<p>The International Capital Market Accociation (ICMA) conducted an European repo market surveys in June of 2022 [3]. In this survey the ICMA asked financial institutions operating in Europe for the value of the cash side of (reverse) repos that were still outstanding at close of business on June 8th 2022. According to the ICMA survey, the total value of the repo contracts outstanding on the books of the 56 participated institutions was at 9,680 Billion EUR. The ICMA conducted prior a similar
+survey with 59 participants one year earlier, where the total value of outstanding repo transactions was at 8,726 Billion EUR [4].</p>
+</section>
+<section id="Typical-Terms-for-Repos">
+<h3>Typical Terms for Repos<a class="headerlink" href="#Typical-Terms-for-Repos" title="Permalink to this heading"></a></h3>
+<p>The market survey in [3] also compared the different maturities for repos between the financial institutions participated in the survey (main survey), automatic repo trading systems (ATS), and tri-party agents (more on that later).</p>
+<p><img alt="Repo maturities" src="../../_images/repo_maturities.png" /></p>
+</section>
+</section>
+<section id="Different-Types-of-Collateral">
+<h2>Different Types of Collateral<a class="headerlink" href="#Different-Types-of-Collateral" title="Permalink to this heading"></a></h2>
+<div class="line-block">
+<div class="line">The quality of the underlying collateral of a repo is a key parameter for determination of the repo rate in a repo contract. Hence, repos collateralised by HQLAs will have a lower repo rate than repos collateralised by non HQLAs. The most commonly used type of collateral are government bonds, but equities and coporate bonds are also used very frequently.</div>
+<div class="line">Generally, assets provided as collateral in a repo contract can be classified as general collateral (GC) or special/specific collateral (SC). Both of these classes represent the two drivers for repo transactions: <em>cash-driven</em> and <em>security-driven</em> repo transactions [1,6].</div>
+</div>
+<section id="General-Collateral">
+<h3>General Collateral<a class="headerlink" href="#General-Collateral" title="Permalink to this heading"></a></h3>
+<p>General collateral is a set or basekt of securities which trade in the repo market at the same or a very similar repo rate (GC repo rate). This means that GC securities can be substituted for one another. Hence, the buyer in a GC repo is indifferent to which security is given as collateral. Due to the fact that securities can be substituted for one another, the driver of the GC repo rate is not the supply and demand of particular issues of securities, but of cash. Furthermore, a buyer in a repo
+may grant the seller permission to substitute some or all collateral during the term of the transaction [5]. General collateral repos are <em>cash-driven</em> repos as the underlying collateral plays a subordinate role. Cash-driven repos are primarily used for funding [1,6].</p>
+</section>
+<section id="Special-Collateral">
+<h3>Special Collateral<a class="headerlink" href="#Special-Collateral" title="Permalink to this heading"></a></h3>
+<p>While in GC repos the specific asset demanded as collateral is not important, as long as it comes from a specific GC basket, the specification of a certain asset privoded as collateral in SC repos is very much so. A special is an issue of securities that is subject to exceptional demand in the repo and cash markets compared to similar issues. A security is said to be <em>on special</em> (a special collateral) if the repo rate for that collateral is distinctly lower than the GC repo rate. The demand for
+some specials can become so large, that the special repo rate becomes negative [1,7]. The repo spread, which is the difference between the GC repo rate and the SC repo rate, can be seen as an implicit borrowing fee for the security on special. Thus, the lower repo rate for specials can be understood as the GC repo rate paid for the cash reduced by the borrowing fee for the security in high demand. Since the main intention of special repos is the ‘borrowing’ of sought after securities, these
+repos are security-driven repos. One of the most common reasons for an security to go special is when that security becomes the <em>cheapest-to-deliver</em> in the futures market.</p>
+</section>
+</section>
+<section id="Risks">
+<h2>Risks<a class="headerlink" href="#Risks" title="Permalink to this heading"></a></h2>
+<p>Generally, there are two sources of risk in repos, collateral and counterparty risk. The primary driver for counterparty risk is the credit risk, meaning the counterpartys inability to repay a loan or meet a contractual obligation. Counterparties with a higher credit risk also pay higher repo rates as compensation for the risk. The collateral risk consists of the liquidity risk, the volatility of the collateral’s market price and the collateral’s credit risk, which influence the quality of the
+collateral. The liqudity risk plays an important role in the event of the sellers default, since collateral taken from a risky counterparty is more likely to be liquidated to mitigate the buyers (cash lenders) losses, than collateral take from a non risky counterparty [1]. Additionally, repos with a longer time to maturity also have a higher repo rate. Further descriptions of best practices in cases of counterparty default will be provided in the next section. If the credit risk of the assets
+provided as collateral has a certain correlation to the credit risk of the party providing this asset, the collateral also has a <em>wrong-way risk</em>. In order to account for the collateral risk in repo transactions, so called <em>haircuts</em> or <em>initial margins</em> are included. The inital margin/ haircut is a risk adjustment of the current market price of the collateral [1,8-10]. In other words, haircuts/ initial marigns are an adjustment to the quoted market value of a collateral in order to account for
+the unexpected loss that the buyer may face due to the difficulty of selling the security in response to a seller’s default. Thus, using a haircut <span class="math notranslate nohighlight">\(h\)</span> or an initial margin <span class="math notranslate nohighlight">\(IM\)</span>, the purchase and repurchase price for a repo with repo rate <span class="math notranslate nohighlight">\(r\)</span> and maturity in years <span class="math notranslate nohighlight">\(T\)</span> can be calculated as follows:</p>
+<p><strong>Using a haircut</strong></p>
+<p><span class="math">\begin{align*}
+P_\text{purchase} &= P_\text{market}\cdot(1-\frac{h}{100})\\
+P_\text{repurchase} &= P_\text{purchase}\cdot\left(1+r\cdot T\right)\\
+h &= \left(\frac{P_\text{market}-P_\text{purchase}}{P_\text{market}}\right)\cdot 100
+\end{align*}</span></p>
+<p>Thus, the haircut is expressed as the percentage difference between the market value of the collateral and the pruchase price of the repo.</p>
+<p><strong>Using an initial margin</strong></p>
+<p><span class="math">\begin{align*}
+P_\text{purchase} &= \frac{P_\text{market}\cdot100}{IM}\\
+P_\text{repurchase} &= P_\text{purchase}\cdot\left(1+r\cdot T\right)\\
+IM &= \frac{P_\text{market}}{P_\text{purchase}}\cdot 100
+\end{align*}</span></p>
+<p>The initial margin is expressed as a relative to 100%. Thereby, an initial margin of 100% means no margin is applied. An initial margin of 102% is not equivalent to a haircut of 2%. The relationship between the haircut and the initial margin can be computed using the fact that both need to result in the same purchase price:</p>
+<p><span class="math">\begin{align*}
+P_\text{market}\cdot(1-\frac{h}{100}) &= \frac{P_\text{market}\cdot100}{IM}\\
+1-\frac{h}{100} &=\frac{100}{IM}\\
+\frac{100}{1-\frac{h}{100}} &=IM
+\end{align*}</span></p>
+<p>Thus, a haircut of 2% is equivalent to an initial margin of 102.041% [5,8,10-12]. The ICMA recommends that once the initial margin or haircut is agreed upon, the initial margin or haircut should be fixed for the full term of the repo [5].</p>
+<p>It is quiet natural, that the market value of the collateral increases or decreases during the term of the repo. In cases where the market value decreases significantlly (more than the haircut accounts for) the buyer of the repo is exposed to the defaulty of the seller, since the buyer may not be able to recover the money ‘lend’ by selling the collateral. Hence, the lender will call for variation margin to rebalance cash and collateral.</p>
+<div class="line-block">
+<div class="line"><em>Example</em></div>
+<div class="line">Assuming a repo the collateral being bonds with dirty price <span class="math notranslate nohighlight">\(P_D=100\)</span> and nominal value of <span class="math notranslate nohighlight">\(N=10,000,000\)</span>, a repo rate of <span class="math notranslate nohighlight">\(3\%\)</span>, a haircut of <span class="math notranslate nohighlight">\(2\%\)</span> and a term of 1 year. The purchase price is <span class="math notranslate nohighlight">\(P_\text{purchase}=9,800,000\)</span> and the repurchase price is <span class="math notranslate nohighlight">\(P_\text{repurchase}=10,094,000\)</span>.</div>
+<div class="line">During the term of the repo (after 30 days) the dirty price decreases to <span class="math notranslate nohighlight">\(P_{D,\text{30d}}=90\)</span>. At this point in time interest has accrued on the purchase price for 30 days, thus the current market value of the collateral needs to be <span class="math notranslate nohighlight">\(P_\text{market}=10,024,658\)</span>, which was also adjusted for the haircut (divided by <span class="math notranslate nohighlight">\((1-\frac{h}{100})\)</span>). The nominal value can be calculated using <span class="math notranslate nohighlight">\(N=P_\text{market}\cdot\frac{100}{P_D}\)</span>, this way the new nominal value for this repo is
+<span class="math notranslate nohighlight">\(N=11,138,508\)</span>, which exceeds the amount the buyer is already holding by <span class="math notranslate nohighlight">\(1,138,508\)</span>. Thus the seller needs to provide additional collateral to the buyer with a face value of exceeded amount.</div>
+</div>
+<p>The example above demonstrated a possible scenario, where the buyer of a repo is exposed to the default of the seller of a repo, once the market value of a collateral significantly decreases. In such cases the buyer will call for variational margin such that the exposure is the buyer is minimised. Additionally, both parties agree on a minimum exposure below which they will not call a margin for each other. The parties exposure is conducted daily [5,10,11].</p>
+</section>
+<section id="Collateral---Coupons-and-Dividends">
+<h2>Collateral - Coupons and Dividends<a class="headerlink" href="#Collateral---Coupons-and-Dividends" title="Permalink to this heading"></a></h2>
+<p>During the life of a repo, the buyer holds legal title to the collateral. This means that all payments produced by the security are paid by the issuer directly to the buyer. However, the seller of the collateral retains the risk on the collateral, as the seller has committed to buy the collateral back in the future for its original value plus repo interest. A key principle in the operation of repos is that only the seller should be exposed to the risks of the collateral. Hence, the seller will
+expect to receive the corresponding return. So, the buyer agrees to immediately pay compensatory amounts to the seller equivalent to any income payment received on the collateral (<em>manufactured payments</em>) [1,8,14].</p>
+</section>
+<section id="Collateral---Voting-Rights">
+<h2>Collateral - Voting Rights<a class="headerlink" href="#Collateral---Voting-Rights" title="Permalink to this heading"></a></h2>
+<p>Since the buyer holds legal title to the collateral, he/she is entitled to any benefits of ownership such as voting rights. The buyer can use this voting right to vote in accordance with the seller but the buyer is not obligated to do so. However, under the Equities Annex to the ICMA’s Global Master Repurchase Agreement (GMRA), the right to take decisions on corporate actions in the case of equity being used as collateral is the seller’s, provided that the seller gives the buyer requisite notice
+of the decision [1,14].</p>
+</section>
+<section id="Different-Types-of-Repos">
+<h2>Different Types of Repos<a class="headerlink" href="#Different-Types-of-Repos" title="Permalink to this heading"></a></h2>
+<section id="Tri-party-Repos">
+<h3>Tri-party Repos<a class="headerlink" href="#Tri-party-Repos" title="Permalink to this heading"></a></h3>
+<p>Tri-party repos are repos for which collateral selection, payments and deliveries, custody of collateral securities, collateral management and other operations during the life of the transaction are outsourced by the parties to a third-party agent. Such a tr-party agent can be a custodian bank, an international central securities depository or a national central securities depository. In Europe, the principle tri-party agents are Clearstream Bank Luxembourg, Euroclear Bank and JP Morgan. Once a
+transaction has been agreed directly between the parties (usually by phone or electronic messaging) both parties independently notify the tri-party agent. The agent will automatically select, from the securities account of the seller, sufficient collateral. The tri-party agent manages the regular revaluation of the collateral, variation margining, income payments on the collateral and the substitution of collateral [1,10,15].</p>
+</section>
+<section id="Open-Repos">
+<h3>Open Repos<a class="headerlink" href="#Open-Repos" title="Permalink to this heading"></a></h3>
+<p>In an open repo (also called on demand or open-ended repo) the transactions is agreed without a ficed maturity date. Thus, the repo can be terminated on any business day by either party, provided they give notice within an agreed period of time. It is common for the repo rate on an open repo rate to be changed up or down (<em>re-rated</em>) only at request of one of the parties and only with agreement of the other. Alternatively, the repo rate can be linked to a one-day interest rate index, which means
+that the repo rate would change automatically. These both approaches can be combined by quoting the repo rate as a floating interest rate plus/minus a spread, which either party can request to change [1,10,16]. Practitioners often use basis points (BP) to refer to interest rates or spreads. The relation of BP and percentage is the following: <span class="math notranslate nohighlight">\(1BP=0.01\%\)</span>. Repo interest is accrued dailty without compounding. Accrued interest can be paid by either, paying it on the repurchase date (as usual
+in repos), on the re-rate date as a discrete interest payment or once a month also as a discrete interest payment.</p>
+</section>
+<section id="Securities-Lending">
+<h3>Securities Lending<a class="headerlink" href="#Securities-Lending" title="Permalink to this heading"></a></h3>
+<p>Securities lendings and repos have many similarities. In a securities lending transaction one part gives legal title to a security or a basket of securities to another party, in exchange for legal ownership of collateral. The <em>seller</em> in a repo is the <em>lender</em> in the securities lending and the <em>buyer</em> is called <em>borrower</em>. The borrower pays a fee to the lender for the usage of the loaned security. The collateral in securities lending can either be cash or other securities. Securities lending
+against cash look very similar to security driven repos. When the collateral is cash, the lender is obliged to reinvest the cash and rebate an agreed proportion of the reinvestment return back to the borrower. Hence, the the analogon to the repo rate in securities lending is the <em>rebate rate</em> [1]. Another way to view this is, that the lender who recevies the cash needs to pay certain interest on that cash, while simulatneously the borrower pays a borrowing fee for the borrowed security. The net
+value of those two cash flows is the rebate rate.</p>
+</section>
+</section>
+<section id="Sources:">
+<h2>Sources:<a class="headerlink" href="#Sources:" title="Permalink to this heading"></a></h2>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://www.icmagroup.org/assets/documents/Regulatory/Repo/Repo-FAQs-January-2019.pdf">[1] Repo-FAQs-January-2019</a></div>
+<div class="line"><a class="reference external" href="https://www.bis.org/publ/cgfs59.pdf">[2] Repo market functioning</a></div>
+<div class="line"><a class="reference external" href="https://www.icmagroup.org/assets/9789-ICMA-Repo-Survey-June-2022.pdf">[3] European Repo Market Survey June 2022</a></div>
+<div class="line"><a class="reference external" href="https://www.icmagroup.org/News/news-in-brief/the-european-repo-market-in-2021-icma-publishes-survey-showing-outstandings-of-eur-8726-billion-at-half-year/">[4] European Repo Market Survey June 2021</a></div>
+<div class="line"><a class="reference external" href="https://www.icmagroup.org/assets/ERCC-Guide-to-Best-Practice-March-2022.pdf">[5] A Guide to Best Practive in the European Repo Market</a></div>
+<div class="line"><a class="reference external" href="https://www.ceps.eu/wp-content/uploads/2015/03/RRinFBRepoMarkets.pdf">[6] The EU Repo Markets: The Need For Full Integration</a></div>
+<div class="line"><a class="reference external" href="https://www.atlantafed.org/-/media/documents/research/publications/economic-review/2002/vol87no2_fisher.pdf">[7] Special Repo Rates: An Introduction</a></div>
+<div class="line"><a class="reference external" href="https://www.iasonltd.com/doc/rps/2019/2019_Market_Instruments_for_Collateral_Management%20(Rev).pdf">[8] Market Instruments for Collateral Management</a></div>
+<div class="line"><a class="reference external" href="https://faculty.fuqua.duke.edu/seminarscalendar/Smith_S13.pdf">[9] Collateral Value Risk in the Repo Market</a></div>
+<div class="line"><a class="reference external" href="https://www.icmagroup.org/assets/documents/Regulatory/Repo/ICMA-ERC-Repo-Margining-Best-Practices-2012-(amended-7-Nov-2013)2.pdf">[10] ICMA European Repo Council (ERC) Repo Margining Best Practices 2012</a></div>
+<div class="line"><a class="reference external" href="https://www.icmagroup.org/assets/documents/Maket-Practice/Regulatory-Policy/Repo-Markets/Haircuts%20and%20initial%20margins%20in%20the%20repo%20market_8%20Feb%202012.pdf">[11] Haircuts and initial margins in the repo market</a></div>
+<div class="line"><a class="reference external" href="https://www.treasury.gov.ph/wp-content/uploads/2018/01/2-repo-risk-management-HO.pdf">[12] nature of repo</a></div>
+<div class="line"><a class="reference external" href="https://econ.wisc.edu/wp-content/uploads/sites/89/2018/09/Gottardi.pdf">[13] A Theory of Repurchase Agreements, Collateral Re-use, and Repo Intermediation</a></div>
+<div class="line"><a class="reference external" href="https://www.icmagroup.org/assets/documents/Legal/GMRA-2011_2011.04.20_formular_copy-incl-annexes-and-buy-sell-back-annex.pdf">[14] Global Master Repurchase Agreement</a></div>
+<div class="line"><a class="reference external" href="https://www.iasonltd.com/doc/rps/2019/2019_Security_Market-_an_Overview_of_Repo_and_Security_Lending_Transactions.pdf">[15] Security Market: an Overview of Repo and Security Lending Transactions</a></div>
+<div class="line"><a class="reference external" href="https://www.icmagroup.org/assets/documents/Regulatory/Repo/floating-rate-repo-convention---July-2012.pdf">[16] Floating-rate repo conventions</a></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../pricing/green_ppa_deep_hedging.html" class="btn btn-neutral float-left" title="Deep Hedging of Green PPAs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../rivapy/index.html" class="btn btn-neutral float-right" title="Module Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
