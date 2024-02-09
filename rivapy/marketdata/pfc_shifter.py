@@ -4,14 +4,9 @@ import rivapy.tools.interfaces as interfaces
 from rivapy.instruments import EnergyFutureSpecifications
 from typing import Dict, Set, List
 
-class PFCShifter(interfaces.FactoryObject):
-    def __init__(self, shape: pd.DataFrame, contracts: Dict[str, EnergyFutureSpecifications]) -> None:
-        self._validate_inputs(shape=shape, contracts=contracts)
-        self.shape = shape
-        self.contracts = contracts
-    
-    @staticmethod
-    def _validate_inputs(shape:pd.DataFrame, contracts: Dict[str, EnergyFutureSpecifications]):
+
+def validate_class_input(func):
+    def validate_wrapper(self, shape: pd.DataFrame, contracts: Dict[str, EnergyFutureSpecifications]):
         if isinstance(shape, pd.DataFrame):
             if not isinstance(shape.index, pd.DatetimeIndex):
                 raise TypeError('The index of the shape DataFrame is not of type pd.DatetimeIndex!')
@@ -23,13 +18,23 @@ class PFCShifter(interfaces.FactoryObject):
         date_diff = expected_dates - contract_scheduled_dates
         if len(date_diff) != 0:
             raise ValueError("The contract dates do not cover each date provided by the shape DataFrame!")
-        return None
+        func(self, shape, contracts) 
+    return validate_wrapper
+
+class PFCShifter(interfaces.FactoryObject):
+    @validate_class_input
+    def __init__(self, shape: pd.DataFrame, contracts: Dict[str, EnergyFutureSpecifications]) -> None:
+        self.shape = shape
+        self.contracts = contracts
         
     def _get_contract_start_end_dates(self) -> List:
         dates = set()
         for contract_schedule in self.contracts.values():
             dates.update(contract_schedule.get_start_end())
         return sorted(list(dates))
+    
+    def _get_forward_price_vector(self) -> np.ndarray:
+        return np.array([contract.get_price() for contract in self.contracts.values()]).reshape(-1,1)
     
     def generate_transition_matrix(self) -> pd.DataFrame:
         contract_start_and_end_dates = np.array(self._get_contract_start_end_dates())
@@ -69,6 +74,22 @@ class PFCShifter(interfaces.FactoryObject):
                     detected_redundant_contracts.append(transition_matrix.index[contract_idx])
 
         return transition_matrix.loc[~transition_matrix.index.isin(detected_redundant_contracts), :]
+    
+    def shift(self, transition_matrix: pd.DataFrame) -> pd.DataFrame:
+        date_tpls = list(zip(transition_matrix.columns[1:],transition_matrix.columns[:-1]))
+        contract_start_and_end_dates = np.array(self._get_contract_start_end_dates())
+        hours_btwn_dates = pd.Series(contract_start_and_end_dates[1:] - contract_start_and_end_dates[:-1]).dt.days.to_numpy().reshape(1,-1) * 24
+        transition_matrix = transition_matrix.to_numpy() * hours_btwn_dates
+        transition_matrix = transition_matrix/np.sum(transition_matrix, axis=1).reshape(-1,1)
+        fwd_price_vec = self._get_forward_price_vector()
+
+        fwd_price_noc = np.linalg.inv(transition_matrix) @ fwd_price_vec
+        #print(fwd_price_noc)
+        # the shifting process is not working correctly currently
+        shape = self.shape.copy()
+        for i, date_tpl in enumerate(date_tpls):
+            shape.iloc[(shape.index >= date_tpl[0]) & (shape.index <= date_tpl[1]),0] = shape.iloc[(shape.index >= date_tpl[0]) & (shape.index <= date_tpl[1]),0]/np.sum(shape.iloc[(shape.index >= date_tpl[0]) & (shape.index <= date_tpl[1]),0]) * len(shape.iloc[(shape.index >= date_tpl[0]) & (shape.index <= date_tpl[1]),0])*fwd_price_noc[i,0]
+        return shape
 
     def non_overlapping_structure(self):
         pass
@@ -80,4 +101,3 @@ class PFCShifter(interfaces.FactoryObject):
     ## TODO
     def _to_dict(self)->dict:
         self.to_dict()
-
