@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rivapy.models.stoch_local_vol &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html#logging-usage">Logging Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rivapy.models.stoch_local_vol</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rivapy.models.stoch_local_vol</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">bisect</span>
+<span class="kn">from</span> <span class="nn">rivapy.models.local_vol</span> <span class="kn">import</span> <span class="n">LocalVol</span>
+<span class="kn">import</span> <span class="nn">rivapy.numerics.kernel_regression</span> <span class="k">as</span> <span class="nn">kernel_regression</span>
+
+<div class="viewcode-block" id="StochasticLocalVol"><a class="viewcode-back" href="../../../rivapy/models/equity.html#rivapy.models.StochasticLocalVol">[docs]</a><span class="k">class</span> <span class="nc">StochasticLocalVol</span><span class="p">:</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stoch_vol_model</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; Stochastic Local Volatility model</span>
+
+<span class="sd">		Args:</span>
+<span class="sd">			stochastic_vol_model (StochasticVolModel): The underlying stochastic vol model</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_stoch_vol_model</span> <span class="o">=</span> <span class="n">stoch_vol_model</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_stoch_local_variance</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#np.ones(shape=(time_grid.shape[0], x_strikes.shape[0]))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_x_strikes</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_time_grid</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="StochasticLocalVol.calibrate_MC"><a class="viewcode-back" href="../../../rivapy/models/equity.html#rivapy.models.StochasticLocalVol.calibrate_MC">[docs]</a>	<span class="k">def</span> <span class="nf">calibrate_MC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+					<span class="n">vol_param</span><span class="p">,</span> 
+					<span class="n">x_strikes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+					<span class="n">time_grid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+					<span class="n">n_sims</span><span class="p">,</span> 
+					<span class="n">local_var</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+					<span class="n">call_prices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Calibrate the Heston Local Volatility Model using kernel regression.</span>
+
+<span class="sd">		This method calibrates the local volatility part of the Heston Model given a volatility parametrization so that the </span>
+<span class="sd">		respective implied volatilities from the given vol parametrization are reproduced by the Heston Local Volatility model.</span>
+<span class="sd">		The calibration is based on kernel regression as described in `Applied Machine Learning for Stochastic Local Volatility Calibration &lt;https://www.frontiersin.org/articles/10.3389/frai.2019.00004/full&gt;`_.</span>
+
+<span class="sd">		Args:</span>
+<span class="sd">			vol_param ([type]): [description]</span>
+<span class="sd">			x_strikes (np.array): [description]</span>
+<span class="sd">			time_grid (np.array): [description]</span>
+<span class="sd">			n_sims ([type]): [description]</span>
+<span class="sd">			local_var (np.ndarray, optional): [description]. Defaults to None.</span>
+<span class="sd">			call_prices (np.ndarray, optional): Defaults to None.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="n">local_var</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">local_var</span> <span class="o">=</span> <span class="n">LocalVol</span><span class="o">.</span><span class="n">compute_local_var</span><span class="p">(</span><span class="n">vol_param</span><span class="p">,</span> <span class="n">x_strikes</span><span class="p">,</span> <span class="n">time_grid</span><span class="p">,</span> <span class="n">call_prices</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_stoch_local_variance</span> <span class="o">=</span> <span class="n">StochasticLocalVol</span><span class="o">.</span><span class="n">_calibrate_MC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stoch_vol_model</span><span class="p">,</span>
+								<span class="n">x_strikes</span><span class="p">,</span> <span class="n">time_grid</span><span class="p">,</span>  <span class="n">n_sims</span><span class="p">,</span> <span class="n">local_var</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_x_strikes</span> <span class="o">=</span> <span class="n">x_strikes</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_time_grid</span> <span class="o">=</span> <span class="n">time_grid</span></div>
+
+	
+		
+<div class="viewcode-block" id="StochasticLocalVol.apply_mc_step"><a class="viewcode-back" href="../../../rivapy/models/equity.html#rivapy.models.StochasticLocalVol.apply_mc_step">[docs]</a>	<span class="k">def</span> <span class="nf">apply_mc_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">t0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">rnd</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Apply a MC-Euler step for the Heston Local Vol Model for n different paths.</span>
+
+<span class="sd">		Args:</span>
+<span class="sd">			x (np.ndarray): 2-d array containing the start values for the spot and variance. The first column contains the spot, the second the variance values.</span>
+<span class="sd">			t0 ([type]): [description]</span>
+<span class="sd">			t1 ([type]): [description]</span>
+<span class="sd">			rnd ([type]): [description]</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">t0_index</span> <span class="o">=</span> <span class="n">bisect</span><span class="o">.</span><span class="n">bisect_left</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_time_grid</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">t0_index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span><span class="c1"># or t0_index == self._time_grid.shape[0]:</span>
+			<span class="n">slv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stoch_local_variance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="k">elif</span> <span class="n">t0_index</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+			<span class="n">slv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stoch_local_variance</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_grid</span><span class="p">[</span><span class="n">t0_index</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_grid</span><span class="p">[</span><span class="n">t0_index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+			<span class="n">w1</span> <span class="o">=</span> <span class="p">(</span><span class="n">t0</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_time_grid</span><span class="p">[</span><span class="n">t0_index</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">dt</span>
+			<span class="n">w2</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_time_grid</span><span class="p">[</span><span class="n">t0_index</span><span class="p">]</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span>
+			<span class="n">slv</span> <span class="o">=</span> <span class="n">w1</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_stoch_local_variance</span><span class="p">[</span><span class="n">t0_index</span><span class="p">]</span> <span class="o">+</span> <span class="n">w2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_stoch_local_variance</span><span class="p">[</span><span class="n">t0_index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">slv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_strikes</span><span class="p">,</span> <span class="n">slv</span><span class="p">)</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stoch_vol_model</span><span class="o">.</span><span class="n">apply_mc_step</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">rnd</span><span class="p">,</span> <span class="n">inplace</span><span class="p">,</span> <span class="n">slv</span><span class="p">)</span></div>
+		<span class="c1"># if False:</span>
+		<span class="c1"># 	rnd_S = rnd[:,0]</span>
+		<span class="c1"># 	rnd_V = rnd[:,1]</span>
+		<span class="c1"># 	rnd_corr_S = np.sqrt(1.0-self._stoch_vol_model._correlation**2)*rnd_S + self._stoch_vol_model._correlation*rnd_V</span>
+		<span class="c1"># 	S = x_[:,0]</span>
+		<span class="c1"># 	v = x_[:,1]</span>
+		<span class="c1"># 	dt = t1-t0</span>
+		<span class="c1"># 	sqrt_dt = np.sqrt(dt)</span>
+		<span class="c1"># 	S *= np.exp(-0.5*v*slv*dt + np.sqrt(v*slv)*rnd_corr_S*sqrt_dt)</span>
+		<span class="c1"># 	v += self._stoch_vol_model._mean_reversion_speed*(self._stoch_vol_model._long_run_variance-v)*dt + self._stoch_vol_model._vol_of_vol*np.sqrt(v)*rnd_V*sqrt_dt</span>
+		<span class="c1"># 	x_[:,1] = np.maximum(v,0)</span>
+		<span class="c1"># 	return x_</span>
+<div class="viewcode-block" id="StochasticLocalVol.get_initial_value"><a class="viewcode-back" href="../../../rivapy/models/equity.html#rivapy.models.StochasticLocalVol.get_initial_value">[docs]</a>	<span class="k">def</span> <span class="nf">get_initial_value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Return the initial value (x0, v0)</span>
+
+<span class="sd">		Returns:</span>
+<span class="sd">			np.ndarray: Initial value.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stoch_vol_model</span><span class="o">.</span><span class="n">get_initial_value</span><span class="p">()</span></div>
+
+	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">_calibrate_MC</span><span class="p">(</span><span class="n">stoch_vol</span><span class="p">,</span>   
+					<span class="n">x_strikes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+					<span class="n">time_grid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> 
+					<span class="n">n_sims</span><span class="p">,</span> 
+					<span class="n">local_var</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+					<span class="n">x0</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+		
+		<span class="c1"># def apply_mc_step( x, t0, t1, rnd, stoch_local_var):</span>
+		<span class="c1"># 	slv = np.interp(x[:,0], x_strikes, stoch_local_var)</span>
+		<span class="c1"># 	rnd_S = rnd[:,0]</span>
+		<span class="c1"># 	rnd_V = rnd[:,1]</span>
+		<span class="c1"># 	rnd_corr_S = np.sqrt(1.0-stoch_vol._correlation**2)*rnd_S + stoch_vol._correlation*rnd_V</span>
+		<span class="c1"># 	S = x[:,0]</span>
+		<span class="c1"># 	v = x[:,1]</span>
+		<span class="c1"># 	dt = t1-t0</span>
+		<span class="c1"># 	sqrt_dt = np.sqrt(dt)</span>
+		<span class="c1"># 	S *= np.exp((0.5*v*slv)*dt + np.sqrt(v*slv)*rnd_corr_S*sqrt_dt)</span>
+		<span class="c1"># 	v += stoch_vol._mean_reversion_speed*(stoch_vol._long_run_variance-v)*dt + stoch_vol._vol_of_vol*np.sqrt(v)*rnd_V*sqrt_dt</span>
+		<span class="c1"># 	x[:,1] = np.maximum(v,0)</span>
+
+		<span class="n">stoch_local_variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">local_var</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+		<span class="n">stoch_local_variance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_var</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">stoch_vol</span><span class="o">.</span><span class="n">_initial_variance</span>
+		<span class="c1">#now apply explicit euler to get new values for v and S and then apply kernel regression to estimate new local variance</span>
+		<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_sims</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+		<span class="n">initial_value</span> <span class="o">=</span> <span class="n">stoch_vol</span><span class="o">.</span><span class="n">get_initial_value</span><span class="p">()</span>
+		<span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">initial_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">initial_value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">time_grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+			<span class="n">rnd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n_sims</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+			<span class="n">slv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">x_strikes</span><span class="p">,</span> <span class="n">stoch_local_variance</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+			<span class="n">stoch_vol</span><span class="o">.</span><span class="n">apply_mc_step</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">time_grid</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">time_grid</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">rnd</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">slv</span><span class="p">)</span>
+			<span class="n">gamma</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="mf">4.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">5</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">3.0</span><span class="o">*</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">5.0</span><span class="p">)</span>
+			<span class="n">kr</span> <span class="o">=</span> <span class="n">kernel_regression</span><span class="o">.</span><span class="n">KernelRegression</span><span class="p">(</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">gamma</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">],</span><span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+			<span class="n">stoch_local_variance</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_var</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="n">kr</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x_strikes</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)))</span>
+			<span class="c1"># overwrite all values at strikes that are outside the simulated spot range</span>
+			<span class="n">min_spot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+			<span class="n">stoch_local_variance</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">x_strikes</span><span class="o">&lt;</span><span class="n">min_spot</span><span class="p">]</span> <span class="o">=</span> <span class="n">stoch_local_variance</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">x_strikes</span><span class="o">&gt;</span><span class="n">min_spot</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+			<span class="n">max_spot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+			<span class="n">stoch_local_variance</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">x_strikes</span><span class="o">&gt;</span><span class="n">max_spot</span><span class="p">]</span> <span class="o">=</span> <span class="n">stoch_local_variance</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">x_strikes</span><span class="o">&lt;</span><span class="n">max_spot</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+		<span class="k">return</span> <span class="n">stoch_local_variance</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

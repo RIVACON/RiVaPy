@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rivapy.instruments.specifications &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html#logging-usage">Logging Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rivapy.instruments.specifications</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rivapy.instruments.specifications</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span> 
+<span class="kn">from</span> <span class="nn">rivapy.tools.enums</span> <span class="kn">import</span> <span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="n">Currency</span>
+<span class="c1">#from rivapy.enums import Currency</span>
+<span class="kn">from</span> <span class="nn">rivapy</span> <span class="kn">import</span> <span class="n">_pyvacon_available</span>
+<span class="k">if</span> <span class="n">_pyvacon_available</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pyvacon.finance.specification</span> <span class="k">as</span> <span class="nn">_spec</span>
+    
+    <span class="n">ComboSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">ComboSpecification</span>
+    <span class="c1">#Equity/FX</span>
+    <span class="n">PayoffStructure</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">PayoffStructure</span>
+    <span class="n">ExerciseSchedule</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">ExerciseSchedule</span>
+    <span class="n">BarrierDefinition</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">BarrierDefinition</span>
+    <span class="n">BarrierSchedule</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">BarrierSchedule</span>
+    <span class="n">BarrierPayoff</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">BarrierPayoff</span>
+    <span class="n">BarrierSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">BarrierSpecification</span>
+    <span class="c1"># EuropeanVanillaSpecification = _spec.EuropeanVanillaSpecification</span>
+    <span class="c1"># AmericanVanillaSpecification = _spec.AmericanVanillaSpecification</span>
+    <span class="c1">#RainbowUnderlyingSpec = _spec.RainbowUnderlyingSpec</span>
+    <span class="c1">#RainbowBarrierSpec = _spec.RainbowBarrierSpec</span>
+    <span class="n">LocalVolMonteCarloSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">LocalVolMonteCarloSpecification</span>
+    <span class="n">RainbowSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">RainbowSpecification</span>
+    <span class="n">MultiMemoryExpressSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">MultiMemoryExpressSpecification</span>
+    <span class="n">MemoryExpressSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">MemoryExpressSpecification</span>
+    <span class="n">ExpressPlusSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">ExpressPlusSpecification</span>
+    <span class="n">AsianVanillaSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">AsianVanillaSpecification</span>
+    <span class="n">RiskControlStrategy</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">RiskControlStrategy</span>
+    <span class="n">AsianRiskControlSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">AsianRiskControlSpecification</span>
+
+
+    <span class="c1">#Interest Rates</span>
+    <span class="n">IrSwapLegSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">IrSwapLegSpecification</span>
+    <span class="n">IrFixedLegSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">IrFixedLegSpecification</span>
+    <span class="n">IrFloatLegSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">IrFloatLegSpecification</span>
+    <span class="n">InterestRateSwapSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">InterestRateSwapSpecification</span>
+    <span class="n">InterestRateBasisSwapSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">InterestRateBasisSwapSpecification</span>
+    <span class="n">DepositSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">DepositSpecification</span>
+    <span class="n">InterestRateFutureSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">InterestRateFutureSpecification</span>
+        
+    <span class="n">InflationLinkedBondSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">InflationLinkedBondSpecification</span>
+    <span class="n">CallableBondSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">CallableBondSpecification</span>
+
+    <span class="c1">#GasStorageSpecification = _spec.GasStorageSpecification</span>
+
+    <span class="c1">#ScheduleSpecification = _spec.ScheduleSpecification</span>
+
+    <span class="c1">#SpecificationManager = _spec.SpecificationManager</span>
+
+    <span class="c1">#Bonds/Credit</span>
+    <span class="n">CouponDescription</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">CouponDescription</span>
+    <span class="n">BondSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">BondSpecification</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1">#empty placeholder...</span>
+    <span class="k">class</span> <span class="nc">BondSpecification</span><span class="p">:</span>
+        <span class="k">pass</span>
+<div class="viewcode-block" id="ComboSpecification"><a class="viewcode-back" href="../../../rivapy/instruments/index.html#rivapy.instruments.ComboSpecification">[docs]</a>    <span class="k">class</span> <span class="nc">ComboSpecification</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+<div class="viewcode-block" id="BarrierSpecification"><a class="viewcode-back" href="../../../rivapy/instruments/equity.html#rivapy.instruments.BarrierSpecification">[docs]</a>    <span class="k">class</span> <span class="nc">BarrierSpecification</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+<div class="viewcode-block" id="RainbowSpecification"><a class="viewcode-back" href="../../../rivapy/instruments/equity.html#rivapy.instruments.RainbowSpecification">[docs]</a>    <span class="k">class</span> <span class="nc">RainbowSpecification</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+<div class="viewcode-block" id="MemoryExpressSpecification"><a class="viewcode-back" href="../../../rivapy/instruments/equity.html#rivapy.instruments.MemoryExpressSpecification">[docs]</a>    <span class="k">class</span> <span class="nc">MemoryExpressSpecification</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="EuropeanVanillaSpecification"><a class="viewcode-back" href="../../../rivapy/instruments/equity.html#rivapy.instruments.EuropeanVanillaSpecification">[docs]</a><span class="k">class</span> <span class="nc">EuropeanVanillaSpecification</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                 <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">expiry</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+                 <span class="n">strike</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+                 <span class="n">sec_lvl</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">SecuritizationLevel</span><span class="o">.</span><span class="n">COLLATERALIZED</span><span class="p">,</span>
+                 <span class="n">curr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Currency</span><span class="o">.</span><span class="n">EUR</span><span class="p">,</span>
+                 <span class="n">udl_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+                 <span class="n">share_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+                <span class="c1">#  holidays: str = &#39;&#39;,</span>
+                <span class="c1">#  ex_settle: int = 0, not implemented</span>
+                <span class="c1">#  trade_settle: int = 0 not implemented</span>
+                 <span class="p">):</span>
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for european vanilla option</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            id (str): Identifier (name) of the european vanilla specification.</span>
+<span class="sd">            type (str): Type of the european vanilla option (&#39;PUT&#39;,&#39;CALL&#39;).</span>
+<span class="sd">            expiry (datetime): Expiration date.</span>
+<span class="sd">            strike (float): Strike price.</span>
+<span class="sd">            issuer (str, optional): Issuer Id. Must not be set if pricing data is manually defined. Defaults to &#39;&#39;.</span>
+<span class="sd">            sec_lvl (str, optional): Securitization level. Can be selected from rivapy.enums.SecuritizationLevel. Defaults to SecuritizationLevel.COLLATERALIZED.</span>
+<span class="sd">            curr (str, optional): Currency (ISO-4217 Code). Must not be set if pricing data is manually defined. Can be selected from rivapy.enums.Currency. Defaults to Currency.EUR.</span>
+<span class="sd">            udl_id (str, optional): Underlying Id. Must not be set if pricing data is manually defined. Defaults to &#39;&#39;.</span>
+<span class="sd">            share_ratio (float, optional): Ratio of covered shares of the underlying by a single option contract. Defaults to 1.0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">issuer</span> <span class="o">=</span> <span class="n">issuer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sec_lvl</span> <span class="o">=</span> <span class="n">sec_lvl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">curr</span> <span class="o">=</span>  <span class="n">curr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">udl_id</span> <span class="o">=</span> <span class="n">udl_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expiry</span> <span class="o">=</span> <span class="n">expiry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strike</span> <span class="o">=</span> <span class="n">strike</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">share_ratio</span> <span class="o">=</span> <span class="n">share_ratio</span>
+        <span class="c1"># self.holidays = holidays</span>
+        <span class="c1"># self.ex_settle = ex_settle</span>
+        <span class="c1"># self.trade_settle = trade_settle</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
+        
+    <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">EuropeanVanillaSpecification</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> 
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">issuer</span><span class="p">,</span> 
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">sec_lvl</span><span class="p">,</span> 
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">curr</span><span class="p">,</span> 
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">udl_id</span><span class="p">,</span> 
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">expiry</span><span class="p">,</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">strike</span><span class="p">,</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">share_ratio</span><span class="p">,</span>
+                                            <span class="s1">&#39;&#39;</span><span class="p">,</span>
+                                            <span class="mi">0</span><span class="p">,</span>
+                                            <span class="mi">0</span><span class="p">)</span>
+                                            
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span></div>
+    
+<div class="viewcode-block" id="AmericanVanillaSpecification"><a class="viewcode-back" href="../../../rivapy/instruments/equity.html#rivapy.instruments.AmericanVanillaSpecification">[docs]</a><span class="k">class</span> <span class="nc">AmericanVanillaSpecification</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>
+                 <span class="p">,</span><span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+                 <span class="p">,</span><span class="nb">type</span><span class="p">:</span> <span class="nb">str</span>
+                 <span class="p">,</span><span class="n">expiry</span><span class="p">:</span> <span class="n">datetime</span>
+                 <span class="p">,</span><span class="n">strike</span><span class="p">:</span> <span class="nb">float</span>
+                 <span class="p">,</span><span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                 <span class="p">,</span><span class="n">sec_lvl</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">SecuritizationLevel</span><span class="o">.</span><span class="n">COLLATERALIZED</span>
+                 <span class="p">,</span><span class="n">curr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Currency</span><span class="o">.</span><span class="n">EUR</span>
+                 <span class="p">,</span><span class="n">udl_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                 <span class="p">,</span><span class="n">share_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
+                 <span class="p">,</span><span class="n">exercise_before_ex_date</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="c1">#  ,holidays: str</span>
+                <span class="c1">#  ,ex_settle: str</span>
+                <span class="c1">#  ,trade_settle: str</span>
+                 <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for american vanilla option</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            id (str): Identifier (name) of the american vanilla specification.</span>
+<span class="sd">            type (str): Type of the american vanilla option (&#39;PUT&#39;,&#39;CALL&#39;).</span>
+<span class="sd">            expiry (datetime): Expiration date.</span>
+<span class="sd">            strike (float): Strike price.</span>
+<span class="sd">            issuer (str, optional): Issuer Id. Must not be set if pricing data is manually defined. Defaults to &#39;&#39;.</span>
+<span class="sd">            sec_lvl (str, optional): Securitization level. Can be selected from rivapy.enums.SecuritizationLevel. Defaults to SecuritizationLevel.COLLATERALIZED.</span>
+<span class="sd">            curr (str, optional): Currency (ISO-4217 Code). Must not be set if pricing data is manually defined. Can be selected from rivapy.enums.Currency. Defaults to Currency.EUR.</span>
+<span class="sd">            udl_id (str, optional): Underlying Id. Must not be set if pricing data is manually defined. Defaults to &#39;&#39;.</span>
+<span class="sd">            share_ratio (float, optional): Ratio of covered shares of the underlying by a single option contract. Defaults to 1.0.</span>
+<span class="sd">            exercise_before_ex_date (bool, optional): Indicates if option can be exercised within two days before dividend ex-date. Defaults to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+     
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expiry</span> <span class="o">=</span> <span class="n">expiry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strike</span> <span class="o">=</span> <span class="n">strike</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">issuer</span> <span class="o">=</span> <span class="n">issuer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sec_lvl</span> <span class="o">=</span> <span class="n">sec_lvl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">curr</span> <span class="o">=</span>  <span class="n">curr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">udl_id</span> <span class="o">=</span> <span class="n">udl_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">share_ratio</span> <span class="o">=</span> <span class="n">share_ratio</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exercise_before_ex_date</span> <span class="o">=</span> <span class="n">exercise_before_ex_date</span>
+        <span class="c1"># self.holidays = holidays</span>
+        <span class="c1"># self.ex_settle = ex_settle</span>
+        <span class="c1"># self.trade_settle = trade_settle</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
+        
+    <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">AmericanVanillaSpecification</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span>
+                                            <span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">issuer</span>
+                                            <span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sec_lvl</span>
+                                            <span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">curr</span>
+                                            <span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">udl_id</span>
+                                            <span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span>
+                                            <span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">expiry</span>
+                                            <span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">strike</span>
+                                            <span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">share_ratio</span>
+                                            <span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">exercise_before_ex_date</span>
+                                            <span class="p">,</span><span class="s1">&#39;&#39;</span>
+                                            <span class="p">,</span><span class="mi">0</span>
+                                            <span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+                                            
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span>   </div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

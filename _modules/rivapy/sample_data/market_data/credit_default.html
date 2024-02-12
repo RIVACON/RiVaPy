@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rivapy.sample_data.market_data.credit_default &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../developer_guide.html#logging-usage">Logging Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rivapy.sample_data.market_data.credit_default</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rivapy.sample_data.market_data.credit_default</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="k">class</span> <span class="nc">Features</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="n">Age</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">Income</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">Savings</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">Credit_income_ratio</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">Economimc_factor</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">ZIP_code</span> <span class="o">=</span> <span class="mi">5</span>
+
+<div class="viewcode-block" id="CreditDefaultData"><a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.credit_default.CreditDefaultData">[docs]</a><span class="k">class</span> <span class="nc">CreditDefaultData</span><span class="p">:</span>
+<div class="viewcode-block" id="CreditDefaultData.sample"><a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.credit_default.CreditDefaultData.sample">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">n_data</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> 
+                <span class="n">cov</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sample credit default data. </span>
+
+<span class="sd">        Return a pandas DataFrame that contains some credit features together with the default probability</span>
+<span class="sd">        and an indicator if the default occured (1) or if the credit did not default (0). The data is generated by a logistic regression</span>
+<span class="sd">        where the pd for a credit is computed by logistic regression (with fixed coefficients). The following features</span>
+<span class="sd">        are used</span>
+
+<span class="sd">        - :math:`x_{\\mbox{age}}` age of lender, sampled from beta distribution (a=2, b=5)</span>
+<span class="sd">        - :math:`x_{\\mbox{income}}` income of lender, sampled from beta distribution (a=2.0, b=2.0)</span>
+<span class="sd">        - :math:`x_{\\mbox{savings}}` savings of lender, sampled from beta distribution (a=5.0, b=1.0)</span>
+<span class="sd">        - :math:`x_{\\mbox{amount}}` amount of credit, sampled from  beta distribution (a=0.5, b=0.5)</span>
+<span class="sd">        - :math:`x_{\\mbox{region}}` one hot encoded feature indicating  one of three regions the lender lives in. The region are uniformly distributed</span>
+<span class="sd">        </span>
+<span class="sd">        The single features (exception is the region that is drawn independently of the other features) are related via a Gaussian copula. The following figure showsthe distributions and pairplots for a </span>
+<span class="sd">        generated sample of features.</span>
+
+<span class="sd">        .. image:: ../../../docs/source/figs/credit_default_features.png</span>
+<span class="sd">            :align: center</span>
+<span class="sd">            :width: 400</span>
+<span class="sd">  </span>
+<span class="sd">        After the features have been generated, logistic regression is used to compute default probabilities (pd) via the formula</span>
+<span class="sd">        </span>
+<span class="sd">        .. math::</span>
+<span class="sd">            pd = \\frac{1}{1+e^{x_{\\mbox{age}}}</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n_data (int): Number of data sampled (number of rows of final DataFrame).</span>
+<span class="sd">            seed (int, optional): The seed used internally, if None, no seed will be set. Defaults to None.</span>
+<span class="sd">            constant (float, optional): Constant used in logistic regression that determines the overall level of the pd. Defaults to -1.0.</span>
+<span class="sd">            cov (np.ndarray, optional): Covariance matrix used in the Gaussian copula. Defaults to None (thena flat covariance of 0.95 is used).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: DataFrame with features, default probabilities and default indicator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cov</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">0.95</span><span class="p">],</span>
+                <span class="p">[</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">0.95</span><span class="p">],</span>
+                <span class="p">[</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.95</span><span class="p">],</span>
+                <span class="p">[</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],])</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">])</span>
+        <span class="n">x_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="n">mean</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="n">cov</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_data</span><span class="p">)</span>
+        <span class="n">x_</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">x_</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">,</span><span class="s1">&#39;income&#39;</span><span class="p">,</span><span class="s1">&#39;savings&#39;</span><span class="p">,</span><span class="s1">&#39;credit_amount_perc&#39;</span><span class="p">])</span>
+        <span class="n">beta_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">},</span> 
+                     <span class="s1">&#39;income&#39;</span><span class="p">:{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="mf">2.0</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">},</span> 
+                     <span class="s1">&#39;savings&#39;</span><span class="p">:{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="mf">5.0</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="mf">1.0</span><span class="p">},</span> 
+                     <span class="s1">&#39;credit_amount_perc&#39;</span><span class="p">:{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="mf">0.5</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">}}</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">x_</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">x_</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">x_</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="o">**</span><span class="n">beta_params</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">x_</span>
+
+
+
+        <span class="c1">#result = {}</span>
+        <span class="c1">#result[&#39;age&#39;] = np.random.beta(a=2.0,b=5.0, size=n_data)</span>
+        <span class="c1">#result[&#39;income&#39;] = np.random.beta(a=2.0, b=2.0, size=n_data)</span>
+        <span class="c1">#result[&#39;savings&#39;] = np.random.uniform(low=0.0, high=1.0)</span>
+        <span class="c1">#result[&#39;credit_amount_perc&#39;] = np.random.uniform(low=0.5,high=5.0, size=n_data)</span>
+        
+        <span class="n">region</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">region</span><span class="p">)):</span>
+            <span class="n">region</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_data</span><span class="p">,))</span>
+        <span class="n">_tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">region</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">n_data</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">_tmp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">region</span><span class="p">[</span><span class="n">_tmp</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">region</span><span class="p">)):</span>
+            <span class="n">result</span><span class="p">[</span><span class="s1">&#39;region_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span><span class="o">=</span><span class="n">region</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;regime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">constant</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        
+        
+        <span class="n">default_prob</span> <span class="o">=</span> <span class="n">CreditDefaultData</span><span class="o">.</span><span class="n">_predict</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;default_prob&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_prob</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">high</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_data</span><span class="p">)</span>
+        <span class="n">defaulted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_data</span><span class="p">,))</span>
+        <span class="n">defaulted</span><span class="p">[</span><span class="n">tmp</span><span class="o">&lt;</span><span class="n">default_prob</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;defaulted&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaulted</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+    
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_predict</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This method computes the pd and is called by the method sample.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): Pandas DataFrame as constructed within the sample method.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Vector of default probabilities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">beta0</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">]</span>
+        <span class="n">tmp</span> <span class="o">=</span>  <span class="p">(</span><span class="mf">0.5</span><span class="o">-</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">0.3</span><span class="o">*</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;credit_amount_perc&#39;</span><span class="p">]</span><span class="c1">#</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="mf">5.0</span><span class="o">*</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;region_0&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mf">1.1</span> <span class="o">*</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;region_1&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.7</span><span class="o">*</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;region_2&#39;</span><span class="p">])</span><span class="o">*</span><span class="n">tmp</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="mf">1.5</span><span class="o">*</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;income&#39;</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="mf">1.5</span><span class="o">*</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;savings&#39;</span><span class="p">]</span>
+        <span class="n">x3</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;regime&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="p">(</span><span class="n">x0</span><span class="o">+</span><span class="n">x1</span><span class="o">+</span><span class="n">x2</span><span class="o">+</span><span class="n">x3</span><span class="p">)))</span></div>
+    
+
+<span class="k">class</span> <span class="nc">CreditDefaultData2</span><span class="p">:</span>
+        
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">n_years</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_data_per_year</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">cov</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                <span class="n">include_economic_factor</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sample credit default data. </span>
+
+<span class="sd">        Return a pandas DataFrame that contains some credit features together with the default probability</span>
+<span class="sd">        and an indicator if the default occured (1) or if the credit did not default (0). The data is generated by a logistic regression</span>
+<span class="sd">        where the pd for a credit is computed by logistic regression (with fixed coefficients). The following features</span>
+<span class="sd">        are used</span>
+
+<span class="sd">        - :math:`x_{\\mbox{age}}` age of lender, sampled from beta distribution (a=2, b=5)</span>
+<span class="sd">        - :math:`x_{\\mbox{income}}` income of lender, sampled from beta distribution (a=2.0, b=2.0)</span>
+<span class="sd">        - :math:`x_{\\mbox{savings}}` savings of lender, sampled from beta distribution (a=5.0, b=1.0)</span>
+<span class="sd">        - :math:`x_{\\mbox{amount}}` amount of credit, sampled from  beta distribution (a=0.5, b=0.5)</span>
+<span class="sd">        - :math:`x_{\\mbox{economic}}` economic factor, uniformly sampled from [0,0.5] for each year but one of the samples will be set to 1.0</span>
+
+<span class="sd">        The single features are related via a Gaussian copula. The following figure shows the distributions and pairplots for a </span>
+<span class="sd">        generated sample of features.</span>
+
+<span class="sd">        .. image:: ../../../docs/source/figs/credit_default_features.png</span>
+<span class="sd">            :align: center</span>
+<span class="sd">            :width: 400</span>
+<span class="sd">  </span>
+<span class="sd">        After the features have been generated, logistic regression is used to compute default probabilities (pd) via the formula</span>
+<span class="sd">        </span>
+<span class="sd">        .. math::</span>
+<span class="sd">            pd = \\frac{1}{1+e^{x_{\\mbox{age}}}</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n_data (int): Number of data sampled (number of rows of final DataFrame).</span>
+<span class="sd">            seed (int, optional): The seed used internally, if None, no seed will be set. Defaults to None.</span>
+<span class="sd">            constant (float, optional): Constant used in logistic regression that determines the overall level of the pd. Defaults to -1.0.</span>
+<span class="sd">            cov (np.ndarray, optional): Covariance matrix used in the Gaussian copula. Defaults to None (thena flat covariance of 0.95 is used).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: DataFrame with features, default probabilities and default indicator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cov</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">0.95</span><span class="p">],</span>
+                <span class="p">[</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">0.95</span><span class="p">],</span>
+                <span class="p">[</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.95</span><span class="p">],</span>
+                <span class="p">[</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],])</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">include_economic_factor</span><span class="p">:</span>
+            <span class="n">economic_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_years</span><span class="p">)</span>
+            <span class="n">economic_score</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">if</span> <span class="n">include_economic_factor</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_years</span><span class="o">*</span><span class="n">n_data_per_year</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span> 
+                            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">,</span><span class="s1">&#39;income&#39;</span><span class="p">,</span><span class="s1">&#39;savings&#39;</span><span class="p">,</span><span class="s1">&#39;credit_income_ratio&#39;</span> <span class="p">,</span> <span class="s1">&#39;economic_factor&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_years</span><span class="o">*</span><span class="n">n_data_per_year</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span> 
+                            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">,</span><span class="s1">&#39;income&#39;</span><span class="p">,</span><span class="s1">&#39;savings&#39;</span><span class="p">,</span><span class="s1">&#39;credit_income_ratio&#39;</span><span class="p">])</span>
+        
+        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_years</span><span class="p">):</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">y</span><span class="o">*</span><span class="n">n_data_per_year</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">n_data_per_year</span>
+            <span class="k">if</span> <span class="n">include_economic_factor</span><span class="p">:</span>
+                <span class="n">x</span><span class="p">[</span><span class="s1">&#39;economic_factor&#39;</span><span class="p">][</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="n">economic_score</span><span class="p">[</span><span class="n">y</span><span class="p">]</span>
+            <span class="n">x_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="n">mean</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="n">cov</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_data_per_year</span><span class="p">)</span>
+            <span class="n">x_</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">x_</span><span class="p">,</span> 
+                          <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">,</span><span class="s1">&#39;income&#39;</span><span class="p">,</span><span class="s1">&#39;savings&#39;</span><span class="p">,</span><span class="s1">&#39;credit_income_ratio&#39;</span><span class="p">,])</span>
+            <span class="n">beta_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">},</span> 
+                        <span class="s1">&#39;income&#39;</span><span class="p">:{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="mf">2.0</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">},</span> 
+                        <span class="s1">&#39;savings&#39;</span><span class="p">:{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="mf">5.0</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="mf">1.0</span><span class="p">},</span> 
+                        <span class="s1">&#39;credit_income_ratio&#39;</span><span class="p">:{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="mf">0.5</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">}}</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">beta_params</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">x</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">x_</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="o">**</span><span class="n">beta_params</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        
+        <span class="n">default_prob</span> <span class="o">=</span> <span class="n">CreditDefaultData2</span><span class="o">.</span><span class="n">_predict</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;default_prob&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_prob</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">high</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_years</span><span class="o">*</span><span class="n">n_data_per_year</span><span class="p">)</span>
+        <span class="n">defaulted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_years</span><span class="o">*</span><span class="n">n_data_per_year</span><span class="p">,))</span>
+        <span class="n">defaulted</span><span class="p">[</span><span class="n">tmp</span><span class="o">&lt;</span><span class="n">default_prob</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;defaulted&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaulted</span>
+        <span class="k">return</span> <span class="n">df</span>
+    
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_predict</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This method computes the pd and is called by the method sample.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (np.ndarray): </span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Vector of default probabilities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">age</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span><span class="n">Features</span><span class="o">.</span><span class="n">Age</span><span class="p">]</span>
+        <span class="n">age</span> <span class="o">=</span> <span class="mf">5.0</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">age</span><span class="p">)</span><span class="o">*</span><span class="n">age</span>
+        <span class="n">credit_income_ratio</span> <span class="o">=</span> <span class="o">-</span><span class="mf">5.0</span><span class="o">*</span><span class="mf">0.3</span><span class="o">*</span><span class="n">X</span><span class="p">[:,</span> <span class="n">Features</span><span class="o">.</span><span class="n">Credit_income_ratio</span><span class="p">]</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="mf">1.5</span><span class="o">*</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">Features</span><span class="o">.</span><span class="n">Income</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="mf">1.5</span><span class="o">*</span><span class="n">X</span><span class="p">[:,</span> <span class="n">Features</span><span class="o">.</span><span class="n">Savings</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span> <span class="c1"># if the given data does not contain the economic factor, set it to 1.0</span>
+            <span class="n">x3</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">-</span><span class="n">X</span><span class="p">[:,</span> <span class="n">Features</span><span class="o">.</span><span class="n">Economimc_factor</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x3</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">return</span> <span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="p">(</span><span class="n">age</span><span class="o">+</span><span class="n">credit_income_ratio</span> <span class="o">+</span> <span class="n">x1</span><span class="o">+</span><span class="n">x2</span><span class="o">+</span><span class="n">x3</span><span class="p">)))</span>
+    
+
+
+<span class="k">class</span> <span class="nc">CreditDefaultDataCategoricalFeature</span><span class="p">:</span>
+    <span class="n">zip_code_score</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.13</span><span class="p">,</span> <span class="mf">0.275</span><span class="p">,</span> <span class="mf">0.59</span><span class="p">,</span> <span class="mf">0.42</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span><span class="mf">0.87</span><span class="p">,</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.21</span><span class="p">,</span> <span class="mf">0.69</span><span class="p">]</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">n_years</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_data_per_year</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">cov</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include_economic_factor</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sample credit default data. </span>
+
+<span class="sd">        Return a pandas DataFrame that contains some credit features together with the default probability</span>
+<span class="sd">        and an indicator if the default occured (1) or if the credit did not default (0). The data is generated by a logistic regression</span>
+<span class="sd">        where the pd for a credit is computed by logistic regression (with fixed coefficients). The following features</span>
+<span class="sd">        are used</span>
+
+<span class="sd">        - :math:`x_{\\mbox{age}}` age of lender, sampled from beta distribution (a=2, b=5)</span>
+<span class="sd">        - :math:`x_{\\mbox{income}}` income of lender, sampled from beta distribution (a=2.0, b=2.0)</span>
+<span class="sd">        - :math:`x_{\\mbox{savings}}` savings of lender, sampled from beta distribution (a=5.0, b=1.0)</span>
+<span class="sd">        - :math:`x_{\\mbox{amount}}` amount of credit, sampled from  beta distribution (a=0.5, b=0.5)</span>
+<span class="sd">        - :math:`x_{\\mbox{economic}}` economic factor, uniformly sampled from [0,0.5] but one of the samples will be set to 1.0</span>
+<span class="sd">        - :math: _{\\mbox{zip}}` zip code of lender, sampled from categorical distribution (with 10 categories). Each zipcode </span>
+
+<span class="sd">        The single features (except the zip code) are related via a Gaussian copula. The following figure showsthe distributions and pairplots for a </span>
+<span class="sd">        generated sample of features.</span>
+
+<span class="sd">        .. image:: ../../../docs/source/figs/credit_default_features.png</span>
+<span class="sd">            :align: center</span>
+<span class="sd">            :width: 400</span>
+<span class="sd">  </span>
+<span class="sd">        After the features have been generated, logistic regression is used to compute default probabilities (pd) via the formula</span>
+<span class="sd">        </span>
+<span class="sd">        .. math::</span>
+<span class="sd">            pd = \\frac{1}{1+e^{x_{\\mbox{age}}}</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n_data (int): Number of data sampled (number of rows of final DataFrame).</span>
+<span class="sd">            seed (int, optional): The seed used internally, if None, no seed will be set. Defaults to None.</span>
+<span class="sd">            constant (float, optional): Constant used in logistic regression that determines the overall level of the pd. Defaults to -1.0.</span>
+<span class="sd">            cov (np.ndarray, optional): Covariance matrix used in the Gaussian copula. Defaults to None (thena flat covariance of 0.95 is used).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: DataFrame with features, default probabilities and default indicator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cov</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">0.95</span><span class="p">],</span>
+                <span class="p">[</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">0.95</span><span class="p">],</span>
+                <span class="p">[</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.95</span><span class="p">],</span>
+                <span class="p">[</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">0.95</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],])</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">include_economic_factor</span><span class="p">:</span>
+            <span class="n">economic_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_years</span><span class="p">)</span>
+            <span class="n">economic_score</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_years</span><span class="o">*</span><span class="n">n_data_per_year</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span> 
+                            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">,</span><span class="s1">&#39;income&#39;</span><span class="p">,</span><span class="s1">&#39;savings&#39;</span><span class="p">,</span><span class="s1">&#39;credit_income_ratio&#39;</span> <span class="p">,</span> <span class="s1">&#39;economic_factor&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_years</span><span class="o">*</span><span class="n">n_data_per_year</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span> 
+                            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">,</span><span class="s1">&#39;income&#39;</span><span class="p">,</span><span class="s1">&#39;savings&#39;</span><span class="p">,</span><span class="s1">&#39;credit_income_ratio&#39;</span> <span class="p">])</span>
+            
+        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_years</span><span class="p">):</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">y</span><span class="o">*</span><span class="n">n_data_per_year</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">n_data_per_year</span>
+            <span class="k">if</span> <span class="n">include_economic_factor</span><span class="p">:</span>
+                <span class="n">x</span><span class="p">[</span><span class="s1">&#39;economic_factor&#39;</span><span class="p">][</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="n">economic_score</span><span class="p">[</span><span class="n">y</span><span class="p">]</span>
+            <span class="n">x_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="n">mean</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="n">cov</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_data_per_year</span><span class="p">)</span>
+            <span class="n">x_</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">x_</span><span class="p">,</span> 
+                          <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">,</span><span class="s1">&#39;income&#39;</span><span class="p">,</span><span class="s1">&#39;savings&#39;</span><span class="p">,</span><span class="s1">&#39;credit_income_ratio&#39;</span><span class="p">,])</span>
+            <span class="n">beta_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">},</span> 
+                        <span class="s1">&#39;income&#39;</span><span class="p">:{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="mf">2.0</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">},</span> 
+                        <span class="s1">&#39;savings&#39;</span><span class="p">:{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="mf">5.0</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="mf">1.0</span><span class="p">},</span> 
+                        <span class="s1">&#39;credit_income_ratio&#39;</span><span class="p">:{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="mf">0.5</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">}}</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">beta_params</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">x</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">x_</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="o">**</span><span class="n">beta_params</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">zip_code_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_years</span><span class="o">*</span><span class="n">n_data_per_year</span><span class="p">)</span>
+        
+        <span class="n">one_hot_encoded_zip_code</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">zip_code_values</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;zip_code&#39;</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">one_hot_encoded_zip_code</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">default_prob</span> <span class="o">=</span> <span class="n">CreditDefaultDataCategoricalFeature</span><span class="o">.</span><span class="n">_predict</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;default_prob&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_prob</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">high</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_years</span><span class="o">*</span><span class="n">n_data_per_year</span><span class="p">)</span>
+        <span class="n">defaulted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_years</span><span class="o">*</span><span class="n">n_data_per_year</span><span class="p">,))</span>
+        <span class="n">defaulted</span><span class="p">[</span><span class="n">tmp</span><span class="o">&lt;</span><span class="n">default_prob</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;defaulted&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaulted</span>
+        <span class="k">return</span> <span class="n">df</span>
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_predict</span><span class="p">(</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This method computes the pd and is called by the method sample.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (np.ndarray): </span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Vector of default probabilities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">age</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span><span class="n">Features</span><span class="o">.</span><span class="n">Age</span><span class="p">]</span>
+        <span class="n">age</span> <span class="o">=</span> <span class="mf">5.0</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">age</span><span class="p">)</span><span class="o">*</span><span class="n">age</span>
+        <span class="n">credit_income_ratio</span> <span class="o">=</span> <span class="o">-</span><span class="mf">5.0</span><span class="o">*</span><span class="mf">0.3</span><span class="o">*</span><span class="n">X</span><span class="p">[:,</span> <span class="n">Features</span><span class="o">.</span><span class="n">Credit_income_ratio</span><span class="p">]</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="mf">1.5</span><span class="o">*</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">Features</span><span class="o">.</span><span class="n">Income</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="mf">1.5</span><span class="o">*</span><span class="n">X</span><span class="p">[:,</span> <span class="n">Features</span><span class="o">.</span><span class="n">Savings</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;</span><span class="n">Features</span><span class="o">.</span><span class="n">ZIP_code</span><span class="o">+</span><span class="mi">9</span><span class="p">:</span><span class="c1">#check if economic factor is included</span>
+            <span class="n">x3</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">-</span><span class="n">X</span><span class="p">[:,</span> <span class="n">Features</span><span class="o">.</span><span class="n">Economimc_factor</span><span class="p">]</span>
+            <span class="n">offset</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x3</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">x4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+            <span class="n">x4</span> <span class="o">+=</span> <span class="n">X</span><span class="p">[:,</span><span class="n">Features</span><span class="o">.</span><span class="n">ZIP_code</span><span class="o">+</span><span class="n">i</span><span class="o">+</span><span class="n">offset</span><span class="p">]</span><span class="o">*</span><span class="n">CreditDefaultDataCategoricalFeature</span><span class="o">.</span><span class="n">zip_code_score</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">return</span> <span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="p">(</span><span class="n">age</span><span class="o">+</span><span class="n">credit_income_ratio</span> <span class="o">+</span> <span class="n">x1</span><span class="o">+</span><span class="n">x2</span><span class="o">+</span><span class="n">x3</span><span class="o">+</span><span class="n">x4</span><span class="p">)))</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rivapy.instruments.bond_specifications &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html#logging-usage">Logging Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rivapy.instruments.bond_specifications</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rivapy.instruments.bond_specifications</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span>  <span class="n">abstractmethod</span> <span class="k">as</span> <span class="n">_abstractmethod</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span> <span class="k">as</span> <span class="n">_List</span><span class="p">,</span> <span class="n">Union</span> <span class="k">as</span> <span class="n">_Union</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">holidays</span> <span class="kn">import</span> <span class="n">HolidayBase</span> <span class="k">as</span> <span class="n">_HolidayBase</span><span class="p">,</span> <span class="n">ECB</span> <span class="k">as</span> <span class="n">_ECB</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">Period</span><span class="p">,</span> <span class="n">Schedule</span><span class="p">,</span> <span class="n">_date_to_datetime</span><span class="p">,</span> <span class="n">_datetime_to_date_list</span><span class="p">,</span> <span class="n">_term_to_period</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.enums</span> <span class="kn">import</span> <span class="n">DayCounterType</span><span class="p">,</span> <span class="n">RollConvention</span><span class="p">,</span> <span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="n">Currency</span><span class="p">,</span> <span class="n">Rating</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools._validators</span> <span class="kn">import</span> <span class="n">_check_positivity</span><span class="p">,</span> <span class="n">_check_start_before_end</span><span class="p">,</span>  <span class="n">_string_to_calendar</span><span class="p">,</span> <span class="n">_is_ascending_date_list</span>
+<span class="kn">import</span> <span class="nn">rivapy.tools.interfaces</span> <span class="k">as</span> <span class="nn">interfaces</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">Period</span><span class="p">,</span> <span class="n">Schedule</span>
+
+
+<span class="k">class</span> <span class="nc">BondBaseSpecification</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">issue_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                 <span class="n">maturity_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                 <span class="n">currency</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Currency</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;EUR&#39;</span><span class="p">,</span>
+                 <span class="n">notional</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span>
+                 <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">securitization_level</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">SecuritizationLevel</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+                 <span class="n">rating</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Rating</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">NONE</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Base bond specification.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            obj_id (str): (Preferably) Unique label of the bond, e.g. ISIN.</span>
+<span class="sd">            issue_date (_Union[date, datetime]): Date of bond issuance.</span>
+<span class="sd">            maturity_date (_Union[date, datetime]): Bond&#39;s maturity/expiry date. Must lie after the issue_date.</span>
+<span class="sd">            currency (str, optional): Currency as alphabetic, Defaults to &#39;EUR&#39;.</span>
+<span class="sd">            notional (float, optional): Bond&#39;s notional/face value. Must be positive. Defaults to 100.0.</span>
+<span class="sd">            issuer (str, optional): Name/id of issuer. Defaults to None.</span>
+<span class="sd">            securitization_level (_Union[SecuritizationLevel, str], optional): Securitization level. Defaults to None.</span>
+<span class="sd">            rating (_Union[Rating, str]): Paper rating.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obj_id</span> <span class="o">=</span> <span class="n">obj_id</span>
+        <span class="k">if</span> <span class="n">issuer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">issuer</span> <span class="o">=</span> <span class="n">issuer</span>
+        <span class="k">if</span> <span class="n">securitization_level</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">securitization_level</span> <span class="o">=</span> <span class="n">securitization_level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">issue_date</span> <span class="o">=</span> <span class="n">issue_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maturity_date</span> <span class="o">=</span> <span class="n">maturity_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currency</span> <span class="o">=</span> <span class="n">currency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notional</span> <span class="o">=</span> <span class="n">notional</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rating</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">rating</span><span class="p">)</span>
+        <span class="c1"># validate dates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_derived_issued_instrument</span><span class="p">()</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ref_date</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+                    <span class="n">issuers</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">sec_levels</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">currencies</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">_List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ref_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ref_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="n">ref_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">ref_date</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">issuers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">issuers</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Issuer_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">n_samples</span><span class="o">/</span><span class="mi">2</span><span class="p">))]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">currencies</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">currencies</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Currency</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sec_levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sec_levels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">SecuritizationLevel</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
+            <span class="n">days</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">15.0</span><span class="o">*</span><span class="mf">365.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span><span class="mf">2.0</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">issue_date</span> <span class="o">=</span> <span class="n">ref_date</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=-</span><span class="mi">365</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                <span class="s1">&#39;issue_date&#39;</span><span class="p">:</span> <span class="n">issue_date</span><span class="p">,</span>
+                <span class="s1">&#39;maturity_date&#39;</span><span class="p">:</span> <span class="n">ref_date</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">days</span><span class="p">),</span>
+                <span class="s1">&#39;currency&#39;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">currencies</span><span class="p">),</span>
+                <span class="s1">&#39;notional&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mf">100.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="mf">10_000.0</span><span class="p">,</span> <span class="mf">100_0000.0</span><span class="p">]),</span>
+                <span class="s1">&#39;issuer&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">issuers</span><span class="p">),</span>
+                <span class="s1">&#39;securitization_level&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">sec_levels</span><span class="p">)</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">_validate_derived_issued_instrument</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__issue_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__maturity_date</span> <span class="o">=</span> <span class="n">_check_start_before_end</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__issue_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__maturity_date</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">dict</span><span class="p">:</span>        
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;obj_id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_id</span><span class="p">,</span> <span class="s1">&#39;issuer&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">issuer</span><span class="p">,</span> 
+            <span class="s1">&#39;securitization_level&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">securitization_level</span><span class="p">,</span>
+            <span class="s1">&#39;issue_date&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">issue_date</span><span class="p">,</span> <span class="s1">&#39;maturity_date&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">maturity_date</span><span class="p">,</span> 
+            <span class="s1">&#39;currency&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span><span class="p">,</span> <span class="s1">&#39;notional&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">notional</span><span class="p">,</span> 
+            <span class="s1">&#39;rating&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rating</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="c1">#region properties</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">issuer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for instrument&#39;s issuer.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Instrument&#39;s issuer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__issuer</span>
+
+    <span class="nd">@issuer</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">issuer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for instrument&#39;s issuer.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            issuer(str): Issuer of the instrument.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__issuer</span> <span class="o">=</span> <span class="n">issuer</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rating</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rating</span>
+
+    <span class="nd">@rating</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">rating</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rating</span><span class="p">:</span><span class="n">_Union</span><span class="p">[</span><span class="n">Rating</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span><span class="o">-&gt;</span><span class="nb">str</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rating</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">rating</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">securitization_level</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for instrument&#39;s securitisation level.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Instrument&#39;s securitisation level.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__securitization_level</span>
+
+    <span class="nd">@securitization_level</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">securitization_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">securitisation_level</span><span class="p">:</span>  <span class="n">_Union</span><span class="p">[</span><span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__securitization_level</span> <span class="o">=</span> <span class="n">SecuritizationLevel</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">securitisation_level</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">issue_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for bond&#39;s issue date.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            date: Bond&#39;s issue date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__issue_date</span>
+
+    <span class="nd">@issue_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">issue_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issue_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for bond&#39;s issue date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            issue_date (Union[datetime, date]): Bond&#39;s issue date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__issue_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">issue_date</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">maturity_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for bond&#39;s maturity date.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            date: Bond&#39;s maturity date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__maturity_date</span>
+
+    <span class="nd">@maturity_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">maturity_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maturity_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for bond&#39;s maturity date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            maturity_date (Union[datetime, date]): Bond&#39;s maturity date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__maturity_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">maturity_date</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">currency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for bond&#39;s currency.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Bond&#39;s ISO 4217 currency code</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__currency</span>
+
+    <span class="nd">@currency</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">currency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currency</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__currency</span> <span class="o">=</span> <span class="n">Currency</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">currency</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">notional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for bond&#39;s face value.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Bond&#39;s face value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__notional</span>
+
+    <span class="nd">@notional</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">notional</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notional</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__notional</span> <span class="o">=</span> <span class="n">_check_positivity</span><span class="p">(</span><span class="n">notional</span><span class="p">)</span>
+
+    <span class="c1">#endregion</span>
+ 
+<div class="viewcode-block" id="ZeroCouponBondSpecification"><a class="viewcode-back" href="../../../rivapy/instruments/credit.html#rivapy.instruments.bond_specifications.ZeroCouponBondSpecification">[docs]</a><span class="k">class</span> <span class="nc">ZeroCouponBondSpecification</span><span class="p">(</span><span class="n">BondBaseSpecification</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">issue_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                 <span class="n">maturity_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                 <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;EUR&#39;</span><span class="p">,</span>
+                 <span class="n">notional</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span>
+                 <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">securitization_level</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">rating</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Rating</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">NONE</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Zero coupon bond specification.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            obj_id (str): (Preferably) Unique label of the bond, e.g. ISIN.</span>
+<span class="sd">            issue_date (_Union[date, datetime]): Date of bond issuance.</span>
+<span class="sd">            maturity_date (_Union[date, datetime]): Bond&#39;s maturity/expiry date. Must lie after the issue_date.</span>
+<span class="sd">            currency (str, optional): Currency as alphabetic, Defaults to &#39;EUR&#39;.</span>
+<span class="sd">            notional (float, optional): Bond&#39;s notional/face value. Must be positive. Defaults to 100.0.</span>
+<span class="sd">            issuer (str, optional): Name/id of issuer. Defaults to None.</span>
+<span class="sd">            securitization_level (_Union[SecuritizationLevel, str], optional): Securitization level. Defaults to None.</span>
+<span class="sd">            rating (_Union[Rating, str]): Paper rating.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span>
+                         <span class="n">issue_date</span><span class="p">,</span>
+                         <span class="n">maturity_date</span><span class="p">,</span>
+                         <span class="n">currency</span><span class="p">,</span>
+                         <span class="n">notional</span><span class="p">,</span>
+                         <span class="n">issuer</span><span class="p">,</span>
+                         <span class="n">securitization_level</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ZeroCouponBondSpecification._create_sample"><a class="viewcode-back" href="../../../rivapy/instruments/credit.html#rivapy.instruments.bond_specifications.ZeroCouponBondSpecification._create_sample">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ref_date</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+                        <span class="n">issuers</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sec_levels</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">currencies</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">specs</span> <span class="o">=</span> <span class="n">BondBaseSpecification</span><span class="o">.</span><span class="n">_create_sample</span><span class="p">(</span><span class="o">**</span><span class="nb">locals</span><span class="p">())</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">specs</span><span class="p">):</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ZeroCouponBondSpecification</span><span class="p">(</span><span class="s1">&#39;ZC_BND_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="o">**</span><span class="n">b</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+    
+    <span class="k">def</span> <span class="nf">_validate_derived_bond</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_validate_derived_issued_instrument</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="ZeroCouponBondSpecification.expected_cashflows"><a class="viewcode-back" href="../../../rivapy/instruments/credit.html#rivapy.instruments.bond_specifications.ZeroCouponBondSpecification.expected_cashflows">[docs]</a>    <span class="k">def</span> <span class="nf">expected_cashflows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">_List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of all expected cashflows (here only the final notional) together with their payment date.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _List[Tuple[datetime, float]]: The resulting list of all cashflows.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">maturity_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">notional</span><span class="p">)]</span></div></div>
+
+    
+    
+<div class="viewcode-block" id="PlainVanillaCouponBondSpecification"><a class="viewcode-back" href="../../../rivapy/instruments/credit.html#rivapy.instruments.bond_specifications.PlainVanillaCouponBondSpecification">[docs]</a><span class="k">class</span> <span class="nc">PlainVanillaCouponBondSpecification</span><span class="p">(</span><span class="n">BondBaseSpecification</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">issue_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                 <span class="n">maturity_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                 <span class="n">accrual_start</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                 <span class="n">coupon_freq</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">coupon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;EUR&#39;</span><span class="p">,</span>
+                 <span class="n">notional</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span>
+                 <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                  <span class="n">securitization_level</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                  <span class="n">stub</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                  <span class="n">rating</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Rating</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">NONE</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;PlainVanillaCouponBond specification.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            obj_id (str): (Preferably) Unique label of the bond, e.g. ISIN.</span>
+<span class="sd">            issue_date (_Union[date, datetime]): Date of bond issuance.</span>
+<span class="sd">            maturity_date (_Union[date, datetime]): Bond&#39;s maturity/expiry date. Must lie after the issue_date.</span>
+<span class="sd">            first_coupondate (_Union[date, datetime]): The first coupon date.</span>
+<span class="sd">            coupon_freq (str): Frequency of coupons. Defaults to &#39;1Y&#39; for yearly. Internally, the method :func:`rivapy.tools.Period.from_string` is used, see the definition of valid strings there.     </span>
+<span class="sd">            coupon (float): Coupon as relative number (multiplied internaly by notional to get absolute cashflow).</span>
+<span class="sd">            currency (str, optional): Currency as alphabetic, Defaults to &#39;EUR&#39;.</span>
+<span class="sd">            notional (float, optional): Bond&#39;s notional/face value. Must be positive. Defaults to 100.0.</span>
+<span class="sd">            issuer (str, optional): Name/id of issuer. Defaults to None.</span>
+<span class="sd">            securitization_level (_Union[SecuritizationLevel, str], optional): Securitization level. Defaults to None.</span>
+<span class="sd">            rating ( _Union[Rating, str]): Paper rating.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span>
+                         <span class="n">issue_date</span><span class="p">,</span>
+                         <span class="n">maturity_date</span><span class="p">,</span>
+                         <span class="n">currency</span><span class="p">,</span>
+                         <span class="n">notional</span><span class="p">,</span>
+                         <span class="n">issuer</span><span class="p">,</span>
+                         <span class="n">securitization_level</span><span class="p">,</span> 
+                         <span class="n">rating</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">accrual_start</span> <span class="o">=</span> <span class="n">accrual_start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coupon_freq</span> <span class="o">=</span> <span class="n">coupon_freq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coupon</span> <span class="o">=</span> <span class="n">coupon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stub</span> <span class="o">=</span> <span class="n">stub</span>
+
+<div class="viewcode-block" id="PlainVanillaCouponBondSpecification.expected_cashflows"><a class="viewcode-back" href="../../../rivapy/instruments/credit.html#rivapy.instruments.bond_specifications.PlainVanillaCouponBondSpecification.expected_cashflows">[docs]</a>    <span class="k">def</span> <span class="nf">expected_cashflows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">_List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of all expected cashflows (final notional and coupons) together with their payment date.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _List[Tuple[datetime, float]]: The resulting list of all cashflows.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#if self.coupon_freq != &#39;Y&#39;:</span>
+        <span class="c1">#    raise Exception(&#39;Cannot calc cashflows for other than yearly coupons. Missing transformation from yearly coupon to .... &#39;)</span>
+        <span class="n">period</span> <span class="o">=</span> <span class="n">Period</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coupon_freq</span><span class="p">)</span>
+        <span class="n">coupon_multiplier</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">if</span> <span class="n">period</span><span class="o">.</span><span class="n">years</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">coupon_multiplier</span> <span class="o">=</span> <span class="n">period</span><span class="o">.</span><span class="n">years</span>
+        <span class="k">elif</span> <span class="n">period</span><span class="o">.</span><span class="n">months</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">coupon_multiplier</span> <span class="o">=</span> <span class="n">period</span><span class="o">.</span><span class="n">months</span><span class="o">/</span><span class="mf">12.0</span>
+        <span class="k">elif</span> <span class="n">period</span><span class="o">.</span><span class="n">days</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">coupon_multiplier</span> <span class="o">=</span> <span class="n">period</span><span class="o">.</span><span class="n">days</span><span class="o">/</span><span class="mf">365.0</span>
+        <span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">accrual_start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maturity_date</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">stub</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stub</span><span class="p">)</span><span class="o">.</span><span class="n">generate_dates</span><span class="p">(</span><span class="n">ends_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[(</span><span class="n">d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coupon</span><span class="o">*</span><span class="n">coupon_multiplier</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">notional</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">schedule</span><span class="p">]</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">accrual_start</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span><span class="c1"># the first entry of this schedule is the accrual start which has a cashflow of zero and is just used for accrual calculation</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">maturity_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">notional</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;accrual_start&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">accrual_start</span><span class="p">,</span>
+            <span class="s1">&#39;coupon_freq&#39;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">coupon_freq</span><span class="p">,</span>
+            <span class="s1">&#39;coupon&#39;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">coupon</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="n">PlainVanillaCouponBondSpecification</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_to_dict</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">result</span>
+    
+<div class="viewcode-block" id="PlainVanillaCouponBondSpecification._create_sample"><a class="viewcode-back" href="../../../rivapy/instruments/credit.html#rivapy.instruments.bond_specifications.PlainVanillaCouponBondSpecification._create_sample">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ref_date</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+                        <span class="n">issuers</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sec_levels</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">currencies</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">specs</span> <span class="o">=</span> <span class="n">BondBaseSpecification</span><span class="o">.</span><span class="n">_create_sample</span><span class="p">(</span><span class="o">**</span><span class="nb">locals</span><span class="p">())</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">coupons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.09</span><span class="p">,</span> <span class="mf">0.0025</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">specs</span><span class="p">):</span>
+            <span class="n">b</span><span class="p">[</span><span class="s1">&#39;coupon_freq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;3M&#39;</span><span class="p">,</span> <span class="s1">&#39;6M&#39;</span><span class="p">,</span> <span class="s1">&#39;9M&#39;</span><span class="p">,</span> <span class="s1">&#39;1Y&#39;</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.4</span><span class="p">])</span>
+            <span class="n">issue_date</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="s1">&#39;issue_date&#39;</span><span class="p">]</span>
+            <span class="n">b</span><span class="p">[</span><span class="s1">&#39;accrual_start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">issue_date</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+            <span class="n">b</span><span class="p">[</span><span class="s1">&#39;coupon&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">coupons</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">PlainVanillaCouponBondSpecification</span><span class="p">(</span><span class="s1">&#39;BND_PV_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="o">**</span><span class="n">b</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">result</span></div></div>
+
+<span class="k">class</span> <span class="nc">FixedRateBondSpecification</span><span class="p">(</span><span class="n">BondBaseSpecification</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">issue_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                 <span class="n">maturity_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                 <span class="n">coupon_payment_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]],</span>
+                 <span class="n">coupons</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+                <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;EUR&#39;</span><span class="p">,</span>
+                 <span class="n">notional</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span>
+                 <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">securitization_level</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">rating</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Rating</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">NONE</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fixed rate bond specification by providing coupons and coupon payment dates directly.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            coupon_payment_dates (List[Union[date, datetime]]): List of annualised coupon payment dates.</span>
+<span class="sd">            coupons (List[float]): List of annualised coupon amounts as fraction of notional.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span> <span class="n">issue_date</span><span class="p">,</span> <span class="n">maturity_date</span><span class="p">,</span> <span class="n">currency</span><span class="p">,</span> <span class="n">notional</span><span class="p">,</span> <span class="n">issuer</span><span class="p">,</span> <span class="n">securitization_level</span><span class="p">,</span> <span class="n">rating</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__coupon_payment_dates</span> <span class="o">=</span> <span class="n">coupon_payment_dates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__coupons</span> <span class="o">=</span> <span class="n">coupons</span>
+        <span class="c1"># validation of dates&#39; consistency</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_ascending_date_list</span><span class="p">(</span><span class="n">issue_date</span><span class="p">,</span> <span class="n">coupon_payment_dates</span><span class="p">,</span> <span class="n">maturity_date</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Inconsistent combination of issue date &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">issue_date</span><span class="p">)</span>
+                            <span class="o">+</span> <span class="s2">&quot;&#39;, payment dates &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">coupon_payment_dates</span><span class="p">)</span>
+                            <span class="o">+</span> <span class="s2">&quot;&#39;, and maturity date &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">maturity_date</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39;.&quot;</span><span class="p">)</span>
+            <span class="c1"># TODO: Clarify if inconsistency should be shown explicitly.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">coupon_payment_dates</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">coupons</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__coupons</span> <span class="o">=</span> <span class="n">coupons</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Number of coupons &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">coupons</span><span class="p">)</span> <span class="o">+</span>
+                            <span class="s1">&#39; is not equal to number of coupon payment dates &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">coupon_payment_dates</span><span class="p">))</span>
+
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ref_date</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">issuers</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">specs</span> <span class="o">=</span> <span class="n">BondBaseSpecification</span><span class="o">.</span><span class="n">_create_sample</span><span class="p">(</span><span class="o">**</span><span class="nb">locals</span><span class="p">())</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">coupons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.09</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">specs</span><span class="p">):</span>
+            <span class="n">issue_date</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="s1">&#39;issue_date&#39;</span><span class="p">]</span>
+            <span class="n">n_coupons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+            <span class="n">days_coupon_period</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mf">90.0</span><span class="p">,</span><span class="mf">180.0</span><span class="p">,</span><span class="mf">365.0</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.6</span><span class="p">])</span>
+            <span class="n">b</span><span class="p">[</span><span class="s1">&#39;coupon_payment_dates&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">issue_date</span><span class="o">+</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">days_coupon_period</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_coupons</span><span class="p">)]</span>
+            <span class="n">coupon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">coupons</span><span class="p">)</span>
+            <span class="n">b</span><span class="p">[</span><span class="s1">&#39;coupons&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">coupon</span><span class="p">]</span><span class="o">*</span><span class="n">n_coupons</span>
+            <span class="n">b</span><span class="p">[</span><span class="s1">&#39;maturity_date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="s1">&#39;coupon_payment_dates&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FixedRateBondSpecification</span><span class="p">(</span><span class="s1">&#39;BND_FR_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="o">**</span><span class="n">b</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">_validate_derived_bond</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__coupon_payment_dates</span> <span class="o">=</span> <span class="n">_datetime_to_date_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__coupon_payment_dates</span><span class="p">)</span>
+        <span class="c1"># validation of dates&#39; consistency</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_ascending_date_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__issue_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__coupon_payment_dates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__maturity_date</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Inconsistent combination of issue date &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__issue_date</span><span class="p">)</span>
+                            <span class="o">+</span> <span class="s2">&quot;&#39;, payment dates &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__coupon_payment_dates</span><span class="p">)</span>
+                            <span class="o">+</span> <span class="s2">&quot;&#39;, and maturity date &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__maturity_date</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39;.&quot;</span><span class="p">)</span>
+            <span class="c1"># TODO: Clarify if inconsistency should be shown explicitly.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__coupon_payment_dates</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__coupons</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Number of coupons &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__coupons</span><span class="p">)</span> <span class="o">+</span>
+                            <span class="s1">&#39; is not equal to number of coupon payment dates &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__coupon_payment_dates</span><span class="p">))</span>
+    
+    <span class="k">def</span> <span class="nf">_validate_derived_issued_instrument</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">dict</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;coupon_payment_dates&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__coupon_payment_dates</span><span class="p">,</span>
+            <span class="s1">&#39;coupons&#39;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__coupons</span> 
+            <span class="p">}</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="n">FixedRateBondSpecification</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_to_dict</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_master_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span>
+                         <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                         <span class="n">issue_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                         <span class="n">maturity_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                         <span class="n">coupon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                         <span class="n">tenor</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Period</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+                         <span class="n">backwards</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                         <span class="n">stub</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                         <span class="n">business_day_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">RollConvention</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">FOLLOWING</span><span class="p">,</span>
+                         <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;EUR&#39;</span><span class="p">,</span>
+                         <span class="n">notional</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span>
+                         <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">securitisation_level</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fixed rate bond specification based on bond&#39;s master data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            # TODO: How can we avoid repeating ourselves here?</span>
+<span class="sd">            obj_id (str): (Preferably) Unique label of the bond, e.g. ISIN.</span>
+<span class="sd">            issue_date (Union[date, datetime]): Date of bond issuance.</span>
+<span class="sd">            maturity_date (Union[date, datetime]): Bond&#39;s maturity/expiry date. Must lie after the issue_date.</span>
+
+<span class="sd">            coupon (float): Annualised coupon amount as fraction of notional, e.g. 0.0125 for fixed rate coupon of</span>
+<span class="sd">                            1.25%.</span>
+<span class="sd">            tenor: (Union[period, str]): Time distance between two coupon payment dates.</span>
+<span class="sd">            backwards (bool, optional): Defines direction for rolling out the schedule. True means the schedule will be</span>
+<span class="sd">                                        rolled out (backwards) from maturity date to issue date. Defaults to True.</span>
+<span class="sd">            stub (bool, optional): Defines if the first/last period is accepted (True), even though it is shorter than</span>
+<span class="sd">                                   the others, or if it remaining days are added to the neighbouring period (False).</span>
+<span class="sd">                                   Defaults to True.</span>
+<span class="sd">            business_day_convention (Union[RollConvention, str], optional): Set of rules defining the adjustment of</span>
+<span class="sd">                                                                            days to ensure each date being a business</span>
+<span class="sd">                                                                            day with respect to a given holiday</span>
+<span class="sd">                                                                            calendar. Defaults to</span>
+<span class="sd">                                                                            RollConvention.FOLLOWING</span>
+<span class="sd">            calendar (Union[HolidayBase, str], optional): Holiday calendar defining the bank holidays of a country or</span>
+<span class="sd">                                                           province (but not all non-business days as for example</span>
+<span class="sd">                                                           Saturdays and Sundays).</span>
+<span class="sd">                                                           Defaults (through constructor) to holidays.ECB</span>
+<span class="sd">                                                           (= Target2 calendar) between start_day and end_day.</span>
+<span class="sd">            # TODO: How can we avoid repeating ourselves here?</span>
+<span class="sd">            currency (str, optional): Currency as alphabetic  according to iso</span>
+<span class="sd">                                                            currency code ISO 4217</span>
+<span class="sd">                                                            (cf. https://www.iso.org/iso-4217-currency-codes.html).</span>
+<span class="sd">                                                            Defaults to &#39;EUR&#39;.</span>
+<span class="sd">            notional (float, optional): Bond&#39;s notional/face value. Must be positive. Defaults to 100.0.</span>
+<span class="sd">            issuer (str, optional): Issuer of the instrument. Defaults to None.</span>
+<span class="sd">            securitisation_level (Union[SecuritizationLevel, str], optional): Securitisation level of the instrument.</span>
+<span class="sd">                                                                              Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            FixedRateBond: Corresponding fixed rate bond with already generated schedule for coupon payments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">coupon</span> <span class="o">=</span> <span class="n">_check_positivity</span><span class="p">(</span><span class="n">coupon</span><span class="p">)</span>
+        <span class="n">tenor</span> <span class="o">=</span> <span class="n">_term_to_period</span><span class="p">(</span><span class="n">tenor</span><span class="p">)</span>
+        <span class="n">business_day_convention</span> <span class="o">=</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">business_day_convention</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">calendar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">calendar</span> <span class="o">=</span> <span class="n">_ECB</span><span class="p">(</span><span class="n">years</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="n">issue_date</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">maturity_date</span><span class="o">.</span><span class="n">year</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">calendar</span> <span class="o">=</span> <span class="n">_string_to_calendar</span><span class="p">(</span><span class="n">calendar</span><span class="p">)</span>
+        <span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">issue_date</span><span class="p">,</span> <span class="n">maturity_date</span><span class="p">,</span> <span class="n">tenor</span><span class="p">,</span> <span class="n">backwards</span><span class="p">,</span> <span class="n">stub</span><span class="p">,</span> <span class="n">business_day_convention</span><span class="p">,</span> <span class="n">calendar</span><span class="p">)</span>
+        <span class="n">coupon_payment_dates</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">generate_dates</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">coupons</span> <span class="o">=</span> <span class="p">[</span><span class="n">coupon</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">coupon_payment_dates</span><span class="p">)</span>
+        <span class="n">securitisation_level</span> <span class="o">=</span> <span class="n">SecuritizationLevel</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">securitisation_level</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">FixedRateBondSpecification</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span> <span class="n">issue_date</span><span class="p">,</span> <span class="n">maturity_date</span><span class="p">,</span> <span class="n">coupon_payment_dates</span><span class="p">,</span> <span class="n">coupons</span><span class="p">,</span> <span class="n">currency</span><span class="p">,</span> <span class="n">notional</span><span class="p">,</span>
+                             <span class="n">issuer</span><span class="p">,</span> <span class="n">securitisation_level</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">coupon_payment_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">date</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for payment dates for fixed coupons.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[date]: List of dates for fixed coupon payments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__coupon_payment_dates</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">coupons</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for fixed coupon payments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[float]: List of coupon amounts expressed as annualised fractions of bond&#39;s face value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__coupons</span>
+
+<span class="k">class</span> <span class="nc">FloatingRateNoteSpecification</span><span class="p">(</span><span class="n">BondBaseSpecification</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                 <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">issue_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                 <span class="n">maturity_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                 <span class="n">coupon_period_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]],</span>
+                 <span class="n">day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">ThirtyU360</span><span class="p">,</span>
+                 <span class="n">spreads</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">reference_index</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;dummy_curve&#39;</span><span class="p">,</span>
+                 <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;EUR&#39;</span><span class="p">,</span>
+                 <span class="n">notional</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span>
+                 <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">securitisation_level</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Floating rate note specification by providing coupon periods directly.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            coupon_period_dates (List[_Union[date, datetime]): Floating rate note&#39;s coupon periods, i.e. beginning and</span>
+<span class="sd">                                                               ends of the accrual periods for the floating rate coupon</span>
+<span class="sd">                                                               payments.</span>
+<span class="sd">            day_count_convention (Union[DayCounter, str], optional): Day count convention for determining period</span>
+<span class="sd">                                                                     length. Defaults to DayCounter.ThirtyU360.</span>
+<span class="sd">            spreads (List[float], optional): List of spreads added to the floating rates derived from fixing the</span>
+<span class="sd">                                             reference curve as fraction of notional. Defaults to None.</span>
+<span class="sd">            reference_index (str, optional): Floating rate note underlying reference curve used for fixing the floating</span>
+<span class="sd">                                             rate coupon amounts. Defaults to &#39;dummy_curve&#39;.</span>
+<span class="sd">                                             Note: A reference curve could also be provided later at the pricing stage.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#super().__init__(obj_id, issue_date, maturity_date, currency, notional, issuer, securitisation_level)</span>
+        <span class="n">BondBaseSpecification</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_id</span><span class="p">,</span> <span class="n">issue_date</span><span class="p">,</span> <span class="n">maturity_date</span><span class="p">,</span> <span class="n">currency</span><span class="p">,</span> <span class="n">notional</span><span class="p">,</span> <span class="n">issuer</span><span class="p">,</span> <span class="n">securitisation_level</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__coupon_period_dates</span> <span class="o">=</span> <span class="n">_datetime_to_date_list</span><span class="p">(</span><span class="n">coupon_period_dates</span><span class="p">)</span>
+        <span class="c1"># validation of dates&#39; consistency</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_ascending_date_list</span><span class="p">(</span><span class="n">issue_date</span><span class="p">,</span> <span class="n">coupon_period_dates</span><span class="p">,</span> <span class="n">maturity_date</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Inconsistent combination of issue date &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">issue_date</span><span class="p">)</span>
+                            <span class="o">+</span> <span class="s2">&quot;&#39;, payment dates &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">coupon_period_dates</span><span class="p">)</span>
+                            <span class="o">+</span> <span class="s2">&quot;&#39;, and maturity date &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">maturity_date</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39;.&quot;</span><span class="p">)</span>
+            <span class="c1"># TODO: Clarify if inconsistency should be shown explicitly.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__day_count_convention</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">day_count_convention</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">spreads</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__spreads</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coupon_period_dates</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">spreads</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">coupon_period_dates</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__spreads</span> <span class="o">=</span> <span class="n">spreads</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Number of spreads &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">spreads</span><span class="p">)</span> <span class="o">+</span>
+                            <span class="s1">&#39; does not fit to number of coupon periods &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">coupon_period_dates</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">reference_index</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="c1"># do not leave reference curve empty as this causes pricer to ignore floating rate coupons!</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__reference_index</span> <span class="o">=</span> <span class="s1">&#39;dummy_curve&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__reference_index</span> <span class="o">=</span> <span class="n">reference_index</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_master_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> 
+                         <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                         <span class="n">issue_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                         <span class="n">maturity_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                         <span class="n">tenor</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Period</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+                         <span class="n">backwards</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                         <span class="n">stub</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                         <span class="n">business_day_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">RollConvention</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">FOLLOWING</span><span class="p">,</span>
+                         <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">ThirtyU360</span><span class="p">,</span>
+                         <span class="n">spread</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                         <span class="n">reference_index</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;dummy_curve&#39;</span><span class="p">,</span>
+                         <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;EUR&#39;</span><span class="p">,</span>
+                         <span class="n">notional</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span>
+                         <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">securitisation_level</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Floating rate note specification based on master data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            # TODO: How can we avoid repeating ourselves here?</span>
+<span class="sd">            obj_id (str): (Preferably) Unique label of the bond, e.g. ISIN.</span>
+<span class="sd">            issue_date (Union[date, datetime]): Date of bond issuance.</span>
+<span class="sd">            maturity_date (Union[date, datetime]): Bond&#39;s maturity/expiry date. Must lie after the issue_date.</span>
+
+<span class="sd">            tenor: (Union[period, str]): Time distance between two coupon payment dates.</span>
+<span class="sd">            backwards (bool, optional): Defines direction for rolling out the schedule. True means the schedule will be</span>
+<span class="sd">                                        rolled out (backwards) from maturity date to issue date. Defaults to True.</span>
+<span class="sd">            stub (bool, optional): Defines if the first/last period is accepted (True), even though it is shorter than</span>
+<span class="sd">                                   the others, or if it remaining days are added to the neighbouring period (False).</span>
+<span class="sd">                                   Defaults to True.</span>
+<span class="sd">            business_day_convention (Union[RollConvention, str], optional): Set of rules defining the adjustment of</span>
+<span class="sd">                                                                            days to ensure each date being a business</span>
+<span class="sd">                                                                            day with respect to a given holiday</span>
+<span class="sd">                                                                            calendar. Defaults to</span>
+<span class="sd">                                                                            RollConvention.FOLLOWING</span>
+<span class="sd">            calendar (Union[HolidayBase, str], optional): Holiday calendar defining the bank holidays of a country or</span>
+<span class="sd">                                                          province (but not all non-business days as for example</span>
+<span class="sd">                                                          Saturdays and Sundays).</span>
+<span class="sd">                                                          Defaults (through constructor) to holidays.ECB</span>
+<span class="sd">                                                          (= Target2 calendar) between start_day and end_day.</span>
+<span class="sd">            # TODO: How can we avoid repeating ourselves here?</span>
+<span class="sd">            day_count_convention (Union[DayCounter, str], optional): Day count convention for determining period</span>
+<span class="sd">                                                                     length. Defaults to DayCounter.ThirtyU360.</span>
+<span class="sd">            spread (float, optional): Spread added to floating rate derived from fixing the reference curve as fraction</span>
+<span class="sd">                                      of notional, i.e. 0.0025 for 25 basis points. Defaults to 0.0.</span>
+<span class="sd">            reference_index (str, optional): Floating rate note underlying reference curve used for fixing the floating</span>
+<span class="sd">                                             rate coupon amounts. Defaults to &#39;dummy_curve&#39;.</span>
+<span class="sd">                                             Note: A reference curve could also be provided later at the pricing stage.</span>
+<span class="sd">            currency (str, optional): Currency as alphabetic code according to iso</span>
+<span class="sd">                                                            currency code ISO 4217</span>
+<span class="sd">                                                            (cf. https://www.iso.org/iso-4217-currency-codes.html).</span>
+<span class="sd">                                                            Defaults to &#39;EUR&#39;.</span>
+<span class="sd">            notional (float, optional): Bond&#39;s notional/face value. Must be positive. Defaults to 100.0.</span>
+<span class="sd">            issuer (str, optional): Issuer of the instrument. Defaults to None.</span>
+<span class="sd">            securitisation_level (Union[SecuritizationLevel, str], optional): Securitisation level of the instrument.</span>
+<span class="sd">                                                                             Defaults to None.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            FloatingRateNote: Corresponding floating rate note with already generated schedule for coupon payments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tenor</span> <span class="o">=</span> <span class="n">_term_to_period</span><span class="p">(</span><span class="n">tenor</span><span class="p">)</span>
+        <span class="n">business_day_convention</span> <span class="o">=</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">business_day_convention</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">calendar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">calendar</span> <span class="o">=</span> <span class="n">_ECB</span><span class="p">(</span><span class="n">years</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="n">issue_date</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">maturity_date</span><span class="o">.</span><span class="n">year</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">calendar</span> <span class="o">=</span> <span class="n">_string_to_calendar</span><span class="p">(</span><span class="n">calendar</span><span class="p">)</span>
+        <span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">issue_date</span><span class="p">,</span> <span class="n">maturity_date</span><span class="p">,</span> <span class="n">tenor</span><span class="p">,</span> <span class="n">backwards</span><span class="p">,</span> <span class="n">stub</span><span class="p">,</span> <span class="n">business_day_convention</span><span class="p">,</span> <span class="n">calendar</span><span class="p">)</span>
+        <span class="n">coupon_period_dates</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">generate_dates</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">spreads</span> <span class="o">=</span> <span class="p">[</span><span class="n">spread</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coupon_period_dates</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">FloatingRateNoteSpecification</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span> <span class="n">issue_date</span><span class="p">,</span> <span class="n">maturity_date</span><span class="p">,</span> <span class="n">coupon_period_dates</span><span class="p">,</span> <span class="n">day_count_convention</span><span class="p">,</span> <span class="n">spreads</span><span class="p">,</span>
+                                <span class="n">reference_index</span><span class="p">,</span> <span class="n">currency</span><span class="p">,</span> <span class="n">notional</span><span class="p">,</span> <span class="n">issuer</span><span class="p">,</span> <span class="n">securitisation_level</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">coupon_period_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">date</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for accrual periods for floating rate coupons.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            List[date]: List of accrual periods for floating rate coupons.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__coupon_period_dates</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">daycount_convention</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for bond&#39;s day count convention.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Bond&#39;s day count convention. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__day_count_convention</span>
+
+    <span class="nd">@daycount_convention</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">daycount_convention</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span><span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__day_count_convention</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">day_count_convention</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">spreads</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for spreads added to the floating rates determined by fixing of reference index.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            List[float]: List of spreads added to the floating rates determined by fixing of reference index.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__spreads</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">reference_index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for reference index for fixing floating rates.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Reference index for fixing floating rates.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reference_index</span>
+
+
+<span class="k">class</span> <span class="nc">FixedToFloatingRateNoteSpecification</span><span class="p">(</span><span class="n">FixedRateBondSpecification</span><span class="p">,</span> <span class="n">FloatingRateNoteSpecification</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">issue_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                 <span class="n">maturity_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                 <span class="n">coupon_payment_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]],</span>
+                 <span class="n">coupons</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+                 <span class="n">coupon_period_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]],</span>
+                 <span class="n">day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">ThirtyU360</span><span class="p">,</span>
+                 <span class="n">spreads</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">reference_index</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;dummy_curve&#39;</span><span class="p">,</span>
+                 <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;EUR&#39;</span><span class="p">,</span>
+                 <span class="n">notional</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span>
+                 <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">securitisation_level</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fixed-to-floating rate note specification by providing fixed rate coupons and fixed rate coupon payment dates</span>
+<span class="sd">        as well as floating rate coupon periods directly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO FIX THIS CLASS!!!!!!!!!!!!!!!!</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Not working properly, @Stefan: Please fix me!!!!&#39;</span><span class="p">)</span>
+        <span class="n">FixedRateBondSpecification</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_id</span><span class="p">,</span> <span class="n">issue_date</span><span class="p">,</span> <span class="n">maturity_date</span><span class="p">,</span> <span class="n">coupon_payment_dates</span><span class="p">,</span> <span class="n">coupons</span><span class="p">,</span>
+                               <span class="n">currency</span><span class="p">,</span> <span class="n">notional</span><span class="p">,</span> <span class="n">issuer</span><span class="p">,</span> <span class="n">securitisation_level</span><span class="p">)</span>
+
+        <span class="n">FloatingRateNoteSpecification</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_id</span><span class="p">,</span> <span class="n">issue_date</span><span class="p">,</span> <span class="n">maturity_date</span><span class="p">,</span> <span class="n">coupon_period_dates</span><span class="p">,</span>
+                                  <span class="n">day_count_convention</span><span class="p">,</span> <span class="n">spreads</span><span class="p">,</span> <span class="n">reference_index</span><span class="p">,</span> <span class="n">currency</span><span class="p">,</span> <span class="n">notional</span><span class="p">,</span> <span class="n">issuer</span><span class="p">,</span>
+                                  <span class="n">securitisation_level</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_master_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                         <span class="n">issue_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                         <span class="n">fixed_to_float_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                         <span class="n">maturity_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                         <span class="n">coupon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                         <span class="n">tenor_fixed</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Period</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+                         <span class="n">tenor_float</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Period</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+                         <span class="n">backwards_fixed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                         <span class="n">backwards_float</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                         <span class="n">stub_fixed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                         <span class="n">stub_float</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                         <span class="n">business_day_convention_fixed</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">RollConvention</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">FOLLOWING</span><span class="p">,</span>
+                         <span class="n">business_day_convention_float</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">RollConvention</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">FOLLOWING</span><span class="p">,</span>
+                         <span class="n">calendar_fixed</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">calendar_float</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">ThirtyU360</span><span class="p">,</span>
+                         <span class="n">spread</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                         <span class="n">reference_index</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;dummy_curve&#39;</span><span class="p">,</span>
+                         <span class="n">currency</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;EUR&#39;</span><span class="p">,</span>
+                         <span class="n">notional</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span>
+                         <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">securitisation_level</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fixed-to-floating rate note specification based on master data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            # TODO: How can we avoid repeating ourselves here?</span>
+<span class="sd">            obj_id (str): (Preferably) Unique label of the bond, e.g. ISIN.</span>
+<span class="sd">            issue_date (_Union[date, datetime]): Date of bond issuance.</span>
+<span class="sd">            fixed_to_float_date (_Union[date, datetime]): Date where fixed schedule changes into floating one.</span>
+<span class="sd">            maturity_date (_Union[date, datetime]): Bond&#39;s maturity/expiry date. Must lie after the issue_date.</span>
+<span class="sd">            coupon (float): Annualised coupon amount as fraction of notional, e.g. 0.0125 for fixed rate coupon of</span>
+<span class="sd">                            1.25%.</span>
+<span class="sd">            tenor_fixed (_Union[period, str]): Time distance between two fixed rate coupon payment dates.</span>
+<span class="sd">            tenor_float (_Union[period, str]): Time distance between two floating rate coupon payment dates.</span>
+<span class="sd">            backwards_fixed (bool, optional): Defines direction for rolling out the schedule for the fixed rate part.</span>
+<span class="sd">                                              True means the schedule will be rolled out (backwards) from maturity date</span>
+<span class="sd">                                              to issue date. Defaults to True.</span>
+<span class="sd">            backwards_float (bool, optional): Defines direction for rolling out the schedule for the floating rate part.</span>
+<span class="sd">                                              True means the schedule will be rolled out (backwards) from maturity date</span>
+<span class="sd">                                              to issue date. Defaults to True.</span>
+<span class="sd">            stub_fixed (bool, optional): Defines if the first/last period is accepted (True) in the fixed rate schedule,</span>
+<span class="sd">                                         even though it is shorter than the others, or if it remaining days are added to</span>
+<span class="sd">                                         the neighbouring period (False). Defaults to True.</span>
+<span class="sd">            stub_float (bool, optional): Defines if the first/last period is accepted (True) in the float rate schedule,</span>
+<span class="sd">                                         even though it is shorter than the others, or if it remaining days are added to</span>
+<span class="sd">                                         the neighbouring period (False). Defaults to True.</span>
+<span class="sd">            business_day_convention_fixed (_Union[RollConvention, str], optional): Set of rules defining the adjustment</span>
+<span class="sd">                                                                                   of days to ensure each date in the</span>
+<span class="sd">                                                                                   fixed rate schedule being a business</span>
+<span class="sd">                                                                                   day with respect to a given holiday</span>
+<span class="sd">                                                                                   calendar. Defaults to</span>
+<span class="sd">                                                                                   RollConvention.FOLLOWING</span>
+<span class="sd">            business_day_convention_float (_Union[RollConvention, str], optional): Set of rules defining the adjustment</span>
+<span class="sd">                                                                                   of days to ensure each date in the</span>
+<span class="sd">                                                                                   float rate schedule being a business</span>
+<span class="sd">                                                                                   day with respect to a given holiday</span>
+<span class="sd">                                                                                   calendar. Defaults to</span>
+<span class="sd">                                                                                   RollConvention.FOLLOWING</span>
+<span class="sd">            calendar_fixed (_Union[__HolidayBase, str], optional): Holiday calendar defining the bank holidays of a</span>
+<span class="sd">                                                                  country or province (but not all non-business days as</span>
+<span class="sd">                                                                  for example Saturdays and Sundays).</span>
+<span class="sd">                                                                  Defaults (through constructor) to holidays.ECB</span>
+<span class="sd">                                                                  (= Target2 calendar) between start_day and end_day.</span>
+<span class="sd">            calendar_float (_Union[__HolidayBase, str], optional): Holiday calendar defining the bank holidays of a</span>
+<span class="sd">                                                                  country or province (but not all non-business days as</span>
+<span class="sd">                                                                  for example Saturdays and Sundays).</span>
+<span class="sd">                                                                  Defaults (through constructor) to holidays.ECB</span>
+<span class="sd">                                                                  (= Target2 calendar) between start_day and end_day.</span>
+<span class="sd">            day_count_convention (_Union[DayCounter, str], optional): Day count convention for determining period</span>
+<span class="sd">                                                                      length.Defaults to DayCounter.ThirtyU360.</span>
+<span class="sd">            spread (float, optional): Spread added to floating rate derived from fixing the reference curve as fraction</span>
+<span class="sd">                                      of notional, i.e. 0.0025 for 25 basis points. Defaults to 0.0.</span>
+<span class="sd">            reference_index (str, optional): Floating rate note underlying reference curve used for fixing the floating</span>
+<span class="sd">                                             rate coupon amounts. Defaults to &#39;dummy_curve&#39;.</span>
+<span class="sd">                                             Note: A reference curve could also be provided later at the pricing stage.</span>
+<span class="sd">            currency (str, optional): Currency as alphabeticcode according to iso currency code</span>
+<span class="sd">                                                   ISO 4217 (cf. https://www.iso.org/iso-4217-currency-codes.html).</span>
+<span class="sd">                                                   Defaults to &#39;EUR&#39;.</span>
+<span class="sd">            notional (float, optional): Bond&#39;s notional/face value. Must be positive. Defaults to 100.0.</span>
+<span class="sd">            issuer (str, optional): Issuer of the instrument. Defaults to None.</span>
+<span class="sd">            securitisation_level (_Union[SecuritizationLevel, str], optional): Securitisation level of the instrument.</span>
+<span class="sd">                                                                               Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            FixedToFloatingRateNote: Corresponding fixed-to-floating rate note with already generated schedules for</span>
+<span class="sd">                                     fixed rate and floating rate coupon payments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fixed_rate_part</span> <span class="o">=</span> <span class="n">FixedRateBondSpecification</span><span class="o">.</span><span class="n">from_master_data</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span> <span class="n">issue_date</span><span class="p">,</span> <span class="n">fixed_to_float_date</span><span class="p">,</span> <span class="n">coupon</span><span class="p">,</span> <span class="n">tenor_fixed</span><span class="p">,</span>
+                                                         <span class="n">backwards_fixed</span><span class="p">,</span> <span class="n">stub_fixed</span><span class="p">,</span> <span class="n">business_day_convention_fixed</span><span class="p">,</span>
+                                                         <span class="n">calendar_fixed</span><span class="p">,</span> <span class="n">currency</span><span class="p">,</span> <span class="n">notional</span><span class="p">,</span> <span class="n">issuer</span><span class="p">,</span>
+                                                         <span class="n">securitisation_level</span><span class="p">)</span>
+        <span class="n">floating_rate_part</span> <span class="o">=</span> <span class="n">FloatingRateNoteSpecification</span><span class="o">.</span><span class="n">from_master_data</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span> <span class="n">fixed_to_float_date</span><span class="p">,</span> <span class="n">maturity_date</span><span class="p">,</span> <span class="n">tenor_float</span><span class="p">,</span>
+                                                               <span class="n">backwards_float</span><span class="p">,</span> <span class="n">stub_float</span><span class="p">,</span>
+                                                               <span class="n">business_day_convention_float</span><span class="p">,</span> <span class="n">calendar_float</span><span class="p">,</span>
+                                                               <span class="n">day_count_convention</span><span class="p">,</span> <span class="n">spread</span><span class="p">,</span> <span class="n">reference_index</span><span class="p">,</span> <span class="n">currency</span><span class="p">,</span>
+                                                               <span class="n">notional</span><span class="p">,</span> <span class="n">issuer</span><span class="p">,</span> <span class="n">securitisation_level</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">FixedToFloatingRateNoteSpecification</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span> <span class="n">issue_date</span><span class="p">,</span> <span class="n">maturity_date</span><span class="p">,</span> <span class="n">fixed_rate_part</span><span class="o">.</span><span class="n">coupon_payment_dates</span><span class="p">,</span>
+                                       <span class="n">fixed_rate_part</span><span class="o">.</span><span class="n">coupons</span><span class="p">,</span> <span class="n">floating_rate_part</span><span class="o">.</span><span class="n">coupon_period_dates</span><span class="p">,</span>
+                                       <span class="n">day_count_convention</span><span class="p">,</span> <span class="n">floating_rate_part</span><span class="o">.</span><span class="n">spreads</span><span class="p">,</span> <span class="n">reference_index</span><span class="p">,</span> <span class="n">currency</span><span class="p">,</span>
+                                       <span class="n">notional</span><span class="p">,</span> <span class="n">issuer</span><span class="p">,</span> <span class="n">securitisation_level</span><span class="p">)</span>
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

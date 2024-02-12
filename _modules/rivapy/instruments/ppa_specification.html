@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rivapy.instruments.ppa_specification &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html#logging-usage">Logging Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rivapy.instruments.ppa_specification</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rivapy.instruments.ppa_specification</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">rivapy.tools.interfaces</span> <span class="k">as</span> <span class="nn">interfaces</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.factory</span> <span class="kn">import</span> <span class="n">create</span> <span class="k">as</span> <span class="n">_create</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.datetime_grid</span> <span class="kn">import</span> <span class="n">DateTimeGrid</span>
+
+
+<div class="viewcode-block" id="SimpleSchedule"><a class="viewcode-back" href="../../../rivapy/instruments/power.html#rivapy.instruments.SimpleSchedule">[docs]</a><span class="k">class</span> <span class="nc">SimpleSchedule</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> 
+					<span class="n">freq</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span> <span class="n">weekdays</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+					<span class="n">hours</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">tz</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span> <span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Simple schedule of fixed datetime points.</span>
+
+<span class="sd">		Args:</span>
+<span class="sd">			start (dt.datetime): Start of schedule (including this timepoint).</span>
+<span class="sd">			end (dt.datetime): End of schedule (excluding this timepoint).</span>
+<span class="sd">			freq (str, optional): Frequency of timepoints. Defaults to &#39;1H&#39;. See documentation for pandas.date_range for further details on freq.</span>
+<span class="sd">			weekdays (Set[int], optional): List of integers representing the weekdays where the schedule is defined. </span>
+<span class="sd">											Integers according to datetime weekdays (0-&gt;Monay, 1-&gt;Tuesday,...,6-&gt;Sunday). </span>
+<span class="sd">											If None, all weekdays are used. Defaults to None.</span>
+<span class="sd">			hours (Set[int], optional): List of hours where schedule is defined. If None, all hours are included. Defaults to None.</span>
+<span class="sd">			tz (str or tzinfo): Time zone name for returning localized datetime points, for example ‘Asia/Hong_Kong’. </span>
+<span class="sd">								By default, the resulting datetime points are timezone-naive. See documentation for pandas.date_range for further details on tz.</span>
+<span class="sd">		Examples:</span>
+<span class="sd">		</span>
+<span class="sd">		.. highlight:: python</span>
+<span class="sd">		.. code-block:: python</span>
+
+<span class="sd">			&gt;&gt;&gt; simple_schedule = SimpleSchedule(dt.datetime(2023,1,1), dt.datetime(2023,1,1,4,0,0), freq=&#39;1H&#39;)</span>
+<span class="sd">			&gt;&gt;&gt; simple_schedule.get_schedule()</span>
+<span class="sd">			[datetime(2023,1,1,0,0,0), datetime(2023,1,1,1,0,0), datetime(2023,1,1,2,0,0), datetime(2023,1,1,3,0,0)]</span>
+
+<span class="sd">			# We include only hours 2 and 3 into schedule</span>
+<span class="sd">			&gt;&gt;&gt; simple_schedule = SimpleSchedule(dt.datetime(2023,1,1), dt.datetime(2023,1,1,4,0,0), freq=&#39;1H&#39;, hours=[2,3])</span>
+<span class="sd">			&gt;&gt;&gt; simple_schedule.get_schedule()</span>
+<span class="sd">			[datetime.datetime(2023, 1, 1, 2, 0), datetime.datetime(2023, 1, 1, 3, 0)]</span>
+
+<span class="sd">			# We restrict further to only mondays as weekdays included</span>
+<span class="sd">			&gt;&gt;&gt; simple_schedule = SimpleSchedule(dt.datetime(2023,1,1), dt.datetime(2023,1,2,4,0,0), freq=&#39;1H&#39;, hours=[2,3], weekdays=[0])</span>
+<span class="sd">			&gt;&gt;&gt; simple_schedule.get_schedule()</span>
+<span class="sd">			[datetime.datetime(2023, 1, 2, 2, 0), datetime.datetime(2023, 1, 2, 3, 0)]</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">start</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="n">end</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">=</span> <span class="n">freq</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">weekdays</span> <span class="o">=</span> <span class="n">weekdays</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">hours</span> <span class="o">=</span> <span class="n">hours</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">tz</span> <span class="o">=</span> <span class="n">tz</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_df</span> <span class="o">=</span> <span class="kc">None</span>
+
+	<span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">dict</span><span class="p">:</span>
+		<span class="k">return</span> <span class="p">{</span>
+					<span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> 
+					<span class="s1">&#39;freq&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span> <span class="s1">&#39;weekdays&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">weekdays</span><span class="p">,</span> 
+					<span class="s1">&#39;hours&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">hours</span><span class="p">,</span> <span class="s1">&#39;tz&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tz</span>
+		<span class="p">}</span>
+ 
+<div class="viewcode-block" id="SimpleSchedule.get_schedule"><a class="viewcode-back" href="../../../rivapy/instruments/power.html#rivapy.instruments.SimpleSchedule.get_schedule">[docs]</a>	<span class="k">def</span> <span class="nf">get_schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Return vector of datetime values belonging to the schedule.</span>
+
+<span class="sd">		Args:</span>
+<span class="sd">			refdate (dt.datetime): All schedule dates are ignored before this reference date. If None, all schedule dates are returned. Defaults to None.</span>
+
+<span class="sd">		Returns:</span>
+<span class="sd">			np.ndarray: Vector of all datetimepoints of the schedule.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">d_</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span> <span class="n">tz</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tz</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weekdays</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">d_</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">d_</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">weekday</span><span class="p">()</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">weekdays</span><span class="p">]</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hours</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">d_</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">d_</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">hour</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hours</span><span class="p">]</span>
+		<span class="k">if</span> <span class="n">refdate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">d_</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">d_</span> <span class="k">if</span> <span class="n">d</span> <span class="o">&gt;=</span> <span class="n">refdate</span><span class="p">]</span>
+		<span class="k">return</span> <span class="n">d_</span></div>
+
+<div class="viewcode-block" id="SimpleSchedule.get_df"><a class="viewcode-back" href="../../../rivapy/instruments/power.html#rivapy.instruments.SimpleSchedule.get_df">[docs]</a>	<span class="k">def</span> <span class="nf">get_df</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;dates&#39;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span> <span class="n">tz</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tz</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()})</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span></div>
+
+<div class="viewcode-block" id="SimpleSchedule.applies"><a class="viewcode-back" href="../../../rivapy/instruments/power.html#rivapy.instruments.SimpleSchedule.applies">[docs]</a>	<span class="k">def</span> <span class="nf">applies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dates</span><span class="p">:</span> <span class="n">DateTimeGrid</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+		<span class="n">dates</span><span class="o">.</span><span class="n">dates</span></div>
+<div class="viewcode-block" id="SimpleSchedule.get_params"><a class="viewcode-back" href="../../../rivapy/instruments/power.html#rivapy.instruments.SimpleSchedule.get_params">[docs]</a>	<span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">dict</span><span class="p">:</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Return all params as json serializable dictionary.</span>
+
+<span class="sd">		Returns:</span>
+<span class="sd">			dict: Dictionary of all parameters.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="p">{</span><span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="s1">&#39;freq&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span> <span class="s1">&#39;weekdays&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">weekdays</span><span class="p">,</span> <span class="s1">&#39;hours&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">hours</span><span class="p">,</span> <span class="s1">&#39;tz&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tz</span><span class="p">}</span></div>
+
+	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ref_date</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">ref_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">ref_date</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1980</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+		<span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
+			<span class="n">start</span> <span class="o">=</span> <span class="n">ref_date</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">))</span>
+			<span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">365</span><span class="p">))</span>
+			<span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SimpleSchedule</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">))</span>
+		<span class="k">return</span> <span class="n">result</span></div>
+	
+<div class="viewcode-block" id="PPASpecification"><a class="viewcode-back" href="../../../rivapy/instruments/power.html#rivapy.instruments.PPASpecification">[docs]</a><span class="k">class</span> <span class="nc">PPASpecification</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+				<span class="n">udl</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+				<span class="n">amount</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> 
+				<span class="n">schedule</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SimpleSchedule</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">]],</span>
+				<span class="n">fixed_price</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+				<span class="nb">id</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;Specification for a simple power purchase agreement (PPA).</span>
+
+<span class="sd">		Args:</span>
+<span class="sd">			udl (str): Name of underlying (power) that is delivered (just use for consistency checking within pricing against simulated model values).</span>
+<span class="sd">			amount (Union[None, float, np.ndarray]): Amount of power delivered at each timepoint/period. Either a single value s.t. all volumes delivered are constant or a load table. If None, a non-constant amount (e.g. by production from renewables) is assumed.</span>
+<span class="sd">			schedule (Union[SimpleSchedule, List[dt.datetime]): Schedule describing when power is delivered.</span>
+<span class="sd">			fixed_price (float): The fixed price paif for the power.</span>
+<span class="sd">			id (str): Simple id of the specification. If None, a uuid will be generated. Defaults to None.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">udl</span> <span class="o">=</span> <span class="n">udl</span>
+		<span class="k">if</span> <span class="nb">id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">amount</span> <span class="o">=</span> <span class="n">amount</span>
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schedule</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span> <span class="c1">#if schedule is a dict we try to create it from factory</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">schedule</span> <span class="o">=</span> <span class="n">_create</span><span class="p">(</span><span class="n">schedule</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">schedule</span> <span class="o">=</span> <span class="n">schedule</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fixed_price</span> <span class="o">=</span> <span class="n">fixed_price</span>
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schedule</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_schedule_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;dates&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">})</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_schedule_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;dates&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_schedule_df</span><span class="p">[</span><span class="s1">&#39;amount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">amount</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_schedule_df</span><span class="p">[</span><span class="s1">&#39;flow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ref_date</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+		<span class="n">schedules</span> <span class="o">=</span> <span class="n">SimpleSchedule</span><span class="o">.</span><span class="n">_create_sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">seed</span><span class="p">,</span> <span class="n">ref_date</span><span class="p">)</span>
+		<span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">schedule</span> <span class="ow">in</span> <span class="n">schedules</span><span class="p">:</span>
+			<span class="n">amount</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mf">50.</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">100.0</span><span class="p">)</span>
+			<span class="n">fixed_price</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+			<span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">PPASpecification</span><span class="p">(</span><span class="n">udl</span><span class="o">=</span><span class="s1">&#39;Power&#39;</span><span class="p">,</span> <span class="n">amount</span><span class="o">=</span><span class="n">amount</span><span class="p">,</span> <span class="n">schedule</span><span class="o">=</span><span class="n">schedule</span><span class="p">,</span> <span class="n">fixed_price</span><span class="o">=</span><span class="n">fixed_price</span><span class="p">))</span>
+		<span class="k">return</span> <span class="n">result</span>
+	
+<div class="viewcode-block" id="PPASpecification.get_schedule"><a class="viewcode-back" href="../../../rivapy/instruments/power.html#rivapy.instruments.PPASpecification.get_schedule">[docs]</a>	<span class="k">def</span> <span class="nf">get_schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">List</span><span class="p">[</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">]:</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="o">.</span><span class="n">get_schedule</span><span class="p">()</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span></div>
+
+	<span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">dict</span><span class="p">:</span>
+		<span class="k">try</span><span class="p">:</span> <span class="c1"># if isinstance(self.schedule, interfaces.FactoryObject):</span>
+			<span class="n">schedule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+		<span class="k">except</span>  <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+			<span class="n">schedule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span>
+		<span class="k">return</span> <span class="p">{</span>
+			<span class="s1">&#39;udl&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">udl</span><span class="p">,</span>
+			<span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+			<span class="s1">&#39;amount&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">amount</span><span class="p">,</span>
+			<span class="s1">&#39;schedule&#39;</span><span class="p">:</span> <span class="n">schedule</span><span class="p">,</span>
+			<span class="s1">&#39;fixed_price&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixed_price</span>
+		<span class="p">}</span>
+
+<div class="viewcode-block" id="PPASpecification.set_amount"><a class="viewcode-back" href="../../../rivapy/instruments/power.html#rivapy.instruments.PPASpecification.set_amount">[docs]</a>	<span class="k">def</span> <span class="nf">set_amount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">amount</span> <span class="o">=</span> <span class="n">amount</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_schedule_df</span><span class="p">[</span><span class="s1">&#39;amount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">amount</span></div>
+
+<div class="viewcode-block" id="PPASpecification.n_deliveries"><a class="viewcode-back" href="../../../rivapy/instruments/power.html#rivapy.instruments.PPASpecification.n_deliveries">[docs]</a>	<span class="k">def</span> <span class="nf">n_deliveries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schedule_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="PPASpecification.compute_flows"><a class="viewcode-back" href="../../../rivapy/instruments/power.html#rivapy.instruments.PPASpecification.compute_flows">[docs]</a>	<span class="k">def</span> <span class="nf">compute_flows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">pfc</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">result_col</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+		<span class="n">df</span> <span class="o">=</span> <span class="n">pfc</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span>
+		<span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_schedule_df</span><span class="p">[</span><span class="s1">&#39;flow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schedule_df</span><span class="p">[</span><span class="s1">&#39;amount&#39;</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_schedule_df</span><span class="o">.</span><span class="n">index</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">fixed_price</span><span class="p">)</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schedule_df</span>
+		<span class="n">result</span><span class="p">[</span><span class="n">result_col</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schedule_df</span><span class="p">[</span><span class="s1">&#39;amount&#39;</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_schedule_df</span><span class="o">.</span><span class="n">index</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">fixed_price</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="GreenPPASpecification"><a class="viewcode-back" href="../../../rivapy/instruments/power.html#rivapy.instruments.GreenPPASpecification">[docs]</a><span class="k">class</span> <span class="nc">GreenPPASpecification</span><span class="p">(</span><span class="n">PPASpecification</span><span class="p">):</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+				<span class="n">schedule</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SimpleSchedule</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">]],</span>
+				<span class="n">fixed_price</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+				<span class="n">max_capacity</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+				<span class="n">technology</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+				<span class="n">udl</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+				<span class="n">location</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+				<span class="nb">id</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; :term:`Specification` for a green power purchase agreement.</span>
+
+<span class="sd">		In contrast to a normal PPA the quantities of this PPA are related to some kind of </span>
+<span class="sd">		renewable energy such as wind or solar, i.e. the quantity is related to some uncertain production.</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">			schedule (Union[SimpleSchedule, List[dt.datetime]]): Delivery schedule.</span>
+<span class="sd">			fixed_price (float): Fixed price paid for the power.</span>
+<span class="sd">			max_capacity (float): The absolute maximal capacity of the renewable energy source. This is used to derive the production amount of the plant by multiplying forecasts with the factor max_capacity/total_capacity (where total capacity may be time dependent).</span>
+<span class="sd">			technology (str): Identifier for the technology. This is used to retrieve the simulated values for production of this technology from a model</span>
+<span class="sd">			location (str, optional): Identifier for the location. This is used to retrieve the simulated values for production of this technology at this location from a model that supports this feature. Defaults to None.</span>
+<span class="sd">			udl (str, optional): Name of underlying (power) that is delivered (just use for consistency checking within pricing against simulated model values). It is used within pricing when the respective simulated price must be retrieved from a model&#39;s simulation results.</span>
+<span class="sd">			id (str, optional): Unique identifier of this contract. Defaults to None.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">udl</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">schedule</span><span class="p">,</span> <span class="n">fixed_price</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">technology</span> <span class="o">=</span> <span class="n">technology</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">max_capacity</span> <span class="o">=</span> <span class="n">max_capacity</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="n">location</span>
+
+	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ref_date</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+		<span class="n">schedules</span> <span class="o">=</span> <span class="n">SimpleSchedule</span><span class="o">.</span><span class="n">_create_sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">seed</span><span class="p">,</span> <span class="n">ref_date</span><span class="p">)</span>
+		<span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">schedule</span> <span class="ow">in</span> <span class="n">schedules</span><span class="p">:</span>
+			<span class="n">max_capacity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mf">50.</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">100.0</span><span class="p">)</span>
+			<span class="n">fixed_price</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+			<span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GreenPPASpecification</span><span class="p">(</span><span class="n">udl</span><span class="o">=</span><span class="s1">&#39;Power&#39;</span><span class="p">,</span> <span class="n">technology</span><span class="o">=</span><span class="s1">&#39;Wind&#39;</span><span class="p">,</span>  <span class="n">location</span><span class="o">=</span><span class="s1">&#39;Onshore&#39;</span><span class="p">,</span> <span class="n">fixed_price</span><span class="o">=</span><span class="n">fixed_price</span><span class="p">,</span> <span class="n">max_capacity</span><span class="o">=</span><span class="n">max_capacity</span><span class="p">,</span> <span class="n">schedule</span> <span class="o">=</span> <span class="n">schedule</span><span class="p">))</span>
+		<span class="k">return</span> <span class="n">result</span>
+	
+	<span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">dict</span><span class="p">:</span>
+		<span class="n">result</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_to_dict</span><span class="p">()</span>
+		<span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;amount&#39;</span><span class="p">]</span>
+		<span class="n">result</span><span class="p">[</span><span class="s1">&#39;technology&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">technology</span>
+		<span class="n">result</span><span class="p">[</span><span class="s1">&#39;max_capacity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_capacity</span>
+		<span class="n">result</span><span class="p">[</span><span class="s1">&#39;location&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">location</span>
+		<span class="k">return</span> <span class="n">result</span>
+
+<div class="viewcode-block" id="GreenPPASpecification.compute_flows"><a class="viewcode-back" href="../../../rivapy/instruments/power.html#rivapy.instruments.GreenPPASpecification.compute_flows">[docs]</a>	<span class="k">def</span> <span class="nf">compute_flows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">pfc</span><span class="p">,</span> <span class="n">forecast_amount</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">result_col</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">set_amount</span><span class="p">(</span><span class="n">forecast_amount</span><span class="p">)</span>
+		<span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">compute_flows</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">pfc</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">result_col</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

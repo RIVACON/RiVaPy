@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rivapy.pricing.pricing_request &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html#logging-usage">Logging Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rivapy.pricing.pricing_request</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rivapy.pricing.pricing_request</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span><span class="p">,</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span>  <span class="n">List</span> <span class="k">as</span> <span class="n">_List</span><span class="p">,</span> <span class="n">Union</span> <span class="k">as</span> <span class="n">_Union</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.interfaces</span> <span class="kn">import</span> <span class="n">FactoryObject</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">_date_to_datetime</span> <span class="k">as</span> <span class="n">datetime_to_date</span><span class="p">,</span> <span class="n">_datetime_to_date_list</span> <span class="k">as</span> <span class="n">datetime_to_date_list</span>
+
+
+<span class="k">class</span> <span class="nc">PricingRequestBase</span><span class="p">(</span><span class="n">FactoryObject</span><span class="p">):</span>
+
+    <span class="n">_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;theo_val&#39;</span><span class="p">,</span> <span class="s1">&#39;paths_udl&#39;</span><span class="p">,</span> <span class="s1">&#39;cf_expected&#39;</span><span class="p">,</span> <span class="s1">&#39;cf_paths&#39;</span><span class="p">]</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1">#validate the given keys</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PricingRequestBase</span><span class="o">.</span><span class="n">_keys</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown key &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+            <span class="c1">#set the attributes</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span>
+
+<div class="viewcode-block" id="GreenPPAPricingRequest"><a class="viewcode-back" href="../../../rivapy/pricing/pricing_request.html#rivapy.pricing.pricing_request.GreenPPAPricingRequest">[docs]</a><span class="k">class</span> <span class="nc">GreenPPAPricingRequest</span><span class="p">(</span><span class="n">PricingRequestBase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theo_val</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">cf_paths</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cf_expected</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;PricingRequest for Green PPA pricing.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            price (bool): If True, the :term:`Theoretical Value` is calculated.</span>
+<span class="sd">            cf_expected (bool, optional): If True, the paths of the simulated :term:`Cash flow` is returned. Defaults to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">theo_val</span><span class="o">=</span><span class="n">theo_val</span><span class="p">,</span> <span class="n">cf_expected</span><span class="o">=</span><span class="n">cf_expected</span><span class="p">,</span> <span class="n">cf_paths</span><span class="o">=</span><span class="n">cf_paths</span><span class="p">)</span></div>
+   
+
+<span class="k">class</span> <span class="nc">PricingRequest</span><span class="p">:</span>
+    <span class="c1"># def __init__(self, calc_delta_gamma: bool = False, calc_cross_gamma: bool = True, calc_clean_price: bool = False,</span>
+    <span class="c1">#              calc_rho: bool = False, rho_scale: float = 0.0001, calc_vega: bool = False, vega_scale: float = 0.01,</span>
+    <span class="c1">#              calc_cross_volga: bool = False, calc_vanna: bool = False, calc_theta: bool = False,</span>
+    <span class="c1">#              theta_scale: float = 1.0, calc_spline: bool = False, calc_grid_sizes: bool = False,</span>
+    <span class="c1">#              calc_implied_volatility: bool = False, management_delta_limit: float = 0.01,</span>
+    <span class="c1">#              calc_pricing_data: bool = False, calc_expected_cashflows: bool = False,</span>
+    <span class="c1">#              calc_simulation_data: bool = False, calc_additional_information: bool = False,</span>
+    <span class="c1">#              calc_z_spread: bool = False, calc_yield_to_maturity: bool = False, calc_convexity: bool = False,</span>
+    <span class="c1">#              max_expected_cashflow_date: _Union[date, datetime] = None,</span>
+    <span class="c1">#              cashflow_times: _List[_Union[date, datetime]] = None, calc_macaulay_duration: bool = False):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Defines the set of information, e.g. sensitivities, cashflow information, etc., to be calculated together with</span>
+    <span class="c1">#     the instrument&#39;s price in the context of pricing. For some sensitivities the shift parameter for calculating</span>
+    <span class="c1">#     the difference quotient (rather than the sensitivity in closed formula) is also stored in the pricing request</span>
+    <span class="c1">#     object.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     Args: TODO: Read carefully and double-check if these guessed descriptions are valid!</span>
+    <span class="c1">#         calc_delta_gamma (bool, optional): Flag determining if the change of the instrument&#39;s price associated with</span>
+    <span class="c1">#                                            small changes of the underlying&#39;s price shall be calculated to first (and</span>
+    <span class="c1">#                                            second) order within the pricing routine. Defaults to False.</span>
+    <span class="c1">#                                            TODO: also second order? delta_scale=?</span>
+    <span class="c1">#         calc_cross_gamma (bool, optional): Flag determining if the change of the instrument&#39;s price associated with</span>
+    <span class="c1">#                                            small changes of two underlyings&#39; prices (both at fist order) shall be</span>
+    <span class="c1">#                                            calculated within the pricing routine. Defaults to True.</span>
+    <span class="c1">#                                            TODO: why defaults to True?</span>
+    <span class="c1">#         calc_clean_price (bool, optional): Flag determining if the instrument&#39;s clean price shall be calculated</span>
+    <span class="c1">#                                            additional to its dirty price within the pricing routine.</span>
+    <span class="c1">#                                            Defaults to False.</span>
+    <span class="c1">#         calc_rho (bool, optional): Flag determining if the change of the instrument&#39;s price associated with small</span>
+    <span class="c1">#                                    changes of the zero rate curve shall be calculated to first order within the</span>
+    <span class="c1">#                                    pricing routine. Defaults to False.</span>
+    <span class="c1">#         rho_scale (float, optional): Size of zero rate shift in the calculation of the change of the instrument&#39;s</span>
+    <span class="c1">#                                      price associated with zero rate curve shifts as difference quotient.</span>
+    <span class="c1">#                                      Defaults to 0.0001 (= 1 basis point).</span>
+    <span class="c1">#         calc_vega (bool, optional): Flag determining if the change of the instrument&#39;s price associated with small</span>
+    <span class="c1">#                                     changes of the implied volatility surface shall be calculated to first order</span>
+    <span class="c1">#                                     within the pricing routine. Defaults to False.</span>
+    <span class="c1">#         vega_scale (float, optional): Size of implied volatility shift in the calculation of the change of the</span>
+    <span class="c1">#                                       instrument&#39;s price associated with implied volatility surface shifts as</span>
+    <span class="c1">#                                       difference quotient. Defaults to 0.01.</span>
+    <span class="c1">#         calc_cross_volga (bool, optional): Flag determining if the change of the instrument&#39;s price associated with</span>
+    <span class="c1">#                                            small changes of two implied volatility surfaces (both at first order)</span>
+    <span class="c1">#                                            shall be calculated within the pricing routine. Defaults to True.</span>
+    <span class="c1">#                                            TODO: why defaults to True?</span>
+    <span class="c1">#         calc_vanna (bool, optional): Flag determining if the change of the instrument&#39;s price associated with small</span>
+    <span class="c1">#                                      changes of the underlying&#39;s price and the implied volatility surface (both at</span>
+    <span class="c1">#                                      first order) shall be calculated within the pricing routine. Defaults to False.</span>
+    <span class="c1">#                                      TODO: why defaults to False in contrast to cross Gamma/Volga?</span>
+    <span class="c1">#         calc_theta (bool, optional): Flag determining if the change of the instrument&#39;s price associated with small</span>
+    <span class="c1">#                                      changes of the instrument&#39;s maturity shall be calculated to first order within</span>
+    <span class="c1">#                                      the pricing routine. Defaults to False.</span>
+    <span class="c1">#         theta_scale (float, optional): Size of maturity shift in the calculation of the change of the instrument&#39;s</span>
+    <span class="c1">#                                        price associated with maturity shifts as difference quotient. Defaults to 1.0</span>
+    <span class="c1">#         calc_spline (bool, optional):</span>
+    <span class="c1">#         calc_grid_sizes (bool, optional):</span>
+    <span class="c1">#         calc_implied_volatility (bool, optional):</span>
+    <span class="c1">#         management_delta_limit (float, optional):</span>
+    <span class="c1">#         calc_pricing_data (bool, optional):</span>
+    <span class="c1">#         calc_expected_cashflows (bool, optional):</span>
+    <span class="c1">#         calc_simulation_data (bool, optional):</span>
+    <span class="c1">#         calc_additional_information (bool, optional):</span>
+    <span class="c1">#         calc_z_spread (bool, optional): Flag determining if the instrument&#39;s z-spread shall be calculated within the</span>
+    <span class="c1">#                                         pricing routine. Defaults to False.</span>
+    <span class="c1">#         calc_yield_to_maturity (bool, optional): Flag determining if the instrument&#39;s yield-to-maturity shall be</span>
+    <span class="c1">#                                                  calculated within the pricing routine. Defaults to False.</span>
+    <span class="c1">#         calc_convexity (bool, optional): Flag determining if the change of the instrument&#39;s price associated with</span>
+    <span class="c1">#                                          small changes of the zero rate curve shall be calculated to second order</span>
+    <span class="c1">#                                          within the pricing routine. Defaults to False.</span>
+    <span class="c1">#         max_expected_cashflow_date (_Union[date, datetime], optional):</span>
+    <span class="c1">#         cashflow_times (_List[_Union[date, datetime]], optional):</span>
+    <span class="c1">#         calc_macaulay_duration (bool, optional): Flag determining if the instrument&#39;s Macaulay duration shall be</span>
+    <span class="c1">#                                                  calculated within the pricing routine. Defaults to False.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_delta_gamma</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">calc_cross_gamma</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">calc_clean_price</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">calc_rho</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">rho_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">calc_vega</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">vega_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">calc_cross_volga</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">calc_vanna</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">calc_theta</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">theta_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">calc_spline</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">calc_grid_sizes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">calc_implied_volatility</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">management_delta_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">calc_pricing_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">calc_expected_cashflows</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">calc_simulation_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">calc_additional_information</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">calc_z_spread</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">calc_yield_to_maturity</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">calc_convexity</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">max_expected_cashflow_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">cashflow_times</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">calc_macaulay_duration</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Defines the set of information, e.g. sensitivities, cashflow information, etc., to be calculated together with</span>
+<span class="sd">        the instrument&#39;s price in the context of pricing. For some sensitivities the shift parameter for calculating</span>
+<span class="sd">        the difference quotient (rather than the sensitivity in closed formula) is also stored in the pricing request</span>
+<span class="sd">        object.</span>
+
+<span class="sd">        Args: TODO: Read carefully and double-check if these guessed descriptions are valid!</span>
+<span class="sd">            calc_delta_gamma (bool, optional): Flag determining if the change of the instrument&#39;s price associated with</span>
+<span class="sd">                                               small changes of the underlying&#39;s price shall be calculated to first (and</span>
+<span class="sd">                                               second) order within the pricing routine. Defaults to None.</span>
+<span class="sd">                                               TODO: also second order? delta_scale=?</span>
+<span class="sd">            calc_cross_gamma (bool, optional): Flag determining if the change of the instrument&#39;s price associated with</span>
+<span class="sd">                                               small changes of two underlyings&#39; prices (both at fist order) shall be</span>
+<span class="sd">                                               calculated within the pricing routine. Defaults to None.</span>
+<span class="sd">            calc_clean_price (bool, optional): Flag determining if the instrument&#39;s clean price shall be calculated</span>
+<span class="sd">                                               additional to its dirty price within the pricing routine.</span>
+<span class="sd">                                               Defaults to None.</span>
+<span class="sd">            calc_rho (bool, optional): Flag determining if the change of the instrument&#39;s price associated with small</span>
+<span class="sd">                                       changes of the zero rate curve shall be calculated to first order within the</span>
+<span class="sd">                                       pricing routine. Defaults to None.</span>
+<span class="sd">            rho_scale (float, optional): Size of zero rate shift in the calculation of the change of the instrument&#39;s</span>
+<span class="sd">                                         price associated with zero rate curve shifts as difference quotient.</span>
+<span class="sd">                                         Defaults to None.</span>
+<span class="sd">            calc_vega (bool, optional): Flag determining if the change of the instrument&#39;s price associated with small</span>
+<span class="sd">                                        changes of the implied volatility surface shall be calculated to first order</span>
+<span class="sd">                                        within the pricing routine. Defaults to None.</span>
+<span class="sd">            vega_scale (float, optional): Size of implied volatility shift in the calculation of the change of the</span>
+<span class="sd">                                          instrument&#39;s price associated with implied volatility surface shifts as</span>
+<span class="sd">                                          difference quotient. Defaults to None.</span>
+<span class="sd">            calc_cross_volga (bool, optional): Flag determining if the change of the instrument&#39;s price associated with</span>
+<span class="sd">                                               small changes of two implied volatility surfaces (both at first order)</span>
+<span class="sd">                                               shall be calculated within the pricing routine. Defaults to None.</span>
+<span class="sd">            calc_vanna (bool, optional): Flag determining if the change of the instrument&#39;s price associated with small</span>
+<span class="sd">                                         changes of the underlying&#39;s price and the implied volatility surface (both at</span>
+<span class="sd">                                         first order) shall be calculated within the pricing routine. Defaults to None.</span>
+<span class="sd">            calc_theta (bool, optional): Flag determining if the change of the instrument&#39;s price associated with small</span>
+<span class="sd">                                         changes of the instrument&#39;s maturity shall be calculated to first order within</span>
+<span class="sd">                                         the pricing routine. Defaults to None.</span>
+<span class="sd">            theta_scale (float, optional): Size of maturity shift in the calculation of the change of the instrument&#39;s</span>
+<span class="sd">                                           price associated with maturity shifts as difference quotient.</span>
+<span class="sd">                                           Defaults to None</span>
+<span class="sd">            calc_spline (bool, optional):</span>
+<span class="sd">            calc_grid_sizes (bool, optional):</span>
+<span class="sd">            calc_implied_volatility (bool, optional):</span>
+<span class="sd">            management_delta_limit (float, optional):</span>
+<span class="sd">            calc_pricing_data (bool, optional):</span>
+<span class="sd">            calc_expected_cashflows (bool, optional):</span>
+<span class="sd">            calc_simulation_data (bool, optional):</span>
+<span class="sd">            calc_additional_information (bool, optional):</span>
+<span class="sd">            calc_z_spread (bool, optional): Flag determining if the instrument&#39;s z-spread shall be calculated within the</span>
+<span class="sd">                                            pricing routine. Defaults to None.</span>
+<span class="sd">            calc_yield_to_maturity (bool, optional): Flag determining if the instrument&#39;s yield-to-maturity shall be</span>
+<span class="sd">                                                     calculated within the pricing routine. Defaults to None.</span>
+<span class="sd">            calc_convexity (bool, optional): Flag determining if the change of the instrument&#39;s price associated with</span>
+<span class="sd">                                             small changes of the zero rate curve shall be calculated to second order</span>
+<span class="sd">                                             within the pricing routine. Defaults to None.</span>
+<span class="sd">            max_expected_cashflow_date (_Union[date, datetime], optional):</span>
+<span class="sd">            cashflow_times (_List[_Union[date, datetime]], optional):</span>
+<span class="sd">            calc_macaulay_duration (bool, optional): Flag determining if the instrument&#39;s Macaulay duration shall be</span>
+<span class="sd">                                                     calculated within the pricing routine. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_delta_gamma</span> <span class="o">=</span> <span class="n">calc_delta_gamma</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_cross_gamma</span> <span class="o">=</span> <span class="n">calc_cross_gamma</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_clean_price</span> <span class="o">=</span> <span class="n">calc_clean_price</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_rho</span> <span class="o">=</span> <span class="n">calc_rho</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rho_scale</span> <span class="o">=</span> <span class="n">rho_scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_vega</span> <span class="o">=</span> <span class="n">calc_vega</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vega_scale</span> <span class="o">=</span> <span class="n">vega_scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_cross_volga</span> <span class="o">=</span> <span class="n">calc_cross_volga</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_vanna</span> <span class="o">=</span> <span class="n">calc_vanna</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_theta</span> <span class="o">=</span> <span class="n">calc_theta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_theta_scale</span> <span class="o">=</span> <span class="n">theta_scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_spline</span> <span class="o">=</span> <span class="n">calc_spline</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_grid_sizes</span> <span class="o">=</span> <span class="n">calc_grid_sizes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_implied_volatility</span> <span class="o">=</span> <span class="n">calc_implied_volatility</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_management_delta_limit</span> <span class="o">=</span> <span class="n">management_delta_limit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_pricing_data</span> <span class="o">=</span> <span class="n">calc_pricing_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_expected_cashflows</span> <span class="o">=</span> <span class="n">calc_expected_cashflows</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_simulation_data</span> <span class="o">=</span> <span class="n">calc_simulation_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_additional_information</span> <span class="o">=</span> <span class="n">calc_additional_information</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_z_spread</span> <span class="o">=</span> <span class="n">calc_z_spread</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_yield_to_maturity</span> <span class="o">=</span> <span class="n">calc_yield_to_maturity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_convexity</span> <span class="o">=</span> <span class="n">calc_convexity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_expected_cashflow_date</span> <span class="o">=</span> <span class="n">max_expected_cashflow_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cashflow_times</span> <span class="o">=</span> <span class="n">cashflow_times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_macaulay_duration</span> <span class="o">=</span> <span class="n">calc_macaulay_duration</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_delta_gamma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_delta_gamma</span>
+
+    <span class="nd">@_calc_delta_gamma</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_delta_gamma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_delta_gamma</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_delta_gamma</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_delta_gamma</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_delta_gamma</span> <span class="o">=</span> <span class="n">calc_delta_gamma</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_delta_gamma</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type bool!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_cross_gamma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_cross_gamma</span>
+
+    <span class="nd">@_calc_cross_gamma</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_cross_gamma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_cross_gamma</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_cross_gamma</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_cross_gamma</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_cross_gamma</span> <span class="o">=</span> <span class="n">calc_cross_gamma</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_cross_gamma</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">calc_delta_gamma</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_cross_gamma</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type bool!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_clean_price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_clean_price</span>
+
+    <span class="nd">@_calc_clean_price</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_clean_price</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_clean_price</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_clean_price</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_clean_price</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_clean_price</span> <span class="o">=</span> <span class="n">calc_clean_price</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_clean_price</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type bool!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_rho</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_rho</span>
+
+    <span class="nd">@_calc_rho</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_rho</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_rho</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_rho</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_rho</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_rho</span> <span class="o">=</span> <span class="n">calc_rho</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_rho</span> <span class="o">&amp;</span> <span class="o">~</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;rho_scale&#39;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">rho_scale</span> <span class="o">=</span> <span class="mf">0.0001</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_rho</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type bool!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_rho_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rho_scale</span>
+
+    <span class="nd">@_rho_scale</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_rho_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rho_scale</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">rho_scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rho_scale</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__rho_scale</span> <span class="o">=</span> <span class="n">rho_scale</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">calc_rho</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rho_scale</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type float!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_vega</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_vega</span>
+
+    <span class="nd">@_calc_vega</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_vega</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_vega</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_vega</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_vega</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_vega</span> <span class="o">=</span> <span class="n">calc_vega</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_vega</span> <span class="o">&amp;</span> <span class="o">~</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;vega_scale&#39;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">vega_scale</span> <span class="o">=</span> <span class="mf">0.01</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_vega</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type bool!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_vega_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vega_scale</span>
+
+    <span class="nd">@_vega_scale</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_vega_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vega_scale</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">vega_scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vega_scale</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__vega_scale</span> <span class="o">=</span> <span class="n">vega_scale</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">calc_vega</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">vega_scale</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type float!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_cross_volga</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_cross_volga</span>
+
+    <span class="nd">@_calc_cross_volga</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_cross_volga</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_cross_volga</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_cross_volga</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_cross_volga</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_cross_volga</span> <span class="o">=</span> <span class="n">calc_cross_volga</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_cross_volga</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">calc_vega</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;vega_scale&#39;</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">vega_scale</span> <span class="o">=</span> <span class="mf">0.01</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_cross_volga</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type bool!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_vanna</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_vanna</span>
+
+    <span class="nd">@_calc_vanna</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_vanna</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_vanna</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_vanna</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_vanna</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_vanna</span> <span class="o">=</span> <span class="n">calc_vanna</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_vanna</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">calc_vega</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;vega_scale&#39;</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">vega_scale</span> <span class="o">=</span> <span class="mf">0.01</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_vanna</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type bool!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_theta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_theta</span>
+
+    <span class="nd">@_calc_theta</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_theta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_theta</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_theta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_theta</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_theta</span> <span class="o">=</span> <span class="n">calc_theta</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_theta</span> <span class="o">&amp;</span> <span class="o">~</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;theta_scale&#39;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">theta_scale</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_theta</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type bool!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_theta_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__theta_scale</span>
+
+    <span class="nd">@_theta_scale</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_theta_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta_scale</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">theta_scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">theta_scale</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__theta_scale</span> <span class="o">=</span> <span class="n">theta_scale</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">calc_theta</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">theta_scale</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type float!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_spline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_spline</span>
+
+    <span class="nd">@_calc_spline</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_spline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_spline</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_spline</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_spline</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_spline</span> <span class="o">=</span> <span class="n">calc_spline</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_spline</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type bool!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_grid_sizes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_grid_sizes</span>
+
+    <span class="nd">@_calc_grid_sizes</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_grid_sizes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_grid_sizes</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_grid_sizes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_grid_sizes</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_grid_sizes</span> <span class="o">=</span> <span class="n">calc_grid_sizes</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_grid_sizes</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type bool!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_implied_volatility</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_implied_volatility</span>
+
+    <span class="nd">@_calc_implied_volatility</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_implied_volatility</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_implied_volatility</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_implied_volatility</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_implied_volatility</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_implied_volatility</span> <span class="o">=</span> <span class="n">calc_implied_volatility</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_implied_volatility</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type bool!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_management_delta_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__management_delta_limit</span>
+
+    <span class="nd">@_management_delta_limit</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_management_delta_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">management_delta_limit</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__management_delta_limit</span> <span class="o">=</span> <span class="n">management_delta_limit</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_pricing_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_pricing_data</span>
+
+    <span class="nd">@_calc_pricing_data</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_pricing_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_pricing_data</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_pricing_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_pricing_data</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_pricing_data</span> <span class="o">=</span> <span class="n">calc_pricing_data</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_pricing_data</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type float!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_expected_cashflows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_expected_cashflows</span>
+
+    <span class="nd">@_calc_expected_cashflows</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_expected_cashflows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_expected_cashflows</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_expected_cashflows</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_expected_cashflows</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_expected_cashflows</span> <span class="o">=</span> <span class="n">calc_expected_cashflows</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_expected_cashflows</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type bool!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_simulation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_simulation_data</span>
+
+    <span class="nd">@_calc_simulation_data</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_simulation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_simulation_data</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_simulation_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_simulation_data</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_simulation_data</span> <span class="o">=</span> <span class="n">calc_simulation_data</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_simulation_data</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type bool!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_additional_information</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_additional_information</span>
+
+    <span class="nd">@_calc_additional_information</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_additional_information</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_additional_information</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_additional_information</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_additional_information</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_additional_information</span> <span class="o">=</span> <span class="n">calc_additional_information</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_additional_information</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type bool!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_z_spread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_z_spread</span>
+
+    <span class="nd">@_calc_z_spread</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_z_spread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_z_spread</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_z_spread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_z_spread</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_z_spread</span> <span class="o">=</span> <span class="n">calc_z_spread</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_z_spread</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type bool!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_yield_to_maturity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_yield_to_maturity</span>
+
+    <span class="nd">@_calc_yield_to_maturity</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_yield_to_maturity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_yield_to_maturity</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_yield_to_maturity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_yield_to_maturity</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_yield_to_maturity</span> <span class="o">=</span> <span class="n">calc_yield_to_maturity</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_yield_to_maturity</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type bool!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_convexity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_convexity</span>
+
+    <span class="nd">@_calc_convexity</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_convexity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_convexity</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_convexity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_convexity</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_convexity</span> <span class="o">=</span> <span class="n">calc_convexity</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_convexity</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">calc_rho</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;rho_scale&#39;</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">rho_scale</span> <span class="o">=</span> <span class="mf">0.0001</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_convexity</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type bool!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_max_expected_cashflow_date</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__max_expected_cashflow_date</span>
+
+    <span class="nd">@_max_expected_cashflow_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_max_expected_cashflow_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_expected_cashflow_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">max_expected_cashflow_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">max_expected_cashflow_date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">)</span> <span class="o">|</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">max_expected_cashflow_date</span><span class="p">,</span> <span class="n">date</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__max_expected_cashflow_date</span> <span class="o">=</span> <span class="n">datetime_to_date</span><span class="p">(</span><span class="n">max_expected_cashflow_date</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_expected_cashflow_date</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type datetime or date!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_cashflow_times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cashflow_times</span>
+
+    <span class="nd">@_cashflow_times</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_cashflow_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cashflow_times</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]]):</span>
+        <span class="k">if</span> <span class="n">cashflow_times</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cashflow_times</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span>
+                    <span class="nb">isinstance</span><span class="p">(</span><span class="n">cashflow_times</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">datetime</span><span class="p">)</span> <span class="o">|</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cashflow_times</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">date</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__cashflow_times</span> <span class="o">=</span> <span class="n">datetime_to_date_list</span><span class="p">(</span><span class="n">cashflow_times</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cashflow_times</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type list of datetime or date!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_calc_macaulay_duration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_macaulay_duration</span>
+
+    <span class="nd">@_calc_macaulay_duration</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_calc_macaulay_duration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_macaulay_duration</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">calc_macaulay_duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">calc_macaulay_duration</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__calc_macaulay_duration</span> <span class="o">=</span> <span class="n">calc_macaulay_duration</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_macaulay_duration</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type bool!&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">BondPricingRequest</span><span class="p">(</span><span class="n">PricingRequest</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_clean_price</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">calc_rho</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">rho_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">calc_theta</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">theta_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">calc_yield_to_maturity</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">calc_convexity</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">calc_macaulay_duration</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>  <span class="c1"># TODO: clarify why no z-spread</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Configuration of set of information to be calculated together with the bond&#39;s dirty price. In restricts the</span>
+<span class="sd">        general PricingRequest to the sub-set relevant for the pricing of bonds.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">PricingRequest</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calc_clean_price</span><span class="o">=</span><span class="n">calc_clean_price</span><span class="p">,</span> <span class="n">calc_rho</span><span class="o">=</span><span class="n">calc_rho</span><span class="p">,</span> <span class="n">rho_scale</span><span class="o">=</span><span class="n">rho_scale</span><span class="p">,</span>
+                                <span class="n">calc_theta</span><span class="o">=</span><span class="n">calc_theta</span><span class="p">,</span> <span class="n">theta_scale</span><span class="o">=</span><span class="n">theta_scale</span><span class="p">,</span>
+                                <span class="n">calc_yield_to_maturity</span><span class="o">=</span><span class="n">calc_yield_to_maturity</span><span class="p">,</span> <span class="n">calc_convexity</span><span class="o">=</span><span class="n">calc_convexity</span><span class="p">,</span>
+                                <span class="n">calc_macaulay_duration</span><span class="o">=</span><span class="n">calc_macaulay_duration</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">bond_pricing_request</span> <span class="o">=</span> <span class="n">BondPricingRequest</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

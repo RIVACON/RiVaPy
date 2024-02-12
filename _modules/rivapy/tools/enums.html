@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rivapy.tools.enums &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html#logging-usage">Logging Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rivapy.tools.enums</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rivapy.tools.enums</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span> <span class="k">as</span> <span class="n">_Enum</span><span class="p">,</span> <span class="n">unique</span> <span class="k">as</span> <span class="n">_unique</span>
+<span class="kn">from</span> <span class="nn">rivapy</span> <span class="kn">import</span> <span class="n">_pyvacon_available</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">The following Enum sub-classes replace to corresponding former classes one-on-one. The main reason for this replacement</span>
+<span class="sd">is the more comfortable iterations over the enumeration class members. Moreover, the Enum class provides potentially</span>
+<span class="sd">useful functionalities like comparisons, pickling, ... Finally, the decorator @unique ensures unique enumeration values.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="k">class</span> <span class="nc">_MyEnum</span><span class="p">(</span><span class="n">_Enum</span><span class="p">):</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">has_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">to_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks if given enum class contains the value and raises exception if not. If value is str </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            enum (_type_): _description_</span>
+<span class="sd">            value (_type_): _description_</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">has_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">has_value</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Unknown  &#39;</span> <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span><span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Given value &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; does not belong to enum &#39;</span> <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+    
+<span class="k">class</span> <span class="nc">_MyIntEnum</span><span class="p">(</span><span class="n">_Enum</span><span class="p">):</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">has_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">to_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks if given enum class contains the value and raises exception if not. If value is str </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            enum (_type_): _description_</span>
+<span class="sd">            value (_type_): _description_</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">has_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="bp">cls</span><span class="p">[</span><span class="n">value</span><span class="p">]</span> <span class="c1">#check if the string exists as key</span>
+            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="p">[</span><span class="n">value</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Given value &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; does not belong to enum &#39;</span> <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">_pyvacon_available</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pyvacon.finance.definition</span> <span class="kn">import</span> <span class="n">DayCounter</span> <span class="k">as</span> <span class="n">_DayCounter</span>
+    <span class="n">DayCounterType</span> <span class="o">=</span> <span class="n">_DayCounter</span><span class="o">.</span><span class="n">Type</span>
+
+    <span class="kn">from</span> <span class="nn">pyvacon.numerics.interpolation</span> <span class="kn">import</span> <span class="n">InterpolationType</span>
+    <span class="kn">from</span> <span class="nn">pyvacon.numerics.extrapolation</span> <span class="kn">import</span> <span class="n">ExtrapolationType</span>
+<span class="k">else</span><span class="p">:</span>
+<div class="viewcode-block" id="InterpolationType"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.InterpolationType">[docs]</a>    <span class="nd">@_unique</span>
+    <span class="k">class</span> <span class="nc">InterpolationType</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+        <span class="n">CONSTANT</span> <span class="o">=</span> <span class="s1">&#39;CONSTANT&#39;</span>
+        <span class="n">LINEAR</span> <span class="o">=</span> <span class="s1">&#39;LINEAR&#39;</span>
+        <span class="n">LINEAR_LOG</span> <span class="o">=</span> <span class="s1">&#39;LINEARLOG&#39;</span>
+        <span class="n">CONSTRAINED_SPLINE</span> <span class="o">=</span> <span class="s1">&#39;CONSTRAINED_SPLINE&#39;</span>
+        <span class="n">HAGAN</span> <span class="o">=</span> <span class="s1">&#39;HAGAN&#39;</span>
+        <span class="n">HAGAN_DF</span> <span class="o">=</span> <span class="s1">&#39;HAGAN_DF&#39;</span></div>
+
+
+<div class="viewcode-block" id="ExtrapolationType"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.ExtrapolationType">[docs]</a>    <span class="nd">@_unique</span>
+    <span class="k">class</span> <span class="nc">ExtrapolationType</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+        <span class="n">NONE</span> <span class="o">=</span> <span class="s1">&#39;NONE&#39;</span>
+        <span class="n">CONSTANT</span> <span class="o">=</span> <span class="s1">&#39;CONSTANT&#39;</span>
+        <span class="n">LINEAR</span> <span class="o">=</span> <span class="s1">&#39;LINEAR&#39;</span>
+        <span class="n">LINEAR_LOG</span> <span class="o">=</span> <span class="s1">&#39;LINEARLOG&#39;</span></div>
+        
+<div class="viewcode-block" id="SecuritizationLevel"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.SecuritizationLevel">[docs]</a><span class="nd">@_unique</span>
+<span class="k">class</span> <span class="nc">SecuritizationLevel</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="s1">&#39;NONE&#39;</span>
+    <span class="n">COLLATERALIZED</span> <span class="o">=</span> <span class="s1">&#39;COLLATERALIZED&#39;</span>
+    <span class="n">SENIOR_SECURED</span> <span class="o">=</span> <span class="s1">&#39;SENIOR_SECURED&#39;</span>
+    <span class="n">SENIOR_UNSECURED</span> <span class="o">=</span> <span class="s1">&#39;SENIOR_UNSECURED&#39;</span>
+    <span class="n">SUBORDINATED</span> <span class="o">=</span> <span class="s1">&#39;SUBORDINATED&#39;</span>
+    <span class="n">MEZZANINE</span> <span class="o">=</span> <span class="s1">&#39;MEZZANINE&#39;</span>
+    <span class="n">EQUITY</span> <span class="o">=</span> <span class="s1">&#39;EQUITY&#39;</span>
+    <span class="n">PREFERRED_SENIOR</span> <span class="o">=</span> <span class="s1">&#39;PREFERRED_SENIOR&#39;</span>
+    <span class="n">NON_PREFERRED_SENIOR</span> <span class="o">=</span> <span class="s1">&#39;NON_PREFERRED_SENIOR&#39;</span></div>
+
+<span class="c1"># class SecuritizationLevel:</span>
+<span class="c1">#     NONE = &#39;NONE&#39;</span>
+<span class="c1">#     COLLATERALIZED = &#39;COLLATERALIZED&#39; #,,,&#39;&#39;,&#39;SUBORDINATED&#39;,&#39;MEZZANINE&#39;,&#39;EQUITY&#39;]</span>
+<span class="c1">#     SENIOR_SECURED = &#39;SENIOR_SECURED&#39;</span>
+<span class="c1">#     SENIOR_UNSECURED = &#39;SENIOR_UNSECURED&#39;</span>
+<span class="c1">#     SUBORDINATED = &#39;SUBORDINATED&#39;</span>
+<span class="c1">#     MEZZANINE = &#39;MEZZANINE&#39;</span>
+<span class="c1">#     EQUITY = &#39;EQUITY&#39;</span>
+
+<span class="c1"># @_unique</span>
+<span class="c1"># class ProductType(_MyEnum):</span>
+<span class="c1">#     BOND = &#39;BOND&#39;</span>
+<span class="c1">#     CALLABLE_BOND = &#39;CALLABLE_BOND&#39;</span>
+
+
+<span class="c1"># @_unique</span>
+<span class="c1"># class PricerType(_MyEnum):</span>
+<span class="c1">#     ANALYTIC = &#39;ANALYTIC&#39;</span>
+<span class="c1">#     PDE = &#39;PDE&#39;</span>
+<span class="c1">#     MONTE_CARLO = &#39;MONTE_CARLO&#39;</span>
+<span class="c1">#     COMBO = &#39;COMBO&#39;</span>
+
+
+<span class="nd">@_unique</span>
+<span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+    <span class="n">BLACK76</span> <span class="o">=</span> <span class="s1">&#39;BLACK76&#39;</span>
+    <span class="n">CIR</span> <span class="o">=</span> <span class="s1">&#39;CIR&#39;</span>
+    <span class="n">HULL_WHITE</span> <span class="o">=</span> <span class="s1">&#39;HULL_WHITE&#39;</span>
+    <span class="n">HESTON</span> <span class="o">=</span> <span class="s1">&#39;HESTON&#39;</span>
+    <span class="n">LV</span> <span class="o">=</span> <span class="s1">&#39;LV&#39;</span>
+    <span class="n">GBM</span> <span class="o">=</span> <span class="s1">&#39;GBM&#39;</span>
+    <span class="n">G2PP</span> <span class="o">=</span> <span class="s1">&#39;G2PP&#39;</span>
+    <span class="n">VASICEK</span> <span class="o">=</span> <span class="s1">&#39;VASICEK&#39;</span>
+
+<span class="c1"># class Model:</span>
+<span class="c1">#     BLACK76 = &#39;BLACK76&#39;</span>
+<span class="c1">#     CIR =&#39;CIR&#39;</span>
+<span class="c1">#     HULL_WHITE = &#39;HULL_WHITE&#39;</span>
+<span class="c1">#     HESTON = &#39;HESTON&#39;</span>
+<span class="c1">#     LV = &#39;LV&#39;</span>
+<span class="c1">#     GBM = &#39;GBM&#39;</span>
+<span class="c1">#     G2PP = &#39;G2PP&#39;</span>
+<span class="c1">#     VASICEK = &#39;VASICEK&#39;</span>
+
+<span class="nd">@_unique</span>
+<span class="k">class</span> <span class="nc">Period</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="s1">&#39;A&#39;</span>
+    <span class="n">SA</span> <span class="o">=</span> <span class="s1">&#39;SA&#39;</span>
+    <span class="n">Q</span> <span class="o">=</span> <span class="s1">&#39;Q&#39;</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="s1">&#39;M&#39;</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
+
+    
+<span class="c1"># class Period:</span>
+<span class="c1">#     A = &#39;A&#39;</span>
+<span class="c1">#     SA = &#39;SA&#39;</span>
+<span class="c1">#     Q = &#39;Q&#39;</span>
+<span class="c1">#     M = &#39;M&#39;</span>
+<span class="c1">#     D = &#39;D&#39;</span>
+
+<div class="viewcode-block" id="RollConvention"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.RollConvention">[docs]</a><span class="nd">@_unique</span>
+<span class="k">class</span> <span class="nc">RollConvention</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+    <span class="n">FOLLOWING</span> <span class="o">=</span> <span class="s1">&#39;Following&#39;</span>
+    <span class="n">MODIFIED_FOLLOWING</span> <span class="o">=</span> <span class="s1">&#39;ModifiedFollowing&#39;</span>
+    <span class="n">MODIFIED_FOLLOWING_EOM</span> <span class="o">=</span> <span class="s1">&#39;ModifiedFollowingEOM&#39;</span>
+    <span class="n">MODIFIED_FOLLOWING_BIMONTHLY</span> <span class="o">=</span> <span class="s1">&#39;ModifiedFollowingBimonthly&#39;</span>
+    <span class="n">PRECEDING</span> <span class="o">=</span> <span class="s1">&#39;Preceding&#39;</span>
+    <span class="n">MODIFIED_PRECEDING</span> <span class="o">=</span> <span class="s1">&#39;ModifiedPreceding&#39;</span>
+    <span class="n">NEAREST</span> <span class="o">=</span> <span class="s1">&#39;Nearest&#39;</span>
+    <span class="n">UNADJUSTED</span> <span class="o">=</span> <span class="s1">&#39;Unadjusted&#39;</span></div>
+
+<span class="c1"># class RollConvention:</span>
+<span class="c1">#     FOLLOWING = &#39;Following&#39;</span>
+<span class="c1">#     MODIFIED_FOLLOWING = &#39;ModifiedFollowing&#39;</span>
+<span class="c1">#     MODIFIED_FOLLOWING_EOM = &#39;ModifiedFollowingEOM&#39;</span>
+<span class="c1">#     PRECEDING = &#39;Preceding&#39;</span>
+<span class="c1">#     MODIFIED_PRECEDING = &#39;ModifiedPreceding&#39;</span>
+<span class="c1">#     UNADJUSTED = &#39;Unadjusted&#39;</span>
+<div class="viewcode-block" id="DayCounterType"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.DayCounterType">[docs]</a><span class="nd">@_unique</span>
+<span class="k">class</span> <span class="nc">DayCounterType</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+    <span class="n">ACT_ACT</span> <span class="o">=</span> <span class="s1">&#39;ActAct&#39;</span>
+    <span class="n">Act365Fixed</span> <span class="o">=</span> <span class="s1">&#39;Act365Fixed&#39;</span>
+    <span class="n">ACT360</span> <span class="o">=</span> <span class="s1">&#39;Act360&#39;</span>
+    <span class="n">ThirtyU360</span> <span class="o">=</span> <span class="s1">&#39;30U360&#39;</span>
+    <span class="n">ThirtyE360</span> <span class="o">=</span> <span class="s1">&#39;30E360&#39;</span>
+    <span class="n">ACT252</span> <span class="o">=</span> <span class="s1">&#39;Act252&#39;</span></div>
+<div class="viewcode-block" id="InflationInterpolation"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.InflationInterpolation">[docs]</a><span class="nd">@_unique</span>
+<span class="k">class</span> <span class="nc">InflationInterpolation</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+    <span class="n">UNDEFINED</span> <span class="o">=</span> <span class="s1">&#39;UNDEFINED&#39;</span>
+    <span class="n">GERMAN</span> <span class="o">=</span> <span class="s1">&#39;GERMAN&#39;</span>
+    <span class="n">JAPAN</span> <span class="o">=</span> <span class="s1">&#39;JAPAN&#39;</span>
+    <span class="n">CONSTANT</span> <span class="o">=</span> <span class="s1">&#39;CONSTANT&#39;</span></div>
+
+<span class="nd">@_unique</span>
+<span class="k">class</span> <span class="nc">Sector</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+    <span class="n">UNDEFINED</span> <span class="o">=</span> <span class="s1">&#39;UNDEFINED&#39;</span>
+    <span class="c1"># BASIC_MATERIALS = &#39;BasicMaterials&#39;</span>
+    <span class="n">CONGLOMERATES</span> <span class="o">=</span> <span class="s1">&#39;Conglomerates&#39;</span>
+    <span class="n">CONSUMER_GOODS</span> <span class="o">=</span> <span class="s1">&#39;ConsumerGoods&#39;</span>
+    <span class="c1"># FINANCIAL = &#39;Financial&#39;</span>
+    <span class="c1"># HEALTHCARE = &#39;Healthcare&#39;</span>
+    <span class="c1"># INDUSTRIAL_GOODS = &#39;IndustrialGoods&#39;</span>
+    <span class="n">SERVICES</span> <span class="o">=</span> <span class="s1">&#39;Services&#39;</span>
+    <span class="c1"># TECHNOLOGY = &#39;Technology&#39;</span>
+    <span class="c1"># UTILITIES = &#39;Utilities&#39;</span>
+
+    <span class="n">COMMUNICATION_SERVICES</span> <span class="o">=</span> <span class="s1">&#39;CommunicationServices&#39;</span>
+    <span class="n">CONSUMER_STAPLES</span> <span class="o">=</span> <span class="s1">&#39;ConsumerStaples&#39;</span>
+    <span class="n">CONSUMER_DISCRETIONARY</span> <span class="o">=</span> <span class="s1">&#39;ConsumerDiscretionary&#39;</span>
+    <span class="n">ENERGY</span> <span class="o">=</span> <span class="s1">&#39;Energy&#39;</span>
+    <span class="n">FINANCIAL</span> <span class="o">=</span> <span class="s1">&#39;Financial&#39;</span>
+    <span class="n">HEALTH_CARE</span> <span class="o">=</span> <span class="s1">&#39;HealthCare&#39;</span>
+    <span class="n">INDUSTRIALS</span> <span class="o">=</span> <span class="s1">&#39;Industrials&#39;</span>
+    <span class="n">INFORMATION_TECHNOLOGY</span> <span class="o">=</span> <span class="s1">&#39;InformationTechnology&#39;</span>
+    <span class="n">MATERIALS</span> <span class="o">=</span> <span class="s1">&#39;Materials&#39;</span>
+    <span class="n">REAL_ESTATE</span> <span class="o">=</span> <span class="s1">&#39;RealEstate&#39;</span>
+    <span class="n">UTILITIES</span> <span class="o">=</span> <span class="s1">&#39;Utilities&#39;</span>
+
+<span class="nd">@_unique</span>
+<span class="k">class</span> <span class="nc">ESGRating</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span> <span class="c1"># see MSCI ESG ratings</span>
+    <span class="n">AAA</span> <span class="o">=</span> <span class="s1">&#39;AAA&#39;</span>
+    <span class="n">AA</span> <span class="o">=</span> <span class="s1">&#39;AA&#39;</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="s1">&#39;A&#39;</span>
+    <span class="n">BBB</span> <span class="o">=</span> <span class="s1">&#39;BBB&#39;</span>
+    <span class="n">BB</span> <span class="o">=</span> <span class="s1">&#39;BB&#39;</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="s1">&#39;B&#39;</span>
+    <span class="n">CCC</span> <span class="o">=</span> <span class="s1">&#39;CCC&#39;</span>
+
+<span class="nd">@_unique</span>
+<span class="k">class</span> <span class="nc">Rating</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+    <span class="c1"># cf. https://www.moneyland.ch/de/vergleich-rating-agenturen</span>
+    <span class="n">AAA</span> <span class="o">=</span> <span class="s1">&#39;AAA&#39;</span>
+    <span class="n">AA_PLUS</span> <span class="o">=</span> <span class="s1">&#39;AA+&#39;</span>
+    <span class="n">AA</span> <span class="o">=</span> <span class="s1">&#39;AA&#39;</span>
+    <span class="n">AA_MINUS</span> <span class="o">=</span> <span class="s1">&#39;AA-&#39;</span>
+    <span class="n">A_PLUS</span> <span class="o">=</span> <span class="s1">&#39;A+&#39;</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="s1">&#39;A&#39;</span>
+    <span class="n">A_MINUS</span> <span class="o">=</span> <span class="s1">&#39;A-&#39;</span>
+    <span class="n">BBB_PLUS</span> <span class="o">=</span> <span class="s1">&#39;BBB+&#39;</span>
+    <span class="n">BBB</span> <span class="o">=</span> <span class="s1">&#39;BBB&#39;</span>
+    <span class="n">BBB_MINUS</span> <span class="o">=</span> <span class="s1">&#39;BBB-&#39;</span>
+    <span class="n">BB_PLUS</span> <span class="o">=</span> <span class="s1">&#39;BB+&#39;</span>
+    <span class="n">BB</span> <span class="o">=</span> <span class="s1">&#39;BB&#39;</span>
+    <span class="n">BB_MINUS</span> <span class="o">=</span> <span class="s1">&#39;BB-&#39;</span>
+    <span class="n">B_PLUS</span> <span class="o">=</span> <span class="s1">&#39;B+&#39;</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="s1">&#39;B&#39;</span>
+    <span class="n">B_MINUS</span> <span class="o">=</span> <span class="s1">&#39;B-&#39;</span>
+    <span class="n">CCC_PLUS</span> <span class="o">=</span> <span class="s1">&#39;CCC+&#39;</span>
+    <span class="n">CCC</span> <span class="o">=</span> <span class="s1">&#39;CCC&#39;</span>
+    <span class="n">CCC_MINUS</span> <span class="o">=</span> <span class="s1">&#39;CCC-&#39;</span>
+    <span class="n">CC</span> <span class="o">=</span> <span class="s1">&#39;CC&#39;</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="s1">&#39;C&#39;</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="s1">&#39;NONE&#39;</span> <span class="c1"># not rated</span>
+
+<span class="c1"># class ProductType:</span>
+<span class="c1">#        BOND = &#39;BOND&#39;</span>
+<span class="c1">#        CALLABLE_BOND = &#39;CALLABLE_BOND&#39;   </span>
+
+<span class="k">class</span> <span class="nc">PricerType</span><span class="p">:</span>
+    <span class="n">ANALYTIC</span> <span class="o">=</span> <span class="s1">&#39;ANALYTIC&#39;</span>
+    <span class="n">PDE</span> <span class="o">=</span> <span class="s1">&#39;PDE&#39;</span>
+    <span class="n">MONTE_CARLO</span> <span class="o">=</span> <span class="s1">&#39;MONTE_CARLO&#39;</span>
+    <span class="n">COMBO</span> <span class="o">=</span> <span class="s1">&#39;COMBO&#39;</span>
+    
+       
+<div class="viewcode-block" id="VolatilityStickyness"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.VolatilityStickyness">[docs]</a><span class="nd">@_unique</span>
+<span class="k">class</span> <span class="nc">VolatilityStickyness</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="s1">&#39;NONE&#39;</span>
+    <span class="n">StickyStrike</span> <span class="o">=</span> <span class="s1">&#39;StickyStrike&#39;</span>
+    <span class="n">StickyXStrike</span> <span class="o">=</span> <span class="s1">&#39;StickyXStrike&#39;</span>
+    <span class="n">StickyFwdMoneyness</span> <span class="o">=</span> <span class="s1">&#39;StickyFwdMoneyness&#39;</span></div>
+
+<span class="nd">@_unique</span>
+<span class="k">class</span> <span class="nc">Currency</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+    <span class="n">AED</span> <span class="o">=</span>  <span class="s1">&#39;AED&#39;</span>
+    <span class="n">AFN</span> <span class="o">=</span>  <span class="s1">&#39;AFN&#39;</span>
+    <span class="n">ALL</span> <span class="o">=</span>  <span class="s1">&#39;ALL&#39;</span>
+    <span class="n">AMD</span> <span class="o">=</span>  <span class="s1">&#39;AMD&#39;</span>
+    <span class="n">ANG</span> <span class="o">=</span>  <span class="s1">&#39;ANG&#39;</span>
+    <span class="n">AOA</span> <span class="o">=</span>  <span class="s1">&#39;AOA&#39;</span>
+    <span class="n">ARS</span> <span class="o">=</span>  <span class="s1">&#39;ARS&#39;</span>
+    <span class="n">AUD</span> <span class="o">=</span>  <span class="s1">&#39;AUD&#39;</span>
+    <span class="n">AWG</span> <span class="o">=</span>  <span class="s1">&#39;AWG&#39;</span>
+    <span class="n">AZN</span> <span class="o">=</span>  <span class="s1">&#39;AZN&#39;</span>
+    <span class="n">BAM</span> <span class="o">=</span>  <span class="s1">&#39;BAM&#39;</span>
+    <span class="n">BBD</span> <span class="o">=</span>  <span class="s1">&#39;BBD&#39;</span>
+    <span class="n">BDT</span> <span class="o">=</span>  <span class="s1">&#39;BDT&#39;</span>
+    <span class="n">BGN</span> <span class="o">=</span>  <span class="s1">&#39;BGN&#39;</span>
+    <span class="n">BHD</span> <span class="o">=</span>  <span class="s1">&#39;BHD&#39;</span>
+    <span class="n">BIF</span> <span class="o">=</span>  <span class="s1">&#39;BIF&#39;</span>
+    <span class="n">BMD</span> <span class="o">=</span>  <span class="s1">&#39;BMD&#39;</span>
+    <span class="n">BND</span> <span class="o">=</span>  <span class="s1">&#39;BND&#39;</span>
+    <span class="n">BOB</span> <span class="o">=</span>  <span class="s1">&#39;BOB&#39;</span>
+    <span class="n">BRL</span> <span class="o">=</span>  <span class="s1">&#39;BRL&#39;</span>
+    <span class="n">BSD</span> <span class="o">=</span>  <span class="s1">&#39;BSD&#39;</span>
+    <span class="n">BTN</span> <span class="o">=</span>  <span class="s1">&#39;BTN&#39;</span>
+    <span class="n">BWP</span> <span class="o">=</span>  <span class="s1">&#39;BWP&#39;</span>
+    <span class="n">BYR</span> <span class="o">=</span>  <span class="s1">&#39;BYR&#39;</span>
+    <span class="n">BZD</span> <span class="o">=</span>  <span class="s1">&#39;BZD&#39;</span>
+    <span class="n">CAD</span> <span class="o">=</span>  <span class="s1">&#39;CAD&#39;</span>
+    <span class="n">CDF</span> <span class="o">=</span>  <span class="s1">&#39;CDF&#39;</span>
+    <span class="n">CHF</span> <span class="o">=</span>  <span class="s1">&#39;CHF&#39;</span>
+    <span class="n">CLP</span> <span class="o">=</span>  <span class="s1">&#39;CLP&#39;</span>
+    <span class="n">CNH</span> <span class="o">=</span>  <span class="s1">&#39;CNH&#39;</span>
+    <span class="n">CNY</span> <span class="o">=</span>  <span class="s1">&#39;CNY&#39;</span>
+    <span class="n">COP</span> <span class="o">=</span>  <span class="s1">&#39;COP&#39;</span>
+    <span class="n">CRC</span> <span class="o">=</span>  <span class="s1">&#39;CRC&#39;</span>
+    <span class="n">CUC</span> <span class="o">=</span>  <span class="s1">&#39;CUC&#39;</span>
+    <span class="n">CUP</span> <span class="o">=</span>  <span class="s1">&#39;CUP&#39;</span>
+    <span class="n">CVE</span> <span class="o">=</span>  <span class="s1">&#39;CVE&#39;</span>
+    <span class="n">CZK</span> <span class="o">=</span>  <span class="s1">&#39;CZK&#39;</span>
+    <span class="n">DJF</span> <span class="o">=</span>  <span class="s1">&#39;DJF&#39;</span>
+    <span class="n">DKK</span> <span class="o">=</span>  <span class="s1">&#39;DKK&#39;</span>
+    <span class="n">DOP</span> <span class="o">=</span>  <span class="s1">&#39;DOP&#39;</span>
+    <span class="n">DZD</span> <span class="o">=</span>  <span class="s1">&#39;DZD&#39;</span>
+    <span class="n">EGP</span> <span class="o">=</span>  <span class="s1">&#39;EGP&#39;</span>
+    <span class="n">ERN</span> <span class="o">=</span>  <span class="s1">&#39;ERN&#39;</span>
+    <span class="n">ETB</span> <span class="o">=</span>  <span class="s1">&#39;ETB&#39;</span>
+    <span class="n">EUR</span> <span class="o">=</span>  <span class="s1">&#39;EUR&#39;</span>
+    <span class="n">FJD</span> <span class="o">=</span>  <span class="s1">&#39;FJD&#39;</span>
+    <span class="n">FKP</span> <span class="o">=</span>  <span class="s1">&#39;FKP&#39;</span>
+    <span class="n">GBP</span> <span class="o">=</span>  <span class="s1">&#39;GBP&#39;</span>
+    <span class="n">GEL</span> <span class="o">=</span>  <span class="s1">&#39;GEL&#39;</span>
+    <span class="n">GGP</span> <span class="o">=</span>  <span class="s1">&#39;GGP&#39;</span>
+    <span class="n">GHS</span> <span class="o">=</span>  <span class="s1">&#39;GHS&#39;</span>
+    <span class="n">GIP</span> <span class="o">=</span>  <span class="s1">&#39;GIP&#39;</span>
+    <span class="n">GMD</span> <span class="o">=</span>  <span class="s1">&#39;GMD&#39;</span>
+    <span class="n">GNF</span> <span class="o">=</span>  <span class="s1">&#39;GNF&#39;</span>
+    <span class="n">GTQ</span> <span class="o">=</span>  <span class="s1">&#39;GTQ&#39;</span>
+    <span class="n">GYD</span> <span class="o">=</span>  <span class="s1">&#39;GYD&#39;</span>
+    <span class="n">HKD</span> <span class="o">=</span>  <span class="s1">&#39;HKD&#39;</span>
+    <span class="n">HNL</span> <span class="o">=</span>  <span class="s1">&#39;HNL&#39;</span>
+    <span class="n">HRK</span> <span class="o">=</span>  <span class="s1">&#39;HRK&#39;</span>
+    <span class="n">HTG</span> <span class="o">=</span>  <span class="s1">&#39;HTG&#39;</span>
+    <span class="n">HUF</span> <span class="o">=</span>  <span class="s1">&#39;HUF&#39;</span>
+    <span class="n">IDR</span> <span class="o">=</span>  <span class="s1">&#39;IDR&#39;</span>
+    <span class="n">ILS</span> <span class="o">=</span>  <span class="s1">&#39;ILS&#39;</span>
+    <span class="n">IMP</span> <span class="o">=</span>  <span class="s1">&#39;IMP&#39;</span>
+    <span class="n">INR</span> <span class="o">=</span>  <span class="s1">&#39;INR&#39;</span>
+    <span class="n">IQD</span> <span class="o">=</span>  <span class="s1">&#39;IQD&#39;</span>
+    <span class="n">IRR</span> <span class="o">=</span>  <span class="s1">&#39;IRR&#39;</span>
+    <span class="n">ISK</span> <span class="o">=</span>  <span class="s1">&#39;ISK&#39;</span>
+    <span class="n">JEP</span> <span class="o">=</span>  <span class="s1">&#39;JEP&#39;</span>
+    <span class="n">JMD</span> <span class="o">=</span>  <span class="s1">&#39;JMD&#39;</span>
+    <span class="n">JOD</span> <span class="o">=</span>  <span class="s1">&#39;JOD&#39;</span>
+    <span class="n">JPY</span> <span class="o">=</span>  <span class="s1">&#39;JPY&#39;</span>
+    <span class="n">KES</span> <span class="o">=</span>  <span class="s1">&#39;KES&#39;</span>
+    <span class="n">KGS</span> <span class="o">=</span>  <span class="s1">&#39;KGS&#39;</span>
+    <span class="n">KHR</span> <span class="o">=</span>  <span class="s1">&#39;KHR&#39;</span>
+    <span class="n">KMF</span> <span class="o">=</span>  <span class="s1">&#39;KMF&#39;</span>
+    <span class="n">KPW</span> <span class="o">=</span>  <span class="s1">&#39;KPW&#39;</span>
+    <span class="n">KRW</span> <span class="o">=</span>  <span class="s1">&#39;KRW&#39;</span>
+    <span class="n">KWD</span> <span class="o">=</span>  <span class="s1">&#39;KWD&#39;</span>
+    <span class="n">KYD</span> <span class="o">=</span>  <span class="s1">&#39;KYD&#39;</span>
+    <span class="n">KZT</span> <span class="o">=</span>  <span class="s1">&#39;KZT&#39;</span>
+    <span class="n">LAK</span> <span class="o">=</span>  <span class="s1">&#39;LAK&#39;</span>
+    <span class="n">LBP</span> <span class="o">=</span>  <span class="s1">&#39;LBP&#39;</span>
+    <span class="n">LKR</span> <span class="o">=</span>  <span class="s1">&#39;LKR&#39;</span>
+    <span class="n">LRD</span> <span class="o">=</span>  <span class="s1">&#39;LRD&#39;</span>
+    <span class="n">LSL</span> <span class="o">=</span>  <span class="s1">&#39;LSL&#39;</span>
+    <span class="n">LTL</span> <span class="o">=</span>  <span class="s1">&#39;LTL&#39;</span>
+    <span class="n">LVL</span> <span class="o">=</span>  <span class="s1">&#39;LVL&#39;</span>
+    <span class="n">LYD</span> <span class="o">=</span>  <span class="s1">&#39;LYD&#39;</span>
+    <span class="n">MAD</span> <span class="o">=</span>  <span class="s1">&#39;MAD&#39;</span>
+    <span class="n">MDL</span> <span class="o">=</span>  <span class="s1">&#39;MDL&#39;</span>
+    <span class="n">MGA</span> <span class="o">=</span>  <span class="s1">&#39;MGA&#39;</span>
+    <span class="n">MKD</span> <span class="o">=</span>  <span class="s1">&#39;MKD&#39;</span>
+    <span class="n">MMK</span> <span class="o">=</span>  <span class="s1">&#39;MMK&#39;</span>
+    <span class="n">MNT</span> <span class="o">=</span>  <span class="s1">&#39;MNT&#39;</span>
+    <span class="n">MOP</span> <span class="o">=</span>  <span class="s1">&#39;MOP&#39;</span>
+    <span class="n">MRO</span> <span class="o">=</span>  <span class="s1">&#39;MRO&#39;</span>
+    <span class="n">MUR</span> <span class="o">=</span>  <span class="s1">&#39;MUR&#39;</span>
+    <span class="n">MVR</span> <span class="o">=</span>  <span class="s1">&#39;MVR&#39;</span>
+    <span class="n">MWK</span> <span class="o">=</span>  <span class="s1">&#39;MWK&#39;</span>
+    <span class="n">MXN</span> <span class="o">=</span>  <span class="s1">&#39;MXN&#39;</span>
+    <span class="n">MYR</span> <span class="o">=</span>  <span class="s1">&#39;MYR&#39;</span>
+    <span class="n">MZN</span> <span class="o">=</span>  <span class="s1">&#39;MZN&#39;</span>
+    <span class="n">NAD</span> <span class="o">=</span>  <span class="s1">&#39;NAD&#39;</span>
+    <span class="n">NGN</span> <span class="o">=</span>  <span class="s1">&#39;NGN&#39;</span>
+    <span class="n">NIO</span> <span class="o">=</span>  <span class="s1">&#39;NIO&#39;</span>
+    <span class="n">NOK</span> <span class="o">=</span>  <span class="s1">&#39;NOK&#39;</span>
+    <span class="n">NPR</span> <span class="o">=</span>  <span class="s1">&#39;NPR&#39;</span>
+    <span class="n">NZD</span> <span class="o">=</span>  <span class="s1">&#39;NZD&#39;</span>
+    <span class="n">OMR</span> <span class="o">=</span>  <span class="s1">&#39;OMR&#39;</span>
+    <span class="n">PAB</span> <span class="o">=</span>  <span class="s1">&#39;PAB&#39;</span>
+    <span class="n">PEN</span> <span class="o">=</span>  <span class="s1">&#39;PEN&#39;</span>
+    <span class="n">PGK</span> <span class="o">=</span>  <span class="s1">&#39;PGK&#39;</span>
+    <span class="n">PHP</span> <span class="o">=</span>  <span class="s1">&#39;PHP&#39;</span>
+    <span class="n">PKR</span> <span class="o">=</span>  <span class="s1">&#39;PKR&#39;</span>
+    <span class="n">PLN</span> <span class="o">=</span>  <span class="s1">&#39;PLN&#39;</span>
+    <span class="n">PYG</span> <span class="o">=</span>  <span class="s1">&#39;PYG&#39;</span>
+    <span class="n">QAR</span> <span class="o">=</span>  <span class="s1">&#39;QAR&#39;</span>
+    <span class="n">RON</span> <span class="o">=</span>  <span class="s1">&#39;RON&#39;</span>
+    <span class="n">RSD</span> <span class="o">=</span>  <span class="s1">&#39;RSD&#39;</span>
+    <span class="n">RUB</span> <span class="o">=</span>  <span class="s1">&#39;RUB&#39;</span>
+    <span class="n">RWF</span> <span class="o">=</span>  <span class="s1">&#39;RWF&#39;</span>
+    <span class="n">SAR</span> <span class="o">=</span>  <span class="s1">&#39;SAR&#39;</span>
+    <span class="n">SBD</span> <span class="o">=</span>  <span class="s1">&#39;SBD&#39;</span>
+    <span class="n">SCR</span> <span class="o">=</span>  <span class="s1">&#39;SCR&#39;</span>
+    <span class="n">SDG</span> <span class="o">=</span>  <span class="s1">&#39;SDG&#39;</span>
+    <span class="n">SEK</span> <span class="o">=</span>  <span class="s1">&#39;SEK&#39;</span>
+    <span class="n">SGD</span> <span class="o">=</span>  <span class="s1">&#39;SGD&#39;</span>
+    <span class="n">SHP</span> <span class="o">=</span>  <span class="s1">&#39;SHP&#39;</span>
+    <span class="n">SLL</span> <span class="o">=</span>  <span class="s1">&#39;SLL&#39;</span>
+    <span class="n">SOS</span> <span class="o">=</span>  <span class="s1">&#39;SOS&#39;</span>
+    <span class="n">SPL</span> <span class="o">=</span>  <span class="s1">&#39;SPL&#39;</span>
+    <span class="n">SRD</span> <span class="o">=</span>  <span class="s1">&#39;SRD&#39;</span>
+    <span class="n">STD</span> <span class="o">=</span>  <span class="s1">&#39;STD&#39;</span>
+    <span class="n">SVC</span> <span class="o">=</span>  <span class="s1">&#39;SVC&#39;</span>
+    <span class="n">SYP</span> <span class="o">=</span>  <span class="s1">&#39;SYP&#39;</span>
+    <span class="n">SZL</span> <span class="o">=</span>  <span class="s1">&#39;SZL&#39;</span>
+    <span class="n">THB</span> <span class="o">=</span>  <span class="s1">&#39;THB&#39;</span>
+    <span class="n">TJS</span> <span class="o">=</span>  <span class="s1">&#39;TJS&#39;</span>
+    <span class="n">TMT</span> <span class="o">=</span>  <span class="s1">&#39;TMT&#39;</span>
+    <span class="n">TND</span> <span class="o">=</span>  <span class="s1">&#39;TND&#39;</span>
+    <span class="n">TOP</span> <span class="o">=</span>  <span class="s1">&#39;TOP&#39;</span>
+    <span class="n">TRY</span> <span class="o">=</span>  <span class="s1">&#39;TRY&#39;</span>
+    <span class="n">TTD</span> <span class="o">=</span>  <span class="s1">&#39;TTD&#39;</span>
+    <span class="n">TVD</span> <span class="o">=</span>  <span class="s1">&#39;TVD&#39;</span>
+    <span class="n">TWD</span> <span class="o">=</span>  <span class="s1">&#39;TWD&#39;</span>
+    <span class="n">TZS</span> <span class="o">=</span>  <span class="s1">&#39;TZS&#39;</span>
+    <span class="n">UAH</span> <span class="o">=</span>  <span class="s1">&#39;UAH&#39;</span>
+    <span class="n">UGX</span> <span class="o">=</span>  <span class="s1">&#39;UGX&#39;</span>
+    <span class="n">USD</span> <span class="o">=</span>  <span class="s1">&#39;USD&#39;</span>
+    <span class="n">UYU</span> <span class="o">=</span>  <span class="s1">&#39;UYU&#39;</span>
+    <span class="n">UZS</span> <span class="o">=</span>  <span class="s1">&#39;UZS&#39;</span>
+    <span class="n">VEF</span> <span class="o">=</span>  <span class="s1">&#39;VEF&#39;</span>
+    <span class="n">VND</span> <span class="o">=</span>  <span class="s1">&#39;VND&#39;</span>
+    <span class="n">VUV</span> <span class="o">=</span>  <span class="s1">&#39;VUV&#39;</span>
+    <span class="n">WST</span> <span class="o">=</span>  <span class="s1">&#39;WST&#39;</span>
+    <span class="n">XAF</span> <span class="o">=</span>  <span class="s1">&#39;XAF&#39;</span>
+    <span class="n">XAG</span> <span class="o">=</span>  <span class="s1">&#39;XAG&#39;</span>
+    <span class="n">XAU</span> <span class="o">=</span>  <span class="s1">&#39;XAU&#39;</span>
+    <span class="n">XPD</span> <span class="o">=</span>  <span class="s1">&#39;XPD&#39;</span>
+    <span class="n">XPT</span> <span class="o">=</span>  <span class="s1">&#39;XPT&#39;</span>
+    <span class="n">XCD</span> <span class="o">=</span>  <span class="s1">&#39;XCD&#39;</span>
+    <span class="n">XDR</span> <span class="o">=</span>  <span class="s1">&#39;XDR&#39;</span>
+    <span class="n">XOF</span> <span class="o">=</span>  <span class="s1">&#39;XOF&#39;</span>
+    <span class="n">XPF</span> <span class="o">=</span>  <span class="s1">&#39;XPF&#39;</span>
+    <span class="n">YER</span> <span class="o">=</span>  <span class="s1">&#39;YER&#39;</span>
+    <span class="n">ZAR</span> <span class="o">=</span>  <span class="s1">&#39;ZAR&#39;</span>
+    <span class="n">ZMW</span> <span class="o">=</span>  <span class="s1">&#39;ZMW&#39;</span>
+    <span class="n">ZWD</span> <span class="o">=</span>  <span class="s1">&#39;ZWD&#39;</span>
+
+
+<span class="k">class</span> <span class="nc">Country</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+    <span class="n">DE</span> <span class="o">=</span> <span class="s1">&#39;DE&#39;</span>
+    <span class="n">FR</span> <span class="o">=</span> <span class="s1">&#39;FR&#39;</span>
+    <span class="n">CA</span> <span class="o">=</span> <span class="s1">&#39;CA&#39;</span>
+    <span class="n">US</span> <span class="o">=</span> <span class="s1">&#39;US&#39;</span>
+    <span class="n">GB</span> <span class="o">=</span> <span class="s1">&#39;GB&#39;</span>
+    <span class="n">JP</span> <span class="o">=</span> <span class="s1">&#39;JP&#39;</span>
+    <span class="n">CN</span> <span class="o">=</span> <span class="s1">&#39;CN&#39;</span>
+       
+
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

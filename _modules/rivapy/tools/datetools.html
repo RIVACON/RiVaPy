@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rivapy.tools.datetools &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html#logging-usage">Logging Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rivapy.tools.datetools</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rivapy.tools.datetools</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">date</span>
+<span class="kn">from</span> <span class="nn">dateutil.relativedelta</span> <span class="kn">import</span> <span class="n">relativedelta</span>
+<span class="kn">from</span> <span class="nn">calendar</span> <span class="kn">import</span> <span class="n">monthrange</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span> <span class="k">as</span> <span class="n">_List</span><span class="p">,</span> <span class="n">Union</span> <span class="k">as</span> <span class="n">_Union</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span> <span class="nn">holidays</span> <span class="kn">import</span> \
+    <span class="n">HolidayBase</span> <span class="k">as</span> <span class="n">_HolidayBase</span><span class="p">,</span> \
+    <span class="n">ECB</span> <span class="k">as</span> <span class="n">_ECB</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.enums</span> <span class="kn">import</span> <span class="n">RollConvention</span><span class="p">,</span> <span class="n">DayCounterType</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools._validators</span> <span class="kn">import</span> <span class="n">_string_to_calendar</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+
+<span class="c1"># TODO: Switch to locally configured logger.</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">DayCounter</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">daycounter</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DayCounterType</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dc</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">daycounter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_yf</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dc</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">yf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d1</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d2</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span><span class="n">_List</span><span class="p">[</span><span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]]]):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_yf</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2_</span><span class="p">)</span> <span class="k">for</span> <span class="n">d2_</span> <span class="ow">in</span> <span class="n">d2</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yf</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span><span class="n">d2</span><span class="p">)</span>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">daycounter</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DayCounterType</span><span class="p">])</span><span class="o">-&gt;</span><span class="n">Callable</span><span class="p">[[</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>  <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]],</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="n">dc</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">daycounter</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dc</span> <span class="o">==</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">Act365Fixed</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">DayCounter</span><span class="o">.</span><span class="n">yf_Act365Fixed</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">dc</span> <span class="o">+</span> <span class="s1">&#39; not yet implemented.&#39;</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">yf_Act365Fixed</span><span class="p">(</span><span class="n">d1</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d2</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">d2</span><span class="o">-</span><span class="n">d1</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span><span class="o">/</span><span class="p">(</span><span class="mf">365.0</span><span class="o">*</span><span class="mi">24</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="mi">60</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="Period"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.Period">[docs]</a><span class="k">class</span> <span class="nc">Period</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">years</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">months</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">days</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Time Period expressed in years, months and days.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            years (int, optional): Number of years in time period. Defaults to 0.</span>
+<span class="sd">            months (int, optional): Number of months in time period. Defaults to 0.</span>
+<span class="sd">            days (int, optional): Number of days in time period. Defaults to 0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">years</span> <span class="o">=</span> <span class="n">years</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">months</span> <span class="o">=</span> <span class="n">months</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">days</span> <span class="o">=</span> <span class="n">days</span>
+
+<div class="viewcode-block" id="Period.from_string"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.Period.from_string">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span><span class="n">period</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a Period from a string</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            period (str): The string defining the period. The string must be defined by the number of days/months/years followed by one of the letters &#39;Y&#39;/&#39;M&#39;/&#39;D&#39;, i.e. &#39;6M&#39; means 6 months.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Period: The resulting period</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            .. code-block:: python</span>
+
+<span class="sd">                &gt;&gt;&gt; p = Period(&#39;6M&#39;)  # period of 6 months</span>
+<span class="sd">                &gt;&gt;&gt; p = Period(&#39;1Y&#39;) #period of 1 year</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">period_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">period</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">period_type</span> <span class="o">=</span> <span class="n">period</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">period_type</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Period</span><span class="p">(</span><span class="n">years</span><span class="o">=</span><span class="n">period_length</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">period_type</span> <span class="o">==</span> <span class="s1">&#39;M&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Period</span><span class="p">(</span><span class="n">months</span> <span class="o">=</span> <span class="n">period_length</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">period_type</span> <span class="o">==</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Period</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">period_length</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">period</span> <span class="o">+</span> <span class="s1">&#39; is not a valid period string. See documentation of tools.datetools.Period for deocumentation of valid strings.&#39;</span><span class="p">)</span></div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">years</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for years of period.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Number of years for specified time period.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__years</span>
+
+    <span class="nd">@years</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">years</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">years</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for years of period.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            years(int): Number of years.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__years</span> <span class="o">=</span> <span class="n">years</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">months</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">       Getter for months of period.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Number of months for specified time period.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__months</span>
+
+    <span class="nd">@months</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">months</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">months</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for months of period.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            months(int): Number of months.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__months</span> <span class="o">=</span> <span class="n">months</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">days</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for number of days in time period.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Number of days for specified time period.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__days</span>
+
+    <span class="nd">@days</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">days</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">days</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for days of period.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            days(int): Number of days.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__days</span> <span class="o">=</span> <span class="n">days</span></div>
+
+
+<div class="viewcode-block" id="Schedule"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.Schedule">[docs]</a><span class="k">class</span> <span class="nc">Schedule</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">start_day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                 <span class="n">end_day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                 <span class="n">time_period</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Period</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+                 <span class="n">backwards</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="n">stub</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">business_day_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">RollConvention</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">MODIFIED_FOLLOWING</span><span class="p">,</span>
+                 <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A schedule is a list of dates, e.g. of coupon payments, fixings, etc., which is defined by its fist (= start</span>
+<span class="sd">        day) and last (= end day) day, by its distance between two consecutive dates (= time period) and by the</span>
+<span class="sd">        procedure for rolling out the schedule, more precisely by the direction (backwards/forwards) and the dealing</span>
+<span class="sd">        with incomplete periods (stubs). Moreover, the schedule ensures to comply to business day conventions with</span>
+<span class="sd">        respect to a specified holiday calendar.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            start_day (_Union[date, datetime]): Schedule&#39;s first day - beginning of the schedule.</span>
+<span class="sd">            end_day (_Union[date, datetime]): Schedule&#39;s last day - end of the schedule.</span>
+<span class="sd">            time_period (_Union[Period, str]): Time distance between two consecutive dates.</span>
+<span class="sd">            backwards (bool, optional): Defines direction for rolling out the schedule. True means the schedule will be</span>
+<span class="sd">                                        rolled out (backwards) from end day to start day. Defaults to True.</span>
+<span class="sd">            stub (bool, optional): Defines if the first/last period is accepted (True), even though it is shorter than</span>
+<span class="sd">                                   the others, or if it remaining days are added to the neighbouring period (False).</span>
+<span class="sd">                                   Defaults to True.</span>
+<span class="sd">            business_day_convention (_Union[RollConvention, str], optional): Set of rules defining the adjustment of</span>
+<span class="sd">                                                                             days to ensure each date being a business</span>
+<span class="sd">                                                                             day with respect to a given holiday</span>
+<span class="sd">                                                                             calendar. Defaults to</span>
+<span class="sd">                                                                             RollConvention.MODIFIED_FOLLOWING</span>
+<span class="sd">            calendar (_Union[_HolidayBase, str], optional): Holiday calendar defining the bank holidays of a country or</span>
+<span class="sd">                                                          province (but not all non-business days as for example</span>
+<span class="sd">                                                          Saturdays and Sundays).</span>
+<span class="sd">                                                          Defaults (through constructor) to holidays.ECB</span>
+<span class="sd">                                                          (= Target2 calendar) between start_day and end_day.</span>
+
+<span class="sd">        Examples:</span>
+
+<span class="sd">            .. code-block:: python</span>
+<span class="sd">            </span>
+<span class="sd">                &gt;&gt;&gt; from datetime import date</span>
+<span class="sd">                &gt;&gt;&gt; from rivapy.tools import schedule</span>
+<span class="sd">                &gt;&gt;&gt; schedule = Schedule(date(2020, 8, 21), date(2021, 8, 21), Period(0, 3, 0), True, False, RollConvention.UNADJUSTED, holidays_de).generate_dates(False),</span>
+<span class="sd">                       [date(2020, 8, 21), date(2020, 11, 21), date(2021, 2, 21), date(2021, 5, 21), date(2021, 8, 21)])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_day</span> <span class="o">=</span> <span class="n">start_day</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_day</span> <span class="o">=</span> <span class="n">end_day</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_period</span> <span class="o">=</span> <span class="n">time_period</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backwards</span> <span class="o">=</span> <span class="n">backwards</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stub</span> <span class="o">=</span> <span class="n">stub</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">business_day_convention</span> <span class="o">=</span> <span class="n">business_day_convention</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calendar</span> <span class="o">=</span> <span class="n">calendar</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">start_day</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for schedule&#39;s start date.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Start date of specified schedule.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__start_day</span>
+
+    <span class="nd">@start_day</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">start_day</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__start_day</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">start_day</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">end_day</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for schedule&#39;s end date.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            End date of specified schedule.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__end_day</span>
+
+    <span class="nd">@end_day</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">end_day</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end_day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__end_day</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">end_day</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">time_period</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for schedule&#39;s time period.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Time period of specified schedule.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__time_period</span>
+
+    <span class="nd">@time_period</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">time_period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_period</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Period</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__time_period</span> <span class="o">=</span> <span class="n">_term_to_period</span><span class="p">(</span><span class="n">time_period</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">backwards</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for schedule&#39;s roll out direction.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True, if rolled out from end day to start day.</span>
+<span class="sd">            False, if rolled out from start day to end day.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__backwards</span>
+
+    <span class="nd">@backwards</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">backwards</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backwards</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__backwards</span> <span class="o">=</span> <span class="n">backwards</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stub</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for potential existence of short periods (stubs).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True, if a shorter period is allowed.</span>
+<span class="sd">            False, if only a longer period is allowed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__stub</span>
+
+    <span class="nd">@stub</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">stub</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stub</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__stub</span> <span class="o">=</span> <span class="n">stub</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">business_day_convention</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for schedule&#39;s business day convention.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Business day convention of specified schedule.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__business_day_convention</span>
+
+    <span class="nd">@business_day_convention</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">business_day_convention</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">business_day_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">RollConvention</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__business_day_convention</span> <span class="o">=</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">business_day_convention</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">calendar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for schedule&#39;s holiday calendar.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Holiday calendar of specified schedule.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calendar</span>
+
+    <span class="nd">@calendar</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">calendar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">calendar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__calendar</span> <span class="o">=</span> <span class="n">_ECB</span><span class="p">(</span><span class="n">years</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__start_day</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__end_day</span><span class="o">.</span><span class="n">year</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__calendar</span> <span class="o">=</span> <span class="n">_string_to_calendar</span><span class="p">(</span><span class="n">calendar</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_roll_out</span><span class="p">(</span><span class="n">from_</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">to_</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">term</span><span class="p">:</span> <span class="n">Period</span><span class="p">,</span> <span class="n">backwards</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+                  <span class="n">allow_stub</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">date</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Rolls out dates from from_ to to_ in the specified direction applying the given term under consideration of the</span>
+<span class="sd">        specification for allowing shorter periods.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            from_ (_Union[date, datetime]): Beginning of the roll out mechanism.</span>
+<span class="sd">            to_ (_Union[date, datetime]): End of the roll out mechanism.</span>
+<span class="sd">            term (Period): Difference between rolled out dates.</span>
+<span class="sd">            backwards (bool): Direction of roll out mechanism: backwards if True, forwards if False.</span>
+<span class="sd">            allow_stub (bool): Defines if periods shorter than term are allowed.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Date schedule not yet adjusted to any business day convention.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># convert datetime to date (if necessary):</span>
+        <span class="n">from_</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">from_</span><span class="p">)</span>
+        <span class="n">to_</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">to_</span><span class="p">)</span>
+
+        <span class="c1"># check input consistency:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">backwards</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">from_</span> <span class="o">&lt;</span> <span class="n">to_</span><span class="p">):</span>
+            <span class="n">direction</span> <span class="o">=</span> <span class="o">+</span><span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">backwards</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">from_</span> <span class="o">&gt;</span> <span class="n">to_</span><span class="p">):</span>
+            <span class="n">direction</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;From-date &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">from_</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; and to-date &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">to_</span><span class="p">)</span> <span class="o">+</span>
+                            <span class="s2">&quot;&#39; are not consistent with roll direction (backwards = &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">backwards</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39;)!&quot;</span><span class="p">)</span>
+
+        <span class="c1"># generates a list of dates ...</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># ... for forward rolling case  or  backward rolling case ...</span>
+        <span class="k">while</span> <span class="p">((</span><span class="o">~</span><span class="n">backwards</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">from_</span> <span class="o">&lt;=</span> <span class="n">to_</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">backwards</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">to_</span> <span class="o">&lt;=</span> <span class="n">from_</span><span class="p">)):</span>
+            <span class="n">dates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">from_</span><span class="p">)</span>
+            <span class="n">from_</span> <span class="o">+=</span> <span class="n">direction</span> <span class="o">*</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">years</span><span class="o">=</span><span class="n">term</span><span class="o">.</span><span class="n">years</span><span class="p">,</span> <span class="n">months</span><span class="o">=</span><span class="n">term</span><span class="o">.</span><span class="n">months</span><span class="p">,</span> <span class="n">days</span><span class="o">=</span><span class="n">term</span><span class="o">.</span><span class="n">days</span><span class="p">)</span>
+            <span class="c1"># ... and compete list for fractional periods ...</span>
+        <span class="k">if</span> <span class="n">dates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">to_</span><span class="p">:</span>
+            <span class="c1"># ... by adding stub or ...</span>
+            <span class="k">if</span> <span class="n">allow_stub</span><span class="p">:</span>
+                <span class="n">dates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">to_</span><span class="p">)</span>
+            <span class="c1"># ... by extending last period.</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_</span>
+        <span class="k">return</span> <span class="n">dates</span>
+
+<div class="viewcode-block" id="Schedule.generate_dates"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.Schedule.generate_dates">[docs]</a>    <span class="k">def</span> <span class="nf">generate_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ends_only</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">date</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate list of schedule days according to the schedule specification, in particular with regards to business</span>
+<span class="sd">        day convention and calendar given.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ends_only (bool): Flag to indicate if period beginnings shall be included, e.g. for defining accrual</span>
+<span class="sd">                              periods: True, if only period ends shall be included, e.g. for defining payment dates.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[date]: List of schedule dates (including start and end date) adjusted to rolling convention.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># roll out dates ignoring any business day issues</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__backwards</span><span class="p">:</span>
+            <span class="n">schedule_dates</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">_roll_out</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__end_day</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__start_day</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__time_period</span><span class="p">,</span>
+                                                <span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__stub</span><span class="p">)</span>
+            <span class="n">schedule_dates</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">schedule_dates</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">_roll_out</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__start_day</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__end_day</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__time_period</span><span class="p">,</span>
+                                                <span class="kc">False</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__stub</span><span class="p">)</span>
+
+        <span class="c1"># adjust according to business day convention</span>
+        <span class="n">rolled_schedule_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">roll_day</span><span class="p">(</span><span class="n">schedule_dates</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calendar</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__business_day_convention</span><span class="p">,</span>
+                                          <span class="n">schedule_dates</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+        <span class="p">[</span><span class="n">rolled_schedule_dates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">roll_day</span><span class="p">(</span><span class="n">schedule_dates</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calendar</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__business_day_convention</span><span class="p">,</span>
+                                               <span class="n">rolled_schedule_dates</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">schedule_dates</span><span class="p">))]</span>
+
+        <span class="k">if</span> <span class="n">ends_only</span><span class="p">:</span>
+            <span class="n">rolled_schedule_dates</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Schedule dates successfully calculated from &#39;&quot;</span>
+                     <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__start_day</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; to &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__end_day</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39;.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rolled_schedule_dates</span></div></div>
+
+
+
+
+<span class="c1"># class PowerSchedule:</span>
+<span class="c1">#     def __init__(self,</span>
+<span class="c1">#                  start_day: _Union[date, datetime],</span>
+<span class="c1">#                  end_day: _Union[date, datetime],</span>
+<span class="c1">#                  time_period: _Union[Period, str],</span>
+<span class="c1">#                  backwards: bool = True,</span>
+<span class="c1">#                  business_day_convention: _Union[RollConvention, str] = RollConvention.MODIFIED_FOLLOWING,</span>
+<span class="c1">#                  calendar: _Union[_HolidayBase, str] = None):</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+        
+<span class="c1">#         Args:</span>
+<span class="c1">#             start_day (_Union[date, datetime]): Schedule&#39;s first day - beginning of the schedule.</span>
+<span class="c1">#             end_day (_Union[date, datetime]): Schedule&#39;s last day - end of the schedule.</span>
+<span class="c1">#             time_period (_Union[Period, str]): Time distance between two consecutive dates.</span>
+<span class="c1">#             backwards (bool, optional): Defines direction for rolling out the schedule. True means the schedule will be</span>
+<span class="c1">#                                         rolled out (backwards) from end day to start day. Defaults to True.</span>
+<span class="c1">#             stub (bool, optional): Defines if the first/last period is accepted (True), even though it is shorter than</span>
+<span class="c1">#                                    the others, or if it remaining days are added to the neighbouring period (False).</span>
+<span class="c1">#                                    Defaults to True.</span>
+<span class="c1">#             business_day_convention (_Union[RollConvention, str], optional): Set of rules defining the adjustment of</span>
+<span class="c1">#                                                                              days to ensure each date being a business</span>
+<span class="c1">#                                                                              day with respect to a given holiday</span>
+<span class="c1">#                                                                              calendar. Defaults to</span>
+<span class="c1">#                                                                              RollConvention.MODIFIED_FOLLOWING</span>
+<span class="c1">#             calendar (_Union[_HolidayBase, str], optional): Holiday calendar defining the bank holidays of a country or</span>
+<span class="c1">#                                                           province (but not all non-business days as for example</span>
+<span class="c1">#                                                           Saturdays and Sundays).</span>
+<span class="c1">#                                                           Defaults (through constructor) to holidays.ECB</span>
+<span class="c1">#                                                           (= Target2 calendar) between start_day and end_day.</span>
+
+<span class="c1">#         Examples:</span>
+
+<span class="c1">#             .. code-block:: python</span>
+            
+<span class="c1">#                 &gt;&gt;&gt; from datetime import date</span>
+<span class="c1">#                 &gt;&gt;&gt; from rivapy.tools import schedule</span>
+<span class="c1">#                 &gt;&gt;&gt; schedule = Schedule(date(2020, 8, 21), date(2021, 8, 21), Period(0, 3, 0), True, False, RollConvention.UNADJUSTED, holidays_de).generate_dates(False),</span>
+<span class="c1">#                        [date(2020, 8, 21), date(2020, 11, 21), date(2021, 2, 21), date(2021, 5, 21), date(2021, 8, 21)])</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         self.start_day = start_day</span>
+<span class="c1">#         self.end_day = end_day</span>
+<span class="c1">#         self.time_period = time_period</span>
+<span class="c1">#         self.backwards = backwards</span>
+<span class="c1">#         self.business_day_convention = business_day_convention</span>
+<span class="c1">#         self.calendar = calendar</span>
+
+    
+
+<span class="c1">#     @property</span>
+<span class="c1">#     def start_day(self):</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         Getter for schedule&#39;s start date.</span>
+
+<span class="c1">#         Returns:</span>
+<span class="c1">#             Start date of specified schedule.</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         return self.__start_day</span>
+
+<span class="c1">#     @start_day.setter</span>
+<span class="c1">#     def start_day(self, start_day: _Union[date, datetime]):</span>
+<span class="c1">#         self.__start_day = _date_to_datetime(start_day)</span>
+
+<span class="c1">#     @property</span>
+<span class="c1">#     def end_day(self):</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         Getter for schedule&#39;s end date.</span>
+
+<span class="c1">#         Returns:</span>
+<span class="c1">#             End date of specified schedule.</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         return self.__end_day</span>
+
+<span class="c1">#     @end_day.setter</span>
+<span class="c1">#     def end_day(self, end_day: _Union[date, datetime]):</span>
+<span class="c1">#         self.__end_day = _date_to_datetime(end_day)</span>
+
+<span class="c1">#     @property</span>
+<span class="c1">#     def time_period(self):</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         Getter for schedule&#39;s time period.</span>
+
+<span class="c1">#         Returns:</span>
+<span class="c1">#             Time period of specified schedule.</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         return self.__time_period</span>
+
+<span class="c1">#     @time_period.setter</span>
+<span class="c1">#     def time_period(self, time_period: _Union[Period, str]):</span>
+<span class="c1">#         self.__time_period = _term_to_period(time_period)</span>
+
+<span class="c1">#     @property</span>
+<span class="c1">#     def backwards(self):</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         Getter for schedule&#39;s roll out direction.</span>
+
+<span class="c1">#         Returns:</span>
+<span class="c1">#             True, if rolled out from end day to start day.</span>
+<span class="c1">#             False, if rolled out from start day to end day.</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         return self.__backwards</span>
+
+<span class="c1">#     @backwards.setter</span>
+<span class="c1">#     def backwards(self, backwards: bool):</span>
+<span class="c1">#         self.__backwards = backwards</span>
+
+<span class="c1">#     @property</span>
+<span class="c1">#     def stub(self):</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         Getter for potential existence of short periods (stubs).</span>
+
+<span class="c1">#         Returns:</span>
+<span class="c1">#             True, if a shorter period is allowed.</span>
+<span class="c1">#             False, if only a longer period is allowed.</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         return self.__stub</span>
+
+<span class="c1">#     @stub.setter</span>
+<span class="c1">#     def stub(self, stub: bool):</span>
+<span class="c1">#         self.__stub = stub</span>
+
+<span class="c1">#     @property</span>
+<span class="c1">#     def business_day_convention(self):</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         Getter for schedule&#39;s business day convention.</span>
+
+<span class="c1">#         Returns:</span>
+<span class="c1">#             Business day convention of specified schedule.</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         return self.__business_day_convention</span>
+
+<span class="c1">#     @business_day_convention.setter</span>
+<span class="c1">#     def business_day_convention(self, business_day_convention: _Union[RollConvention, str]):</span>
+<span class="c1">#         self.__business_day_convention = RollConvention.to_string(business_day_convention)</span>
+
+<span class="c1">#     @property</span>
+<span class="c1">#     def calendar(self):</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         Getter for schedule&#39;s holiday calendar.</span>
+
+<span class="c1">#         Returns:</span>
+<span class="c1">#             Holiday calendar of specified schedule.</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         return self.__calendar</span>
+
+<span class="c1">#     @calendar.setter</span>
+<span class="c1">#     def calendar(self, calendar: _Union[_HolidayBase, str]):</span>
+<span class="c1">#         if calendar is None:</span>
+<span class="c1">#             self.__calendar = _ECB(years=range(self.__start_day.year, self.__end_day.year + 1))</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             self.__calendar = _string_to_calendar(calendar)</span>
+
+<span class="c1">#     @staticmethod</span>
+<span class="c1">#     def _roll_out(from_: _Union[date, datetime], to_: _Union[date, datetime], term: Period, backwards: bool,</span>
+<span class="c1">#                   allow_stub: bool) -&gt; _List[date]:</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         Rolls out dates from from_ to to_ in the specified direction applying the given term under consideration of the</span>
+<span class="c1">#         specification for allowing shorter periods.</span>
+
+<span class="c1">#         Args:</span>
+<span class="c1">#             from_ (_Union[date, datetime]): Beginning of the roll out mechanism.</span>
+<span class="c1">#             to_ (_Union[date, datetime]): End of the roll out mechanism.</span>
+<span class="c1">#             term (Period): Difference between rolled out dates.</span>
+<span class="c1">#             backwards (bool): Direction of roll out mechanism: backwards if True, forwards if False.</span>
+<span class="c1">#             allow_stub (bool): Defines if periods shorter than term are allowed.</span>
+
+<span class="c1">#         Returns:</span>
+<span class="c1">#             Date schedule not yet adjusted to any business day convention.</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         # convert datetime to date (if necessary):</span>
+<span class="c1">#         from_ = _date_to_datetime(from_)</span>
+<span class="c1">#         to_ = _date_to_datetime(to_)</span>
+
+<span class="c1">#         # check input consistency:</span>
+<span class="c1">#         if (~backwards) &amp; (from_ &lt; to_):</span>
+<span class="c1">#             direction = +1</span>
+<span class="c1">#         elif backwards &amp; (from_ &gt; to_):</span>
+<span class="c1">#             direction = -1</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             raise Exception(&quot;From-date &#39;&quot; + str(from_) + &quot;&#39; and to-date &#39;&quot; + str(to_) +</span>
+<span class="c1">#                             &quot;&#39; are not consistent with roll direction (backwards = &#39;&quot; + str(backwards) + &quot;&#39;)!&quot;)</span>
+
+<span class="c1">#         # generates a list of dates ...</span>
+<span class="c1">#         dates = []</span>
+<span class="c1">#         # ... for forward rolling case  or  backward rolling case ...</span>
+<span class="c1">#         while ((~backwards) &amp; (from_ &lt;= to_)) | (backwards &amp; (to_ &lt;= from_)):</span>
+<span class="c1">#             dates.append(from_)</span>
+<span class="c1">#             from_ += direction * relativedelta(years=term.years, months=term.months, days=term.days)</span>
+<span class="c1">#             # ... and compete list for fractional periods ...</span>
+<span class="c1">#         if dates[-1] != to_:</span>
+<span class="c1">#             # ... by adding stub or ...</span>
+<span class="c1">#             if allow_stub:</span>
+<span class="c1">#                 dates.append(to_)</span>
+<span class="c1">#             # ... by extending last period.</span>
+<span class="c1">#             else:</span>
+<span class="c1">#                 dates[-1] = to_</span>
+<span class="c1">#         return dates</span>
+
+<span class="c1">#     def generate_dates(self, ends_only: bool) -&gt; _List[date]:</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         Generate list of schedule days according to the schedule specification, in particular with regards to business</span>
+<span class="c1">#         day convention and calendar given.</span>
+
+<span class="c1">#         Args:</span>
+<span class="c1">#             ends_only (bool): Flag to indicate if period beginnings shall be included, e.g. for defining accrual</span>
+<span class="c1">#                               periods: True, if only period ends shall be included, e.g. for defining payment dates.</span>
+
+<span class="c1">#         Returns:</span>
+<span class="c1">#             List[date]: List of schedule dates (including start and end date) adjusted to rolling convention.</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         # roll out dates ignoring any business day issues</span>
+<span class="c1">#         if self.__backwards:</span>
+<span class="c1">#             schedule_dates = Schedule._roll_out(self.__end_day, self.__start_day, self.__time_period,</span>
+<span class="c1">#                                                 True, self.__stub)</span>
+<span class="c1">#             schedule_dates.reverse()</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             schedule_dates = Schedule._roll_out(self.__start_day, self.__end_day, self.__time_period,</span>
+<span class="c1">#                                                 False, self.__stub)</span>
+
+<span class="c1">#         # adjust according to business day convention</span>
+<span class="c1">#         rolled_schedule_dates = [roll_day(schedule_dates[0], self.__calendar, self.__business_day_convention,</span>
+<span class="c1">#                                           schedule_dates[0])]</span>
+<span class="c1">#         [rolled_schedule_dates.append(roll_day(schedule_dates[i], self.__calendar, self.__business_day_convention,</span>
+<span class="c1">#                                                rolled_schedule_dates[i - 1])) for i in range(1, len(schedule_dates))]</span>
+
+<span class="c1">#         if ends_only:</span>
+<span class="c1">#             rolled_schedule_dates.pop(0)</span>
+
+<span class="c1">#         logger.debug(&quot;Schedule dates successfully calculated from &#39;&quot;</span>
+<span class="c1">#                      + str(self.__start_day) + &quot;&#39; to &#39;&quot; + str(self.__end_day) + &quot;&#39;.&quot;)</span>
+<span class="c1">#         return rolled_schedule_dates</span>
+
+
+
+<span class="k">def</span> <span class="nf">_date_to_datetime</span><span class="p">(</span><span class="n">date_time</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">]</span>
+                      <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a date to a datetime or leaves it unchanged if it is already of type datetime.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        date_time (_Union[datetime, date]): Date(time) to be converted.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        date: (Potentially) Converted datetime.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">date_time</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">date_time</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">date_time</span><span class="p">,</span> <span class="n">date</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span><span class="n">date_time</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">date_time</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be of type datetime or date!&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_datetime_to_date_list</span><span class="p">(</span><span class="n">date_times</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span> <span class="n">_List</span><span class="p">[</span><span class="n">date</span><span class="p">]]</span>
+                           <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">date</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts types of date  list from datetime to date or leaves it unchanged if they are already of type date.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        date_times (_Union[List[datetime], List[date]]): List of date(time)s to be converted.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List[date]: List of (potentially) converted date(time)s.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">date_times</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">date_time</span><span class="p">)</span> <span class="k">for</span> <span class="n">date_time</span> <span class="ow">in</span> <span class="n">date_times</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">date_times</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be a list of type datetime or date!&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_string_to_period</span><span class="p">(</span><span class="n">term</span><span class="p">:</span> <span class="nb">str</span>
+                      <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Period</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts terms, e.g. 1D, 3M, and 5Y, into periods, i.e. Period(0, 0, 1), Period(0, 3, 0), and Period(5, 0, 0),</span>
+<span class="sd">    respectively.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        term (str): Term to be converted into a period.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Period: Period corresponding to the term specified.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">unit</span> <span class="o">=</span> <span class="n">term</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">measure</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">term</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">unit</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span>
+        <span class="n">period</span> <span class="o">=</span> <span class="n">Period</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">measure</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">unit</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;M&#39;</span><span class="p">:</span>
+        <span class="n">period</span> <span class="o">=</span> <span class="n">Period</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">measure</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">unit</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+        <span class="n">period</span> <span class="o">=</span> <span class="n">Period</span><span class="p">(</span><span class="n">measure</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown term! Please use: &#39;D&#39;, &#39;M&#39;, or &#39;Y&#39;.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">period</span>
+
+
+<span class="k">def</span> <span class="nf">_term_to_period</span><span class="p">(</span><span class="n">term</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Period</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+                    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Period</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a term provided as period or string into period format if necessary.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        term (_Union[Period, str]): Tenor to be converted if provided as string.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Period: Tenor (potentially converted) in(to) period format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">Period</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">term</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_string_to_period</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The term &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">term</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be provided as Period or string!&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">calc_end_day</span><span class="p">(</span><span class="n">start_day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                 <span class="n">term</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">business_day_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">RollConvention</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Derives the end date of a time period based on the start day the the term given as string, e.g. 1D, 3M, or 5Y.</span>
+<span class="sd">    If business day convention and corresponding calendar are provided the end date is additionally rolled accordingly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        start_day (_Union[date, datetime): Beginning of the time period with length term.</span>
+<span class="sd">        term (str): Term defining the period from start to end date.</span>
+<span class="sd">        business_day_convention (_Union[RollConvention, str], optional): Set of rules defining how to adjust</span>
+<span class="sd">                                                                         non-business days. Defaults to None.</span>
+<span class="sd">        calendar (_Union[_HolidayBase, str], optional): Holiday calender defining non-business days</span>
+<span class="sd">                                                      (but not Saturdays and Sundays).</span>
+<span class="sd">                                                      Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        date: End date potentially adjusted according to the specified business day convention with respect to the given</span>
+<span class="sd">              calendar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">start_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">start_day</span><span class="p">)</span>
+    <span class="n">period</span> <span class="o">=</span> <span class="n">_term_to_period</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+    <span class="n">end_date</span> <span class="o">=</span> <span class="n">start_date</span> <span class="o">+</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">years</span><span class="o">=</span><span class="n">period</span><span class="o">.</span><span class="n">years</span><span class="p">,</span> <span class="n">months</span><span class="o">=</span><span class="n">period</span><span class="o">.</span><span class="n">months</span><span class="p">,</span> <span class="n">days</span><span class="o">=</span><span class="n">period</span><span class="o">.</span><span class="n">days</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">business_day_convention</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">calendar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">end_date</span> <span class="o">=</span> <span class="n">roll_day</span><span class="p">(</span><span class="n">end_date</span><span class="p">,</span> <span class="n">calendar</span><span class="p">,</span> <span class="n">business_day_convention</span><span class="p">,</span> <span class="n">start_date</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">end_date</span>
+
+
+<span class="k">def</span> <span class="nf">calc_start_day</span><span class="p">(</span><span class="n">end_day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                   <span class="n">term</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                   <span class="n">business_day_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">RollConvention</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Derives the start date of a time period based on the end day the the term given as string, e.g. 1D, 3M, or 5Y.</span>
+<span class="sd">    If business day convention and corresponding calendar are provided the start date is additionally rolled</span>
+<span class="sd">    accordingly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        end_day (_Union[date, datetime): End of the time period with length term.</span>
+<span class="sd">        term (str): Term defining the period from start to end date.</span>
+<span class="sd">        business_day_convention (_Union[RollConvention, str], optional): Set of rules defining how to adjust</span>
+<span class="sd">                                                                         non-business days. Defaults to None.</span>
+<span class="sd">        calendar (_Union[_HolidayBase, str], optional): Holiday calender defining non-business days</span>
+<span class="sd">                                                      (but not Saturdays and Sundays).</span>
+<span class="sd">                                                      Defaults to None.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        date: Start date potentially adjusted according to the specified business day convention with respect to the</span>
+<span class="sd">              given calendar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">end_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">end_day</span><span class="p">)</span>
+    <span class="n">period</span> <span class="o">=</span> <span class="n">_term_to_period</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+    <span class="n">start_date</span> <span class="o">=</span> <span class="n">end_date</span> <span class="o">-</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">years</span><span class="o">=</span><span class="n">period</span><span class="o">.</span><span class="n">years</span><span class="p">,</span> <span class="n">months</span><span class="o">=</span><span class="n">period</span><span class="o">.</span><span class="n">months</span><span class="p">,</span> <span class="n">days</span><span class="o">=</span><span class="n">period</span><span class="o">.</span><span class="n">days</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">business_day_convention</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">calendar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">start_date</span> <span class="o">=</span> <span class="n">roll_day</span><span class="p">(</span><span class="n">start_date</span><span class="p">,</span> <span class="n">calendar</span><span class="p">,</span> <span class="n">business_day_convention</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">start_date</span>
+
+
+<span class="k">def</span> <span class="nf">last_day_of_month</span><span class="p">(</span><span class="n">day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]</span>
+                      <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Derives last day of the month corresponding to the given day.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        day (_Union[date, datetime]): Day defining month and year for derivation of month&#39;s last day.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        date: Date of last day of the corresponding month.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">date</span><span class="p">(</span><span class="n">day</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">day</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">monthrange</span><span class="p">(</span><span class="n">day</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">day</span><span class="o">.</span><span class="n">month</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">is_last_day_of_month</span><span class="p">(</span><span class="n">day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]</span>
+                         <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks if a given day is the last day of the corresponding month.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        day (_Union[date, datetime]): Day to be checked.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True, if day is last day of the month, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">day</span><span class="p">)</span> <span class="o">==</span> <span class="n">last_day_of_month</span><span class="p">(</span><span class="n">day</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">is_business_day</span><span class="p">(</span><span class="n">day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                    <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+                    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks if a given day is a business day in a given calendar.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        day (_Union[date, datetime]): Day to be checked.</span>
+<span class="sd">        calendar (_Union[_HolidayBase, str]): List of holidays defined by the given calendar.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True, if day is a business day, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: adjust for countries with weekend not on Saturday/Sunday (http://worldmap.workingdays.org/)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">day</span><span class="o">.</span><span class="n">isoweekday</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">6</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">day</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_string_to_calendar</span><span class="p">(</span><span class="n">calendar</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">last_business_day_of_month</span><span class="p">(</span><span class="n">day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                               <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+                               <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Derives the last business day of a month corresponding to a given day based on the holidays set in the calendar.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        day (_Union[date, datetime]): Day defining month and year for deriving the month&#39;s last business day.</span>
+<span class="sd">        calendar (_Union[_HolidayBase, str]): List of holidays defined by the given calendar.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        date: Date of last business day of the corresponding month.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_day</span> <span class="o">=</span> <span class="n">date</span><span class="p">(</span><span class="n">day</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">day</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">monthrange</span><span class="p">(</span><span class="n">day</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">day</span><span class="o">.</span><span class="n">month</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="p">(</span><span class="n">is_business_day</span><span class="p">(</span><span class="n">check_day</span><span class="p">,</span> <span class="n">calendar</span><span class="p">)):</span>
+        <span class="n">check_day</span> <span class="o">-=</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">check_day</span>
+
+
+<span class="k">def</span> <span class="nf">is_last_business_day_of_month</span><span class="p">(</span><span class="n">day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                                  <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+                                  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks it the given day is the last business day of the corresponding month.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        day (_Union[date, datetime]): day to be checked</span>
+<span class="sd">        calendar (_Union[_HolidayBase, str]): list of holidays defined by the given calendar</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if day is last business day of the corresponding month, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">day</span><span class="p">)</span> <span class="o">==</span> <span class="n">last_business_day_of_month</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">calendar</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">nearest_business_day</span><span class="p">(</span><span class="n">day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                         <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+                         <span class="n">following_first</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+                         <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Derives nearest business day from given day for a given calendar. If there are equally near days preceding and</span>
+<span class="sd">    following the flag following_first determines if the following day is preferred to the preceding one.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        day (_Union[date, datetime]): Day for which the nearest business day is to be found. </span>
+<span class="sd">        calendar (_Union[_HolidayBase, str]): List of holidays given by calendar.</span>
+<span class="sd">        following_first (bool): Flag for deciding if following days are preferred to an equally near preceding day.</span>
+<span class="sd">                                Default value is True.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        date: Nearest business day to given day according to given calendar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">distance</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">following_first</span><span class="p">:</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="o">+</span><span class="mi">1</span>
+
+    <span class="n">day</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">day</span><span class="p">)</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">is_business_day</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">calendar</span><span class="p">):</span>
+        <span class="n">distance</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">direction</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">day</span> <span class="o">+=</span> <span class="n">direction</span> <span class="o">*</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">distance</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">day</span>
+
+
+<span class="k">def</span> <span class="nf">nearest_last_business_day_of_month</span><span class="p">(</span><span class="n">day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                                       <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+                                       <span class="n">following_first</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+                                       <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Derives nearest last business day of a month from given day for a given calendar. If there are equally near days</span>
+<span class="sd">    preceding and following the flag following_first determines if the following day is preferred to the preceding one.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        day (_Union[date, datetime]): Day for which the nearest last business day of the month is to be found.</span>
+<span class="sd">        calendar (_Union[_HolidayBase, str]): List of holidays given by calendar.</span>
+<span class="sd">        following_first (bool, optional): Flag for deciding if following days are preferred to an equally near preceding</span>
+<span class="sd">                                          day. Defaults to True.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        date: Nearest last business day of a month to given day according to given calendar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">distance</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">following_first</span><span class="p">:</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="o">+</span><span class="mi">1</span>
+
+    <span class="n">day</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">day</span><span class="p">)</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">is_last_business_day_of_month</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">calendar</span><span class="p">):</span>
+        <span class="n">distance</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">direction</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">day</span> <span class="o">+=</span> <span class="n">direction</span> <span class="o">*</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">distance</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">day</span>
+
+
+<span class="k">def</span> <span class="nf">next_or_previous_business_day</span><span class="p">(</span><span class="n">day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                                  <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+                                  <span class="n">following_first</span><span class="p">:</span> <span class="nb">bool</span>
+                                  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Derives the preceding or following business day to a given day according to a given calendar depending on the flag</span>
+<span class="sd">    following_first. If the day is already a business day the function directly returns the day.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        day (_Union[date, datetime]): Day for which the preceding or following business day is to be found.</span>
+<span class="sd">        calendar (_HolidayBase): List of holidays defined by the calendar.</span>
+<span class="sd">        following_first (bool): Flag to determine in the following (True) or preceding (False) business day is to be</span>
+<span class="sd">        found.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        date: Preceding or following business day, respectively, or day itself if it is a business day.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">following_first</span><span class="p">:</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="o">+</span><span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="n">day</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">day</span><span class="p">)</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">is_business_day</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">calendar</span><span class="p">):</span>
+        <span class="n">day</span> <span class="o">+=</span> <span class="n">direction</span> <span class="o">*</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">day</span>
+
+
+<span class="k">def</span> <span class="nf">following</span><span class="p">(</span><span class="n">day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+              <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+              <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Derives the (potentially) adjusted business day according to the business day convention &#39;Following&#39; for a specified</span>
+<span class="sd">    day with respect to a specific calendar: The adjusted date is the following good business day.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        day (_Union[date, datetime]): Day to be adjusted according to the roll convention if not already a business day.</span>
+<span class="sd">        calendar (_Union[_HolidayBase, str]): Calendar defining holidays additional to weekends.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        date: Adjusted business day according to the roll convention &#39;Following&#39; with respect to calendar if the day is</span>
+<span class="sd">              not already a business day. Otherwise the (unadjusted) day is returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">next_or_previous_business_day</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">calendar</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">preceding</span><span class="p">(</span><span class="n">day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+              <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+              <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Derives the (potentially) adjusted business day according to the business day convention &#39;Preceding&#39; for a specified</span>
+<span class="sd">    day with respect to a specific calendar: The adjusted date is the preceding good business day.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        day (_Union[date, datetime]): Day to be adjusted according to the roll convention if not already a business day.</span>
+<span class="sd">        calendar (_Union[_HolidayBase, str]): Calendar defining holidays additional to weekends.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        date: Adjusted business day according to the roll convention &#39;Preceding&#39; with respect to calendar if the day is</span>
+<span class="sd">              not already a business day. Otherwise the (unadjusted) day is returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">next_or_previous_business_day</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">calendar</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">modified_following</span><span class="p">(</span><span class="n">day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                       <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+                       <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Derives the (potentially) adjusted business day according to the business day convention &#39;Modified Following&#39; for a</span>
+<span class="sd">    specified day with respect to a specific calendar: The adjusted date is the following good business day unless the</span>
+<span class="sd">    day is in the next calendar month, in which case the adjusted date is the preceding good business day.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        day (_Union[date, datetime]): Day to be adjusted according to the roll convention if not already a business day.</span>
+<span class="sd">        calendar (_Union[_HolidayBase, str]): Calendar defining holidays additional to weekends.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        date: Adjusted business day according to the roll convention &#39;Modified Following&#39; with respect to calendar if</span>
+<span class="sd">              the day is not already a business day. Otherwise the (unadjusted) day is returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">next_day</span> <span class="o">=</span> <span class="n">next_or_previous_business_day</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">calendar</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">next_day</span><span class="o">.</span><span class="n">month</span> <span class="o">&gt;</span> <span class="n">day</span><span class="o">.</span><span class="n">month</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">preceding</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">calendar</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">next_day</span>
+
+
+<span class="k">def</span> <span class="nf">modified_following_eom</span><span class="p">(</span><span class="n">day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                           <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+                           <span class="n">start_day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]</span>
+                           <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Derives the (potentially) adjusted business day according to the business day convention &#39;End of Month&#39; for a</span>
+<span class="sd">    specified day with respect to a specific calendar: Where the start date of a period is on the final business day of</span>
+<span class="sd">    a particular calendar month, the end date is on the final business day of the end month (not necessarily the</span>
+<span class="sd">    corresponding date in the end month).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        day (_Union[date, datetime]): Day to be adjusted according to the roll convention if not already a business day.</span>
+<span class="sd">        calendar (_Union[_HolidayBase, str]): Calendar defining holidays additional to weekends.</span>
+<span class="sd">        start_day (_Union[date, datetime]): Day at which the period under consideration begins.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        date: Adjusted business day according to the roll convention &#39;End of Month&#39; with respect to calendar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start_day</span><span class="p">,</span> <span class="n">date</span><span class="p">)</span> <span class="o">|</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start_day</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">is_last_business_day_of_month</span><span class="p">(</span><span class="n">start_day</span><span class="p">,</span> <span class="n">calendar</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">nearest_last_business_day_of_month</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">calendar</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">modified_following</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">calendar</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The roll convention &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">RollConvention</span><span class="o">.</span><span class="n">MODIFIED_FOLLOWING_EOM</span><span class="p">)</span>
+                        <span class="o">+</span> <span class="s1">&#39; cannot be evaluated without a start_day&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">modified_following_bimonthly</span><span class="p">(</span><span class="n">day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                                 <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+                                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Derives the (potentially) adjusted business day according to the business day convention &#39;Modified Following</span>
+<span class="sd">    Bimonthly&#39; for a specified day with respect to a specific calendar: The adjusted date is the following good business</span>
+<span class="sd">    day unless that day crosses the mid-month (15th) or end of a month, in which case the adjusted date is the preceding</span>
+<span class="sd">    good business day.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        day (_Union[date, datetime]): Day to be adjusted according to the roll convention if not already a business day.</span>
+<span class="sd">        calendar (_Union[_HolidayBase, str]): Calendar defining holidays additional to weekends.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        date: Adjusted business day according to the roll convention &#39;Modified Following Bimonthly&#39; with respect to</span>
+<span class="sd">              calendar if the day is not already a business day. Otherwise the (unadjusted) day is returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">next_day</span> <span class="o">=</span> <span class="n">next_or_previous_business_day</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">calendar</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">next_day</span><span class="o">.</span><span class="n">month</span> <span class="o">&gt;</span> <span class="n">day</span><span class="o">.</span><span class="n">month</span><span class="p">)</span> <span class="o">|</span> <span class="p">((</span><span class="n">next_day</span><span class="o">.</span><span class="n">day</span> <span class="o">&gt;</span> <span class="mi">15</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">day</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">15</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">preceding</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">calendar</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">next_day</span>
+
+
+<span class="k">def</span> <span class="nf">modified_preceding</span><span class="p">(</span><span class="n">day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+                       <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+                       <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Derives the (potentially) adjusted business day according to the business day convention &#39;Modified Preceding&#39; for a</span>
+<span class="sd">    specified day with respect to a specific calendar: The adjusted date is the preceding good business day unless the</span>
+<span class="sd">    day is in the previous calendar month, in which case the adjusted date is the following good business day.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        day (_Union[date, datetime]): Day to be adjusted according to the roll convention if not already a business day.</span>
+<span class="sd">        calendar (_Union[_HolidayBase, str]): Calendar defining holidays additional to weekends.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        date: Adjusted business day according to the roll convention &#39;Modified Preceding&#39; with respect to calendar if</span>
+<span class="sd">              the day is not already a business day. Otherwise the (unadjusted) day is returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">prev_day</span> <span class="o">=</span> <span class="n">next_or_previous_business_day</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">calendar</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">prev_day</span><span class="o">.</span><span class="n">month</span> <span class="o">&lt;</span> <span class="n">day</span><span class="o">.</span><span class="n">month</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">following</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">calendar</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">prev_day</span>
+
+
+<span class="c1"># to be used in the switcher (identical argument list)</span>
+<span class="k">def</span> <span class="nf">unadjusted</span><span class="p">(</span><span class="n">day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+               <span class="n">_</span>
+               <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Leaves the day unchanged independent from the fact if it is already a business day.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        day (_Union[date, datetime]): Day to be adjusted according to the roll convention.</span>
+<span class="sd">        _: Placeholder for calendar argument.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        date: Unadjusted day.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">day</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">roll_day</span><span class="p">(</span><span class="n">day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+             <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+             <span class="n">business_day_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">RollConvention</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+             <span class="n">start_day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+             <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adjusts a given day according to the specified business day convention with respect to a given calendar or if the</span>
+<span class="sd">    given day falls on a Saturday or Sunday. For some roll conventions not only the (end) day to be adjusted but also</span>
+<span class="sd">    the start day of a period is relevant for the adjustment of the given (end) day.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        day (_Union[date, datetime]): Day to be adjusted if it is a non-business day.</span>
+<span class="sd">        calendar (_Union[_HolidayBase, str]): Holiday calendar defining non-business days (but not weekends).</span>
+<span class="sd">        business_day_convention (_Union[RollConvention, str]): Set of rules defining how to adjust non-business days.</span>
+<span class="sd">        start_day (_Union[date, datetime], optional): Period&#39;s start day that may influence the rolling of the end day.</span>
+<span class="sd">                                                      Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        date: Adjusted day.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">roll_convention</span> <span class="o">=</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">business_day_convention</span><span class="p">)</span>
+    <span class="c1">#if start_day is not None:</span>
+    <span class="c1">#    start_day = _date_to_datetime(start_day)</span>
+
+    <span class="n">switcher</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;Unadjusted&#39;</span><span class="p">:</span> <span class="n">unadjusted</span><span class="p">,</span>
+        <span class="s1">&#39;Following&#39;</span><span class="p">:</span> <span class="n">following</span><span class="p">,</span>
+        <span class="s1">&#39;ModifiedFollowing&#39;</span><span class="p">:</span> <span class="n">modified_following</span><span class="p">,</span>
+        <span class="s1">&#39;ModifiedFollowingEOM&#39;</span><span class="p">:</span> <span class="n">modified_following_eom</span><span class="p">,</span>
+        <span class="s1">&#39;ModifiedFollowingBimonthly&#39;</span><span class="p">:</span> <span class="n">modified_following_bimonthly</span><span class="p">,</span>
+        <span class="s1">&#39;Nearest&#39;</span><span class="p">:</span> <span class="n">nearest_business_day</span><span class="p">,</span>
+        <span class="s1">&#39;Preceding&#39;</span><span class="p">:</span> <span class="n">preceding</span><span class="p">,</span>
+        <span class="s1">&#39;ModifiedPreceding&#39;</span><span class="p">:</span> <span class="n">modified_preceding</span>
+    <span class="p">}</span>
+    <span class="c1"># Get the appropriate roll function from switcher dictionary</span>
+    <span class="n">roll_func</span> <span class="o">=</span> <span class="n">switcher</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">roll_convention</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="s2">&quot;Business day convention &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">business_day_convention</span><span class="p">)</span>
+                                                      <span class="o">+</span> <span class="s2">&quot;&#39; is not known!&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">roll_func</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">calendar</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">roll_func</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">calendar</span><span class="p">,</span> <span class="n">start_day</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
