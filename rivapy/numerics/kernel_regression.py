@@ -47,6 +47,7 @@ class KernelRegression(BaseEstimator, RegressorMixin):
     bandwith selection of the kernel via leave-one-out cross-validation. Kernel
     regression is a simple non-parametric kernelized technique for learning
     a non-linear relationship between input variable(s) and a target variable.
+
     Parameters
     ----------
     kernel : string or callable, default="rbf"
@@ -60,6 +61,7 @@ class KernelRegression(BaseEstimator, RegressorMixin):
         sklearn.metrics.pairwise. Ignored by other kernels. If a sequence of
         values is given, one of these values is selected which minimizes
         the mean-squared-error of leave-one-out cross-validation.
+    
     See also
     --------
     sklearn.metrics.pairwise.kernel_metrics : List of built-in kernels.

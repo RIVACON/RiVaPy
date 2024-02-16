@@ -18,6 +18,20 @@ class DateTimeGrid:
                 daycounter:Union[str, DayCounterType]=DayCounterType.Act365Fixed, 
                 tz=None,
                 inclusive = 'left'):
+        """Object to handle datetimes together with their respective timegridpoints (according to a given daycount convention)
+
+        Args:
+            datetime_grid (pd.DatetimeIndex, optional): A grid of datetime values that is then transformed to datapoints. Defaults to None. Note that either this or a start and end date together with a frequency must be given. If a start date and a datetimegrid are specified at the same time, an exception will be thrown.
+            start (Union[dt.datetime, pd.Timestamp], optional): Start date of the datetime grid. Defaults to None.
+            end (Union[dt.datetime, pd.Timestamp], optional): Enddate of the datetimegrid. The parameter inclusive specifies whether the end date will be included into the grid or not.. Defaults to None.
+            freq (str, optional): A frequency string. Defaults to '1H'. See the documentation for the pandas function :external:py:func:`pandas.date_range` for more details of this string.
+            daycounter (Union[str, DayCounterType], optional): String or daycounterType used to compute the timepoints internally. Defaults to DayCounterType.Act365Fixed.
+            tz (str, optional): Time zone name for returning localized DatetimeIndex, see the pandas function :external:py:func:`pandas.date_range` for more details. Defaults to None.
+            inclusive (str, optional): Defines which boundary is included into the grid, see the pandas function ::external:py:func:`pandas.date_range`. Defaults to 'left'.
+
+        Raises:
+            ValueError: If both, datetime_grid and start, are either None or not None.
+        """
         if (start is not None) and (datetime_grid is not None):
             raise ValueError('Either datetime_grid or start must be None.')
         if start is not None:
@@ -37,7 +51,12 @@ class DateTimeGrid:
             self.df = None
 
         
-    def get_daily_subgrid(self):
+    def get_daily_subgrid(self)->'DateTimeGrid':
+        """Return a new datetime grid that is a subgrid of the current grid consisting of just daily values.
+
+        Returns:
+            DateTimeGrid: Reulting grid.
+        """
         df = self.df.groupby(by=['dates']).min()
         df = df.reset_index()
         result = DateTimeGrid(None, None, freq='1D')
@@ -46,13 +65,6 @@ class DateTimeGrid:
         result.shape = result.timegrid.shape
         result.df = pd.DataFrame({'dates': result.dates, 'tg': result.timegrid})
         return result
-
-    # def get_grid_indices(self, dates):
-    #     df = pd.DataFrame({'dates': self.dates, 'tg': self.timegrid})
-    #     df = df.reset_index()
-    #     df = df.set_index('dates')
-    #     df_tg = pd.DataFrame({'dates_': dates})
-    #     df.join(df_tg)
 
     def get_day_of_year(self):
         if 'day_of_year' not in self.df.columns:
