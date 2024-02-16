@@ -4,6 +4,9 @@ import rivapy.tools.interfaces as interfaces
 from rivapy.instruments import EnergyFutureSpecifications
 from typing import Dict, Set, List
 
+# TODO:
+# 1. add logic for creating synthetic contracts
+# 2. add possible to also include peak contracts
 
 def validate_class_input(func):
     def validate_wrapper(self, shape: pd.DataFrame, contracts: Dict[str, EnergyFutureSpecifications]):
@@ -76,20 +79,24 @@ class PFCShifter(interfaces.FactoryObject):
         return transition_matrix.loc[~transition_matrix.index.isin(detected_redundant_contracts), :]
     
     def shift(self, transition_matrix: pd.DataFrame) -> pd.DataFrame:
-        date_tpls = list(zip(transition_matrix.columns[1:],transition_matrix.columns[:-1]))
         contract_start_and_end_dates = np.array(self._get_contract_start_end_dates())
+        date_tpls = list(zip(contract_start_and_end_dates[:-1], contract_start_and_end_dates[1:]))
         hours_btwn_dates = pd.Series(contract_start_and_end_dates[1:] - contract_start_and_end_dates[:-1]).dt.days.to_numpy().reshape(1,-1) * 24
+        
         transition_matrix = transition_matrix.to_numpy() * hours_btwn_dates
         transition_matrix = transition_matrix/np.sum(transition_matrix, axis=1).reshape(-1,1)
         fwd_price_vec = self._get_forward_price_vector()
 
         fwd_price_noc = np.linalg.inv(transition_matrix) @ fwd_price_vec
-        #print(fwd_price_noc)
-        # the shifting process is not working correctly currently
-        shape = self.shape.copy()
+        pfc = self.shape.copy()
         for i, date_tpl in enumerate(date_tpls):
-            shape.iloc[(shape.index >= date_tpl[0]) & (shape.index <= date_tpl[1]),0] = shape.iloc[(shape.index >= date_tpl[0]) & (shape.index <= date_tpl[1]),0]/np.sum(shape.iloc[(shape.index >= date_tpl[0]) & (shape.index <= date_tpl[1]),0]) * len(shape.iloc[(shape.index >= date_tpl[0]) & (shape.index <= date_tpl[1]),0])*fwd_price_noc[i,0]
-        return shape
+            if i == len(date_tpls)-1:
+                row_filter = (pfc.index >= date_tpl[0]) & (pfc.index <= date_tpl[1])
+            else:
+                row_filter =  (pfc.index >= date_tpl[0]) & (pfc.index < date_tpl[1])
+                
+            pfc.iloc[row_filter, 0] = pfc.iloc[row_filter, 0]/np.sum(pfc.iloc[row_filter, 0]) * len(pfc.iloc[row_filter, 0]) * fwd_price_noc[i, 0]
+        return pfc
 
     def non_overlapping_structure(self):
         pass
