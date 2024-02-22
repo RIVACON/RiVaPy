@@ -46,9 +46,11 @@ from sys import exit
 # data ---------------------------------------------------
 spot_data = pd.read_pickle('df.pickle')
 
-sel = spot_data[(spot_data['Month'] >=9) & (spot_data['Month'] <= 11) & (spot_data['Day_of_week'] == 3) & (spot_data['GWL'] == 9.)]
+sel = spot_data[(spot_data['Month'] >=9) & (spot_data['Month'] <= 9) & (spot_data['Day_of_week'] == 3)]# & (spot_data['GWL'] ==  9.)]
 
 sel = sel.sort_values(by='Datetime')
+
+print(sel['Hour_of_day'])
 
 
 spot = np.array(sel['Spot'])
@@ -62,17 +64,18 @@ batch_size=int(len(sel)/(ts_len))#512#1024
 latent_size=1
 context_size=1
 hidden_size=64
-lr_init=1e-2
+lr_init=5e-3
+wd_init = 1e-5
 t0=0.
 t1=float(ts_len)
-lr_gamma=0.999
+lr_gamma=0.997
 kl_anneal_iters=100
 noise_std=5.
 adjoint=False
 method="milstein"
 
 num_samples=batch_size
-num_iters = 1000
+num_iters = 100000
 
 
 
@@ -84,11 +87,12 @@ spot_std = np.std(spot_r1y[0,:])
 
 spot_r1y = (spot_r1y - spot_mean) / spot_std
 
-#for i in range(batch_size):
-#    plt.plot(spot_r1y[:,i])
-#plt.show()
+for i in range(batch_size):
+    plt.plot(spot_r1y[:,i])
+plt.show()
 
-#exit()
+
+
 
 
 # torch tensors -------------------------------------------
@@ -168,7 +172,7 @@ class LatentSDE(nn.Module):
             nn.Linear(latent_size + context_size, hidden_size),
             #nn.Softplus(),
             #nn.Linear(hidden_size, hidden_size),
-            nn.Tanh(),#Softplus(),
+            nn.Softplus(),
             nn.Linear(hidden_size, latent_size),
         )
 
@@ -176,28 +180,31 @@ class LatentSDE(nn.Module):
             nn.Linear(latent_size, hidden_size),
             #nn.Softplus(),
             #nn.Linear(hidden_size, hidden_size),
-            nn.Tanh(),#Softplus(),
+            nn.Softplus(),
             nn.Linear(hidden_size, latent_size),
         )
+
 
         self.g_nets = nn.ModuleList(
             [
                 nn.Sequential(
                     nn.Linear(latent_size, hidden_size),
-                    nn.Tanh(),#Softplus(),
+                    nn.Softplus(),
                     nn.Linear(hidden_size, latent_size),
                     nn.Sigmoid()
                 )
                 for _ in range(latent_size)
             ]
         )
+        
+
         #self.projector = nn.Linear(latent_size, data_size)
         #Decoder: 
         self.projector =nn.Sequential(
             nn.Linear(latent_size, hidden_size),
             #nn.Softplus(),
             #nn.Linear(hidden_size, hidden_size),
-            nn.Tanh(),#Softplus(),
+            nn.Softplus(),
             nn.Linear(hidden_size, data_size),
         )
         self.pz0_mean = nn.Parameter(torch.zeros(1, latent_size))
@@ -212,6 +219,13 @@ class LatentSDE(nn.Module):
         ts, ctx = self._ctx
         i = min(torch.searchsorted(ts, t, right=True), len(ts) - 1)
         return self.f_net(torch.cat((y, ctx[i]), dim=1))
+
+        #if t.dim() == 0:
+        #    t = torch.full_like(y, fill_value=t)
+        # Positional encoding in transformers for time-inhomogeneous posterior.
+        #return self.f_net(torch.cat((torch.sin(t), y), dim=-1))
+    
+       
 
     def h(self, t, y): # (prior) Drift
         return self.h_net(y)
@@ -269,7 +283,9 @@ latent_sde = LatentSDE(
         hidden_size=hidden_size,
     ).to(device)
 
-optimizer = optim.Adam(params=latent_sde.parameters(), lr=lr_init)
+optimizer = optim.Adam(params=latent_sde.parameters(), lr=lr_init)#,weight_decay=wd_init)
+#lambda1 = lambda epoch: 0.65 ** epoch
+#scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda1)
 scheduler = torch.optim.lr_scheduler.LinearLR(optimizer=optimizer)#ExponentialLR(optimizer=optimizer, gamma=lr_gamma)#
 kl_scheduler = LinearScheduler(iters=kl_anneal_iters)
 
