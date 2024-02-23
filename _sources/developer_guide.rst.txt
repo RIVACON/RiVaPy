@@ -41,7 +41,7 @@ Function names, variable names, and filenames should be descriptive; avoid abbre
 
 Unit Testing
 ---------------------
-Please write as much unittests as possible. The tests are located in the folder *tests* and use the python unittest framework.
+Please write as many unittests as possible. The tests are located in the folder *tests* and use the python unittest framework.
 
 
 Logging
@@ -57,7 +57,7 @@ to retrieve the correct logger.
 
 
 Logging Usage
-==============================
+^^^^^^^^^^^^^^^^^^
 The rivapy package provides logging using the standard python logging module. Here, a separate logger for each submodule 
 exists:
 
