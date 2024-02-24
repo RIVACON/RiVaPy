@@ -19,6 +19,7 @@ from scipy.special import comb
 
 import analysis
 
+from sys import exit
 
 #timegrid = np.linspace(0.0, days*1.0/365.0, days*24)
 #forward_expiries = [timegrid[-1]]
@@ -47,9 +48,11 @@ model = LinearDemandForwardModel(wind_power_forecast=wind,
 
 val_date = dt.datetime(2023,1,1)
 strike = 1.0 #0.22
+transaction_cost = 0.01
 days = 2
 
 repo = analysis.Repo('./experiments/')
+
 
 # einmal mit forecast 0.2, 0.5
 # delta-vergleich auf pfaden
@@ -64,6 +67,7 @@ for max_capacity in [0.0, 0.125, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 5.0
                                 location = 'Onshore',
                                 schedule = [val_date + dt.timedelta(days=days)], 
                                 fixed_price=strike,
+                                transaction_cost = transaction_cost,
                                 max_capacity = max_capacity, 
                                 id='dummy')
     for loss in ['exponential_utility']:        #'exponential_utility', mean_variance
@@ -82,7 +86,7 @@ for max_capacity in [0.0, 0.125, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 5.0
                                             nb_neurons=32, 
                                             n_sims=200_000, 
                                             regularization=regularization,
-                                            epochs=400, 
+                                            epochs=10,#400, #FS 
                                             verbose=1,
                                             tensorboard_logdir = 'logs/' + dt.datetime.now().strftime("%Y%m%dT%H%M%S"), 
                                             initial_lr=1e-5,
@@ -90,5 +94,6 @@ for max_capacity in [0.0, 0.125, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 5.0
                                             batch_size=2000, 
                                             decay_rate=0.2, 
                                             seed=seed, 
-                                            loss=loss#'exponential_utility' #'mean_variance'
+                                            loss=loss,#'exponential_utility' #'mean_variance'
+                                            transaction_cost = transaction_cost
                     )
