@@ -108,10 +108,14 @@ class DeepHedgeModel(tf.keras.Model):
                 pnl += tf.where(tf.greater(diff_q, 0), 
                                 tf.scalar_mul((1.+self.transaction_cost),tf.math.multiply(diff_q, tf.squeeze(x[j][:,i]))), 
                                 tf.scalar_mul((1.-self.transaction_cost),tf.math.multiply(diff_q, tf.squeeze(x[j][:,i]))))
-                #pnl += tf.math.multiply(diff, tf.squeeze(x[j][:,i]))
+                #pnl += tf.math.multiply(diff_q, tf.squeeze(x[j][:,i]))
             self._prev_q = quantity
         for j in range(len(self.hedge_instruments)):
-            pnl += self._prev_q[:,j]* tf.squeeze(x[j][:,-1])#+ rlzd_qty[:,-1]*(tf.squeeze(power_fwd[:,-1])-self.fixed_price)
+            diff_q = self._prev_q[:,j]-quantity[:,j]
+            pnl += tf.where(tf.greater(diff_q, 0), 
+                            tf.scalar_mul((1.+self.transaction_cost),tf.math.multiply(self._prev_q[:,j], tf.squeeze(x[j][:,i]))), 
+                            tf.scalar_mul((1.-self.transaction_cost),tf.math.multiply(self._prev_q[:,j], tf.squeeze(x[j][:,i]))))
+            #pnl += self._prev_q[:,j]* tf.squeeze(x[j][:,-1])#+ rlzd_qty[:,-1]*(tf.squeeze(power_fwd[:,-1])-self.fixed_price)
         return pnl
     
 
