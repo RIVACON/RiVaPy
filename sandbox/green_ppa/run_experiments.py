@@ -94,6 +94,5 @@ for max_capacity in [0.0, 0.125, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 5.0
                                             batch_size=2000, 
                                             decay_rate=0.2, 
                                             seed=seed, 
-                                            loss=loss,#'exponential_utility' #'mean_variance'
-                                            transaction_cost = transaction_cost
+                                            loss=loss
                     )
