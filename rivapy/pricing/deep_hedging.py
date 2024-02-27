@@ -21,7 +21,7 @@ class DeepHedgeModel(tf.keras.Model):
                         depth: int,
                         n_neurons: int,
                         loss: str,
-                        transaction_cost: float,
+                        transaction_cost: dict,
                         model: tf.keras.Model=None,
                         **kwargs):
         """ Class for Deep Hedging Model.
@@ -54,11 +54,10 @@ class DeepHedgeModel(tf.keras.Model):
         self.transaction_cost = transaction_cost
         
     def __call__(self, x, training=True):
-        # tensorflow schnittstelle #FS
-        if self.transaction_cost > 0:
-            return self._compute_pnl_withtransactioncost(x, training) #+ self.price
-        else:
+        if not self.transaction_cost:
             return self._compute_pnl(x, training) #+ self.price
+        else:
+            return self._compute_pnl_withtransactioncost(x, training) #+ self.price
     
     def _build_model(self, depth: int, nb_neurons: int):
         inputs= [tf.keras.Input(shape=(1,),name = ins) for ins in self.hedge_instruments]
@@ -104,17 +103,27 @@ class DeepHedgeModel(tf.keras.Model):
             inputs.append(t)
             quantity = self.model(inputs, training=training)#tf.squeeze(self.model(inputs, training=training))
             for j in range(len(self.hedge_instruments)):
+                key_to_check = self.hedge_instruments[j]
+                if key_to_check in self.transaction_cost.keys():
+                    tc = self.transaction_cost[key_to_check]
+                else:
+                    tc = 0.
                 diff_q = self._prev_q[:,j]-quantity[:,j]
                 pnl += tf.where(tf.greater(diff_q, 0), 
-                                tf.math.multiply(diff_q, tf.scalar_mul((1.-self.transaction_cost),tf.squeeze(x[j][:,i]))),
-                                tf.math.multiply(diff_q, tf.scalar_mul((1.+self.transaction_cost),tf.squeeze(x[j][:,i]))))
+                                tf.math.multiply(diff_q, tf.scalar_mul((1.-tc[0]),tf.squeeze(x[j][:,i]))),
+                                tf.math.multiply(diff_q, tf.scalar_mul((1.+tc[0]),tf.squeeze(x[j][:,i]))))
                 #pnl += tf.math.multiply(diff_q, tf.squeeze(x[j][:,i]))
             self._prev_q = quantity
         for j in range(len(self.hedge_instruments)):
+            key_to_check = self.hedge_instruments[j]
+            if key_to_check in self.transaction_cost.keys():
+                tc = self.transaction_cost[key_to_check]
+            else:
+                tc = 0.
             diff_q = self._prev_q[:,j]-quantity[:,j]
             pnl += tf.where(tf.greater(diff_q, 0), 
-                            tf.math.multiply(self._prev_q[:,j], tf.scalar_mul((1.-self.transaction_cost),tf.squeeze(x[j][:,-1]))),
-                            tf.math.multiply(self._prev_q[:,j], tf.scalar_mul((1.+self.transaction_cost),tf.squeeze(x[j][:,-1]))))
+                            tf.math.multiply(self._prev_q[:,j], tf.scalar_mul((1.-tc[0]),tf.squeeze(x[j][:,-1]))),
+                            tf.math.multiply(self._prev_q[:,j], tf.scalar_mul((1.+tc[0]),tf.squeeze(x[j][:,-1]))))
             #pnl += self._prev_q[:,j]* tf.squeeze(x[j][:,-1])#+ rlzd_qty[:,-1]*(tf.squeeze(power_fwd[:,-1])-self.fixed_price)
         return pnl
     

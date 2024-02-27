@@ -106,7 +106,7 @@ class GreenPPADeepHedgingPricer:
                 seed: int = 42,
                 additional_states=None, 
                 loss: str = 'mean_variance',
-                transaction_cost: float = 0.
+                transaction_cost: dict = {}
                 #paths: Dict[str, np.ndarray] = None
                 ):
         """Price a green PPA using deeep hedging
@@ -128,7 +128,7 @@ class GreenPPADeepHedgingPricer:
             decay_rate (float, optional): Decay of learning rate after each epoch. Defaults to 0.7.
             seed (int, optional): Seed that is set to make results reproducible. Defaults to 42.
             loss (str, optional): Either 'mean_variance' or 'exponential_utility'.
-            transaction_cost (float, optional): Proportional transaction cost. Defaults to 0.
+            transaction_cost (dict, optional): Proportional transaction cost dependent on instrument. Default is empty dict.
         Returns:
             _type_: _description_
 
