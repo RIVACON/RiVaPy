@@ -67,7 +67,6 @@ for max_capacity in [0.0, 0.125, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 5.0
                                 location = 'Onshore',
                                 schedule = [val_date + dt.timedelta(days=days)], 
                                 fixed_price=strike,
-                                transaction_cost = transaction_cost,
                                 max_capacity = max_capacity, 
                                 id='dummy')
     for loss in ['exponential_utility']:        #'exponential_utility', mean_variance

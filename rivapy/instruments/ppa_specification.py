@@ -110,7 +110,6 @@ class PPASpecification(interfaces.FactoryObject):
 				amount: Union[float, np.ndarray], 
 				schedule: Union[SimpleSchedule, List[dt.datetime]],
 				fixed_price: float,
-				transaction_cost: float,
 				id:str = None):
 		"""Specification for a simple power purchase agreement (PPA).
 
@@ -131,7 +130,6 @@ class PPASpecification(interfaces.FactoryObject):
 		else:
 			self.schedule = schedule
 		self.fixed_price = fixed_price
-		self.transaction_cost = transaction_cost
 		if isinstance(schedule, list):
 			self._schedule_df = pd.DataFrame({'dates': self.schedule}).reset_index()
 		else:
@@ -164,8 +162,7 @@ class PPASpecification(interfaces.FactoryObject):
 			'id': self.id,
 			'amount': self.amount,
 			'schedule': schedule,
-			'fixed_price': self.fixed_price,
-			'transaction_cost': self.transaction_cost
+			'fixed_price': self.fixed_price
 		}
 
 	def set_amount(self, amount):
@@ -186,7 +183,6 @@ class GreenPPASpecification(PPASpecification):
 	def __init__(self,
 				schedule: Union[SimpleSchedule, List[dt.datetime]],
 				fixed_price: float,
-				transaction_cost: float,
 				max_capacity: float,
 				technology: str,
 				udl: str,
@@ -200,14 +196,13 @@ class GreenPPASpecification(PPASpecification):
 		Args:
 			schedule (Union[SimpleSchedule, List[dt.datetime]]): Delivery schedule.
 			fixed_price (float): Fixed price paid for the power.
-			transaction_cost (float): Transaction cost paid for buy/sell
 			max_capacity (float): The absolute maximal capacity of the renewable energy source. This is used to derive the production amount of the plant by multiplying forecasts with the factor max_capacity/total_capacity (where total capacity may be time dependent).
 			technology (str): Identifier for the technology. This is used to retrieve the simulated values for production of this technology from a model
 			location (str, optional): Identifier for the location. This is used to retrieve the simulated values for production of this technology at this location from a model that supports this feature. Defaults to None.
 			udl (str, optional): Name of underlying (power) that is delivered (just use for consistency checking within pricing against simulated model values). It is used within pricing when the respective simulated price must be retrieved from a model's simulation results.
 			id (str, optional): Unique identifier of this contract. Defaults to None.
 		"""
-		super().__init__(udl, None, schedule, fixed_price, transaction_cost, id)
+		super().__init__(udl, None, schedule, fixed_price, id)
 		self.technology = technology
 		self.max_capacity = max_capacity
 		self.location = location
@@ -219,8 +214,7 @@ class GreenPPASpecification(PPASpecification):
 		for schedule in schedules:
 			max_capacity = np.random.uniform(low=50., high=100.0)
 			fixed_price = np.random.uniform(low=0.5, high=1.5)
-			transaction_cost = np.random.uniform(low=0.5, high=1.5)
-			result.append(GreenPPASpecification(udl='Power', technology='Wind',  location='Onshore', fixed_price=fixed_price, transaction_cost = transaction_cost, max_capacity=max_capacity, schedule = schedule))
+			result.append(GreenPPASpecification(udl='Power', technology='Wind',  location='Onshore', fixed_price=fixed_price, max_capacity=max_capacity, schedule = schedule))
 		return result
 	
 	def _to_dict(self)->dict:

@@ -105,7 +105,8 @@ class GreenPPADeepHedgingPricer:
                 decay_steps: int = 100_000,
                 seed: int = 42,
                 additional_states=None, 
-                loss: str = 'mean_variance'
+                loss: str = 'mean_variance',
+                transaction_cost: float = 0.
                 #paths: Dict[str, np.ndarray] = None
                 ):
         """Price a green PPA using deeep hedging
@@ -127,6 +128,7 @@ class GreenPPADeepHedgingPricer:
             decay_rate (float, optional): Decay of learning rate after each epoch. Defaults to 0.7.
             seed (int, optional): Seed that is set to make results reproducible. Defaults to 42.
             loss (str, optional): Either 'mean_variance' or 'exponential_utility'.
+            transaction_cost (float, optional): Proportional transaction cost. Defaults to 0.
         Returns:
             _type_: _description_
 
@@ -170,7 +172,7 @@ class GreenPPADeepHedgingPricer:
                     additional_states_[key] = simulation_results.get(key, forecast_points)
         
         hedge_model = DeepHedgeModel(list(hedge_ins.keys()), list(additional_states_.keys()), timegrid.timegrid, 
-                                        regularization=regularization,depth=depth, n_neurons=nb_neurons, loss = loss, transaction_cost = green_ppa.transaction_cost)
+                                        regularization=regularization,depth=depth, n_neurons=nb_neurons, loss = loss, transaction_cost = transaction_cost)
         paths = {}
         paths.update(hedge_ins)
         paths.update(additional_states_)
