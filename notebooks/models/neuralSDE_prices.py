@@ -75,7 +75,7 @@ adjoint=False
 method="milstein"
 
 num_samples=batch_size
-num_iters = 100000
+num_iters = 100
 
 
 
