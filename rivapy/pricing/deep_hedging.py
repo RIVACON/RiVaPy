@@ -22,6 +22,7 @@ class DeepHedgeModel(tf.keras.Model):
                         n_neurons: int,
                         loss: str,
                         transaction_cost: dict,
+                        #trading_restrictions #TODO_FS
                         model: tf.keras.Model=None,
                         **kwargs):
         """ Class for Deep Hedging Model.
@@ -97,33 +98,38 @@ class DeepHedgeModel(tf.keras.Model):
         # realisierte PnL zu Zeitpunkten # FS
         pnl = tf.zeros((tf.shape(x[0])[0],))
         self._prev_q = tf.zeros((tf.shape(x[0])[0], len(self.hedge_instruments)), name='prev_q')
-        for i in range(self.timegrid.shape[0]-2):
+        for i in range(self.timegrid.shape[0]-2):# TODO_FS: Tensorflow loop?
             t = [self.timegrid[-1]-self.timegrid[i]]*tf.ones((tf.shape(x[0])[0],1))/self.timegrid[-1]
             inputs = [v[:,i] for v in x]
             inputs.append(t)
+            #TODO_FS: max so und so viel handeln: quantity > irgendwas threshold -> Zeitabhängig!
+            # Kaskadierung:  Trading Restriktion auf Null setzen
             quantity = self.model(inputs, training=training)#tf.squeeze(self.model(inputs, training=training))
-            for j in range(len(self.hedge_instruments)):
+            for j in range(len(self.hedge_instruments)): 
                 key_to_check = self.hedge_instruments[j]
                 if key_to_check in self.transaction_cost.keys():
-                    tc = self.transaction_cost[key_to_check]
+                    tc = list(self.transaction_cost[key_to_check])
+                    tf.cond(tf.equal(len(self.timegrid), len(tc)), lambda: None, lambda: tc.extend([tc[-1]] * (len(self.timegrid) - len(tc))))
                 else:
-                    tc = 0.
+                    tc = [0] * len(self.timegrid)
                 diff_q = self._prev_q[:,j]-quantity[:,j]
                 pnl += tf.where(tf.greater(diff_q, 0), 
-                                tf.math.multiply(diff_q, tf.scalar_mul((1.-tc[0]),tf.squeeze(x[j][:,i]))),
-                                tf.math.multiply(diff_q, tf.scalar_mul((1.+tc[0]),tf.squeeze(x[j][:,i]))))
+                                tf.math.multiply(diff_q, tf.scalar_mul((1.-tc[i]),tf.squeeze(x[j][:,i]))),
+                                tf.math.multiply(diff_q, tf.scalar_mul((1.+tc[i]),tf.squeeze(x[j][:,i]))))
                 #pnl += tf.math.multiply(diff_q, tf.squeeze(x[j][:,i]))
             self._prev_q = quantity
+
         for j in range(len(self.hedge_instruments)):
             key_to_check = self.hedge_instruments[j]
             if key_to_check in self.transaction_cost.keys():
-                tc = self.transaction_cost[key_to_check]
+                tc = list(self.transaction_cost[key_to_check])
+                tf.cond(tf.equal(len(self.timegrid), len(tc)), lambda: None, lambda: tc.extend([tc[-1]] * (len(self.timegrid) - len(tc))))
             else:
-                tc = 0.
+                tc = [0] * len(self.timegrid)
             diff_q = self._prev_q[:,j]-quantity[:,j]
             pnl += tf.where(tf.greater(diff_q, 0), 
-                            tf.math.multiply(self._prev_q[:,j], tf.scalar_mul((1.-tc[0]),tf.squeeze(x[j][:,-1]))),
-                            tf.math.multiply(self._prev_q[:,j], tf.scalar_mul((1.+tc[0]),tf.squeeze(x[j][:,-1]))))
+                            tf.math.multiply(self._prev_q[:,j], tf.scalar_mul((1.-tc[-1]),tf.squeeze(x[j][:,-1]))),
+                            tf.math.multiply(self._prev_q[:,j], tf.scalar_mul((1.+tc[-1]),tf.squeeze(x[j][:,-1]))))
             #pnl += self._prev_q[:,j]* tf.squeeze(x[j][:,-1])#+ rlzd_qty[:,-1]*(tf.squeeze(power_fwd[:,-1])-self.fixed_price)
         return pnl
     

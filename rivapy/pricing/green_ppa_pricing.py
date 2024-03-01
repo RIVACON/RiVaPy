@@ -48,12 +48,12 @@ class GreenPPADeepHedgingPricer:
         ppa_schedule = green_ppa.get_schedule()
         if ppa_schedule[-1] <= val_date:
             return None
-        #FS:
         timegrid = DateTimeGrid(start=val_date, end=ppa_schedule[-1], freq='1H', inclusive='both', daycounter=DayCounterType.Act365Fixed)
         #timegrid = DateTimeGrid(start=val_date, end=ppa_schedule[-1], freq='1H', inclusive=None, daycounter=DayCounterType.Act365Fixed)
         dc = DayCounter(DayCounterType.Act365Fixed)
         fwd_expiries = [dc.yf(val_date, d) for d in ppa_schedule if d>val_date]
         forecast_points = [i for i in range(len(timegrid.dates)) if timegrid.dates[i].hour in forecast_hours]
+        print(ppa_schedule)
         return timegrid, fwd_expiries, forecast_points
 
 
