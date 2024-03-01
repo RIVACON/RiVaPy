@@ -72,7 +72,7 @@ adjoint=False
 method="milstein"
 
 num_samples=ts_len*batch_size
-num_iters = 10#50000
+num_iters = 100#50000
 
 
 
@@ -197,10 +197,9 @@ class LatentSDE(nn.Module):
         self._ctx = ctx  
 
     def f(self, t, y): # (posterior) Drift 
-        return self.f_net(y)
-        #ts, ctx = self._ctx
-        #i = min(torch.searchsorted(ts, t, right=True), len(ts) - 1)
-        #return self.f_net(torch.cat((y, ctx[i]), dim=1))
+        ts, ctx = self._ctx
+        i = min(torch.searchsorted(ts, t, right=True), len(ts) - 1)
+        return self.f_net(torch.cat((y, ctx[i]), dim=1))
         
 
     def h(self, t, y): # (prior) Drift
@@ -230,7 +229,6 @@ class LatentSDE(nn.Module):
         else:
             zs, log_ratio = torchsde.sdeint(self, z0, ts, dt=1, logqp=True, method=method, rtol = 1e-3, atol = 1e-3)
 
-            print(self.f(self,ts,zs[0]))
 
         _xs = self.projector(zs)
         xs_dist = Normal(loc=_xs, scale=noise_std)
