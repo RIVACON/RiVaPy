@@ -62,10 +62,10 @@ class Repo:
                 '1%':np.percentile(pnl,1), '99%': np.percentile(pnl,99),
                 '5%':np.percentile(pnl,5), '95%': np.percentile(pnl,95)}
 
-    def run(self, val_date, ppa_spec, model, rerun=False, **kwargs):
+    def run(self, val_date, spec, model, rerun=False, **kwargs):
         params = {}
         params['val_date'] = val_date
-        params['ppa_spec'] = ppa_spec.to_dict()
+        params['spec'] = spec.to_dict()
         params['model'] = model.to_dict()
         _kwargs = copy.deepcopy(kwargs)
         _kwargs.pop('tensorboard_logdir', None) #remove  parameters irrelevant for hashing before generating kashkey
@@ -73,13 +73,13 @@ class Repo:
         params['pricing_param'] = _kwargs
         hash_key = FactoryObject.hash_for_dict(params)
         params['pricing_param'] = kwargs
-        params['ppa_spec_hash'] = ppa_spec.hash()
+        params['spec_hash'] = spec.hash()
         params['model_hash'] = model.hash()
         params['pricing_params_hash'] = FactoryObject.hash_for_dict(kwargs) #FS
         if (hash_key in self.results.keys()) and (not rerun):
             return self.results[hash_key]
         pricing_result =  GreenPPADeepHedgingPricer.price(val_date, 
-                                      ppa_spec, 
+                                      spec, 
                                       model,
                                     **kwargs)
         params['result'] = Repo.compute_pnl_figures(pricing_result)

@@ -21,37 +21,22 @@ import analysis
 
 from sys import exit
 
-#timegrid = np.linspace(0.0, days*1.0/365.0, days*24)
-#forward_expiries = [timegrid[-1]]
+#np.random.seed(42)
+#timegrid = np.linspace(0.0,1.0,365) # simulate on daily timegrid over 1 yr horizon
+model = OrnsteinUhlenbeck(speed_of_mean_reversion = 5.0, volatility=0.1)
 
-wind_onshore = WindPowerForecastModel(region='Onshore', speed_of_mean_reversion=0.1, volatility=3.0)
-wind_offshore = WindPowerForecastModel(region='Offshore', speed_of_mean_reversion=0.1, volatility=3.0)
-regions = [ MultiRegionWindForecastModel.Region( 
-                                    wind_onshore,
-                                    capacity=1000.0,
-                                    rnd_weights=[0.8,0.2]
-                                ),
-           MultiRegionWindForecastModel.Region( 
-                                    wind_offshore,
-                                    capacity=100.0,
-                                    rnd_weights=[0.2,0.8]
-                                )
-           
-          ]
-wind = MultiRegionWindForecastModel('Wind_Germany', regions)
+#val_date = dt.datetime(2023,1,1)
+#strike = 1.0 #0.22
+#transaction_cost = 0.01
+#days = 2
 
-#model = LinearDemandForwardModel(wind_power_forecast=wind, 
-#                                 x_volatility = 0.8, 
-#                                 x_mean_reversion_speed = 0.5,
-#                                 power_name= 'Power_Germany',
-#                                additive_correction=False)
-
-model = OrnsteinUhlenbeck(1.0,0.2,1.0)
-
-val_date = dt.datetime(2023,1,1)
-strike = 1.0 #0.22
-transaction_cost = 0.01
-days = 2
+refdate = dt.datetime(2023,1,1)
+issuer = 'DBK'
+seclevel = 'COLLATERALIZED'
+currency = 'EUR'
+tpe = 'CALL' # Change to 'PUT' if you want to calculate the price of an european put option.
+expiry = refdate + dt.timedelta(days=365)
+strike = 60
 
 repo = analysis.Repo('./experiments/')
 
