@@ -40,9 +40,9 @@ from sys import exit
 #data-------------------------------------------------------------------------------------
 
 np.random.seed(seed=42)
-N = 24  # time steps
-paths = 10  # number of paths
-T = 24
+N = 45  # time steps
+paths = 200  # number of paths
+T = 1
 T_vec, dt = np.linspace(0, T, N, retstep=True)
 kappa = 3
 theta = 0.5
@@ -57,7 +57,7 @@ for t in range(0, N - 1):
     X[t + 1, :] = theta + np.exp(-kappa * dt) * (X[t, :] - theta) + std_dt * W[t, :]
 
 #visualisation of tests-------------------------------------------------
-figure, axis = plt.subplots(6, 1, layout='constrained',figsize = (10,15))
+figure, axis = plt.subplots(3, 1, layout='constrained',figsize = (10,15))
     
     
 
@@ -65,14 +65,13 @@ figure, axis = plt.subplots(6, 1, layout='constrained',figsize = (10,15))
 ts_len = N
 batch_size=paths
 hidden_size=64
-lr_init=1e-2
+lr_init=1e-4
 t0=0.
 t1=float(ts_len)
-kl_anneal_iters=100
-noise_std=5.
-
+noise_std=0.01
 num_samples=batch_size
-num_iters = 500
+num_iters = 100
+kl_anneal_iters=int(num_iters/5)    
 
 
 
@@ -116,7 +115,7 @@ class LatentSDE(nn.Module):
             nn.Linear(1, hidden_size),
             #nn.Softplus(),
             #nn.Linear(hidden_size, hidden_size),
-            nn.SELU(),
+            nn.ReLU(),
             nn.Linear(hidden_size, 2),
         )
 
@@ -130,7 +129,7 @@ class LatentSDE(nn.Module):
             nn.Linear(3, hidden_size),
             #nn.Softplus(),
             #nn.Linear(hidden_size, hidden_size),
-            nn.SELU(),
+            nn.ReLU(),
             nn.Linear(hidden_size, 1),
         )
 
@@ -139,10 +138,14 @@ class LatentSDE(nn.Module):
         self.projector =nn.Sequential(
             nn.Linear(1, hidden_size),
             nn.Softplus(),
-            #nn.Linear(hidden_size, hidden_size),
-            #nn.SELU(),
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
             nn.Linear(hidden_size, 1),
         )
+
+
+
+
         self.pz0_mean = nn.Parameter(torch.zeros(1, 1))
         self.pz0_logstd = nn.Parameter(torch.zeros(1, 1))
 
@@ -172,7 +175,7 @@ class LatentSDE(nn.Module):
         qz0_mean, qz0_logstd = self.qz0_net(ctx[0]).chunk(chunks=2, dim=1)
         z0 = qz0_mean + qz0_logstd.exp() * torch.randn_like(qz0_mean)
 
-        zs, log_ratio = torchsde.sdeint(self, z0, ts, dt=1, logqp=True, method='milstein', rtol = 1e-3, atol = 1e-3)
+        zs, log_ratio = torchsde.sdeint(self, z0, ts, dt=dt,  logqp=True, method='milstein', rtol = 1e-3, atol = 1e-3)
 
         _xs = self.projector(zs)
         xs_dist = Normal(loc=_xs, scale=noise_std)
@@ -182,15 +185,13 @@ class LatentSDE(nn.Module):
         pz0 = torch.distributions.Normal(loc=self.pz0_mean, scale=self.pz0_logstd.exp())
         logqp0 = torch.distributions.kl_divergence(qz0, pz0).sum(dim=1).mean(dim=0)
         logqp_path = log_ratio.sum(dim=0).mean(dim=0)
-        return log_pxs, logqp0 + logqp_path
+        return log_pxs, logqp0 + logqp_path, _xs
 
-    #We can use these parameters to sample new similar points from the latent space
     @torch.no_grad()
     def sample(self, batch_size, ts, bm=None):
         eps = torch.randn(size=(batch_size, *self.pz0_mean.shape[1:]), device=self.pz0_mean.device)
-        z0 = self.pz0_mean + self.pz0_logstd.exp() * eps
-        zs = torchsde.sdeint(self, z0, ts, names={'drift': 'h'}, dt=1, bm=bm)
-        # Most of the times in ML, we don't sample the observation noise for visualization purposes.
+        z0 = self.pz0_mean + self.pz0_logstd.exp() * eps  #torch.zeros((batch_size,1)) 
+        zs = torchsde.sdeint(self, z0, ts, names={'drift': 'h'}, dt=dt, bm=bm)
         _xs = self.projector(zs)
         return _xs, zs
 
@@ -220,7 +221,7 @@ k = 0
 
 for global_step in tqdm.tqdm(range(1, num_iters + 1)):
     latent_sde.zero_grad()
-    log_pxs, log_ratio = latent_sde(xs, ts, noise_std)
+    log_pxs, log_ratio = latent_sde(xs, ts, noise_std)[:2]
     loss = -log_pxs + log_ratio * kl_scheduler.val
     if (global_step)% (num_iters/100) == 0:
         loss_trend.append(loss.detach().numpy())
@@ -228,24 +229,31 @@ for global_step in tqdm.tqdm(range(1, num_iters + 1)):
     optimizer.step()
     scheduler.step()
     kl_scheduler.step()
-    if global_step == 50 or global_step == 500 or global_step == 5000 or global_step == 50000 or global_step == num_iters:#
-        k += 1
-        xs_l, zs_l = latent_sde.sample(batch_size=xs.size(1), ts=ts, bm=bm_vis)
+    #if global_step == 50 or global_step == 500 or global_step == 5000 or global_step == 50000 or global_step == num_iters:#
+        #k += 1
 
-        input_data = xs.cpu().numpy()
-        latent_data = zs_l.cpu().numpy()
-        output_data = xs_l.cpu().numpy()
-        for i in range(batch_size-1):
-            axis[k].plot(tt,input_data[:,i,0], color='blue')
-            axis[k].plot(tt,latent_data[:,i,0], color='orangered')
-            axis[k].plot(tt,output_data[:,i,0], color='darkgreen')
-        axis[k].plot(tt,input_data[:,batch_size-1,0], label = 'data',color='blue')
-        axis[k].plot(tt,latent_data[:,batch_size-1,0], label = 'latent',color='orangered')
-        axis[k].plot(tt,output_data[:,batch_size-1,0], label = 'model',color='darkgreen')
-        axis[k].set_xlabel('t')
-        axis[k].set_ylabel('x')
-        axis[k].set_title(str(global_step) + ' iterations')
-        axis[k].legend()
+
+xs_l, zs_l = latent_sde.sample(batch_size=xs.size(1), ts=ts, bm=bm_vis)
+_xs = latent_sde(xs, ts, noise_std)[2].cpu().detach().numpy()
+input_data = xs.cpu().numpy()
+latent_data = zs_l.cpu().numpy()
+output_data = xs_l.cpu().numpy()
+for i in range(20):
+    axis[1].plot(tt,input_data[:,i,0], color='blue', linewidth = 0.2)
+    axis[1].plot(tt,_xs[:,i,0], color='orangered', linewidth = 0.2)
+    axis[2].plot(tt,latent_data[:,i,0], color='orangered', linewidth = 0.2)
+    axis[2].plot(tt,output_data[:,i,0], color='darkgreen', linewidth = 0.5)
+    if i <= 5:
+        axis[2].plot(tt,input_data[:,i,0], color = 'blue', linewidth = 0.2)
+axis[1].plot(tt,input_data[:,batch_size-1,0], label = 'data',color='blue', linewidth = 0.2)
+axis[1].plot(tt,_xs[:,batch_size-1,0], label = 'data',color='orangered', linewidth = 0.2)
+axis[2].plot(tt,latent_data[:,batch_size-1,0], label = 'latent',color='orangered', linewidth = 0.2)
+axis[2].plot(tt,output_data[:,batch_size-1,0], label = 'model',color='darkgreen', linewidth = 0.2)
+axis[1].set_xlabel('t')
+axis[1].set_ylabel('x')
+axis[1].set_title('data')
+axis[1].set_title('model')
+axis[2].legend()
         
 
 num_values = [num_iters/100*i for i in range(len(loss_trend))]
@@ -253,6 +261,7 @@ num_values = [num_iters/100*i for i in range(len(loss_trend))]
 axis[0].plot(num_values,loss_trend)
 axis[0].set_xlabel('iteration')
 axis[0].set_ylabel('loss')
+#plt.savefig(fname = str(num_iters) + 'iters_' + str(lr_init) + 'lr_' 
+#            + str(paths) + 'paths_' + str(N) + 'N' 
+#            +'0.1dtt_0.01dts' '.jpeg', dpi = 500)
 plt.show()
-#plt.savefig(fname = '100,000_Iterations.jpeg', dpi = 500)
-
