@@ -78,6 +78,7 @@ class DeepHedgeModel(tf.keras.Model):
         return model
 
     def _compute_pnl(self, x, training):
+        print(x)
         # realisierte PnL zu Zeitpunkten # FS
         pnl = tf.zeros((tf.shape(x[0])[0],))
         self._prev_q = tf.zeros((tf.shape(x[0])[0], len(self.hedge_instruments)), name='prev_q')

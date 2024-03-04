@@ -106,6 +106,7 @@ class EuropeanVanillaSpecification:
         # self.trade_settle = trade_settle
         
         self._pyvacon_obj = None
+
         
     def _get_pyvacon_obj(self):
         if self._pyvacon_obj is None:
