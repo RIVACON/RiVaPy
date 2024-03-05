@@ -10,9 +10,9 @@ from torchsde import sdeint
 
 #OU-construction----------------------------------------
 
-N = 1000  # time steps
+N = 365  # time steps
 paths = 15  # number of paths
-T = 3
+T = 1.0
 T_vec, dt = np.linspace(0, T, N, retstep=True)
 kappa = 3
 theta = 0.5
@@ -36,13 +36,10 @@ t1=float(ts_len)
 
 #modeling------------------------------------------------
 xs = torch.empty((int(t1), batch_size,1), dtype=torch.float32)
-ts = torch.empty(int(t1), dtype=torch.float32)
 X0 = X0 * torch.ones((batch_size, 1), dtype=torch.float32)
 
 xs[:,:,0] = torch.tensor(X)
 
-for i in range(ts_len):
-    ts[i] = float(i)
    
 
 class SDE(nn.Module):
@@ -63,7 +60,7 @@ class SDE(nn.Module):
 
 
 sde = SDE(kappa,theta, sigma)
-ts = torch.linspace(0, 3, N)
+ts = torch.linspace(0, T, N)
 y0 = torch.zeros(batch_size, 1).fill_(0.1)  # (batch_size, d)
 xs = xs.cpu().numpy()
 with torch.no_grad():
