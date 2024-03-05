@@ -47,7 +47,7 @@ class VanillaOptionDeepHedgingPricer:
                        hedge_ins: Dict[str, np.ndarray]):
         payoff = np.zeros((n_sims,))
         for k,v in hedge_ins.items(): 
-            payoff += (v[-1,:])
+            payoff += np.max(v[-1,:] - 60.,0)
         return payoff
 
     @staticmethod
@@ -117,14 +117,17 @@ class VanillaOptionDeepHedgingPricer:
         timegrid = np.linspace(0.0,1.0,365)
         simulation_results = model.simulate(timegrid, start_value=0.2,rnd=np.random.normal(size=(timegrid.shape[0],n_sims)))
         
-        hedge_ins = ['vanillaoption']
+        hedge_ins = {}
+        key = 'vanillaoption'
+        hedge_ins[key] = simulation_results
+        #hedge_ins = ['vanillaoption'] #dict von 'udl' : pfade von udl 
         additional_states_ = {}
         
-        hedge_model = DeepHedgeModel(hedge_ins, list(additional_states_.keys()), timegrid=timegrid, 
+        hedge_model = DeepHedgeModel(list(hedge_ins.keys()), list(additional_states_.keys()), timegrid=timegrid, 
                                         regularization=regularization,depth=depth, n_neurons=nb_neurons, loss = loss, transaction_cost = transaction_cost)
         paths = {}
         paths.update(hedge_ins)
-        paths.update(additional_states_)
+        #paths.update(additional_states_)
         lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
                 initial_learning_rate=initial_lr,#1e-3,
                 decay_steps=decay_steps,
