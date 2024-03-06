@@ -42,8 +42,8 @@ N = 365  # time steps
 paths = 200  # number of paths
 T = 1.
 T_vec, dt = np.linspace(0, T, N, retstep=True)
-kappa = 10
-theta = 1
+kappa = 6
+theta = 10
 sigma = 1
 std_asy = np.sqrt(sigma**2 / (2 * kappa))  
 X0 = 0.
@@ -60,7 +60,7 @@ figure, axis = plt.subplots(3, 1, layout='constrained',figsize = (10,15), gridsp
     
 
 # parameters for neuralSDE ---------------------------------------------
-num_iters = 100
+num_iters = 350
 num_samples = 1
 ts_len = N
 batch_size=paths
@@ -68,7 +68,7 @@ hidden_size=64
 context_size = 1
 input_size = 1
 latent_size = 1
-lr_init=1e-3
+lr_init=1e-4
 noise_std=0.01
 num_samples=batch_size
 kl_anneal_iters=int(num_iters/5)    
@@ -134,13 +134,13 @@ class LatentSDE(nn.Module):
     
         #Decoder: 
         self.projector =nn.Sequential(
-            #nn.Linear(latent_size, input_size)
+            nn.Linear(latent_size, input_size)
 
-            nn.Linear(latent_size, hidden_size),
-            nn.ReLU(),
-            nn.Linear(hidden_size, hidden_size),
-            nn.ReLU(),
-            nn.Linear(hidden_size, input_size),
+            #nn.Linear(latent_size, hidden_size),
+            #nn.ReLU(),
+            #nn.Linear(hidden_size, hidden_size),
+            #nn.ReLU(),
+            #nn.Linear(hidden_size, input_size),
         )
 
 
