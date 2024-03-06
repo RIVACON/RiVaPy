@@ -54,8 +54,26 @@ std_dt = np.sqrt(sigma**2 / (2 * kappa) * (1 - np.exp(-2 * kappa * dt)))
 for t in range(0, N - 1):
     X[t + 1, :] = theta + np.exp(-kappa * dt) * (X[t, :] - theta) + std_dt * W[t, :]
 
-print(X)
-exit()
+
+
+
+#data GBM--------------------------------------------------------------------------------------
+    
+#np.random.seed(seed=42)
+#N = 365  # number of time steps
+#paths = 200  # number of paths
+#T = 1.
+#T_vec, dt = np.linspace(0, T, N, retstep=True)
+#mu = 0.1
+#sigma = 0.2
+#S0 = 1
+#X0 = np.zeros((paths, 1))  # each path starts at zero
+#W = ss.norm.rvs((mu - 0.5 * sigma**2) * dt, np.sqrt(dt) * sigma, (paths, N-1))
+#X = np.concatenate((X0, W), axis=1).cumsum(1)
+#S_T = np.exp(np.transpose(X))
+
+
+
 
 #visualisation of tests-------------------------------------------------
 figure, axis = plt.subplots(3, 1, layout='constrained',figsize = (10,15), gridspec_kw={'height_ratios': [1, 2, 2]})
@@ -109,7 +127,8 @@ class LatentSDE(nn.Module):
     sde_type = "ito"
     noise_type = "diagonal" 
 
-    def __init__(self, hidden_size,context_size,latent_size,input_size,sigma,kappa, theta): 
+    def __init__(self, hidden_size,context_size,latent_size,input_size,sigma,kappa, theta):
+    #def __init__(self, hidden_size, context_size, latent_size, input_size, sigma, mu): 
         super(LatentSDE, self).__init__()
         # Encoder
         self.encoder = nn.Sequential(
@@ -121,9 +140,12 @@ class LatentSDE(nn.Module):
         )
 
         self.qz0_net = nn.Linear(context_size, latent_size + latent_size)
+
+        self.register_buffer("sigma", torch.tensor([[sigma]]))
         self.register_buffer("kappa", torch.tensor([[kappa]]))
         self.register_buffer("theta", torch.tensor([[theta]]))
-        self.register_buffer("sigma", torch.tensor([[sigma]]))
+
+        #self.register_buffer("mu", torch.tensor([[mu]]))
 
 
         self.f_net = nn.Sequential(
@@ -165,6 +187,7 @@ class LatentSDE(nn.Module):
 
     def h(self, t, y): # (prior) Drift
         return self.kappa * (self.theta - y)
+        #return self.mu * y
 
     def g(self, t, y):  # Diagonal diffusion. 
         return self.sigma.repeat(y.size(0), 1)
@@ -194,7 +217,7 @@ class LatentSDE(nn.Module):
     def sample(self, batch_size, ts, bm=None):
         eps = torch.randn(size=(batch_size, *self.pz0_mean.shape[1:]), device=self.pz0_mean.device)
         z0 = self.pz0_mean.repeat(batch_size,1) #              + self.pz0_logstd.exp() * eps  #torch.zeros((batch_size,1)) 
-        zs = torchsde.sdeint(self, z0, ts, names={'drift': 'f'},  bm=bm)
+        zs = torchsde.sdeint(self, z0, ts, names={'drift': 'f'}, bm = bm)
         _xs = self.projector(zs)
         return _xs, zs
 
@@ -206,6 +229,12 @@ latent_sde = LatentSDE(
         context_size = 2, input_size = 1, latent_size = 1
 
     ).to(device)
+
+#latent_sde = LatentSDE(
+#        hidden_size=hidden_size,
+#        sigma = sigma, mu=mu,
+#        context_size = 2, input_size = 1, latent_size = 1
+#    ).to(device)
 
 optimizer = optim.Adam(params=latent_sde.parameters(), lr=lr_init)
 scheduler = torch.optim.lr_scheduler.LinearLR(optimizer=optimizer)
