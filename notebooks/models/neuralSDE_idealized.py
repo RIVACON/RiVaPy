@@ -54,8 +54,7 @@ std_dt = np.sqrt(sigma**2 / (2 * kappa) * (1 - np.exp(-2 * kappa * dt)))
 for t in range(0, N - 1):
     X[t + 1, :] = theta + np.exp(-kappa * dt) * (X[t, :] - theta) + std_dt * W[t, :]
 
-print(X)
-exit()
+
 
 #visualisation of tests-------------------------------------------------
 figure, axis = plt.subplots(3, 1, layout='constrained',figsize = (10,15), gridspec_kw={'height_ratios': [1, 2, 2]})
@@ -63,7 +62,7 @@ figure, axis = plt.subplots(3, 1, layout='constrained',figsize = (10,15), gridsp
     
 
 # parameters for neuralSDE ---------------------------------------------
-num_iters = 500
+num_iters = 5000
 num_samples = 1
 ts_len = N
 batch_size=paths
@@ -72,6 +71,8 @@ context_size = 1
 input_size = 1
 latent_size = 1
 lr_init=5e-2
+lr_final = 5e-4
+lr_gamma = math.pow(lr_final / lr_init, 1/num_iters)
 noise_std=0.01
 num_samples=batch_size
 kl_anneal_iters=int(num_iters/5)    
@@ -208,15 +209,13 @@ latent_sde = LatentSDE(
     ).to(device)
 
 optimizer = optim.Adam(params=latent_sde.parameters(), lr=lr_init)
-scheduler = torch.optim.lr_scheduler.LinearLR(optimizer=optimizer)
+scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer=optimizer, gamma = lr_gamma)
 kl_scheduler = LinearScheduler(iters=kl_anneal_iters)
 
 
 # Fix the same Brownian motion for visualization.
 bm_vis = torchsde.BrownianInterval(
         t0=T_vec[0], t1=T, size=(batch_size, 1,), device=device, levy_area_approximation="space-time")
-
-
 
 #training and testing model--------------------------------------------------------------------------------
 
@@ -230,9 +229,9 @@ for global_step in tqdm.tqdm(range(1, num_iters + 1)):
     if (global_step)% (num_iters/100) == 0:
         loss_trend.append(loss.detach().numpy())
     loss.backward()
-    #print(log_pxs.item())
-    #print(log_ratio.item(),kl_scheduler.val)
-    print(loss.item())
+    print('Loss: ' + str(loss.item()) + '  log_pxs: '+ str(log_pxs.item()) 
+          + '  log_ratio, kl_scheduler: ' + str((log_ratio.item(),kl_scheduler.val)) 
+          + '  lr_scheduler: ' + str(scheduler.get_last_lr()))  
     optimizer.step()
     scheduler.step()
     kl_scheduler.step()
