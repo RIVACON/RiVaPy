@@ -37,6 +37,11 @@ class GBM(FactoryObject):
         self._delta_t = self._timegrid[1]-self._timegrid[0]
         self._sqrt_delta_t = np.sqrt(self._delta_t)
 
+    def _set_params(self,start_value,M,n):
+        self.start_value = start_value #S0
+        self.n_sims = M 
+        self.n = n #length of timegrid
+
 
     def simulate(self, timegrid, start_value, M,n):
         """ Simulate the GBM Paths
@@ -55,6 +60,7 @@ class GBM(FactoryObject):
         Returns:
             np.ndarray: Array r containing the simulations where r[:,i] is the path of the i-th simulation (r.shape[0] equals number of timepoints, r.shape[1] the number of simulations). 
         """
+        self._set_params(start_value,M,n)
         self._set_timegrid(timegrid)
         St = np.exp( (self.drift - self.volatility ** 2 / 2) * self._delta_t + self.volatility * np.random.normal(0, np.sqrt(self._delta_t), size=(M,n)).T)
         St = np.vstack([np.ones(M), St]) 

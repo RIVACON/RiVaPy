@@ -16,7 +16,7 @@ import sys
 sys.path.append('C:/Users/doeltz/development/RiVaPy/')
 import datetime as dt
 from rivapy.models.base_model import BaseFwdModel
-from rivapy.models import OrnsteinUhlenbeck
+from rivapy.models.gbm import GBM
 from rivapy.instruments.specifications import EuropeanVanillaSpecification
 from rivapy.tools.datetools import DayCounter
 from rivapy.tools.enums import DayCounterType
@@ -47,20 +47,27 @@ class VanillaOptionDeepHedgingPricer:
                        hedge_ins: Dict[str, np.ndarray]):
         payoff = np.zeros((n_sims,))
         for k,v in hedge_ins.items(): 
-            payoff += np.max(v[-1,:] - 60.,0)
+            payoff += np.max(v[-1,:] - 0.2,0)
         return payoff
 
     @staticmethod
     def generate_paths(vanillaoption: EuropeanVanillaSpecification,
-                model: OrnsteinUhlenbeck, 
+                model: GBM, 
                 n_sims: int, 
                 timegrid: DateTimeGrid):
-        return model.simulate(timegrid, start_value=0.2,rnd=np.random.normal(size=(timegrid.shape[0],n_sims)))
+        np.random.seed(42)
+        n = 365
+        T = 1.
+        timegrid = np.linspace(0.0,T,n) # simulate on daily timegrid over 1 yr horizon
+        model = GBM(drift = 0.05, volatility=0.25)
+        n_sims = 100_000
+        S0 = 0.2
+        return model.simulate(timegrid, start_value=S0,M = n_sims, n=n)
 
     @staticmethod
     def price( val_date: dt.datetime,
                 vanillaoption: EuropeanVanillaSpecification,
-                model: OrnsteinUhlenbeck, 
+                model: GBM, 
                 depth: int, 
                 nb_neurons: int, 
                 n_sims: int, 
@@ -114,13 +121,17 @@ class VanillaOptionDeepHedgingPricer:
 
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
-        timegrid = np.linspace(0.0,1.0,365)
-        simulation_results = model.simulate(timegrid, start_value=0.2,rnd=np.random.normal(size=(timegrid.shape[0],n_sims)))
+        n = 365
+        T = 1.
+        timegrid = np.linspace(0.0,T,n) # simulate on daily timegrid over 1 yr horizon
+        model = GBM(drift = 0.05, volatility=0.25)
+        n_sims = 100_000
+        S0 = 0.2
+        simulation_results = model.simulate(timegrid, start_value=S0,M = n_sims, n=n)
         
         hedge_ins = {}
         key = 'vanillaoption'
         hedge_ins[key] = simulation_results
-        #hedge_ins = ['vanillaoption'] #dict von 'udl' : pfade von udl 
         additional_states_ = {}
         
         hedge_model = DeepHedgeModel(list(hedge_ins.keys()), list(additional_states_.keys()), timegrid=timegrid, 
