@@ -47,7 +47,7 @@ class VanillaOptionDeepHedgingPricer:
                        hedge_ins: Dict[str, np.ndarray]):
         payoff = np.zeros((n_sims,))
         for k,v in hedge_ins.items(): 
-            payoff += np.max(v[-1,:] - 1.,0)
+            payoff -= np.maximum(v[-1,:] - 1.,0)
         return payoff
 
     @staticmethod
@@ -55,11 +55,12 @@ class VanillaOptionDeepHedgingPricer:
                 model: GBM, 
                 n_sims: int, 
                 timegrid: DateTimeGrid):
-        np.random.seed(42)
+        tf.random.set_seed(seed)
+        np.random.seed(seed+123)
         n = 30#365
         T = 30/365
         timegrid = np.linspace(0.0,T,n) # simulate on daily timegrid over 1 yr horizon
-        model = GBM(drift = 0.0, volatility=0.2)
+        model = GBM(drift = 0., volatility=0.2)
         n_sims = 100_000
         S0 = 1.
         return model.simulate(timegrid, start_value=S0,M = n_sims, n=n)
@@ -124,11 +125,10 @@ class VanillaOptionDeepHedgingPricer:
         n = 30#365
         T = 30/365
         timegrid = np.linspace(0.0,T,n) # simulate on daily timegrid over 1 yr horizon
-        model = GBM(drift = 0.0, volatility=0.2)
+        model = GBM(drift = 0., volatility=0.2)
         n_sims = 100_000
         S0 = 1.
         simulation_results = model.simulate(timegrid, start_value=S0,M = n_sims, n=n)
-        
         hedge_ins = {}
         key = 'vanillaoption'
         hedge_ins[key] = simulation_results
