@@ -78,7 +78,6 @@ class DeepHedgeModel(tf.keras.Model):
         return model
 
     def _compute_pnl(self, x, training):
-        print(x)
         # realisierte PnL zu Zeitpunkten # FS
         pnl = tf.zeros((tf.shape(x[0])[0],))
         self._prev_q = tf.zeros((tf.shape(x[0])[0], len(self.hedge_instruments)), name='prev_q')
@@ -115,8 +114,8 @@ class DeepHedgeModel(tf.keras.Model):
                     tc = [0] * len(self.timegrid)
                 diff_q = self._prev_q[:,j]-quantity[:,j]
                 pnl += tf.where(tf.greater(diff_q, 0), 
-                                tf.math.multiply(diff_q, tf.scalar_mul((1.-tc[i]),tf.squeeze(x[j][:,i]))),
-                                tf.math.multiply(diff_q, tf.scalar_mul((1.+tc[i]),tf.squeeze(x[j][:,i]))))
+                                tf.math.multiply(diff_q, tf.scalar_mul((1.-tc[0]),tf.squeeze(x[j][:,i]))),
+                                tf.math.multiply(diff_q, tf.scalar_mul((1.+tc[0]),tf.squeeze(x[j][:,i]))))
                 #pnl += tf.math.multiply(diff_q, tf.squeeze(x[j][:,i]))
             self._prev_q = quantity
 
