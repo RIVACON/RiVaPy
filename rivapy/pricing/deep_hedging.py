@@ -113,7 +113,10 @@ class DeepHedgeModel(tf.keras.Model):
                     tc = [0] * len(self.timegrid)
                 diff_q = self._prev_q[:,j]-quantity[:,j]
                 xx = tf.squeeze(x[j][:,i])
-                xx = tf.where(tf.greater(quantity[:,j], self.threshold), tf.zeros_like(xx), xx) 
+                # Cascading
+                
+                # Trading restriction based on threshold
+                tf.cond(tf.equal(self.threshold, 0.), lambda: xx, lambda: tf.where(tf.greater(quantity[:,j], self.threshold), tf.zeros_like(xx), xx) )
                 pnl += tf.where(tf.greater(diff_q, 0), 
                                 tf.math.multiply(diff_q, tf.scalar_mul((1.-tc[0]),xx)),
                                 tf.math.multiply(diff_q, tf.scalar_mul((1.+tc[0]),xx)))
@@ -129,7 +132,8 @@ class DeepHedgeModel(tf.keras.Model):
                 tc = [0] * len(self.timegrid)
             diff_q = self._prev_q[:,j]-quantity[:,j]
             xx = tf.squeeze(x[j][:,i])
-            xx = tf.where(tf.greater(quantity[:,j], self.threshold), tf.zeros_like(xx), xx)
+            # Trading restriction based on threshold
+            tf.cond(tf.equal(self.threshold, 0.), lambda: xx, lambda: tf.where(tf.greater(quantity[:,j], self.threshold), tf.zeros_like(xx), xx) )
             pnl += tf.where(tf.greater(diff_q, 0), 
                             tf.math.multiply(self._prev_q[:,j], tf.scalar_mul((1.-tc[-1]),xx)),
                             tf.math.multiply(self._prev_q[:,j], tf.scalar_mul((1.+tc[-1]),xx)))

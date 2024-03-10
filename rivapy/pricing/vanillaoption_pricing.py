@@ -83,7 +83,7 @@ class VanillaOptionDeepHedgingPricer:
                 seed: int = 42,
                 loss: str = 'mean_variance',
                 transaction_cost: dict = {},
-                threshold: float = 0.,
+                threshold: float = 0.
                 #paths: Dict[str, np.ndarray] = None
                 ):
         """Price a vanilla option using deeep hedging
