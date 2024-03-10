@@ -23,6 +23,7 @@ class DeepHedgeModel(tf.keras.Model):
                         loss: str,
                         transaction_cost: dict,
                         threshold: float,
+                        cascading: bool = False,
                         #trading_restrictions #TODO_FS
                         model: tf.keras.Model=None,
                         **kwargs):
@@ -55,12 +56,14 @@ class DeepHedgeModel(tf.keras.Model):
         self._loss = loss 
         self.transaction_cost = transaction_cost
         self.threshold = threshold
+        self.cascading = cascading
+
         
     def __call__(self, x, training=True):
         if not self.transaction_cost:
             return self._compute_pnl(x, training) #+ self.price
         else:
-            return self._compute_pnl_withtransactioncost(x, training) #+ self.price
+            return self._compute_pnl_withconstains(x, training) #+ self.price
     
     def _build_model(self, depth: int, nb_neurons: int):
         inputs= [tf.keras.Input(shape=(1,),name = ins) for ins in self.hedge_instruments]
@@ -96,10 +99,10 @@ class DeepHedgeModel(tf.keras.Model):
         return pnl
     
     
-    def _compute_pnl_withtransactioncost(self, x, training):
+    def _compute_pnl_withconstains(self, x, training):
         pnl = tf.zeros((tf.shape(x[0])[0],))
         self._prev_q = tf.zeros((tf.shape(x[0])[0], len(self.hedge_instruments)), name='prev_q')
-        for i in range(self.timegrid.shape[0]-2):# TODO_FS: Tensorflow loop?
+        for i in range(self.timegrid.shape[0]-2): # tensorflow loop?
             t = [self.timegrid[-1]-self.timegrid[i]]*tf.ones((tf.shape(x[0])[0],1))/self.timegrid[-1]
             inputs = [v[:,i] for v in x]
             inputs.append(t)
@@ -113,10 +116,13 @@ class DeepHedgeModel(tf.keras.Model):
                     tc = [0] * len(self.timegrid)
                 diff_q = self._prev_q[:,j]-quantity[:,j]
                 xx = tf.squeeze(x[j][:,i])
-                # Cascading
-                
                 # Trading restriction based on threshold
                 tf.cond(tf.equal(self.threshold, 0.), lambda: xx, lambda: tf.where(tf.greater(quantity[:,j], self.threshold), tf.zeros_like(xx), xx) )
+                # Cascading:
+                if self.cascading:
+                    tt = np.round(self.timegrid*365.,0)
+                    if (tt[i] % 7 != 0 and tt[i] >=7): #weekly
+                        xx = tf.zeros_like(xx)
                 pnl += tf.where(tf.greater(diff_q, 0), 
                                 tf.math.multiply(diff_q, tf.scalar_mul((1.-tc[0]),xx)),
                                 tf.math.multiply(diff_q, tf.scalar_mul((1.+tc[0]),xx)))
@@ -131,7 +137,7 @@ class DeepHedgeModel(tf.keras.Model):
             else:
                 tc = [0] * len(self.timegrid)
             diff_q = self._prev_q[:,j]-quantity[:,j]
-            xx = tf.squeeze(x[j][:,i])
+            xx = tf.squeeze(x[j][:,-1])
             # Trading restriction based on threshold
             tf.cond(tf.equal(self.threshold, 0.), lambda: xx, lambda: tf.where(tf.greater(quantity[:,j], self.threshold), tf.zeros_like(xx), xx) )
             pnl += tf.where(tf.greater(diff_q, 0), 
