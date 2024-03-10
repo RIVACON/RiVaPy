@@ -82,7 +82,8 @@ class VanillaOptionDeepHedgingPricer:
                 decay_steps: int = 100_000,
                 seed: int = 42,
                 loss: str = 'mean_variance',
-                transaction_cost: dict = {}
+                transaction_cost: dict = {},
+                threshold: float = 0.,
                 #paths: Dict[str, np.ndarray] = None
                 ):
         """Price a vanilla option using deeep hedging
@@ -105,6 +106,7 @@ class VanillaOptionDeepHedgingPricer:
             seed (int, optional): Seed that is set to make results reproducible. Defaults to 42.
             loss (str, optional): Either 'mean_variance' or 'exponential_utility'.
             transaction_cost (dict, optional): Proportional transaction cost dependent on instrument. Default is empty dict.
+            threshold(float,optional): Threshold for trading restrictions. Default is 0.
         Returns:
             _type_: _description_
 
@@ -135,7 +137,7 @@ class VanillaOptionDeepHedgingPricer:
         additional_states_ = {}
         
         hedge_model = DeepHedgeModel(list(hedge_ins.keys()), list(additional_states_.keys()), timegrid=timegrid, 
-                                        regularization=regularization,depth=depth, n_neurons=nb_neurons, loss = loss, transaction_cost = transaction_cost)
+                                        regularization=regularization,depth=depth, n_neurons=nb_neurons, loss = loss, transaction_cost = transaction_cost,threshold = threshold)
         paths = {}
         paths.update(hedge_ins)
         #paths.update(additional_states_)
