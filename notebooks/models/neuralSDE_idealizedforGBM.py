@@ -69,19 +69,17 @@ for t in range(0, N - 1):
 #S0 = 1
 #X0 = np.zeros((paths, 1))  # each path starts at zero
 #W = ss.norm.rvs((mu - 0.5 * sigma**2) * dt, np.sqrt(dt) * sigma, (paths, N-1))
-#X = np.concatenate((X0, W), axis=1).cumsum(1)
+#X = np.concatenate((X0, W), axis=1)[0].cumsum(1)
 #S_T = np.exp(np.transpose(X))
 
 
 
 
-#visualisation of tests-------------------------------------------------
-figure, axis = plt.subplots(3, 1, figsize = (8,12), gridspec_kw={'height_ratios': [1, 2, 2]})
-    
+
     
 
 # parameters for neuralSDE ---------------------------------------------
-num_iters = 5000
+num_iters = 1000
 num_samples = 1
 ts_len = N
 batch_size=paths
@@ -90,7 +88,7 @@ context_size = 1
 input_size = 1
 latent_size = 1
 lr_init=5e-2
-lr_final = 1e-5
+lr_final = 5e-2
 lr_gamma = math.pow(lr_final / lr_init, 1/num_iters)
 noise_std=0.01
 num_samples=batch_size
@@ -267,7 +265,7 @@ latent_sde = LatentSDE(
 #    ).to(device)
 
 optimizer = optim.Adam(params=latent_sde.parameters(), lr=lr_init)
-scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer=optimizer, gamma = lr_gamma)
+scheduler = torch.optim.lr_scheduler.LinearLR(optimizer=optimizer) #ExponentialLR(optimizer=optimizer, gamma = lr_gamma)
 kl_scheduler = LinearScheduler(iters=kl_anneal_iters)
 
 
@@ -279,7 +277,7 @@ bm_vis = torchsde.BrownianInterval(
 
 #training and testing model--------------------------------------------------------------------------------
 
-tt = ts.numpy()
+
 loss_trend = []
 if True:
     for global_step in tqdm.tqdm(range(1, num_iters + 1)):
@@ -305,6 +303,17 @@ _zs = latent_sde(xs, ts, noise_std)[3].cpu().detach().numpy()
 
 
 #visualisation---------------------------------------------------------------------------------------------
+#visualisation of tests-------------------------------------------------
+#figure, axis = plt.subplots(4, 5, figsize = (8,12), gridspec_kw={'height_ratios': [1, 2, 2,2]})
+figure = plt.figure(figsize= (18,12), constrained_layout = True)
+gs = figure.add_gridspec(4,5)   
+axis0 = figure.add_subplot(gs[0,:])
+axis1 = figure.add_subplot(gs[1,:])
+axis2 = figure.add_subplot(gs[2,:])
+
+
+
+
 
 input_data = xs.cpu().numpy()
 latent_data = zs_l.cpu().numpy()
@@ -314,45 +323,56 @@ outputmean = np.array([np.mean(output_data[i]) for i in range(N)])
 reconmean = np.array([np.mean(_xs[i]) for i in range(N)])
 latentmean = np.array([np.mean(latent_data[i]) for i in range(N)])
 
+x_morm = np.array([np.array(input_data[i])- inputmean[i] for i in range(N)]).reshape(N*paths)
+output_morm = np.array([np.array(output_data[i]) - outputmean[i] for i in range(N)]).reshape(N*paths)
 
 
 print(np.mean(outputmean))
 print(np.mean(inputmean))
 
-for i in range(100):
-    axis[1].plot(tt,input_data[:,i,0], color='blue', linewidth = 0.2)
-    axis[1].plot(tt,_xs[:,i,0], color='orangered', linewidth = 0.2)
-    axis[1].plot(tt,_zs[:,i,0], color='dimgray', linewidth = 0.2)
-    #axis[2].plot(tt,latent_data[:,i,0], color='orangered', linewidth = 0.2)
-    axis[2].plot(tt,output_data[:,i,0], color='darkgreen', linewidth = 0.2)
-    axis[2].plot(tt,input_data[:,i,0], color = 'blue', linewidth = 0.1)
-axis[1].plot(tt,input_data[:,batch_size-1,0],color='blue', linewidth = 0.2)
-axis[1].plot(tt,_xs[:,batch_size-1,0], color='orangered', linewidth = 0.2)
-axis[1].plot(tt,inputmean, color='blue', label = 'data', linewidth = 1)
-axis[1].plot(tt,reconmean, color='orangered', label = 'reconstructed data', linewidth = 1)
+for i in range(10):
+    axis1.plot(T_vec,input_data[:,i,0], color='blue', linewidth = 0.2)
+    axis1.plot(T_vec,_xs[:,i,0], color='orangered', linewidth = 0.2)
+    axis1.plot(T_vec,_zs[:,i,0], color='dimgray', linewidth = 0.2)
+    axis2.plot(T_vec,latent_data[:,i,0], color='orangered', linewidth = 0.2)
+    axis1.plot(T_vec,output_data[:,i,0], color='darkgreen', linewidth = 0.2)
+    axis2.plot(T_vec,input_data[:,i,0], color = 'blue', linewidth = 0.1)
+axis1.plot(T_vec,input_data[:,batch_size-1,0],color='blue', linewidth = 0.2)
+axis1.plot(T_vec,_xs[:,batch_size-1,0], color='orangered', linewidth = 0.2)
+axis1.plot(T_vec,inputmean, color='blue', label = 'data', linewidth = 1)
+axis1.plot(T_vec,reconmean, color='orangered', label = 'reconstructed data', linewidth = 1)
 
-axis[2].plot(tt,latent_data[:,batch_size-1,0], color='orangered', linewidth = 0.2)
-axis[2].plot(tt,output_data[:,batch_size-1,0], color='darkgreen', linewidth = 0.2)
-axis[2].plot(tt,inputmean, color='blue', label = 'data', linewidth = 1)
-axis[2].plot(tt,outputmean, color='darkgreen', label = 'model', linewidth = 1)
-axis[2].plot(tt,latentmean, color='orangered', label = 'latent', linewidth = 1)
+axis2.plot(T_vec,latent_data[:,batch_size-1,0], color='orangered', linewidth = 0.2)
+axis2.plot(T_vec,output_data[:,batch_size-1,0], color='darkgreen', linewidth = 0.2)
+axis2.plot(T_vec,inputmean, color='blue', label = 'data', linewidth = 1)
+axis2.plot(T_vec,outputmean, color='darkgreen', label = 'model', linewidth = 1)
+axis2.plot(T_vec,latentmean, color='orangered', label = 'latent', linewidth = 1)
 
-axis[1].set_xlabel('t')
-axis[1].set_ylabel('x')
-axis[1].set_xlabel('t')
-axis[1].set_ylabel('x')
-axis[1].set_title('data')
-axis[2].set_title('model')
-axis[2].legend()
-axis[1].legend()
+axis1.set_xlabel('t')
+axis1.set_ylabel('x')
+axis2.set_xlabel('t')
+axis2.set_ylabel('x')
+axis0.set_title('loss')
+axis1.set_title('training')
+axis2.set_title('sampling')
+axis2.legend()
+axis1.legend()
         
 
 num_values = [num_iters/100*i for i in range(len(loss_trend))]
 
-axis[0].plot(num_values,loss_trend)
-axis[0].set_xlabel('iteration')
-axis[0].set_ylabel('loss')
+axis0.plot(num_values,loss_trend)
+axis0.set_xlabel('iteration')
+axis0.set_ylabel('loss')
 #plt.savefig(fname = str(num_iters) + 'iters_' + str(lr_init) + 'lr_' 
 #            + str(paths) + 'paths_' + str(N) + 'N' 
 #            +'0.1dtt_0.01dts' '.jpeg', dpi = 500)
+hist_interval = int(N*paths/5)
+for col in range(5):
+    ax = figure.add_subplot(gs[3,col:col+1])
+    ax.hist(x_morm[hist_interval*col:hist_interval*(col+1)], bins = 50, alpha = 0.5, color = 'blue')
+    ax.hist(output_morm[hist_interval*col:hist_interval*(col+1)], bins = 50, alpha = 0.5, color = 'orangered')
+
+
+
 plt.show()
