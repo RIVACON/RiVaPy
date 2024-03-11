@@ -24,7 +24,6 @@ class DeepHedgeModel(tf.keras.Model):
                         transaction_cost: dict,
                         threshold: float,
                         cascading: bool = False,
-                        #trading_restrictions #TODO_FS
                         model: tf.keras.Model=None,
                         **kwargs):
         """ Class for Deep Hedging Model.
