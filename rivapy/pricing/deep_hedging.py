@@ -188,6 +188,7 @@ class DeepHedgeModel(tf.keras.Model):
     
     @tf.function
     def indifference_price(self, y_true, y_pred):
+        ##TODO: Testing!!! just a first draft
         if self._loss == 'exponential_utility':
             a = tf.keras.backend.mean(tf.keras.backend.exp(-self.regularization*(y_pred+y_true)))
             b = tf.keras.backend.mean(tf.keras.backend.exp(-self.regularization*(y_pred)))
