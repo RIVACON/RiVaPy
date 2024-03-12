@@ -41,13 +41,21 @@ class VanillaOptionDeepHedgingPricer:
             self.sim_results = sim_results
             self.payoff = payoff
 
+    @staticmethod
+    def _compute_timegrid():
+        n = 30#365
+        T = 30/365
+        timegrid = np.linspace(0.0,T,n)
+        return timegrid, n
+    
+
 
     @staticmethod
     def compute_payoff(n_sims: int, 
-                       hedge_ins: Dict[str, np.ndarray]):
+                       hedge_ins: Dict[str, np.ndarray], strike: float):
         payoff = np.zeros((n_sims,))
         for k,v in hedge_ins.items(): 
-            payoff -= np.maximum(v[-1,:] - 1.,0)
+            payoff -= np.maximum(v[-1,:] - strike,0)
         return payoff
 
     @staticmethod
@@ -57,11 +65,9 @@ class VanillaOptionDeepHedgingPricer:
                 timegrid: DateTimeGrid):
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
-        n = 30#365
-        T = 30/365
-        timegrid = np.linspace(0.0,T,n) # simulate on daily timegrid over 1 yr horizon
+        timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid()
         model = GBM(drift = 0., volatility=0.2)
-        n_sims = 100_000
+        #n_sims = 100_000
         S0 = 1.
         return model.simulate(timegrid, start_value=S0,M = n_sims, n=n)
 
@@ -126,11 +132,9 @@ class VanillaOptionDeepHedgingPricer:
 
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
-        n = 30#365
-        T = 30/365
-        timegrid = np.linspace(0.0,T,n) # simulate on daily timegrid over 1 yr horizon
+        timegrid, n = VanillaOptionDeepHedgingPricer._compute_timegrid()
         model = GBM(drift = 0., volatility=0.2)
-        n_sims = 100_000
+        #n_sims = 100_000
         S0 = 1.
         simulation_results = model.simulate(timegrid, start_value=S0,M = n_sims, n=n)
         hedge_ins = {}
@@ -150,7 +154,7 @@ class VanillaOptionDeepHedgingPricer:
                 decay_rate=decay_rate, 
                 staircase=True)
 
-        payoff = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins)  
+        payoff = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, vanillaoption.strike)  
         
         hedge_model.train(paths, payoff,lr_schedule, epochs=epochs, batch_size=batch_size, tensorboard_log=tensorboard_logdir, verbose=verbose)
         return VanillaOptionDeepHedgingPricer.PricingResults(hedge_model, paths=paths, sim_results=simulation_results, payoff=payoff)
