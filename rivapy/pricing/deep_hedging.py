@@ -180,12 +180,12 @@ class DeepHedgeModel(tf.keras.Model):
                     payoff: np.ndarray):
         inputs = self._create_inputs(paths)
         if self._loss == 'exponential_utility':
-            a = np.exp(-self.regularization*(payoff + self.predict(inputs)))
+            a = np.exp(-self.regularization*(-payoff + self.predict(inputs)))
             b = np.exp(-self.regularization*(self.predict(inputs)))
             c = 1./self.regularization
             return c*np.log(np.mean(a)/np.mean(b))
         else: 
-            return None #TODO!!
+            return None#payoff + self.predict(inputs)
 
 
 
