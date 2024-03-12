@@ -138,7 +138,7 @@ class VanillaOptionDeepHedgingPricer:
         S0 = 1.
         simulation_results = model.simulate(timegrid, start_value=S0,M = n_sims, n=n)
         hedge_ins = {}
-        key = 'vanillaoption'
+        key = vanillaoption.udl_id
         hedge_ins[key] = simulation_results
         additional_states_ = {}
         

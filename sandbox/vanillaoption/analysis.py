@@ -87,7 +87,7 @@ class Repo:
                                       spec, 
                                       model, 
                                       **kwargs)
-        params['delta_result'] = Repo.compute_delta_figures(pricing_result,t = -2)
+        #params['delta_result'] = Repo.compute_delta_figures(pricing_result,t = -2)
         params['pnl_result'] = Repo.compute_pnl_figures(pricing_result)
         self.results[hash_key] = params
         with open(self.repo_dir+'/results.json','w') as f:
@@ -99,16 +99,16 @@ class Repo:
         with open(self.repo_dir+'/results.json','w') as f:
             json.dump(self.results, f, cls=_JSONEncoder)
 
-    #def get_hedge_model(self, hashkey:str)->DeepHedgeModel:
-    #    return DeepHedgeModel.load(self.repo_dir+'/'+hashkey+'/')
+    def get_hedge_model(self, hashkey:str)->DeepHedgeModel:
+        return DeepHedgeModel.load(self.repo_dir+'/'+hashkey+'/')
         
     #def get_model(self, hashkey:str)->LinearDemandForwardModel:
     #    return LinearDemandForwardModel.from_dict(self.results[hashkey]['model'])
         
-    #def simulate_model(self, hashkey: str, n_sims:int, seed: int = 42)->np.ndarray:
-    #    res = self.results[hashkey]
-    #    spec = GreenPPASpecification.from_dict(res['ppa_spec'])
-    #    timegrid,expiries ,forecast_points = GreenPPADeepHedgingPricer._compute_points(res['val_date'],
+    def simulate_model(self, hashkey: str, n_sims:int, seed: int = 42)->np.ndarray:
+        res = self.results[hashkey]
+        spec = EuropeanVanillaSpecification.from_dict(res['spec'])
+        #timegrid,expiries ,forecast_points = GreenPPADeepHedgingPricer._compute_points(res['val_date'],
     #                                                                     spec,
     #                                                                    forecast_hours=res['pricing_param']['forecast_hours'])
     #    np.random.seed(seed)
