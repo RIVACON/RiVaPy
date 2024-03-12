@@ -1,6 +1,7 @@
 
 from datetime import datetime 
 from rivapy.tools.enums import SecuritizationLevel, Currency
+import rivapy.tools.interfaces as interfaces
 #from rivapy.enums import Currency
 from rivapy import _pyvacon_available
 if _pyvacon_available:
@@ -62,7 +63,7 @@ else:
     class MemoryExpressSpecification:
         pass
 
-class EuropeanVanillaSpecification:
+class EuropeanVanillaSpecification(interfaces.FactoryObject):
     def __init__(self, 
                  id: str,
                  type: str,
@@ -106,6 +107,9 @@ class EuropeanVanillaSpecification:
         # self.trade_settle = trade_settle
         
         self._pyvacon_obj = None
+
+    def _to_dict(self)->dict:
+        return {'id': self.id, 'issuer':self.issuer, 'sec_lvl': self.sec_lvl, 'curr': self.curr, 'udl_id': self.udl_id, 'type': self.type,'expiry':self.expiry, 'strike':self.strike,'share_ratio': self.share_ratio}
 
         
     def _get_pyvacon_obj(self):
