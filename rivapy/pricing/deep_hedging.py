@@ -89,12 +89,12 @@ class DeepHedgeModel(tf.keras.Model):
             t = [self.timegrid[-1]-self.timegrid[i]]*tf.ones((tf.shape(x[0])[0],1))/self.timegrid[-1]
             inputs = [v[:,i] for v in x]
             inputs.append(t)
-            quantity = self.model(inputs, training=training)#tf.squeeze(self.model(inputs, training=training))
+            quantity = self.model(inputs, training=training)
             for j in range(len(self.hedge_instruments)):
                 pnl += tf.math.multiply((self._prev_q[:,j]-quantity[:,j]), tf.squeeze(x[j][:,i]))
             self._prev_q = quantity
         for j in range(len(self.hedge_instruments)):
-            pnl += self._prev_q[:,j]* tf.squeeze(x[j][:,-1])#+ rlzd_qty[:,-1]*(tf.squeeze(power_fwd[:,-1])-self.fixed_price)
+            pnl += self._prev_q[:,j]* tf.squeeze(x[j][:,-1])
         return pnl
     
     
@@ -105,7 +105,7 @@ class DeepHedgeModel(tf.keras.Model):
             t = [self.timegrid[-1]-self.timegrid[i]]*tf.ones((tf.shape(x[0])[0],1))/self.timegrid[-1]
             inputs = [v[:,i] for v in x]
             inputs.append(t)
-            quantity = self.model(inputs, training=training)#tf.squeeze(self.model(inputs, training=training))
+            quantity = self.model(inputs, training=training)
             for j in range(len(self.hedge_instruments)): 
                 key_to_check = self.hedge_instruments[j]
                 if key_to_check in self.transaction_cost.keys():
@@ -125,7 +125,6 @@ class DeepHedgeModel(tf.keras.Model):
                 pnl += tf.where(tf.greater(diff_q, 0), 
                                 tf.math.multiply(diff_q, tf.scalar_mul((1.-tc[0]),xx)),
                                 tf.math.multiply(diff_q, tf.scalar_mul((1.+tc[0]),xx)))
-                #pnl += tf.math.multiply(diff_q, tf.squeeze(x[j][:,i]))
             self._prev_q = quantity
 
         for j in range(len(self.hedge_instruments)):
@@ -142,7 +141,6 @@ class DeepHedgeModel(tf.keras.Model):
             pnl += tf.where(tf.greater(diff_q, 0), 
                             tf.math.multiply(self._prev_q[:,j], tf.scalar_mul((1.-tc[-1]),xx)),
                             tf.math.multiply(self._prev_q[:,j], tf.scalar_mul((1.+tc[-1]),xx)))
-            #pnl += self._prev_q[:,j]* tf.squeeze(x[j][:,-1])#+ rlzd_qty[:,-1]*(tf.squeeze(power_fwd[:,-1])-self.fixed_price)
         return pnl
     
 
@@ -187,7 +185,16 @@ class DeepHedgeModel(tf.keras.Model):
             es, _ = tf.nn.top_k(-(y_pred+y_true), tf.cast(self.regularization*y_true.shape[0], tf.int32))
             return tf.reduce_mean(es)
         return - self.regularization*tf.keras.backend.mean(y_pred+y_true) + tf.keras.backend.var(y_pred+y_true)
-        #return tf.keras.backend.mean(tf.keras.backend.exp(-self.lamda*y_pred))
+    
+    @tf.function
+    def indifference_price(self, y_true, y_pred):
+        if self._loss == 'exponential_utility':
+            a = tf.keras.backend.mean(tf.keras.backend.exp(-self.regularization*(y_pred+y_true)))
+            b = tf.keras.backend.mean(tf.keras.backend.exp(-self.regularization*(y_pred)))
+            return np.log(a/b)/self.regularization
+        else:
+            return None #TODO
+
 
     def _create_inputs(self, paths: Dict[str, np.ndarray], check_timegrid: bool=True)->List[np.ndarray]:
         inputs = []

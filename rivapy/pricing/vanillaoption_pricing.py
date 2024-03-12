@@ -97,8 +97,8 @@ class VanillaOptionDeepHedgingPricer:
 
         Args:
             val_date (dt.datetime): Valuation date.
-            green_ppa (EuropeanVanillaSpecification): Specification of a vanilla option.
-            power_wind_model (OrnsteinUhlenbeck): The model modeling blackbla
+            vanillaoption (EuropeanVanillaSpecification): Specification of a vanilla option.
+            model (GBM): The model
             depth (int): Number of layers of neural network.
             nb_neurons (int): Number of activation functions. 
             n_sims (int): Number of paths used as input for network training.
@@ -124,8 +124,6 @@ class VanillaOptionDeepHedgingPricer:
                 The general deep hedging model used internally in this pricing method.
 
         """
-        #print(locals())
-        #if paths is None and power_wind_model is None:
         if model is None:
             raise Exception('A model must be specified.')
         tf.keras.backend.set_floatx('float32')
