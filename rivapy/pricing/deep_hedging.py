@@ -175,6 +175,19 @@ class DeepHedgeModel(tf.keras.Model):
                     payoff: np.ndarray):
         inputs = self._create_inputs(paths)
         return payoff+self.predict(inputs)
+    
+    def compute_indifference_price(self,paths: Dict[str, np.ndarray],                   
+                    payoff: np.ndarray):
+        inputs = self._create_inputs(paths)
+        if self._loss == 'exponential_utility':
+            a = np.exp(-self.regularization*(payoff + self.predict(inputs)))
+            b = np.exp(-self.regularization*(self.predict(inputs)))
+            c = 1./self.regularization
+            return c*np.log(np.mean(a)/np.mean(b))
+        else: 
+            return None #TODO!!
+
+
 
     @tf.function
     def custom_loss(self, y_true, y_pred):
@@ -185,16 +198,7 @@ class DeepHedgeModel(tf.keras.Model):
             es, _ = tf.nn.top_k(-(y_pred+y_true), tf.cast(self.regularization*y_true.shape[0], tf.int32))
             return tf.reduce_mean(es)
         return - self.regularization*tf.keras.backend.mean(y_pred+y_true) + tf.keras.backend.var(y_pred+y_true)
-    
-    @tf.function
-    def indifference_price(self, y_true, y_pred):
-        ##TODO: Testing!!! just a first draft
-        if self._loss == 'exponential_utility':
-            a = tf.keras.backend.mean(tf.keras.backend.exp(-self.regularization*(y_pred+y_true)))
-            b = tf.keras.backend.mean(tf.keras.backend.exp(-self.regularization*(y_pred)))
-            return np.log(a/b)/self.regularization
-        else:
-            return None #TODO
+
 
 
     def _create_inputs(self, paths: Dict[str, np.ndarray], check_timegrid: bool=True)->List[np.ndarray]:
