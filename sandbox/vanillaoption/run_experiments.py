@@ -36,28 +36,30 @@ strike = 1.
 
 repo = analysis.Repo('./experiments/')
 
-
-
-reg ={'mean_variance':[0.0, 0.2, 0.5], 
+reg ={'mean_variance':[0.0], 
       'exponential_utility':[5.0, 10.0],#, 15.0, 20.0] , 
         'expected_shortfall':[0.1]} 
 spec = EuropeanVanillaSpecification('Test_call', tpe, expiry, strike, 
                                                        issuer = issuer, sec_lvl = seclevel, curr='EUR',udl_id='ADS',
                                                        share_ratio = 1)
-for loss in ['exponential_utility']:        #'exponential_utility', mean_variance
+
+
+
+for loss in ['mean_variance']:        #'exponential_utility', mean_variance
     for regularization in reg[loss]:#  [0.0, 0.1, 0.2, 0.5]:
         for seed in [42]:
             pricing_results = repo.run(refdate, 
                                     spec, 
                                     model,
+                                    rerun=False,
                                     depth=3, 
-                                    nb_neurons=64, 
-                                    n_sims=100_000, 
-                                    regularization=0.,
-                                    epochs=10, verbose=1,
-                                    tensorboard_logdir = 'logs/' + dt.datetime.now().strftime("%Y%m%dT%H%M%S"), 
-                                    initial_lr=5e-4,
-                                    decay_steps=8_000,
-                                    batch_size=100, 
-                                    decay_rate=0.8, 
-                                    seed=seed,transaction_cost = {'vanillaoption': [1.e-10]},threshold = 5.)
+                                      nb_neurons=64, 
+                                      n_sims=100_000, 
+                                      regularization=0.,
+                                      epochs=10, verbose=1,
+                                      tensorboard_logdir = 'logs/' + dt.datetime.now().strftime("%Y%m%dT%H%M%S"), 
+                                      initial_lr=0.005,#5e-4,
+                                      decay_steps=8_000,
+                                      batch_size=100, 
+                                      decay_rate=0.8, 
+                                      seed=42,transaction_cost = {'ADS': [1.e-10]})

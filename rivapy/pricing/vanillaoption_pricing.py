@@ -65,7 +65,7 @@ class VanillaOptionDeepHedgingPricer:
                 timegrid: DateTimeGrid):
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
-        timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid()
+        timegrid, n = VanillaOptionDeepHedgingPricer._compute_timegrid()
         model = GBM(drift = 0., volatility=0.2)
         #n_sims = 100_000
         S0 = 1.

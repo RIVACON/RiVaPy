@@ -102,25 +102,21 @@ class Repo:
     def get_hedge_model(self, hashkey:str)->DeepHedgeModel:
         return DeepHedgeModel.load(self.repo_dir+'/'+hashkey+'/')
         
-    #def get_model(self, hashkey:str)->LinearDemandForwardModel:
-    #    return LinearDemandForwardModel.from_dict(self.results[hashkey]['model'])
+    def get_model(self, hashkey:str)->GBM:
+        return GBM.from_dict(self.results[hashkey]['model'])
         
     def simulate_model(self, hashkey: str, n_sims:int, seed: int = 42)->np.ndarray:
         res = self.results[hashkey]
         spec = EuropeanVanillaSpecification.from_dict(res['spec'])
-        #timegrid,expiries ,forecast_points = GreenPPADeepHedgingPricer._compute_points(res['val_date'],
-    #                                                                     spec,
-    #                                                                    forecast_hours=res['pricing_param']['forecast_hours'])
-    #    np.random.seed(seed)
-    #    model = self.get_model(hashkey)
-    #    rnd = np.random.normal(size=model.rnd_shape(n_sims=n_sims, n_timesteps=timegrid.shape[0]))
-    #    model_result = model.simulate(timegrid.timegrid, rnd, expiries=expiries,
-    #                                   initial_forecasts=res['pricing_param']['initial_forecasts'],
-    #                                    power_fwd_prices=res['pricing_param']['power_fwd_prices'])
-    #    return model_result
+        timegrid,n = VanillaOptionDeepHedgingPricer._compute_timegrid()
+        np.random.seed(seed)
+        model = self.get_model(hashkey)
+        S0 = 1.
+        model_result = model.simulate(timegrid, start_value=S0,M = n_sims, n=n)
+        return model_result
     
-    #def select(self, conditions: List[Tuple[str, Union[str, float, int,Tuple]]])->dict:
-    #    return _select(conditions, self.results)
+    def select(self, conditions: List[Tuple[str, Union[str, float, int,Tuple]]])->dict:
+        return _select(conditions, self.results)
 
 
    
