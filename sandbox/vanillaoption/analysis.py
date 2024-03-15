@@ -60,7 +60,7 @@ class Repo:
         #delta = pricing_results.hedge_model.compute_delta(pricing_results.paths, -2).reshape((-1,))
 
         return {'mean': pnl.mean(), 'var': pnl.var(), 
-                'loss': loss, 
+                'loss': loss,
                 '1%':np.percentile(pnl,1), '99%': np.percentile(pnl,99),
                 '5%':np.percentile(pnl,5), '95%': np.percentile(pnl,95)}
     
