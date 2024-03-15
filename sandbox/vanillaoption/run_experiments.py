@@ -45,21 +45,19 @@ spec = EuropeanVanillaSpecification('Test_call', tpe, expiry, strike,
 
 
 
-for loss in ['mean_variance']:        #'exponential_utility', mean_variance
-    for regularization in reg[loss]:#  [0.0, 0.1, 0.2, 0.5]:
-        for seed in [42]:
-            pricing_results = repo.run(refdate, 
-                                    spec, 
-                                    model,
-                                    rerun=False,
-                                    depth=3, 
-                                      nb_neurons=64, 
-                                      n_sims=100_000, 
-                                      regularization=0.,
-                                      epochs=10, verbose=1,
-                                      tensorboard_logdir = 'logs/' + dt.datetime.now().strftime("%Y%m%dT%H%M%S"), 
-                                      initial_lr=0.005,#5e-4,
-                                      decay_steps=8_000,
-                                      batch_size=100, 
-                                      decay_rate=0.8, 
-                                      seed=42,transaction_cost = {'ADS': [1.e-10]})
+for tc in [0.001,0.002,0.004,0.008,0.016]:    
+  pricing_results = repo.run(refdate, 
+                            spec, 
+                            model,
+                            rerun=False,
+                            depth=3, 
+                            nb_neurons=64, 
+                            n_sims=100_000, 
+                            regularization=1.,
+                            epochs=10, verbose=1,
+                            tensorboard_logdir = 'logs/' + dt.datetime.now().strftime("%Y%m%dT%H%M%S"), 
+                            initial_lr=0.005,#5e-4,
+                            decay_steps=8_000,
+                            batch_size=100, 
+                            decay_rate=0.8, 
+                            seed=42,transaction_cost = {'ADS': [tc]},loss = 'exponential_utility')

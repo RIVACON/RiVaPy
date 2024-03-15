@@ -57,15 +57,13 @@ class Repo:
         pnl = pricing_results.hedge_model.compute_pnl(pricing_results.paths, pricing_results.payoff)
         inputs = pricing_results.hedge_model._create_inputs(pricing_results.paths)
         loss = pricing_results.hedge_model.evaluate(inputs, pricing_results.payoff)
+        #delta = pricing_results.hedge_model.compute_delta(pricing_results.paths, -2).reshape((-1,))
 
         return {'mean': pnl.mean(), 'var': pnl.var(), 
-                'loss': loss,
+                'loss': loss, 
                 '1%':np.percentile(pnl,1), '99%': np.percentile(pnl,99),
                 '5%':np.percentile(pnl,5), '95%': np.percentile(pnl,95)}
     
-    def compute_delta_figures(pricing_results, t):
-        delta = pricing_results.hedge_model.compute_delta(pricing_results.paths, t).reshape((-1,))
-        return {'delta':delta}
 
     def run(self, val_date, spec, model, rerun=False, **kwargs):
         params = {}
@@ -87,7 +85,6 @@ class Repo:
                                       spec, 
                                       model, 
                                       **kwargs)
-        #params['delta_result'] = Repo.compute_delta_figures(pricing_result,t = -2)
         params['pnl_result'] = Repo.compute_pnl_figures(pricing_result)
         self.results[hash_key] = params
         with open(self.repo_dir+'/results.json','w') as f:

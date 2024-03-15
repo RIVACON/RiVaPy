@@ -49,7 +49,6 @@ class VanillaOptionDeepHedgingPricer:
         return timegrid, n
     
 
-
     @staticmethod
     def compute_payoff(n_sims: int, 
                        hedge_ins: Dict[str, np.ndarray], strike: float):
