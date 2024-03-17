@@ -42,11 +42,10 @@ class VanillaOptionDeepHedgingPricer:
             self.payoff = payoff
 
     @staticmethod
-    def _compute_timegrid():
-        n = 30#365
-        T = 30/365
-        timegrid = np.linspace(0.0,T,n)
-        return timegrid, n
+    def _compute_timegrid(days):
+        T = days/365
+        timegrid = np.linspace(0.0,T,days)
+        return timegrid
     
 
     @staticmethod
@@ -61,18 +60,17 @@ class VanillaOptionDeepHedgingPricer:
     def generate_paths(vanillaoption: EuropeanVanillaSpecification,
                 model: GBM, 
                 n_sims: int, 
-                timegrid: DateTimeGrid):
+                timegrid: DateTimeGrid,
+                days: int):
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
-        timegrid, n = VanillaOptionDeepHedgingPricer._compute_timegrid()
+        timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days)
         model = GBM(drift = 0., volatility=0.2)
-        #n_sims = 100_000
-        S0 = 1.
-        return model.simulate(timegrid, start_value=S0,M = n_sims, n=n)
+        S0 = vanillaoption.strike #ATM option
+        return model.simulate(timegrid, start_value=S0,M = n_sims, n=days)
 
     @staticmethod
-    def price( val_date: dt.datetime,
-                vanillaoption: EuropeanVanillaSpecification,
+    def price( vanillaoption: EuropeanVanillaSpecification,
                 model: GBM, 
                 depth: int, 
                 nb_neurons: int, 
@@ -89,13 +87,14 @@ class VanillaOptionDeepHedgingPricer:
                 loss: str = 'mean_variance',
                 transaction_cost: dict = {},
                 threshold: float = 0.,
-                cascading: bool = False
+                cascading: bool = False,
+                days: int = 30
                 #paths: Dict[str, np.ndarray] = None
                 ):
         """Price a vanilla option using deeep hedging
 
         Args:
-            val_date (dt.datetime): Valuation date.
+            days (int): number of days until expiry, used for time grid. Defaults to 30.
             vanillaoption (EuropeanVanillaSpecification): Specification of a vanilla option.
             model (GBM): The model
             depth (int): Number of layers of neural network.
@@ -129,11 +128,10 @@ class VanillaOptionDeepHedgingPricer:
 
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
-        timegrid, n = VanillaOptionDeepHedgingPricer._compute_timegrid()
+        timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days)
         model = GBM(drift = 0., volatility=0.2)
-        #n_sims = 100_000
-        S0 = 1.
-        simulation_results = model.simulate(timegrid, start_value=S0,M = n_sims, n=n)
+        S0 = vanillaoption.strike #ATM option
+        simulation_results = model.simulate(timegrid, start_value=S0,M = n_sims, n=days)
         hedge_ins = {}
         key = vanillaoption.udl_id
         hedge_ins[key] = simulation_results

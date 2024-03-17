@@ -174,7 +174,7 @@ class DeepHedgeModel(tf.keras.Model):
                     paths: Dict[str, np.ndarray],
                     payoff: np.ndarray):
         inputs = self._create_inputs(paths)
-        return payoff+self.predict(inputs)
+        return payoff+self.predict(inputs) # -Z + d S
     
 
     def compute_indifference_price(self,paths: Dict[str, np.ndarray],                   

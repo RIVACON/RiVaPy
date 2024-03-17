@@ -81,8 +81,7 @@ class Repo:
         params['pricing_params_hash'] = FactoryObject.hash_for_dict(kwargs) 
         if (hash_key in self.results.keys()) and (not rerun):
             return self.results[hash_key]
-        pricing_result = VanillaOptionDeepHedgingPricer.price(val_date, 
-                                      spec, 
+        pricing_result = VanillaOptionDeepHedgingPricer.price(spec, 
                                       model, 
                                       **kwargs)
         params['pnl_result'] = Repo.compute_pnl_figures(pricing_result)
