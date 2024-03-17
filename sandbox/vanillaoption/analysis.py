@@ -101,14 +101,14 @@ class Repo:
     def get_model(self, hashkey:str)->GBM:
         return GBM.from_dict(self.results[hashkey]['model'])
         
-    def simulate_model(self, hashkey: str, n_sims:int, seed: int = 42)->np.ndarray:
+    def simulate_model(self, hashkey: str, n_sims:int, seed: int = 42, days: int = 30)->np.ndarray:
         res = self.results[hashkey]
         spec = EuropeanVanillaSpecification.from_dict(res['spec'])
-        timegrid,n = VanillaOptionDeepHedgingPricer._compute_timegrid()
+        timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days)
         np.random.seed(seed)
         model = self.get_model(hashkey)
-        S0 = 1.
-        model_result = model.simulate(timegrid, start_value=S0,M = n_sims, n=n)
+        S0 = spec.strike #ATM option
+        model_result = model.simulate(timegrid, start_value=S0,M = n_sims, n=days)
         return model_result
     
     def select(self, conditions: List[Tuple[str, Union[str, float, int,Tuple]]])->dict:

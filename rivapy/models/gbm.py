@@ -68,7 +68,8 @@ class GBM(FactoryObject):
         return result
 
 
-    def compute_BS_delta(self, S):
+    def compute_BS_delta(self, S,timegrid):
+        self._set_timegrid(timegrid)
         d1 = (np.log(S/1.) + (self.drift + self.volatility*self.volatility*0.5)*(self._delta_t))/(self.volatility*np.sqrt(self._delta_t))
         delta_BS = scipy.stats.norm.cdf(d1)
         return delta_BS

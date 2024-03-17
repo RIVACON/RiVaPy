@@ -44,7 +44,7 @@ spec = EuropeanVanillaSpecification('Test_call', tpe, expiry, strike,
 
 
 
-for tc in [0.,0.001,0.002,0.004,0.008,0.016]:    
+for tc in [0.,1.e-10,0.0001,0.001,0.01]:    
   pricing_results = repo.run(refdate, 
                             spec, 
                             model,
