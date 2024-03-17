@@ -59,4 +59,4 @@ for tc in [0.,1.e-10,0.0001,0.001,0.01]:
                             decay_steps=8_000,
                             batch_size=256, 
                             decay_rate=0.8, 
-                            seed=42,transaction_cost = {'ADS': [tc]})
+                            seed=42,transaction_cost = {'ADS': [tc]},test_weighted_paths= True)

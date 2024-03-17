@@ -88,7 +88,8 @@ class VanillaOptionDeepHedgingPricer:
                 transaction_cost: dict = {},
                 threshold: float = 0.,
                 cascading: bool = False,
-                days: int = 30
+                days: int = 30,
+                test_weighted_paths: bool = False
                 #paths: Dict[str, np.ndarray] = None
                 ):
         """Price a vanilla option using deeep hedging
@@ -132,6 +133,12 @@ class VanillaOptionDeepHedgingPricer:
         model = GBM(drift = 0., volatility=0.2)
         S0 = vanillaoption.strike #ATM option
         simulation_results = model.simulate(timegrid, start_value=S0,M = n_sims, n=days)
+        if test_weighted_paths:
+            bla = np.where(simulation_results[-1,:] < 0.85)
+            bla2 = np.where(simulation_results[-1,:] > 1.15)
+            for i in range(len(bla)):
+                paths = np.append(simulation_results, simulation_results[:,bla[i]], axis = 1)
+                paths = np.append(simulation_results, simulation_results[:,bla2[i]], axis = 1)
         hedge_ins = {}
         key = vanillaoption.udl_id
         hedge_ins[key] = simulation_results
