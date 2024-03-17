@@ -25,7 +25,6 @@ from sys import exit
 model = GBM(drift = 0., volatility=0.2)
 
 refdate = dt.datetime(2023,1,1)
-strike = 1.0 
 transaction_cost = 0.01
 days = 30
 issuer = 'DBK'
@@ -53,11 +52,11 @@ for tc in [0.,0.001,0.002,0.004,0.008,0.016]:
                             depth=3, 
                             nb_neurons=64, 
                             n_sims=100_000, 
-                            regularization=1.,
+                            regularization=0.,
                             epochs=50, verbose=1,
                             tensorboard_logdir = 'logs/' + dt.datetime.now().strftime("%Y%m%dT%H%M%S"), 
                             initial_lr=0.005,#5e-4,
                             decay_steps=8_000,
                             batch_size=256, 
                             decay_rate=0.8, 
-                            seed=42,transaction_cost = {'ADS': [tc]},loss = 'exponential_utility')
+                            seed=42,transaction_cost = {'ADS': [tc]})
