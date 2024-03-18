@@ -45,7 +45,7 @@ val_date = dt.datetime(2023,1,1)
 strike = 1.0 #0.22
 days = 2
 
-repo = analysis.Repo('./experiments/')
+repo = analysis.Repo('/home/doeltz/doeltz/development/RiVaPy/sandbox/green_ppa/experiments/')
 
 
 
@@ -54,9 +54,9 @@ repo = analysis.Repo('./experiments/')
 # 3 dtm
 
 reg ={'mean_variance':[10_000.0],#[0.0, 0.2, 0.5], 
-      'exponential_utility':[0.005], #[5.0, 10.0],#, 15.0, 20.0] , 
+      'exponential_utility':[5.0], #[5.0, 10.0],#, 15.0, 20.0] , 
         'expected_shortfall':[0.05]} 
-for max_capacity in [0.0]:# [0.0, 0.125, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 5.0, 10.0]:
+for max_capacity in [1.0]:# [0.0, 0.125, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 5.0, 10.0]:
     spec = GreenPPASpecification(udl='Power_Germany',
                                 technology = 'Wind',
                                 location = 'Onshore',
@@ -65,7 +65,7 @@ for max_capacity in [0.0]:# [0.0, 0.125, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 
                                 max_capacity = max_capacity, 
                                 id='dummy')
     for x_volatility in [0.8]:#[0.8] 
-        for vol_wind_onshore in [4.0]:#[1.0,2.0,3.0,4.0]: #
+        for vol_wind_onshore in [3.0]:#[1.0,2.0,3.0,4.0]: #
             wind_onshore = WindPowerForecastModel(region='Onshore', speed_of_mean_reversion=0.1, volatility=vol_wind_onshore)
             wind_offshore = WindPowerForecastModel(region='Offshore', speed_of_mean_reversion=0.1, volatility=3.0)
             regions = [ MultiRegionWindForecastModel.Region( 
@@ -86,9 +86,9 @@ for max_capacity in [0.0]:# [0.0, 0.125, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 
                                         x_mean_reversion_speed = 0.5,
                                         power_name= 'Power_Germany',
                                         additive_correction=False)
-            for loss in ['expected_shortfall']:        #'exponential_utility', mean_variance
+            for loss in ['expected_shortfall', 'exponential_utility']:        #'exponential_utility', mean_variance
                 for regularization in reg[loss]:#  [0.0, 0.1, 0.2, 0.5]:
-                    for seed in [42]:
+                    for seed in [111, 112,113,114,115,116,117]:
                         for power_fwd_price in [1.0]:#, 0.8, 1.2]: 
                             pricing_results = repo.run(val_date, 
                                                     spec, model,
@@ -102,10 +102,10 @@ for max_capacity in [0.0]:# [0.0, 0.125, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 
                                                     nb_neurons=32, 
                                                     n_sims=200_000, 
                                                     regularization=regularization,
-                                                    epochs=50, 
+                                                    epochs=800, 
                                                     verbose=1,
                                                     tensorboard_logdir = 'logs/' + dt.datetime.now().strftime("%Y%m%dT%H%M%S"), 
-                                                    initial_lr=1e-5,
+                                                    initial_lr=2e-5,
                                                     decay_steps=4_000,
                                                     batch_size=2000, 
                                                     decay_rate=0.2, 
