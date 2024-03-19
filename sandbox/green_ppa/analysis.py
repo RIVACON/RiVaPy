@@ -75,7 +75,7 @@ class Repo:
         params['pricing_param'] = kwargs
         params['ppa_spec_hash'] = ppa_spec.hash()
         params['model_hash'] = model.hash()
-        #params['pricing_params_hash'] = FactoryObject.hash_for_dict(kwargs)
+        params['pricing_params_hash'] = FactoryObject.hash_for_dict(kwargs) #FS
         if (hash_key in self.results.keys()) and (not rerun):
             return self.results[hash_key]
         pricing_result =  GreenPPADeepHedgingPricer.price(val_date, 

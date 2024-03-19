@@ -15,7 +15,6 @@ class BaseModel(FactoryObject):
         pass
 
     
-    
 
 class BaseFwdModel(BaseModel):
    

@@ -19,6 +19,7 @@ from scipy.special import comb
 
 import analysis
 
+from sys import exit
 
 #timegrid = np.linspace(0.0, days*1.0/365.0, days*24)
 #forward_expiries = [timegrid[-1]]
@@ -43,9 +44,11 @@ wind = MultiRegionWindForecastModel('Wind_Germany', regions)
 
 val_date = dt.datetime(2023,1,1)
 strike = 1.0 #0.22
+transaction_cost = 0.01
 days = 2
 
 repo = analysis.Repo('/home/doeltz/doeltz/development/RiVaPy/sandbox/green_ppa/experiments/')
+
 
 
 

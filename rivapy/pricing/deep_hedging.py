@@ -21,6 +21,9 @@ class DeepHedgeModel(tf.keras.Model):
                         depth: int,
                         n_neurons: int,
                         loss: str,
+                        transaction_cost: dict,
+                        threshold: float,
+                        cascading: bool = False,
                         model: tf.keras.Model=None,
                         **kwargs):
         """ Class for Deep Hedging Model.
@@ -49,10 +52,17 @@ class DeepHedgeModel(tf.keras.Model):
         self.regularization = regularization
         self._prev_q = None
         self._forecast_ids = None
-        self._loss = loss
+        self._loss = loss 
+        self.transaction_cost = transaction_cost
+        self.threshold = threshold
+        self.cascading = cascading
+
         
     def __call__(self, x, training=True):
-        return self._compute_pnl(x, training) #+ self.price
+        if not self.transaction_cost:
+            return self._compute_pnl(x, training) #+ self.price
+        else:
+            return self._compute_pnl_withconstains(x, training) #+ self.price
     
     def _build_model(self, depth: int, nb_neurons: int):
         inputs= [tf.keras.Input(shape=(1,),name = ins) for ins in self.hedge_instruments]
@@ -72,19 +82,68 @@ class DeepHedgeModel(tf.keras.Model):
         return model
 
     def _compute_pnl(self, x, training):
+        # realisierte PnL zu Zeitpunkten # FS
         pnl = tf.zeros((tf.shape(x[0])[0],))
         self._prev_q = tf.zeros((tf.shape(x[0])[0], len(self.hedge_instruments)), name='prev_q')
         for i in range(self.timegrid.shape[0]-2):
             t = [self.timegrid[-1]-self.timegrid[i]]*tf.ones((tf.shape(x[0])[0],1))/self.timegrid[-1]
             inputs = [v[:,i] for v in x]
             inputs.append(t)
-            quantity = self.model(inputs, training=training)#tf.squeeze(self.model(inputs, training=training))
+            quantity = self.model(inputs, training=training)
             for j in range(len(self.hedge_instruments)):
                 pnl += tf.math.multiply((self._prev_q[:,j]-quantity[:,j]), tf.squeeze(x[j][:,i]))
             self._prev_q = quantity
         for j in range(len(self.hedge_instruments)):
-            pnl += self._prev_q[:,j]* tf.squeeze(x[j][:,-1])#+ rlzd_qty[:,-1]*(tf.squeeze(power_fwd[:,-1])-self.fixed_price)
+            pnl += self._prev_q[:,j]* tf.squeeze(x[j][:,-1])
         return pnl
+    
+    
+    def _compute_pnl_withconstains(self, x, training):
+        pnl = tf.zeros((tf.shape(x[0])[0],))
+        self._prev_q = tf.zeros((tf.shape(x[0])[0], len(self.hedge_instruments)), name='prev_q')
+        for i in range(self.timegrid.shape[0]-2): # tensorflow loop?
+            t = [self.timegrid[-1]-self.timegrid[i]]*tf.ones((tf.shape(x[0])[0],1))/self.timegrid[-1]
+            inputs = [v[:,i] for v in x]
+            inputs.append(t)
+            quantity = self.model(inputs, training=training)
+            for j in range(len(self.hedge_instruments)): 
+                key_to_check = self.hedge_instruments[j]
+                if key_to_check in self.transaction_cost.keys():
+                    tc = list(self.transaction_cost[key_to_check])
+                    tf.cond(tf.equal(len(self.timegrid), len(tc)), lambda: None, lambda: tc.extend([tc[-1]] * (len(self.timegrid) - len(tc))))
+                else:
+                    tc = [0] * len(self.timegrid)
+                diff_q = self._prev_q[:,j]-quantity[:,j]
+                xx = tf.squeeze(x[j][:,i])
+                # Trading restriction based on threshold
+                tf.cond(tf.equal(self.threshold, 0.), lambda: xx, lambda: tf.where(tf.greater(quantity[:,j], self.threshold), tf.zeros_like(xx), xx) )
+                # Cascading:
+                if self.cascading:
+                    tt = np.round(self.timegrid*365.,0)
+                    if (tt[i] % 7 != 0 and tt[i] >=7): #weekly
+                        xx = tf.zeros_like(xx)
+                pnl += tf.where(tf.greater(diff_q, 0), 
+                                tf.math.multiply(diff_q, tf.scalar_mul((1.-tc[0]),xx)),
+                                tf.math.multiply(diff_q, tf.scalar_mul((1.+tc[0]),xx)))
+            self._prev_q = quantity
+
+        for j in range(len(self.hedge_instruments)):
+            key_to_check = self.hedge_instruments[j]
+            if key_to_check in self.transaction_cost.keys():
+                tc = list(self.transaction_cost[key_to_check])
+                tf.cond(tf.equal(len(self.timegrid), len(tc)), lambda: None, lambda: tc.extend([tc[-1]] * (len(self.timegrid) - len(tc))))
+            else:
+                tc = [0] * len(self.timegrid)
+            diff_q = self._prev_q[:,j]-quantity[:,j]
+            xx = tf.squeeze(x[j][:,-1])
+            # Trading restriction based on threshold
+            tf.cond(tf.equal(self.threshold, 0.), lambda: xx, lambda: tf.where(tf.greater(quantity[:,j], self.threshold), tf.zeros_like(xx), xx) )
+            pnl += tf.where(tf.greater(diff_q, 0), 
+                            tf.math.multiply(self._prev_q[:,j], tf.scalar_mul((1.-tc[-1]),xx)),
+                            tf.math.multiply(self._prev_q[:,j], tf.scalar_mul((1.+tc[-1]),xx)))
+        return pnl
+    
+
 
     def compute_delta(self, paths: Dict[str, np.ndarray],
                       t: Union[int, float]=None):
@@ -115,17 +174,30 @@ class DeepHedgeModel(tf.keras.Model):
                     paths: Dict[str, np.ndarray],
                     payoff: np.ndarray):
         inputs = self._create_inputs(paths)
-        return payoff+self.predict(inputs)
+        return payoff+self.predict(inputs) # -Z + d S
+    
+
+    def compute_indifference_price(self,paths: Dict[str, np.ndarray],                   
+                    payoff: np.ndarray):
+        inputs = self._create_inputs(paths)
+        a = np.exp(-self.regularization*(payoff + self.predict(inputs)))
+        b = np.exp(-self.regularization*(self.predict(inputs)))
+        c = 1./self.regularization
+        return c*np.log(np.mean(a))#FStest/np.mean(b))
+    
+
 
     @tf.function
     def custom_loss(self, y_true, y_pred):
+        # 
         if self._loss == 'exponential_utility':
             return tf.keras.backend.mean(tf.keras.backend.exp(-self.regularization*(y_pred+y_true)))
         elif self._loss == 'expected_shortfall':
             es, _ = tf.nn.top_k(-(y_pred+y_true), tf.cast(self.regularization*y_true.shape[0], tf.int32))
             return tf.reduce_mean(es)
         return - self.regularization*tf.keras.backend.mean(y_pred+y_true) + tf.keras.backend.var(y_pred+y_true)
-        #return tf.keras.backend.mean(tf.keras.backend.exp(-self.lamda*y_pred))
+
+
 
     def _create_inputs(self, paths: Dict[str, np.ndarray], check_timegrid: bool=True)->List[np.ndarray]:
         inputs = []
@@ -174,6 +246,8 @@ class DeepHedgeModel(tf.keras.Model):
         params['additional_states'] = self.additional_states
         params['hedge_instruments'] = self.hedge_instruments
         params['loss'] = self._loss
+        params['transaction_cost'] = self.transaction_cost
+        params['threshold'] = self.threshold
         with open(folder+'/params.json','w') as f:
             json.dump(params, f)
 

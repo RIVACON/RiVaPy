@@ -48,10 +48,12 @@ class GreenPPADeepHedgingPricer:
         ppa_schedule = green_ppa.get_schedule()
         if ppa_schedule[-1] <= val_date:
             return None
-        timegrid = DateTimeGrid(start=val_date, end=ppa_schedule[-1], freq='1H', inclusive=None, daycounter=DayCounterType.Act365Fixed)
+        timegrid = DateTimeGrid(start=val_date, end=ppa_schedule[-1], freq='1H', inclusive='both', daycounter=DayCounterType.Act365Fixed)
+        #timegrid = DateTimeGrid(start=val_date, end=ppa_schedule[-1], freq='1H', inclusive=None, daycounter=DayCounterType.Act365Fixed)
         dc = DayCounter(DayCounterType.Act365Fixed)
         fwd_expiries = [dc.yf(val_date, d) for d in ppa_schedule if d>val_date]
         forecast_points = [i for i in range(len(timegrid.dates)) if timegrid.dates[i].hour in forecast_hours]
+        print(ppa_schedule)
         return timegrid, fwd_expiries, forecast_points
 
 
@@ -103,7 +105,8 @@ class GreenPPADeepHedgingPricer:
                 decay_steps: int = 100_000,
                 seed: int = 42,
                 additional_states=None, 
-                loss: str = 'mean_variance'
+                loss: str = 'mean_variance',
+                transaction_cost: dict = {}
                 #paths: Dict[str, np.ndarray] = None
                 ):
         """Price a green PPA using deeep hedging
@@ -125,6 +128,7 @@ class GreenPPADeepHedgingPricer:
             decay_rate (float, optional): Decay of learning rate after each epoch. Defaults to 0.7.
             seed (int, optional): Seed that is set to make results reproducible. Defaults to 42.
             loss (str, optional): Either 'mean_variance' or 'exponential_utility'.
+            transaction_cost (dict, optional): Proportional transaction cost dependent on instrument. Default is empty dict.
         Returns:
             _type_: _description_
 
@@ -168,7 +172,7 @@ class GreenPPADeepHedgingPricer:
                     additional_states_[key] = simulation_results.get(key, forecast_points)
         
         hedge_model = DeepHedgeModel(list(hedge_ins.keys()), list(additional_states_.keys()), timegrid.timegrid, 
-                                        regularization=regularization,depth=depth, n_neurons=nb_neurons, loss = loss)
+                                        regularization=regularization,depth=depth, n_neurons=nb_neurons, loss = loss, transaction_cost = transaction_cost)
         paths = {}
         paths.update(hedge_ins)
         paths.update(additional_states_)

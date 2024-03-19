@@ -43,8 +43,11 @@ extensions = [
     'sphinx_rtd_theme',
     'sphinxcontrib.bibtex',
     'nbsphinx',
-    "sphinx_gallery.load_style"
+    "sphinx_gallery.load_style",
+    'sphinx.ext.viewcode'
 ]
+
+intersphinx_mapping ={'pandas': ('https://pandas.pydata.org/docs/', None)}
 
 # Add bibtex file
 bibtex_bibfiles = ['refs.bib']
@@ -71,3 +74,7 @@ html_theme = 'sphinx_rtd_theme'
 #html_static_path = ['_static']
 
 autoclass_content = 'both'
+
+# thumbnail image paths should be relative to the _static folder
+nbsphinx_thumbnails = {
+    'notebooks/instruments/repurchase_agreement': "../../source/figs/repo_schema.png"}
