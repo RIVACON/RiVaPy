@@ -45,7 +45,7 @@ spec = EuropeanVanillaSpecification('Test_call', tpe, expiry, strike,
 
 
 for tc in [0.001]:
-  for loss in ['exponential_utility']:
+  for loss in ['expected_shortfall']:
     pricing_results = repo.run(refdate, 
                             spec, 
                             model,
@@ -53,11 +53,11 @@ for tc in [0.001]:
                             depth=3, 
                             nb_neurons=64, 
                             n_sims=100_000, 
-                            regularization=10.,
-                            epochs=50, verbose=1,
+                            regularization=0.5,
+                            epochs=10, verbose=1,
                             tensorboard_logdir = 'logs/' + dt.datetime.now().strftime("%Y%m%dT%H%M%S"), 
                             initial_lr= 0.005,#5e-4,
-                            decay_steps=16_000,
-                            batch_size=256, 
-                            decay_rate=0.97, 
+                            decay_steps=8_000,
+                            batch_size=100, 
+                            decay_rate=0.8, 
                             seed=42,transaction_cost = {'ADS': [tc]},loss=loss)#,test_weighted_paths= True)
