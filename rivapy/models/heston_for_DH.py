@@ -67,8 +67,11 @@ class HestonForDeepHedging(FactoryObject):
         self._set_timegrid(timegrid)
         S = np.zeros((self._timegrid.shape[0]+1, M))
         V =  np.zeros((self._timegrid.shape[0]+1, M))
+        L = np.zeros((self._timegrid.shape[0]+1,M))
+        X = np.zeros((self._timegrid.shape[0]+1, M, 2))
         S[0, :] = S0
         V[0, :] = v0
+        
         # Generate correlated Brownian motions
         z1 = np.random.normal(size=(self._timegrid.shape[0], M))
         z2 = self.correlation_rho * z1 + np.sqrt(1 - self.correlation_rho ** 2) * np.random.normal(size=(self._timegrid.shape[0], M))
@@ -78,14 +81,27 @@ class HestonForDeepHedging(FactoryObject):
             # Calculate volatility
             vol = np.sqrt(V[t - 1, :])
 
+
+            # Calculate S_k^1 and S_k^2 as in Deep Hedging by Bühler et al. 2019 Section 5.2:
+            X[t-1,:,0] = S[t-1,:]
+            ttm = self._timegrid[-1]-self._timegrid[t-1]
+            L[t-1,:] = ((V[t-1, :] - self.long_run_average)/self.rate_of_mean_reversion)*(1. - np.exp(-self.rate_of_mean_reversion*ttm)) + self.long_run_average*ttm
+            X[t-1,:,1] = np.sum(V[:t-1, :],axis=0) + L[t-1,:]
+
+
             # Update the stock price and volatility
             S[t, :] = S[t - 1, :] * np.exp((- 0.5 * vol**2) * self._delta_t + vol * np.sqrt(self._delta_t) * z1[t - 1, :])
             V[t, :] = np.maximum(
                 0.0, V[t - 1, :] + self.rate_of_mean_reversion * (self.long_run_average - V[t - 1, :]) * self._delta_t 
                 + self.vol_of_vol * np.sqrt(V[t - 1, :]) * np.sqrt(self._delta_t) * z2[t - 1, :]
             )
+
+        # Calculate S_k^1 and S_k^2 as in Deep Hedging by Bühler et al. 2019 Section 5.2:
+        t = self._timegrid.shape[0] + 1
+        X[t-1,:,0] = S[t-1,:]
+        X[t-1,:,1] = np.sum(V[:t-1, :],axis=0) 
         
-        return S
+        return X
 
 
 
