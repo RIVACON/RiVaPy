@@ -15,8 +15,8 @@ import numpy as np
 import sys
 sys.path.append('C:/Users/doeltz/development/RiVaPy/')
 import datetime as dt
-from rivapy.models.base_model import BaseFwdModel
 from rivapy.models.gbm import GBM
+from rivapy.models.heston_for_DH import HestonForDeepHedging
 from rivapy.instruments.specifications import EuropeanVanillaSpecification
 from rivapy.tools.datetools import DayCounter
 from rivapy.tools.enums import DayCounterType
@@ -58,20 +58,22 @@ class VanillaOptionDeepHedgingPricer:
 
     @staticmethod
     def generate_paths(vanillaoption: EuropeanVanillaSpecification,
-                model: GBM, 
+                model: HestonForDeepHedging,#GBM, 
                 n_sims: int, 
                 timegrid: DateTimeGrid,
                 days: int):
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
         timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days)
-        model = GBM(drift = 0., volatility=0.2)
+        model = HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04,
+                  vol_of_vol = 2., correlation_rho = -0.7)#GBM(drift = 0., volatility=0.2)
         S0 = vanillaoption.strike #ATM option
-        return model.simulate(timegrid, start_value=S0,M = n_sims, n=days)
+        v0 = 0.04
+        return model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days)#model.simulate(timegrid, start_value=S0,M = n_sims, n=days)
 
     @staticmethod
     def price( vanillaoption: EuropeanVanillaSpecification,
-                model: GBM, 
+                model: HestonForDeepHedging,#GBM, 
                 depth: int, 
                 nb_neurons: int, 
                 n_sims: int, 
@@ -97,7 +99,7 @@ class VanillaOptionDeepHedgingPricer:
         Args:
             days (int): number of days until expiry, used for time grid. Defaults to 30.
             vanillaoption (EuropeanVanillaSpecification): Specification of a vanilla option.
-            model (GBM): The model
+            model (GBM, HestonForDeepHedging): The model
             depth (int): Number of layers of neural network.
             nb_neurons (int): Number of activation functions. 
             n_sims (int): Number of paths used as input for network training.
@@ -130,12 +132,21 @@ class VanillaOptionDeepHedgingPricer:
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
         timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days)
-        model = GBM(drift = 0., volatility=0.2)
+        model = HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04,
+                  vol_of_vol = 2., correlation_rho = -0.7)#GBM(drift = 0., volatility=0.2)
         S0 = vanillaoption.strike #ATM option
-        simulation_results = model.simulate(timegrid, start_value=S0,M = n_sims, n=days)
+        v0 = 0.04
+        simulation_results = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days)#model.simulate(timegrid, start_value=S0,M = n_sims, n=days)
         if test_weighted_paths:
-            bla = np.where(simulation_results[-1,:] < 0.85)
-            bla2 = np.where(simulation_results[-1,:] > 1.15)
+            bla = np.where((simulation_results[-1,:] < 0.9) & (simulation_results[-1,:] > 0.8))
+            bla2 = np.where((simulation_results[-1,:] > 1.1) & (simulation_results[-1,:] < 1.2))
+            for i in range(len(bla)):
+                paths = np.append(simulation_results, simulation_results[:,bla[i]], axis = 1)
+                paths = np.append(simulation_results, simulation_results[:,bla2[i]], axis = 1)
+                paths = np.append(simulation_results, simulation_results[:,bla[i]], axis = 1)
+                paths = np.append(simulation_results, simulation_results[:,bla2[i]], axis = 1)
+            bla = np.where(simulation_results[-1,:] < 0.8)
+            bla2 = np.where(simulation_results[-1,:] > 1.2)
             for i in range(len(bla)):
                 paths = np.append(simulation_results, simulation_results[:,bla[i]], axis = 1)
                 paths = np.append(simulation_results, simulation_results[:,bla2[i]], axis = 1)
