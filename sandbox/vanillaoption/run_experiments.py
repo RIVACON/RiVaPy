@@ -38,7 +38,7 @@ expiry = refdate + dt.timedelta(days=30)
 strike = 1.0
 
 repo = analysis.Repo(
-    "/home/doeltz/doeltz/development/RiVaPy/sandbox/vanillaoption/experiments/"
+    "./experiments"
 )
 
 reg = {
@@ -59,30 +59,25 @@ spec = EuropeanVanillaSpecification(
 )
 
 
-for nb_neurons in [64]:  # 16,32,64]:
-    for depth in [3]:  #  [2,3,4]:
-        for tc in [0]:  # .,1.e-10,0.0001,0.001,0.01]:
-            for initial_lr in [5e-4]:  #  [1e-4, 5e-4, 1e-3, 5e-3]:
-                for test_weighted_paths in [True]:  #  , False]:
-                    for batch_size in [128]:  # ,256,4*256, 4*4*256]:
-                        pricing_results = repo.run(
+for tc in [0]:#,1.e-10,0.0001,0.001,0.01]:
+    pricing_results = repo.run(
                             refdate,
                             spec,
                             model,
                             rerun=False,
-                            depth=depth,
-                            nb_neurons=nb_neurons,
+                            depth=3,
+                            nb_neurons=16,
                             n_sims=100_000,
                             regularization=0.0,
-                            epochs=800,
+                            epochs=400,
                             verbose=1,
                             tensorboard_logdir="logs/"
                             + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
-                            initial_lr=initial_lr,  # 5e-4,
-                            decay_steps=6_000,
-                            batch_size=batch_size,
+                            initial_lr=0.005,  # 5e-4,
+                            decay_steps=16_000,
+                            batch_size=64,
                             decay_rate=0.95,
                             seed=42,
                             transaction_cost={"ADS": [tc]},
-                            test_weighted_paths=test_weighted_paths,
+                            test_weighted_paths=False,
                         )

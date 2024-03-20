@@ -138,15 +138,13 @@ class VanillaOptionDeepHedgingPricer:
         v0 = 0.04
         simulation_results = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days)#model.simulate(timegrid, start_value=S0,M = n_sims, n=days)
         if test_weighted_paths:
-            bla = np.where((simulation_results[-1,:] < 0.9) & (simulation_results[-1,:] > 0.8))
-            bla2 = np.where((simulation_results[-1,:] > 1.1) & (simulation_results[-1,:] < 1.2))
+            bla = np.where((simulation_results[-1,:] < 0.9))
+            bla2 = np.where((simulation_results[-1,:] > 1.1))
             for i in range(len(bla)):
                 paths = np.append(simulation_results, simulation_results[:,bla[i]], axis = 1)
                 paths = np.append(simulation_results, simulation_results[:,bla2[i]], axis = 1)
-                paths = np.append(simulation_results, simulation_results[:,bla[i]], axis = 1)
-                paths = np.append(simulation_results, simulation_results[:,bla2[i]], axis = 1)
-            bla = np.where(simulation_results[-1,:] < 0.8)
-            bla2 = np.where(simulation_results[-1,:] > 1.2)
+            bla = np.where(simulation_results[-1,:] <= 0.8)
+            bla2 = np.where(simulation_results[-1,:] >= 1.2)
             for i in range(len(bla)):
                 paths = np.append(simulation_results, simulation_results[:,bla[i]], axis = 1)
                 paths = np.append(simulation_results, simulation_results[:,bla2[i]], axis = 1)
