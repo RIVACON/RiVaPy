@@ -69,7 +69,7 @@ for tc in [0]:#,1.e-10,0.0001,0.001,0.01]:
                             nb_neurons=16,
                             n_sims=100_000,
                             regularization=0.0,
-                            epochs=400,
+                            epochs=50,
                             verbose=1,
                             tensorboard_logdir="logs/"
                             + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
@@ -80,4 +80,5 @@ for tc in [0]:#,1.e-10,0.0001,0.001,0.01]:
                             seed=42,
                             transaction_cost={"ADS": [tc]},
                             test_weighted_paths=False,
+                            parameter_uncertainty = True
                         )

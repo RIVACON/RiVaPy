@@ -13,6 +13,7 @@ except:
     
 import numpy as np
 import sys
+import random
 sys.path.append('C:/Users/doeltz/development/RiVaPy/')
 import datetime as dt
 from rivapy.models.gbm import GBM
@@ -58,22 +59,22 @@ class VanillaOptionDeepHedgingPricer:
 
     @staticmethod
     def generate_paths(vanillaoption: EuropeanVanillaSpecification,
-                model: HestonForDeepHedging,#GBM, 
+                model: GBM,#HestonForDeepHedging, 
                 n_sims: int, 
                 timegrid: DateTimeGrid,
                 days: int):
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
         timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days)
-        model = HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04,
-                  vol_of_vol = 2., correlation_rho = -0.7)#GBM(drift = 0., volatility=0.2)
+        model = GBM(drift = 0., volatility=0.2)#HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04,
+                  #vol_of_vol = 2., correlation_rho = -0.7)
         S0 = vanillaoption.strike #ATM option
         v0 = 0.04
         return model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days)#model.simulate(timegrid, start_value=S0,M = n_sims, n=days)
 
     @staticmethod
     def price( vanillaoption: EuropeanVanillaSpecification,
-                model: HestonForDeepHedging,#GBM, 
+                model: GBM, #HestonForDeepHedging,
                 depth: int, 
                 nb_neurons: int, 
                 n_sims: int, 
@@ -91,7 +92,8 @@ class VanillaOptionDeepHedgingPricer:
                 threshold: float = 0.,
                 cascading: bool = False,
                 days: int = 30,
-                test_weighted_paths: bool = False
+                test_weighted_paths: bool = False,
+                parameter_uncertainty: bool = False
                 #paths: Dict[str, np.ndarray] = None
                 ):
         """Price a vanilla option using deeep hedging
@@ -132,11 +134,23 @@ class VanillaOptionDeepHedgingPricer:
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
         timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days)
-        model = HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04,
-                  vol_of_vol = 2., correlation_rho = -0.7)#GBM(drift = 0., volatility=0.2)
-        S0 = vanillaoption.strike #ATM option
-        v0 = 0.04
-        simulation_results = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days)#model.simulate(timegrid, start_value=S0,M = n_sims, n=days)
+        if parameter_uncertainty:
+            simulation_results = np.zeros((len(timegrid)+1, n_sims))
+            nb_of_diff_vols = 10
+            for i in range(nb_of_diff_vols):
+                M = int(n_sims/nb_of_diff_vols)
+                vol = random.uniform(0.1, 0.3)
+                model = GBM(drift = 0., volatility=vol)#HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04,
+                 # vol_of_vol = 2., correlation_rho = -0.7)
+                S0 = vanillaoption.strike #ATM option
+                v0 = 0.04
+                simulation_results[:,i*M:(i+1)*M] = model.simulate(timegrid, start_value=S0,M=M, n=days)#model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days)
+        else:
+            model = GBM(drift = 0., volatility=0.2)#HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04,
+                 # vol_of_vol = 2., correlation_rho = -0.7)
+            S0 = vanillaoption.strike #ATM option
+            v0 = 0.04
+            simulation_results = model.simulate(timegrid, start_value=S0,M = n_sims, n=days)#model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days)#
         if test_weighted_paths:
             bla = np.where((simulation_results[-1,:] < 0.9))
             bla2 = np.where((simulation_results[-1,:] > 1.1))
