@@ -36,6 +36,7 @@ seclevel = "COLLATERALIZED"
 tpe = "CALL"  # Change to 'PUT' if you want to calculate the price of an european put option.
 expiry = refdate + dt.timedelta(days=30)
 strike = 1.0
+long_short_flag = 'short'
 
 repo = analysis.Repo(
     "./experiments"
@@ -47,7 +48,7 @@ reg = {
     "expected_shortfall": [0.1],
 }
 spec = EuropeanVanillaSpecification(
-    "Test_call",
+    "Test_Call",
     tpe,
     expiry,
     strike,
@@ -56,10 +57,11 @@ spec = EuropeanVanillaSpecification(
     curr="EUR",
     udl_id="ADS",
     share_ratio=1,
+    long_short_flag=long_short_flag
 )
 
 
-for tc in [0]:#,1.e-10,0.0001,0.001,0.01]:
+for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
     pricing_results = repo.run(
                             refdate,
                             spec,
@@ -81,5 +83,4 @@ for tc in [0]:#,1.e-10,0.0001,0.001,0.01]:
                             transaction_cost={"ADS": [tc]},
                             test_weighted_paths=True,
                             parameter_uncertainty = False,
-                            vol = 0.1
                         )

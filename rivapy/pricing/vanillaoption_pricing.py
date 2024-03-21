@@ -43,18 +43,26 @@ class VanillaOptionDeepHedgingPricer:
             self.payoff = payoff
 
     @staticmethod
-    def _compute_timegrid(days):
+    def _compute_timegrid(days, freq):
         T = days/365
-        timegrid = np.linspace(0.0,T,days)
+        if freq == '12H':
+            timegrid = np.linspace(0.0,T,days*2)
+        else:
+            timegrid = np.linspace(0.0,T,days)
         return timegrid
     
 
     @staticmethod
     def compute_payoff(n_sims: int, 
-                       hedge_ins: Dict[str, np.ndarray], strike: float):
+                       hedge_ins: Dict[str, np.ndarray], strike: float, long_short_flag: str):
         payoff = np.zeros((n_sims,))
-        for k,v in hedge_ins.items(): 
-            payoff -= np.maximum(v[-1,:] - strike,0)
+        if long_short_flag == 'short':
+            for k,v in hedge_ins.items(): 
+                payoff -= np.minimum(strike - v[-1,:],0)
+        else:
+            for k,v in hedge_ins.items(): 
+                payoff -= np.maximum(v[-1,:] - strike,0)
+
         return payoff
 
     @staticmethod
@@ -64,10 +72,11 @@ class VanillaOptionDeepHedgingPricer:
                 timegrid: DateTimeGrid,
                 days: int,
                 vol: float,
-                parameter_uncertainty: bool):
+                parameter_uncertainty: bool,
+                freq: str):
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
-        timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days)
+        timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days,freq)
 
         if parameter_uncertainty:
             simulation_results = np.zeros((len(timegrid)+1, n_sims))
@@ -111,7 +120,8 @@ class VanillaOptionDeepHedgingPricer:
                 days: int = 30,
                 test_weighted_paths: bool = False,
                 parameter_uncertainty: bool = False,
-                vol: float = 0.2
+                vol: float = 0.2,
+                freq: str = 'D'
                 #paths: Dict[str, np.ndarray] = None
                 ):
         """Price a vanilla option using deeep hedging
@@ -151,7 +161,7 @@ class VanillaOptionDeepHedgingPricer:
 
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
-        timegrid= VanillaOptionDeepHedgingPricer._compute_timegrid(days)
+        timegrid= VanillaOptionDeepHedgingPricer._compute_timegrid(days,freq)
         if parameter_uncertainty:
             simulation_results = np.zeros((len(timegrid)+1, n_sims))
             nb_of_diff_vols = 10
@@ -162,13 +172,20 @@ class VanillaOptionDeepHedgingPricer:
                  # vol_of_vol = 2., correlation_rho = -0.7)
                 S0 = vanillaoption.strike #ATM option
                 v0 = 0.04
-                simulation_results[:,i*M:(i+1)*M] = model.simulate(timegrid, start_value=S0,M=M, n=days)#model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days)
+                if freq == '12H':
+                    simulation_results[:,i*M:(i+1)*M] = model.simulate(timegrid, start_value=S0,M=M, n=days*2)#model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days)
+                else:
+                    simulation_results[:,i*M:(i+1)*M] = model.simulate(timegrid, start_value=S0,M=M, n=days)#model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days)
+                
         else:
             model = GBM(drift = 0., volatility=vol)#HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04,
                  # vol_of_vol = 2., correlation_rho = -0.7)
             S0 = vanillaoption.strike #ATM option
             v0 = 0.04
-            simulation_results = model.simulate(timegrid, start_value=S0,M = n_sims, n=days)#model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days)#
+            if freq == '12H':
+                simulation_results = model.simulate(timegrid, start_value=S0,M=n_sims, n=days*2)#model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days)
+            else:
+                simulation_results = model.simulate(timegrid, start_value=S0,M=n_sims, n=days)#model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days)
         if test_weighted_paths:
             bla = np.where((simulation_results[-1,:] < 0.9))
             bla2 = np.where((simulation_results[-1,:] > 1.1))
@@ -197,7 +214,7 @@ class VanillaOptionDeepHedgingPricer:
                 decay_rate=decay_rate, 
                 staircase=True)
 
-        payoff = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, vanillaoption.strike)  
+        payoff = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, vanillaoption.strike, vanillaoption.long_short_flag)  
         
         hedge_model.train(paths, payoff,lr_schedule, epochs=epochs, batch_size=batch_size, tensorboard_log=tensorboard_logdir, verbose=verbose)
         return VanillaOptionDeepHedgingPricer.PricingResults(hedge_model, paths=paths, sim_results=simulation_results, payoff=payoff)
