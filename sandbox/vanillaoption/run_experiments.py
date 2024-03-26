@@ -11,6 +11,7 @@ import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.models.gbm import GBM
+from rivapy.models.heston_for_DH import HestonForDeepHedging
 from rivapy.instruments.specifications import EuropeanVanillaSpecification
 from rivapy.pricing.vanillaoption_pricing import (
     VanillaOptionDeepHedgingPricer,
@@ -22,11 +23,10 @@ import analysis
 
 from sys import exit
 
-# timegrid = np.linspace(0.0, days*1.0/365.0, days*24)
-# forward_expiries = [timegrid[-1]]
 
 
-model = GBM(drift=0.0, volatility=0.2)
+#model = GBM(drift=0.0, volatility=0.2)
+model = HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04, vol_of_vol = 2., correlation_rho = -0.7)
 
 refdate = dt.datetime(2023, 1, 1)
 transaction_cost = 0.01
@@ -36,7 +36,7 @@ seclevel = "COLLATERALIZED"
 tpe = "CALL"  # Change to 'PUT' if you want to calculate the price of an european put option.
 expiry = refdate + dt.timedelta(days=30)
 strike = 1.0
-long_short_flag = 'short'
+long_short_flag = 'long'
 
 repo = analysis.Repo(
     "./experiments"
@@ -81,6 +81,5 @@ for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
                             decay_rate=0.95,
                             seed=42,
                             transaction_cost={"ADS": [tc]},
-                            test_weighted_paths=True,
-                            parameter_uncertainty = False,
+                            modelname = 'Heston with Volswap'
                         )

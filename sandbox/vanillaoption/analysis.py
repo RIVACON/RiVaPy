@@ -2,12 +2,14 @@ from typing import List, Tuple, Union
 import copy
 import json
 import numpy as np
+import random
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import hiplot as hip
 from rivapy.tools.interfaces import _JSONEncoder, _JSONDecoder, FactoryObject
 from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.models.gbm import GBM
+from rivapy.models.heston_for_DH import HestonForDeepHedging
 from rivapy.instruments.specifications import EuropeanVanillaSpecification
 from rivapy.pricing.vanillaoption_pricing import VanillaOptionDeepHedgingPricer, DeepHedgeModel 
 
@@ -101,19 +103,47 @@ class Repo:
     def get_model(self, hashkey:str)->GBM:
         return GBM.from_dict(self.results[hashkey]['model'])
         
-    def simulate_model(self, hashkey: str, n_sims:int, seed: int = 42, days: int = 30,freq: str = 'D')->np.ndarray:
+    def simulate_model(self, hashkey: str, n_sims:int, seed: int = 42, days: int = 30,freq: str = 'D',parameter_uncertainty: bool = False, modelname: str = 'GBM')->np.ndarray:
         res = self.results[hashkey]
         spec = EuropeanVanillaSpecification.from_dict(res['spec'])
         timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days,freq)
         np.random.seed(seed)
-        model = self.get_model(hashkey)
+        #model = self.get_model(hashkey)
         S0 = spec.strike #ATM option
-        if freq == '12H':
-            model_result = model.simulate(timegrid, start_value=S0,M=n_sims, n=days*2)#model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days)
-        else:
-            model_result = model.simulate(timegrid, start_value=S0,M=n_sims, n=days)#model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days)
+
+        if parameter_uncertainty:
+            if ((modelname == 'Heston') or (modelname == 'Heston with Volswap')):
+                raise Exception('For simple test case parameter uncertainty w.r.t vol model GBM must be used.')
+            simulation_results = np.zeros((len(timegrid)+1, n_sims))
+            nb_of_diff_vols = 10
+            for i in range(nb_of_diff_vols):
+                M = int(n_sims/nb_of_diff_vols)
+                vol = random.uniform(0.1, 0.3)
+                model = GBM(drift = 0., volatility=vol)
+                S0 = spec.strike #ATM option
+                if freq == '12H':
+                    simulation_results[:,i*M:(i+1)*M] = model.simulate(timegrid, start_value=S0,M=M, n=days*2)
+                else:
+                    simulation_results[:,i*M:(i+1)*M] = model.simulate(timegrid, start_value=S0,M=M, n=days)
                 
-        return model_result
+        else:
+            if ((modelname == 'Heston') or (modelname == 'Heston with Volswap')):
+                model= HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04, vol_of_vol = 2., correlation_rho = -0.7)
+                v0 = 0.04
+                S0 = spec.strike #ATM option
+                if freq == '12H':
+                    simulation_results = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days*2, modelname=modelname)
+                else:
+                    simulation_results = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days, modelname=modelname)
+            else:
+                model = GBM(drift = 0., volatility=vol)
+                S0 = spec.strike #ATM option
+                if freq == '12H':
+                    simulation_results = model.simulate(timegrid, start_value=S0,M=n_sims, n=days*2)
+                else:
+                    simulation_results = model.simulate(timegrid, start_value=S0,M=n_sims, n=days)
+                
+        return simulation_results
     
     def select(self, conditions: List[Tuple[str, Union[str, float, int,Tuple]]])->dict:
         return _select(conditions, self.results)

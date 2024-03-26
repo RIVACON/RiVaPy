@@ -50,7 +50,7 @@ class HestonForDeepHedging(FactoryObject):
         self.n = n #length of timegrid
 
 
-    def simulate(self, timegrid, S0, v0, M,n):
+    def simulate(self, timegrid, S0, v0, M,n,modelname):
         """ Simulate the Heston Model Paths
         
         
@@ -101,7 +101,10 @@ class HestonForDeepHedging(FactoryObject):
         X[t-1,:,0] = S[t-1,:]
         X[t-1,:,1] = np.sum(V[:t-1, :],axis=0) 
         
-        return X
+        if modelname == 'Heston with Volswap':
+            return X
+        else:
+            return S
 
 
 
