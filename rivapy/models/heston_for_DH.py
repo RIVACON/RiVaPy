@@ -33,6 +33,7 @@ class HestonForDeepHedging(FactoryObject):
         self.vol_of_vol = vol_of_vol
         self.correlation_rho = correlation_rho
         self._timegrid = None
+        self.modelname = 'Heston'
 
     def _to_dict(self) -> dict:
         return {'rate_of_mean_reversion': self.rate_of_mean_reversion, 'long_run_average': self.long_run_average,
@@ -50,7 +51,7 @@ class HestonForDeepHedging(FactoryObject):
         self.n = n #length of timegrid
 
 
-    def simulate(self, timegrid, S0, v0, M,n,modelname):
+    def simulate(self, timegrid, S0, v0, M,n,model_name):
         """ Simulate the Heston Model Paths
         
         
@@ -101,7 +102,7 @@ class HestonForDeepHedging(FactoryObject):
         X[t-1,:,0] = S[t-1,:]
         X[t-1,:,1] = np.sum(V[:t-1, :],axis=0) 
         
-        if modelname == 'Heston with Volswap':
+        if model_name == 'Heston with Volswap':
             return X
         else:
             return S

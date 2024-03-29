@@ -24,10 +24,7 @@ import analysis
 from sys import exit
 
 
-
-model = GBM(drift=0.0, volatility=0.2)
-#model = HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04, vol_of_vol = 2., correlation_rho = -0.7)
-
+model = [GBM(drift=0.0, volatility=0.2), HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04, vol_of_vol = 2., correlation_rho = -0.7)]
 
 repo = analysis.Repo(
     "./experiments1"
@@ -53,14 +50,14 @@ for i in range(len(strike)):
     for j in range(len(days)):
         expiry = refdate + dt.timedelta(days=days[j])
         ins = EuropeanVanillaSpecification(
-                "Test_Call",
+                "Test_Call"+str(i)+str(j),
                 tpe,
                 expiry,
                 strike[i],
                 issuer=issuer,
                 sec_lvl=seclevel,
                 curr="EUR",
-                udl_id="ADS"+str(i)+str(j),
+                udl_id="ADS",
                 share_ratio=1,
                 long_short_flag=long_short_flag
             )
@@ -79,7 +76,7 @@ for i in range(len(strike)):
     for j in range(len(days)):
         expiry = refdate + dt.timedelta(days=days[j])
         ins = EuropeanVanillaSpecification(
-                "Test_Call",
+                "Test_Put"+str(i)+str(j),
                 tpe,
                 expiry,
                 strike[i],
@@ -102,7 +99,7 @@ for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
                             rerun=False,
                             depth=3,
                             nb_neurons=16,
-                            n_sims=100_000,
+                            n_sims=50_000,
                             regularization=0.0,
                             epochs=100,
                             verbose=1,
@@ -114,5 +111,6 @@ for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
                             decay_rate=0.95,
                             seed=42,
                             transaction_cost={"ADS": [tc]},
-                            days=int(np.max(days))
+                            days=int(np.max(days)),
+                            parameter_uncertainty = True
                         )

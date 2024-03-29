@@ -55,7 +55,7 @@ class VanillaOptionDeepHedgingPricer:
     @staticmethod
     def compute_payoff(n_sims: int, 
                        hedge_ins: Dict[str, np.ndarray], ins_list: list):
-        payoff = np.zeros((n_sims,))
+        payoff = np.zeros((n_sims*2,))
         for i in range(len(ins_list)):
             strike = ins_list[i].strike
             long_short_flag = ins_list[i].long_short_flag
@@ -79,54 +79,61 @@ class VanillaOptionDeepHedgingPricer:
 
     @staticmethod
     def generate_paths(seed: int,
-                       model: GBM,#HestonForDeepHedging, 
+                       model_list: list,#GBM,#HestonForDeepHedging, 
                        timegrid: DateTimeGrid,
                 n_sims: int, 
                 days: int,
-                vol: float,
                 parameter_uncertainty: bool,
-                freq: str, modelname: str):
+                freq: str):
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
 
-        if parameter_uncertainty:
-            if ((modelname == 'Heston') or (modelname == 'Heston with Volswap')):
-                raise Exception('For simple test case parameter uncertainty w.r.t vol model GBM must be used.')
-            simulation_results = np.zeros((len(timegrid)+1, n_sims))
-            nb_of_diff_vols = 10
-            for i in range(nb_of_diff_vols):
-                M = int(n_sims/nb_of_diff_vols)
-                vol = random.uniform(0.1, 0.3)
-                model = GBM(drift = 0., volatility=vol)
-                S0 = 1. #ATM option
-                if freq == '12H':
-                    simulation_results[:,i*M:(i+1)*M] = model.simulate(timegrid, start_value=S0,M=M, n=days*2)
-                else:
-                    simulation_results[:,i*M:(i+1)*M] = model.simulate(timegrid, start_value=S0,M=M, n=days)
+        #if parameter_uncertainty:
+        #    simulation_results = np.zeros((len(timegrid)+1, n_sims*len(model_list)))
+        #    nb_of_diff_vols = 10
+        #    for i in range(nb_of_diff_vols):
+        #        M = int(n_sims/nb_of_diff_vols)
+        #        vol = random.uniform(0.1, 0.3)
+        #        model = model_list[0]#GBM(drift = 0., volatility=vol)
+        #        S0 = 1. #ATM option
+        #        if freq == '12H':
+        #            simulation_results[:,i*M:(i+1)*M] = model.simulate(timegrid, start_value=S0,M=M, n=days*2)
+        #        else:
+        #            simulation_results[:,i*M:(i+1)*M] = model.simulate(timegrid, start_value=S0,M=M, n=days)
                 
+        #else:
+        n_sims = n_sims
+        M = 1
+        rate = 0.5
+        simulation_results = np.zeros((len(timegrid)+1, n_sims*len(model_list)))
+        v0 = 0.04
+        S0 = 1. #ATM option
+        if freq == '12H':
+            n = days*2
         else:
-            if ((modelname == 'Heston') or (modelname == 'Heston with Volswap')):
-                model= HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04, vol_of_vol = 2., correlation_rho = -0.7)
-                v0 = 0.04
-                S0 = 1. #ATM option
-                if freq == '12H':
-                    simulation_results = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days*2, modelname=modelname)
-                else:
-                    simulation_results = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days, modelname=modelname)
+            n = days
+        for i in range(len(model_list)):
+            if not parameter_uncertainty:
+                    model= model_list[i]
+                    simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=n, model_name=model_list[i].modelname)
             else:
-                model = GBM(drift = 0., volatility=vol)
-                S0 = 1. #ATM option
-                if freq == '12H':
-                    simulation_results = model.simulate(timegrid, start_value=S0,M=n_sims, n=days*2)
+                if (model_list[i].modelname == 'GBM'):
+                    for j in range(0,n_sims*len(model_list),M):
+                        vol = random.uniform(model_list[i].volatility-model_list[i].volatility*rate, model_list[i].volatility+model_list[i].volatility*rate)
+                        model = GBM(drift = 0., volatility=vol)
+                        simulation_results[:,j:j+M] = model.simulate(timegrid, S0=S0, v0=v0, M=M,n=n, model_name=model_list[i].modelname)
                 else:
-                    simulation_results = model.simulate(timegrid, start_value=S0,M=n_sims, n=days)
+                    for j in range(0,n_sims*len(model_list),M):
+                        vol_of_vol = random.uniform(model_list[i].vol_of_vol-model_list[i].vol_of_vol*rate,model_list[i].vol_of_vol+model_list[i].vol_of_vol*rate)
+                        model = HestonForDeepHedging(rate_of_mean_reversion=model_list[i].rate_of_mean_reversion,long_run_average=model_list[i].long_run_average, vol_of_vol=vol_of_vol, correlation_rho = -0.7)
+                        simulation_results[:,j:j+M] = model.simulate(timegrid, S0=S0, v0=v0, M=M,n=n, model_name=model_list[i].modelname)
 
         return simulation_results
     
     @staticmethod
     def price(val_date: dt.datetime,
         ins_list: list,#EuropeanVanillaSpecification,
-                model: GBM, #HestonForDeepHedging,
+                model_list: list, #HestonForDeepHedging,
                 depth: int, 
                 nb_neurons: int, 
                 n_sims: int, 
@@ -146,17 +153,15 @@ class VanillaOptionDeepHedgingPricer:
                 days: int = 30,
                 test_weighted_paths: bool = False,
                 parameter_uncertainty: bool = False,
-                vol: float = 0.2,
-                freq: str = 'D',
-                modelname: str = 'GBM'
+                freq: str = 'D'
                 #paths: Dict[str, np.ndarray] = None
                 ):
         """Price a vanilla option using deeep hedging
 
         Args:
-            days (int): number of days until expiry, used for time grid. Defaults to 30.
-            vanillaoption (EuropeanVanillaSpecification): Specification of a vanilla option.
-            model (GBM, HestonForDeepHedging): The model
+            val_date (dt.dtetime): Valuation date
+            ins_list (EuropeanVanillaSpecification): Specification of a list of vanilla options
+            model (GBM, HestonForDeepHedging): The list of models.
             depth (int): Number of layers of neural network.
             nb_neurons (int): Number of activation functions. 
             n_sims (int): Number of paths used as input for network training.
@@ -173,6 +178,10 @@ class VanillaOptionDeepHedgingPricer:
             transaction_cost (dict, optional): Proportional transaction cost dependent on instrument. Default is empty dict.
             threshold(float,optional): Threshold for trading restrictions. Defaults to 0.
             cascading(bool,optiona): Flag if cascading is considered (in timegrid) or not. Defaults to False.
+            days (int): number of days until expiry, used for time grid. Defaults to 30.
+            test_weighted_paths (bool): Option to Test "weighted" paths S(t), currently not possible. Defaults to False.
+            parameter_uncertainty (bool): Option to test for parameter uncertainty in models (vol).Defaults to False.
+            freq (str): Delta t for timegrid ('D' or '12H'). Defaults to 'D' (i.e., dt = 1day)
         Returns:
             _type_: _description_
 
@@ -182,7 +191,7 @@ class VanillaOptionDeepHedgingPricer:
                 The general deep hedging model used internally in this pricing method.
 
         """
-        if model is None:
+        if model_list is None:
             raise Exception('A model must be specified.')
         tf.keras.backend.set_floatx('float32')
 
@@ -190,23 +199,22 @@ class VanillaOptionDeepHedgingPricer:
         np.random.seed(seed+123)
         timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days,freq)
 
-        simulation_results = VanillaOptionDeepHedgingPricer.generate_paths(seed,model,timegrid,n_sims,days, vol,parameter_uncertainty,freq, modelname)
-
+        simulation_results = VanillaOptionDeepHedgingPricer.generate_paths(seed,model_list,timegrid,n_sims,days, vol,parameter_uncertainty,freq)
         
-        if test_weighted_paths:
-            if ((modelname == 'Heston') or (modelname == 'Heston with Volswap')):
-                raise Exception('Currently, for simple test case parameter uncertainty w.r.t vol model no weighted paths allowed to use.')
-            bla = np.where((simulation_results[-1,:] < 0.9))
-            bla2 = np.where((simulation_results[-1,:] > 1.1))
-            for i in range(len(bla)):
-                paths = np.append(simulation_results, simulation_results[:,bla[i]], axis = 1)
-                paths = np.append(simulation_results, simulation_results[:,bla2[i]], axis = 1)
-            bla = np.where(simulation_results[-1,:] <= 0.8)
-            bla2 = np.where(simulation_results[-1,:] >= 1.2)
-            for i in range(len(bla)):
-                paths = np.append(simulation_results, simulation_results[:,bla[i]], axis = 1)
-                paths = np.append(simulation_results, simulation_results[:,bla2[i]], axis = 1)
-        if modelname == 'Heston with Volswap':
+        #if test_weighted_paths:
+        #    if ((modelname == 'Heston') or (modelname == 'Heston with Volswap')):
+        #        raise Exception('Currently, for simple test case parameter uncertainty w.r.t vol model no weighted paths allowed to use.')
+        #    bla = np.where((simulation_results[-1,:] < 0.9))
+        #    bla2 = np.where((simulation_results[-1,:] > 1.1))
+        #    for i in range(len(bla)):
+        #        paths = np.append(simulation_results, simulation_results[:,bla[i]], axis = 1)
+        #        paths = np.append(simulation_results, simulation_results[:,bla2[i]], axis = 1)
+        #    bla = np.where(simulation_results[-1,:] <= 0.8)
+        #    bla2 = np.where(simulation_results[-1,:] >= 1.2)
+        #    for i in range(len(bla)):
+        #        paths = np.append(simulation_results, simulation_results[:,bla[i]], axis = 1)
+        #        paths = np.append(simulation_results, simulation_results[:,bla2[i]], axis = 1)
+        if model_list[0].modelname == 'Heston with Volswap':
             hedge_ins = {}
             hedge_ins['S1'] = simulation_results[:,:,0]
             hedge_ins['S2'] = simulation_results[:,:,1]
@@ -216,9 +224,9 @@ class VanillaOptionDeepHedgingPricer:
                 key = ins_list[i].udl_id
                 T = (ins_list[i].expiry - val_date).days
                 if freq == '12H':
-                    hedge_ins[key] = simulation_results[:int(T)]
-                else:
                     hedge_ins[key] = simulation_results[:int(T*2)]
+                else:
+                    hedge_ins[key] = simulation_results[:int(T)]
         additional_states_ = {}
         
         hedge_model = DeepHedgeModel(list(hedge_ins.keys()), list(additional_states_.keys()), timegrid=timegrid, 
