@@ -102,7 +102,6 @@ class VanillaOptionDeepHedgingPricer:
         #            simulation_results[:,i*M:(i+1)*M] = model.simulate(timegrid, start_value=S0,M=M, n=days)
                 
         #else:
-        n_sims = n_sims
         M = 1
         rate = 0.5
         simulation_results = np.zeros((len(timegrid)+1, n_sims*len(model_list)))
@@ -199,7 +198,7 @@ class VanillaOptionDeepHedgingPricer:
         np.random.seed(seed+123)
         timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days,freq)
 
-        simulation_results = VanillaOptionDeepHedgingPricer.generate_paths(seed,model_list,timegrid,n_sims,days, vol,parameter_uncertainty,freq)
+        simulation_results = VanillaOptionDeepHedgingPricer.generate_paths(seed,model_list,timegrid,n_sims,days, parameter_uncertainty,freq)
         
         #if test_weighted_paths:
         #    if ((modelname == 'Heston') or (modelname == 'Heston with Volswap')):
