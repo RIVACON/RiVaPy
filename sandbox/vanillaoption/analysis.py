@@ -70,7 +70,7 @@ class Repo:
     def run(self, val_date, spec, model, rerun=False, **kwargs):
         params = {}
         params['val_date'] = val_date
-        params['spec'] = spec._to_dict()
+        params['spec'] = spec[0]._to_dict()
         params['model'] = model.to_dict()
         _kwargs = copy.deepcopy(kwargs)
         _kwargs.pop('tensorboard_logdir', None) #remove  parameters irrelevant for hashing before generating kashkey
@@ -78,12 +78,12 @@ class Repo:
         params['pricing_param'] = _kwargs
         hash_key = FactoryObject.hash_for_dict(params)
         params['pricing_param'] = kwargs
-        params['spec_hash'] = spec.hash()
+        params['spec_hash'] = spec[0].hash()
         params['model_hash'] = model.hash()
         params['pricing_params_hash'] = FactoryObject.hash_for_dict(kwargs) 
         if (hash_key in self.results.keys()) and (not rerun):
             return self.results[hash_key]
-        pricing_result = VanillaOptionDeepHedgingPricer.price(spec, 
+        pricing_result = VanillaOptionDeepHedgingPricer.price(val_date, spec, 
                                       model, 
                                       **kwargs)
         params['pnl_result'] = Repo.compute_pnl_figures(pricing_result)
@@ -136,6 +136,7 @@ class Repo:
                 else:
                     simulation_results = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days, modelname=modelname)
             else:
+                vol = 0.2
                 model = GBM(drift = 0., volatility=vol)
                 S0 = spec.strike #ATM option
                 if freq == '12H':

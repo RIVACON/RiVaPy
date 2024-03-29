@@ -25,21 +25,12 @@ from sys import exit
 
 
 
-#model = GBM(drift=0.0, volatility=0.2)
-model = HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04, vol_of_vol = 2., correlation_rho = -0.7)
+model = GBM(drift=0.0, volatility=0.2)
+#model = HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04, vol_of_vol = 2., correlation_rho = -0.7)
 
-refdate = dt.datetime(2023, 1, 1)
-transaction_cost = 0.01
-days = 30
-issuer = "DBK"
-seclevel = "COLLATERALIZED"
-tpe = "CALL"  # Change to 'PUT' if you want to calculate the price of an european put option.
-expiry = refdate + dt.timedelta(days=30)
-strike = 1.0
-long_short_flag = 'long'
 
 repo = analysis.Repo(
-    "./experiments"
+    "./experiments1"
 )
 
 reg = {
@@ -47,18 +38,60 @@ reg = {
     "exponential_utility": [5.0, 10.0],  # , 15.0, 20.0] ,
     "expected_shortfall": [0.1],
 }
-spec = EuropeanVanillaSpecification(
-    "Test_Call",
-    tpe,
-    expiry,
-    strike,
-    issuer=issuer,
-    sec_lvl=seclevel,
-    curr="EUR",
-    udl_id="ADS",
-    share_ratio=1,
-    long_short_flag=long_short_flag
-)
+
+spec = []
+
+strike = [1.]# [0.8, 0.85, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2]
+days = [30]#[20,40, 60, 80, 100, 120]
+refdate = dt.datetime(2023, 1, 1)
+issuer = "DBK"
+seclevel = "COLLATERALIZED"
+tpe = "CALL"  # Change to 'PUT' if you want to calculate the price of an european put option.
+long_short_flag = 'long'
+
+for i in range(len(strike)):
+    for j in range(len(days)):
+        expiry = refdate + dt.timedelta(days=days[j])
+        ins = EuropeanVanillaSpecification(
+                "Test_Call",
+                tpe,
+                expiry,
+                strike[i],
+                issuer=issuer,
+                sec_lvl=seclevel,
+                curr="EUR",
+                udl_id="ADS"+str(i)+str(j),
+                share_ratio=1,
+                long_short_flag=long_short_flag
+            )
+        spec.append(ins)
+
+
+strike = [1.]# [0.8, 0.85, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2]
+days = [30]#[20,40, 60, 80, 100, 120]
+refdate = dt.datetime(2023, 1, 1)
+issuer = "DBK"
+seclevel = "COLLATERALIZED"
+tpe = "PUT"  # Change to 'PUT' if you want to calculate the price of an european put option.
+long_short_flag = 'long'
+
+for i in range(len(strike)):
+    for j in range(len(days)):
+        expiry = refdate + dt.timedelta(days=days[j])
+        ins = EuropeanVanillaSpecification(
+                "Test_Call",
+                tpe,
+                expiry,
+                strike[i],
+                issuer=issuer,
+                sec_lvl=seclevel,
+                curr="EUR",
+                udl_id="ADS"+str(i)+str(j),
+                share_ratio=1,
+                long_short_flag=long_short_flag
+            )
+        spec.append(ins)
+
 
 
 for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
@@ -81,5 +114,5 @@ for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
                             decay_rate=0.95,
                             seed=42,
                             transaction_cost={"ADS": [tc]},
-                            modelname = 'Heston with Volswap'
+                            days=int(np.max(days))
                         )

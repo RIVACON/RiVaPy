@@ -54,29 +54,40 @@ class VanillaOptionDeepHedgingPricer:
 
     @staticmethod
     def compute_payoff(n_sims: int, 
-                       hedge_ins: Dict[str, np.ndarray], strike: float, long_short_flag: str):
+                       hedge_ins: Dict[str, np.ndarray], ins_list: list):
         payoff = np.zeros((n_sims,))
-        if long_short_flag == 'short':
-            for k,v in hedge_ins.items(): 
-                payoff -= np.minimum(strike - v[-1,:],0)
-        else:
-            for k,v in hedge_ins.items(): 
-                payoff -= np.maximum(v[-1,:] - strike,0)
+        for i in range(len(ins_list)):
+            strike = ins_list[i].strike
+            long_short_flag = ins_list[i].long_short_flag
+            tpe = ins_list[i].type
+            if tpe == 'CALL':
+                if long_short_flag == 'short':
+                    for k,v in hedge_ins.items(): 
+                        payoff -= np.minimum(strike - v[-1,:],0)
+                else:
+                    for k,v in hedge_ins.items(): 
+                        payoff -= np.maximum(v[-1,:] - strike,0)
+            if tpe == 'PUT':
+                if long_short_flag == 'short':
+                    for k,v in hedge_ins.items(): 
+                        payoff -= np.minimum(v[-1,:] - strike,0)
+                else:
+                    for k,v in hedge_ins.items(): 
+                        payoff -= np.maximum(strike - v[-1,:],0)
 
         return payoff
 
     @staticmethod
-    def generate_paths(vanillaoption: EuropeanVanillaSpecification,
-                model: GBM,#HestonForDeepHedging, 
+    def generate_paths(seed: int,
+                       model: GBM,#HestonForDeepHedging, 
+                       timegrid: DateTimeGrid,
                 n_sims: int, 
-                timegrid: DateTimeGrid,
                 days: int,
                 vol: float,
                 parameter_uncertainty: bool,
                 freq: str, modelname: str):
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
-        timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days,freq)
 
         if parameter_uncertainty:
             if ((modelname == 'Heston') or (modelname == 'Heston with Volswap')):
@@ -87,7 +98,7 @@ class VanillaOptionDeepHedgingPricer:
                 M = int(n_sims/nb_of_diff_vols)
                 vol = random.uniform(0.1, 0.3)
                 model = GBM(drift = 0., volatility=vol)
-                S0 = vanillaoption.strike #ATM option
+                S0 = 1. #ATM option
                 if freq == '12H':
                     simulation_results[:,i*M:(i+1)*M] = model.simulate(timegrid, start_value=S0,M=M, n=days*2)
                 else:
@@ -97,14 +108,14 @@ class VanillaOptionDeepHedgingPricer:
             if ((modelname == 'Heston') or (modelname == 'Heston with Volswap')):
                 model= HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04, vol_of_vol = 2., correlation_rho = -0.7)
                 v0 = 0.04
-                S0 = vanillaoption.strike #ATM option
+                S0 = 1. #ATM option
                 if freq == '12H':
                     simulation_results = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days*2, modelname=modelname)
                 else:
                     simulation_results = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days, modelname=modelname)
             else:
                 model = GBM(drift = 0., volatility=vol)
-                S0 = vanillaoption.strike #ATM option
+                S0 = 1. #ATM option
                 if freq == '12H':
                     simulation_results = model.simulate(timegrid, start_value=S0,M=n_sims, n=days*2)
                 else:
@@ -113,7 +124,8 @@ class VanillaOptionDeepHedgingPricer:
         return simulation_results
     
     @staticmethod
-    def price( vanillaoption: EuropeanVanillaSpecification,
+    def price(val_date: dt.datetime,
+        ins_list: list,#EuropeanVanillaSpecification,
                 model: GBM, #HestonForDeepHedging,
                 depth: int, 
                 nb_neurons: int, 
@@ -176,38 +188,11 @@ class VanillaOptionDeepHedgingPricer:
 
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
-        timegrid= VanillaOptionDeepHedgingPricer._compute_timegrid(days,freq)
-        if parameter_uncertainty:
-            if ((modelname == 'Heston') or (modelname == 'Heston with Volswap')):
-                raise Exception('For simple test case parameter uncertainty w.r.t vol model GBM must be used.')
-            simulation_results = np.zeros((len(timegrid)+1, n_sims))
-            nb_of_diff_vols = 10
-            for i in range(nb_of_diff_vols):
-                M = int(n_sims/nb_of_diff_vols)
-                vol = random.uniform(0.1, 0.3)
-                model = GBM(drift = 0., volatility=vol)
-                S0 = vanillaoption.strike #ATM option
-                if freq == '12H':
-                    simulation_results[:,i*M:(i+1)*M] = model.simulate(timegrid, start_value=S0,M=M, n=days*2)
-                else:
-                    simulation_results[:,i*M:(i+1)*M] = model.simulate(timegrid, start_value=S0,M=M, n=days)
-                
-        else:
-            if ((modelname == 'Heston') or (modelname == 'Heston with Volswap')):
-                model= HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04, vol_of_vol = 2., correlation_rho = -0.7)
-                v0 = 0.04
-                S0 = vanillaoption.strike #ATM option
-                if freq == '12H':
-                    simulation_results = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days*2, modelname=modelname)
-                else:
-                    simulation_results = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=days, modelname=modelname)
-            else:
-                model = GBM(drift = 0., volatility=vol)
-                S0 = vanillaoption.strike #ATM option
-                if freq == '12H':
-                    simulation_results = model.simulate(timegrid, start_value=S0,M=n_sims, n=days*2)
-                else:
-                    simulation_results = model.simulate(timegrid, start_value=S0,M=n_sims, n=days)
+        timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days,freq)
+
+        simulation_results = VanillaOptionDeepHedgingPricer.generate_paths(seed,model,timegrid,n_sims,days, vol,parameter_uncertainty,freq, modelname)
+
+        
         if test_weighted_paths:
             if ((modelname == 'Heston') or (modelname == 'Heston with Volswap')):
                 raise Exception('Currently, for simple test case parameter uncertainty w.r.t vol model no weighted paths allowed to use.')
@@ -227,8 +212,13 @@ class VanillaOptionDeepHedgingPricer:
             hedge_ins['S2'] = simulation_results[:,:,1]
         else:
             hedge_ins = {}
-            key = vanillaoption.udl_id
-            hedge_ins[key] = simulation_results
+            for i in range(len(ins_list)):
+                key = ins_list[i].udl_id
+                T = (ins_list[i].expiry - val_date).days
+                if freq == '12H':
+                    hedge_ins[key] = simulation_results[:int(T)]
+                else:
+                    hedge_ins[key] = simulation_results[:int(T*2)]
         additional_states_ = {}
         
         hedge_model = DeepHedgeModel(list(hedge_ins.keys()), list(additional_states_.keys()), timegrid=timegrid, 
@@ -243,7 +233,7 @@ class VanillaOptionDeepHedgingPricer:
                 decay_rate=decay_rate, 
                 staircase=True)
 
-        payoff = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, vanillaoption.strike, vanillaoption.long_short_flag)  
+        payoff = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, ins_list)  
         
         hedge_model.train(paths, payoff,lr_schedule, epochs=epochs, batch_size=batch_size, tensorboard_log=tensorboard_logdir, verbose=verbose)
         return VanillaOptionDeepHedgingPricer.PricingResults(hedge_model, paths=paths, sim_results=simulation_results, payoff=payoff)
