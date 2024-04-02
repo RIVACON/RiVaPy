@@ -57,6 +57,15 @@ class DeepHedgeModel(tf.keras.Model):
         self.threshold = threshold
         self.cascading = cascading
 
+    def _init_embedding(self):
+        self.n_sims = 100_000
+        self.cat_data = np.random.randint(0,4,self.n_sims)
+        self.one_hot_encoded_cat_data = np.eye(self.cat_data.max()+1)[self.cat_data]
+        self.target =  np.random.random(size=(self.n_sims,1))
+        self.no_of_unique_cat  = len(np.unique(self.cat_data))
+        #Jeremy Howard provides the following rule of thumb; embedding size = min(50, number of categories/2).
+        self.embedding_size = min(np.ceil((self.no_of_unique_cat)/2), 50 )
+        self.embedding_size = int(self.embedding_size)
         
     def __call__(self, x, training=True):
         if not self.transaction_cost:
@@ -80,6 +89,37 @@ class DeepHedgeModel(tf.keras.Model):
                         kernel_initializer=tf.keras.initializers.GlorotUniform())(values_all)
         model = tf.keras.Model(inputs=inputs, outputs = value_out)
         return model
+    
+
+    def _build_model_with_embedding(self, depth: int, nb_neurons: int):
+        self._init_embedding()
+        # Use Input layers, specify input shape (dimensions except first)
+        inp_cat_data = [tf.keras.Input(shape = (self.no_of_unique_cat,),name = ins) for ins in self.hedge_instruments]
+        inputs= [tf.keras.Input(shape=(1,),name = ins) for ins in self.hedge_instruments]
+        if self.additional_states is not None:
+            for state in self.additional_states:
+                inputs.append(tf.keras.Input(shape=(1,),name = state))
+        inputs.append(tf.keras.Input(shape=(1,),name = "ttm"))
+        # Bind multi_hot to embedding layer
+        emb = tf.keras.layers.Embedding(input_dim=self.no_of_unique_cat, output_dim=self.embedding_size)(inp_cat_data) 
+        # Also you need flatten embedded output of shape (?,3,2) to (?, 6) -
+        # otherwise it's not possible to concatenate it with inp_num_data
+        flatten = tf.keras.layers.Flatten()(emb)
+        # Concatenate two layers
+        fully_connected_Input = tf.keras.layers.Concatenate()([flatten, inputs])
+
+        #fully_connected_Input = tf.keras.layers.concatenate(inputs)         
+        values_all = tf.keras.layers.Dense(nb_neurons,activation = "selu", 
+                        kernel_initializer=tf.keras.initializers.GlorotUniform())(fully_connected_Input)       
+        for _ in range(depth):
+            values_all = tf.keras.layers.Dense(nb_neurons,activation = "selu", 
+                        kernel_initializer=tf.keras.initializers.GlorotUniform())(values_all)            
+        value_out = tf.keras.layers.Dense(len(self.hedge_instruments), activation="linear",
+                        kernel_initializer=tf.keras.initializers.GlorotUniform())(values_all)
+        model = tf.keras.Model(inputs=[inp_cat_data, inputs], outputs = value_out)
+        return model
+
+
 
     def _compute_pnl(self, x, training):
         # realisierte PnL zu Zeitpunkten # FS
