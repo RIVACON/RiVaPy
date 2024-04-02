@@ -75,7 +75,7 @@ for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
                             rerun=False,
                             depth=3,
                             nb_neurons=16,
-                            n_sims=50_000,
+                            n_sims=100_000,
                             regularization=0.0,
                             epochs=100,
                             verbose=1,
