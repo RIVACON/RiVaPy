@@ -73,7 +73,7 @@ class DeepHedgeModel(tf.keras.Model):
         else:
             return self._compute_pnl_withconstains(x, training) #+ self.price
     
-    def _build_model(self, depth: int, nb_neurons: int):
+    def _build_model_old(self, depth: int, nb_neurons: int):
         inputs= [tf.keras.Input(shape=(1,),name = ins) for ins in self.hedge_instruments]
         if self.additional_states is not None:
             for state in self.additional_states:
@@ -91,7 +91,7 @@ class DeepHedgeModel(tf.keras.Model):
         return model
     
 
-    def _build_model_withembedding(self, depth: int, nb_neurons: int):
+    def _build_model(self, depth: int, nb_neurons: int):
         self._init_embedding()
         # Use Input layers, specify input shape (dimensions except first)
         inp_cat_data = tf.keras.Input(shape = (self.no_of_unique_cat,))
@@ -141,7 +141,6 @@ class DeepHedgeModel(tf.keras.Model):
     
 
     def _compute_pnl(self, x, training):
-        print(x)
         # realisierte PnL zu Zeitpunkten # FS
         pnl = tf.zeros((tf.shape(x[0])[0],))
         self._prev_q = tf.zeros((tf.shape(x[0])[0], len(self.hedge_instruments)), name='prev_q')
@@ -149,7 +148,7 @@ class DeepHedgeModel(tf.keras.Model):
             t = [self.timegrid[-1]-self.timegrid[i]]*tf.ones((tf.shape(x[0])[0],1))/self.timegrid[-1]
             inputs = [v[:,i] for v in x]
             inputs.append(t)
-            quantity = self.model(inputs, training=training)
+            quantity = self.model([self.one_hot_encoded_cat_data, inputs], training=training)
             for j in range(len(self.hedge_instruments)):
                 pnl += tf.math.multiply((self._prev_q[:,j]-quantity[:,j]), tf.squeeze(x[j][:,i]))
             self._prev_q = quantity

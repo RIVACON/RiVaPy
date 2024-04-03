@@ -86,6 +86,5 @@ for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
                             batch_size=64,
                             decay_rate=0.95,
                             seed=42,
-                            transaction_cost={"ADS": [tc]},
                             days=int(np.max(days))
                         )
