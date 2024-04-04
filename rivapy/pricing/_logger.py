@@ -1,2 +1,3 @@
 import logging
-logger = logging.getLogger('rivapy.pricing')
+
+logger = logging.getLogger("rivapy.pricing")

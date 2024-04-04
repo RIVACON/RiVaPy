@@ -3,13 +3,17 @@ from typing import List
 
 
 class CDSSpecification:
-    def __init__(self,  premium: float, 
-                premium_pay_dates: List[datetime], 
-                protection_start: datetime,
-                notional: float = 1.0, 
-                expiry: datetime=None, 
-                recovery: float = None, 
-                issuer: str = '', cash_settled: bool = True):
+    def __init__(
+        self,
+        premium: float,
+        premium_pay_dates: List[datetime],
+        protection_start: datetime,
+        notional: float = 1.0,
+        expiry: datetime = None,
+        recovery: float = None,
+        issuer: str = "",
+        cash_settled: bool = True,
+    ):
         """Constructor for credit default swap
 
         Args:
@@ -35,10 +39,6 @@ class CDSSpecification:
         self.validate()
 
     def validate(self):
-        """Some simple validation
-        """
+        """Some simple validation"""
         if len(self.premium_pay_dates) == 0:
-            raise Exception('Premium payment dates must not be empty.')
-        
-        
-        
+            raise Exception("Premium payment dates must not be empty.")

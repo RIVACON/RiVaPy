@@ -1,2 +1,3 @@
 import logging
-logger = logging.getLogger('rivapy.tools')
+
+logger = logging.getLogger("rivapy.tools")

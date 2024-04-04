@@ -2,7 +2,7 @@
 from enum import Enum
 from datetime import datetime, date
 from typing import List as _List, Tuple as _Tuple, Union as _Union
-from holidays import  HolidayBase as _HolidayBase, country_holidays as _CountryHoliday
+from holidays import HolidayBase as _HolidayBase, country_holidays as _CountryHoliday
 from holidays.utils import list_supported_countries as _list_supported_countries
 
 # from iso4217parse import \
@@ -10,8 +10,8 @@ from holidays.utils import list_supported_countries as _list_supported_countries
 #     by_code_num as _iso4217_by_code_num, \
 #     Currency as _Currency
 
-def _date_to_datetime(date_time: _Union[datetime, date]
-                      ) -> date:
+
+def _date_to_datetime(date_time: _Union[datetime, date]) -> date:
     """
     Converts a date to a datetime or leaves it unchanged if it is already of type datetime.
 
@@ -28,8 +28,8 @@ def _date_to_datetime(date_time: _Union[datetime, date]
     else:
         raise TypeError("'" + str(date_time) + "' must be of type datetime or date!")
 
-def _check_positivity(value: float
-                      ) -> float:
+
+def _check_positivity(value: float) -> float:
     """
     Checks if value is positive.
 
@@ -42,7 +42,7 @@ def _check_positivity(value: float
     if value > 0.0:
         return value
     else:
-        raise Exception(str(value) + ' must be positive!')
+        raise Exception(str(value) + " must be positive!")
 
 
 # def check_non_negativity(value: float
@@ -62,9 +62,7 @@ def _check_positivity(value: float
 #         return value
 
 
-def _check_relation(less: float,
-                    more: float
-                    ) -> _Tuple[float, float]:
+def _check_relation(less: float, more: float) -> _Tuple[float, float]:
     """
     Checks if the relative size of two floating numbers is as expected.
 
@@ -81,10 +79,7 @@ def _check_relation(less: float,
         raise Exception("'" + str(less) + "' must be smaller than '" + str(more) + "'.")
 
 
-def _is_start_before_end(start: date,
-                         end: date,
-                         strictly: bool = True
-                         ) -> bool:
+def _is_start_before_end(start: date, end: date, strictly: bool = True) -> bool:
     """
     Checks if the start date is before (strictly = True) of not after (strictly = False) the end date, respectively.
 
@@ -109,9 +104,10 @@ def _is_start_before_end(start: date,
         print("WARNING: '" + str(start) + "' must be earlier than '" + str(end) + "'!")
         return False
 
-def _check_start_before_end(start: _Union[date, datetime],
-                           end: _Union[date, datetime]
-                           ) -> _Tuple[date, date]:
+
+def _check_start_before_end(
+    start: _Union[date, datetime], end: _Union[date, datetime]
+) -> _Tuple[date, date]:
     """
     Converts the two input dates from datetime to date format it necessary and checks if the first date is earlier
     than the second one.
@@ -130,13 +126,15 @@ def _check_start_before_end(start: _Union[date, datetime],
     else:
         raise Exception("'" + str(start) + "' must be earlier than '" + str(end) + "'!")
 
-def _is_chronological(start_date: date,
-                      end_date: date,
-                      dates: _List[date] = None,
-                      strictly_start: bool = True,
-                      strictly_between: bool = True,
-                      strictly_end: bool = False
-                      ) -> bool:
+
+def _is_chronological(
+    start_date: date,
+    end_date: date,
+    dates: _List[date] = None,
+    strictly_start: bool = True,
+    strictly_between: bool = True,
+    strictly_end: bool = False,
+) -> bool:
     """
     Checks if a given set of dates fulfills the following requirements:
     - start date <(=) end date
@@ -173,9 +171,10 @@ def _is_chronological(start_date: date,
 
         return True
 
-def check_start_before_end(start: _Union[date, datetime],
-                           end: _Union[date, datetime]
-                           ) -> _Tuple[date, date]:
+
+def check_start_before_end(
+    start: _Union[date, datetime], end: _Union[date, datetime]
+) -> _Tuple[date, date]:
     """
     Converts the two input dates from datetime to date format it necessary and checks if the first date is earlier
     than the second one.
@@ -194,12 +193,14 @@ def check_start_before_end(start: _Union[date, datetime],
     else:
         raise Exception("'" + str(start) + "' must be earlier than '" + str(end) + "'!")
 
-def _is_ascending_date_list(start_date: date,
-                           dates: _List[date],
-                           end_date: date,
-                           exclude_start: bool = True,
-                           exclude_end: bool = False
-                           ) -> bool:
+
+def _is_ascending_date_list(
+    start_date: date,
+    dates: _List[date],
+    end_date: date,
+    exclude_start: bool = True,
+    exclude_end: bool = False,
+) -> bool:
     """
     Checks if all specified dates, e.g. coupon payment dates, fall between start date and end date. Start and end date
     are excluded dependent on the corresponding boolean flags. Moreover, the dates are verified to be ascending.
@@ -222,7 +223,7 @@ def _is_ascending_date_list(start_date: date,
         return False
 
     for i in range(1, len(dates)):
-        if dates[i] <= dates[i-1]:
+        if dates[i] <= dates[i - 1]:
             return False
 
     if dates[-1] > end_date:
@@ -233,9 +234,7 @@ def _is_ascending_date_list(start_date: date,
     return True
 
 
-
-def _string_to_calendar(calendar: _Union[_HolidayBase, str]
-                        ) -> _HolidayBase:
+def _string_to_calendar(calendar: _Union[_HolidayBase, str]) -> _HolidayBase:
     """
     Checks if calendar provided as _HolidayBase or string (of corresponding country), respectively, is known and
     converts it if necessary into the HolidayBse format.
@@ -252,11 +251,15 @@ def _string_to_calendar(calendar: _Union[_HolidayBase, str]
         if calendar in _list_supported_countries():
             return _CountryHoliday(calendar)
         else:
-            raise Exception('Unknown calendar ' + calendar + "'!")
+            raise Exception("Unknown calendar " + calendar + "'!")
     else:
-        raise TypeError("The holiday calendar '" + str(calendar)
-                        + "' must be provided as HolidayBase or string!")
+        raise TypeError(
+            "The holiday calendar '"
+            + str(calendar)
+            + "' must be provided as HolidayBase or string!"
+        )
+
 
 def _validate_schedule(self):
-        if ~_is_start_before_end(self.__start_day, self.__end_day, True):
-            raise Exception('Chronological order mismatch!')
+    if ~_is_start_before_end(self.__start_day, self.__end_day, True):
+        raise Exception("Chronological order mismatch!")

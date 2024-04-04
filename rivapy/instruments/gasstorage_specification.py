@@ -1,17 +1,19 @@
 import numpy as np
 
+
 class GasStorageSpecification:
-    def __init__(self, 
-                timegrid: np.array, #TODO: instead of timegrid array, datetime array with startP & endP
-                storage_capacity: float, 
-                withdrawal_rate: float, 
-                injection_rate: float, 
-                withdrawal_cost: float = 0.0, 
-                injection_cost: float = 0.0,
-                min_level: float = 0.0,
-                start_level: float = 0.0,
-                end_level: float = 0.0 
-                ):
+    def __init__(
+        self,
+        timegrid: np.array,  # TODO: instead of timegrid array, datetime array with startP & endP
+        storage_capacity: float,
+        withdrawal_rate: float,
+        injection_rate: float,
+        withdrawal_cost: float = 0.0,
+        injection_cost: float = 0.0,
+        min_level: float = 0.0,
+        start_level: float = 0.0,
+        end_level: float = 0.0,
+    ):
         """Constructor for gas storage specification
 
         Args:
@@ -25,7 +27,7 @@ class GasStorageSpecification:
             start_level (float, optional): Start level for the gas storage. Defaults to 0.0.
             end_level (float, optional): End level for gas storage. Defaults to 0.0.
         """
-        
+
         self.timegrid = timegrid
         self.storage_capacity = storage_capacity
         self.min_level = min_level
