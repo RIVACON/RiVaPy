@@ -40,7 +40,7 @@ class VaRHistSim(VaRBase):
         timeseries: dict,
         portfolio: dict
     ):
-        print('test')
+        pass
 
 
 class VaRDeltaNormal(VaRBase):
@@ -161,45 +161,6 @@ class VarAnalysis:
             self.portfolio,
             rounding_digits
         )
-
-    def var_by_holding_period(
-            self,
-            periods_back: int,
-            confidence: float
-    ) -> dict:
-        """
-        Calculates the value at risk for a given historical time frame and confidence
-        and varying holding periods.
-
-        Args:
-            periods_back (int): Holding period in number of periods the time series is given in.
-            confidence (float): Value at risk confidence level.
-
-        Returns:
-            dict: Value at risks for different holding periods.
-        """
-        return {i: self.value_at_risk(i, periods_back, confidence)
-                for i in range(1, 21, 1)}
-
-    def var_by_confidence(
-            self,
-            holding_period: int,
-            periods_back: int,
-    ) -> dict:
-        """
-        Calculates the value at risk for a given holding periods and historical time frame
-        and varying confidence level.
-
-        Args:
-            holding_period (int): Number of historical time periods to use for the analysis.
-            periods_back (int): Holding period in number of periods the time series is given in.
-
-        Returns:
-            dict: Value at risks for different confidence levels.
-        """
-        return {c: self.value_at_risk(
-            holding_period, periods_back, c)
-            for c in c.CONFIDENCE_LEVEL}
 
     def shapely(
         self,
