@@ -6,8 +6,7 @@ import math
 
 import numpy as np
 
-from rivapy.marketdata.factory import create as _create
-import sandbox.var.portfolio as pf
+import rivapy.portfolio.portfolio as pf
 
 class VaRBase:
 
