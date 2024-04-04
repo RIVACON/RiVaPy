@@ -10,9 +10,12 @@ class InfoFilter(logging.Filter):
         """
         Constructor
         """
-        super().__init__(name='filter_info_logs')
+        super().__init__(name="filter_info_logs")
 
-    def filter(self, record: LogRecord, ) -> LogRecord:
+    def filter(
+        self,
+        record: LogRecord,
+    ) -> LogRecord:
         """
         Return Log Record Object based on condition - Return only info logs
 

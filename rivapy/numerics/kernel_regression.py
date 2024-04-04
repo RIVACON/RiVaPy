@@ -61,7 +61,7 @@ class KernelRegression(BaseEstimator, RegressorMixin):
         sklearn.metrics.pairwise. Ignored by other kernels. If a sequence of
         values is given, one of these values is selected which minimizes
         the mean-squared-error of leave-one-out cross-validation.
-    
+
     See also
     --------
     sklearn.metrics.pairwise.kernel_metrics : List of built-in kernels.
@@ -111,8 +111,7 @@ class KernelRegression(BaseEstimator, RegressorMixin):
         # by minimizing mean-squared error in leave-one-out cross validation
         mse = np.empty_like(gamma_values, dtype=np.float)
         for i, gamma in enumerate(gamma_values):
-            K = pairwise_kernels(self.X, self.X, metric=self.kernel,
-                                 gamma=gamma)
+            K = pairwise_kernels(self.X, self.X, metric=self.kernel, gamma=gamma)
             np.fill_diagonal(K, 0)  # leave-one-out
             Ky = K * self.y[:, np.newaxis]
             y_pred = Ky.sum(axis=0) / K.sum(axis=0)

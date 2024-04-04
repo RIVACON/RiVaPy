@@ -12,5 +12,11 @@
     "files.exclude": {
         "**/__pycache__": true,
         "docs/build/*": true
-    }
+    },
+    "python.formatting.provider": "black",
+    "editor.formatOnSave": true,
+    "black-formatter.args": [
+        "--line-length",
+        "150"
+    ]
 }
