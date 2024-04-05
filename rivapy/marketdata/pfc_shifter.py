@@ -6,7 +6,7 @@ from typing import Dict, Set, List
 
 # TODO:
 # 1. add logic for creating synthetic contracts
-# 2. add possible to also include peak contracts
+# 2. add possibility to also include peak contracts
 
 def validate_class_input(func):
     def validate_wrapper(self, shape: pd.DataFrame, contracts: Dict[str, EnergyFutureSpecifications]):
@@ -30,30 +30,38 @@ class PFCShifter(interfaces.FactoryObject):
         self.shape = shape
         self.contracts = contracts
         
+        
     def _get_contract_start_end_dates(self) -> List:
         dates = set()
         for contract_schedule in self.contracts.values():
             dates.update(contract_schedule.get_start_end())
         return sorted(list(dates))
     
+    
     def _get_forward_price_vector(self) -> np.ndarray:
         return np.array([contract.get_price() for contract in self.contracts.values()]).reshape(-1,1)
+    
     
     def generate_transition_matrix(self) -> pd.DataFrame:
         contract_start_and_end_dates = np.array(self._get_contract_start_end_dates())
         
-        transition_df = pd.DataFrame(data=np.zeros((len(self.contracts.keys()), len(contract_start_and_end_dates)-1)), 
-                                     index=list(self.contracts.keys()), columns=contract_start_and_end_dates[:-1])
+        transition_df = pd.DataFrame(data=np.zeros((len(self.contracts.keys()), len(contract_start_and_end_dates))), 
+                                     index=list(self.contracts.keys()), columns=contract_start_and_end_dates)
         
-        for contract_name, constract_schedule in self.contracts.items():
-            idx = contract_start_and_end_dates[:-1].searchsorted(list(constract_schedule.get_start_end()), "right") - 1
-
+        for contract_name, contract_schedule in self.contracts.items():
+            idx = contract_start_and_end_dates.searchsorted(list(contract_schedule.get_start_end()), "right") - 1
+                    
             if idx[0] == idx[1]: 
                 transition_df.iloc[transition_df.index == contract_name, idx[0]] = 1
             else:
                 transition_df.iloc[transition_df.index == contract_name, idx[0]:idx[1]] = 1
 
-        return transition_df
+        return transition_df.iloc[:, :-1] # drop the last column for the transition matrix
+    
+    
+    def generate_synthetic_contracts(self) -> pd.DataFrame:
+        pass
+    
     
     def detect_redundant_contracts(self, transition_matrix: pd.DataFrame) -> pd.DataFrame:
         potential_redundant_contracts = []
@@ -78,10 +86,11 @@ class PFCShifter(interfaces.FactoryObject):
 
         return transition_matrix.loc[~transition_matrix.index.isin(detected_redundant_contracts), :]
     
+    
     def shift(self, transition_matrix: pd.DataFrame) -> pd.DataFrame:
         contract_start_and_end_dates = np.array(self._get_contract_start_end_dates())
         date_tpls = list(zip(contract_start_and_end_dates[:-1], contract_start_and_end_dates[1:]))
-        hours_btwn_dates = pd.Series(contract_start_and_end_dates[1:] - contract_start_and_end_dates[:-1]).dt.days.to_numpy().reshape(1,-1) * 24
+        hours_btwn_dates = pd.Series(contract_start_and_end_dates[1:] - contract_start_and_end_dates[:-1]).dt.days.to_numpy().reshape(1,-1) * 24 # 24 only for HPFC
         
         transition_matrix = transition_matrix.to_numpy() * hours_btwn_dates
         transition_matrix = transition_matrix/np.sum(transition_matrix, axis=1).reshape(-1,1)
@@ -97,12 +106,6 @@ class PFCShifter(interfaces.FactoryObject):
                 
             pfc.iloc[row_filter, 0] = pfc.iloc[row_filter, 0]/np.sum(pfc.iloc[row_filter, 0]) * len(pfc.iloc[row_filter, 0]) * fwd_price_noc[i, 0]
         return pfc
-
-    def non_overlapping_structure(self):
-        pass
-
-    def get_nonredundant_transition_matrix(self, transition_matrix:pd.DataFrame):
-        pass
 
 
     ## TODO
