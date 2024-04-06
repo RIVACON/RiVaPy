@@ -16,7 +16,7 @@ except:
 class DeepHedgeModel(tf.keras.Model):
     def __init__(self, hedge_instruments:List[str], 
                         additional_states:List[str],
-                        embedding:List[int],
+                        embedding:List[float],
                         timegrid: np.ndarray, 
                         regularization: float, 
                         depth: int,
@@ -41,9 +41,9 @@ class DeepHedgeModel(tf.keras.Model):
         """
         super().__init__(**kwargs)
 
-        self.emb_flag = False#(not np.any(np.array(embedding)))
-        self.emb_list = embedding
-        self.no_of_unique_model = len(set(self.emb_list))       
+        self.emb_flag = True#(not np.any(np.array(embedding))
+        self.emb_vec = embedding
+        self.no_of_unique_model = len(set(self.emb_vec))       
         self.embedding_size = int(min(np.ceil((self.no_of_unique_model)/2), 50))
 
         if self.emb_flag:
@@ -71,14 +71,10 @@ class DeepHedgeModel(tf.keras.Model):
 
         
     def __call__(self, x, training=True):
-        if self.emb_flag:
-            params = self._embedding_layer(x)
-        else:
-            params = x
         if not self.transaction_cost:
-            return self._compute_pnl(params, training) #+ self.price
+            return self._compute_pnl(x, training) #+ self.price
         else:
-            return self._compute_pnl_withconstains(params, training) #+ self.price
+            return self._compute_pnl_withconstains(x, training) #+ self.price
     
     def _build_model(self, depth: int, nb_neurons: int):
         inputs= [tf.keras.Input(shape=(1,),name = ins) for ins in self.hedge_instruments]
@@ -86,9 +82,17 @@ class DeepHedgeModel(tf.keras.Model):
             for state in self.additional_states:
                 inputs.append(tf.keras.Input(shape=(1,),name = state))
         inputs.append(tf.keras.Input(shape=(1,),name = "ttm"))
-        #if self.emb_flag:
-        #    inputs.append(tf.keras.Input(shape=(1,),name = "emb"))
-        fully_connected_Input = tf.keras.layers.concatenate(inputs)         
+
+        if self.emb_flag:
+            inp_cat_data = tf.keras.layers.Input(shape=(1,),name = "emb")
+            inputs.append(inp_cat_data)
+            fully_connected_Input1 = tf.keras.layers.concatenate(inputs)
+            emb = self._embedding_layer(inp_cat_data)
+            flatten = tf.keras.layers.Flatten()(emb)
+            fully_connected_Input = self._concat_layer([fully_connected_Input1, flatten])
+        else:
+            fully_connected_Input = tf.keras.layers.concatenate(inputs)
+
         values_all = tf.keras.layers.Dense(nb_neurons,activation = "selu", 
                         kernel_initializer=tf.keras.initializers.GlorotUniform())(fully_connected_Input)       
         for _ in range(depth):
@@ -102,15 +106,14 @@ class DeepHedgeModel(tf.keras.Model):
 
 
     def _compute_pnl(self, x, training):
-        # realisierte PnL zu Zeitpunkten # FS
         pnl = tf.zeros((tf.shape(x[0])[0],))
         self._prev_q = tf.zeros((tf.shape(x[0])[0], len(self.hedge_instruments)), name='prev_q')
         for i in range(self.timegrid.shape[0]-2):
             t = [self.timegrid[-1]-self.timegrid[i]]*tf.ones((tf.shape(x[0])[0],1))/self.timegrid[-1]
             inputs = [v[:,i] for v in x]
             inputs.append(t)
-            #if self.emb_flag:
-            #    inputs.append(self.emb_list)
+            if self.emb_flag:
+                inputs.append(t) ## TODO_ initialize vector for different models in vanillaoption pricing
             quantity = self.model(inputs, training=training)
             for j in range(len(self.hedge_instruments)):
                 pnl += tf.math.multiply((self._prev_q[:,j]-quantity[:,j]), tf.squeeze(x[j][:,i]))
@@ -166,39 +169,7 @@ class DeepHedgeModel(tf.keras.Model):
                             tf.math.multiply(self._prev_q[:,j], tf.scalar_mul((1.+tc[-1]),xx)))
         return pnl
     
-    def n_tasks(self)->int:
-        """Return the number of tasks the model was trained on
 
-        Returns:
-            int: number of tasks used to train the model
-        """
-        return self._embedding_layer.input_dim-1
-    
-    def get_params(self)->np.ndarray:
-        """Get all paramaters (including placeholder for).
-
-        Returns:
-            np.ndarray: The parameters as 2D matrix where each row contains the parameters for one task. The last row is a placeholder to calibrate just a new parameter.
-        """
-        return self.layers[1].get_weights()[0]
-    
-    def set_params(self, params: np.ndarray):
-        """Set new parameters.
-
-        Depending on the dimension of the new parameter, either only the placeholder param is set or all others.
-
-        Args:
-            params (np.ndarray): Either 1D array (then the placeholder is set) or a matrix. If matrix has only one row placeholder will be set otherwise all other parameters.
-        """
-        new_params = self.get_params()
-        if len(params.shape) == 1:
-            new_params[-1,:] = params
-        elif params.shape[0] == 1:
-            new_params[-1,:] = params
-        elif params.shape[0] == self.n_tasks():
-            new_params[:-1,:] = params
-        
-        self.layers[1].set_weights([new_params])
 
     def compute_delta(self, paths: Dict[str, np.ndarray],
                       t: Union[int, float]=None):
@@ -292,6 +263,7 @@ class DeepHedgeModel(tf.keras.Model):
                             batch_size=batch_size, callbacks=callbacks, 
                             verbose=verbose, validation_split=0.1, 
                             validation_freq=5)
+
 
     def save(self, folder):
         self.model.save(folder+'/delta_model')

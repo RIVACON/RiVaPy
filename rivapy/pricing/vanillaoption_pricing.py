@@ -55,7 +55,7 @@ class VanillaOptionDeepHedgingPricer:
     @staticmethod
     def compute_payoff(n_sims: int, 
                        hedge_ins: Dict[str, np.ndarray], ins_list: list):
-        payoff = np.zeros((n_sims*2,))
+        payoff = np.zeros((n_sims,))
         for i in range(len(ins_list)):
             strike = ins_list[i].strike
             long_short_flag = ins_list[i].long_short_flag
@@ -104,14 +104,15 @@ class VanillaOptionDeepHedgingPricer:
         #else:
         M = 1
         rate = 0.5
-        simulation_results = np.zeros((len(timegrid)+1, n_sims*len(model_list)))
+        simulation_results = np.zeros((len(timegrid)+1, n_sims))
         v0 = 0.04
         S0 = 1. #ATM option
-        emb_vec = np.zeros(n_sims*len(model_list))
+        emb_vec = np.zeros((n_sims))
         if freq == '12H':
             n = days*2
         else:
             n = days
+        n_sims = int(n_sims/len(model_list))
         for i in range(len(model_list)):
             if not parameter_uncertainty:
                     model= model_list[i]
@@ -229,9 +230,10 @@ class VanillaOptionDeepHedgingPricer:
                     hedge_ins[key] = simulation_results[:int(T)]
         additional_states_ = {}
         
-        hedge_model = DeepHedgeModel(list(hedge_ins.keys()), list(additional_states_.keys()),list(emb_vec), timegrid=timegrid, 
+        hedge_model = DeepHedgeModel(list(hedge_ins.keys()), list(additional_states_.keys()),emb_vec, timegrid=timegrid, 
                                         regularization=regularization,depth=depth, n_neurons=nb_neurons, loss = loss,
                                           transaction_cost = transaction_cost,threshold = threshold, cascading = cascading)
+        
         paths = {}
         paths.update(hedge_ins)
         #paths.update(additional_states_)
@@ -240,6 +242,7 @@ class VanillaOptionDeepHedgingPricer:
                 decay_steps=decay_steps,
                 decay_rate=decay_rate, 
                 staircase=True)
+    
 
         payoff = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, ins_list)  
         
