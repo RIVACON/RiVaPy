@@ -98,9 +98,9 @@ class VanillaOptionDeepHedgingPricer:
             n = days
         n_sims = int(n_sims/len(model_list))
         for i in range(len(model_list)):
-                model= model_list[i]
-                simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=n, model_name=model_list[i].modelname)
-                emb_vec[i*n_sims:n_sims*(i+1)] = i    
+            model= model_list[i]
+            simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=n, model_name=model_list[i].modelname)
+            emb_vec[i*n_sims:n_sims*(i+1)] = i    
         return simulation_results, emb_vec
     
     @staticmethod
