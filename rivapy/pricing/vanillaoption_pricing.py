@@ -100,7 +100,7 @@ class VanillaOptionDeepHedgingPricer:
         for i in range(len(model_list)):
                 model= model_list[i]
                 simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=n, model_name=model_list[i].modelname)
-                emb_vec[i*n_sims:n_sims*(i+1)] = i
+                emb_vec[i*n_sims:n_sims*(i+1)] = i    
         return simulation_results, emb_vec
     
     @staticmethod
@@ -193,6 +193,9 @@ class VanillaOptionDeepHedgingPricer:
         else:
             hedge_ins = {}
             additional_states_ = {}
+            #if (np.any(np.array(emb_vec))):
+            #    additional_states_["emb_key"] = emb_vec
+            #    print(emb_vec)
             for i in range(len(ins_list)):
                 key = ins_list[i].udl_id
                 T = (ins_list[i].expiry - val_date).days
@@ -200,9 +203,6 @@ class VanillaOptionDeepHedgingPricer:
                     hedge_ins[key] = simulation_results[:int(T*2),:]
                 else:
                     hedge_ins[key] = simulation_results[:int(T),:]
-            key = "emb_key"
-            additional_states_[key] = emb_vec
-        
 
         
         hedge_model = DeepHedgeModel(list(hedge_ins.keys()), list(additional_states_.keys()),timegrid=timegrid, 
@@ -211,7 +211,8 @@ class VanillaOptionDeepHedgingPricer:
         
         paths = {}
         paths.update(hedge_ins)
-        paths.update(additional_states_) 
+        #if (np.any(np.array(emb_vec))):
+        #    paths.update(additional_states_) 
         lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
                 initial_learning_rate=initial_lr,#1e-3,
                 decay_steps=decay_steps,

@@ -16,6 +16,7 @@ except:
 class DeepHedgeModel(tf.keras.Model):
     def __init__(self, hedge_instruments:List[str], 
                         additional_states:List[str],
+                        embedding:List[int],
                         timegrid: np.ndarray, 
                         regularization: float, 
                         depth: int,
@@ -40,21 +41,21 @@ class DeepHedgeModel(tf.keras.Model):
         """
         super().__init__(**kwargs)
 
-        self.hedge_instruments = hedge_instruments
-        if additional_states is None:
-            self.additional_states = []
-            self.emb_flag = False
-        else:
-            self.additional_states = additional_states
-            self.emb_flag = False
+        self.emb_flag = True#(not np.any(np.array(embedding))
+        self.emb_list = embedding
+        self.no_of_unique_model = len(set(self.emb_list))       
+        self.embedding_size = int(min(np.ceil((self.no_of_unique_model)/2), 50))
 
         if self.emb_flag:
-            self.no_of_unique_model = 2 # TODO!!!    
-            self.embedding_size = int(min(np.ceil((self.no_of_unique_model)/2), 50))
             self._embedding_layer = tf.keras.layers.Embedding(input_dim=self.no_of_unique_model, output_dim=self.embedding_size, 
                                                             input_length=1,name='Embedding')
             self._concat_layer = tf.keras.layers.Concatenate(name='Concatenate')
 
+        self.hedge_instruments = hedge_instruments
+        if additional_states is None:
+            self.additional_states = []
+        else:
+            self.additional_states = additional_states
         if model is None:
             self.model = self._build_model(depth,n_neurons)
         else:
@@ -68,7 +69,6 @@ class DeepHedgeModel(tf.keras.Model):
         self.threshold = threshold
         self.cascading = cascading
 
-
         
     def __call__(self, x, training=True):
         if not self.transaction_cost:
@@ -78,20 +78,11 @@ class DeepHedgeModel(tf.keras.Model):
     
     def _build_model(self, depth: int, nb_neurons: int):
         inputs= [tf.keras.Input(shape=(1,),name = ins) for ins in self.hedge_instruments]
-        if self.emb_flag:#self.additional_states is not None:
+        if self.additional_states is not None:
             for state in self.additional_states:
-                inp_cat_data = tf.keras.layers.Input(shape=(1,),name = state)
-                inputs.append(inp_cat_data)
+                inputs.append(tf.keras.Input(shape=(1,),name = state))
         inputs.append(tf.keras.Input(shape=(1,),name = "ttm"))
-
-        if self.emb_flag:
-            fully_connected_Input1 = tf.keras.layers.concatenate(inputs)
-            emb = self._embedding_layer(inp_cat_data)
-            flatten = tf.keras.layers.Flatten()(emb)
-            fully_connected_Input = self._concat_layer([fully_connected_Input1, flatten])
-        else:
-            fully_connected_Input = tf.keras.layers.concatenate(inputs)
-
+        fully_connected_Input = tf.keras.layers.concatenate(inputs)         
         values_all = tf.keras.layers.Dense(nb_neurons,activation = "selu", 
                         kernel_initializer=tf.keras.initializers.GlorotUniform())(fully_connected_Input)       
         for _ in range(depth):
@@ -99,25 +90,19 @@ class DeepHedgeModel(tf.keras.Model):
                         kernel_initializer=tf.keras.initializers.GlorotUniform())(values_all)            
         value_out = tf.keras.layers.Dense(len(self.hedge_instruments), activation="linear",
                         kernel_initializer=tf.keras.initializers.GlorotUniform())(values_all)
+        
         model = tf.keras.Model(inputs=inputs, outputs = value_out)
         return model
     
 
 
     def _compute_pnl(self, x, training):
-        #if not self.emb_flag:
-        #x = [x_in[0]]
-        #params = [x_in[1]]
-        #else:
-        #    x = x_in
         pnl = tf.zeros((tf.shape(x[0])[0],))
         self._prev_q = tf.zeros((tf.shape(x[0])[0], len(self.hedge_instruments)), name='prev_q')
         for i in range(self.timegrid.shape[0]-2):
             t = [self.timegrid[-1]-self.timegrid[i]]*tf.ones((tf.shape(x[0])[0],1))/self.timegrid[-1]
             inputs = [v[:,i] for v in x]
-            if self.emb_flag:
-                inputs.append(params)
-            inputs.append(t) 
+            inputs.append(t)
             quantity = self.model(inputs, training=training)
             for j in range(len(self.hedge_instruments)):
                 pnl += tf.math.multiply((self._prev_q[:,j]-quantity[:,j]), tf.squeeze(x[j][:,i]))
@@ -129,8 +114,6 @@ class DeepHedgeModel(tf.keras.Model):
 
     
     def _compute_pnl_withconstains(self, x, training):
-        #x = [x_in[0]]
-        #params = [x_in[1]]
         pnl = tf.zeros((tf.shape(x[0])[0],))
         self._prev_q = tf.zeros((tf.shape(x[0])[0], len(self.hedge_instruments)), name='prev_q')
         for i in range(self.timegrid.shape[0]-2): # tensorflow loop?
