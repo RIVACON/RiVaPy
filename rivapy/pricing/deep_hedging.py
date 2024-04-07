@@ -16,7 +16,6 @@ except:
 class DeepHedgeModel(tf.keras.Model):
     def __init__(self, hedge_instruments:List[str], 
                         additional_states:List[str],
-                        embedding:List[float],
                         timegrid: np.ndarray, 
                         regularization: float, 
                         depth: int,
@@ -41,21 +40,20 @@ class DeepHedgeModel(tf.keras.Model):
         """
         super().__init__(**kwargs)
 
-        self.emb_flag = True#(not np.any(np.array(embedding))
-        self.emb_vec = embedding
-        self.no_of_unique_model = len(set(self.emb_vec))       
-        self.embedding_size = int(min(np.ceil((self.no_of_unique_model)/2), 50))
-
-        if self.emb_flag:
-            self._embedding_layer = tf.keras.layers.Embedding(input_dim=self.no_of_unique_model, output_dim=self.embedding_size, 
-                                                            input_length=1,name='Embedding')
-            self._concat_layer = tf.keras.layers.Concatenate(name='Concatenate')
-
         self.hedge_instruments = hedge_instruments
         if additional_states is None:
             self.additional_states = []
         else:
             self.additional_states = additional_states
+
+        self.emb_flag = True#(not np.any(np.array(embedding))
+        self.no_of_unique_model = 3#len(set(self.additional_states))      
+        self.embedding_size = int(min(np.ceil((self.no_of_unique_model)/2), 50))
+        if self.emb_flag:
+            self._embedding_layer = tf.keras.layers.Embedding(input_dim=self.no_of_unique_model, output_dim=self.embedding_size, 
+                                                            input_length=1,name='Embedding')
+            self._concat_layer = tf.keras.layers.Concatenate(name='Concatenate')
+
         if model is None:
             self.model = self._build_model(depth,n_neurons)
         else:
@@ -69,6 +67,7 @@ class DeepHedgeModel(tf.keras.Model):
         self.threshold = threshold
         self.cascading = cascading
 
+
         
     def __call__(self, x, training=True):
         if not self.transaction_cost:
@@ -80,12 +79,11 @@ class DeepHedgeModel(tf.keras.Model):
         inputs= [tf.keras.Input(shape=(1,),name = ins) for ins in self.hedge_instruments]
         if self.additional_states is not None:
             for state in self.additional_states:
-                inputs.append(tf.keras.Input(shape=(1,),name = state))
+                inp_cat_data = tf.keras.layers.Input(shape=(1,),name = state)
+                inputs.append(inp_cat_data)
         inputs.append(tf.keras.Input(shape=(1,),name = "ttm"))
 
         if self.emb_flag:
-            inp_cat_data = tf.keras.layers.Input(shape=(1,),name = "emb")
-            inputs.append(inp_cat_data)
             fully_connected_Input1 = tf.keras.layers.concatenate(inputs)
             emb = self._embedding_layer(inp_cat_data)
             flatten = tf.keras.layers.Flatten()(emb)
@@ -105,7 +103,9 @@ class DeepHedgeModel(tf.keras.Model):
     
 
 
-    def _compute_pnl(self, x, training):
+    def _compute_pnl(self, x_in, training):
+        x = [x_in[0]]
+        params = [x_in[1]]
         pnl = tf.zeros((tf.shape(x[0])[0],))
         self._prev_q = tf.zeros((tf.shape(x[0])[0], len(self.hedge_instruments)), name='prev_q')
         for i in range(self.timegrid.shape[0]-2):
@@ -113,7 +113,7 @@ class DeepHedgeModel(tf.keras.Model):
             inputs = [v[:,i] for v in x]
             inputs.append(t)
             if self.emb_flag:
-                inputs.append(t) ## TODO_ initialize vector for different models in vanillaoption pricing
+                inputs.append(params) 
             quantity = self.model(inputs, training=training)
             for j in range(len(self.hedge_instruments)):
                 pnl += tf.math.multiply((self._prev_q[:,j]-quantity[:,j]), tf.squeeze(x[j][:,i]))
@@ -258,7 +258,7 @@ class DeepHedgeModel(tf.keras.Model):
             tensorboard_callback = tf.keras.callbacks.TensorBoard(logdir, histogram_freq=0)
             callbacks.append(tensorboard_callback)
         self.compile(optimizer=optimizer, loss=self.custom_loss)
-        inputs = self._create_inputs(paths)
+        inputs = self._create_inputs(paths,check_timegrid=False)
         return self.fit(inputs, payoff, epochs=epochs, 
                             batch_size=batch_size, callbacks=callbacks, 
                             verbose=verbose, validation_split=0.1, 

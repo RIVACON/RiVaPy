@@ -192,32 +192,36 @@ class VanillaOptionDeepHedgingPricer:
             hedge_ins['S2'] = simulation_results[:,:,1]
         else:
             hedge_ins = {}
+            additional_states_ = {}
             for i in range(len(ins_list)):
                 key = ins_list[i].udl_id
                 T = (ins_list[i].expiry - val_date).days
                 if freq == '12H':
-                    hedge_ins[key] = simulation_results[:int(T*2)]
+                    hedge_ins[key] = simulation_results[:int(T*2),:]
                 else:
-                    hedge_ins[key] = simulation_results[:int(T)]
-        additional_states_ = {}
+                    hedge_ins[key] = simulation_results[:int(T),:]
+            key = "emb_key"
+            additional_states_[key] = emb_vec
         
-        hedge_model = DeepHedgeModel(list(hedge_ins.keys()), list(additional_states_.keys()),emb_vec, timegrid=timegrid, 
+
+        
+        hedge_model = DeepHedgeModel(list(hedge_ins.keys()), list(additional_states_.keys()),timegrid=timegrid, 
                                         regularization=regularization,depth=depth, n_neurons=nb_neurons, loss = loss,
                                           transaction_cost = transaction_cost,threshold = threshold, cascading = cascading)
         
         paths = {}
         paths.update(hedge_ins)
-        #paths.update(additional_states_)
+        paths.update(additional_states_) 
         lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
                 initial_learning_rate=initial_lr,#1e-3,
                 decay_steps=decay_steps,
                 decay_rate=decay_rate, 
                 staircase=True)
     
-
+    
         payoff = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, ins_list)  
         
-        hedge_model.train(paths, payoff,lr_schedule, epochs=epochs, batch_size=batch_size, tensorboard_log=tensorboard_logdir, verbose=verbose)
+        hedge_model.train(paths, payoff, lr_schedule, epochs=epochs, batch_size=batch_size, tensorboard_log=tensorboard_logdir, verbose=verbose)
         return VanillaOptionDeepHedgingPricer.PricingResults(hedge_model, paths=paths, sim_results=simulation_results, payoff=payoff)
 
 if __name__=='__main__':
