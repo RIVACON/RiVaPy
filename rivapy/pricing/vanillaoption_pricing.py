@@ -193,9 +193,7 @@ class VanillaOptionDeepHedgingPricer:
         else:
             hedge_ins = {}
             additional_states_ = {}
-            #if (np.any(np.array(emb_vec))):
-            #    additional_states_["emb_key"] = emb_vec
-            #    print(emb_vec)
+            additional_states_["emb_key"] = emb_vec
             for i in range(len(ins_list)):
                 key = ins_list[i].udl_id
                 T = (ins_list[i].expiry - val_date).days
@@ -207,12 +205,12 @@ class VanillaOptionDeepHedgingPricer:
         
         hedge_model = DeepHedgeModel(list(hedge_ins.keys()), list(additional_states_.keys()),timegrid=timegrid, 
                                         regularization=regularization,depth=depth, n_neurons=nb_neurons, loss = loss,
-                                          transaction_cost = transaction_cost,threshold = threshold, cascading = cascading)
+                                        transaction_cost = transaction_cost,threshold = threshold,no_of_models=len(model_list),
+                                        cascading = cascading)
         
         paths = {}
         paths.update(hedge_ins)
-        #if (np.any(np.array(emb_vec))):
-        #    paths.update(additional_states_) 
+        paths.update(additional_states_) 
         lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
                 initial_learning_rate=initial_lr,#1e-3,
                 decay_steps=decay_steps,
