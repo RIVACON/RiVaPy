@@ -30,6 +30,7 @@ jobs:
       run: |
         # $CONDA is an environment variable pointing to the root of the miniconda directory
         conda install -y python=3.11
+        echo $CONDA/bin >> $GITHUB_PATH
         $CONDA/bin/conda env update --file environment.yml --name base
     #- name: Install pyvacon from pypi test
     #  run: $CONDA/bin/python -m pip install pyvacon 
