@@ -7,10 +7,8 @@
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
 
   
-    <link rel="shortcut icon" href="../../../_static/favicon.svg"/>
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -34,9 +32,8 @@
 
           
           
-          <a href="../../../index.html">
-            
-              <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
+          <a href="../../../index.html" class="icon icon-home">
+            rivapy
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -53,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../rivapy/index.html">Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../sample_data/index.html">Sample and Test Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html#logging-usage">Logging Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 </ul>
 
@@ -92,20 +90,22 @@
 
 
 <span class="k">class</span> <span class="nc">Coupon</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">accrual_start</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
-                 <span class="n">accrual_end</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
-                 <span class="n">payment_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
-                 <span class="n">day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-                 <span class="n">annualised_fixed_coupon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                 <span class="n">fixing_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
-                 <span class="n">floating_period_start</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
-                 <span class="n">floating_period_end</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
-                 <span class="n">floating_spread</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-                 <span class="n">floating_rate_cap</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e10</span><span class="p">,</span>
-                 <span class="n">floating_rate_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1e10</span><span class="p">,</span>
-                 <span class="n">floating_reference_index</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;dummy_reference_index&#39;</span><span class="p">,</span>
-                 <span class="n">amortisation_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">accrual_start</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">accrual_end</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">payment_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">annualised_fixed_coupon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">fixing_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">floating_period_start</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">floating_period_end</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">floating_spread</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">floating_rate_cap</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e10</span><span class="p">,</span>
+        <span class="n">floating_rate_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1e10</span><span class="p">,</span>
+        <span class="n">floating_reference_index</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dummy_reference_index&quot;</span><span class="p">,</span>
+        <span class="n">amortisation_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="c1"># accrual start and end date as well as payment date</span>
         <span class="k">if</span> <span class="n">_is_chronological</span><span class="p">(</span><span class="n">accrual_start</span><span class="p">,</span> <span class="p">[</span><span class="n">accrual_end</span><span class="p">],</span> <span class="n">payment_date</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__accrual_start</span> <span class="o">=</span> <span class="n">accrual_start</span>
@@ -122,25 +122,29 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__spread</span> <span class="o">=</span> <span class="n">floating_spread</span>
 
         <span class="c1"># cap/floor on floating rate</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__floating_rate_floor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__floating_rate_cap</span> <span class="o">=</span> <span class="n">_check_relation</span><span class="p">(</span><span class="n">floating_rate_floor</span><span class="p">,</span> <span class="n">floating_rate_cap</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__floating_rate_floor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__floating_rate_cap</span> <span class="o">=</span> <span class="n">_check_relation</span><span class="p">(</span>
+            <span class="n">floating_rate_floor</span><span class="p">,</span> <span class="n">floating_rate_cap</span>
+        <span class="p">)</span>
 
         <span class="c1"># reference index for fixing floating rates</span>
-        <span class="k">if</span> <span class="n">floating_reference_index</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">floating_reference_index</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
             <span class="c1"># do not leave reference index empty as this causes pricer to ignore floating rate coupons!</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">floating_reference_index</span> <span class="o">=</span> <span class="s1">&#39;dummy_reference_index&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">floating_reference_index</span> <span class="o">=</span> <span class="s2">&quot;dummy_reference_index&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__floating_reference_index</span> <span class="o">=</span> <span class="n">floating_reference_index</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__amortisation_factor</span> <span class="o">=</span> <span class="n">_check_positivity</span><span class="p">(</span><span class="n">amortisation_factor</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Issuer"><a class="viewcode-back" href="../../../rivapy/instruments/components.html#rivapy.instruments.components.Issuer">[docs]</a><span class="k">class</span> <span class="nc">Issuer</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                 <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                 <span class="n">rating</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Rating</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-                 <span class="n">esg_rating</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">ESGRating</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-                 <span class="n">country</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Country</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-                 <span class="n">sector</span><span class="p">:</span> <span class="n">Sector</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">rating</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Rating</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">esg_rating</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">ESGRating</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">country</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Country</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">sector</span><span class="p">:</span> <span class="n">Sector</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__obj_id</span> <span class="o">=</span> <span class="n">obj_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__rating</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">rating</span><span class="p">)</span>
@@ -149,11 +153,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__sector</span> <span class="o">=</span> <span class="n">Sector</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">sector</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Issuer._create_sample"><a class="viewcode-back" href="../../../rivapy/instruments/components.html#rivapy.instruments.components.Issuer._create_sample">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">issuer</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
-                    <span class="n">rating_probs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
-                    <span class="n">country_probs</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="n">sector_probs</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="n">esg_rating_probs</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span> <span class="p">)</span><span class="o">-&gt;</span><span class="n">List</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span>
+        <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">issuer</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">rating_probs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">country_probs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sector_probs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">esg_rating_probs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Just sample some test data</span>
 
 <span class="sd">        Args:</span>
@@ -173,50 +181,85 @@
         <span class="n">ratings</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Rating</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">rating_probs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ratings</span><span class="p">)</span> <span class="o">!=</span> <span class="n">rating_probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Number of rating probabilities must equal number of ratings&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Number of rating probabilities must equal number of ratings&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">rating_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ratings</span><span class="p">,)))</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">ratings</span><span class="p">)</span>
+            <span class="n">rating_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span>
+                        <span class="n">ratings</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">ratings</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">country_probs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Country</span><span class="p">)</span> <span class="o">!=</span> <span class="n">country_probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Number of country probabilities must equal number of countries&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Number of country probabilities must equal number of countries&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">country_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">Country</span><span class="p">,)))</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">Country</span><span class="p">)</span>
+            <span class="n">country_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span>
+                        <span class="n">Country</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">Country</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">sector_probs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Sector</span><span class="p">)</span> <span class="o">!=</span> <span class="n">sector_probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Number of sector probabilities must equal number of sectors&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Number of sector probabilities must equal number of sectors&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">sector_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">Sector</span><span class="p">,)))</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">Sector</span><span class="p">)</span>
+            <span class="n">sector_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span>
+                        <span class="n">Sector</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">Sector</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">esg_rating_probs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ESGRating</span><span class="p">)</span> <span class="o">!=</span> <span class="n">esg_rating_probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Number of ESG rating probabilities must equal number of ESG ratings&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Number of ESG rating probabilities must equal number of ESG ratings&quot;</span>
+                <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">esg_rating_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ESGRating</span><span class="p">,)))</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">ESGRating</span><span class="p">)</span>
+            <span class="n">esg_rating_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span>
+                        <span class="n">ESGRating</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">ESGRating</span><span class="p">)</span>
 
-        
-            
         <span class="n">esg_ratings</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ESGRating</span><span class="p">)</span>
         <span class="n">sectors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Sector</span><span class="p">)</span>
         <span class="n">country</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Country</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">issuer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">issuer</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Issuer_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)]</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="n">n_samples</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">n_samples</span> <span class="o">!=</span>  <span class="nb">len</span><span class="p">(</span><span class="n">issuer</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot create data since length of issuer list does not equal number of samples. Set n_namples to None.&#39;</span><span class="p">)</span>
+            <span class="n">issuer</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Issuer_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)]</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">n_samples</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">n_samples</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">issuer</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Cannot create data since length of issuer list does not equal number of samples. Set n_namples to None.&quot;</span>
+            <span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Issuer</span><span class="p">(</span><span class="s1">&#39;Issuer_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">issuer</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">ratings</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">rating_probs</span><span class="p">),</span> 
-                        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">esg_ratings</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">esg_rating_probs</span><span class="p">),</span> 
-                        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">country</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">country_probs</span><span class="p">),</span>
-                        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">sectors</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">sector_probs</span><span class="p">)))</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Issuer</span><span class="p">(</span>
+                    <span class="s2">&quot;Issuer_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                    <span class="n">issuer</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">ratings</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">rating_probs</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">esg_ratings</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">esg_rating_probs</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">country</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">country_probs</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">sectors</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">sector_probs</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
     <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;obj_id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_id</span><span class="p">,</span> 
-                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;rating&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rating</span><span class="p">,</span>
-                <span class="s1">&#39;esg_rating&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">esg_rating</span><span class="p">,</span> 
-                <span class="s1">&#39;country&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">country</span><span class="p">,</span> <span class="s1">&#39;sector&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sector</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;obj_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_id</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;rating&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rating</span><span class="p">,</span>
+            <span class="s2">&quot;esg_rating&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">esg_rating</span><span class="p">,</span>
+            <span class="s2">&quot;country&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">country</span><span class="p">,</span>
+            <span class="s2">&quot;sector&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sector</span><span class="p">,</span>
+        <span class="p">}</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">obj_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -256,7 +299,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            rating: Rating of issuer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__rating</span> <span class="o">=</span><span class="n">Rating</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">rating</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rating</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">rating</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">esg_rating</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -299,7 +342,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sector</span>
 
     <span class="nd">@sector</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">sector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sector</span><span class="p">:</span><span class="n">_Union</span><span class="p">[</span><span class="n">Sector</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">sector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sector</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Sector</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Setter for issuer&#39;s sector.</span>
 
@@ -307,7 +350,6 @@
 <span class="sd">            Sector: Issuer&#39;s sector.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__sector</span> <span class="o">=</span> <span class="n">Sector</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">sector</span><span class="p">)</span></div>
-
 </pre></div>
 
            </div>

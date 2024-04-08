@@ -7,10 +7,8 @@
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
 
   
-    <link rel="shortcut icon" href="../../../_static/favicon.svg"/>
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -34,9 +32,8 @@
 
           
           
-          <a href="../../../index.html">
-            
-              <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
+          <a href="../../../index.html" class="icon icon-home">
+            rivapy
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -53,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../rivapy/index.html">Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../sample_data/index.html">Sample and Test Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html#logging-usage">Logging Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 </ul>
 
@@ -81,16 +79,17 @@
            <div itemprop="articleBody">
              
   <h1>Source code for rivapy.instruments.specifications</h1><div class="highlight"><pre>
-<span></span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span> 
+<span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">rivapy.tools.enums</span> <span class="kn">import</span> <span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="n">Currency</span>
-<span class="c1">#from rivapy.enums import Currency</span>
+
+<span class="c1"># from rivapy.enums import Currency</span>
 <span class="kn">from</span> <span class="nn">rivapy</span> <span class="kn">import</span> <span class="n">_pyvacon_available</span>
+
 <span class="k">if</span> <span class="n">_pyvacon_available</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">pyvacon.finance.specification</span> <span class="k">as</span> <span class="nn">_spec</span>
-    
+
     <span class="n">ComboSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">ComboSpecification</span>
-    <span class="c1">#Equity/FX</span>
+    <span class="c1"># Equity/FX</span>
     <span class="n">PayoffStructure</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">PayoffStructure</span>
     <span class="n">ExerciseSchedule</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">ExerciseSchedule</span>
     <span class="n">BarrierDefinition</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">BarrierDefinition</span>
@@ -99,8 +98,8 @@
     <span class="n">BarrierSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">BarrierSpecification</span>
     <span class="c1"># EuropeanVanillaSpecification = _spec.EuropeanVanillaSpecification</span>
     <span class="c1"># AmericanVanillaSpecification = _spec.AmericanVanillaSpecification</span>
-    <span class="c1">#RainbowUnderlyingSpec = _spec.RainbowUnderlyingSpec</span>
-    <span class="c1">#RainbowBarrierSpec = _spec.RainbowBarrierSpec</span>
+    <span class="c1"># RainbowUnderlyingSpec = _spec.RainbowUnderlyingSpec</span>
+    <span class="c1"># RainbowBarrierSpec = _spec.RainbowBarrierSpec</span>
     <span class="n">LocalVolMonteCarloSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">LocalVolMonteCarloSpecification</span>
     <span class="n">RainbowSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">RainbowSpecification</span>
     <span class="n">MultiMemoryExpressSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">MultiMemoryExpressSpecification</span>
@@ -110,8 +109,7 @@
     <span class="n">RiskControlStrategy</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">RiskControlStrategy</span>
     <span class="n">AsianRiskControlSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">AsianRiskControlSpecification</span>
 
-
-    <span class="c1">#Interest Rates</span>
+    <span class="c1"># Interest Rates</span>
     <span class="n">IrSwapLegSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">IrSwapLegSpecification</span>
     <span class="n">IrFixedLegSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">IrFixedLegSpecification</span>
     <span class="n">IrFloatLegSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">IrFloatLegSpecification</span>
@@ -119,48 +117,53 @@
     <span class="n">InterestRateBasisSwapSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">InterestRateBasisSwapSpecification</span>
     <span class="n">DepositSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">DepositSpecification</span>
     <span class="n">InterestRateFutureSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">InterestRateFutureSpecification</span>
-        
+
     <span class="n">InflationLinkedBondSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">InflationLinkedBondSpecification</span>
     <span class="n">CallableBondSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">CallableBondSpecification</span>
 
-    <span class="c1">#GasStorageSpecification = _spec.GasStorageSpecification</span>
+    <span class="c1"># GasStorageSpecification = _spec.GasStorageSpecification</span>
 
-    <span class="c1">#ScheduleSpecification = _spec.ScheduleSpecification</span>
+    <span class="c1"># ScheduleSpecification = _spec.ScheduleSpecification</span>
 
-    <span class="c1">#SpecificationManager = _spec.SpecificationManager</span>
+    <span class="c1"># SpecificationManager = _spec.SpecificationManager</span>
 
-    <span class="c1">#Bonds/Credit</span>
+    <span class="c1"># Bonds/Credit</span>
     <span class="n">CouponDescription</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">CouponDescription</span>
     <span class="n">BondSpecification</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">BondSpecification</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="c1">#empty placeholder...</span>
+    <span class="c1"># empty placeholder...</span>
     <span class="k">class</span> <span class="nc">BondSpecification</span><span class="p">:</span>
         <span class="k">pass</span>
+
 <div class="viewcode-block" id="ComboSpecification"><a class="viewcode-back" href="../../../rivapy/instruments/index.html#rivapy.instruments.ComboSpecification">[docs]</a>    <span class="k">class</span> <span class="nc">ComboSpecification</span><span class="p">:</span>
         <span class="k">pass</span></div>
+
 <div class="viewcode-block" id="BarrierSpecification"><a class="viewcode-back" href="../../../rivapy/instruments/equity.html#rivapy.instruments.BarrierSpecification">[docs]</a>    <span class="k">class</span> <span class="nc">BarrierSpecification</span><span class="p">:</span>
         <span class="k">pass</span></div>
+
 <div class="viewcode-block" id="RainbowSpecification"><a class="viewcode-back" href="../../../rivapy/instruments/equity.html#rivapy.instruments.RainbowSpecification">[docs]</a>    <span class="k">class</span> <span class="nc">RainbowSpecification</span><span class="p">:</span>
         <span class="k">pass</span></div>
+
 <div class="viewcode-block" id="MemoryExpressSpecification"><a class="viewcode-back" href="../../../rivapy/instruments/equity.html#rivapy.instruments.MemoryExpressSpecification">[docs]</a>    <span class="k">class</span> <span class="nc">MemoryExpressSpecification</span><span class="p">:</span>
         <span class="k">pass</span></div>
 
+
 <div class="viewcode-block" id="EuropeanVanillaSpecification"><a class="viewcode-back" href="../../../rivapy/instruments/equity.html#rivapy.instruments.EuropeanVanillaSpecification">[docs]</a><span class="k">class</span> <span class="nc">EuropeanVanillaSpecification</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
-                 <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                 <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                 <span class="n">expiry</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
-                 <span class="n">strike</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                 <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
-                 <span class="n">sec_lvl</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">SecuritizationLevel</span><span class="o">.</span><span class="n">COLLATERALIZED</span><span class="p">,</span>
-                 <span class="n">curr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Currency</span><span class="o">.</span><span class="n">EUR</span><span class="p">,</span>
-                 <span class="n">udl_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
-                 <span class="n">share_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-                <span class="c1">#  holidays: str = &#39;&#39;,</span>
-                <span class="c1">#  ex_settle: int = 0, not implemented</span>
-                <span class="c1">#  trade_settle: int = 0 not implemented</span>
-                 <span class="p">):</span>
-<span class="w">        </span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">expiry</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+        <span class="n">strike</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">sec_lvl</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">SecuritizationLevel</span><span class="o">.</span><span class="n">COLLATERALIZED</span><span class="p">,</span>
+        <span class="n">curr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Currency</span><span class="o">.</span><span class="n">EUR</span><span class="p">,</span>
+        <span class="n">udl_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">share_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="c1">#  holidays: str = &#39;&#39;,</span>
+        <span class="c1">#  ex_settle: int = 0, not implemented</span>
+        <span class="c1">#  trade_settle: int = 0 not implemented</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for european vanilla option</span>
 
 <span class="sd">        Args:</span>
@@ -174,11 +177,11 @@
 <span class="sd">            udl_id (str, optional): Underlying Id. Must not be set if pricing data is manually defined. Defaults to &#39;&#39;.</span>
 <span class="sd">            share_ratio (float, optional): Ratio of covered shares of the underlying by a single option contract. Defaults to 1.0.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">issuer</span> <span class="o">=</span> <span class="n">issuer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sec_lvl</span> <span class="o">=</span> <span class="n">sec_lvl</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">curr</span> <span class="o">=</span>  <span class="n">curr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">curr</span> <span class="o">=</span> <span class="n">curr</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">udl_id</span> <span class="o">=</span> <span class="n">udl_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">expiry</span> <span class="o">=</span> <span class="n">expiry</span>
@@ -187,42 +190,46 @@
         <span class="c1"># self.holidays = holidays</span>
         <span class="c1"># self.ex_settle = ex_settle</span>
         <span class="c1"># self.trade_settle = trade_settle</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
-        
+
     <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">EuropeanVanillaSpecification</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> 
-                                            <span class="bp">self</span><span class="o">.</span><span class="n">issuer</span><span class="p">,</span> 
-                                            <span class="bp">self</span><span class="o">.</span><span class="n">sec_lvl</span><span class="p">,</span> 
-                                            <span class="bp">self</span><span class="o">.</span><span class="n">curr</span><span class="p">,</span> 
-                                            <span class="bp">self</span><span class="o">.</span><span class="n">udl_id</span><span class="p">,</span> 
-                                            <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-                                            <span class="bp">self</span><span class="o">.</span><span class="n">expiry</span><span class="p">,</span>
-                                            <span class="bp">self</span><span class="o">.</span><span class="n">strike</span><span class="p">,</span>
-                                            <span class="bp">self</span><span class="o">.</span><span class="n">share_ratio</span><span class="p">,</span>
-                                            <span class="s1">&#39;&#39;</span><span class="p">,</span>
-                                            <span class="mi">0</span><span class="p">,</span>
-                                            <span class="mi">0</span><span class="p">)</span>
-                                            
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">EuropeanVanillaSpecification</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">issuer</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sec_lvl</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">curr</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">udl_id</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">expiry</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">strike</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">share_ratio</span><span class="p">,</span>
+                <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="mi">0</span><span class="p">,</span>
+                <span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span></div>
-    
+
+
 <div class="viewcode-block" id="AmericanVanillaSpecification"><a class="viewcode-back" href="../../../rivapy/instruments/equity.html#rivapy.instruments.AmericanVanillaSpecification">[docs]</a><span class="k">class</span> <span class="nc">AmericanVanillaSpecification</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>
-                 <span class="p">,</span><span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
-                 <span class="p">,</span><span class="nb">type</span><span class="p">:</span> <span class="nb">str</span>
-                 <span class="p">,</span><span class="n">expiry</span><span class="p">:</span> <span class="n">datetime</span>
-                 <span class="p">,</span><span class="n">strike</span><span class="p">:</span> <span class="nb">float</span>
-                 <span class="p">,</span><span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-                 <span class="p">,</span><span class="n">sec_lvl</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">SecuritizationLevel</span><span class="o">.</span><span class="n">COLLATERALIZED</span>
-                 <span class="p">,</span><span class="n">curr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Currency</span><span class="o">.</span><span class="n">EUR</span>
-                 <span class="p">,</span><span class="n">udl_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-                 <span class="p">,</span><span class="n">share_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
-                 <span class="p">,</span><span class="n">exercise_before_ex_date</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="c1">#  ,holidays: str</span>
-                <span class="c1">#  ,ex_settle: str</span>
-                <span class="c1">#  ,trade_settle: str</span>
-                 <span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">expiry</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+        <span class="n">strike</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">sec_lvl</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">SecuritizationLevel</span><span class="o">.</span><span class="n">COLLATERALIZED</span><span class="p">,</span>
+        <span class="n">curr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Currency</span><span class="o">.</span><span class="n">EUR</span><span class="p">,</span>
+        <span class="n">udl_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">share_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">exercise_before_ex_date</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="c1">#  ,holidays: str</span>
+        <span class="c1">#  ,ex_settle: str</span>
+        <span class="c1">#  ,trade_settle: str</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for american vanilla option</span>
 
 <span class="sd">        Args:</span>
@@ -237,42 +244,42 @@
 <span class="sd">            share_ratio (float, optional): Ratio of covered shares of the underlying by a single option contract. Defaults to 1.0.</span>
 <span class="sd">            exercise_before_ex_date (bool, optional): Indicates if option can be exercised within two days before dividend ex-date. Defaults to False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-     
+
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">expiry</span> <span class="o">=</span> <span class="n">expiry</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">strike</span> <span class="o">=</span> <span class="n">strike</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">issuer</span> <span class="o">=</span> <span class="n">issuer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sec_lvl</span> <span class="o">=</span> <span class="n">sec_lvl</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">curr</span> <span class="o">=</span>  <span class="n">curr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">curr</span> <span class="o">=</span> <span class="n">curr</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">udl_id</span> <span class="o">=</span> <span class="n">udl_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">share_ratio</span> <span class="o">=</span> <span class="n">share_ratio</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">exercise_before_ex_date</span> <span class="o">=</span> <span class="n">exercise_before_ex_date</span>
         <span class="c1"># self.holidays = holidays</span>
         <span class="c1"># self.ex_settle = ex_settle</span>
         <span class="c1"># self.trade_settle = trade_settle</span>
-            
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
-        
+
     <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">AmericanVanillaSpecification</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span>
-                                            <span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">issuer</span>
-                                            <span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sec_lvl</span>
-                                            <span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">curr</span>
-                                            <span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">udl_id</span>
-                                            <span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span>
-                                            <span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">expiry</span>
-                                            <span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">strike</span>
-                                            <span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">share_ratio</span>
-                                            <span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">exercise_before_ex_date</span>
-                                            <span class="p">,</span><span class="s1">&#39;&#39;</span>
-                                            <span class="p">,</span><span class="mi">0</span>
-                                            <span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-                                            
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span>   </div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_spec</span><span class="o">.</span><span class="n">AmericanVanillaSpecification</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">issuer</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sec_lvl</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">curr</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">udl_id</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">expiry</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">strike</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">share_ratio</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">exercise_before_ex_date</span><span class="p">,</span>
+                <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="mi">0</span><span class="p">,</span>
+                <span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
 
-
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span></div>
 </pre></div>
 
            </div>

@@ -8,10 +8,8 @@
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css" />
-      <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
 
   
-    <link rel="shortcut icon" href="_static/favicon.svg"/>
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -37,9 +35,8 @@
 
           
           
-          <a href="index.html">
-            
-              <img src="_static/logo.svg" class="logo" alt="Logo"/>
+          <a href="index.html" class="icon icon-home">
+            rivapy
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -65,12 +62,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#unit-testing">Unit Testing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#logging">Logging</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#logging-usage">Logging Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logging">Logging</a></li>
 </ul>
 </li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="#logging-usage">Logging Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
 </ul>
 
@@ -165,7 +160,7 @@ A docstring is mandatory for every function or method that has one or more of th
 </section>
 <section id="unit-testing">
 <h2>Unit Testing<a class="headerlink" href="#unit-testing" title="Permalink to this heading"></a></h2>
-<p>Please write as many unittests as possible. The tests are located in the folder <em>tests</em> and use the python unittest framework.</p>
+<p>Please write as much unittests as possible. The tests are located in the folder <em>tests</em> and use the python unittest framework.</p>
 </section>
 <section id="logging">
 <h2>Logging<a class="headerlink" href="#logging" title="Permalink to this heading"></a></h2>
@@ -176,8 +171,10 @@ So, if you are currently working in rivapy.pricing, just use the following line 
 </pre></div>
 </div>
 <p>to retrieve the correct logger.</p>
+</section>
+</section>
 <section id="logging-usage">
-<h3>Logging Usage<a class="headerlink" href="#logging-usage" title="Permalink to this heading"></a></h3>
+<h1>Logging Usage<a class="headerlink" href="#logging-usage" title="Permalink to this heading"></a></h1>
 <p>The rivapy package provides logging using the standard python logging module. Here, a separate logger for each submodule
 exists:</p>
 <blockquote>
@@ -203,8 +200,6 @@ one can use the usual logic, e.g.</p>
 </pre></div>
 </div>
 <p>to set the loglevel of the rivapy.pricing module.</p>
-</section>
-</section>
 </section>
 
 
