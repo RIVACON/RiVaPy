@@ -1,0 +1,103 @@
+from typing import Union, Callable
+import numpy as np
+import scipy
+from rivapy.tools.interfaces import FactoryObject
+import scipy.stats as ss
+from rivapy.models.VG import VG
+from scipy.interpolate import interp1d
+
+
+class VG_GammaOU(FactoryObject):
+
+    def _eval_grid(f, timegrid):
+        try:
+            return f(timegrid)
+        except:
+            result = np.full(timegrid.shape, f)
+            return result
+
+    def __init__(self, C: Union[float, Callable], G:Union[float, Callable],M:Union[float, Callable],
+                 lmbda:Union[float, Callable], a: Union[float, Callable], b: Union[float, Callable],
+                 y0:Union[float, Callable]):
+        """NIG_GammaOU process as in https://perswww.kuleuven.be/~u0009713/ScSiTi03.pdf
+
+            
+        """
+        self.C = C
+        self.G = G
+        self.M = M
+        self.lmbda = lmbda
+        self.a = a
+        self.b = b
+        self.y0 = y0
+        self._timegrid = None
+        self.modelname = 'NIG_GammaOU'
+
+    def _to_dict(self) -> dict:
+        return {'C':self.C, 'G':self.G,'M':self.M, 'lmbda':self.lmbda, 'a':self.a,'b':self.b,'y0':self.y0}
+
+
+    def _set_timegrid(self, timegrid):
+        self._timegrid = np.copy(timegrid)
+        self._delta_t = self._timegrid[1]-self._timegrid[0]
+        self._sqrt_delta_t = np.sqrt(self._delta_t)
+
+    def _set_params(self,S0,v0,M,n):
+        self.S0 = S0
+        self.v0 = v0 
+        self.n_sims = M 
+        self.n = n 
+
+
+    def simulate(self, timegrid, S0, v0, M,n, model_name):
+        """ Simulate the paths
+            
+        """
+        
+        self._set_params(S0,v0,M,n)
+        self._set_timegrid(timegrid)
+
+        np.random.seed(seed=42)
+
+        # simulate the rate of change process
+        P = np.zeros((self._timegrid.shape[0]))
+        jumps = []
+        for t in range(1, self._timegrid.shape[0]):
+            P[t] = ss.poisson.rvs(self.a*self.lmbda * t, size=1)
+        for i in P:
+            bla = np.sum((- np.log(np.random.uniform(0, 1,int(i)))/self.b)*np.exp(-self.lmbda*self._delta_t*np.random.normal(0, 1,int(i))))
+            jumps.append(bla)    
+
+
+        y = np.zeros((self._timegrid.shape[0]))
+        y[0] = self.y0
+        for t in range(1, self._timegrid.shape[0]):
+            y[t] = (1. - self.lmbda*self._delta_t)*y[t-1] + jumps[t]
+
+        # calculate the time change
+        YY = np.zeros((self._timegrid.shape[0]))
+        for t in range(0, self._timegrid.shape[0]):
+            YY[t] =  np.sum(y[0:t])/365.
+
+        #simulate the Levy process
+        model = VG(C=self.C,M=self.M,G=self.G) 
+        X = model.simulate(YY, S0=0., v0=1, M=self.n_sims,n=self.n,model_name='VG')
+
+
+        # calculate time changed Levy process
+        X_Y = np.zeros((self._timegrid.shape[0], M))
+        #for i in range(self.n_sims):
+        interp_func = interp1d(YY,X,axis=0,  # interpolate along columns
+                bounds_error=False)
+        X_Y = interp_func(self._timegrid)
+
+        # calculate S
+        S = np.zeros((self._timegrid.shape[0], M))
+        S[0,:] = S0
+        for t in range(1, self._timegrid.shape[0]):
+            for i in range(self.n_sims):
+                S[t,i] = S0*np.exp(X_Y[t,i])
+        return S
+
+
+
