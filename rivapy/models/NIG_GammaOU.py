@@ -65,7 +65,7 @@ class NIG_GammaOU(FactoryObject):
         for t in range(1, self._timegrid.shape[0]):
             P[t] = ss.poisson.rvs(self.a*self.lmbda * t, size=1)
         for i in P:
-            bla = np.sum((- np.log(np.random.uniform(0, 1,int(i)))/self.b)*np.exp(-self.lmbda*self._delta_t*np.random.normal(0, 1,int(i))))
+            bla = np.sum((- np.log(np.random.uniform(0, 1,int(i)))/self.b)*np.exp(-self.lmbda*self._delta_t*np.random.uniform(0, 1,int(i))))
             jumps.append(bla)    
 
 

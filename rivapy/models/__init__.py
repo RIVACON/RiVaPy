@@ -11,6 +11,16 @@ from rivapy.models.lucia_schwartz import LuciaSchwartz
 from rivapy.models.residual_demand_model import ResidualDemandModel,  WindPowerModel, SolarPowerModel, SupplyFunction, LoadModel, SmoothstepSupplyCurve
 from rivapy.models.residual_demand_fwd_model import WindPowerForecastModel, WindPowerForecastModelParameter, ResidualDemandForwardModel, MultiRegionWindForecastModel, LinearDemandForwardModel
 from rivapy.models.gas_fwd_model import GasFwdModel2Factor
+from rivapy.models.gbm import GBM
+from rivapy.models.heston_for_DH import HestonForDeepHedging
+from rivapy.models.roughbergomi_for_DH import rBergomiForDeepHedging
+from rivapy.models.SDE_for_DH import SDEForDeepHedging
+from rivapy.models.NIG import NIG
+from rivapy.models.VG import VG
+from rivapy.models.VG_CIR import VG_CIR
+from rivapy.models.NIG_CIR import NIG_CIR
+from rivapy.models.NIG_GammaOU import NIG_GammaOU
+from rivapy.models.VG_GammaOU import VG_GammaOU
 
 def _add_to_factory(cls):
     factory_entries = _factory()
@@ -26,6 +36,7 @@ _add_to_factory(ResidualDemandForwardModel)
 _add_to_factory(MultiRegionWindForecastModel.Region)
 _add_to_factory(MultiRegionWindForecastModel)
 _add_to_factory(GasFwdModel2Factor)
+
 
 
 
