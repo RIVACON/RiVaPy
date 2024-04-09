@@ -3,7 +3,6 @@ import numpy as np
 import scipy
 from rivapy.tools.interfaces import FactoryObject
 import scipy.stats as ss
-import stochastic
 
 class VG(FactoryObject):
 
