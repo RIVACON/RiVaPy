@@ -34,7 +34,7 @@ class VG_CIR(FactoryObject):
         self.modelname = 'VG_CIR'
 
     def _to_dict(self) -> dict:
-        return {'C':self.C, 'G':self.G,'M':self.M}
+        return {'C':self.C, 'G':self.G,'M':self.M, 'kappa':self.kappa, 'eta':self.eta,'lmbda':self.lmbda,'y0':self.y0}
 
     def _set_timegrid(self, timegrid):
         self._timegrid = np.copy(timegrid)
@@ -73,8 +73,6 @@ class VG_CIR(FactoryObject):
         model = VG(C=self.C,M=self.M,G=self.G) 
         X = model.simulate(YY, S0=1., v0=1, M=self.n_sims,n=self.n,model_name='VG')
 
-        print(self._timegrid)
-        print(YY)
 
         # calculate time changed Levy process
         X_Y = np.zeros((self._timegrid.shape[0], M))
@@ -92,7 +90,7 @@ class VG_CIR(FactoryObject):
         for t in range(1, self._timegrid.shape[0]):
             for i in range(self.n_sims):
                 S[t,i] = S0*np.exp(X_Y[t,i])
-        return X, X_Y, S
+        return S
 
 
 
