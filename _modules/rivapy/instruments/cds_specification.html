@@ -84,17 +84,13 @@
 
 
 <div class="viewcode-block" id="CDSSpecification"><a class="viewcode-back" href="../../../rivapy/instruments/credit.html#rivapy.instruments.cds_specification.CDSSpecification">[docs]</a><span class="k">class</span> <span class="nc">CDSSpecification</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">premium</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">premium_pay_dates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
-        <span class="n">protection_start</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
-        <span class="n">notional</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">expiry</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">recovery</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="n">cash_settled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">premium</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
+                <span class="n">premium_pay_dates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span> 
+                <span class="n">protection_start</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+                <span class="n">notional</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> 
+                <span class="n">expiry</span><span class="p">:</span> <span class="n">datetime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                <span class="n">recovery</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+                <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">cash_settled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for credit default swap</span>
 
 <span class="sd">        Args:</span>
@@ -120,9 +116,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
 
 <div class="viewcode-block" id="CDSSpecification.validate"><a class="viewcode-back" href="../../../rivapy/instruments/credit.html#rivapy.instruments.cds_specification.CDSSpecification.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Some simple validation&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Some simple validation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">premium_pay_dates</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Premium payment dates must not be empty.&quot;</span><span class="p">)</span></div></div>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Premium payment dates must not be empty.&#39;</span><span class="p">)</span></div></div>
+        
+        
+        
 </pre></div>
 
            </div>
