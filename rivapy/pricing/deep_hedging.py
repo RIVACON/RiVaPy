@@ -48,7 +48,7 @@ class DeepHedgeModel(tf.keras.Model):
             self.additional_states = additional_states
 
         self.no_of_unique_model = no_of_models    
-        self.embedding_size = int(min(np.ceil((self.no_of_unique_model)/2), 50))
+        self.embedding_size = 10#int(min(np.ceil((self.no_of_unique_model)/2), 50))
         self._embedding_layer = tf.keras.layers.Embedding(input_dim=self.no_of_unique_model, output_dim=self.embedding_size, 
                                                             input_length=1,name='Embedding')
         self._concat_layer = tf.keras.layers.Concatenate(name='Concatenate')
