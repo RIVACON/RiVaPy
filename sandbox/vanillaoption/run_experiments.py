@@ -11,6 +11,7 @@ import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.models.gbm import GBM
+from rivapy.models.heston_for_DH import HestonForDeepHedging
 from rivapy.instruments.specifications import EuropeanVanillaSpecification
 from rivapy.pricing.vanillaoption_pricing import (
     VanillaOptionDeepHedgingPricer,
@@ -22,23 +23,11 @@ import analysis
 
 from sys import exit
 
-# timegrid = np.linspace(0.0, days*1.0/365.0, days*24)
-# forward_expiries = [timegrid[-1]]
 
-
-model = GBM(drift=0.0, volatility=0.2)
-
-refdate = dt.datetime(2023, 1, 1)
-transaction_cost = 0.01
-days = 30
-issuer = "DBK"
-seclevel = "COLLATERALIZED"
-tpe = "CALL"  # Change to 'PUT' if you want to calculate the price of an european put option.
-expiry = refdate + dt.timedelta(days=30)
-strike = 1.0
+model = [GBM(drift=0.0, volatility=0.2),GBM(drift=0.0, volatility=0.1)]# HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04, vol_of_vol = 2., correlation_rho = -0.7)]
 
 repo = analysis.Repo(
-    "/home/doeltz/doeltz/development/RiVaPy/sandbox/vanillaoption/experiments/"
+    "./experiments1"
 )
 
 reg = {
@@ -46,43 +35,56 @@ reg = {
     "exponential_utility": [5.0, 10.0],  # , 15.0, 20.0] ,
     "expected_shortfall": [0.1],
 }
-spec = EuropeanVanillaSpecification(
-    "Test_call",
-    tpe,
-    expiry,
-    strike,
-    issuer=issuer,
-    sec_lvl=seclevel,
-    curr="EUR",
-    udl_id="ADS",
-    share_ratio=1,
-)
+
+spec = []
+
+strike = [1.]# [0.8, 0.85, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2]
+days = [30]#[20,40, 60, 80, 100, 120]
+refdate = dt.datetime(2023, 1, 1)
+issuer = "DBK"
+seclevel = "COLLATERALIZED"
+tpe = "CALL"  # Change to 'PUT' if you want to calculate the price of an european put option.
+long_short_flag = 'long'
+
+count = 0
+for i in range(len(strike)):
+    for j in range(len(days)):
+        count = count + 1
+        expiry = refdate + dt.timedelta(days=days[j])
+        ins = EuropeanVanillaSpecification(
+                "Test_Call"+str(count),
+                tpe,
+                expiry,
+                strike[i],
+                issuer=issuer,
+                sec_lvl=seclevel,
+                curr="EUR",
+                udl_id="ADS",
+                share_ratio=1,
+                long_short_flag=long_short_flag
+            )
+        spec.append(ins)
 
 
-for nb_neurons in [64]:  # 16,32,64]:
-    for depth in [3]:  #  [2,3,4]:
-        for tc in [0]:  # .,1.e-10,0.0001,0.001,0.01]:
-            for initial_lr in [5e-4]:  #  [1e-4, 5e-4, 1e-3, 5e-3]:
-                for test_weighted_paths in [True]:  #  , False]:
-                    for batch_size in [128]:  # ,256,4*256, 4*4*256]:
-                        pricing_results = repo.run(
+
+for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
+    pricing_results = repo.run(
                             refdate,
                             spec,
                             model,
                             rerun=False,
-                            depth=depth,
-                            nb_neurons=nb_neurons,
+                            depth=3,
+                            nb_neurons=16,
                             n_sims=100_000,
                             regularization=0.0,
-                            epochs=800,
+                            epochs=100,#400,
                             verbose=1,
                             tensorboard_logdir="logs/"
                             + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
-                            initial_lr=initial_lr,  # 5e-4,
-                            decay_steps=6_000,
-                            batch_size=batch_size,
+                            initial_lr=0.005,  # 5e-4,
+                            decay_steps=16_000,
+                            batch_size=64,
                             decay_rate=0.95,
                             seed=42,
-                            transaction_cost={"ADS": [tc]},
-                            test_weighted_paths=test_weighted_paths,
+                            days=int(np.max(days))
                         )

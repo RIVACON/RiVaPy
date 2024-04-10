@@ -23,6 +23,7 @@ class DeepHedgeModel(tf.keras.Model):
                         loss: str,
                         transaction_cost: dict,
                         threshold: float,
+                        no_of_models: int = 1,
                         cascading: bool = False,
                         model: tf.keras.Model=None,
                         **kwargs):
@@ -39,11 +40,19 @@ class DeepHedgeModel(tf.keras.Model):
             model (tf.keras.Model, optional): The model (neural network) used. If it is None, a fully connected neural network using the parameter depth and n_neurons. The network Input must equal the number of hedge instruments plus the number of additional states plus one input for the time to maturity. The output dimension must equal the number of hedge instruments. Defaults to None.
         """
         super().__init__(**kwargs)
+
         self.hedge_instruments = hedge_instruments
         if additional_states is None:
             self.additional_states = []
         else:
             self.additional_states = additional_states
+
+        self.no_of_unique_model = no_of_models    
+        self.embedding_size = int(min(np.ceil((self.no_of_unique_model)/2), 50))
+        self._embedding_layer = tf.keras.layers.Embedding(input_dim=self.no_of_unique_model, output_dim=self.embedding_size, 
+                                                            input_length=1,name='Embedding')
+        self._concat_layer = tf.keras.layers.Concatenate(name='Concatenate')
+
         if model is None:
             self.model = self._build_model(depth,n_neurons)
         else:
@@ -57,7 +66,7 @@ class DeepHedgeModel(tf.keras.Model):
         self.threshold = threshold
         self.cascading = cascading
 
-        
+
     def __call__(self, x, training=True):
         if not self.transaction_cost:
             return self._compute_pnl(x, training) #+ self.price
@@ -66,11 +75,20 @@ class DeepHedgeModel(tf.keras.Model):
     
     def _build_model(self, depth: int, nb_neurons: int):
         inputs= [tf.keras.Input(shape=(1,),name = ins) for ins in self.hedge_instruments]
-        if self.additional_states is not None:
+        if self.no_of_unique_model > 1:#self.additional_states is not None:
             for state in self.additional_states:
-                inputs.append(tf.keras.Input(shape=(1,),name = state))
+                inp_cat_data = tf.keras.layers.Input(shape=(1,),name = state)
+                inputs.append(inp_cat_data)
         inputs.append(tf.keras.Input(shape=(1,),name = "ttm"))
-        fully_connected_Input = tf.keras.layers.concatenate(inputs)         
+
+        if self.no_of_unique_model > 1:
+            fully_connected_Input1 = tf.keras.layers.concatenate(inputs)
+            emb = self._embedding_layer(inp_cat_data)
+            flatten = tf.keras.layers.Flatten()(emb)
+            fully_connected_Input = self._concat_layer([fully_connected_Input1, flatten])
+        else:
+            fully_connected_Input = tf.keras.layers.concatenate(inputs)
+
         values_all = tf.keras.layers.Dense(nb_neurons,activation = "selu", 
                         kernel_initializer=tf.keras.initializers.GlorotUniform())(fully_connected_Input)       
         for _ in range(depth):
@@ -80,15 +98,20 @@ class DeepHedgeModel(tf.keras.Model):
                         kernel_initializer=tf.keras.initializers.GlorotUniform())(values_all)
         model = tf.keras.Model(inputs=inputs, outputs = value_out)
         return model
+    
 
-    def _compute_pnl(self, x, training):
-        # realisierte PnL zu Zeitpunkten # FS
+
+    def _compute_pnl(self, x_in, training):
+        x = [x_in[0]]
+        params = [x_in[1]]
         pnl = tf.zeros((tf.shape(x[0])[0],))
         self._prev_q = tf.zeros((tf.shape(x[0])[0], len(self.hedge_instruments)), name='prev_q')
         for i in range(self.timegrid.shape[0]-2):
             t = [self.timegrid[-1]-self.timegrid[i]]*tf.ones((tf.shape(x[0])[0],1))/self.timegrid[-1]
             inputs = [v[:,i] for v in x]
-            inputs.append(t)
+            if self.no_of_unique_model > 1:
+                inputs.append(params)
+            inputs.append(t) 
             quantity = self.model(inputs, training=training)
             for j in range(len(self.hedge_instruments)):
                 pnl += tf.math.multiply((self._prev_q[:,j]-quantity[:,j]), tf.squeeze(x[j][:,i]))
@@ -97,13 +120,18 @@ class DeepHedgeModel(tf.keras.Model):
             pnl += self._prev_q[:,j]* tf.squeeze(x[j][:,-1])
         return pnl
     
+
     
-    def _compute_pnl_withconstains(self, x, training):
+    def _compute_pnl_withconstains(self, x_in, training):
+        x = [x_in[0]]
+        params = [x_in[1]]
         pnl = tf.zeros((tf.shape(x[0])[0],))
         self._prev_q = tf.zeros((tf.shape(x[0])[0], len(self.hedge_instruments)), name='prev_q')
         for i in range(self.timegrid.shape[0]-2): # tensorflow loop?
             t = [self.timegrid[-1]-self.timegrid[i]]*tf.ones((tf.shape(x[0])[0],1))/self.timegrid[-1]
             inputs = [v[:,i] for v in x]
+            if self.no_of_unique_model > 1:
+                inputs.append(params)
             inputs.append(t)
             quantity = self.model(inputs, training=training)
             for j in range(len(self.hedge_instruments)): 
@@ -208,10 +236,12 @@ class DeepHedgeModel(tf.keras.Model):
                 else:
                     inputs.append(paths[k])
             for k in self.additional_states:
-                if paths[k].shape[1] != self.timegrid.shape[0]:
-                    inputs.append(paths[k].transpose())
-                else:
-                    inputs.append(paths[k])
+                inputs.append(paths[k])
+            #for k in self.additional_states:
+            #    if paths[k].shape[1] != self.timegrid.shape[0]:
+            #        inputs.append(paths[k].transpose())
+            #    else:
+            #        inputs.append(paths[k])
         else:
             for k in self.hedge_instruments:
                 inputs.append(paths[k])
@@ -237,6 +267,7 @@ class DeepHedgeModel(tf.keras.Model):
                             batch_size=batch_size, callbacks=callbacks, 
                             verbose=verbose, validation_split=0.1, 
                             validation_freq=5)
+
 
     def save(self, folder):
         self.model.save(folder+'/delta_model')

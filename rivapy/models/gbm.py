@@ -28,6 +28,7 @@ class GBM(FactoryObject):
         self.drift = drift
         self.volatility = volatility
         self._timegrid = None
+        self.modelname = 'GBM'
 
     def _to_dict(self) -> dict:
         return {'drift': self.drift, 'volatility': self.volatility}
@@ -43,7 +44,7 @@ class GBM(FactoryObject):
         self.n = n #length of timegrid
 
 
-    def simulate(self, timegrid, start_value, M,n):
+    def simulate(self, timegrid, S0, v0, M,n, model_name):
         """ Simulate the GBM Paths
             
             .. math:: 
@@ -54,17 +55,18 @@ class GBM(FactoryObject):
         
         Args:
             timegrid (np.ndarray): One dimensional array containing the time points where the process will be simulated (containing 0.0 as the first timepoint).
-            start_value (Union[float, np.ndarray]): Either a float or an array (for each path) with the start value of the simulation.
+            S0 (Union[float, np.ndarray]): Either a float or an array (for each path) with the start value of the simulation.
             M = number of simulations
             n = number of timesteps
+            v0 and model_name are currently not used, defined just to be consistent with HestonModel for Deep Hedging.
         Returns:
             np.ndarray: Array r containing the simulations where r[:,i] is the path of the i-th simulation (r.shape[0] equals number of timepoints, r.shape[1] the number of simulations). 
         """
-        self._set_params(start_value,M,n)
+        self._set_params(S0,M,n)
         self._set_timegrid(timegrid)
         St = np.exp( (self.drift - self.volatility ** 2 / 2) * self._delta_t + self.volatility * np.random.normal(0, np.sqrt(self._delta_t), size=(M,n)).T)
         St = np.vstack([np.ones(M), St]) 
-        result = start_value * np.cumprod(St,axis=0)
+        result = S0 * np.cumprod(St,axis=0)
         return result
 
 
@@ -75,3 +77,14 @@ class GBM(FactoryObject):
         return delta_BS
 
 
+    def compute_call_price(self, S0: Union[float, np.ndarray], K: float, ttm: float):
+        """Computes the price of a call option with strike K and time to maturity ttm for a spot following the GBM.
+            -> Black Scholes closed formula.
+
+        """
+        if ttm < 1e-5:
+            return np.maximum(S0 - K, 0.0)
+        d1 = (np.log(S0 / K) + (self.drift + self.volatility*self.volatility*0.5) * ttm) / (self.volatility * np.sqrt(ttm))
+        d2 = (np.log(S0 / K) + (self.drift - self.volatility*self.volatility*0.5) * ttm) / (self.volatility * np.sqrt(ttm))
+
+        return S0 * scipy.stats.norm.cdf(d1) - K * np.exp(-self.drift*ttm)*scipy.stats.norm.cdf(d2)

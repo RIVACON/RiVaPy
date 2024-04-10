@@ -9,6 +9,68 @@ Ornstein-Uhlenbeck
    :show-inheritance:
 
 
+Heston 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: rivapy.models.HestonForDeepHedging
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+
+NIG_CIR 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: rivapy.models.NIG_CIR
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+NIG_GammaOU 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: rivapy.models.NIG_GammaOU
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+VG_CIR 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: rivapy.models.VG_CIR
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+VG_GammaOU 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: rivapy.models.VG_GammaOU
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+rBergomiForDeepHedging 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: rivapy.models.rBergomiForDeepHedging
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+SDEForDeepHedging 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: rivapy.models.SDEForDeepHedging
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+GBM 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: rivapy.models.GBM
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
 Lucia-Schwartz
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The Lucia-Schwartz two-factor model for power prices is a mathematical model used to explain the behavior of electricity prices. The model assumes that electricity prices are determined by two 

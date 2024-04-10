@@ -74,6 +74,7 @@ class EuropeanVanillaSpecification(interfaces.FactoryObject):
                  curr: str = Currency.EUR,
                  udl_id: str = '',
                  share_ratio: float = 1.0,
+                 long_short_flag: str = 'long'
                 #  holidays: str = '',
                 #  ex_settle: int = 0, not implemented
                 #  trade_settle: int = 0 not implemented
@@ -102,6 +103,7 @@ class EuropeanVanillaSpecification(interfaces.FactoryObject):
         self.expiry = expiry
         self.strike = strike
         self.share_ratio = share_ratio
+        self.long_short_flag = long_short_flag
         # self.holidays = holidays
         # self.ex_settle = ex_settle
         # self.trade_settle = trade_settle
@@ -109,7 +111,9 @@ class EuropeanVanillaSpecification(interfaces.FactoryObject):
         self._pyvacon_obj = None
 
     def _to_dict(self)->dict:
-        return {'id': self.id, 'issuer':self.issuer, 'sec_lvl': self.sec_lvl, 'curr': self.curr, 'udl_id': self.udl_id, 'type': self.type,'expiry':self.expiry, 'strike':self.strike,'share_ratio': self.share_ratio}
+        return {'id': self.id, 'issuer':self.issuer, 'sec_lvl': self.sec_lvl, 'curr': self.curr, 'udl_id': self.udl_id, 
+                'type': self.type,'expiry':self.expiry, 'strike':self.strike,'share_ratio': self.share_ratio,
+                'long_short_flag':self.long_short_flag}
 
         
     def _get_pyvacon_obj(self):
