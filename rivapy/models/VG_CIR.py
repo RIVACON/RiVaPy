@@ -69,25 +69,27 @@ class VG_CIR(FactoryObject):
         for t in range(0, self._timegrid.shape[0]+1):
             YY[t] =  np.sum(y[0:t])/365.
 
+
         #simulate the Levy process
         model = VG(C=self.C,M=self.M,G=self.G) 
         X = model.simulate(YY, S0=1., v0=1, M=self.n_sims,n=self.n,model_name='VG')
 
 
         # calculate time changed Levy process
-        X_Y = np.zeros((self._timegrid.shape[0], M))
+        X_Y = np.zeros((self._timegrid.shape[0]+1, M))
         #for i in range(self.n_sims):
         interp_func = interp1d(YY,X,axis=0,  # interpolate along columns
                 bounds_error=False,
                 kind='linear',
-                fill_value=(YY[0], YY[-1]))
-        X_Y = interp_func(self._timegrid)
+                fill_value=(X[0], X[-1]))
+        X_Y[:-1] = interp_func(self._timegrid)
+        X_Y[-1] = interp_func(self._timegrid[-1]+self._delta_t)
 
 
         # calculate S
-        S = np.zeros((self._timegrid.shape[0], M))
+        S = np.zeros((self._timegrid.shape[0]+1, M))
         S[0,:] = S0
-        for t in range(1, self._timegrid.shape[0]):
+        for t in range(1, self._timegrid.shape[0]+1):
             for i in range(self.n_sims):
                 S[t,i] = S0*np.exp(X_Y[t,i])
         return S
