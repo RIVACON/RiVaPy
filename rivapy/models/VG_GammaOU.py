@@ -62,8 +62,10 @@ class VG_GammaOU(FactoryObject):
         # simulate the rate of change process
         P = np.zeros((self._timegrid.shape[0]))
         jumps = []
-        for t in range(1, self._timegrid.shape[0]):
-            P[t] = ss.poisson.rvs(self.a*self.lmbda * t, size=1)
+        count = 0
+        for t in timegrid:
+            P[count] = ss.poisson.rvs(self.a*self.lmbda * t, size=1)
+            count = count + 1
         for i in P:
             bla = np.sum((- np.log(np.random.uniform(0, 1,int(i)))/self.b)*np.exp(-self.lmbda*self._delta_t*np.random.normal(0, 1,int(i))))
             jumps.append(bla)    
@@ -92,11 +94,12 @@ class VG_GammaOU(FactoryObject):
         X_Y = interp_func(self._timegrid)
 
         # calculate S
-        S = np.zeros((self._timegrid.shape[0], M))
+        S = np.zeros((self._timegrid.shape[0]+1, M))
         S[0,:] = S0
         for t in range(1, self._timegrid.shape[0]):
             for i in range(self.n_sims):
                 S[t,i] = S0*np.exp(X_Y[t,i])
+        S[-1,i] = S0*np.exp(X_Y[-1,i])
         return S
 
 

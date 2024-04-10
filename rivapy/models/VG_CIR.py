@@ -59,13 +59,13 @@ class VG_CIR(FactoryObject):
         np.random.seed(seed=42)
 
         # simulate the rate of change process
-        y = np.zeros((self._timegrid.shape[0])+1)
+        y = np.zeros((self._timegrid.shape[0]+1))
         y[0] = self.y0
         for t in range(1, self._timegrid.shape[0]+1):
             y[t] = y[t-1] + self.kappa*(self.eta - y[t-1])*self._delta_t + np.random.normal(0, 1)*np.sqrt(self._delta_t)*self.lmbda*(y[t-1])**0.5
 
         # calculate the time change
-        YY = np.zeros((self._timegrid.shape[0])+1)
+        YY = np.zeros((self._timegrid.shape[0]+1))
         for t in range(0, self._timegrid.shape[0]+1):
             YY[t] =  np.sum(y[0:t])/365.
 
