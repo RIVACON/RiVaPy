@@ -15,7 +15,7 @@ class YahooFinance(APIHandler):
     
     @staticmethod
     def load(
-        ticker: dict,
+        symbol: dict,
         starttime: datetime,
         endtime: datetime,
         # todo: find all possible keywords
@@ -26,7 +26,7 @@ class YahooFinance(APIHandler):
 
         # dictionary of charts and their names
         charts = {k: yf.download(v, starttime, endtime)[value_type].to_numpy()
-                for k, v in ticker.items()}
+                for k, v in symbol.items()}
         
         # clean and scale the data
         for key in charts.keys():

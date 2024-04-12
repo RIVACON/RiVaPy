@@ -26,7 +26,7 @@ class VaRBase:
     def value_at_risk(
         self,
         timeseries: dict,
-        portfolio: dict
+        portfolio: pf.Portfolio
     ):
         self.__calc_var()
 
@@ -38,17 +38,16 @@ class VaRHistSim(VaRBase):
     def __calc_var(
         self,
         timeseries: dict,
-        portfolio: dict
+        portfolio: pf.Portfolio
     ):
         pass
-
 
 class VaRDeltaNormal(VaRBase):
 
     def __calc_var(
         self,
         timeseries: dict,
-        portfolio: dict
+        portfolio: pf.Portfolio
     ):
         pass
     
@@ -57,14 +56,14 @@ class VaRDeltaGamma(VaRBase):
     def __calc_var(
         self,
         timeseries: dict,
-        portfolio: dict
+        portfolio: pf.Portfolio
     ):
         pass
 
 class Shapely:
     pass
 
-
+# --------------------------------------------------------------------------------------
 # todo: the following class is from another program and has to be translated into the new structure above
 class VarAnalysis:
     """
