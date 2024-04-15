@@ -55,6 +55,15 @@ class VG(FactoryObject):
             G2 =np.random.gamma(self.C, self.G, self.n_sims)
             X[t,:] = G1 - G2
         return X
+    
+
+    def _characteristic_func(self, xi, s0, v0, tau):
+        """Characteristic function as in https://perswww.kuleuven.be/~u0009713/ScSiTi03.pdf.
+		"""
+        ixi = 1j * xi
+        nom = self.G*self.M
+        denom = self.G*self.M + (self.M - self.G)*ixi + xi*xi
+        return (nom/denom)**self.C
 
 
 

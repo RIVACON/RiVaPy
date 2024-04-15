@@ -60,23 +60,21 @@ class VG_GammaOU(FactoryObject):
         np.random.seed(seed=42)
 
         # simulate the rate of change process
-        P = np.zeros((self._timegrid.shape[0]))
-        jumps = []
-        for t in range(1, self._timegrid.shape[0]):
-            P[t] = ss.poisson.rvs(self.a*self.lmbda * t, size=1)
-        for i in P:
-            bla = np.sum((- np.log(np.random.uniform(0, 1,int(i)))/self.b)*np.exp(-self.lmbda*self._delta_t*np.random.normal(0, 1,int(i))))
-            jumps.append(bla)    
+        P = np.zeros((self._timegrid.shape[0]+1))
+        for t in range(self._timegrid.shape[0] + 1):
+            P[t] = ss.poisson.rvs(self.a*self.lmbda * self._delta_t*t, size=1)
+        jumps = np.asarray([np.sum((- np.log(np.random.uniform(0, 1,int(i)))/self.b)*np.exp(-self.lmbda*self._delta_t*np.random.uniform(0, 1,int(i)))) for i in P])
+  
 
 
-        y = np.zeros((self._timegrid.shape[0]))
+        y = np.zeros((self._timegrid.shape[0]+1))
         y[0] = self.y0
-        for t in range(1, self._timegrid.shape[0]):
+        for t in range(1, self._timegrid.shape[0]+1):
             y[t] = (1. - self.lmbda*self._delta_t)*y[t-1] + jumps[t]
 
         # calculate the time change
-        YY = np.zeros((self._timegrid.shape[0]))
-        for t in range(0, self._timegrid.shape[0]):
+        YY = np.zeros((self._timegrid.shape[0]+1))
+        for t in range(0, self._timegrid.shape[0]+1):
             YY[t] =  np.sum(y[0:t])/365.
 
         #simulate the Levy process
@@ -85,16 +83,19 @@ class VG_GammaOU(FactoryObject):
 
 
         # calculate time changed Levy process
-        X_Y = np.zeros((self._timegrid.shape[0], M))
+        X_Y = np.zeros((self._timegrid.shape[0]+1, M))
         #for i in range(self.n_sims):
         interp_func = interp1d(YY,X,axis=0,  # interpolate along columns
-                bounds_error=False)
-        X_Y = interp_func(self._timegrid)
+                bounds_error=False,
+                kind='linear',
+                fill_value=(X[0], X[-1]))
+        X_Y[:-1] = interp_func(self._timegrid)
+        X_Y[-1] = interp_func(self._timegrid[-1]+self._delta_t)
 
         # calculate S
-        S = np.zeros((self._timegrid.shape[0], M))
+        S = np.zeros((self._timegrid.shape[0]+1, M))
         S[0,:] = S0
-        for t in range(1, self._timegrid.shape[0]):
+        for t in range(1, self._timegrid.shape[0]+1):
             for i in range(self.n_sims):
                 S[t,i] = S0*np.exp(X_Y[t,i])
         return S

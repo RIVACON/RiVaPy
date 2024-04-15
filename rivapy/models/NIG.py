@@ -60,4 +60,15 @@ class NIG(FactoryObject):
         return X
 
 
+    def _characteristic_func(self, xi, s0, v0, tau):
+        """Characteristic function as in https://perswww.kuleuven.be/~u0009713/ScSiTi03.pdf.
+		"""
+        ixi = 1j * xi
+        sqrt1 = np.sqrt(self.alpha*self.alpha - (self.beta + ixi)**2)
+        sqrt2 = np.sqrt(self.alpha*self.alpha - self.beta*self.beta)
+        return np.exp(-self.delta*(sqrt1 - sqrt2))
+
+
+
+
 
