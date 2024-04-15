@@ -54,7 +54,7 @@ class DeepHedgeModel(tf.keras.Model):
         else:
             self.additional_states = additional_states
 
-        if "emb_key" in self.additional_states.keys():
+        if "emb_key" in self.additional_states:
             self.no_of_unique_model = no_of_models
             self.embedding_size = 10  # int(min(np.ceil((self.no_of_unique_model)/2), 50))
             self._embedding_layer = tf.keras.layers.Embedding(
@@ -91,13 +91,13 @@ class DeepHedgeModel(tf.keras.Model):
         inputs = [
             tf.keras.Input(shape=(1,), name=ins) for ins in self.hedge_instruments
         ]
-        if "emb_key" in self.additional_states.keys():  # self.additional_states is not None:
+        if "emb_key" in self.additional_states:  # self.additional_states is not None:
             for state in self.additional_states:
                 inp_cat_data = tf.keras.layers.Input(shape=(1,), name=state)
                 inputs.append(inp_cat_data)
         inputs.append(tf.keras.Input(shape=(1,), name="ttm"))
 
-        if "emb_key" in self.additional_states.keys():
+        if "emb_key" in self.additional_states:
             fully_connected_Input1 = tf.keras.layers.concatenate(inputs)
             emb = self._embedding_layer(inp_cat_data)
             flatten = tf.keras.layers.Flatten()(emb)
@@ -141,7 +141,7 @@ class DeepHedgeModel(tf.keras.Model):
                 / self.timegrid[-1]
             )
             inputs = [v[:, i] for v in x]
-            if "emb_key" in self.additional_states.keys():
+            if "emb_key" in self.additional_states:
                 inputs.append(params)
             inputs.append(t)
             quantity = self.model(inputs, training=training)
@@ -169,7 +169,7 @@ class DeepHedgeModel(tf.keras.Model):
                 / self.timegrid[-1]
             )
             inputs = [v[:, i] for v in x]
-            if "emb_key" in self.additional_states.keys():
+            if "emb_key" in self.additional_states:
                 inputs.append(params)
             inputs.append(t)
             quantity = self.model(inputs, training=training)
