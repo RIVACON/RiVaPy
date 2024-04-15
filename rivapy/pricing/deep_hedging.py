@@ -324,6 +324,14 @@ class DeepHedgeModel(tf.keras.Model):
             for k in self.additional_states:
                 inputs.append(paths[k])
         return inputs
+    
+    def n_tasks(self)->int:
+        """Return the number of tasks the model was trained on
+
+        Returns:
+            int: number of tasks used to train the model
+        """
+        return self._embedding_layer.input_dim#-1
 
     def train(
         self,

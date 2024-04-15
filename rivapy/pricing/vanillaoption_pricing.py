@@ -205,9 +205,7 @@ class VanillaOptionDeepHedgingPricer:
         
         hedge_model = DeepHedgeModel(list(hedge_ins.keys()), list(additional_states_.keys()),timegrid=timegrid, 
                                         regularization=regularization,depth=depth, n_neurons=nb_neurons, loss = loss,
-                                        transaction_cost = transaction_cost,threshold = threshold,no_of_models=len(model_list),
-                                        cascading = cascading)
-        
+                                        transaction_cost = transaction_cost,no_of_models=len(model_list))
         paths = {}
         paths.update(hedge_ins)
         paths.update(additional_states_) 
