@@ -24,7 +24,7 @@ import analysis
 from sys import exit
 
 
-model = [GBM(drift=0.0, volatility=0.2),GBM(drift=0.0, volatility=0.1)]# HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04, vol_of_vol = 2., correlation_rho = -0.7)]
+model = [GBM(drift=0.0, volatility=0.1),GBM(drift=0.0, volatility=0.2)]# HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04, vol_of_vol = 2., correlation_rho = -0.7)]
 
 repo = analysis.Repo(
     "./experiments1"

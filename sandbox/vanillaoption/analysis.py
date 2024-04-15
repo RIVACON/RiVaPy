@@ -85,7 +85,9 @@ class Repo:
     def run(self, val_date, spec, model, rerun=False, **kwargs):
         params = {}
         params["val_date"] = val_date
-        params["spec"] = {spec[k].id: spec[k]._to_dict() for k in range(len(spec))}
+        params["spec"] = [
+            spec[k].to_dict() for k in range(len(spec))
+        ] #{spec[k].id: spec[k]._to_dict() for k in range(len(spec))}
         params["model"] = [
             model[k].to_dict() for k in range(len(model))
         ]  # model.to_dict()
@@ -139,65 +141,22 @@ class Repo:
         timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days, freq)
         np.random.seed(seed)
         # model = self.get_model(hashkey)
-        S0 = 1.0  # ATM option
-        vol = 0.2
-        if parameter_uncertainty:
-            if (modelname == "Heston") or (modelname == "Heston with Volswap"):
-                raise Exception(
-                    "For simple test case parameter uncertainty w.r.t vol model GBM must be used."
-                )
-            simulation_results = np.zeros((len(timegrid) + 1, n_sims))
-            nb_of_diff_vols = 10
-            for i in range(nb_of_diff_vols):
-                M = int(n_sims / nb_of_diff_vols)
-                vol = random.uniform(0.1, 0.3)
-                model = GBM(drift=0.0, volatility=vol)
-                S0 = 1.0  # ATM option
-                if freq == "12H":
-                    simulation_results[:, i * M : (i + 1) * M] = model.simulate(
-                        timegrid, start_value=S0, M=M, n=days * 2
-                    )
-                else:
-                    simulation_results[:, i * M : (i + 1) * M] = model.simulate(
-                        timegrid, start_value=S0, M=M, n=days
-                    )
-
+        simulation_results = np.zeros((len(timegrid)+1, n_sims))
+        v0 = 0.04
+        S0 = 1. #ATM option
+        #emb_vec = np.zeros((n_sims))
+        if freq == '12H':
+            n = days*2
         else:
-            if (modelname == "Heston") or (modelname == "Heston with Volswap"):
-                model = HestonForDeepHedging(
-                    rate_of_mean_reversion=1.0,
-                    long_run_average=0.04,
-                    vol_of_vol=2.0,
-                    correlation_rho=-0.7,
-                )
-                v0 = 0.04
-                S0 = 1.0  # ATM option
-                if freq == "12H":
-                    simulation_results = model.simulate(
-                        timegrid,
-                        S0=S0,
-                        v0=v0,
-                        M=n_sims,
-                        n=days * 2,
-                        modelname=modelname,
-                    )
-                else:
-                    simulation_results = model.simulate(
-                        timegrid, S0=S0, v0=v0, M=n_sims, n=days, modelname=modelname
-                    )
-            else:
-                model = GBM(drift=0.0, volatility=vol)
-                S0 = 1.0  # ATM option
-                if freq == "12H":
-                    simulation_results = model.simulate(
-                        timegrid, start_value=S0, M=n_sims, n=days * 2
-                    )
-                else:
-                    simulation_results = model.simulate(
-                        timegrid, start_value=S0, M=n_sims, n=days
-                    )
+            n = days
+        model_list = [GBM(drift=0.0, volatility=0.1),GBM(drift=0.0, volatility=0.2)]
+        n_sims = int(n_sims/len(model_list))
+        for i in range(len(model_list)):
+            model= model_list[i]
+            simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=n, model_name=model_list[i].modelname)
+            #emb_vec[i*n_sims:n_sims*(i+1)] = i    
+        return simulation_results#, emb_vec
 
-        return simulation_results
 
     def select(
         self, conditions: List[Tuple[str, Union[str, float, int, Tuple]]]
