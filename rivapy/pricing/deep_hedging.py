@@ -28,9 +28,9 @@ class DeepHedgeModel(tf.keras.Model):
         n_neurons: int,
         loss: str,
         transaction_cost: dict = None,
-        threshold: float = 0.0,
+        #threshold: float = 0.0,
         no_of_models: int = 1,
-        cascading: bool = False,
+        #cascading: bool = False,
         model: tf.keras.Model = None,
         **kwargs
     ):
@@ -54,15 +54,16 @@ class DeepHedgeModel(tf.keras.Model):
         else:
             self.additional_states = additional_states
 
-        self.no_of_unique_model = no_of_models
-        self.embedding_size = 10  # int(min(np.ceil((self.no_of_unique_model)/2), 50))
-        self._embedding_layer = tf.keras.layers.Embedding(
-            input_dim=self.no_of_unique_model,
-            output_dim=self.embedding_size,
-            input_length=1,
-            name="Embedding",
-        )
-        self._concat_layer = tf.keras.layers.Concatenate(name="Concatenate")
+        if "emb_key" in self.additional_states.keys():
+            self.no_of_unique_model = no_of_models
+            self.embedding_size = 10  # int(min(np.ceil((self.no_of_unique_model)/2), 50))
+            self._embedding_layer = tf.keras.layers.Embedding(
+                input_dim=self.no_of_unique_model,
+                output_dim=self.embedding_size,
+                input_length=1,
+                name="Embedding",
+            )
+            self._concat_layer = tf.keras.layers.Concatenate(name="Concatenate")
 
         if model is None:
             self.model = self._build_model(depth, n_neurons)
@@ -73,11 +74,12 @@ class DeepHedgeModel(tf.keras.Model):
         self._prev_q = None
         self._forecast_ids = None
         self._loss = loss
-        self.transaction_cost = transaction_cost
         if transaction_cost is None:
             self.transaction_cost = {}
-        self.threshold = threshold
-        self.cascading = cascading
+        else:
+            self.transaction_cost = transaction_cost
+        #self.threshold = threshold
+        #self.cascading = cascading
 
     def __call__(self, x, training=True):
         if not self.transaction_cost:
@@ -89,13 +91,13 @@ class DeepHedgeModel(tf.keras.Model):
         inputs = [
             tf.keras.Input(shape=(1,), name=ins) for ins in self.hedge_instruments
         ]
-        if self.no_of_unique_model > 1:  # self.additional_states is not None:
+        if "emb_key" in self.additional_states.keys():  # self.additional_states is not None:
             for state in self.additional_states:
                 inp_cat_data = tf.keras.layers.Input(shape=(1,), name=state)
                 inputs.append(inp_cat_data)
         inputs.append(tf.keras.Input(shape=(1,), name="ttm"))
 
-        if self.no_of_unique_model > 1:
+        if "emb_key" in self.additional_states.keys():
             fully_connected_Input1 = tf.keras.layers.concatenate(inputs)
             emb = self._embedding_layer(inp_cat_data)
             flatten = tf.keras.layers.Flatten()(emb)
@@ -139,7 +141,7 @@ class DeepHedgeModel(tf.keras.Model):
                 / self.timegrid[-1]
             )
             inputs = [v[:, i] for v in x]
-            if self.no_of_unique_model > 1:
+            if "emb_key" in self.additional_states.keys():
                 inputs.append(params)
             inputs.append(t)
             quantity = self.model(inputs, training=training)
@@ -167,7 +169,7 @@ class DeepHedgeModel(tf.keras.Model):
                 / self.timegrid[-1]
             )
             inputs = [v[:, i] for v in x]
-            if self.no_of_unique_model > 1:
+            if "emb_key" in self.additional_states.keys():
                 inputs.append(params)
             inputs.append(t)
             quantity = self.model(inputs, training=training)
@@ -196,10 +198,10 @@ class DeepHedgeModel(tf.keras.Model):
                 #     ),
                 # )
                 # Cascading:
-                if self.cascading:
-                    tt = np.round(self.timegrid * 365.0, 0)
-                    if tt[i] % 7 != 0 and tt[i] >= 7:  # weekly
-                        xx = tf.zeros_like(xx)
+                #if self.cascading:
+                #    tt = np.round(self.timegrid * 365.0, 0)
+                #    if tt[i] % 7 != 0 and tt[i] >= 7:  # weekly
+                #        xx = tf.zeros_like(xx)
                 pnl += tf.where(
                     tf.greater(diff_q, 0),
                     tf.math.multiply(diff_q, tf.scalar_mul((1.0 - tc[0]), xx)),
@@ -221,13 +223,13 @@ class DeepHedgeModel(tf.keras.Model):
             diff_q = self._prev_q[:, j] - quantity[:, j]
             xx = tf.squeeze(x[j][:, -1])
             # Trading restriction based on threshold
-            tf.cond(
-                tf.equal(self.threshold, 0.0),
-                lambda: xx,
-                lambda: tf.where(
-                    tf.greater(quantity[:, j], self.threshold), tf.zeros_like(xx), xx
-                ),
-            )
+            #tf.cond(
+            #    tf.equal(self.threshold, 0.0),
+            #    lambda: xx,
+            #    lambda: tf.where(
+            #        tf.greater(quantity[:, j], self.threshold), tf.zeros_like(xx), xx
+            #    ),
+            #)
             pnl += tf.where(
                 tf.greater(diff_q, 0),
                 tf.math.multiply(self._prev_q[:, j], tf.scalar_mul((1.0 - tc[-1]), xx)),
@@ -365,7 +367,7 @@ class DeepHedgeModel(tf.keras.Model):
         params["hedge_instruments"] = self.hedge_instruments
         params["loss"] = self._loss
         params["transaction_cost"] = self.transaction_cost
-        params["threshold"] = self.threshold
+        #params["threshold"] = self.threshold
         with open(folder + "/params.json", "w") as f:
             json.dump(params, f)
 
