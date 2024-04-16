@@ -28,9 +28,9 @@ class DeepHedgeModel(tf.keras.Model):
         n_neurons: int,
         loss: str,
         transaction_cost: dict = None,
-        #threshold: float = 0.0,
+        # threshold: float = 0.0,
         no_of_models: int = 1,
-        #cascading: bool = False,
+        # cascading: bool = False,
         model: tf.keras.Model = None,
         **kwargs
     ):
@@ -56,7 +56,9 @@ class DeepHedgeModel(tf.keras.Model):
 
         if "emb_key" in self.additional_states:
             self.no_of_unique_model = no_of_models
-            self.embedding_size = 1#10  # int(min(np.ceil((self.no_of_unique_model)/2), 50))
+            self.embedding_size = (
+                1  # 10  # int(min(np.ceil((self.no_of_unique_model)/2), 50))
+            )
             self._embedding_layer = tf.keras.layers.Embedding(
                 input_dim=self.no_of_unique_model,
                 output_dim=self.embedding_size,
@@ -78,8 +80,8 @@ class DeepHedgeModel(tf.keras.Model):
             self.transaction_cost = {}
         else:
             self.transaction_cost = transaction_cost
-        #self.threshold = threshold
-        #self.cascading = cascading
+        # self.threshold = threshold
+        # self.cascading = cascading
 
     def __call__(self, x, training=True):
         if not self.transaction_cost:
@@ -128,8 +130,12 @@ class DeepHedgeModel(tf.keras.Model):
 
     @tf.function
     def _compute_pnl(self, x_in, training):
-        x = [x_in[0]]
-        params = [x_in[1]]
+        if "emb_key" in self.additional_states:
+            x = [x_in[0]]
+            params = [x_in[1]]
+        else:
+            x = x_in
+            params = []
         pnl = tf.zeros((tf.shape(x[0])[0],))
         self._prev_q = tf.zeros(
             (tf.shape(x[0])[0], len(self.hedge_instruments)), name="prev_q"
@@ -198,7 +204,7 @@ class DeepHedgeModel(tf.keras.Model):
                 #     ),
                 # )
                 # Cascading:
-                #if self.cascading:
+                # if self.cascading:
                 #    tt = np.round(self.timegrid * 365.0, 0)
                 #    if tt[i] % 7 != 0 and tt[i] >= 7:  # weekly
                 #        xx = tf.zeros_like(xx)
@@ -223,13 +229,13 @@ class DeepHedgeModel(tf.keras.Model):
             diff_q = self._prev_q[:, j] - quantity[:, j]
             xx = tf.squeeze(x[j][:, -1])
             # Trading restriction based on threshold
-            #tf.cond(
+            # tf.cond(
             #    tf.equal(self.threshold, 0.0),
             #    lambda: xx,
             #    lambda: tf.where(
             #        tf.greater(quantity[:, j], self.threshold), tf.zeros_like(xx), xx
             #    ),
-            #)
+            # )
             pnl += tf.where(
                 tf.greater(diff_q, 0),
                 tf.math.multiply(self._prev_q[:, j], tf.scalar_mul((1.0 - tc[-1]), xx)),
@@ -311,28 +317,28 @@ class DeepHedgeModel(tf.keras.Model):
                     inputs.append(paths[k].transpose())
                 else:
                     inputs.append(paths[k])
-            for k in self.additional_states:
-                inputs.append(paths[k])
+            # for k in self.additional_states:
+            #    inputs.append(paths[k])
 
-            #for k in self.additional_states:
-            #    if paths[k].shape[1] != self.timegrid.shape[0]:
-            #        inputs.append(paths[k].transpose())
-            #    else:
-            #        inputs.append(paths[k])
+            for k in self.additional_states:
+                if paths[k].shape[1] != self.timegrid.shape[0]:
+                    inputs.append(paths[k].transpose())
+                else:
+                    inputs.append(paths[k])
         else:
             for k in self.hedge_instruments:
                 inputs.append(paths[k])
             for k in self.additional_states:
                 inputs.append(paths[k])
         return inputs
-    
-    def n_tasks(self)->int:
+
+    def n_tasks(self) -> int:
         """Return the number of tasks the model was trained on
 
         Returns:
             int: number of tasks used to train the model
         """
-        return self._embedding_layer.input_dim#-1
+        return self._embedding_layer.input_dim  # -1
 
     def train(
         self,
@@ -376,7 +382,7 @@ class DeepHedgeModel(tf.keras.Model):
         params["hedge_instruments"] = self.hedge_instruments
         params["loss"] = self._loss
         params["transaction_cost"] = self.transaction_cost
-        #params["threshold"] = self.threshold
+        # params["threshold"] = self.threshold
         with open(folder + "/params.json", "w") as f:
             json.dump(params, f)
 
