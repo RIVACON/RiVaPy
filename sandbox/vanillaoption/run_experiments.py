@@ -24,7 +24,7 @@ import analysis
 from sys import exit
 
 
-model = [GBM(drift=0.0, volatility=0.1),GBM(drift=0.0, volatility=0.2)]# HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04, vol_of_vol = 2., correlation_rho = -0.7)]
+model = [GBM(drift=0.0, volatility=0.1),GBM(drift=0.0, volatility=0.2),GBM(drift=0.0, volatility=0.3)]# HestonForDeepHedging(rate_of_mean_reversion = 1.,long_run_average = 0.04, vol_of_vol = 2., correlation_rho = -0.7)]
 
 repo = analysis.Repo(
     "./experiments1"
@@ -75,9 +75,9 @@ for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
                             rerun=False,
                             depth=3,
                             nb_neurons=16,
-                            n_sims=100_000,
+                            n_sims=300_000,
                             regularization=0.0,
-                            epochs=100,#400,
+                            epochs=100,
                             verbose=1,
                             tensorboard_logdir="logs/"
                             + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
