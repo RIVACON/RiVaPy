@@ -149,7 +149,7 @@ class Repo:
             n = days*2
         else:
             n = days
-        model_list = [GBM(drift=0.0, volatility=0.2),GBM(drift=0.0, volatility=0.2)]
+        model_list = [GBM(drift=0.0, volatility=0.1),GBM(drift=0.0, volatility=0.2),GBM(drift=0.0, volatility=0.3)]
         n_sims = int(n_sims/len(model_list))
         for i in range(len(model_list)):
             model= model_list[i]
