@@ -16,31 +16,48 @@ class VaRBase:
         historical_steps: int,
         confidence_level: float
     ):
-        self.__holding_period = holding_period
-        self.__historical_steps = historical_steps
-        self.__confidence_level = confidence_level
-    
-    def info(self):
-        return self.__var_type
+        
+        self.holding_period = holding_period
+        self.historical_steps = historical_steps
+        self.confidence_level = confidence_level
+
+class VaRHistSim(VaRBase):
 
     def value_at_risk(
         self,
         timeseries: dict,
         portfolio: pf.Portfolio
     ):
-        self.__calc_var()
-
-    def __calc_var(self):
-        raise NotImplementedError(self.__var_type)
-
-class VaRHistSim(VaRBase):
-
+        return self.__calc_var(timeseries, portfolio)
+        
     def __calc_var(
         self,
         timeseries: dict,
         portfolio: pf.Portfolio
     ):
-        pass
+        
+        # prune the market data to only keep the relevant returns needed for the VaR 
+        num_steps = self.historical_steps + self.holding_period
+        for k, v in timeseries.items():
+            timeseries[k] = v[:num_steps]
+            if len(v) < num_steps:
+                raise ValueError(f"The timeseries for the product {k} does not have enough values. \
+                                 {num_steps} are needed for the VaR.")
+
+        # look up all values for all speecifications and timesteps
+        portfolio_values = np.array([
+            spec.value(np.array(timeseries[spec.symbol]))
+            for spec in portfolio.constituents
+        ])
+        portfolio_values = np.sum(portfolio_values, axis=0)
+
+        # calculate the portfolio returns and find the array index for the provided quantile
+        portfolio_returns = portfolio_values[self.holding_period:] - portfolio_values[:-self.holding_period]
+        portfolio_returns = np.sort(portfolio_returns)
+        index = round(portfolio_returns.size * (1 - self.confidence_level))
+
+        return portfolio_returns[index]
+
 
 class VaRDeltaNormal(VaRBase):
 

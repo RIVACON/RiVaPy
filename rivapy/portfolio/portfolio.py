@@ -2,28 +2,47 @@
 Defines a portfolio class. 
 """
 
-class PortfolioConstituent:
-    def __init__(self):
-        self.__financial_data = None
+from typing import List, Union
 
+import numpy as np
+
+
+class BaseSpecification:
+
+    def value(self, market_price: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        raise NotImplementedError("A BaseSpecification cannot be priced")
+        # this is a placeholder for a general parent class for all specifications
+
+class StockSpecification(BaseSpecification):
+    def __init__(self, symbol: str, quantity: float):
+        self.__symbol = symbol
+        self.__quantity = quantity
+
+    def value(self, market_price: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        return self.__quantity * market_price
+    
     @property
-    def financial_data(self):
-        if self.__financial_data is None:
-            pass
-            # yf.load()
-        return self.__financial_data
+    def symbol(self):
+        return self.__symbol
 
 class Portfolio:
     
-    def __init__(self, constitutents: PortfolioConstituent):
-        self.__constitutents = constitutents
-        
-        self.__supported_specifications = None #[EuropeanVanillaSpecification]
+    __supported_types = [StockSpecification]
 
-        # todo market data dict
-        self.__market_data = {}
-        # todo: as a first step: make sure, that all constitutents are stocks.
-        # todo: optionally pass yahoo finance symbols to donwload market data.
+    def __init__(
+            self, 
+            constituents: List[BaseSpecification],
+        ):
+
+        self.__constituents = constituents
+        
+        # checks, if any objects were inputted, that are not supported.
+        unsupported_types = []
+        for c in self.__constituents:
+            if not isinstance(c, tuple(self.__supported_types)):
+                unsupported_types.append(type(c))
+        if unsupported_types:
+            raise ValueError("The following types are not yet supported in the `Portfolio` class: {unsupported_types}")
 
     @property
     def value(self):
@@ -35,11 +54,11 @@ class Portfolio:
 
     @property
     def size(self):
-        return len(self.__constitutents)
+        return len(self.__constituents)
 
     @property
     def constituents(self):
-        return self.__constitutents
+        return self.__constituents
     
     def add_constituent(self, const):
         # if any(isinstance(...))
