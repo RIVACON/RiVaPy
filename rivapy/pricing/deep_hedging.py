@@ -93,7 +93,8 @@ class DeepHedgeModel(tf.keras.Model):
         inputs = [
             tf.keras.Input(shape=(1,), name=ins) for ins in self.hedge_instruments
         ]
-        if "emb_key" in self.additional_states:  # self.additional_states is not None:
+        # if "emb_key" in self.additional_states:  #
+        if self.additional_states is not None:
             for state in self.additional_states:
                 inp_cat_data = tf.keras.layers.Input(shape=(1,), name=state)
                 inputs.append(inp_cat_data)
@@ -321,7 +322,9 @@ class DeepHedgeModel(tf.keras.Model):
             #    inputs.append(paths[k])
 
             for k in self.additional_states:
-                if paths[k].shape[1] != self.timegrid.shape[0]:
+                if len(paths[k].shape) > 1 and (
+                    paths[k].shape[1] != self.timegrid.shape[0]
+                ):
                     inputs.append(paths[k].transpose())
                 else:
                     inputs.append(paths[k])
