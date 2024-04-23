@@ -131,12 +131,8 @@ class DeepHedgeModel(tf.keras.Model):
 
     @tf.function
     def _compute_pnl(self, x_in, training):
-        if "emb_key" in self.additional_states:
-            x = [x_in[0]]
-            params = [x_in[1]]
-        else:
-            x = x_in
-            params = []
+        x = [x_in[0]]
+        params = [x_in[1]]
         pnl = tf.zeros((tf.shape(x[0])[0],))
         self._prev_q = tf.zeros(
             (tf.shape(x[0])[0], len(self.hedge_instruments)), name="prev_q"
@@ -318,10 +314,8 @@ class DeepHedgeModel(tf.keras.Model):
                     inputs.append(paths[k].transpose())
                 else:
                     inputs.append(paths[k])
-            # for k in self.additional_states:
-            #    inputs.append(paths[k])
-
             for k in self.additional_states:
+
                 if len(paths[k].shape) > 1 and (
                     paths[k].shape[1] != self.timegrid.shape[0]
                 ):
