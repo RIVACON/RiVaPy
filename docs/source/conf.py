@@ -76,5 +76,5 @@ html_theme = 'sphinx_rtd_theme'
 autoclass_content = 'both'
 
 # thumbnail image paths should be relative to the _static folder
-nbsphinx_thumbnails = {
-    'notebooks/instruments/repurchase_agreement': os.path.join(os.path.dirname(os.path.realpath(__file__)),'figs','repo_schema.png')}#"../../source/figs/repo_schema.png"}
+# nbsphinx_thumbnails = {
+#     'notebooks/instruments/repurchase_agreement': os.path.join(os.path.dirname(os.path.realpath(__file__)),'figs','repo_schema.png')}#"../../source/figs/repo_schema.png"}
