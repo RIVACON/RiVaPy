@@ -34,8 +34,7 @@
    "metadata": {
     "tags": [
      "nbsphinx-thumbnail"
-    ],
-    "nbsphinx": "hidden"
+    ]
    },
    "outputs": [
     {
