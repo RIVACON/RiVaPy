@@ -22,13 +22,6 @@
    ]
   },
   {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "![Repo schema](../../figs/repo_schema.png)"
-   ]
-  },
-  {
    "cell_type": "code",
    "execution_count": 16,
    "metadata": {
