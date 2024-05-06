@@ -1,4 +1,14 @@
 '''
+**** WARNING ****
+CODE HERE IS TEMPORARY AND LIKELY OBSOLETE.
+IT WAS JUST AN HELPER FOR ME WHILE WRITING THE intro_var
+NOTEBOOK, WHICH SHOULD BE CONSIDERED THE REFERENCE.
+'''
+
+#######################################################################
+
+
+'''
 Simple idea for computing the empirical quantile for a random set
 of samples by using sorting.
 This version eliminates the use of torch and only relies on numpy.
