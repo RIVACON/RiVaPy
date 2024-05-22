@@ -59,12 +59,13 @@ class BNS(FactoryObject):
             # Calculate volatility
             vol = np.sqrt(V[t - 1, :])
 
-            P = ss.poisson.rvs(self.a * self._delta_t*t,size=M)
-            jumps = np.asarray([np.sum(np.random.exponential(self.b, int(i))) for i in P])
+            P = ss.poisson.rvs(self.a * self.lmbda*self._delta_t,size=M)
+            jumps = np.asarray([np.sum(np.random.exponential(1./self.b, size=int(i))) for i in P])
 
             # Update the stock price and volatility
-            S[t, :] = S[t - 1, :]  - (self.lmbda*self.k + 0.5*vol*vol)*self._delta_t + vol * np.sqrt(self._delta_t) * z1[t - 1, :] + self.rho*jumps[:]
-            V[t, :] =  V[t - 1, :] - self.lmbda*V[t - 1, :]*self._delta_t
+            S[t, :] = S[t - 1, :]  + (-self.lmbda*self.k - 0.5*vol*vol)*self._delta_t + vol * np.sqrt(self._delta_t) * z1[t - 1, :] + self.rho*jumps
+            V[t, :] =  np.maximum(
+                0.0,V[t - 1, :] - self.lmbda*V[t - 1, :]*self._delta_t + jumps)
         return np.exp(S)
         
 
