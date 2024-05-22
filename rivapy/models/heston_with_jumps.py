@@ -59,7 +59,6 @@ class HestonWithJumps(FactoryObject):
         """
         self._set_params(S0,v0,M,n)
         self._set_timegrid(timegrid)
-
         S = np.zeros((self._timegrid.shape[0]+1, M))
         V =  np.zeros((self._timegrid.shape[0]+1, M))
         S[0, :] = S0
@@ -69,16 +68,17 @@ class HestonWithJumps(FactoryObject):
         z1 = np.random.normal(size=(self._timegrid.shape[0], M))
         z2 = self.correlation_rho * z1 + np.sqrt(1 - self.correlation_rho ** 2) * np.random.normal(size=(self._timegrid.shape[0], M))
 
+    
         # Generate stock price and volatility paths
         for t in range(1, self._timegrid.shape[0] + 1):
             # Calculate volatility
             vol = np.sqrt(V[t - 1, :])
 
-            P = ss.poisson.rvs(self.lmbda * self._delta_t*t,size=M)
-            jumps = np.asarray([np.sum(ss.norm.rvs(self.muj, self.sigmaj, int(i))) for i in P])
+            P = ss.poisson.rvs(self.lmbda * self._delta_t,size=M)
+            jumps = np.asarray([np.sum(np.exp(ss.norm.rvs(np.log(self.muj+1.)-0.5*self.sigmaj*self.sigmaj, self.sigmaj,i)) -1.) for i in P])
 
             # Update the stock price and volatility
-            S[t, :] = S[t - 1, :]  - self.lmbda*self.muj*self._delta_t + vol * np.sqrt(self._delta_t) * z1[t - 1, :] + jumps[:]
+            S[t, :] = S[t - 1, :]*(1.  - self.lmbda*self.muj*self._delta_t + vol * np.sqrt(self._delta_t) * z1[t - 1, :] + jumps)
             V[t, :] = np.maximum(
                 0.0, V[t - 1, :] + self.rate_of_mean_reversion * (self.long_run_average - V[t - 1, :]) * self._delta_t 
                 + self.vol_of_vol * np.sqrt(V[t - 1, :]) * np.sqrt(self._delta_t) * z2[t - 1, :]
