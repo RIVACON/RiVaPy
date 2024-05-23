@@ -33,6 +33,7 @@ class OrnsteinUhlenbeck(FactoryObject):
         self.mean_reversion_level = mean_reversion_level
         self.volatility = volatility
         self._timegrid = None
+        self.modelname = 'OrnsteinUhlenbeck'
 
     def _to_dict(self) -> dict:
         return {'speed_of_mean_reversion': self.speed_of_mean_reversion, 'volatility': self.volatility,
@@ -49,9 +50,16 @@ class OrnsteinUhlenbeck(FactoryObject):
         
     def rnd_shape(self, n_sims: int, n_timepoints: int)->tuple:
         return (n_timepoints-1, n_sims)
+    
+    def _set_params(self,S0,v0,M,n):
+        self.S0 = S0
+        self.v0 = v0
+        self.n_sims = M 
+        self.n = n #length of timegrid
 
 
-    def simulate(self, timegrid, start_value, rnd):
+    #def simulate(self, timegrid, start_value, rnd):
+    def simulate(self, timegrid, S0, v0, M,n,model_name):
         """ Simulate the Ornstein Uhlenbeck process on the given timegrid using simple explicit euler scheme:
             
             .. math:: 
@@ -68,14 +76,17 @@ class OrnsteinUhlenbeck(FactoryObject):
         Returns:
             np.ndarray: Array r containing the simulations where r[:,i] is the path of the i-th simulation (r.shape[0] equals number of timepoints, r.shape[1] the number of simulations). 
         """
+        self._set_params(S0,v0,M,n)
         self._set_timegrid(timegrid)
-        result = np.empty((self._timegrid.shape[0], rnd.shape[1]))
-        result[0,:] = start_value
+        result = np.empty((self._timegrid.shape[0], M))
+        result[0,:] = S0
+
+        z1 = np.random.normal(size=(self._timegrid.shape[0], M))
 
         for i in range(self._timegrid.shape[0]-1):
             result[i+1,:] = (result[i, :] * np.exp(-self._speed_of_mean_reversion_grid[i]*self._delta_t[i])
                         + self._mean_reversion_level_grid[i]* (1 - np.exp(-self._speed_of_mean_reversion_grid[i]*self._delta_t[i])) 
-                        + self._volatility_grid[i]* np.sqrt((1 - np.exp(-2*self._speed_of_mean_reversion_grid[i]*self._delta_t[i])) / (2*self._speed_of_mean_reversion_grid[i])) * rnd[i,:]
+                        + self._volatility_grid[i]* np.sqrt((1 - np.exp(-2*self._speed_of_mean_reversion_grid[i]*self._delta_t[i])) / (2*self._speed_of_mean_reversion_grid[i])) * z1[i,:]
                         )
         return result
 
@@ -192,3 +203,4 @@ class OrnsteinUhlenbeck(FactoryObject):
         self.speed_of_mean_reversion = speed_mr
         self.volatility = sigma
         self.mean_reversion_level = mu
+
