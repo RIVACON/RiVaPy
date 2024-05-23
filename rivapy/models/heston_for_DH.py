@@ -113,9 +113,8 @@ class HestonForDeepHedging(FactoryObject):
         """Characteristic function needed internally to compute call prices with analytic formula.
 		"""
         ixi = 1j * xi
-        d = np.sqrt((self.rate_of_mean_reversion - ixi * self.correlation_rho * self.vol_of_vol)**2
-					   + self.vol_of_vol**2 * (ixi + xi**2))
-        g = (self.rate_of_mean_reversion - ixi * self.correlation_rho * self.vol_of_vol - d) / (self.rate_of_mean_reversion - ixi * self.correlation_rho * self.vol_of_vol + d)
+        d = np.sqrt((self.correlation_rho*self.vol_of_vol*ixi - self.rate_of_mean_reversion)**2 - self.vol_of_vol**2*(-ixi-xi**2))
+        g = (self.rate_of_mean_reversion - self.correlation_rho*self.vol_of_vol*ixi - d) / (self.rate_of_mean_reversion - ixi * self.correlation_rho * self.vol_of_vol + d)
         ee = np.exp(-d * tau)
         C = self.rate_of_mean_reversion * self.long_run_average / self.vol_of_vol**2 * (
 			(self.rate_of_mean_reversion - ixi * self.correlation_rho * self.vol_of_vol - d) * tau - 2. * np.log((1 - g * ee) / (1 - g))
@@ -124,6 +123,7 @@ class HestonForDeepHedging(FactoryObject):
 			(1 - ee) / (1 - g * ee)
 		)
         return np.exp(C + D*v0 + ixi * np.log(s0))
+    
 	    
     def compute_call_price(self, s0: float, v0: float, K: Union[np.ndarray, float], ttm: Union[np.ndarray, float])->Union[np.ndarray, float]:
         """Computes a call price for the Heston model via integration over characteristic function.

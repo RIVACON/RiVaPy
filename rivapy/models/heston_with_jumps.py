@@ -87,6 +87,54 @@ class HestonWithJumps(FactoryObject):
         
 
 
+    def _characteristic_func(self, xi, s0, v0, tau):
+        """Characteristic function needed internally to compute call prices with analytic formula.
+		"""
+        ixi = 1j * xi
+        d = np.sqrt((self.correlation_rho*self.vol_of_vol*ixi - self.rate_of_mean_reversion)**2 - self.vol_of_vol**2*(-ixi-xi**2))
+        g = (self.rate_of_mean_reversion - self.correlation_rho*self.vol_of_vol*ixi - d) / (self.rate_of_mean_reversion - ixi * self.correlation_rho * self.vol_of_vol + d)
+        ee = np.exp(-d * tau)
+        C = self.rate_of_mean_reversion * self.long_run_average / self.vol_of_vol**2 * (
+			(self.rate_of_mean_reversion - ixi * self.correlation_rho * self.vol_of_vol - d) * tau - 2. * np.log((1 - g * ee) / (1 - g))
+		)
+        D = (self.rate_of_mean_reversion - ixi * self.correlation_rho * self.vol_of_vol - d) / self.vol_of_vol**2 * (
+			(1 - ee) / (1 - g * ee)
+		)
+        E = -self.lmbda*self.muj*ixi*tau + self.lmbda*tau*((1.+self.muj)**ixi * np.exp(self.sigmaj*0.5*ixi*(ixi-1.))-1.)
+        return np.exp(E + C + D*v0 + ixi * np.log(s0))
+    
+	    
+    def compute_call_price(self, s0: float, v0: float, K: Union[np.ndarray, float], ttm: Union[np.ndarray, float])->Union[np.ndarray, float]:
+        """Computes a call price for the Heston model via integration over characteristic function.
+		Args:
+			s0 (float): current spot
+			v0 (float): current variance
+			K (float): strike
+			ttm (float): time to maturity
+		"""
+        if isinstance(ttm, np.ndarray):
+            result = np.empty((ttm.shape[0], K.shape[0], ))
+            for i in range(ttm.shape[0]):
+				#for j in range(K.shape[0]):
+					#result[i,j] = self.call_price(s0,v0,K[j], tau[i])
+                result[i,:] = self.compute_call_price(s0,v0,K, ttm[i])
+            return result
+
+        def integ_func(xi, s0, v0, K, tau, num):
+            ixi = 1j * xi
+            if num == 1:
+                return (self._characteristic_func(xi - 1j, s0, v0, tau) / (ixi * self._characteristic_func(-1j, s0, v0, tau)) * np.exp(-ixi * np.log(K))).real
+            else:
+                return (self._characteristic_func(xi, s0, v0, tau) / (ixi) * np.exp(-ixi * np.log(K))).real
+
+        if ttm < 1e-3:
+            res = (s0-K > 0) * (s0-K)
+        else:
+            "Simplified form, with only one integration. "
+            h = lambda xi: s0 * integ_func(xi, s0, v0, K, ttm, 1) - K * integ_func(xi, s0, v0, K, ttm, 2)
+            res = 0.5 * (s0 - K) + 1/scipy.pi * scipy.integrate.quad_vec(h, 0, 500.)[0]  #vorher 500
+        return res
+
   
 
 
