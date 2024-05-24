@@ -16,11 +16,6 @@ import sys
 import random
 sys.path.append('C:/Users/doeltz/development/RiVaPy/')
 import datetime as dt
-from rivapy.models.gbm import GBM
-from rivapy.models.heston_for_DH import HestonForDeepHedging
-from rivapy.instruments.specifications import EuropeanVanillaSpecification
-from rivapy.tools.datetools import DayCounter
-from rivapy.tools.enums import DayCounterType
 from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.pricing.deep_hedging import DeepHedgeModel
 

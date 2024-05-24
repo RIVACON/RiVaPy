@@ -12,6 +12,8 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.models.gbm import GBM
 from rivapy.models.heston_for_DH import HestonForDeepHedging
+from rivapy.models.heston_with_jumps import HestonWithJumps
+from rivapy.models.barndorff_nielsen_shephard import BNS
 from rivapy.instruments.specifications import EuropeanVanillaSpecification
 from rivapy.pricing.vanillaoption_pricing import (
     VanillaOptionDeepHedgingPricer,
@@ -24,8 +26,9 @@ import analysis
 from sys import exit
 
 
-model = [GBM(drift=0.0, volatility=0.1),GBM(drift=0.0, volatility=0.2),GBM(drift=0.0, volatility=0.3),GBM(drift=0.0, volatility=0.4),
-         GBM(drift=0.0, volatility=0.5),GBM(drift=0.0, volatility=0.6),GBM(drift=0.0, volatility=0.7),GBM(drift=0.0, volatility=0.8)]
+model = [GBM(drift=0.0, volatility=0.25),HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.0707,
+                  vol_of_vol = 0.2928, correlation_rho = -0.757),HestonWithJumps(rate_of_mean_reversion = 0.4963,long_run_average = 0.065,
+                  vol_of_vol = 0.2286, correlation_rho = -0.99,muj = 0.1791,sigmaj = 0.1346, lmbda = 0.1382),BNS(rho =-4.675,lmbda=0.5474,b=18.6075,a=0.6069)]
 
 repo = analysis.Repo(
     "./experiments1"
@@ -60,7 +63,7 @@ for i in range(len(strike)):
                 issuer=issuer,
                 sec_lvl=seclevel,
                 curr="EUR",
-                udl_id="ADS",
+                udl_id="ADS4",
                 share_ratio=1,
                 long_short_flag=long_short_flag
             )
@@ -76,7 +79,7 @@ for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
                             rerun=False,
                             depth=3,
                             nb_neurons=16,
-                            n_sims=80_000,
+                            n_sims=200_000,
                             regularization=0.0,
                             epochs=100,
                             verbose=1,
