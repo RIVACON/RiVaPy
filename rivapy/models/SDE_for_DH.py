@@ -52,7 +52,7 @@ class SDEForDeepHedging(FactoryObject):
         S[0, :] = S0
         z1 = np.random.normal(size=(self._timegrid.shape[0]+1, M))
         for t in range(1, self._timegrid.shape[0]):
-            S[t,:] = S[t-1,:] + (self.b0 + self.b1 * S[t-1,:])*self._delta_t + (self.a0 + self.a1*np.max(S[t-1,:],0))**self.gamma *  np.sqrt(self._delta_t) * z1[t - 1, :]
+            S[t,:] = S[t-1,:] + (self.b0 + self.b1 * S[t-1,:])*self._delta_t + (self.a0 + self.a1*S[t-1,:])**self.gamma *  np.sqrt(self._delta_t) * z1[t - 1, :]
 
 
         return S
