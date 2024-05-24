@@ -17,10 +17,7 @@ from rivapy.models.roughbergomi_for_DH import rBergomiForDeepHedging
 from rivapy.models.SDE_for_DH import SDEForDeepHedging
 from rivapy.models.NIG import NIG
 from rivapy.models.VG import VG
-from rivapy.models.VG_CIR import VG_CIR
-from rivapy.models.NIG_CIR import NIG_CIR
-from rivapy.models.NIG_GammaOU import NIG_GammaOU
-from rivapy.models.VG_GammaOU import VG_GammaOU
+
 
 def _add_to_factory(cls):
     factory_entries = _factory()
