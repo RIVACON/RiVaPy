@@ -57,7 +57,7 @@ class DeepHedgeModel(tf.keras.Model):
         if "emb_key" in self.additional_states:
             self.no_of_unique_model = no_of_models
             self.embedding_size = (
-                1  # 10  # int(min(np.ceil((self.no_of_unique_model)/2), 50))
+                1#int(min(np.ceil((self.no_of_unique_model)/2), 50))
             )
             self._embedding_layer = tf.keras.layers.Embedding(
                 input_dim=self.no_of_unique_model,
