@@ -14,7 +14,7 @@ class BNS(FactoryObject):
             return result
 
     def __init__(self, rho: Union[float, Callable],lmbda: Union[float, Callable],
-                  b: Union[float, Callable], a: Union[float, Callable]):
+                  b: Union[float, Callable], a: Union[float, Callable], v0: Union[float, Callable]):
         """Barndorff-Nielson-Shephard Model as in https://perswww.kuleuven.be/~u0009713/ScSiTi03.pdf.
         """
         self.rho = rho
@@ -24,6 +24,7 @@ class BNS(FactoryObject):
         self.k = self.a*self.rho/(self.b - self.rho)
         self._timegrid = None
         self.modelname = 'BNS'
+        self.v0 = v0
 
     def _to_dict(self) -> dict:
         return {'rho': self.rho, 'lmbda':self.lmbda,'b':self.b,'a':self.a}

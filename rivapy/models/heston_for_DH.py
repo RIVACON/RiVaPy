@@ -13,7 +13,7 @@ class HestonForDeepHedging(FactoryObject):
             return result
 
     def __init__(self, rate_of_mean_reversion: Union[float, Callable],long_run_average: Union[float, Callable],
-                  vol_of_vol: Union[float, Callable], correlation_rho: Union[float, Callable]):
+                  vol_of_vol: Union[float, Callable], correlation_rho: Union[float, Callable],v0: Union[float, Callable]):
         """Heston Model.
 
         .. math:: dS_t = \\sqrt{V_t} S_t dB_t; dV_t = \\kappa (\\theta - V_t) dt + \\sigma \\sqrt{V_t} dW_t
@@ -34,6 +34,7 @@ class HestonForDeepHedging(FactoryObject):
         self.correlation_rho = correlation_rho
         self._timegrid = None
         self.modelname = 'Heston'
+        self.v0 = v0
 
     def _to_dict(self) -> dict:
         return {'rate_of_mean_reversion': self.rate_of_mean_reversion, 'long_run_average': self.long_run_average,

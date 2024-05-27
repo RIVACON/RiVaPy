@@ -9,8 +9,6 @@ import hiplot as hip
 from rivapy.tools.interfaces import _JSONEncoder, _JSONDecoder, FactoryObject
 from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.models.gbm import GBM
-from rivapy.models.heston_for_DH import HestonForDeepHedging
-from rivapy.instruments.specifications import EuropeanVanillaSpecification
 from rivapy.pricing.vanillaoption_pricing import (
     VanillaOptionDeepHedgingPricer,
     DeepHedgeModel,
@@ -134,7 +132,8 @@ class Repo:
         days: int = 30,
         freq: str = "D",
         parameter_uncertainty: bool = False,
-        model: list = [GBM(drift=0.0, volatility=0.25)]
+        model: list = [GBM(drift=0.0, volatility=0.25)],
+        emb: int = 0
     ) -> np.ndarray:
         # res = self.results[hashkey]
         # spec = EuropeanVanillaSpecification.from_dict(res['spec'])
@@ -142,7 +141,6 @@ class Repo:
         np.random.seed(seed)
         # model = self.get_model(hashkey)
         simulation_results = np.zeros((len(timegrid)+1, n_sims))
-        v0 = 0.04
         S0 = 1. #ATM option
         emb_vec = np.zeros((n_sims))
         if freq == '12H':
@@ -153,8 +151,8 @@ class Repo:
         n_sims = int(n_sims/len(model_list))
         for i in range(len(model_list)):
             model= model_list[i]
-            simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=n, model_name=model_list[i].modelname)
-            emb_vec[i*n_sims:n_sims*(i+1)] = i    
+            simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid, S0=S0, v0=model.v0, M=n_sims,n=n, model_name=model_list[i].modelname)
+            emb_vec[i*n_sims:n_sims*(i+1)] = emb    
         return simulation_results, emb_vec
 
 

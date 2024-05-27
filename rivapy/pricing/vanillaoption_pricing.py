@@ -84,7 +84,6 @@ class VanillaOptionDeepHedgingPricer:
 
  
         simulation_results = np.zeros((len(timegrid)+1, n_sims))
-        v0 = 0.04
         S0 = 1. #ATM option
         emb_vec = np.zeros((n_sims))
         if freq == '12H':
@@ -94,7 +93,7 @@ class VanillaOptionDeepHedgingPricer:
         n_sims = int(n_sims/len(model_list))
         for i in range(len(model_list)):
             model= model_list[i]
-            simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid, S0=S0, v0=v0, M=n_sims,n=n, model_name=model_list[i].modelname)
+            simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid, S0=S0, v0=model.v0, M=n_sims,n=n, model_name=model_list[i].modelname)
             emb_vec[i*n_sims:n_sims*(i+1)] = i    
         return simulation_results, emb_vec
     

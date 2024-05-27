@@ -15,7 +15,8 @@ class HestonWithJumps(FactoryObject):
 
     def __init__(self, rate_of_mean_reversion: Union[float, Callable],long_run_average: Union[float, Callable],
                   vol_of_vol: Union[float, Callable], correlation_rho: Union[float, Callable],
-                  muj: Union[float, Callable],sigmaj: Union[float, Callable],lmbda: Union[float, Callable]):
+                  muj: Union[float, Callable],sigmaj: Union[float, Callable],lmbda: Union[float, Callable],
+                  v0: Union[float, Callable]):
         """Heston Model with Jumps as in https://perswww.kuleuven.be/~u0009713/ScSiTi03.pdf.
         """
         self.rate_of_mean_reversion = rate_of_mean_reversion
@@ -27,6 +28,7 @@ class HestonWithJumps(FactoryObject):
         self.lmbda = lmbda
         self._timegrid = None
         self.modelname = 'Heston with Jumps'
+        self.v0 = v0
 
     def _to_dict(self) -> dict:
         return {'rate_of_mean_reversion': self.rate_of_mean_reversion, 'long_run_average': self.long_run_average,
