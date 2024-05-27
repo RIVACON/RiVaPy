@@ -29,6 +29,7 @@ class GBM(FactoryObject):
         self.volatility = volatility
         self._timegrid = None
         self.modelname = 'GBM'
+        self.v0 = 0.
 
     def _to_dict(self) -> dict:
         return {'drift': self.drift, 'volatility': self.volatility}
