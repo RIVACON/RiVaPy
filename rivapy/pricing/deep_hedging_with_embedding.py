@@ -57,7 +57,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
 
         if "emb_key" in self.additional_states:
             self.no_of_unique_model = no_of_models 
-            self.embedding_size = 1
+            self.embedding_size = 4#1
             self._embedding_layer = tf.keras.layers.Embedding(
                 input_dim=self.no_of_unique_model+1,
                 output_dim=self.embedding_size,
@@ -387,7 +387,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         params["hedge_instruments"] = np.array(params["hedge_instruments"])
         if not ("loss" in params.keys()):
             params["loss"] = "mean_variance"
-        return DeepHedgeModel(depth=None, n_neurons=None, model=base_model, **params), (w,)
+        return DeepHedgeModelwEmbedding(depth=None, n_neurons=None, model=base_model, **params), (w,)
     
 
     def get_params(self)->np.ndarray:
