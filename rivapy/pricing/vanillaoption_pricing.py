@@ -17,21 +17,12 @@ import random
 sys.path.append('C:/Users/doeltz/development/RiVaPy/')
 import datetime as dt
 from rivapy.tools.datetime_grid import DateTimeGrid
-from rivapy.pricing.deep_hedging import DeepHedgeModel
-
-
-            
-def _generate_lr_schedule(initial_learning_rate: float, decay_step: int, decay_rate: float,):
-    return tf.keras.optimizers.schedules.InverseTimeDecay(
-            initial_learning_rate=initial_learning_rate,#1e-3,
-            decay_steps=decay_step,
-            decay_rate=decay_rate)
-    
-
+from rivapy.pricing.deep_hedging_with_embedding import DeepHedgeModelwEmbedding
+             
 
 class VanillaOptionDeepHedgingPricer:
     class PricingResults:
-        def __init__(self, hedge_model: DeepHedgeModel, paths: np.ndarray, sim_results, payoff):
+        def __init__(self, hedge_model: DeepHedgeModelwEmbedding, paths: np.ndarray, sim_results, payoff):
             self.hedge_model = hedge_model
             self.paths = paths
             self.sim_results = sim_results
@@ -74,7 +65,7 @@ class VanillaOptionDeepHedgingPricer:
 
     @staticmethod
     def generate_paths(seed: int,
-                       model_list: list,#GBM,#HestonForDeepHedging, 
+                       model_list: list,
                        timegrid: DateTimeGrid,
                 n_sims: int, 
                 days: int,
@@ -82,7 +73,6 @@ class VanillaOptionDeepHedgingPricer:
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
 
- 
         simulation_results = np.zeros((len(timegrid)+1, n_sims))
         S0 = 1. #ATM option
         emb_vec = np.zeros((n_sims))
@@ -96,6 +86,33 @@ class VanillaOptionDeepHedgingPricer:
             simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid, S0=S0, v0=model.v0, M=n_sims,n=n, model_name=model_list[i].modelname)
             emb_vec[i*n_sims:n_sims*(i+1)] = i    
         return simulation_results, emb_vec
+    
+    @staticmethod
+    def get_call_prices(sim_results: np.ndarray, strike: float,
+               seed: int,
+                model_list: list,
+                timegrid: DateTimeGrid,
+                n_sims: int, 
+                days: int,
+                freq: str):
+        tf.random.set_seed(seed)
+        np.random.seed(seed+123)
+
+        call_prices = np.zeros((len(timegrid)+1, n_sims))
+
+        if freq == '12H':
+            n = days*2
+        else:
+            n = days
+        n_sims = int(n_sims/len(model_list))
+
+        for i in range(len(model_list)):
+            model= model_list[i]
+            for j in range(len(timegrid)):
+                ttm = (timegrid[-1] - timegrid[j])
+                call_prices[j,i*n_sims:n_sims*(i+1)] = model.compute_call_price(sim_results[j,i*n_sims:n_sims*(i+1)],strike,ttm)
+            call_prices[-1,i*n_sims:n_sims*(i+1)] = 0.
+        return call_prices
     
     @staticmethod
     def price(val_date: dt.datetime,
@@ -193,13 +210,15 @@ class VanillaOptionDeepHedgingPricer:
                 T = (ins_list[i].expiry - val_date).days
                 if freq == '12H':
                     hedge_ins[key] = simulation_results[:int(T*2),:]
+                    #hedge_ins['V'] = VanillaOptionDeepHedgingPricer.get_call_prices(simulation_results[:int(T*2),:], ins_list[i].strike, seed,model_list,timegrid[:int(T*2)],n_sims,days,freq)
                 else:
                     hedge_ins[key] = simulation_results[:int(T),:]
-
-        
-        hedge_model = DeepHedgeModel(list(hedge_ins.keys()), list(additional_states_.keys()),timegrid=timegrid, 
+                    #hedge_ins['V'] = VanillaOptionDeepHedgingPricer.get_call_prices(simulation_results[:int(T),:], ins_list[i].strike, seed,model_list,timegrid[:int(T)],n_sims,days,freq)
+                
+        hedge_model = DeepHedgeModelwEmbedding(list(hedge_ins.keys()), list(additional_states_.keys()),timegrid=timegrid, 
                                         regularization=regularization,depth=depth, n_neurons=nb_neurons, loss = loss,
                                         transaction_cost = transaction_cost,no_of_models=len(model_list))
+
         paths = {}
         paths.update(hedge_ins)
         paths.update(additional_states_) 
@@ -209,9 +228,8 @@ class VanillaOptionDeepHedgingPricer:
                 decay_rate=decay_rate, 
                 staircase=True)
     
-    
-        payoff = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, ins_list)  
-        
+        payoff = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, ins_list) 
+
         hedge_model.train(paths, payoff, lr_schedule, epochs=epochs, batch_size=batch_size, tensorboard_log=tensorboard_logdir, verbose=verbose)
         return VanillaOptionDeepHedgingPricer.PricingResults(hedge_model, paths=paths, sim_results=simulation_results, payoff=payoff)
 

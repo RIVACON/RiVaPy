@@ -11,9 +11,8 @@ from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.models.gbm import GBM
 from rivapy.pricing.vanillaoption_pricing import (
     VanillaOptionDeepHedgingPricer,
-    DeepHedgeModel,
+    DeepHedgeModelwEmbedding,
 )
-
 
 def _get_entry(path: str, x: dict):
     path_entry = path.split(".")
@@ -21,7 +20,6 @@ def _get_entry(path: str, x: dict):
     for i in range(len(path_entry) - 1):
         y = y[path_entry[i]]
     return y[path_entry[-1]]
-
 
 def _fulfills(conditions: List[Tuple[str, Union[str, float, int, Tuple]]], x: dict):
 
@@ -118,8 +116,8 @@ class Repo:
         with open(self.repo_dir + "/results.json", "w") as f:
             json.dump(self.results, f, cls=_JSONEncoder)
 
-    def get_hedge_model(self, hashkey: str) -> DeepHedgeModel:
-        return DeepHedgeModel.load(self.repo_dir + "/" + hashkey + "/")
+    def get_hedge_model(self, hashkey: str) -> DeepHedgeModelwEmbedding:
+        return DeepHedgeModelwEmbedding.load(self.repo_dir + "/" + hashkey + "/")
 
     def get_model(self, hashkey: str) -> GBM:
         return GBM.from_dict(self.results[hashkey]["model"])
@@ -154,6 +152,34 @@ class Repo:
             simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid, S0=S0, v0=model.v0, M=n_sims,n=n, model_name=model_list[i].modelname)
             emb_vec[i*n_sims:n_sims*(i+1)] = emb    
         return simulation_results, emb_vec
+
+    def get_call_prices(self,
+        hashkey: str,
+            sim_results: np.ndarray, strike: float,
+               seed: int,
+                model_list: list,
+                n_sims: int, 
+                days: int,
+                freq: str)-> np.ndarray:
+        tf.random.set_seed(seed)
+        np.random.seed(seed+123)
+
+        call_prices = np.zeros((len(timegrid)+1, n_sims))
+        timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days, freq)
+        if freq == '12H':
+            n = days*2
+        else:
+            n = days
+        n_sims = int(n_sims/len(model_list))
+        model_list = [model]
+        for i in range(len(model_list)):
+            model= model_list[i]
+            for j in range(len(timegrid)):
+                ttm = (timegrid[-1] - timegrid[j])
+                call_prices[j,i*n_sims:n_sims*(i+1)] = model.compute_call_price(sim_results[j,i*n_sims:n_sims*(i+1)],strike,ttm)
+
+            call_prices[-1,i*n_sims:n_sims*(i+1)] = model.compute_call_price(sim_results[j,i*n_sims:n_sims*(i+1)],strike,0.)
+        return call_prices
 
 
     def select(
