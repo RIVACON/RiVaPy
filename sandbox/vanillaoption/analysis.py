@@ -153,33 +153,29 @@ class Repo:
             emb_vec[i*n_sims:n_sims*(i+1)] = emb    
         return simulation_results, emb_vec
 
-    def get_call_prices(self,
+    def get_call_price(self,
         hashkey: str,
-            sim_results: np.ndarray, strike: float,
-               seed: int,
-                model_list: list,
-                n_sims: int, 
-                days: int,
-                freq: str)-> np.ndarray:
+            sim_results: np.ndarray, 
+               seed: int = 42,
+                model: list = [GBM(drift=0.0, volatility=0.25)],
+                n_sims: int = 10000, 
+                days: int = 30,
+                freq: str = 'D')-> np.ndarray:
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
 
-        call_prices = np.zeros((len(timegrid)+1, n_sims))
         timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days, freq)
         if freq == '12H':
             n = days*2
         else:
             n = days
-        n_sims = int(n_sims/len(model_list))
         model_list = [model]
+        n_sims = int(n_sims/len(model_list))
         for i in range(len(model_list)):
             model= model_list[i]
-            for j in range(len(timegrid)):
-                ttm = (timegrid[-1] - timegrid[j])
-                call_prices[j,i*n_sims:n_sims*(i+1)] = model.compute_call_price(sim_results[j,i*n_sims:n_sims*(i+1)],strike,ttm)
-
-            call_prices[-1,i*n_sims:n_sims*(i+1)] = model.compute_call_price(sim_results[j,i*n_sims:n_sims*(i+1)],strike,0.)
-        return call_prices
+            ttm = (timegrid[-1] - timegrid[0])
+            call_price = model.compute_call_price(1.,model.v0,1.,ttm)
+        return call_price
 
 
     def select(

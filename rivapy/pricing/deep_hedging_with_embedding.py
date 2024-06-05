@@ -449,10 +449,10 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
 
         for k,v in model.model._get_trainable_state().items():
             if k.name == 'Embedding':
-                k.trainable = False
+                k.trainable = True
                 model.compile(optimizer=optimizer, loss=model.custom_loss)
             else:
-                k.trainable = True
+                k.trainable = False
                 model.compile(optimizer=optimizer, loss=model.custom_loss)
 
         inputs = model._create_inputs(paths)
