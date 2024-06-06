@@ -32,26 +32,26 @@ model_params = ast.literal_eval(data)
 
 model = []
 
-
-for i in range(64):
+loop = 16
+for i in range(loop):
     model.append(GBM(drift=model_params['GBM']['drift'][i],volatility=model_params['GBM']['vol'][i]))
-    #model.append(HestonForDeepHedging(rate_of_mean_reversion = model_params['Heston']['rate_of_mean_reversion'][i],
-    #                                  long_run_average = model_params['Heston']['long_run_average'][i],
-    #                                  vol_of_vol = model_params['Heston']['vol_of_vol'][i], 
-    #                                  correlation_rho = model_params['Heston']['correlation_rho'][i],
-    #                                  v0 = model_params['Heston']['v0'][i]))
-    #model.append(HestonWithJumps(rate_of_mean_reversion = model_params['Heston with Jumps']['rate_of_mean_reversion'][i],
-    #                             long_run_average = model_params['Heston with Jumps']['long_run_average'][i],
-    #                             vol_of_vol = model_params['Heston with Jumps']['vol_of_vol'][i], 
-    #                             correlation_rho = model_params['Heston with Jumps']['correlation_rho'][i],
-    #                             muj = 0.1791,sigmaj = 0.1346, 
-    #                             lmbda = model_params['Heston with Jumps']['lmbda'][i],
-    #                             v0 = model_params['Heston with Jumps']['v0'][i]))
-    #model.append(BNS(rho =model_params['BNS']['rho'][i],
-    #                 lmbda=model_params['BNS']['lmbda'][i],
-    #                 b=model_params['BNS']['b'][i],
-    #                 a=model_params['BNS']['a'][i],
-    #                 v0 = model_params['BNS']['v0'][i]))
+    model.append(HestonForDeepHedging(rate_of_mean_reversion = model_params['Heston']['rate_of_mean_reversion'][i],
+                                      long_run_average = model_params['Heston']['long_run_average'][i],
+                                      vol_of_vol = model_params['Heston']['vol_of_vol'][i], 
+                                      correlation_rho = model_params['Heston']['correlation_rho'][i],
+                                      v0 = model_params['Heston']['v0'][i]))
+    model.append(HestonWithJumps(rate_of_mean_reversion = model_params['Heston with Jumps']['rate_of_mean_reversion'][i],
+                                 long_run_average = model_params['Heston with Jumps']['long_run_average'][i],
+                                 vol_of_vol = model_params['Heston with Jumps']['vol_of_vol'][i], 
+                                 correlation_rho = model_params['Heston with Jumps']['correlation_rho'][i],
+                                 muj = 0.1791,sigmaj = 0.1346, 
+                                 lmbda = model_params['Heston with Jumps']['lmbda'][i],
+                                 v0 = model_params['Heston with Jumps']['v0'][i]))
+    model.append(BNS(rho =model_params['BNS']['rho'][i],
+                     lmbda=model_params['BNS']['lmbda'][i],
+                     b=model_params['BNS']['b'][i],
+                     a=model_params['BNS']['a'][i],
+                     v0 = model_params['BNS']['v0'][i]))
 
 
 #model = [HestonForDeepHedging(rate_of_mean_reversion = 0.06067,long_run_average = 0.0707,
@@ -176,7 +176,7 @@ for i in range(len(strike)):
         spec.append(ins)
 
 
-n_sims = 64*1000#*4
+n_sims = loop*3125*4
 for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
     pricing_results = repo.run(
                             refdate,
@@ -184,17 +184,18 @@ for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
                             model,
                             rerun=False,
                             depth=3,
-                            nb_neurons=64,#16,
+                            nb_neurons=32,#16,
                             n_sims=n_sims,#800_000,
-                            regularization=0.,
+                            regularization=0.,#0.01,
                             epochs=100,
                             verbose=1,
                             tensorboard_logdir="logs/"
                             + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
-                            initial_lr=0.0001,#0.005,  # 5e-4,
-                            decay_steps=1_000,
-                            batch_size=64,
-                            decay_rate=0.95,
+                            initial_lr=0.005,  # 5e-4,
+                            decay_steps=1000,
+                            batch_size=500,#2000,
+                            decay_rate=0.97,
                             seed=42,
-                            days=int(np.max(days))
+                            days=int(np.max(days)),
+                            #loss = "expected_shortfall"
                         )

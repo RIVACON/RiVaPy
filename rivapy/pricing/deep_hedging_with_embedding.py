@@ -57,7 +57,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
 
         if "emb_key" in self.additional_states:
             self.no_of_unique_model = no_of_models 
-            self.embedding_size = 4#1
+            self.embedding_size = 32
             self._embedding_layer = tf.keras.layers.Embedding(
                 input_dim=self.no_of_unique_model+1,
                 output_dim=self.embedding_size,
@@ -259,7 +259,6 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             return result
         if isinstance(t, int):
             inputs_ = self._create_inputs(paths)#, check_timegrid=True)
-            print(inputs_)
             inputs = []
             inputs.append(inputs_[0][:,t])
             inputs.append(inputs_[1]) #= [inputs_[i][:,t] for i in range(len(inputs_))]
@@ -280,6 +279,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
     def compute_pnl(self, paths: Dict[str, np.ndarray], payoff: np.ndarray):
         inputs = self._create_inputs(paths)
         return payoff + self.predict(inputs)  # -Z + d S
+
 
     @tf.function
     def custom_loss(self, y_true, y_pred):
@@ -415,10 +415,45 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
     def predict_single_pnl(self, paths: Dict[str, np.ndarray], payoff: np.ndarray):
         inputs = self._create_inputs(paths)
         return self.predict(inputs) + payoff 
+    
+
+    def fit_param(self, optimizer, callbacks, paths: Dict[str, np.ndarray], payoff: np.ndarray):
+
+        emb_layer = self.get_layer('Embedding')
+        params = emb_layer.get_weights()
+        emb_layer.set_weights(params)
+
+        self.model.trainable = False
+        self.compile(optimizer=optimizer, loss=self.custom_loss)
+        emb_layer.trainable = True
+        self.compile(optimizer=optimizer, loss=self.custom_loss)
+
+        self.model.trainable = False
+        self.compile(optimizer=optimizer, loss=self.custom_loss)
+        for k,v in self._get_trainable_state().items():
+            if k.name == 'Embedding':
+                emb_layer.trainable = True
+                k.trainable = True
+                self.compile(optimizer=optimizer, loss=self.custom_loss)
+            else:
+                k.trainable = False
+                self.compile(optimizer=optimizer, loss=self.custom_loss)
+            print(k.name,v)
+        inputs = self._create_inputs(paths)
+        return(self.fit(
+            inputs,
+            payoff,
+            epochs=10,
+            batch_size=64,
+            callbacks=callbacks,
+            verbose=1,
+            validation_split=0.1,
+            validation_freq=5))
 
     def set_embedding_trainable(self, trainable: bool):
         emb_layer = self.model.get_layer('Embedding')
         emb_layer.trainable=trainable
+
 
 
     @staticmethod
@@ -434,9 +469,6 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
                 staircase=True)
         optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
 
-        emb_layer = model.model.get_layer('Embedding')
-        params = emb_layer.get_weights()
-        emb_layer.set_weights(params)
 
         callbacks = []
         tensorboard_log = None
@@ -446,26 +478,9 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
                 logdir, histogram_freq=0
             )
             callbacks.append(tensorboard_callback)
+        
 
-        for k,v in model.model._get_trainable_state().items():
-            if k.name == 'Embedding':
-                k.trainable = True
-                model.compile(optimizer=optimizer, loss=model.custom_loss)
-            else:
-                k.trainable = False
-                model.compile(optimizer=optimizer, loss=model.custom_loss)
-
-        inputs = model._create_inputs(paths)
-        model.fit(
-            inputs,
-            payoff,
-            epochs=epochs,
-            batch_size=batch_size,
-            callbacks=callbacks,
-            verbose=verbose,
-            validation_split=0.1,
-            validation_freq=5)
-
+        model.fit_param(optimizer=optimizer, callbacks=callbacks,paths=paths,payoff=payoff)
         y_pred = model.predict_single_pnl(paths, payoff)
         return y_pred
     
