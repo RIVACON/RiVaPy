@@ -122,8 +122,6 @@ class Repo:
     def get_model(self, hashkey: str) -> GBM:
         return GBM.from_dict(self.results[hashkey]["model"])
     
-    def train_embedding(self, hashkey: str):
-        return DeepHedgeModelwEmbedding.load(self.repo_dir + "/" + hashkey + "/")
 
     def simulate_model(
         self,

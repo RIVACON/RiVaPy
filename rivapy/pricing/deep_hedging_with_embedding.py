@@ -30,7 +30,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         loss: str,
         transaction_cost: dict = None,
         # threshold: float = 0.0,
-        no_of_models: int = 1,
+        no_of_unique_model: int = 1,
         # cascading: bool = False,
         model: tf.keras.Model = None,
         **kwargs
@@ -55,18 +55,17 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         else:
             self.additional_states = additional_states
 
-        if "emb_key" in self.additional_states:
-            self.no_of_unique_model = no_of_models 
-            self.embedding_size = 32
-            self._embedding_layer = tf.keras.layers.Embedding(
-                input_dim=self.no_of_unique_model+1,
-                output_dim=self.embedding_size,
-                input_length=1,
-                name="Embedding",
-            )
-            self._concat_layer = tf.keras.layers.Concatenate(name="Concatenate")
-
+            #self._concat_layer = tf.keras.layers.Concatenate(name="Concatenate")
         if model is None:
+            if "emb_key" in self.additional_states:
+                self.no_of_unique_model = no_of_unique_model
+                self.embedding_size = 32
+                self._embedding_layer = tf.keras.layers.Embedding(
+                    input_dim=self.no_of_unique_model+1,
+                    output_dim=self.embedding_size,
+                    input_length=1,
+                    name="Embedding",
+                )
             self.model = self._build_model(depth, n_neurons)
         else:
             self.model = model
@@ -87,8 +86,52 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             return self._compute_pnl(x, training)  # + self.price
         else:
             return self._compute_pnl_withconstains(x, training)  # + self.price
+    
 
     def _build_model(self, depth: int, nb_neurons: int):
+        inputs = [
+            tf.keras.Input(shape=(1,), name=ins) for ins in self.hedge_instruments
+        ]
+        # if "emb_key" in self.additional_states:  #
+        #if self.additional_states is not None:
+         #   for state in self.additional_states:
+         #       inp_cat_data = tf.keras.layers.Input(shape=(1,), name=state)
+                #inputs.append(inp_cat_data)
+        inputs.append(tf.keras.Input(shape=(1,), name="ttm"))
+
+        if "emb_key" in self.additional_states:
+            inp_cat_data = tf.keras.layers.Input(shape=(1,))
+            inputs.append(inp_cat_data)
+            emb = self._embedding_layer(inp_cat_data)
+            flatten = tf.keras.layers.Flatten()(emb)
+            fully_connected_Input1 = tf.keras.layers.concatenate(inputs)
+            fully_connected_Input = tf.keras.layers.concatenate(
+                    [fully_connected_Input1, flatten]
+            )
+        else:
+            fully_connected_Input = tf.keras.layers.concatenate(inputs)
+
+        values_all = tf.keras.layers.Dense(
+            nb_neurons,
+            activation="selu",
+            kernel_initializer=tf.keras.initializers.GlorotUniform(),
+        )(fully_connected_Input)
+        for _ in range(depth):
+            values_all = tf.keras.layers.Dense(
+                nb_neurons,
+                activation="selu",
+                kernel_initializer=tf.keras.initializers.GlorotUniform(),
+            )(values_all)
+        value_out = tf.keras.layers.Dense(
+            len(self.hedge_instruments),
+            activation="linear",
+            kernel_initializer=tf.keras.initializers.GlorotUniform(),
+        )(values_all)
+        model = tf.keras.Model(inputs=inputs, outputs=value_out)
+        return model
+
+
+    def _build_model_old(self, depth: int, nb_neurons: int):
         inputs = [
             tf.keras.Input(shape=(1,), name=ins) for ins in self.hedge_instruments
         ]
@@ -127,9 +170,43 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         )(values_all)
         model = tf.keras.Model(inputs=inputs, outputs=value_out)
         return model
+    
 
     @tf.function
     def _compute_pnl(self, x_in, training):
+        if "emb_key" in self.additional_states:
+            x = [x_in[0]]
+            params = [x_in[1]]
+        else:
+            x = x_in
+        pnl = tf.zeros((tf.shape(x[0])[0],))
+        self._prev_q = tf.zeros(
+            (tf.shape(x[0])[0], len(self.hedge_instruments)), name="prev_q"
+        )
+        for i in range(self.timegrid.shape[0] - 2):
+            t = (
+                [self.timegrid[-1] - self.timegrid[i]]
+                * tf.ones((tf.shape(x[0])[0], 1))
+                / self.timegrid[-1]
+            )
+            inputs = [v[:, i] for v in x]
+            inputs.append(t)
+            if "emb_key" in self.additional_states:
+                #params = self._embedding_layer(x_in[1])
+                inputs.append(params)
+            quantity = self.model(inputs,training)#self.model(inputs, training=training)
+            for j in range(len(self.hedge_instruments)):
+                pnl += tf.math.multiply(
+                    (self._prev_q[:, j] - quantity[:, j]), tf.squeeze(x[j][:, i])
+                )
+            self._prev_q = quantity
+        for j in range(len(self.hedge_instruments)):
+            pnl += self._prev_q[:, j] * tf.squeeze(x[j][:, -1])
+        return pnl
+    
+
+    @tf.function
+    def _compute_pnl_old(self, x_in, training):
         if "emb_key" in self.additional_states:
             x = [x_in[0]]
             params = [x_in[1]]
@@ -371,6 +448,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         params["hedge_instruments"] = self.hedge_instruments
         params["loss"] = self._loss
         params["transaction_cost"] = self.transaction_cost
+        params["no_of_unique_model"] = self.no_of_unique_model
         # params["threshold"] = self.threshold
         with open(folder + "/params.json", "w") as f:
             json.dump(params, f)
@@ -382,9 +460,11 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         base_model = tf.keras.models.load_model(folder + "/delta_model")
         emb_layer = base_model.get_layer('Embedding')
         (w,) = emb_layer.get_weights()
+        
         params["timegrid"] = np.array(params["timegrid"])
         params["additional_states"] = np.array(params["additional_states"])
         params["hedge_instruments"] = np.array(params["hedge_instruments"])
+        params["no_of_unique_model"] = params["no_of_unique_model"]
         if not ("loss" in params.keys()):
             params["loss"] = "mean_variance"
         return DeepHedgeModelwEmbedding(depth=None, n_neurons=None, model=base_model, **params), (w,)
@@ -419,40 +499,47 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
 
     def fit_param(self, optimizer, callbacks, paths: Dict[str, np.ndarray], payoff: np.ndarray):
 
-        emb_layer = self.get_layer('Embedding')
-        params = emb_layer.get_weights()
-        emb_layer.set_weights(params)
 
-        self.model.trainable = False
-        self.compile(optimizer=optimizer, loss=self.custom_loss)
-        emb_layer.trainable = True
-        self.compile(optimizer=optimizer, loss=self.custom_loss)
+        #self.model.trainable = False
+        #self.model.compile(optimizer=optimizer, loss=self.custom_loss)
 
-        self.model.trainable = False
-        self.compile(optimizer=optimizer, loss=self.custom_loss)
-        for k,v in self._get_trainable_state().items():
-            if k.name == 'Embedding':
-                emb_layer.trainable = True
-                k.trainable = True
-                self.compile(optimizer=optimizer, loss=self.custom_loss)
+        #emb_layer.trainable = True
+        #self.compile(optimizer=optimizer, loss=self.custom_loss)
+        #count = 0
+        #for k,v in self.model._get_trainable_state().items():
+        #    if count == 0:
+        #        k.trainable = True
+        #    if count == 4:
+        #        k.trainable = True
+        #        #self.compile(optimizer=optimizer, loss=self.custom_loss)
+        #    else:
+        #        k.trainable = False
+        #    count = count + 1
+        #    print(k.name,v)
+
+        for layer in self.model.layers:
+            if layer.name == 'Embedding':
+                emb_layer = self.model.get_layer('Embedding')
+                params = emb_layer.get_weights()
+                print(params)
+                emb_layer.trainable=True
             else:
-                k.trainable = False
-                self.compile(optimizer=optimizer, loss=self.custom_loss)
-            print(k.name,v)
+                layer.trainable = False
+            print(layer, layer.name, layer.trainable)
+        self.compile(optimizer=optimizer, loss=self.custom_loss)
+            #print(k.name,v)
+            #print(k.get_weights())
+
         inputs = self._create_inputs(paths)
         return(self.fit(
             inputs,
             payoff,
             epochs=10,
-            batch_size=64,
+            batch_size=500,
             callbacks=callbacks,
             verbose=1,
             validation_split=0.1,
             validation_freq=5))
-
-    def set_embedding_trainable(self, trainable: bool):
-        emb_layer = self.model.get_layer('Embedding')
-        emb_layer.trainable=trainable
 
 
 
@@ -469,7 +556,6 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
                 staircase=True)
         optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
 
-
         callbacks = []
         tensorboard_log = None
         if tensorboard_log is not None:
@@ -481,8 +567,8 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         
 
         model.fit_param(optimizer=optimizer, callbacks=callbacks,paths=paths,payoff=payoff)
-        y_pred = model.predict_single_pnl(paths, payoff)
-        return y_pred
+        #y_pred = model.predict_single_pnl(paths, payoff)
+        return None#y_pred
     
 
 
