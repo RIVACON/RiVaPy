@@ -178,7 +178,7 @@ for i in range(len(strike)):
         spec.append(ins)
 
 
-n_sims = loop*100000  #3125*4#*loop
+n_sims = loop*50000  #3125*4#*loop
 for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
     pricing_results = repo.run(
                             refdate,
@@ -186,17 +186,17 @@ for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
                             model,
                             rerun=False,
                             depth=3,
-                            nb_neurons=32,#64,#32,
+                            nb_neurons=32,#64,#
                             n_sims=n_sims,#800_000,
                             regularization=0.,#0.01,
-                            epochs=100,
+                            epochs=50,#100,
                             verbose=1,
                             tensorboard_logdir="logs/"
                             + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
                             initial_lr=0.005,  # 5e-4,
-                            decay_steps=1000,#16_000,#
+                            decay_steps=2000,#16_000,#1000,#
                             batch_size=500,#64,#500,
-                            decay_rate=0.97,#0.95,#0.97,
+                            decay_rate=0.95,#0.97,
                             seed=42,
                             days=int(np.max(days)),
                             #loss = "expected_shortfall"
