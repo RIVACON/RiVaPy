@@ -59,7 +59,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         if model is None:
             if "emb_key" in self.additional_states:
                 self.no_of_unique_model = no_of_unique_model
-                self.embedding_size = 32
+                self.embedding_size = 1#32
                 self._embedding_layer = tf.keras.layers.Embedding(
                     input_dim=self.no_of_unique_model+1,
                     output_dim=self.embedding_size,
@@ -131,7 +131,6 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         return model
 
 
-    def _build_model_old(self, depth: int, nb_neurons: int):
         inputs = [
             tf.keras.Input(shape=(1,), name=ins) for ins in self.hedge_instruments
         ]
@@ -204,9 +203,6 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             pnl += self._prev_q[:, j] * tf.squeeze(x[j][:, -1])
         return pnl
     
-
-    @tf.function
-    def _compute_pnl_old(self, x_in, training):
         if "emb_key" in self.additional_states:
             x = [x_in[0]]
             params = [x_in[1]]

@@ -25,16 +25,18 @@ import analysis
 
 from sys import exit
 
-import ast  
-with open('model_params_dict.txt') as f: 
-    data = f.read() 
-model_params = ast.literal_eval(data) 
+#import ast  
+#with open('model_params_dict.txt') as f: 
+#    data = f.read() 
+#model_params = ast.literal_eval(data) 
 
 model = []
 
 loop = 4
+vol_list = [0.1,0.2,0.3,0.4]
 for i in range(loop):
-    model.append(GBM(drift=model_params['GBM']['drift'][i],volatility=model_params['GBM']['vol'][i]))
+    model.append(GBM(0.,vol_list[i]))
+    #model.append(GBM(drift=model_params['GBM']['drift'][i],volatility=model_params['GBM']['vol'][i]))
     #model.append(HestonForDeepHedging(rate_of_mean_reversion = model_params['Heston']['rate_of_mean_reversion'][i],
     #                                  long_run_average = model_params['Heston']['long_run_average'][i],
     #                                  vol_of_vol = model_params['Heston']['vol_of_vol'][i], 
@@ -137,7 +139,7 @@ for i in range(loop):
 
 
 repo = analysis.Repo(
-    "./test_models"
+    "./sims_vanillacalloption"
 )
 
 reg = {
@@ -172,11 +174,11 @@ for i in range(len(strike)):
                 udl_id="ADS",
                 share_ratio=1,
                 long_short_flag=long_short_flag
-            )
+               )
         spec.append(ins)
 
 
-n_sims = 3125*4#*loop
+n_sims = loop*100000  #3125*4#*loop
 for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
     pricing_results = repo.run(
                             refdate,
@@ -184,17 +186,17 @@ for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
                             model,
                             rerun=False,
                             depth=3,
-                            nb_neurons=32,#16,
+                            nb_neurons=32,#64,#32,
                             n_sims=n_sims,#800_000,
                             regularization=0.,#0.01,
-                            epochs=10,#100,
+                            epochs=100,
                             verbose=1,
                             tensorboard_logdir="logs/"
                             + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
                             initial_lr=0.005,  # 5e-4,
-                            decay_steps=1000,
-                            batch_size=500,#2000,
-                            decay_rate=0.97,
+                            decay_steps=1000,#16_000,#
+                            batch_size=500,#64,#500,
+                            decay_rate=0.97,#0.95,#0.97,
                             seed=42,
                             days=int(np.max(days)),
                             #loss = "expected_shortfall"
