@@ -97,12 +97,11 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
          #   for state in self.additional_states:
          #       inp_cat_data = tf.keras.layers.Input(shape=(1,), name=state)
                 #inputs.append(inp_cat_data)
-        #FStestinputs.append(tf.keras.Input(shape=(1,), name="ttm"))
+        inputs.append(tf.keras.Input(shape=(1,), name="ttm"))
 
         if "emb_key" in self.additional_states:
             inp_cat_data = tf.keras.layers.Input(shape=(1,))
             inputs.append(inp_cat_data)
-            inputs.append(tf.keras.Input(shape=(1,), name="ttm"))
             emb = self._embedding_layer(inp_cat_data)
             flatten = tf.keras.layers.Flatten()(emb)
             fully_connected_Input1 = tf.keras.layers.concatenate(inputs)
@@ -190,10 +189,10 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
                 / self.timegrid[-1]
             )
             inputs = [v[:, i] for v in x]
+            inputs.append(t)
             if "emb_key" in self.additional_states:
                 #params = self._embedding_layer(x_in[1])
                 inputs.append(params)
-            inputs.append(t)
             quantity = self.model(inputs,training)#self.model(inputs, training=training)
             for j in range(len(self.hedge_instruments)):
                 pnl += tf.math.multiply(
@@ -251,9 +250,9 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
                 / self.timegrid[-1]
             )
             inputs = [v[:, i] for v in x]
+            inputs.append(t)
             if "emb_key" in self.additional_states:
                 inputs.append(params)
-            inputs.append(t)
             quantity = self.model(inputs, training=training)
             for j in range(len(self.hedge_instruments)):
                 key_to_check = self.hedge_instruments[j]
@@ -525,7 +524,6 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         self.compile(optimizer=optimizer, loss=self.custom_loss)
             #print(k.name,v)
             #print(k.get_weights())
-
         inputs = self._create_inputs(paths)
         return(self.fit(
             inputs,

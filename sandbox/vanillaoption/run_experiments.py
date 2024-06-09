@@ -32,8 +32,8 @@ from sys import exit
 
 model = []
 
-loop = 4
-vol_list = [0.1,0.2,0.3,0.4]
+loop = 16
+vol_list = [0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85]
 for i in range(loop):
     model.append(GBM(0.,vol_list[i]))
     #model.append(GBM(drift=model_params['GBM']['drift'][i],volatility=model_params['GBM']['vol'][i]))
@@ -189,7 +189,7 @@ for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
                             nb_neurons=32,#64,#
                             n_sims=n_sims,#800_000,
                             regularization=0.,#0.01,
-                            epochs=50,#100,
+                            epochs=100,
                             verbose=1,
                             tensorboard_logdir="logs/"
                             + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
