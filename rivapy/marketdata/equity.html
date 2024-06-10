@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Equity &mdash; rivapy  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
 
   
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -75,6 +75,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../developer_guide.html">Developer Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developer_guide.html#logging-usage">Logging Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../search.html">Search Page</a></li>
 </ul>
 
         </div>
@@ -108,7 +110,10 @@
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="dividends.html">Dividend Tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dividends.html">Dividend Tables</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dividends.html#rivapy.marketdata.DividendTable"><code class="docutils literal notranslate"><span class="pre">DividendTable</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
 <section id="curves">
@@ -119,7 +124,7 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Equity Forward Curve</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>spot</strong> (<em>float</em>) – Current spot</p></li>
 <li><p><strong>discount_curve</strong> (<a class="reference internal" href="discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – [description]</p></li>
@@ -134,7 +139,7 @@
 <span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days_end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3650</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/marketdata/curves.html#EquityForwardCurve.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.EquityForwardCurve.plot" title="Permalink to this definition"></a></dt>
 <dd><p>Plots the forward curve using matplotlibs plot function.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>days</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of days between two plotted rates/discount factors. Defaults to 10.</p></li>
 <li><p><strong>days_end</strong> (<em>int. optional</em>) – Number of days when plotting will end. Defaults to 10*365 (10yr)</p></li>
@@ -160,7 +165,7 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Volatility surface</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>id</strong> (<em>str</em>) – Identifier (name) of the volatility surface.</p></li>
 <li><p><strong>refdate</strong> (<em>datetime</em>) – Valuation date.</p></li>
@@ -172,23 +177,23 @@
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="rivapy.marketdata.VolatilitySurface.calc_implied_vol">
-<span class="sig-name descname"><span class="pre">calc_implied_vol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expiry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strike</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward_curve</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata.html#VolatilitySurface.calc_implied_vol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.VolatilitySurface.calc_implied_vol" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">calc_implied_vol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expiry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strike</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward_curve</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata.html#VolatilitySurface.calc_implied_vol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.VolatilitySurface.calc_implied_vol" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate implied volatility</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>refdate</strong> (<em>datetime</em>) – Valuation date.</p></li>
 <li><p><strong>expiry</strong> (<em>datetime</em>) – Expiration date.</p></li>
 <li><p><strong>strike</strong> (<em>float</em>) – Strike price.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>Exception</strong> – [description]</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Implied volatility.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>float</p>
 </dd>
 </dl>
@@ -214,7 +219,7 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Flat volatility parametrization</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>vol</strong> (<em>float</em>) – Constant volatility.</p>
 </dd>
 </dl>
@@ -226,7 +231,7 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Term volatility parametrization</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>expiries</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – List of expiries (sorted from nearest to farest).</p></li>
 <li><p><strong>fwd_atm_vols</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – List of at-the-money volatilities.</p></li>
@@ -243,7 +248,7 @@
 <div class="math notranslate nohighlight">
 \[w(k) = a + b(\rho (k-m) + \sqrt{(k-m)^2+\sigma^2 })\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>expiries</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – List of expiries (sorted from nearest to farest).</p></li>
 <li><p><strong>svi_params</strong> (<em>List</em><em>[</em><em>Tuple</em><em>]</em>) – List of SVI parameters (one Tuple for each expiry). Tuple in the order (a, b, rho, m, sigma).</p></li>
@@ -259,7 +264,7 @@
 <p>SSVI volatility parametrization
 <a class="reference external" href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2033323">https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2033323</a></p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>expiries</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – List of expiries (sorted from nearest to farest).</p></li>
 <li><p><strong>fwd_atm_vols</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – List of at-the-money volatilities.</p></li>
@@ -274,16 +279,16 @@
 <span class="sig-name descname"><span class="pre">calc_implied_vol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ttm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strike</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/marketdata.html#VolatilityParametrizationSSVI.calc_implied_vol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.VolatilityParametrizationSSVI.calc_implied_vol" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate implied volatility for given expiry and strike</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ttm</strong> (<em>[</em><em>float</em><em>]</em>) – Expiry.</p></li>
 <li><p><strong>strike</strong> (<em>[</em><em>float</em><em>]</em>) – Strike.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Implied volatility.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>[float]</p>
 </dd>
 </dl>
@@ -340,7 +345,7 @@
 <p>&gt; <span class="math notranslate nohighlight">\(\rho\)</span> is the correlation between the Brownian motions driving the forward rate and the instantaneous vol;</p>
 <p>&gt; <span class="math notranslate nohighlight">\(\beta\)</span> is the CEV component for forward rate (determines shape of forward rates, leverage effect and backbond of ATM vol).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>expiries</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – List of expiries (sorted from nearest to farest).</p></li>
 <li><p><strong>sabr_params</strong> (<em>List</em><em>[</em><em>Tuple</em><em>]</em>) – List of SABR parameters (one Tuple for each expiry). Tuple in the order (alpha, nu, beta, rho).</p></li>
@@ -359,7 +364,7 @@ This parametrization stores a set of strike-vol grids for a given list of expiri
 - apply a splien interpolation in each expiry to get the respective volatility
 - apply a linear interpolation (in total variance)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>expiries</strong> (<em>np.array</em>) – An array of the expiries.</p></li>
 <li><p><strong>strikes</strong> (<em>np.ndarray</em>) – </p></li>
@@ -372,16 +377,16 @@ This parametrization stores a set of strike-vol grids for a given list of expiri
 <span class="sig-name descname"><span class="pre">calc_implied_vol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ttm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strike</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/marketdata.html#VolatilityGridParametrization.calc_implied_vol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.VolatilityGridParametrization.calc_implied_vol" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate implied volatility for given expiry and strike</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ttm</strong> (<em>[</em><em>float</em><em>]</em>) – Expiry.</p></li>
 <li><p><strong>strike</strong> (<em>[</em><em>float</em><em>]</em>) – Strike.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Implied volatility.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>[float]</p>
 </dd>
 </dl>

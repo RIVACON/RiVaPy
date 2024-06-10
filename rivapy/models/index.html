@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Models &mdash; rivapy  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
 
   
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -68,6 +68,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../developer_guide.html">Developer Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developer_guide.html#logging-usage">Logging Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../search.html">Search Page</a></li>
 </ul>
 
         </div>
@@ -101,20 +103,74 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="stochastic_processes.html">Stochastic Processes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="stochastic_processes.html#ornstein-uhlenbeck">Ornstein-Uhlenbeck</a></li>
-<li class="toctree-l2"><a class="reference internal" href="stochastic_processes.html#lucia-schwartz">Lucia-Schwartz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stochastic_processes.html#ornstein-uhlenbeck">Ornstein-Uhlenbeck</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck"><code class="docutils literal notranslate"><span class="pre">OrnsteinUhlenbeck</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.apply_mc_step"><code class="docutils literal notranslate"><span class="pre">OrnsteinUhlenbeck.apply_mc_step()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.calibrate"><code class="docutils literal notranslate"><span class="pre">OrnsteinUhlenbeck.calibrate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.compute_call_price"><code class="docutils literal notranslate"><span class="pre">OrnsteinUhlenbeck.compute_call_price()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.compute_expected_value"><code class="docutils literal notranslate"><span class="pre">OrnsteinUhlenbeck.compute_expected_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.conditional_probability_density"><code class="docutils literal notranslate"><span class="pre">OrnsteinUhlenbeck.conditional_probability_density()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.rnd_shape"><code class="docutils literal notranslate"><span class="pre">OrnsteinUhlenbeck.rnd_shape()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.simulate"><code class="docutils literal notranslate"><span class="pre">OrnsteinUhlenbeck.simulate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stochastic_processes.html#lucia-schwartz">Lucia-Schwartz</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stochastic_processes.html#rivapy.models.LuciaSchwartz"><code class="docutils literal notranslate"><span class="pre">LuciaSchwartz</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stochastic_processes.html#rivapy.models.LuciaSchwartz.compute_expected_value"><code class="docutils literal notranslate"><span class="pre">LuciaSchwartz.compute_expected_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stochastic_processes.html#rivapy.models.LuciaSchwartz.compute_fwd_value"><code class="docutils literal notranslate"><span class="pre">LuciaSchwartz.compute_fwd_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stochastic_processes.html#rivapy.models.LuciaSchwartz.rnd_shape"><code class="docutils literal notranslate"><span class="pre">LuciaSchwartz.rnd_shape()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stochastic_processes.html#rivapy.models.LuciaSchwartz.simulate"><code class="docutils literal notranslate"><span class="pre">LuciaSchwartz.simulate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="equity.html">Equity</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="equity.html#local-volatility-model">Local Volatility Model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="equity.html#heston-model">Heston Model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="equity.html#scott-chesney">Scott Chesney</a></li>
-<li class="toctree-l2"><a class="reference internal" href="equity.html#stochastic-local-volatility-model">Stochastic Local Volatility Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equity.html#local-volatility-model">Local Volatility Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="equity.html#rivapy.models.LocalVol"><code class="docutils literal notranslate"><span class="pre">LocalVol</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="equity.html#rivapy.models.LocalVol.apply_mc_step"><code class="docutils literal notranslate"><span class="pre">LocalVol.apply_mc_step()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="equity.html#rivapy.models.LocalVol.compute_local_var"><code class="docutils literal notranslate"><span class="pre">LocalVol.compute_local_var()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="equity.html#heston-model">Heston Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="equity.html#rivapy.models.HestonModel"><code class="docutils literal notranslate"><span class="pre">HestonModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="equity.html#rivapy.models.HestonModel.apply_mc_step"><code class="docutils literal notranslate"><span class="pre">HestonModel.apply_mc_step()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="equity.html#rivapy.models.HestonModel.call_price"><code class="docutils literal notranslate"><span class="pre">HestonModel.call_price()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="equity.html#rivapy.models.HestonModel.feller_condition"><code class="docutils literal notranslate"><span class="pre">HestonModel.feller_condition()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="equity.html#rivapy.models.HestonModel.get_initial_value"><code class="docutils literal notranslate"><span class="pre">HestonModel.get_initial_value()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="equity.html#scott-chesney">Scott Chesney</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="equity.html#rivapy.models.ScottChesneyModel"><code class="docutils literal notranslate"><span class="pre">ScottChesneyModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="equity.html#rivapy.models.ScottChesneyModel.apply_mc_step"><code class="docutils literal notranslate"><span class="pre">ScottChesneyModel.apply_mc_step()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="equity.html#stochastic-local-volatility-model">Stochastic Local Volatility Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="equity.html#rivapy.models.StochasticLocalVol"><code class="docutils literal notranslate"><span class="pre">StochasticLocalVol</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="equity.html#rivapy.models.StochasticLocalVol.apply_mc_step"><code class="docutils literal notranslate"><span class="pre">StochasticLocalVol.apply_mc_step()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="equity.html#rivapy.models.StochasticLocalVol.calibrate_MC"><code class="docutils literal notranslate"><span class="pre">StochasticLocalVol.calibrate_MC()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="equity.html#rivapy.models.StochasticLocalVol.get_initial_value"><code class="docutils literal notranslate"><span class="pre">StochasticLocalVol.get_initial_value()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="energy/index.html">Energy and Weather</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="energy/energy_weather.html">Wind</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="energy/energy_weather.html#instantenous-production-models-spot-models">Instantenous Production Models (Spot Models)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="energy/energy_weather.html#instantenous-production-models-spot-models">Instantenous Production Models (Spot Models)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="energy/energy_weather.html#rivapy.models.WindPowerModel"><code class="docutils literal notranslate"><span class="pre">WindPowerModel</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="energy/energy_weather.html#forecast-models-forward-models">Forecast Models (Forward Models)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="energy/energy_weather.html#windpowerforecastmodel">WindPowerForecastModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="energy/energy_weather.html#multiregionwindforecastmodel">MultiRegionWindForecastModel</a></li>
@@ -123,7 +179,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="energy/energy_weather.html#solar">Solar</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="energy/energy_weather.html#solarpowermodel">SolarPowerModel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="energy/energy_weather.html#solarpowermodel">SolarPowerModel</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="energy/energy_weather.html#rivapy.models.SolarPowerModel"><code class="docutils literal notranslate"><span class="pre">SolarPowerModel</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="energy/energy_weather.html#power">Power</a><ul>
@@ -136,8 +195,14 @@
 <li class="toctree-l4"><a class="reference internal" href="energy/energy_weather.html#residualdemandforwardmodel">ResidualDemandForwardModel</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="energy/energy_weather.html#loadmodel">LoadModel</a></li>
-<li class="toctree-l3"><a class="reference internal" href="energy/energy_weather.html#supplyfunction">SupplyFunction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="energy/energy_weather.html#loadmodel">LoadModel</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="energy/energy_weather.html#rivapy.models.LoadModel"><code class="docutils literal notranslate"><span class="pre">LoadModel</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="energy/energy_weather.html#supplyfunction">SupplyFunction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="energy/energy_weather.html#rivapy.models.SupplyFunction"><code class="docutils literal notranslate"><span class="pre">SupplyFunction</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
