@@ -25,35 +25,35 @@ import analysis
 
 from sys import exit
 
-import ast  
-with open('model_params_dict.txt') as f: 
-    data = f.read() 
-model_params = ast.literal_eval(data) 
+#import ast  
+#with open('model_params_dict.txt') as f: 
+#    data = f.read() 
+#model_params = ast.literal_eval(data) 
 
 model = []
 
-loop = 64
-#vol_list = [0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85]
+loop = 4
+vol_list = [0.1,0.2,0.3,0.4]
 for i in range(loop):
-#    model.append(GBM(0.,vol_list[i]))
-    model.append(GBM(drift=model_params['GBM']['drift'][i],volatility=model_params['GBM']['vol'][i]))
-    model.append(HestonForDeepHedging(rate_of_mean_reversion = model_params['Heston']['rate_of_mean_reversion'][i],
-                                      long_run_average = model_params['Heston']['long_run_average'][i],
-                                      vol_of_vol = model_params['Heston']['vol_of_vol'][i], 
-                                      correlation_rho = model_params['Heston']['correlation_rho'][i],
-                                      v0 = model_params['Heston']['v0'][i]))
-    model.append(HestonWithJumps(rate_of_mean_reversion = model_params['Heston with Jumps']['rate_of_mean_reversion'][i],
-                                 long_run_average = model_params['Heston with Jumps']['long_run_average'][i],
-                                 vol_of_vol = model_params['Heston with Jumps']['vol_of_vol'][i], 
-                                 correlation_rho = model_params['Heston with Jumps']['correlation_rho'][i],
-                                 muj = 0.1791,sigmaj = 0.1346, 
-                                 lmbda = model_params['Heston with Jumps']['lmbda'][i],
-                                 v0 = model_params['Heston with Jumps']['v0'][i]))
-    model.append(BNS(rho =model_params['BNS']['rho'][i],
-                     lmbda=model_params['BNS']['lmbda'][i],
-                     b=model_params['BNS']['b'][i],
-                     a=model_params['BNS']['a'][i],
-                     v0 = model_params['BNS']['v0'][i]))
+    model.append(GBM(0.,vol_list[i]))
+    #model.append(GBM(drift=model_params['GBM']['drift'][i],volatility=model_params['GBM']['vol'][i]))
+    #model.append(HestonForDeepHedging(rate_of_mean_reversion = model_params['Heston']['rate_of_mean_reversion'][i],
+    #                                  long_run_average = model_params['Heston']['long_run_average'][i],
+    #                                  vol_of_vol = model_params['Heston']['vol_of_vol'][i], 
+    #                                  correlation_rho = model_params['Heston']['correlation_rho'][i],
+    #                                  v0 = model_params['Heston']['v0'][i]))
+    #model.append(HestonWithJumps(rate_of_mean_reversion = model_params['Heston with Jumps']['rate_of_mean_reversion'][i],
+    #                             long_run_average = model_params['Heston with Jumps']['long_run_average'][i],
+    #                             vol_of_vol = model_params['Heston with Jumps']['vol_of_vol'][i], 
+    #                             correlation_rho = model_params['Heston with Jumps']['correlation_rho'][i],
+    #                             muj = 0.1791,sigmaj = 0.1346, 
+    #                             lmbda = model_params['Heston with Jumps']['lmbda'][i],
+    #                             v0 = model_params['Heston with Jumps']['v0'][i]))
+    #model.append(BNS(rho =model_params['BNS']['rho'][i],
+    #                 lmbda=model_params['BNS']['lmbda'][i],
+    #                 b=model_params['BNS']['b'][i],
+   #                  a=model_params['BNS']['a'][i],
+   #                  v0 = model_params['BNS']['v0'][i]))
 
 
 #model = [HestonForDeepHedging(rate_of_mean_reversion = 0.06067,long_run_average = 0.0707,
@@ -105,21 +105,21 @@ for i in range(len(strike)):
         count = count + 1
         expiry = refdate + dt.timedelta(days=days[j])
         ins = EuropeanVanillaSpecification(
-                "Test_Call"+str(count),
-                tpe,
-                expiry,
-                strike[i],
-                issuer=issuer,
-                sec_lvl=seclevel,
-                curr="EUR",
-                udl_id="ADS",
-                share_ratio=1,
-                long_short_flag=long_short_flag
-               )
+                    "Test_Call_100epochs"+str(count),
+                    tpe,
+                    expiry,
+                    strike[i],
+                    issuer=issuer,
+                    sec_lvl=seclevel,
+                    curr="EUR",
+                    udl_id="ADS",
+                    share_ratio=1,
+                    long_short_flag=long_short_flag
+                )
         spec.append(ins)
 
 
-n_sims = loop*50000*4 
+n_sims = loop*100000#*4
 for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
     pricing_results = repo.run(
                             refdate,
@@ -127,7 +127,7 @@ for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
                             model,
                             rerun=False,
                             depth=3,
-                            nb_neurons=32,#64,#
+                            nb_neurons=64,#32,#64,#
                             n_sims=n_sims,#800_000,
                             regularization=0.,#0.01,
                             epochs=100,
@@ -135,9 +135,9 @@ for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
                             tensorboard_logdir="logs/"
                             + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
                             initial_lr=0.005,  # 5e-4,
-                            decay_steps=2000,#16_000,#1000,#
-                            batch_size=500,#64,#500,
-                            decay_rate=0.95,#0.97,
+                            decay_steps=16_000,#1000,#
+                            batch_size=256,#500,
+                            decay_rate=0.95,
                             seed=42,
                             days=int(np.max(days)),
                             #loss = "expected_shortfall"

@@ -59,7 +59,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         if model is None:
             if "emb_key" in self.additional_states:
                 self.no_of_unique_model = no_of_unique_model
-                self.embedding_size = 32
+                self.embedding_size = 1#32
                 self._embedding_layer = tf.keras.layers.Embedding(
                     input_dim=self.no_of_unique_model+1,
                     output_dim=self.embedding_size,
@@ -318,7 +318,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             )
         return pnl
 
-    def compute_delta(self, paths: Dict[str, np.ndarray], t: Union[int, float] = None):
+    def compute_delta(self, paths: Dict[str, np.ndarray], t: Union[int, float] = None,emb: Union[int, float] = None):
         if t is None:
             result = np.zeros(
                 (
@@ -334,13 +334,14 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             inputs_ = self._create_inputs(paths)#, check_timegrid=True)
             inputs = []
             inputs.append(inputs_[0][:,t])
-            inputs.append(inputs_[1]) #= [inputs_[i][:,t] for i in range(len(inputs_))]
+            #inputs.append(inputs_[1]) #= [inputs_[i][:,t] for i in range(len(inputs_))]
             t = (self.timegrid[-1] - self.timegrid[t]) / self.timegrid[-1]
         else:
             inputs_ = self._create_inputs(paths, check_timegrid=True)
             inputs = [inputs_[i] for i in range(len(inputs_))]
         # for k,v in paths.items():
         inputs.append(np.full(inputs[0].shape, fill_value=t))
+        inputs.append(np.full(inputs_[1].shape, fill_value=emb))
         return self.model.predict(inputs)
 
     def _compute_delta_path(self, paths: Dict[str, np.ndarray]):
