@@ -59,7 +59,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         if model is None:
             if "emb_key" in self.additional_states:
                 self.no_of_unique_model = no_of_unique_model
-                self.embedding_size = 1#32
+                self.embedding_size = 32
                 self._embedding_layer = tf.keras.layers.Embedding(
                     input_dim=self.no_of_unique_model+1,
                     output_dim=self.embedding_size,

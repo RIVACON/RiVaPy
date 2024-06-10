@@ -25,117 +25,58 @@ import analysis
 
 from sys import exit
 
-#import ast  
-#with open('model_params_dict.txt') as f: 
-#    data = f.read() 
-#model_params = ast.literal_eval(data) 
+import ast  
+with open('model_params_dict.txt') as f: 
+    data = f.read() 
+model_params = ast.literal_eval(data) 
 
 model = []
 
-loop = 16
-vol_list = [0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85]
+loop = 64
+#vol_list = [0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85]
 for i in range(loop):
-    model.append(GBM(0.,vol_list[i]))
-    #model.append(GBM(drift=model_params['GBM']['drift'][i],volatility=model_params['GBM']['vol'][i]))
-    #model.append(HestonForDeepHedging(rate_of_mean_reversion = model_params['Heston']['rate_of_mean_reversion'][i],
-    #                                  long_run_average = model_params['Heston']['long_run_average'][i],
-    #                                  vol_of_vol = model_params['Heston']['vol_of_vol'][i], 
-    #                                  correlation_rho = model_params['Heston']['correlation_rho'][i],
-    #                                  v0 = model_params['Heston']['v0'][i]))
-    #model.append(HestonWithJumps(rate_of_mean_reversion = model_params['Heston with Jumps']['rate_of_mean_reversion'][i],
-    #                             long_run_average = model_params['Heston with Jumps']['long_run_average'][i],
-    #                             vol_of_vol = model_params['Heston with Jumps']['vol_of_vol'][i], 
-    #                             correlation_rho = model_params['Heston with Jumps']['correlation_rho'][i],
-   #                              muj = 0.1791,sigmaj = 0.1346, 
-    #                             lmbda = model_params['Heston with Jumps']['lmbda'][i],
-    #                             v0 = model_params['Heston with Jumps']['v0'][i]))
-    #model.append(BNS(rho =model_params['BNS']['rho'][i],
-    #                 lmbda=model_params['BNS']['lmbda'][i],
-    #                 b=model_params['BNS']['b'][i],
-    #                 a=model_params['BNS']['a'][i],
-    #                 v0 = model_params['BNS']['v0'][i]))
+#    model.append(GBM(0.,vol_list[i]))
+    model.append(GBM(drift=model_params['GBM']['drift'][i],volatility=model_params['GBM']['vol'][i]))
+    model.append(HestonForDeepHedging(rate_of_mean_reversion = model_params['Heston']['rate_of_mean_reversion'][i],
+                                      long_run_average = model_params['Heston']['long_run_average'][i],
+                                      vol_of_vol = model_params['Heston']['vol_of_vol'][i], 
+                                      correlation_rho = model_params['Heston']['correlation_rho'][i],
+                                      v0 = model_params['Heston']['v0'][i]))
+    model.append(HestonWithJumps(rate_of_mean_reversion = model_params['Heston with Jumps']['rate_of_mean_reversion'][i],
+                                 long_run_average = model_params['Heston with Jumps']['long_run_average'][i],
+                                 vol_of_vol = model_params['Heston with Jumps']['vol_of_vol'][i], 
+                                 correlation_rho = model_params['Heston with Jumps']['correlation_rho'][i],
+                                 muj = 0.1791,sigmaj = 0.1346, 
+                                 lmbda = model_params['Heston with Jumps']['lmbda'][i],
+                                 v0 = model_params['Heston with Jumps']['v0'][i]))
+    model.append(BNS(rho =model_params['BNS']['rho'][i],
+                     lmbda=model_params['BNS']['lmbda'][i],
+                     b=model_params['BNS']['b'][i],
+                     a=model_params['BNS']['a'][i],
+                     v0 = model_params['BNS']['v0'][i]))
 
 
 #model = [HestonForDeepHedging(rate_of_mean_reversion = 0.06067,long_run_average = 0.0707,
 #                  vol_of_vol = 0.2928, correlation_rho = -0.757,v0 = 0.009),
-#                HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.707,
-#                  vol_of_vol = 0.2928, correlation_rho = -0.757,v0 = 0.009),
-#                  HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.0707,
-#                  vol_of_vol = 0.02928, correlation_rho = -0.757,v0 = 0.009),
-#                  HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.0707,
-#                  vol_of_vol = 0.2928, correlation_rho = -0.0757,v0 = 0.04),
 #            HestonForDeepHedging(rate_of_mean_reversion = 0.06067,long_run_average = 0.0707,
 #                  vol_of_vol = 0.2928, correlation_rho = -0.757,v0 = 0.04),
-#                HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.707,
-#                  vol_of_vol = 0.2928, correlation_rho = -0.757,v0 = 0.04),
-#                  HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.0707,
-#                  vol_of_vol = 0.02928, correlation_rho = -0.757,v0 = 0.04),
-#                  HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.0707,
-#                  vol_of_vol = 0.2928, correlation_rho = -0.0757,v0 = 0.04),
 #            HestonForDeepHedging(rate_of_mean_reversion = 0.06067,long_run_average = 0.0707,
 #                  vol_of_vol = 0.2928, correlation_rho = -0.757,v0 = 0.09),
-#                HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.707,
-#                  vol_of_vol = 0.2928, correlation_rho = -0.757,v0 = 0.09),
-#                  HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.0707,
-#                  vol_of_vol = 0.02928, correlation_rho = -0.757,v0 = 0.09),
-#                  HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.0707,
-#                  vol_of_vol = 0.2928, correlation_rho = -0.0757,v0 = 0.09),
 #            HestonForDeepHedging(rate_of_mean_reversion = 0.06067,long_run_average = 0.0707,
 #                  vol_of_vol = 0.2928, correlation_rho = -0.757,v0 = 0.16),
-#                HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.707,
-#                  vol_of_vol = 0.2928, correlation_rho = -0.757,v0 = 0.16),
-#                  HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.0707,
-#                  vol_of_vol = 0.02928, correlation_rho = -0.757,v0 = 0.16),
-#                  HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.0707,
-#                  vol_of_vol = 0.2928, correlation_rho = -0.0757,v0 = 0.16),
-#                GBM(drift=-0.1, volatility=0.1),GBM(drift=-0.05, volatility=0.1),GBM(drift=0.05, volatility=0.1),GBM(drift=0.1, volatility=0.1),
-#                GBM(drift=-0.1, volatility=0.2),GBM(drift=-0.05, volatility=0.2),GBM(drift=0.05, volatility=0.2),GBM(drift=0.1, volatility=0.2),
-#                GBM(drift=-0.1, volatility=0.3),GBM(drift=-0.05, volatility=0.3),GBM(drift=0.05, volatility=0.3),GBM(drift=0.1, volatility=0.3),
-#                GBM(drift=-0.1, volatility=0.4),GBM(drift=-0.05, volatility=0.4),GBM(drift=0.05, volatility=0.4),GBM(drift=0.1, volatility=0.4),
+#                GBM(drift=0., volatility=0.1),GBM(drift=0., volatility=0.2),GBM(drift=0., volatility=0.3),GBM(drift=0., volatility=0.4),
 #            BNS(rho =-0.4675,lmbda=0.5474,b=18.6075,a=0.6069,v0 = 0.006),
-#                BNS(rho =-4.675,lmbda=0.05474,b=18.6075,a=0.6069,v0 = 0.006),
-#                BNS(rho =-4.675,lmbda=0.5474,b=1.86075,a=0.6069,v0 = 0.006),
-#                BNS(rho =-4.675,lmbda=0.5474,b=18.6075,a=0.06069,v0 = 0.006),
 #            BNS(rho =-0.4675,lmbda=0.5474,b=18.6075,a=0.6069,v0 = 0.033),
-#                BNS(rho =-4.675,lmbda=0.05474,b=18.6075,a=0.6069,v0 = 0.033),
-#                BNS(rho =-4.675,lmbda=0.5474,b=1.86075,a=0.6069,v0 = 0.033),
-#                BNS(rho =-4.675,lmbda=0.5474,b=18.6075,a=0.06069,v0 = 0.033),
 #            BNS(rho =-0.4675,lmbda=0.5474,b=18.6075,a=0.6069,v0 = 0.08),
-#                BNS(rho =-4.675,lmbda=0.05474,b=18.6075,a=0.6069,v0 = 0.08),
-#                BNS(rho =-4.675,lmbda=0.5474,b=1.86075,a=0.6069,v0 = 0.08),
-#                BNS(rho =-4.675,lmbda=0.5474,b=18.6075,a=0.06069,v0 = 0.08),
+#            BNS(rho =-0.4675,lmbda=0.5474,b=18.6075,a=0.6069,v0 = 0.15),
 #            HestonWithJumps(rate_of_mean_reversion = 0.04963,long_run_average = 0.065,
 #                vol_of_vol = 0.2286, correlation_rho = -0.99,muj = 0.1791,sigmaj = 0.1346, lmbda = 0.1382,v0 = 0.007),
-#                HestonWithJumps(rate_of_mean_reversion = 0.4963,long_run_average = 0.65,
-#                vol_of_vol = 0.2286, correlation_rho = -0.99,muj = 0.1791,sigmaj = 0.1346, lmbda = 0.1382,v0 = 0.007),
-#                HestonWithJumps(rate_of_mean_reversion = 0.4963,long_run_average = 0.065,
-#                vol_of_vol = 0.02286, correlation_rho = -0.99,muj = 0.1791,sigmaj = 0.1346, lmbda = 0.1382,v0 = 0.007),
-#                HestonWithJumps(rate_of_mean_reversion = 0.4963,long_run_average = 0.065,
-#                vol_of_vol = 0.2286, correlation_rho = -0.099,muj = 0.1791,sigmaj = 0.1346, lmbda = 0.1382,v0 = 0.007),
 #            HestonWithJumps(rate_of_mean_reversion = 0.04963,long_run_average = 0.065,
 #                vol_of_vol = 0.2286, correlation_rho = -0.99,muj = 0.1791,sigmaj = 0.1346, lmbda = 0.1382,v0 = 0.032),
-#                HestonWithJumps(rate_of_mean_reversion = 0.4963,long_run_average = 0.65,
-#                vol_of_vol = 0.2286, correlation_rho = -0.99,muj = 0.1791,sigmaj = 0.1346, lmbda = 0.1382,v0 = 0.032),
-#                HestonWithJumps(rate_of_mean_reversion = 0.4963,long_run_average = 0.065,
-#                vol_of_vol = 0.02286, correlation_rho = -0.99,muj = 0.1791,sigmaj = 0.1346, lmbda = 0.1382,v0 = 0.032),
-#                HestonWithJumps(rate_of_mean_reversion = 0.4963,long_run_average = 0.065,
-#                vol_of_vol = 0.2286, correlation_rho = -0.099,muj = 0.1791,sigmaj = 0.1346, lmbda = 0.1382,v0 = 0.032),
 #            HestonWithJumps(rate_of_mean_reversion = 0.04963,long_run_average = 0.065,
 #                vol_of_vol = 0.2286, correlation_rho = -0.99,muj = 0.1791,sigmaj = 0.1346, lmbda = 0.1382,v0 = 0.085),
-#                HestonWithJumps(rate_of_mean_reversion = 0.4963,long_run_average = 0.65,
-#                vol_of_vol = 0.2286, correlation_rho = -0.99,muj = 0.1791,sigmaj = 0.1346, lmbda = 0.1382,v0 = 0.085),
-#                HestonWithJumps(rate_of_mean_reversion = 0.4963,long_run_average = 0.065,
-#                vol_of_vol = 0.02286, correlation_rho = -0.99,muj = 0.1791,sigmaj = 0.1346, lmbda = 0.1382,v0 = 0.085),
-#                HestonWithJumps(rate_of_mean_reversion = 0.4963,long_run_average = 0.065,
-#                vol_of_vol = 0.2286, correlation_rho = -0.099,muj = 0.1791,sigmaj = 0.1346, lmbda = 0.1382,v0 = 0.085),
 #            HestonWithJumps(rate_of_mean_reversion = 0.04963,long_run_average = 0.065,
-#                vol_of_vol = 0.2286, correlation_rho = -0.99,muj = 0.1791,sigmaj = 0.1346, lmbda = 0.1382,v0 = 0.15),
-#                HestonWithJumps(rate_of_mean_reversion = 0.4963,long_run_average = 0.65,
-#                vol_of_vol = 0.2286, correlation_rho = -0.99,muj = 0.1791,sigmaj = 0.1346, lmbda = 0.1382,v0 = 0.15),
-#                HestonWithJumps(rate_of_mean_reversion = 0.4963,long_run_average = 0.065,
-#                vol_of_vol = 0.02286, correlation_rho = -0.99,muj = 0.1791,sigmaj = 0.1346, lmbda = 0.1382,v0 = 0.15),
-#                HestonWithJumps(rate_of_mean_reversion = 0.4963,long_run_average = 0.065,
-#                vol_of_vol = 0.2286, correlation_rho = -0.099,muj = 0.1791,sigmaj = 0.1346, lmbda = 0.1382,v0 = 0.15)]
+#                vol_of_vol = 0.2286, correlation_rho = -0.99,muj = 0.1791,sigmaj = 0.1346, lmbda = 0.1382,v0 = 0.15)]
 
 
 repo = analysis.Repo(
@@ -178,7 +119,7 @@ for i in range(len(strike)):
         spec.append(ins)
 
 
-n_sims = loop*50000  #3125*4#*loop
+n_sims = loop*50000*4 
 for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
     pricing_results = repo.run(
                             refdate,
