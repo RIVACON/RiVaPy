@@ -55,6 +55,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         else:
             self.additional_states = additional_states
 
+
             #self._concat_layer = tf.keras.layers.Concatenate(name="Concatenate")
         if model is None:
             if "emb_key" in self.additional_states:
@@ -69,6 +70,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             self.model = self._build_model(depth, n_neurons)
         else:
             self.model = model
+            self._embedding_layer = self.model.get_layer('Embedding')
         self.timegrid = timegrid
         self.regularization = regularization
         self._prev_q = None
@@ -98,13 +100,13 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
          #       inp_cat_data = tf.keras.layers.Input(shape=(1,), name=state)
                 #inputs.append(inp_cat_data)
         inputs.append(tf.keras.Input(shape=(1,), name="ttm"))
+        fully_connected_Input1 = tf.keras.layers.concatenate(inputs)
 
         if "emb_key" in self.additional_states:
             inp_cat_data = tf.keras.layers.Input(shape=(1,))
             inputs.append(inp_cat_data)
             emb = self._embedding_layer(inp_cat_data)
             flatten = tf.keras.layers.Flatten()(emb)
-            fully_connected_Input1 = tf.keras.layers.concatenate(inputs)
             fully_connected_Input = tf.keras.layers.concatenate(
                     [fully_connected_Input1, flatten]
             )
@@ -191,8 +193,8 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             inputs = [v[:, i] for v in x]
             inputs.append(t)
             if "emb_key" in self.additional_states:
-                #params = self._embedding_layer(x_in[1])
                 inputs.append(params)
+                #emb = self._embedding_layer(x_in[1])
             quantity = self.model(inputs,training)#self.model(inputs, training=training)
             for j in range(len(self.hedge_instruments)):
                 pnl += tf.math.multiply(
@@ -354,6 +356,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         inputs = self._create_inputs(paths)
         return payoff + self.predict(inputs)  # -Z + d S
 
+    
 
     @tf.function
     def custom_loss(self, y_true, y_pred):
@@ -469,7 +472,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
 
     def get_params(self)->np.ndarray:
         emb_layer = self.model.get_layer('Embedding')
-        return emb_layer.get_weights()[0]
+        return emb_layer.get_weights()#[0]
     
     def n_tasks(self) -> int:
         emb_layer = self.model.get_layer('Embedding')
@@ -477,71 +480,45 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
     
 
     def set_params(self, params: np.ndarray):
-        new_params = self.get_params()
-        if len(params.shape) == 1:
-            new_params[-1,:] = params
-        elif params.shape[0] == 1:
-            new_params[-1,:] = params
-        elif params.shape[0] == self.n_tasks():
-            new_params[:-1,:] = params
-        
         emb_layer = self.model.get_layer('Embedding')
-        emb_layer.set_weights([new_params])
+        emb_layer.set_weights([params])
 
-    
-    def predict_single_pnl(self, paths: Dict[str, np.ndarray], payoff: np.ndarray):
-        inputs = self._create_inputs(paths)
-        return self.predict(inputs) + payoff 
     
 
     def fit_param(self, optimizer, callbacks, paths: Dict[str, np.ndarray], payoff: np.ndarray):
 
 
-        #self.model.trainable = False
-        #self.model.compile(optimizer=optimizer, loss=self.custom_loss)
-
-        #emb_layer.trainable = True
-        #self.compile(optimizer=optimizer, loss=self.custom_loss)
-        #count = 0
-        #for k,v in self.model._get_trainable_state().items():
-        #    if count == 0:
-        #        k.trainable = True
-        #    if count == 4:
-        #        k.trainable = True
-        #        #self.compile(optimizer=optimizer, loss=self.custom_loss)
-        #    else:
-        #        k.trainable = False
-        #    count = count + 1
-        #    print(k.name,v)
-
         for layer in self.model.layers:
             if layer.name == 'Embedding':
                 emb_layer = self.model.get_layer('Embedding')
                 params = emb_layer.get_weights()
+                params[0][-1,:] = params[0][:-1,:].mean(axis=0)
+                emb_layer.set_weights(params)
                 emb_layer.trainable=True
             else:
                 layer.trainable = False
             print(layer, layer.name, layer.trainable)
         self.compile(optimizer=optimizer, loss=self.custom_loss)
-            #print(k.name,v)
-            #print(k.get_weights())
         inputs = self._create_inputs(paths)
-        return(self.fit(
+        self.fit(
             inputs,
             payoff,
             epochs=100,
-            batch_size=500,
+            batch_size=256,
             callbacks=callbacks,
             verbose=1,
             validation_split=0.1,
-            validation_freq=5))
+            validation_freq=5)
+        for layer in self.model.layers:
+                layer.trainable = True
+        self.compile(optimizer=optimizer, loss=self.custom_loss)
 
 
 
     @staticmethod
     def train_task(model, paths: Dict[str, np.ndarray], payoff: np.ndarray, #X_test, task, 
                   initial_lr=0.005, 
-                  decay_steps=2000,decay_rate=0.95):
+                  decay_steps=16_000,decay_rate=0.95):
 
         lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
                 initial_learning_rate=initial_lr,#1e-3,
@@ -561,7 +538,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         
 
         model.fit_param(optimizer=optimizer, callbacks=callbacks,paths=paths,payoff=payoff)
-        y_pred = model.predict_single_pnl(paths, payoff)
+        y_pred = model.compute_pnl(paths, payoff)
         return y_pred
     
 

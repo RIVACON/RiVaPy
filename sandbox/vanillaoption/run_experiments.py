@@ -105,7 +105,7 @@ for i in range(len(strike)):
         count = count + 1
         expiry = refdate + dt.timedelta(days=days[j])
         ins = EuropeanVanillaSpecification(
-                    "Test_Call_100epochs"+str(count),
+                    "Test_Call_emb2"+str(count),
                     tpe,
                     expiry,
                     strike[i],
@@ -130,7 +130,7 @@ for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
                             nb_neurons=64,#32,#64,#
                             n_sims=n_sims,#800_000,
                             regularization=0.,#0.01,
-                            epochs=100,
+                            epochs=5,
                             verbose=1,
                             tensorboard_logdir="logs/"
                             + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
