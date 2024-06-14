@@ -31,6 +31,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         transaction_cost: dict = None,
         # threshold: float = 0.0,
         no_of_unique_model: int = 1,
+        embedding_size: int = 1,
         # cascading: bool = False,
         model: tf.keras.Model = None,
         **kwargs
@@ -60,7 +61,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         if model is None:
             if "emb_key" in self.additional_states:
                 self.no_of_unique_model = no_of_unique_model
-                self.embedding_size = 1#32
+                self.embedding_size = embedding_size#32
                 self._embedding_layer = tf.keras.layers.Embedding(
                     input_dim=self.no_of_unique_model+1,
                     output_dim=self.embedding_size,
@@ -449,6 +450,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         params["loss"] = self._loss
         params["transaction_cost"] = self.transaction_cost
         params["no_of_unique_model"] = self.no_of_unique_model
+        params["embedding_size"] = self.embedding_size
         # params["threshold"] = self.threshold
         with open(folder + "/params.json", "w") as f:
             json.dump(params, f)
@@ -465,6 +467,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         params["additional_states"] = np.array(params["additional_states"])
         params["hedge_instruments"] = np.array(params["hedge_instruments"])
         params["no_of_unique_model"] = params["no_of_unique_model"]
+        params["embedding_size"] = params["embedding_size"]
         if not ("loss" in params.keys()):
             params["loss"] = "mean_variance"
         return DeepHedgeModelwEmbedding(depth=None, n_neurons=None, model=base_model, **params), (w,)
@@ -504,7 +507,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             inputs,
             payoff,
             epochs=100,
-            batch_size=256,
+            batch_size=10,
             callbacks=callbacks,
             verbose=1,
             validation_split=0.1,
@@ -516,9 +519,9 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
 
 
     @staticmethod
-    def train_task(model, paths: Dict[str, np.ndarray], payoff: np.ndarray, #X_test, task, 
+    def train_task(model, paths: Dict[str, np.ndarray], payoff: np.ndarray, paths_test: Dict[str, np.ndarray], payoff_test, 
                   initial_lr=0.005, 
-                  decay_steps=16_000,decay_rate=0.95):
+                  decay_steps=200,decay_rate=0.95):
 
         lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
                 initial_learning_rate=initial_lr,#1e-3,
@@ -539,7 +542,8 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
 
         model.fit_param(optimizer=optimizer, callbacks=callbacks,paths=paths,payoff=payoff)
         y_pred = model.compute_pnl(paths, payoff)
-        return y_pred
+        y_test = model.compute_pnl(paths_test,payoff_test)
+        return y_pred, y_test
     
 
 

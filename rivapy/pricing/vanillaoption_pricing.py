@@ -136,7 +136,8 @@ class VanillaOptionDeepHedgingPricer:
                 cascading: bool = False,
                 days: int = 30,
                 test_weighted_paths: bool = False,
-                freq: str = 'D'
+                freq: str = 'D',
+                embedding_size: int = 1
                 #paths: Dict[str, np.ndarray] = None
                 ):
         """Price a vanilla option using deeep hedging
@@ -217,7 +218,7 @@ class VanillaOptionDeepHedgingPricer:
                 
         hedge_model = DeepHedgeModelwEmbedding(list(hedge_ins.keys()), list(additional_states_.keys()),timegrid=timegrid, 
                                         regularization=regularization,depth=depth, n_neurons=nb_neurons, loss = loss,
-                                        transaction_cost = transaction_cost,no_of_unique_model=len(model_list))
+                                        transaction_cost = transaction_cost,no_of_unique_model=len(model_list),embedding_size=embedding_size)
 
         paths = {}
         paths.update(hedge_ins)

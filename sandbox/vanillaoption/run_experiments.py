@@ -32,8 +32,8 @@ from sys import exit
 
 model = []
 
-loop = 4
 vol_list = [0.1,0.2,0.3,0.4]
+loop = len(vol_list)
 for i in range(loop):
     model.append(GBM(0.,vol_list[i]))
     #model.append(GBM(drift=model_params['GBM']['drift'][i],volatility=model_params['GBM']['vol'][i]))
@@ -80,7 +80,7 @@ for i in range(loop):
 
 
 repo = analysis.Repo(
-    "./sims_vanillacalloption"
+    "./case1_vanillacalloption"
 )
 
 reg = {
@@ -105,7 +105,7 @@ for i in range(len(strike)):
         count = count + 1
         expiry = refdate + dt.timedelta(days=days[j])
         ins = EuropeanVanillaSpecification(
-                    "Test_Call_emb2"+str(count),
+                    "Test_Call"+str(count),
                     tpe,
                     expiry,
                     strike[i],
@@ -119,26 +119,28 @@ for i in range(len(strike)):
         spec.append(ins)
 
 
-n_sims = loop*100000#*4
-for tc in [0]:#[1.e-10,0.0001,0.001,0.01]:
-    pricing_results = repo.run(
+n_sims = loop*64000#*4
+for emb_size in [1,2,4]:
+    for seed in [0,42,123,152,999]:
+        pricing_results = repo.run(
                             refdate,
                             spec,
                             model,
                             rerun=False,
                             depth=3,
-                            nb_neurons=64,#32,#64,#
-                            n_sims=n_sims,#800_000,
-                            regularization=0.,#0.01,
-                            epochs=5,
+                            nb_neurons=64,
+                            n_sims=n_sims,
+                            regularization=0.,
+                            epochs=1000,
                             verbose=1,
                             tensorboard_logdir="logs/"
                             + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
-                            initial_lr=0.005,  # 5e-4,
-                            decay_steps=16_000,#1000,#
-                            batch_size=256,#500,
+                            initial_lr=0.005, 
+                            decay_steps=16_000,
+                            batch_size=256,
                             decay_rate=0.95,
-                            seed=42,
+                            seed=seed,
                             days=int(np.max(days)),
+                            embedding_size=emb_size
                             #loss = "expected_shortfall"
                         )
