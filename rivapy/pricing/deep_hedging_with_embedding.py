@@ -88,7 +88,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         if not self.transaction_cost:
             return self._compute_pnl(x, training)  # + self.price
         else:
-            return self._compute_pnl_withconstains(x, training)  # + self.price
+            return self._compute_pnl_withconstraints(x, training)  # + self.price
     
 
     def _build_model(self, depth: int, nb_neurons: int):
@@ -236,7 +236,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         return pnl
 
     @tf.function
-    def _compute_pnl_withconstains(self, x_in, training):
+    def _compute_pnl_withconstraints(self, x_in, training):
         if "emb_key" in self.additional_states:
             x = [x_in[0]]
             params = [x_in[1]]
