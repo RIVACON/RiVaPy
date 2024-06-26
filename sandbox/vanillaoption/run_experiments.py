@@ -32,16 +32,16 @@ model_params = ast.literal_eval(data)
 
 model = []
 
-vol_list = [0.1,0.2,0.3,0.4]
-loop = 32#len(vol_list)
+vol_list = [0.1]
+loop = 1#len(vol_list)
 for i in range(loop):
-    #model.append(GBM(0.,vol_list[i]))
+    model.append(GBM(0.,vol_list[i]))
     #model.append(GBM(drift=model_params['GBM']['drift'][i],volatility=model_params['GBM']['vol'][i]))
-    model.append(HestonForDeepHedging(rate_of_mean_reversion = model_params['Heston']['rate_of_mean_reversion'][i],
-                                      long_run_average = model_params['Heston']['long_run_average'][i],
-                                      vol_of_vol = model_params['Heston']['vol_of_vol'][i], 
-                                      correlation_rho = model_params['Heston']['correlation_rho'][i],
-                                      v0 = model_params['Heston']['v0'][i]))
+    #model.append(HestonForDeepHedging(rate_of_mean_reversion = model_params['Heston']['rate_of_mean_reversion'][i],
+    #                                  long_run_average = model_params['Heston']['long_run_average'][i],
+    #                                  vol_of_vol = model_params['Heston']['vol_of_vol'][i], 
+    #                                  correlation_rho = model_params['Heston']['correlation_rho'][i],
+    #                                  v0 = model_params['Heston']['v0'][i]))
     #model.append(HestonWithJumps(rate_of_mean_reversion = model_params['Heston with Jumps']['rate_of_mean_reversion'][i],
     #                             long_run_average = model_params['Heston with Jumps']['long_run_average'][i],
     #                             vol_of_vol = model_params['Heston with Jumps']['vol_of_vol'][i], 
@@ -80,7 +80,7 @@ for i in range(loop):
 
 
 repo = analysis.Repo(
-    "./sims_heston"
+    "./sims_vanillacalloption_single"
 )
 
 reg = {
@@ -119,11 +119,11 @@ for i in range(len(strike)):
         spec.append(ins)
 
 
-n_sims = loop*16000#*4
-for emb_size in [1,2,3,5,10]:
+n_sims = loop*64000#*4
+for emb_size in [1]:
     for seed in [0,42,123,152,999]:
-        for tc in [1e-10,0.0001,0.001,0.01]:
-            pricing_results = repo.run(
+        #for tc in [1e-10,0.0001,0.001,0.01]:
+        pricing_results = repo.run(
                             refdate,
                             spec,
                             model,
@@ -131,7 +131,7 @@ for emb_size in [1,2,3,5,10]:
                             depth=3,
                             nb_neurons=64,
                             n_sims=n_sims,
-                            regularization=10.,
+                            regularization=0.,
                             epochs=1000,
                             verbose=1,
                             tensorboard_logdir="logs/"
@@ -143,6 +143,6 @@ for emb_size in [1,2,3,5,10]:
                             seed=seed,
                             days=int(np.max(days)),
                             embedding_size=emb_size,
-                            transaction_cost={'ADS':[tc]},
-                            loss = "exponential_utility"
+                            #transaction_cost={'ADS':[tc]},
+                            #loss = "exponential_utility"
                         )
