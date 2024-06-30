@@ -541,9 +541,12 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         
 
         model.fit_param(optimizer=optimizer, callbacks=callbacks,paths=paths,payoff=payoff)
-        y_pred = model.compute_pnl(paths, payoff)
+        #y_pred = model.compute_pnl(paths, payoff)
         y_test = model.compute_pnl(paths_test,payoff_test)
-        return y_pred, y_test
+        #y_delta = model.compute_delta(paths_test, t=28,emb=4)
+        inputs = model._create_inputs(paths_test)
+        y_loss = model.evaluate(inputs, payoff_test)
+        return y_test,y_loss#y_pred, y_test,y_delta,y_loss
     
 
 
