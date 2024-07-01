@@ -60,6 +60,24 @@ class VanillaOptionDeepHedgingPricer:
                 else:
                     for k,v in hedge_ins.items(): 
                         payoff -= np.maximum(strike - v[-1,:],0)
+            if tpe == 'UIB_CALL':
+                for k,v in hedge_ins.items(): 
+                    condition =  v[-1,:] > ins_list[i].barrier
+                    payoff -= np.maximum(v - strike,0)[-1,:]*condition
+            if tpe == 'UOB_CALL':
+                for k,v in hedge_ins.items(): 
+                    condition =  v[-1,:] <= ins_list[i].barrier
+                    payoff -= np.maximum(v - strike,0)[-1,:]*condition
+            if tpe == 'DIB_CALL':
+                for k,v in hedge_ins.items(): 
+                    condition =  v[-1,:] < ins_list[i].barrier
+                    payoff -= np.maximum(v - strike,0)[-1,:]*condition
+            if tpe == 'DOB_CALL':
+                for k,v in hedge_ins.items(): 
+                    condition =  v[-1,:] >= ins_list[i].barrier
+                    payoff -= np.maximum(v - strike,0)[-1,:]*condition
+
+
 
         return payoff
 
@@ -209,6 +227,7 @@ class VanillaOptionDeepHedgingPricer:
             for i in range(len(ins_list)):
                 key = ins_list[i].udl_id
                 T = (ins_list[i].expiry - val_date).days
+                print(T)
                 if freq == '12H':
                     hedge_ins[key] = simulation_results[:int(T*2),:]
                     #hedge_ins['V'] = VanillaOptionDeepHedgingPricer.get_call_prices(simulation_results[:int(T*2),:], ins_list[i].strike, seed,model_list,timegrid[:int(T*2)],n_sims,days,freq)
@@ -223,6 +242,8 @@ class VanillaOptionDeepHedgingPricer:
         paths = {}
         paths.update(hedge_ins)
         paths.update(additional_states_) 
+        print(paths)
+
         lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
                 initial_learning_rate=initial_lr,#1e-3,
                 decay_steps=decay_steps,
@@ -231,6 +252,10 @@ class VanillaOptionDeepHedgingPricer:
     
         payoff = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, ins_list) 
 
+
+        print(payoff)
+
+        exit()
         hedge_model.train(paths, payoff, lr_schedule, epochs=epochs, batch_size=batch_size, tensorboard_log=tensorboard_logdir, verbose=verbose)
         return VanillaOptionDeepHedgingPricer.PricingResults(hedge_model, paths=paths, sim_results=simulation_results, payoff=payoff)
 

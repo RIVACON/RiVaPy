@@ -133,6 +133,82 @@ class EuropeanVanillaSpecification(interfaces.FactoryObject):
                                             
         return self._pyvacon_obj
     
+
+class BarrierOptionSpecification(interfaces.FactoryObject):
+    def __init__(self, 
+                 id: str,
+                 type: str,
+                 expiry: datetime,
+                 strike: float,
+                 barrier: float,
+                 issuer: str = '',
+                 sec_lvl: str = SecuritizationLevel.COLLATERALIZED,
+                 curr: str = Currency.EUR,
+                 udl_id: str = '',
+                 share_ratio: float = 1.0,
+                 long_short_flag: str = 'long'
+                #  holidays: str = '',
+                #  ex_settle: int = 0, not implemented
+                #  trade_settle: int = 0 not implemented
+                 ):
+        
+        """Constructor for european vanilla option
+
+        Args:
+            id (str): Identifier (name) of the european vanilla specification.
+            type (str): Type of the european vanilla option ('PUT','CALL').
+            expiry (datetime): Expiration date.
+            strike (float): Strike price.
+            issuer (str, optional): Issuer Id. Must not be set if pricing data is manually defined. Defaults to ''.
+            sec_lvl (str, optional): Securitization level. Can be selected from rivapy.enums.SecuritizationLevel. Defaults to SecuritizationLevel.COLLATERALIZED.
+            curr (str, optional): Currency (ISO-4217 Code). Must not be set if pricing data is manually defined. Can be selected from rivapy.enums.Currency. Defaults to Currency.EUR.
+            udl_id (str, optional): Underlying Id. Must not be set if pricing data is manually defined. Defaults to ''.
+            share_ratio (float, optional): Ratio of covered shares of the underlying by a single option contract. Defaults to 1.0.
+        """
+        
+        self.id = id
+        self.issuer = issuer
+        self.sec_lvl = sec_lvl
+        self.curr =  curr
+        self.udl_id = udl_id
+        self.type = type
+        self.expiry = expiry
+        self.strike = strike
+        self.barrier = barrier
+        self.share_ratio = share_ratio
+        self.long_short_flag = long_short_flag
+        # self.holidays = holidays
+        # self.ex_settle = ex_settle
+        # self.trade_settle = trade_settle
+        
+        self._pyvacon_obj = None
+
+    def _to_dict(self)->dict:
+        return {'id': self.id, 'issuer':self.issuer, 'sec_lvl': self.sec_lvl, 'curr': self.curr, 'udl_id': self.udl_id, 
+                'type': self.type,'expiry':self.expiry, 'strike':self.strike, 'barrier':self.barrier,'share_ratio': self.share_ratio,
+                'long_short_flag':self.long_short_flag}
+
+        
+    def _get_pyvacon_obj(self):
+        if self._pyvacon_obj is None:
+            self._pyvacon_obj = _spec.EuropeanVanillaSpecification(self.id, 
+                                            self.issuer, 
+                                            self.sec_lvl, 
+                                            self.curr, 
+                                            self.udl_id, 
+                                            self.type,
+                                            self.expiry,
+                                            self.strike,
+                                            self.barrier,
+                                            self.share_ratio,
+                                            '',
+                                            0,
+                                            0)
+                                            
+        return self._pyvacon_obj
+    
+
+    
 class AmericanVanillaSpecification:
     def __init__(self
                  ,id: str
