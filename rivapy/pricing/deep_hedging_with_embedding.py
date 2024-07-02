@@ -134,51 +134,11 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         return model
 
 
-        inputs = [
-            tf.keras.Input(shape=(1,), name=ins) for ins in self.hedge_instruments
-        ]
-        # if "emb_key" in self.additional_states:  #
-        if self.additional_states is not None:
-            for state in self.additional_states:
-                inp_cat_data = tf.keras.layers.Input(shape=(1,), name=state)
-                inputs.append(inp_cat_data)
-        inputs.append(tf.keras.Input(shape=(1,), name="ttm"))
-
-        if "emb_key" in self.additional_states:
-            fully_connected_Input1 = tf.keras.layers.concatenate(inputs)
-            emb = self._embedding_layer(inp_cat_data)
-            flatten = tf.keras.layers.Flatten()(emb)
-            fully_connected_Input = self._concat_layer(
-                [fully_connected_Input1, flatten]
-            )
-        else:
-            fully_connected_Input = tf.keras.layers.concatenate(inputs)
-
-        values_all = tf.keras.layers.Dense(
-            nb_neurons,
-            activation="selu",
-            kernel_initializer=tf.keras.initializers.GlorotUniform(),
-        )(fully_connected_Input)
-        for _ in range(depth):
-            values_all = tf.keras.layers.Dense(
-                nb_neurons,
-                activation="selu",
-                kernel_initializer=tf.keras.initializers.GlorotUniform(),
-            )(values_all)
-        value_out = tf.keras.layers.Dense(
-            len(self.hedge_instruments),
-            activation="linear",
-            kernel_initializer=tf.keras.initializers.GlorotUniform(),
-        )(values_all)
-        model = tf.keras.Model(inputs=inputs, outputs=value_out)
-        return model
-    
-
     @tf.function
     def _compute_pnl(self, x_in, training):
         if "emb_key" in self.additional_states:
-            x = [x_in[0]]
-            params = [x_in[1]]
+            x = x_in[:-1]
+            params = [x_in[-1]]
         else:
             x = x_in
         pnl = tf.zeros((tf.shape(x[0])[0],))
@@ -205,41 +165,13 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         for j in range(len(self.hedge_instruments)):
             pnl += self._prev_q[:, j] * tf.squeeze(x[j][:, -1])
         return pnl
-    
-        if "emb_key" in self.additional_states:
-            x = [x_in[0]]
-            params = [x_in[1]]
-        else:
-            x = x_in
-        pnl = tf.zeros((tf.shape(x[0])[0],))
-        self._prev_q = tf.zeros(
-            (tf.shape(x[0])[0], len(self.hedge_instruments)), name="prev_q"
-        )
-        for i in range(self.timegrid.shape[0] - 2):
-            t = (
-                [self.timegrid[-1] - self.timegrid[i]]
-                * tf.ones((tf.shape(x[0])[0], 1))
-                / self.timegrid[-1]
-            )
-            inputs = [v[:, i] for v in x]
-            if "emb_key" in self.additional_states:
-                inputs.append(params)
-            inputs.append(t)
-            quantity = self.model(inputs, training=training)
-            for j in range(len(self.hedge_instruments)):
-                pnl += tf.math.multiply(
-                    (self._prev_q[:, j] - quantity[:, j]), tf.squeeze(x[j][:, i])
-                )
-            self._prev_q = quantity
-        for j in range(len(self.hedge_instruments)):
-            pnl += self._prev_q[:, j] * tf.squeeze(x[j][:, -1])
-        return pnl
+
 
     @tf.function
     def _compute_pnl_withconstraints(self, x_in, training):
         if "emb_key" in self.additional_states:
-            x = [x_in[0]]
-            params = [x_in[1]]
+            x = x_in[:-1]
+            params = [x_in[-1]]
         else:
             x = x_in
         pnl = tf.zeros((tf.shape(x[0])[0],))
@@ -344,7 +276,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             inputs = [inputs_[i] for i in range(len(inputs_))]
         # for k,v in paths.items():
         inputs.append(np.full(inputs[0].shape, fill_value=t))
-        inputs.append(np.full(inputs_[1].shape, fill_value=emb))
+        inputs.append(np.full(inputs_[-1].shape, fill_value=emb))
         return self.model.predict(inputs)
 
     def _compute_delta_path(self, paths: Dict[str, np.ndarray]):

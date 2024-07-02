@@ -14,7 +14,7 @@ from rivapy.models.gbm import GBM
 from rivapy.models.heston_for_DH import HestonForDeepHedging
 from rivapy.models.heston_with_jumps import HestonWithJumps
 from rivapy.models.barndorff_nielsen_shephard import BNS
-from rivapy.instruments.specifications import EuropeanVanillaSpecification
+from rivapy.instruments.specifications import EuropeanVanillaSpecification, BarrierOptionSpecification
 from rivapy.pricing.vanillaoption_pricing import (
     VanillaOptionDeepHedgingPricer,
     DeepHedgeModelwEmbedding,
@@ -26,14 +26,14 @@ import analysis
 from sys import exit
 
 #import ast  
-##with open('model_params_dict.txt') as f: 
+#with open('model_params_dict.txt') as f: 
 #    data = f.read() 
 #model_params = ast.literal_eval(data) 
 
 model = []
 
-vol_list = [0.2]
-loop = 1#len(vol_list)
+vol_list = [0.1,0.2,0.3,0.4]
+loop = len(vol_list)
 for i in range(loop):
     model.append(GBM(0.,vol_list[i]))
     #model.append(GBM(drift=model_params['GBM']['drift'][i],volatility=model_params['GBM']['vol'][i]))
@@ -91,12 +91,12 @@ reg = {
 
 spec = []
 
-strike = [1.]# [0.8, 0.85, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2]
+strike = [0.85]#, 0.9, 1.0, 1.1, 1.2]
 days = [30]#[20,40, 60, 80, 100, 120]
 refdate = dt.datetime(2023, 1, 1)
 issuer = "DBK"
 seclevel = "COLLATERALIZED"
-tpe = "CALL"  # Change to 'PUT' if you want to calculate the price of an european put option.
+tpe = "DOB_CALL"  # Change to 'PUT' if you want to calculate the price of an european put option.
 long_short_flag = 'long'
 
 count = 0
@@ -104,24 +104,25 @@ for i in range(len(strike)):
     for j in range(len(days)):
         count = count + 1
         expiry = refdate + dt.timedelta(days=days[j])
-        ins = EuropeanVanillaSpecification(
+        ins = BarrierOptionSpecification(#EuropeanVanillaSpecification(
                     "Test_Call"+str(count),
                     tpe,
                     expiry,
                     strike[i],
+                    barrier=1.05,
                     issuer=issuer,
                     sec_lvl=seclevel,
                     curr="EUR",
-                    udl_id="ADS",
+                    udl_id="ADS"+str(count),
                     share_ratio=1,
                     long_short_flag=long_short_flag
                 )
         spec.append(ins)
 
 
-n_sims = loop*64000#64000#*4
+n_sims = loop*16000#64000#*4
 for emb_size in [1]:
-    for seed in [0]:#,42,123,152,999]:
+    for seed in [42]:
         #for tc in [1e-10,0.0001,0.001,0.01]:
         pricing_results = repo.run(
                             refdate,
@@ -132,7 +133,7 @@ for emb_size in [1]:
                             nb_neurons=64,
                             n_sims=n_sims,
                             regularization=0.,
-                            epochs=1000,
+                            epochs=1,
                             verbose=1,
                             tensorboard_logdir="logs/"
                             + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
