@@ -9,3 +9,4 @@ docs/source/notebooks/models/geo_data/*
 sandbox/green_ppa/experiments/*
 sandbox/green_ppa/logs/*
 .vscode/launch.json
+.ipynb_checkpoints
