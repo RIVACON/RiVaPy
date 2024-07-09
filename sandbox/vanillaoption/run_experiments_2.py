@@ -33,8 +33,8 @@ model_params = ast.literal_eval(data)
 model = []
 
 vol_list = [0.1,0.2,0.3,0.4]
-loop = 32#len(vol_list)
-for i in range(loop):
+loop = 1#len(vol_list)
+for i in [47]:#range(loop):
     #model.append(GBM(0.,vol_list[i]))
     #model.append(GBM(drift=model_params['GBM']['drift'][i],volatility=model_params['GBM']['vol'][i]))
     model.append(HestonForDeepHedging(rate_of_mean_reversion = model_params['Heston']['rate_of_mean_reversion'][i],
@@ -80,7 +80,7 @@ for i in range(loop):
 
 
 repo = analysis.Repo(
-    "./sims_heston"
+    "./test_ins"
 )
 
 reg = {
@@ -99,7 +99,7 @@ seclevel = "COLLATERALIZED"
 tpe = "CALL"  # Change to 'PUT' if you want to calculate the price of an european put option.
 long_short_flag = 'long'
 
-count = 0
+count = 3
 for i in range(len(strike)):
     for j in range(len(days)):
         count = count + 1
@@ -119,10 +119,10 @@ for i in range(len(strike)):
         spec.append(ins)
 
 
-n_sims = loop*16000#*4
-for emb_size in [1,2,3,5,10]:
-    for seed in [0,42,123,152,999]:
-        for tc in [1e-10,0.0001,0.001,0.01]:
+n_sims = 64000#loop*16000#*4
+for emb_size in [1]:
+    for seed in [0]:
+        for tc in [0.01]:
             pricing_results = repo.run(
                             refdate,
                             spec,

@@ -438,7 +438,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         self.fit(
             inputs,
             payoff,
-            epochs=100,
+            epochs=10,
             batch_size=10,
             callbacks=callbacks,
             verbose=1,
@@ -452,7 +452,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
 
     @staticmethod
     def train_task(model, paths: Dict[str, np.ndarray], payoff: np.ndarray, paths_test: Dict[str, np.ndarray], payoff_test, 
-                  initial_lr=0.005, 
+                  initial_lr=0.0005, 
                   decay_steps=200,decay_rate=0.95):
 
         lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
@@ -473,12 +473,12 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         
 
         model.fit_param(optimizer=optimizer, callbacks=callbacks,paths=paths,payoff=payoff)
-        #y_pred = model.compute_pnl(paths, payoff)
+        y_pred = model.compute_pnl(paths, payoff)
         y_test = model.compute_pnl(paths_test,payoff_test)
-        #y_delta = model.compute_delta(paths_test, t=28,emb=4)
+        y_delta = model.compute_delta(paths_test, t=28,emb=4)
         inputs = model._create_inputs(paths_test)
         y_loss = model.evaluate(inputs, payoff_test)
-        return y_test,y_loss#y_pred, y_test,y_delta,y_loss
+        return y_pred, y_test,y_delta, y_loss
     
 
 
