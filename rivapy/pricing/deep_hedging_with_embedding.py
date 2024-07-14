@@ -427,7 +427,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             if layer.name == 'Embedding':
                 emb_layer = self.model.get_layer('Embedding')
                 params = emb_layer.get_weights()
-                params[0][-1,:] = params[0][:-1,:].mean(axis=0)
+                params[0][-1,:] = params[0][11,:]#.mean(axis=0)
                 emb_layer.set_weights(params)
                 emb_layer.trainable=True
             else:
@@ -435,15 +435,15 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             print(layer, layer.name, layer.trainable)
         self.compile(optimizer=optimizer, loss=self.custom_loss)
         inputs = self._create_inputs(paths)
-        self.fit(
-            inputs,
-            payoff,
-            epochs=10,
-            batch_size=10,
-            callbacks=callbacks,
-            verbose=1,
-            validation_split=0.1,
-            validation_freq=5)
+        # self.fit(
+        #     inputs,
+        #     payoff,
+        #     epochs=50,
+        #     batch_size=5,
+        #     callbacks=callbacks,
+        #     verbose=1,
+        #     validation_split=0.1,
+        #     validation_freq=5)
         for layer in self.model.layers:
                 layer.trainable = True
         self.compile(optimizer=optimizer, loss=self.custom_loss)
@@ -452,7 +452,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
 
     @staticmethod
     def train_task(model, paths: Dict[str, np.ndarray], payoff: np.ndarray, paths_test: Dict[str, np.ndarray], payoff_test, 
-                  initial_lr=0.0005, 
+                  initial_lr=0.0001, 
                   decay_steps=200,decay_rate=0.95):
 
         lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
@@ -475,7 +475,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         model.fit_param(optimizer=optimizer, callbacks=callbacks,paths=paths,payoff=payoff)
         y_pred = model.compute_pnl(paths, payoff)
         y_test = model.compute_pnl(paths_test,payoff_test)
-        y_delta = model.compute_delta(paths_test, t=28,emb=4)
+        y_delta = model.compute_delta(paths_test, t=28,emb=128)
         inputs = model._create_inputs(paths_test)
         y_loss = model.evaluate(inputs, payoff_test)
         return y_pred, y_test,y_delta, y_loss
