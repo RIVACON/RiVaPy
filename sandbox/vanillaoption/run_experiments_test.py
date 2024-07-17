@@ -144,8 +144,8 @@ for i in range(len(strike)):
         spec.append(ins)
 
 n_sims = loop*16000*4
-for emb_size in [32]:
-    for seed in [0]:
+for emb_size in [64]:
+    for seed in [42]:
         #for tc in [1e-10,0.0001,0.001,0.01]:
         pricing_results = repo.run(
                             refdate,
@@ -156,14 +156,14 @@ for emb_size in [32]:
                             nb_neurons=128,
                             n_sims=n_sims,
                             regularization=0.,
-                            epochs=1,
+                            epochs=300,
                             verbose=1,
                             tensorboard_logdir="logs/"
                             + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
                             initial_lr=0.0005, 
                             decay_steps=16_000,
                             batch_size=2024,
-                            decay_rate=0.95,
+                            decay_rate=0.9,
                             seed=seed,
                             days=int(np.max(days)),
                             embedding_size=emb_size,
