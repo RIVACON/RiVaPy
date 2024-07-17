@@ -202,19 +202,6 @@ class VanillaOptionDeepHedgingPricer:
         timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days,freq)
 
         simulation_results,emb_vec = VanillaOptionDeepHedgingPricer.generate_paths(seed,model_list,timegrid,n_sims,days,freq)
-        #if test_weighted_paths:
-        #    if ((modelname == 'Heston') or (modelname == 'Heston with Volswap')):
-        #        raise Exception('Currently, for simple test case parameter uncertainty w.r.t vol model no weighted paths allowed to use.')
-        #    bla = np.where((simulation_results[-1,:] < 0.9))
-        #    bla2 = np.where((simulation_results[-1,:] > 1.1))
-        #    for i in range(len(bla)):
-        #        paths = np.append(simulation_results, simulation_results[:,bla[i]], axis = 1)
-        #        paths = np.append(simulation_results, simulation_results[:,bla2[i]], axis = 1)
-        #    bla = np.where(simulation_results[-1,:] <= 0.8)
-        #    bla2 = np.where(simulation_results[-1,:] >= 1.2)
-        #    for i in range(len(bla)):
-        #        paths = np.append(simulation_results, simulation_results[:,bla[i]], axis = 1)
-        #        paths = np.append(simulation_results, simulation_results[:,bla2[i]], axis = 1)
         if model_list[0].modelname == 'Heston with Volswap':
             raise Exception('Heston with Volswap currently not running')
             hedge_ins = {}

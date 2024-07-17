@@ -95,11 +95,6 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         inputs = [
             tf.keras.Input(shape=(1,), name=ins) for ins in self.hedge_instruments
         ]
-        # if "emb_key" in self.additional_states:  #
-        #if self.additional_states is not None:
-         #   for state in self.additional_states:
-         #       inp_cat_data = tf.keras.layers.Input(shape=(1,), name=state)
-                #inputs.append(inp_cat_data)
         inputs.append(tf.keras.Input(shape=(1,), name="ttm"))
         fully_connected_Input1 = tf.keras.layers.concatenate(inputs)
 
@@ -202,22 +197,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
                     tc = [0] * len(self.timegrid)
                 diff_q = self._prev_q[:, j] - quantity[:, j]
                 xx = tf.squeeze(x[j][:, i])
-                # Trading restriction based on threshold
 
-                # tf.cond(
-                #     tf.equal(self.threshold, 0.0),
-                #     lambda: xx,
-                #     lambda: tf.where(
-                #         tf.greater(quantity[:, j], self.threshold),
-                #         tf.zeros_like(xx),
-                #         xx,
-                #     ),
-                # )
-                # Cascading:
-                # if self.cascading:
-                #    tt = np.round(self.timegrid * 365.0, 0)
-                #    if tt[i] % 7 != 0 and tt[i] >= 7:  # weekly
-                #        xx = tf.zeros_like(xx)
                 pnl += tf.where(
                     tf.greater(diff_q, 0),
                     tf.math.multiply(diff_q, tf.scalar_mul((1.0 - tc[0]), xx)),
@@ -238,14 +218,6 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
                 tc = [0] * len(self.timegrid)
             diff_q = self._prev_q[:, j] - quantity[:, j]
             xx = tf.squeeze(x[j][:, -1])
-            # Trading restriction based on threshold
-            # tf.cond(
-            #    tf.equal(self.threshold, 0.0),
-            #    lambda: xx,
-            #    lambda: tf.where(
-            #        tf.greater(quantity[:, j], self.threshold), tf.zeros_like(xx), xx
-            #    ),
-            # )
             pnl += tf.where(
                 tf.greater(diff_q, 0),
                 tf.math.multiply(self._prev_q[:, j], tf.scalar_mul((1.0 - tc[-1]), xx)),
