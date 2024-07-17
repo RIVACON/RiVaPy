@@ -427,7 +427,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             if layer.name == 'Embedding':
                 emb_layer = self.model.get_layer('Embedding')
                 params = emb_layer.get_weights()
-                params[0][-1,:] = params[0][11,:]#.mean(axis=0)
+                params[0][-1,:] =  params[0][:-1,:].mean(axis=0)
                 emb_layer.set_weights(params)
                 emb_layer.trainable=True
             else:
@@ -435,15 +435,15 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             print(layer, layer.name, layer.trainable)
         self.compile(optimizer=optimizer, loss=self.custom_loss)
         inputs = self._create_inputs(paths)
-        # self.fit(
-        #     inputs,
-        #     payoff,
-        #     epochs=50,
-        #     batch_size=5,
-        #     callbacks=callbacks,
-        #     verbose=1,
-        #     validation_split=0.1,
-        #     validation_freq=5)
+        self.fit(
+             inputs,
+             payoff,
+             epochs=20,
+             batch_size=5,
+             callbacks=callbacks,
+             verbose=1,
+             validation_split=0.1,
+             validation_freq=5)
         for layer in self.model.layers:
                 layer.trainable = True
         self.compile(optimizer=optimizer, loss=self.custom_loss)
