@@ -33,7 +33,7 @@ model_params = ast.literal_eval(data)
 
 model = []
 
-vol_list = [0.1,0.2,0.3,0.4]
+vol_list = [0.2]
 loop = len(vol_list)#32#
 for i in range(len(vol_list)):#range(loop):
     #model.append(HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.0707,
@@ -73,7 +73,7 @@ reg = {
 
 #spec = {}
 
-strike = [0.9,1.,1.1]#, 0.9, 1.0, 1.1, 1.2]
+strike = [0.95,1.15]#, 0.9, 1.0, 1.1, 1.2]
 days = [30]#[20,40, 60, 80, 100, 120]
 refdate = dt.datetime(2023, 1, 1)
 issuer = "DBK"
@@ -110,8 +110,8 @@ for i in range(len(strike)):
 
 
 
-n_sims = loop*16000*4
-for emb_size in [64]:
+n_sims = loop*64000
+for emb_size in [1]:
     for seed in [42]:
         #for tc in [1e-10,0.0001,0.001,0.01]:
         pricing_results = repo.run(
@@ -123,7 +123,7 @@ for emb_size in [64]:
                             nb_neurons=128,
                             n_sims=n_sims,
                             regularization=0.,
-                            epochs=1,#300,
+                            epochs=50,#300,
                             verbose=1,
                             tensorboard_logdir="logs/"
                             + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),

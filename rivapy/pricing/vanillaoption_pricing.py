@@ -187,6 +187,7 @@ class VanillaOptionDeepHedgingPricer:
             if maxid_old < portfolio_list[i].portfolioid:
                 maxid = portfolio_list[i].portfolioid
     
+        print('compute paths:')
         simulation_results,emb_vec = VanillaOptionDeepHedgingPricer.generate_paths(seed,model_list,timegrid,n_sims,days,freq)
         port_vec = np.random.randint(maxid+1, size=len(emb_vec))
 
@@ -221,12 +222,13 @@ class VanillaOptionDeepHedgingPricer:
                 decay_steps=decay_steps,
                 decay_rate=decay_rate, 
                 staircase=True)
-    
-
+        print('done.')
+        print('compute payoff:')
         payoff = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, portfolio_list,port_vec) 
-
-
+        print('done.')
+        print('train hedge model:')
         hedge_model.train(paths, payoff, lr_schedule, epochs=epochs, batch_size=batch_size, tensorboard_log=tensorboard_logdir, verbose=verbose)
+        print('done.')
         return VanillaOptionDeepHedgingPricer.PricingResults(hedge_model, paths=paths, sim_results=simulation_results, payoff=payoff)
 
 if __name__=='__main__':
