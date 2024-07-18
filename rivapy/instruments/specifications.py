@@ -74,7 +74,8 @@ class EuropeanVanillaSpecification(interfaces.FactoryObject):
                  curr: str = Currency.EUR,
                  udl_id: str = '',
                  share_ratio: float = 1.0,
-                 long_short_flag: str = 'long'
+                 long_short_flag: str = 'long',
+                 portfolioid: str=None
                 #  holidays: str = '',
                 #  ex_settle: int = 0, not implemented
                 #  trade_settle: int = 0 not implemented
@@ -104,6 +105,7 @@ class EuropeanVanillaSpecification(interfaces.FactoryObject):
         self.strike = strike
         self.share_ratio = share_ratio
         self.long_short_flag = long_short_flag
+        self.portfolioid = portfolioid
         # self.holidays = holidays
         # self.ex_settle = ex_settle
         # self.trade_settle = trade_settle
@@ -113,7 +115,7 @@ class EuropeanVanillaSpecification(interfaces.FactoryObject):
     def _to_dict(self)->dict:
         return {'id': self.id, 'issuer':self.issuer, 'sec_lvl': self.sec_lvl, 'curr': self.curr, 'udl_id': self.udl_id, 
                 'type': self.type,'expiry':self.expiry, 'strike':self.strike,'share_ratio': self.share_ratio,
-                'long_short_flag':self.long_short_flag}
+                'long_short_flag':self.long_short_flag, 'portfolioid':self.portfolioid}
 
         
     def _get_pyvacon_obj(self):
@@ -146,13 +148,14 @@ class BarrierOptionSpecification(interfaces.FactoryObject):
                  curr: str = Currency.EUR,
                  udl_id: str = '',
                  share_ratio: float = 1.0,
-                 long_short_flag: str = 'long'
+                 long_short_flag: str = 'long',
+                 portfolioid: int=0
                 #  holidays: str = '',
                 #  ex_settle: int = 0, not implemented
                 #  trade_settle: int = 0 not implemented
                  ):
         
-        """Constructor for european vanilla option
+        """Constructor for barrier option
 
         Args:
             id (str): Identifier (name) of the european vanilla specification.
@@ -177,6 +180,7 @@ class BarrierOptionSpecification(interfaces.FactoryObject):
         self.barrier = barrier
         self.share_ratio = share_ratio
         self.long_short_flag = long_short_flag
+        self.portfolioid = portfolioid
         # self.holidays = holidays
         # self.ex_settle = ex_settle
         # self.trade_settle = trade_settle
@@ -186,7 +190,7 @@ class BarrierOptionSpecification(interfaces.FactoryObject):
     def _to_dict(self)->dict:
         return {'id': self.id, 'issuer':self.issuer, 'sec_lvl': self.sec_lvl, 'curr': self.curr, 'udl_id': self.udl_id, 
                 'type': self.type,'expiry':self.expiry, 'strike':self.strike, 'barrier':self.barrier,'share_ratio': self.share_ratio,
-                'long_short_flag':self.long_short_flag}
+                'long_short_flag':self.long_short_flag,'portfolioid':self.portfolioid}
 
         
     def _get_pyvacon_obj(self):

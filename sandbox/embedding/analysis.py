@@ -81,9 +81,7 @@ class Repo:
     def run(self, val_date, spec, model, rerun=False, **kwargs):
         params = {}
         params["val_date"] = val_date
-        params["spec"] = [
-            spec[k].to_dict() for k in range(len(spec))
-        ] #{spec[k].id: spec[k]._to_dict() for k in range(len(spec))}
+        params["spec"] = {spec[k].id: spec[k]._to_dict() for k in range(len(spec))}
         params["model"] = [
             model[k].to_dict() for k in range(len(model))
         ]  # model.to_dict()

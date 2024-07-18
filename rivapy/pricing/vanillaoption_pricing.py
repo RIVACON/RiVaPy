@@ -1,5 +1,5 @@
 from typing import List, Dict
-
+import copy
 
 try:
     import tensorflow as tf
@@ -40,43 +40,47 @@ class VanillaOptionDeepHedgingPricer:
 
     @staticmethod
     def compute_payoff(n_sims: int, 
-                       hedge_ins: Dict[str, np.ndarray], ins_list: list):
+                       hedge_ins: Dict[str, np.ndarray], portfolio_list: list, port_vec):
         payoff = np.zeros((n_sims,))
-        for i in range(len(ins_list)):
-            strike = ins_list[i].strike
-            long_short_flag = ins_list[i].long_short_flag
-            tpe = ins_list[i].type
-            if tpe == 'CALL':
-                if long_short_flag == 'short':
-                    for k,v in hedge_ins.items(): 
-                        payoff -= np.minimum(strike - v[-1,:],0)
-                else:
-                    for k,v in hedge_ins.items(): 
-                        payoff -= np.maximum(v[-1,:] - strike,0)
-            if tpe == 'PUT':
-                if long_short_flag == 'short':
-                    for k,v in hedge_ins.items(): 
-                        payoff -= np.minimum(v[-1,:] - strike,0)
-                else:
-                    for k,v in hedge_ins.items(): 
-                        payoff -= np.maximum(strike - v[-1,:],0)
-            if tpe == 'UIB_CALL':
-                for k,v in hedge_ins.items(): 
-                    condition =  v[-1,:] > ins_list[i].barrier
-                    payoff -= np.maximum(v - strike,0)[-1,:]*condition
-            if tpe == 'UOB_CALL':
-                for k,v in hedge_ins.items(): 
-                    condition =  v[-1,:] <= ins_list[i].barrier
-                    payoff -= np.maximum(v - strike,0)[-1,:]*condition
-            if tpe == 'DIB_CALL':
-                for k,v in hedge_ins.items(): 
-                    condition =  v[-1,:] < ins_list[i].barrier
-                    payoff -= np.maximum(v - strike,0)[-1,:]*condition
-            if tpe == 'DOB_CALL':
-                for k,v in hedge_ins.items(): 
-                    condition =  v[-1,:] >= ins_list[i].barrier
-                    payoff -= np.maximum(v - strike,0)[-1,:]*condition
 
+
+        for i in range(n_sims):
+            for k,v in hedge_ins.items(): 
+                if int(k[1]) == port_vec[i]:
+                    strike = portfolio_list[int(k[1])].strike
+                    long_short_flag = portfolio_list[int(k[1])].long_short_flag
+                    tpe = portfolio_list[int(k[1])].type
+                    if tpe == 'CALL':
+                        if long_short_flag == 'short':
+                            payoff[i] -= np.minimum(strike - v[-1,i],0)
+                            continue
+                        else:
+                            payoff[i] -= np.maximum(v[-1,i] - strike,0)
+                            continue
+                    if tpe == 'PUT':
+                        if long_short_flag == 'short':
+                            payoff[i] -= np.minimum(v[-1,i] - strike,0)
+                            continue
+                        else:
+                            payoff[i] -= np.maximum(strike - v[-1,i],0)
+                            continue
+
+                    if tpe == 'UIB_CALL':
+                        condition =  v[-1,i] > portfolio_list[i].barrier
+                        payoff[i] -= np.maximum(v - strike,0)[-1,i]*condition
+                        continue
+                    if tpe == 'UOB_CALL':
+                        condition =  v[-1,i] <= portfolio_list[i].barrier
+                        payoff[i] -= np.maximum(v - strike,0)[-1,i]*condition
+                        continue
+                    if tpe == 'DIB_CALL':
+                        condition =  v[-1,i] < portfolio_list[i].barrier
+                        payoff[i] -= np.maximum(v - strike,0)[-1,i]*condition
+                        continue
+                    if tpe == 'DOB_CALL':
+                        condition =  v[-1,i] >= portfolio_list[i].barrier
+                        payoff[i] -= np.maximum(v - strike,0)[-1,i]*condition
+                        continue
 
 
         return payoff
@@ -105,36 +109,12 @@ class VanillaOptionDeepHedgingPricer:
             emb_vec[i*n_sims:n_sims*(i+1)] = i    
         return simulation_results, emb_vec
     
-    @staticmethod
-    def get_call_prices(sim_results: np.ndarray, strike: float,
-               seed: int,
-                model_list: list,
-                timegrid: DateTimeGrid,
-                n_sims: int, 
-                days: int,
-                freq: str):
-        tf.random.set_seed(seed)
-        np.random.seed(seed+123)
 
-        call_prices = np.zeros((len(timegrid)+1, n_sims))
-
-        if freq == '12H':
-            n = days*2
-        else:
-            n = days
-        n_sims = int(n_sims/len(model_list))
-
-        for i in range(len(model_list)):
-            model= model_list[i]
-            for j in range(len(timegrid)):
-                ttm = (timegrid[-1] - timegrid[j])
-                call_prices[j,i*n_sims:n_sims*(i+1)] = model.compute_call_price(sim_results[j,i*n_sims:n_sims*(i+1)],strike,ttm)
-            call_prices[-1,i*n_sims:n_sims*(i+1)] = 0.
-        return call_prices
+    
     
     @staticmethod
     def price(val_date: dt.datetime,
-        ins_list: list,#EuropeanVanillaSpecification,
+        portfolio_list: list,#EuropeanVanillaSpecification,
                 model_list: list, #HestonForDeepHedging,
                 depth: int, 
                 nb_neurons: int, 
@@ -162,7 +142,7 @@ class VanillaOptionDeepHedgingPricer:
 
         Args:
             val_date (dt.dtetime): Valuation date
-            ins_list (EuropeanVanillaSpecification): Specification of a list of vanilla options
+            portfolio_list (PortfolioSpecification): Specification of a list of portfolios
             model (GBM, HestonForDeepHedging): The list of models.
             depth (int): Number of layers of neural network.
             nb_neurons (int): Number of activation functions. 
@@ -201,7 +181,15 @@ class VanillaOptionDeepHedgingPricer:
         np.random.seed(seed+123)
         timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days,freq)
 
+        maxid_old = 0
+        maxid = 0
+        for i in range(len(portfolio_list)):
+            if maxid_old < portfolio_list[i].portfolioid:
+                maxid = portfolio_list[i].portfolioid
+    
         simulation_results,emb_vec = VanillaOptionDeepHedgingPricer.generate_paths(seed,model_list,timegrid,n_sims,days,freq)
+        port_vec = np.random.randint(maxid+1, size=len(emb_vec))
+
         if model_list[0].modelname == 'Heston with Volswap':
             raise Exception('Heston with Volswap currently not running')
             hedge_ins = {}
@@ -211,25 +199,22 @@ class VanillaOptionDeepHedgingPricer:
             hedge_ins = {}
             additional_states_ = {}
             additional_states_["emb_key"] = emb_vec
-            for i in range(len(ins_list)):
-                key = ins_list[i].udl_id
-                T = (ins_list[i].expiry - val_date).days
-                print(T)
+            additional_states_["port_key"] = port_vec
+            for i in range(len(portfolio_list)):
+                T = (portfolio_list[i].expiry - val_date).days
+                key = 'P'+str(portfolio_list[i].portfolioid)+portfolio_list[i].udl_id + str(T)
                 if freq == '12H':
                     hedge_ins[key] = simulation_results[:int(T*2),:]
                     #hedge_ins['V'] = VanillaOptionDeepHedgingPricer.get_call_prices(simulation_results[:int(T*2),:], ins_list[i].strike, seed,model_list,timegrid[:int(T*2)],n_sims,days,freq)
                 else:
                     hedge_ins[key] = simulation_results[:int(T),:]
                     #hedge_ins['V'] = VanillaOptionDeepHedgingPricer.get_call_prices(simulation_results[:int(T),:], ins_list[i].strike, seed,model_list,timegrid[:int(T)],n_sims,days,freq)
-                
         hedge_model = DeepHedgeModelwEmbedding(list(hedge_ins.keys()), list(additional_states_.keys()),timegrid=timegrid, 
                                         regularization=regularization,depth=depth, n_neurons=nb_neurons, loss = loss,
                                         transaction_cost = transaction_cost,no_of_unique_model=len(model_list),embedding_size=embedding_size)
-
         paths = {}
         paths.update(hedge_ins)
         paths.update(additional_states_) 
-        print(paths)
 
         lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
                 initial_learning_rate=initial_lr,#1e-3,
@@ -237,7 +222,9 @@ class VanillaOptionDeepHedgingPricer:
                 decay_rate=decay_rate, 
                 staircase=True)
     
-        payoff = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, ins_list) 
+
+        payoff = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, portfolio_list,port_vec) 
+
 
         hedge_model.train(paths, payoff, lr_schedule, epochs=epochs, batch_size=batch_size, tensorboard_log=tensorboard_logdir, verbose=verbose)
         return VanillaOptionDeepHedgingPricer.PricingResults(hedge_model, paths=paths, sim_results=simulation_results, payoff=payoff)

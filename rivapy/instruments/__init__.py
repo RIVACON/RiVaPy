@@ -7,7 +7,6 @@ from rivapy.instruments.ppa_specification import PPASpecification, GreenPPASpeci
 from rivapy.instruments.bond_specifications import ZeroCouponBondSpecification, FixedRateBondSpecification, PlainVanillaCouponBondSpecification, FloatingRateNoteSpecification, FixedToFloatingRateNoteSpecification
 
 
-
 def _add_to_factory(cls):
     factory_entries = _factory()
     factory_entries[cls.__name__] = cls
@@ -20,5 +19,6 @@ _add_to_factory(GreenPPASpecification)
 _add_to_factory(ZeroCouponBondSpecification)
 _add_to_factory(FixedRateBondSpecification)
 _add_to_factory(PlainVanillaCouponBondSpecification)
+_add_to_factory(PPASpecification)
 
 
