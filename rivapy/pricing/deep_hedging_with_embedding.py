@@ -69,7 +69,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
                     name="Embedding",
                 )
             if "port_key" in self.additional_states:
-                self.no_of_portfolios = 2
+                self.no_of_portfolios = 4
                 self.embedding_size_port = 1
                 self._embedding_layer_port = tf.keras.layers.Embedding(
                     input_dim=self.no_of_portfolios+1,
@@ -258,8 +258,9 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             return result
         if isinstance(t, int):
             inputs_ = self._create_inputs(paths)#, check_timegrid=True)
-            inputs = []
-            inputs.append(inputs_[0][:,t])
+            #inputs = []
+            #inputs.append(inputs_[0][:,t])
+            inputs = [inputs_[i][:,t] for i in range(len(inputs_)-2)]
             #inputs.append(inputs_[1]) #= [inputs_[i][:,t] for i in range(len(inputs_))]
             t = (self.timegrid[-1] - self.timegrid[t]) / self.timegrid[-1]
         else:
@@ -375,8 +376,6 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         params["transaction_cost"] = self.transaction_cost
         params["no_of_unique_model"] = self.no_of_unique_model
         params["embedding_size"] = self.embedding_size
-        params["no_of_portfolio"] = self.no_of_portfolio
-        params["embedding_size_port"] = self.embedding_size_port
         # params["threshold"] = self.threshold
         with open(folder + "/params.json", "w") as f:
             json.dump(params, f)
@@ -396,8 +395,6 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         params["hedge_instruments"] = np.array(params["hedge_instruments"])
         params["no_of_unique_model"] = params["no_of_unique_model"]
         params["embedding_size"] = params["embedding_size"]
-        params["no_of_portfolio"] = params["no_of_portfolio"]
-        params["embedding_size_port"] = params["embedding_size_port"]
         if not ("loss" in params.keys()):
             params["loss"] = "mean_variance"
         return DeepHedgeModelwEmbedding(depth=None, n_neurons=None, model=base_model, **params), (w,), (w2,)
@@ -450,6 +447,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
 
     @staticmethod
     def train_task(model, paths: Dict[str, np.ndarray], payoff: np.ndarray, paths_test: Dict[str, np.ndarray], payoff_test, 
+                   emb: int, emb_port: int,
                   initial_lr=0.0001, 
                   decay_steps=200,decay_rate=0.95):
 
@@ -473,7 +471,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         model.fit_param(optimizer=optimizer, callbacks=callbacks,paths=paths,payoff=payoff)
         y_pred = model.compute_pnl(paths, payoff)
         y_test = model.compute_pnl(paths_test,payoff_test)
-        y_delta = model.compute_delta(paths_test, t=28,emb=128,emb_port=0)
+        y_delta = model.compute_delta(paths_test, t=28,emb=emb,emb_port=emb_port)
         inputs = model._create_inputs(paths_test)
         y_loss = model.evaluate(inputs, payoff_test)
         return y_pred, y_test,y_delta, y_loss

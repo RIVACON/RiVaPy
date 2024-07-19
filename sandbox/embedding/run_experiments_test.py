@@ -73,7 +73,7 @@ reg = {
 
 #spec = {}
 
-strike = [0.95,1.15]#, 0.9, 1.0, 1.1, 1.2]
+strike = [0.85,0.9,0.95,1.]#, 0.9, 1.0, 1.1, 1.2]
 days = [30]#[20,40, 60, 80, 100, 120]
 refdate = dt.datetime(2023, 1, 1)
 issuer = "DBK"
@@ -90,7 +90,7 @@ for i in range(len(strike)):
         count = count + 1
         expiry = refdate + dt.timedelta(days=days[j])
         spec.append(EuropeanVanillaSpecification(
-                    "Test_Call",
+                    'P'+str(count-1)+str(tpe)+'K'+str(strike[i])+'T'+str(days[j]),
                     tpe,
                     expiry,
                     strike[i],
@@ -105,12 +105,7 @@ for i in range(len(strike)):
         
 
         
-
-        
-
-
-
-n_sims = loop*64000
+n_sims = loop*128000
 for emb_size in [1]:
     for seed in [42]:
         #for tc in [1e-10,0.0001,0.001,0.01]:
@@ -123,7 +118,7 @@ for emb_size in [1]:
                             nb_neurons=128,
                             n_sims=n_sims,
                             regularization=0.,
-                            epochs=50,#300,
+                            epochs=100,
                             verbose=1,
                             tensorboard_logdir="logs/"
                             + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),

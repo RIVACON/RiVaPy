@@ -123,7 +123,6 @@ class Repo:
 
     def simulate_model(
         self,
-        hashkey: str,
         n_sims: int,
         seed: int = 42,
         days: int = 30,
