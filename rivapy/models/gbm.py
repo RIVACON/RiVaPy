@@ -78,7 +78,7 @@ class GBM(FactoryObject):
         return delta_BS
 
 
-    def compute_call_price(self, S0: Union[float, np.ndarray], v0: Union[float, np.ndarray], K: float, ttm: float):
+    def compute_call_price(self, S0: Union[float, np.ndarray], v0: Union[float, np.ndarray], K:Union[float, np.ndarray], ttm: float):
         """Computes the price of a call option with strike K and time to maturity ttm for a spot following the GBM.
             -> Black Scholes closed formula.
 
