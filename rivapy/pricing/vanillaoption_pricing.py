@@ -47,42 +47,41 @@ class VanillaOptionDeepHedgingPricer:
             for j in range(len(portfolio_list)): 
                 for k,v in hedge_ins.items():
                     if portfolio_list[j].portfolioid == port_vec[i]:
-                        if (portfolio_list[j].expiry - val_date).days >= days:
-                            strike = portfolio_list[j].strike
-                            long_short_flag = portfolio_list[j].long_short_flag
-                            tpe = portfolio_list[j].type
-                            if tpe == 'CALL':
-                                if long_short_flag == 'short':
-                                    payoff[i] -= np.minimum(strike - v[-1,i],0)
-                                    continue
-                                else:
-                                    payoff[i] -= np.maximum(v[-1,i] - strike,0)
-                                    continue
-                            if tpe == 'PUT':
-                                if long_short_flag == 'short':
-                                    payoff[i] -= np.minimum(v[-1,i] - strike,0)
-                                    continue
-                                else:
-                                    payoff[i] -= np.maximum(strike - v[-1,i],0)
-                                    continue
-
-                            if tpe == 'UIB_CALL':
-                                condition =  v[-1,i] > portfolio_list[i].barrier
-                                payoff[i] -= np.maximum(v - strike,0)[-1,i]*condition
+                        T = (portfolio_list[j].expiry - val_date).days
+                        strike = portfolio_list[j].strike
+                        long_short_flag = portfolio_list[j].long_short_flag
+                        tpe = portfolio_list[j].type
+                        if tpe == 'CALL':
+                            if long_short_flag == 'short':
+                                payoff[i] -= np.minimum(strike - v[T-1,i],0)
                                 continue
-                            if tpe == 'UOB_CALL':
-                                condition =  v[-1,i] <= portfolio_list[i].barrier
-                                payoff[i] -= np.maximum(v - strike,0)[-1,i]*condition
+                            else:
+                                payoff[i] -= np.maximum(v[T-1,i] - strike,0)
                                 continue
-                            if tpe == 'DIB_CALL':
-                                condition =  v[-1,i] < portfolio_list[i].barrier
-                                payoff[i] -= np.maximum(v - strike,0)[-1,i]*condition
+                        if tpe == 'PUT':
+                            if long_short_flag == 'short':
+                                payoff[i] -= np.minimum(v[T-1,i] - strike,0)
                                 continue
-                            if tpe == 'DOB_CALL':
-                                condition =  v[-1,i] >= portfolio_list[i].barrier
-                                payoff[i] -= np.maximum(v - strike,0)[-1,i]*condition
+                            else:
+                                payoff[i] -= np.maximum(strike - v[T-1,i],0)
                                 continue
 
+                        if tpe == 'UIB_CALL':
+                            condition =  v[T-1,i] > portfolio_list[i].barrier
+                            payoff[i] -= np.maximum(v - strike,0)[T-1,i]*condition
+                            continue
+                        if tpe == 'UOB_CALL':
+                            condition =  v[-1,i] <= portfolio_list[i].barrier
+                            payoff[i] -= np.maximum(v - strike,0)[T-1,i]*condition
+                            continue
+                        if tpe == 'DIB_CALL':
+                            condition =  v[-1,i] < portfolio_list[i].barrier
+                            payoff[i] -= np.maximum(v - strike,0)[T-1,i]*condition
+                            continue
+                        if tpe == 'DOB_CALL':
+                            condition =  v[-1,i] >= portfolio_list[i].barrier
+                            payoff[i] -= np.maximum(v - strike,0)[T-1,i]*condition
+                            continue
 
         return payoff
 
