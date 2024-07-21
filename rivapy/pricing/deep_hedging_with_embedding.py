@@ -2,6 +2,7 @@ from typing import List, Dict, Union
 import json
 import numpy as np
 import sys
+import time
 
 try:
     import tensorflow as tf
@@ -361,7 +362,8 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             callbacks.append(tensorboard_callback)
         self.compile(optimizer=optimizer, loss=self.custom_loss)
         inputs = self._create_inputs(paths)
-        return self.fit(
+        start = time.time()
+        bla = self.fit(
             inputs,
             payoff,
             epochs=epochs,
@@ -371,6 +373,9 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             validation_split=0.1,
             validation_freq=5,
         )
+        end = time.time()
+        print('time:',start-end)
+        return bla
 
     def save(self, folder):
         self.model.save(folder + "/delta_model")
@@ -427,7 +432,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             if layer.name == 'Embedding':
                 emb_layer = self.model.get_layer('Embedding')
                 params = emb_layer.get_weights()
-                params[0][-1,:] =  params[0][:-1,:].mean(axis=0)
+                params[0][-1,:] = params[0][:-1,:].mean(axis=0)
                 emb_layer.set_weights(params)
                 emb_layer.trainable=True
             else:
@@ -471,8 +476,10 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             )
             callbacks.append(tensorboard_callback)
         
-
+        start = time.time()
         model.fit_param(optimizer=optimizer, callbacks=callbacks,paths=paths,payoff=payoff)
+        end = time.time()
+        print('time:',start-end)
         y_pred = model.compute_pnl(paths, payoff)
         y_test = model.compute_pnl(paths_test,payoff_test)
         y_delta = model.compute_delta(paths_test, t=28,emb=128)
