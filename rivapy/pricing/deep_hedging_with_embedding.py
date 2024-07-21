@@ -32,6 +32,8 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         # threshold: float = 0.0,
         no_of_unique_model: int = 1,
         embedding_size: int = 1,
+        no_of_portfolios: int = 1, 
+        embedding_size_port: int = 1,
         # cascading: bool = False,
         model: tf.keras.Model = None,
         **kwargs
@@ -69,8 +71,8 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
                     name="Embedding",
                 )
             if "port_key" in self.additional_states:
-                self.no_of_portfolios = 4
-                self.embedding_size_port = 1
+                self.no_of_portfolios = no_of_portfolios
+                self.embedding_size_port = embedding_size_port
                 self._embedding_layer_port = tf.keras.layers.Embedding(
                     input_dim=self.no_of_portfolios+1,
                     output_dim=self.embedding_size_port,
@@ -376,6 +378,8 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         params["transaction_cost"] = self.transaction_cost
         params["no_of_unique_model"] = self.no_of_unique_model
         params["embedding_size"] = self.embedding_size
+        params["no_of_portfolios"] = self.no_of_portfolios
+        params["embedding_size_port"] = self.embedding_size_port
         # params["threshold"] = self.threshold
         with open(folder + "/params.json", "w") as f:
             json.dump(params, f)
@@ -395,6 +399,8 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         params["hedge_instruments"] = np.array(params["hedge_instruments"])
         params["no_of_unique_model"] = params["no_of_unique_model"]
         params["embedding_size"] = params["embedding_size"]
+        params["no_of_portfolios"] = params["no_of_portfolios"]
+        params["embedding_size_port"] = params["embedding_size_port"]
         if not ("loss" in params.keys()):
             params["loss"] = "mean_variance"
         return DeepHedgeModelwEmbedding(depth=None, n_neurons=None, model=base_model, **params), (w,), (w2,)
@@ -415,16 +421,22 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
 
     
 
-    def fit_param(self, optimizer, callbacks, paths: Dict[str, np.ndarray], payoff: np.ndarray):
+    def fit_param(self, optimizer, callbacks, paths: Dict[str, np.ndarray], payoff: np.ndarray,emb: int, emb_port: int):
 
 
         for layer in self.model.layers:
             if layer.name == 'Embedding':
                 emb_layer = self.model.get_layer('Embedding')
                 params = emb_layer.get_weights()
-                params[0][-1,:] =  params[0][:-1,:].mean(axis=0)
+                params[0][emb,:] =  params[0][:-1,:].mean(axis=0)
                 emb_layer.set_weights(params)
                 emb_layer.trainable=True
+            elif layer.name == 'Embedding_port':
+                emb_layer_port = self.model.get_layer('Embedding_port')
+                params2 = emb_layer_port.get_weights()
+                params2[0][emb_port,:] =  params2[0][:-1,:].mean(axis=0)
+                emb_layer_port.set_weights(params2)
+                emb_layer_port.trainable=True
             else:
                 layer.trainable = False
             print(layer, layer.name, layer.trainable)
@@ -447,7 +459,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
 
     @staticmethod
     def train_task(model, paths: Dict[str, np.ndarray], payoff: np.ndarray, paths_test: Dict[str, np.ndarray], payoff_test, 
-                   emb: int, emb_port: int,
+                   emb: int, emb_port: int, t: int,
                   initial_lr=0.0001, 
                   decay_steps=200,decay_rate=0.95):
 
@@ -468,10 +480,10 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             callbacks.append(tensorboard_callback)
         
 
-        model.fit_param(optimizer=optimizer, callbacks=callbacks,paths=paths,payoff=payoff)
+        model.fit_param(optimizer=optimizer, callbacks=callbacks,paths=paths,payoff=payoff,emb=emb,emb_port=emb_port)
         y_pred = model.compute_pnl(paths, payoff)
         y_test = model.compute_pnl(paths_test,payoff_test)
-        y_delta = model.compute_delta(paths_test, t=28,emb=emb,emb_port=emb_port)
+        y_delta = model.compute_delta(paths_test, t=t,emb=emb,emb_port=emb_port)
         inputs = model._create_inputs(paths_test)
         y_loss = model.evaluate(inputs, payoff_test)
         return y_pred, y_test,y_delta, y_loss

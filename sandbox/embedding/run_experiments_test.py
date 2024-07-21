@@ -73,8 +73,8 @@ reg = {
 
 #spec = {}
 
-strike = [0.85,0.9,0.95,1.]#, 0.9, 1.0, 1.1, 1.2]
-days = [30]#[20,40, 60, 80, 100, 120]
+strike = [1.]#[0.85,0.9,0.95,1.]#, 0.9, 1.0, 1.1, 1.2]
+days = [20,40,60,80]#[20,40, 60, 80, 100, 120]
 refdate = dt.datetime(2023, 1, 1)
 issuer = "DBK"
 seclevel = "COLLATERALIZED"
@@ -129,6 +129,7 @@ for emb_size in [1]:
                             seed=seed,
                             days=int(np.max(days)),
                             embedding_size=emb_size,
+                            embedding_size_port=1
                             #transaction_cost={'DIB_ADS':[0.01],'DOB_ADS':[0.01]},
                             #loss = "exponential_utility"
                         )

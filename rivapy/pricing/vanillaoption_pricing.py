@@ -96,7 +96,8 @@ class VanillaOptionDeepHedgingPricer:
         np.random.seed(seed+123)
 
         simulation_results = np.zeros((len(timegrid)+1, n_sims))
-        S0 = 1. #ATM option
+        ## still a constant, fixed to 1.: TODO -> set variable!!
+        S0 = 1. 
         emb_vec = np.zeros((n_sims))
         if freq == '12H':
             n = days*2
@@ -130,12 +131,10 @@ class VanillaOptionDeepHedgingPricer:
                 seed: int = 42,
                 loss: str = 'mean_variance',
                 transaction_cost: dict = {},
-                threshold: float = 0.,
-                cascading: bool = False,
                 days: int = 30,
-                test_weighted_paths: bool = False,
                 freq: str = 'D',
-                embedding_size: int = 1
+                embedding_size: int = 1,
+                embedding_size_port: int = 1
                 #paths: Dict[str, np.ndarray] = None
                 ):
         """Price a vanilla option using deeep hedging
@@ -212,7 +211,8 @@ class VanillaOptionDeepHedgingPricer:
                     #hedge_ins['V'] = VanillaOptionDeepHedgingPricer.get_call_prices(simulation_results[:int(T),:], ins_list[i].strike, seed,model_list,timegrid[:int(T)],n_sims,days,freq)
         hedge_model = DeepHedgeModelwEmbedding(list(hedge_ins.keys()), list(additional_states_.keys()),timegrid=timegrid, 
                                         regularization=regularization,depth=depth, n_neurons=nb_neurons, loss = loss,
-                                        transaction_cost = transaction_cost,no_of_unique_model=len(model_list),embedding_size=embedding_size)
+                                        transaction_cost = transaction_cost,no_of_unique_model=len(model_list),embedding_size=embedding_size,
+                                        no_of_portfolios=maxid,embedding_size_port=embedding_size_port)
         paths = {}
         paths.update(hedge_ins)
         paths.update(additional_states_) 
