@@ -69,8 +69,10 @@ class Repo:
             pricing_results.paths, pricing_results.payoff
         )
         inputs = pricing_results.hedge_model._create_inputs(pricing_results.paths)
-        print(inputs)
-        loss = pricing_results.hedge_model.evaluate(inputs, pricing_results.payoff)
+        #print(inputs)
+        y_pred = pricing_results.hedge_model.predict(inputs)
+        loss = float(pricing_results.hedge_model.custom_loss(y_pred, tf.cast(pricing_results.payoff, tf.float32)))
+        #loss = pricing_results.hedge_model.evaluate(inputs, pricing_results.payoff)
 
         return {
             "mean": pnl.mean(),
@@ -172,8 +174,8 @@ class Repo:
             tmp["dtm"] = (v["ppa_spec"]["schedule"][0] - v["val_date"]).days
             tmp["n_forecast_hours"] = len(tmp["forecast_hours"])
             del tmp["forecast_hours"]
-            tmp["n_additional_states"] = len(tmp["additional_states"])
-            del tmp["additional_states"]
+            #tmp["n_additional_states"] = len(tmp["additional_states"])
+            #del tmp["additional_states"]
             if "tensorboard_logdir" in tmp.keys():
                 del tmp["tensorboard_logdir"]
             d = v["result"]
