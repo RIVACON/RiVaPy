@@ -14,7 +14,7 @@ except:
     import warnings
 
     warnings.warn(
-        "Tensorflow is not installed. You cannot use the PPA Deep Hedging Pricer!"
+        "Tensorflow is not installed. You cannot use the Deep Hedging Pricer!"
     )
 
 
@@ -170,7 +170,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             if "emb_key" in self.additional_states:
                 inputs.append(params)
                 inputs.append(params_port)
-            quantity = self.model(inputs,training)#self.model(inputs, training=training)
+            quantity = self.model(inputs,training)
             for j in range(len(self.hedge_instruments)):
                 pnl += tf.math.multiply(
                     (self._prev_q[:, j] - quantity[:, j]), tf.squeeze(x[j][:, i])
@@ -419,7 +419,6 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         emb_layer = self.model.get_layer('Embedding')
         emb_layer.set_weights([params])
 
-    
 
     def fit_param(self, optimizer, callbacks, paths: Dict[str, np.ndarray], payoff: np.ndarray,emb: int, emb_port: int):
 
