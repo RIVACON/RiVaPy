@@ -67,19 +67,19 @@ class VanillaOptionDeepHedgingPricer:
                                 continue
 
                         if tpe == 'UIB_CALL':
-                            condition =  v[T-1,i] > portfolio_list[i].barrier
+                            condition =  np.max(v[:,i]) > portfolio_list[i].barrier
                             payoff[i] -= np.maximum(v - strike,0)[T-1,i]*condition
                             continue
                         if tpe == 'UOB_CALL':
-                            condition =  v[-1,i] <= portfolio_list[i].barrier
+                            condition =  np.max(v[:,i]) <= portfolio_list[i].barrier
                             payoff[i] -= np.maximum(v - strike,0)[T-1,i]*condition
                             continue
                         if tpe == 'DIB_CALL':
-                            condition =  v[-1,i] < portfolio_list[i].barrier
+                            condition =  np.min(v[:,i]) < portfolio_list[i].barrier
                             payoff[i] -= np.maximum(v - strike,0)[T-1,i]*condition
                             continue
                         if tpe == 'DOB_CALL':
-                            condition =  v[-1,i] >= portfolio_list[i].barrier
+                            condition =  np.min(v[:,i]) >= portfolio_list[i].barrier
                             payoff[i] -= np.maximum(v - strike,0)[T-1,i]*condition
                             continue
 

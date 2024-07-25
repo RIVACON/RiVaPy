@@ -75,7 +75,7 @@ class EuropeanVanillaSpecification(interfaces.FactoryObject):
                  udl_id: str = '',
                  share_ratio: float = 1.0,
                  long_short_flag: str = 'long',
-                 portfolioid: str=None
+                 portfolioid: int=0
                 #  holidays: str = '',
                 #  ex_settle: int = 0, not implemented
                 #  trade_settle: int = 0 not implemented
