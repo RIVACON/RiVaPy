@@ -62,19 +62,19 @@ class VanillaOptionDeepHedgingPricer:
                         payoff -= np.maximum(strike - v[-1,:],0)
             if tpe == 'UIB_CALL':
                 for k,v in hedge_ins.items(): 
-                    condition =  v[-1,:] > ins_list[i].barrier
+                    condition =  np.max(v[-1,:]) > ins_list[i].barrier
                     payoff -= np.maximum(v - strike,0)[-1,:]*condition
             if tpe == 'UOB_CALL':
                 for k,v in hedge_ins.items(): 
-                    condition =  v[-1,:] <= ins_list[i].barrier
+                    condition =  np.max(v[-1,:])  <= ins_list[i].barrier
                     payoff -= np.maximum(v - strike,0)[-1,:]*condition
             if tpe == 'DIB_CALL':
                 for k,v in hedge_ins.items(): 
-                    condition =  v[-1,:] < ins_list[i].barrier
+                    condition =  np.min(v[-1,:])  < ins_list[i].barrier
                     payoff -= np.maximum(v - strike,0)[-1,:]*condition
             if tpe == 'DOB_CALL':
                 for k,v in hedge_ins.items(): 
-                    condition =  v[-1,:] >= ins_list[i].barrier
+                    condition =  np.min(v[-1,:])  >= ins_list[i].barrier
                     payoff -= np.maximum(v - strike,0)[-1,:]*condition
 
 
