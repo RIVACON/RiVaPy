@@ -242,7 +242,6 @@ class VanillaOptionDeepHedgingPricer:
         paths = {}
         paths.update(hedge_ins)
         paths.update(additional_states_) 
-        print(paths)
 
         lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
                 initial_learning_rate=initial_lr,#1e-3,
