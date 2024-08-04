@@ -44,6 +44,7 @@ class VanillaOptionDeepHedgingPricer:
         payoff = np.zeros((n_sims,))
 
         for i in range(n_sims):
+            print(i)
             for j in range(len(portfolio_list)): 
                 for k,v in hedge_ins.items():
                     if portfolio_list[j].portfolioid == port_vec[i]:
@@ -67,19 +68,19 @@ class VanillaOptionDeepHedgingPricer:
                                 continue
 
                         if tpe == 'UIB_CALL':
-                            condition =  np.max(v[:T,i]) > portfolio_list[i].barrier
+                            condition =  np.max(v[:T,i]) > portfolio_list[j].barrier
                             payoff[i] -= np.maximum(v - strike,0)[T-1,i]*condition
                             continue
                         if tpe == 'UOB_CALL':
-                            condition =  np.max(v[:T,i]) <= portfolio_list[i].barrier
+                            condition =  np.max(v[:T,i]) <= portfolio_list[j].barrier
                             payoff[i] -= np.maximum(v - strike,0)[T-1,i]*condition
                             continue
                         if tpe == 'DIB_CALL':
-                            condition =  np.min(v[:T,i]) < portfolio_list[i].barrier
+                            condition =  np.min(v[:T,i]) < portfolio_list[j].barrier
                             payoff[i] -= np.maximum(v - strike,0)[T-1,i]*condition
                             continue
                         if tpe == 'DOB_CALL':
-                            condition =  np.min(v[:T,i]) >= portfolio_list[i].barrier
+                            condition =  np.min(v[:T,i]) >= portfolio_list[j].barrier
                             payoff[i] -= np.maximum(v - strike,0)[T-1,i]*condition
                             continue
 
