@@ -1,5 +1,6 @@
 
 from datetime import datetime 
+import numpy as np
 from rivapy.tools.enums import SecuritizationLevel, Currency
 import rivapy.tools.interfaces as interfaces
 #from rivapy.enums import Currency
@@ -135,6 +136,20 @@ class EuropeanVanillaSpecification(interfaces.FactoryObject):
                                             
         return self._pyvacon_obj
     
+    def compute_payoff(self, v, expiry_index, payoff,states=None):
+
+        if self.type == 'CALL':
+            if self.long_short_flag == 'short':
+                payoff -= np.minimum(self.strike - v[expiry_index,:],0)
+            else:
+                payoff -= np.maximum(v[expiry_index,:] - self.strike,0)
+        if self.type == 'PUT':
+            if self.long_short_flag == 'short':
+                payoff -= np.minimum(v[expiry_index,:] - self.strike,0)
+            else:
+                payoff -= np.maximum(self.strike - v[expiry_index,:],0)
+
+    
 
 class BarrierOptionSpecification(interfaces.FactoryObject):
     def __init__(self, 
@@ -210,6 +225,23 @@ class BarrierOptionSpecification(interfaces.FactoryObject):
                                             0)
                                             
         return self._pyvacon_obj
+    
+
+    def compute_payoff(self, v, expiry_index, payoff,states):
+
+        if self.type == 'UIB_CALL':
+            condition =  np.max(v[:expiry_index+1,:],axis=1) > self.barrier
+            payoff -= np.maximum(v - self.strike,0)[expiry_index,:]*condition
+        if self.type == 'UOB_CALL':
+            condition =  np.max(v[:expiry_index+1,:],axis=1) <= self.barrier
+            payoff -= np.maximum(v - self.strike,0)[expiry_index,:]*condition
+        if self.type == 'DIB_CALL':
+            condition =  np.min(v[:expiry_index+1,:],axis=1) < self.barrier
+            payoff -= np.maximum(v - self.strike,0)[expiry_index,:]*condition
+        if self.type == 'DOB_CALL':
+            condition =  np.min(v[:expiry_index+1,:],axis=1) >= self.barrier
+            payoff -= np.maximum(v - self.strike,0)[expiry_index,:]*condition
+
     
 
     

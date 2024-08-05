@@ -37,21 +37,26 @@ class VanillaOptionDeepHedgingPricer:
             timegrid = np.linspace(0.0,T,days)
         return timegrid
     
+    
 
     @staticmethod
     def compute_payoff(n_sims: int, 
                        hedge_ins: Dict[str, np.ndarray], portfolio_list: list, port_vec,days, val_date):
         payoff = np.zeros((n_sims,))
+        states = np.zeros((n_sims,))
 
-        for i in range(n_sims):
-            print(i)
+        for k,v in hedge_ins.items():
             for j in range(len(portfolio_list)): 
-                for k,v in hedge_ins.items():
+                T = (portfolio_list[j].expiry - val_date).days
+                strike = portfolio_list[j].strike
+                long_short_flag = portfolio_list[j].long_short_flag
+                tpe = portfolio_list[j].type
+                selected = portfolio_list[j].portfolioid == port_vec
+                portfolio_list[j].compute_payoff(v[:,selected], T-1, payoff, states)
+
+            if False:
+                for i in range(n_sims):
                     if portfolio_list[j].portfolioid == port_vec[i]:
-                        T = (portfolio_list[j].expiry - val_date).days
-                        strike = portfolio_list[j].strike
-                        long_short_flag = portfolio_list[j].long_short_flag
-                        tpe = portfolio_list[j].type
                         if tpe == 'CALL':
                             if long_short_flag == 'short':
                                 payoff[i] -= np.minimum(strike - v[T-1,i],0)
