@@ -126,6 +126,7 @@ class SpecificationDeepHedgingInterfaceTest(unittest.TestCase):
         path[:,0] = 105.0
         path[:,1] = 115.0
         path[:,2] = 115.0
+        path[0,2] = 90.0
         path[-5:,2] = 105.0
         payoff,states = spec.compute_payoff(path,path.shape[0]-1)
         self.assertIsNotNone(states)
@@ -133,9 +134,13 @@ class SpecificationDeepHedgingInterfaceTest(unittest.TestCase):
         self.assertAlmostEqual(payoff[1], 15.0, places=8)
         self.assertAlmostEqual(payoff[2], 5.0, places=8)
         self.assertEqual(states[0,0], 0)
-        self.assertEqual(states[1,-1], 1)
-        self.assertEqual(states[1,-1], 1)
-        self.assertEqual(states[2,-1], 1)
+        self.assertEqual(states[-1,0], 0)
+        self.assertEqual(states[0,1], 1)
+        self.assertEqual(states[-1,1], 1)
+        self.assertEqual(states[0,2], 0)
+        self.assertEqual(states[1,2], 1)
+        self.assertEqual(states[-1,2], 1)
+        
 
 if __name__ == '__main__':
     unittest.main()
