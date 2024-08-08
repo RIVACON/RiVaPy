@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Protocol, Tuple
 import copy
 
 try:
@@ -19,6 +19,25 @@ import datetime as dt
 from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.pricing.deep_hedging_with_embedding import DeepHedgeModelwEmbedding
              
+class SpecificationDeepHedging(Protocol):
+    """Class to define the interfaces for the specification of a portfolio for deep hedging.
+    """
+    def compute_payoff(self, paths: np.ndarray, T: int)->Tuple[np.ndarray, np.ndarray|None]:
+        """Compute the payoff of the specification on a set of paths.
+
+        Args:
+            paths (np.ndarray): Set of paths.
+            T (int): Index of the timepoint where the given specification expires.
+
+        Returns:
+            Tuple[np.ndarray, np.ndarray|None]: The payoff and the states of the specification (None if no states exist).
+        """
+        pass
+
+    # TODO DO: replace this by portfolio weights/"Portfolio" class
+    long_short_flag: str 
+
+    portfolioid: int
 
 class VanillaOptionDeepHedgingPricer:
     class PricingResults:
@@ -37,13 +56,13 @@ class VanillaOptionDeepHedgingPricer:
             timegrid = np.linspace(0.0,T,days)
         return timegrid
     
-    
-
     @staticmethod
     def compute_payoff(n_sims: int, 
-                       hedge_ins: Dict[str, np.ndarray], portfolio_list: list, port_vec,days, val_date):
+                       hedge_ins: Dict[str, np.ndarray], 
+                       portfolio_list: List[SpecificationDeepHedging], 
+                       port_vec, days, val_date)->Tuple[np.ndarray, Dict[str, np.ndarray]]:
         payoff = np.zeros((n_sims,))
-        states = np.zeros((n_sims,))
+        states = {}
 
         for k,v in hedge_ins.items():
             for j in range(len(portfolio_list)): 
@@ -52,8 +71,13 @@ class VanillaOptionDeepHedgingPricer:
                 long_short_flag = portfolio_list[j].long_short_flag
                 tpe = portfolio_list[j].type
                 selected = portfolio_list[j].portfolioid == port_vec
-                portfolio_list[j].compute_payoff(v[:,selected], T-1, payoff, states)
-
+                ins_payoff, ins_states = portfolio_list[j].compute_payoff(v[:,selected], T-1, payoff, states)
+                if ins_states is not None:
+                    states[f"portfolio_list[{j}]"] = ins_states
+                    if long_short_flag == 'short':
+                        payoff -= ins_payoff
+                    else:
+                        payoff += ins_payoff
             if False:
                 for i in range(n_sims):
                     if portfolio_list[j].portfolioid == port_vec[i]:
