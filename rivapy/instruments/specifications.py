@@ -1,4 +1,5 @@
 
+from typing import Tuple
 from datetime import datetime 
 import numpy as np
 from rivapy.tools.enums import SecuritizationLevel, Currency
@@ -22,8 +23,8 @@ if _pyvacon_available:
     #RainbowBarrierSpec = _spec.RainbowBarrierSpec
     LocalVolMonteCarloSpecification = _spec.LocalVolMonteCarloSpecification
     RainbowSpecification = _spec.RainbowSpecification
-    MultiMemoryExpressSpecification = _spec.MultiMemoryExpressSpecification
-    MemoryExpressSpecification = _spec.MemoryExpressSpecification
+    #MultiMemoryExpressSpecification = _spec.MultiMemoryExpressSpecification
+    #MemoryExpressSpecification = _spec.MemoryExpressSpecification
     ExpressPlusSpecification = _spec.ExpressPlusSpecification
     AsianVanillaSpecification = _spec.AsianVanillaSpecification
     RiskControlStrategy = _spec.RiskControlStrategy
@@ -136,20 +137,14 @@ class EuropeanVanillaSpecification(interfaces.FactoryObject):
                                             
         return self._pyvacon_obj
     
-    def compute_payoff(self, v, expiry_index, payoff,states=None):
-
+    def compute_payoff(self, v: np.ndarray, expiry_index: int)->Tuple[np.ndarray, np.ndarray|None]:
+        
         if self.type == 'CALL':
-            if self.long_short_flag == 'short':
-                payoff -= np.minimum(self.strike - v[expiry_index,:],0)
-            else:
-                payoff -= np.maximum(v[expiry_index,:] - self.strike,0)
-        if self.type == 'PUT':
-            if self.long_short_flag == 'short':
-                payoff -= np.minimum(v[expiry_index,:] - self.strike,0)
-            else:
-                payoff -= np.maximum(self.strike - v[expiry_index,:],0)
-
-    
+            return np.maximum(v[expiry_index,:] - self.strike,0.0), None
+        elif self.type == 'PUT':
+            return np.maximum(self.strike - v[expiry_index,:],0.0), None
+        else:
+            raise ValueError('Type of option not supported.')    
 
 class BarrierOptionSpecification(interfaces.FactoryObject):
     def __init__(self, 
@@ -227,21 +222,27 @@ class BarrierOptionSpecification(interfaces.FactoryObject):
         return self._pyvacon_obj
     
 
-    def compute_payoff(self, v, expiry_index, payoff,states):
-
+    def compute_payoff(self, v: np.ndarray, expiry_index: int)->Tuple[np.ndarray, np.ndarray|None]:
+        state_barrier_hit = None
+        payoff = None
+        if self.type in ['UIB_CALL','UOB_CALL']:
+            state_barrier_hit = v >= self.barrier
+        else:
+            state_barrier_hit = v <= self.barrier
+        state_barrier_hit = np.cumsum(state_barrier_hit,axis=0) > 0
         if self.type == 'UIB_CALL':
-            condition =  np.max(v[:expiry_index+1,:],axis=1) > self.barrier
-            payoff -= np.maximum(v - self.strike,0)[expiry_index,:]*condition
+            condition =  np.max(v[:expiry_index+1,:],axis=0) > self.barrier
+            payoff = np.maximum(v - self.strike,0)[expiry_index,:]*condition
         if self.type == 'UOB_CALL':
-            condition =  np.max(v[:expiry_index+1,:],axis=1) <= self.barrier
-            payoff -= np.maximum(v - self.strike,0)[expiry_index,:]*condition
+            condition =  np.max(v[:expiry_index+1,:],axis=0) <= self.barrier
+            payoff = np.maximum(v - self.strike,0)[expiry_index,:]*condition
         if self.type == 'DIB_CALL':
             condition =  np.min(v[:expiry_index+1,:],axis=1) < self.barrier
-            payoff -= np.maximum(v - self.strike,0)[expiry_index,:]*condition
+            payoff = np.maximum(v - self.strike,0)[expiry_index,:]*condition
         if self.type == 'DOB_CALL':
             condition =  np.min(v[:expiry_index+1,:],axis=1) >= self.barrier
-            payoff -= np.maximum(v - self.strike,0)[expiry_index,:]*condition
-
+            payoff = np.maximum(v - self.strike,0)[expiry_index,:]*condition
+        return payoff, state_barrier_hit
     
 
     
