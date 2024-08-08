@@ -132,6 +132,10 @@ class SpecificationDeepHedgingInterfaceTest(unittest.TestCase):
         self.assertAlmostEqual(payoff[0], 0.0, places=8)
         self.assertAlmostEqual(payoff[1], 15.0, places=8)
         self.assertAlmostEqual(payoff[2], 5.0, places=8)
+        self.assertEqual(states[0,0], 0)
+        self.assertEqual(states[1,-1], 1)
+        self.assertEqual(states[1,-1], 1)
+        self.assertEqual(states[2,-1], 1)
 
 if __name__ == '__main__':
     unittest.main()
