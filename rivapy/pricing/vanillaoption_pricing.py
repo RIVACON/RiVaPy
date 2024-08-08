@@ -113,7 +113,7 @@ class VanillaOptionDeepHedgingPricer:
                             payoff[i] -= np.maximum(v - strike,0)[T-1,i]*condition
                             continue
 
-        return payoff
+        return payoff, states
 
     @staticmethod
     def generate_paths(seed: int,
@@ -239,13 +239,18 @@ class VanillaOptionDeepHedgingPricer:
                 else:
                     hedge_ins[key] = simulation_results[:int(T),:]
                     #hedge_ins['V'] = VanillaOptionDeepHedgingPricer.get_call_prices(simulation_results[:int(T),:], ins_list[i].strike, seed,model_list,timegrid[:int(T)],n_sims,days,freq)
-        hedge_model = DeepHedgeModelwEmbedding(list(hedge_ins.keys()), list(additional_states_.keys()),timegrid=timegrid, 
+        keys_additional_states = list(additional_states_.keys())
+        payoff, ins_states = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, portfolio_list,port_vec,days,val_date) 
+        if len(ins_states) != 0:
+            keys_additional_states += list(ins_states.keys)
+        hedge_model = DeepHedgeModelwEmbedding(list(hedge_ins.keys()), keys_additional_states, timegrid=timegrid, 
                                         regularization=regularization,depth=depth, n_neurons=nb_neurons, loss = loss,
                                         transaction_cost = transaction_cost,no_of_unique_model=len(model_list),embedding_size=embedding_size,
                                         no_of_portfolios=maxid,embedding_size_port=embedding_size_port)
         paths = {}
         paths.update(hedge_ins)
         paths.update(additional_states_) 
+        paths.update(ins_states)
 
         lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
                 initial_learning_rate=initial_lr,#1e-3,
@@ -254,7 +259,7 @@ class VanillaOptionDeepHedgingPricer:
                 staircase=True)
         print('done.')
         print('compute payoff:')
-        payoff = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, portfolio_list,port_vec,days,val_date) 
+        
         print('done.')
         print('train hedge model:')
         hedge_model.train(paths, payoff, lr_schedule, epochs=epochs, batch_size=batch_size, tensorboard_log=tensorboard_logdir, verbose=verbose)
