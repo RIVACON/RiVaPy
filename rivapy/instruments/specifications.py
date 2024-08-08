@@ -237,10 +237,10 @@ class BarrierOptionSpecification(interfaces.FactoryObject):
             condition =  np.max(v[:expiry_index+1,:],axis=0) <= self.barrier
             payoff = np.maximum(v - self.strike,0)[expiry_index,:]*condition
         if self.type == 'DIB_CALL':
-            condition =  np.min(v[:expiry_index+1,:],axis=1) < self.barrier
+            condition =  np.min(v[:expiry_index+1,:],axis=0) < self.barrier
             payoff = np.maximum(v - self.strike,0)[expiry_index,:]*condition
         if self.type == 'DOB_CALL':
-            condition =  np.min(v[:expiry_index+1,:],axis=1) >= self.barrier
+            condition =  np.min(v[:expiry_index+1,:],axis=0) >= self.barrier
             payoff = np.maximum(v - self.strike,0)[expiry_index,:]*condition
         return payoff, state_barrier_hit
     
