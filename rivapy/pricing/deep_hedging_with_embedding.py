@@ -109,17 +109,34 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         ]
         inputs.append(tf.keras.Input(shape=(1,), name="ttm"))
         fully_connected_Input1 = tf.keras.layers.concatenate(inputs)
+        if self.additional_states is not None:
+            for state in self.additional_states:
+                if state not in ["emb_key","port_key"]:
+                    inp_cat_data = tf.keras.layers.Input(shape=(1,), name=state)
+                    inputs.append(inp_cat_data)
+                elif state == "emb_key":
+                    inp_cat_data = tf.keras.layers.Input(shape=(1,), name=state)
+                    inputs.append(inp_cat_data)
+                    emb = self._embedding_layer(inp_cat_data)
+                    flatten = tf.keras.layers.Flatten()(emb)
+                elif state == "port_key":
+                    inp_cat2_data = tf.keras.layers.Input(shape=(1,), name=state)
+                    inputs.append(inp_cat2_data)
+                    emb_port = self._embedding_layer_port(inp_cat2_data)
+                    flatten2 = tf.keras.layers.Flatten()(emb_port)
 
-        if "emb_key" in self.additional_states:
-            inp_cat_data = tf.keras.layers.Input(shape=(1,))
-            inputs.append(inp_cat_data)
-            emb = self._embedding_layer(inp_cat_data)
-            flatten = tf.keras.layers.Flatten()(emb)
-        if "port_key" in self.additional_states:
-            inp_cat2_data = tf.keras.layers.Input(shape=(1,))
-            inputs.append(inp_cat2_data)
-            emb_port = self._embedding_layer_port(inp_cat2_data)
-            flatten2 = tf.keras.layers.Flatten()(emb_port)
+
+
+        # if "emb_key" in self.additional_states:
+        #     inp_cat_data = tf.keras.layers.Input(shape=(1,))
+        #     inputs.append(inp_cat_data)
+        #     emb = self._embedding_layer(inp_cat_data)
+        #     flatten = tf.keras.layers.Flatten()(emb)
+        # if "port_key" in self.additional_states:
+        #     inp_cat2_data = tf.keras.layers.Input(shape=(1,))
+        #     inputs.append(inp_cat2_data)
+        #     emb_port = self._embedding_layer_port(inp_cat2_data)
+        #     flatten2 = tf.keras.layers.Flatten()(emb_port)
         if (("emb_key" in self.additional_states) and ("port_key" in self.additional_states)):   
             fully_connected_Input = tf.keras.layers.concatenate(
                     [fully_connected_Input1, flatten,flatten2]
@@ -183,10 +200,14 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
 
     @tf.function
     def _compute_pnl_withconstraints(self, x_in, training):
-        if (("emb_key" in self.additional_states) and ("port_key" in self.additional_states)):   
-            x = x_in[:-2]
-            params = [x_in[-2]]
-            params_port = [x_in[-1]]
+        #if (("emb_key" in self.additional_states) and ("port_key" in self.additional_states)):   
+        #    x = x_in[:-2]
+
+        #    params = [x_in[-2]]
+        #    params_port = [x_in[-1]]
+        if self.additional_states is not None:
+            length = len(self.additional_states)
+            x = x_in[:-length]
         else:
             x = x_in
         pnl = tf.zeros((tf.shape(x[0])[0],))
@@ -201,9 +222,9 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             )
             inputs = [v[:, i] for v in x]
             inputs.append(t)
-            if (("emb_key" in self.additional_states) and ("port_key" in self.additional_states)):
-                inputs.append(params)
-                inputs.append(params_port)
+            if self.additional_states is not None:
+                for ii in range(length,0,-1):
+                    inputs.append([x_in[-ii]])
             quantity = self.model(inputs, training=training)
             for j in range(len(self.hedge_instruments)):
                 key_to_check = self.hedge_instruments[j]
@@ -238,7 +259,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             else:
                 tc = [0] * len(self.timegrid)
             diff_q = self._prev_q[:, j] - quantity[:, j]
-            xx = tf.squeeze(x[j][:, -1])
+            xx = tf.squeeze(x[j][:, -1])[x_in[-2]]
             pnl += tf.where(
                 tf.greater(diff_q, 0),
                 tf.math.multiply(self._prev_q[:, j], tf.scalar_mul((1.0 - tc[-1]), xx)),

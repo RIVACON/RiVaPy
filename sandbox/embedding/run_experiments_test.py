@@ -27,7 +27,7 @@ from sys import exit
 
 
 import ast  
-with open('model_params_dict.txt') as f: 
+with open('/home/doeltz/doeltz/development/RiVaPy/sandbox/embedding/model_params_dict.txt') as f: 
     data = f.read() 
 model_params = ast.literal_eval(data) 
 
@@ -39,23 +39,23 @@ for i in range(loop):
     #              vol_of_vol = 0.2928, correlation_rho = -0.757,v0 = 0.0654))
     #model.append(GBM(0.,vol_list[i]))
     model.append(GBM(drift=model_params['GBM']['drift'][i],volatility=model_params['GBM']['vol'][i]))
-    model.append(HestonForDeepHedging(rate_of_mean_reversion = model_params['Heston']['rate_of_mean_reversion'][i],
-                                      long_run_average = model_params['Heston']['long_run_average'][i],
-                                      vol_of_vol = model_params['Heston']['vol_of_vol'][i], 
-                                      correlation_rho = model_params['Heston']['correlation_rho'][i],
-                                      v0 = model_params['Heston']['v0'][i]))
-    model.append(HestonWithJumps(rate_of_mean_reversion = model_params['Heston with Jumps']['rate_of_mean_reversion'][i],
-                                 long_run_average = model_params['Heston with Jumps']['long_run_average'][i],
-                                 vol_of_vol = model_params['Heston with Jumps']['vol_of_vol'][i], 
-                                 correlation_rho = model_params['Heston with Jumps']['correlation_rho'][i],
-                                 muj = 0.1791,sigmaj = 0.1346, 
-                                 lmbda = model_params['Heston with Jumps']['lmbda'][i],
-                                 v0 = model_params['Heston with Jumps']['v0'][i]))
-    model.append(BNS(rho =model_params['BNS']['rho'][i],
-                     lmbda=model_params['BNS']['lmbda'][i],
-                     b=model_params['BNS']['b'][i],
-                     a=model_params['BNS']['a'][i],
-                     v0 = model_params['BNS']['v0'][i]))
+    # model.append(HestonForDeepHedging(rate_of_mean_reversion = model_params['Heston']['rate_of_mean_reversion'][i],
+    #                                   long_run_average = model_params['Heston']['long_run_average'][i],
+    #                                   vol_of_vol = model_params['Heston']['vol_of_vol'][i], 
+    #                                   correlation_rho = model_params['Heston']['correlation_rho'][i],
+    #                                   v0 = model_params['Heston']['v0'][i]))
+    # model.append(HestonWithJumps(rate_of_mean_reversion = model_params['Heston with Jumps']['rate_of_mean_reversion'][i],
+    #                              long_run_average = model_params['Heston with Jumps']['long_run_average'][i],
+    #                              vol_of_vol = model_params['Heston with Jumps']['vol_of_vol'][i], 
+    #                              correlation_rho = model_params['Heston with Jumps']['correlation_rho'][i],
+    #                              muj = 0.1791,sigmaj = 0.1346, 
+    #                              lmbda = model_params['Heston with Jumps']['lmbda'][i],
+    #                              v0 = model_params['Heston with Jumps']['v0'][i]))
+    # model.append(BNS(rho =model_params['BNS']['rho'][i],
+    #                  lmbda=model_params['BNS']['lmbda'][i],
+    #                  b=model_params['BNS']['b'][i],
+    #                  a=model_params['BNS']['a'][i],
+    #                  v0 = model_params['BNS']['v0'][i]))
 
 
 
@@ -105,7 +105,7 @@ for i in range(len(strike)):
         
 
         
-n_sims = loop*16000*4
+n_sims = loop*100#16000*4
 for emb_size in [64]:
     for seed in [42]:
         #for tc in [1e-10,0.0001,0.001,0.01]:

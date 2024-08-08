@@ -71,13 +71,13 @@ class VanillaOptionDeepHedgingPricer:
                 long_short_flag = portfolio_list[j].long_short_flag
                 tpe = portfolio_list[j].type
                 selected = portfolio_list[j].portfolioid == port_vec
-                ins_payoff, ins_states = portfolio_list[j].compute_payoff(v[:,selected], T-1, payoff, states)
+                ins_payoff, ins_states = portfolio_list[j].compute_payoff(v[:,selected], T-1)
                 if ins_states is not None:
                     states[f"portfolio_list[{j}]"] = ins_states
-                    if long_short_flag == 'short':
-                        payoff -= ins_payoff
-                    else:
-                        payoff += ins_payoff
+                if long_short_flag == 'short':
+                    payoff -= ins_payoff
+                else:
+                    payoff += ins_payoff
             if False:
                 for i in range(n_sims):
                     if portfolio_list[j].portfolioid == port_vec[i]:
@@ -239,18 +239,19 @@ class VanillaOptionDeepHedgingPricer:
                 else:
                     hedge_ins[key] = simulation_results[:int(T),:]
                     #hedge_ins['V'] = VanillaOptionDeepHedgingPricer.get_call_prices(simulation_results[:int(T),:], ins_list[i].strike, seed,model_list,timegrid[:int(T)],n_sims,days,freq)
-        keys_additional_states = list(additional_states_.keys())
+        print('compute payoff:')
         payoff, ins_states = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, portfolio_list,port_vec,days,val_date) 
-        if len(ins_states) != 0:
-            keys_additional_states += list(ins_states.keys)
+        print('done.')
+        keys_additional_states = list(ins_states.keys())+list(additional_states_.keys())
         hedge_model = DeepHedgeModelwEmbedding(list(hedge_ins.keys()), keys_additional_states, timegrid=timegrid, 
                                         regularization=regularization,depth=depth, n_neurons=nb_neurons, loss = loss,
                                         transaction_cost = transaction_cost,no_of_unique_model=len(model_list),embedding_size=embedding_size,
                                         no_of_portfolios=maxid,embedding_size_port=embedding_size_port)
         paths = {}
         paths.update(hedge_ins)
-        paths.update(additional_states_) 
         paths.update(ins_states)
+        paths.update(additional_states_) 
+        
 
         lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
                 initial_learning_rate=initial_lr,#1e-3,
@@ -258,9 +259,9 @@ class VanillaOptionDeepHedgingPricer:
                 decay_rate=decay_rate, 
                 staircase=True)
         print('done.')
-        print('compute payoff:')
+       
         
-        print('done.')
+       
         print('train hedge model:')
         hedge_model.train(paths, payoff, lr_schedule, epochs=epochs, batch_size=batch_size, tensorboard_log=tensorboard_logdir, verbose=verbose)
         print('done.')
