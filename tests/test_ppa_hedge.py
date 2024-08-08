@@ -1,8 +1,8 @@
 import sys
-
+import unittest
+import rivapy.instruments.specifications as specs
 try:
-    import tensorflow as tf # exit this test if no tensorflow is installed
-    import unittest
+    import tensorflow as tf # exit this test if no tensorflow is installed    
     import datetime as dt
     import numpy as np
     from rivapy.models.residual_demand_model import MultiRegionWindForecastModel, WindPowerForecastModel, OrnsteinUhlenbeck, ResidualDemandForwardModel, SmoothstepSupplyCurve
@@ -104,5 +104,34 @@ try:
 except:
     pass
     
+class SpecificationDeepHedgingInterfaceTest(unittest.TestCase):
+    def test_EuropeanVanillaSpecification(self):
+        spec = specs.EuropeanVanillaSpecification('TEST_INS', 'CALL', dt.datetime(2020,1,1), 100.0)
+        path = np.zeros((10,3)) # 3 paths at 10 timesteps
+        # Test if the interface compute_payoff is implemented correctly
+        path[:,0] = 100.0 # first path is constant at the strike
+        path[:,1] = 110.0 # second path is above the strike
+        path[:,2] = 90.0 # third path is below the strike
+        payoff,states = spec.compute_payoff(path,path.shape[0]-1)
+        self.assertIsNone(states)
+        self.assertAlmostEqual(payoff[0], 0.0, places=8)
+        self.assertAlmostEqual(payoff[1], 10.0, places=8)
+        self.assertAlmostEqual(payoff[2], 0.0, places=8)
+
+    def test_BarrierOptionSpecification(self):
+        spec = specs.BarrierOptionSpecification('TEST_INS', 'UIB_CALL', dt.datetime(2020,1,1), 100.0, 110.0)
+        path = np.zeros((10,3))
+        # Test if the interface compute_payoff is implemented correctly
+        # we consider three cases: Barrier not hit, Barrier hit spot stays above barrier, barrier hit and spot drops below barrier
+        path[:,0] = 105.0
+        path[:,1] = 115.0
+        path[:,2] = 115.0
+        path[-5:,2] = 105.0
+        payoff,states = spec.compute_payoff(path,path.shape[0]-1)
+        self.assertIsNotNone(states)
+        self.assertAlmostEqual(payoff[0], 0.0, places=8)
+        self.assertAlmostEqual(payoff[1], 15.0, places=8)
+        self.assertAlmostEqual(payoff[2], 5.0, places=8)
+
 if __name__ == '__main__':
     unittest.main()
