@@ -370,7 +370,7 @@ class DeepHedgeModel(tf.keras.Model):
             batch_size=batch_size,
             callbacks=callbacks,
             verbose=verbose,
-            validation_split=0.1,
+            validation_split=0.0,
             validation_freq=5,
         )
 

@@ -73,11 +73,13 @@ class VanillaOptionDeepHedgingPricer:
                 selected = portfolio_list[j].portfolioid == port_vec
                 ins_payoff, ins_states = portfolio_list[j].compute_payoff(v[:,selected], T-1)
                 if ins_states is not None:
+                    #tmp = np.zeros(v.shape)
+                    #tmp[:,selected] = ins_states TODO DO: States must be aligned with the paths
                     states[f"portfolio_list[{j}]"] = ins_states
                 if long_short_flag == 'short':
-                    payoff -= ins_payoff
+                    payoff[selected] -= ins_payoff
                 else:
-                    payoff += ins_payoff
+                    payoff[selected] += ins_payoff
             if False:
                 for i in range(n_sims):
                     if portfolio_list[j].portfolioid == port_vec[i]:
@@ -218,7 +220,7 @@ class VanillaOptionDeepHedgingPricer:
     
         print('compute paths:')
         simulation_results,emb_vec = VanillaOptionDeepHedgingPricer.generate_paths(seed,model_list,timegrid,n_sims,days,freq)
-        port_vec = np.random.randint(maxid+1, size=len(emb_vec))
+        port_vec = np.random.randint(maxid+1, size=len(emb_vec)) # TODO: replace by portfolio weights/"Portfolio" class and give portfolio weights as arguments (do not create inside of this pricer)
 
         if model_list[0].modelname == 'Heston with Volswap':
             raise Exception('Heston with Volswap currently not running')

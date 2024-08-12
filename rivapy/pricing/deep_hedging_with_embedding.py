@@ -108,47 +108,24 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             tf.keras.Input(shape=(1,), name=ins) for ins in self.hedge_instruments
         ]
         inputs.append(tf.keras.Input(shape=(1,), name="ttm"))
-        fully_connected_Input1 = tf.keras.layers.concatenate(inputs)
+        inputs_inner_model = [i for i in inputs]
         if self.additional_states is not None:
             for state in self.additional_states:
-                if state not in ["emb_key","port_key"]:
-                    inp_cat_data = tf.keras.layers.Input(shape=(1,), name=state)
-                    inputs.append(inp_cat_data)
-                elif state == "emb_key":
-                    inp_cat_data = tf.keras.layers.Input(shape=(1,), name=state)
-                    inputs.append(inp_cat_data)
-                    emb = self._embedding_layer(inp_cat_data)
-                    flatten = tf.keras.layers.Flatten()(emb)
+                inputs.append(tf.keras.layers.Input(shape=(1,)))#, name="input:"+state)
+                if state == "emb_key":
+                    emb = self._embedding_layer(inputs[-1])
+                    inputs_inner_model.append(tf.keras.layers.Flatten()(emb))
                 elif state == "port_key":
-                    inp_cat2_data = tf.keras.layers.Input(shape=(1,), name=state)
-                    inputs.append(inp_cat2_data)
-                    emb_port = self._embedding_layer_port(inp_cat2_data)
-                    flatten2 = tf.keras.layers.Flatten()(emb_port)
-
-
-
-        # if "emb_key" in self.additional_states:
-        #     inp_cat_data = tf.keras.layers.Input(shape=(1,))
-        #     inputs.append(inp_cat_data)
-        #     emb = self._embedding_layer(inp_cat_data)
-        #     flatten = tf.keras.layers.Flatten()(emb)
-        # if "port_key" in self.additional_states:
-        #     inp_cat2_data = tf.keras.layers.Input(shape=(1,))
-        #     inputs.append(inp_cat2_data)
-        #     emb_port = self._embedding_layer_port(inp_cat2_data)
-        #     flatten2 = tf.keras.layers.Flatten()(emb_port)
-        if (("emb_key" in self.additional_states) and ("port_key" in self.additional_states)):   
-            fully_connected_Input = tf.keras.layers.concatenate(
-                    [fully_connected_Input1, flatten,flatten2]
-            )
-        else:
-            fully_connected_Input = tf.keras.layers.concatenate(inputs)
+                    emb_port = self._embedding_layer_port(inputs[-1])
+                    inputs_inner_model.append(tf.keras.layers.Flatten()(emb_port))
+                else:
+                    inputs_inner_model.append(inputs[-1])
 
         values_all = tf.keras.layers.Dense(
             nb_neurons,
             activation="selu",
             kernel_initializer=tf.keras.initializers.GlorotUniform(),
-        )(fully_connected_Input)
+        )(tf.keras.layers.concatenate(inputs_inner_model))
         for _ in range(depth):
             values_all = tf.keras.layers.Dense(
                 nb_neurons,
@@ -164,17 +141,34 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         return model
 
 
-    @tf.function
-    def _compute_pnl(self, x_in, training):
-        if (("emb_key" in self.additional_states) and ("port_key" in self.additional_states)):   
-            x = x_in[:-2]
-            params = [x_in[-2]]
-            params_port = [x_in[-1]]
+    @tf.function 
+    def _create_timeslice_input(self, x_in, t: float, t_index: int):
+        if self.additional_states is not None:
+            length = len(self.additional_states)
+            x = x_in[:-length]
         else:
             x = x_in
-        pnl = tf.zeros((tf.shape(x[0])[0],))
+        inputs = [v[:, t_index] for v in x]
+        inputs.append(t)
+        if self.additional_states is not None:
+            for ii in range(length,0,-1):
+                if len(x_in[-ii].shape)>1:
+                    inputs.append(x_in[-ii][:,t_index])
+                else:
+                    inputs.append(x_in[-ii])
+        return inputs
+
+    @tf.function
+    def _compute_pnl(self, x_in, training):
+        # if (("emb_key" in self.additional_states) and ("port_key" in self.additional_states)):   
+        #     x = x_in[:-2]
+        #     params = [x_in[-2]]
+        #     params_port = [x_in[-1]]
+        # else:
+        #     x = x_in
+        pnl = tf.zeros((tf.shape(x_in[0])[0],))
         self._prev_q = tf.zeros(
-            (tf.shape(x[0])[0], len(self.hedge_instruments)), name="prev_q"
+            (tf.shape(x_in[0])[0], len(self.hedge_instruments)), name="prev_q"
         )
         for i in range(self.timegrid.shape[0] - 2):
             t = (
@@ -182,49 +176,52 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
                 * tf.ones((tf.shape(x[0])[0], 1))
                 / self.timegrid[-1]
             )
-            inputs = [v[:, i] for v in x]
-            inputs.append(t)
-            if "emb_key" in self.additional_states:
-                inputs.append(params)
-                inputs.append(params_port)
+            # inputs = [v[:, i] for v in x]
+            # inputs.append(t)
+            # if "emb_key" in self.additional_states:
+            #     inputs.append(params)
+            #     inputs.append(params_port)
+            inputs = self._create_timeslice_input(x_in, t, i)
             quantity = self.model(inputs,training)
             for j in range(len(self.hedge_instruments)):
                 pnl += tf.math.multiply(
-                    (self._prev_q[:, j] - quantity[:, j]), tf.squeeze(x[j][:, i])
+                    (self._prev_q[:, j] - quantity[:, j]), tf.squeeze(x_in[j][:, i])
                 )
             self._prev_q = quantity
         for j in range(len(self.hedge_instruments)):
-            pnl += self._prev_q[:, j] * tf.squeeze(x[j][:, -1])
+            pnl += self._prev_q[:, j] * tf.squeeze(x_in[j][:, -1])
         return pnl
 
 
+   
+    
     @tf.function
     def _compute_pnl_withconstraints(self, x_in, training):
-        #if (("emb_key" in self.additional_states) and ("port_key" in self.additional_states)):   
-        #    x = x_in[:-2]
-
-        #    params = [x_in[-2]]
-        #    params_port = [x_in[-1]]
-        if self.additional_states is not None:
-            length = len(self.additional_states)
-            x = x_in[:-length]
-        else:
-            x = x_in
-        pnl = tf.zeros((tf.shape(x[0])[0],))
+        # if self.additional_states is not None:
+        #     length = len(self.additional_states)
+        #     x = x_in[:-length]
+        # else:
+        #     x = x_in
+        pnl = tf.zeros((tf.shape(x_in[0])[0],))
         self._prev_q = tf.zeros(
-            (tf.shape(x[0])[0], len(self.hedge_instruments)), name="prev_q"
+            (tf.shape(x_in[0])[0], len(self.hedge_instruments)), name="prev_q"
         )
         for i in range(self.timegrid.shape[0] - 2):  # tensorflow loop?
             t = (
                 [self.timegrid[-1] - self.timegrid[i]]
-                * tf.ones((tf.shape(x[0])[0], 1))
+                * tf.ones((tf.shape(x_in[0])[0], 1))
                 / self.timegrid[-1]
             )
-            inputs = [v[:, i] for v in x]
-            inputs.append(t)
-            if self.additional_states is not None:
-                for ii in range(length,0,-1):
-                    inputs.append([x_in[-ii]])
+            # if False:
+            #     inputs = [v[:, i] for v in x]
+            #     inputs.append(t)
+            #     if self.additional_states is not None:
+            #         for ii in range(length,0,-1):
+            #             if len(x_in[-ii].shape)>1:
+            #                 inputs.append(x_in[-ii][:,i])
+            #             else:
+            #                 inputs.append(x_in[-ii])
+            inputs = self._create_timeslice_input(x_in, t, i)
             quantity = self.model(inputs, training=training)
             for j in range(len(self.hedge_instruments)):
                 key_to_check = self.hedge_instruments[j]
@@ -238,7 +235,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
                 else:
                     tc = [0] * len(self.timegrid)
                 diff_q = self._prev_q[:, j] - quantity[:, j]
-                xx = tf.squeeze(x[j][:, i])
+                xx = tf.squeeze(x_in[j][:, i])
 
                 pnl += tf.where(
                     tf.greater(diff_q, 0),
@@ -259,7 +256,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             else:
                 tc = [0] * len(self.timegrid)
             diff_q = self._prev_q[:, j] - quantity[:, j]
-            xx = tf.squeeze(x[j][:, -1])[x_in[-2]]
+            xx = tf.squeeze(x_in[j][:, -1])#[x_in[-2]]
             pnl += tf.where(
                 tf.greater(diff_q, 0),
                 tf.math.multiply(self._prev_q[:, j], tf.scalar_mul((1.0 - tc[-1]), xx)),
