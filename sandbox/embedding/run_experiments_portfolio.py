@@ -65,7 +65,7 @@ for i in range(loop):
 
 
 repo = analysis.Repo(
-    "./test"
+    "./test_vanilla_portfolio"
 )
 
 reg = {
@@ -76,38 +76,58 @@ reg = {
 
 #spec = {}
 
-strike = [0.8]#[0.85,0.9,0.95,1.]#, 0.9, 1.0, 1.1, 1.2]
-days = [30]#[20,40, 60, 80, 100, 120]
+strike = [0.8, 0.9, 1.0, 1.1, 1.2]
+days = [20, 40, 60, 80, 100, 120]
 refdate = dt.datetime(2023, 1, 1)
 issuer = "DBK"
 seclevel = "COLLATERALIZED"
-tpe = "DOB_CALL"  # Change to 'PUT' if you want to calculate the price of an european put option.
+tpe = "CALL"  # Change to 'PUT' if you want to calculate the price of an european put option.
 long_short_flag = 'long'
 
 
 spec = []
 
-count = 0
+count = 1
 for i in range(len(strike)):
-    for j in range(len(days)):
-        count = count + 1
-        expiry = refdate + dt.timedelta(days=days[j])
-        spec.append(BarrierOptionSpecification( #EuropeanVanillaSpecification(
-                    'P'+str(count-1)+str(tpe)+'K'+str(strike[i])+'T'+str(days[j]),
-                    tpe,
-                    expiry,
-                    strike[i],
-                    barrier=0.95,
-                    issuer=issuer,
-                    sec_lvl=seclevel,
-                    curr="EUR",
-                    udl_id="ADS",
-                    share_ratio=1,
-                    long_short_flag=long_short_flag,
-                    portfolioid=count-1
-                ))
+    #for j in range(len(days)):
+        #count = count + 1
+    j=1
+    expiry = refdate + dt.timedelta(days=days[j])
+    spec.append(EuropeanVanillaSpecification(
+                'P'+str(count-1)+str(tpe)+'K'+str(strike[i])+'T'+str(days[j]),
+                tpe,
+                expiry,
+                strike[i],
+                #barrier=0.95,
+                issuer=issuer,
+                sec_lvl=seclevel,
+                curr="EUR",
+                udl_id="ADS",
+                share_ratio=1,
+                long_short_flag=long_short_flag,
+                portfolioid=count-1
+            ))
         
-
+#for i in range(len(strike)):
+i=2
+count=2
+for j in range(len(days)):
+    #count = count + 1
+    expiry = refdate + dt.timedelta(days=days[j])
+    spec.append(EuropeanVanillaSpecification(
+                'P'+str(count-1)+str(tpe)+'K'+str(strike[i])+'T'+str(days[j]),
+                tpe,
+                expiry,
+                strike[i],
+                #barrier=0.95,
+                issuer=issuer,
+                sec_lvl=seclevel,
+                curr="EUR",
+                udl_id="ADS",
+                share_ratio=1,
+                long_short_flag=long_short_flag,
+                portfolioid=count-1
+            ))
         
 n_sims = loop*16000*4
 for emb_size in [64]:
@@ -121,7 +141,7 @@ for emb_size in [64]:
                             depth=3,
                             nb_neurons=128,
                             n_sims=n_sims,
-                            regularization=10.,
+                            regularization=0.,
                             epochs=300,
                             verbose=1,
                             tensorboard_logdir="logs/"
@@ -133,7 +153,7 @@ for emb_size in [64]:
                             seed=seed,
                             days=int(np.max(days)),
                             embedding_size=emb_size,
-                            embedding_size_port=1,
-                            transaction_cost={'ADS':[0.01]},#'DOB_ADS':[0.01]},
-                            loss = "exponential_utility"
+                            embedding_size_port=2,
+                            transaction_cost={'ADS':[1e-10]},#'DOB_ADS':[0.01]},
+                            #loss = "exponential_utility"
                         )
