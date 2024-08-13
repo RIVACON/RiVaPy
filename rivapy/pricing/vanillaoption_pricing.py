@@ -14,7 +14,7 @@ except:
 import numpy as np
 import sys
 import random
-sys.path.append('C:/Users/doeltz/development/RiVaPy/')
+
 import datetime as dt
 from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.pricing.deep_hedging_with_embedding import DeepHedgeModelwEmbedding
