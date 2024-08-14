@@ -1,9 +1,10 @@
 
-from typing import Tuple
+from typing import Tuple, Dict
 from datetime import datetime 
 import numpy as np
 from rivapy.tools.enums import SecuritizationLevel, Currency
 import rivapy.tools.interfaces as interfaces
+from rivapy.tools.datetime_grid import DateTimeGrid
 #from rivapy.enums import Currency
 from rivapy import _pyvacon_available
 if _pyvacon_available:
@@ -64,6 +65,21 @@ else:
         pass
     class MemoryExpressSpecification:
         pass
+
+
+def _find_nearest(array, value)->int:
+    """Return the index of the element in array that is closest to value.
+
+    Args:
+        array (_type_): The array to search in.
+        value (_type_): The value to search for.
+
+    Returns:
+        int: The index of the element in array that is closest to value.
+    """
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return idx
 
 class EuropeanVanillaSpecification(interfaces.FactoryObject):
     def __init__(self, 
@@ -137,8 +153,9 @@ class EuropeanVanillaSpecification(interfaces.FactoryObject):
                                             
         return self._pyvacon_obj
     
-    def compute_payoff(self, v: np.ndarray, expiry_index: int)->Tuple[np.ndarray, np.ndarray|None]:
-        
+    def compute_payoff(self, paths: Dict[str,np.ndarray], timegrid: DateTimeGrid)->Tuple[np.ndarray, np.ndarray|None]:
+        v = paths[self.udl_id]
+        expiry_index = _find_nearest(timegrid.dates,self.expiry)
         if self.type == 'CALL':
             return np.maximum(v[expiry_index,:] - self.strike,0.0), None
         elif self.type == 'PUT':
@@ -222,7 +239,9 @@ class BarrierOptionSpecification(interfaces.FactoryObject):
         return self._pyvacon_obj
     
 
-    def compute_payoff(self, v: np.ndarray, expiry_index: int)->Tuple[np.ndarray, np.ndarray|None]:
+    def compute_payoff(self, paths: Dict[str,np.ndarray], timegrid: DateTimeGrid)->Tuple[np.ndarray, np.ndarray|None]:
+        expiry_index = _find_nearest(timegrid.dates,self.expiry)
+        v = paths[self.udl_id]
         state_barrier_hit = None
         payoff = None
         if self.type in ['UIB_CALL','UOB_CALL']:

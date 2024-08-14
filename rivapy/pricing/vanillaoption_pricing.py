@@ -21,24 +21,21 @@ from rivapy.tools.interfaces import hash_for_dict
 class SpecificationDeepHedging(Protocol):
     """Class to define the interfaces for the specification of a portfolio for deep hedging.
     """
-    def compute_payoff(self, paths: np.ndarray, T: int)->Tuple[np.ndarray, np.ndarray|None]:
+    def compute_payoff(self, paths: Dict[str,np.ndarray], timegrid: DateTimeGrid)->Tuple[np.ndarray, np.ndarray|None]:
         """Compute the payoff of the specification on a set of paths.
 
         Args:
             paths (np.ndarray): Set of paths.
-            T (int): Index of the timepoint where the given specification expires.
+            timegrid (DateTimeGrid): Timegrid used for simulation and hedging.
 
         Returns:
             Tuple[np.ndarray, np.ndarray|None]: The payoff and the states of the specification (None if no states exist).
         """
         pass
 
-    # TODO DO: replace this by portfolio weights/"Portfolio" class
-    long_short_flag: str 
-
-    portfolioid: int
-
     expiry: dt.datetime|dt.date
+
+    id: str
 
 
 class DeepHedgingData:
@@ -89,101 +86,92 @@ class DeepHedgingData:
 
 class VanillaOptionDeepHedgingPricer:
     class PricingResults:
-        def __init__(self, hedge_model: DeepHedgeModelwEmbedding, paths: np.ndarray, sim_results, payoff):
+        def __init__(self, hedge_model: DeepHedgeModelwEmbedding, paths: np.ndarray, payoff):
             self.hedge_model = hedge_model
             self.paths = paths
-            self.sim_results = sim_results
             self.payoff = payoff
 
-    @staticmethod
-    def _compute_timegrid(days, freq):
-        T = days/365
-        if freq == '12H':
-            timegrid = np.linspace(0.0,T,days*2)
-        else:
-            timegrid = np.linspace(0.0,T,days)
-        return timegrid
-    
     @staticmethod
     def compute_portfolio_payoff( 
                        paths: Dict[str, np.ndarray], 
                        portfolio_instruments: List[SpecificationDeepHedging], 
                        portfolio_weights: np.ndarray, 
                        val_date)->Tuple[np.ndarray, Dict[str, np.ndarray]]:
-
+        pass
     @staticmethod
     def compute_payoff(n_sims: int, 
-                       hedge_ins: Dict[str, np.ndarray], 
+                       paths: Dict[str, np.ndarray], 
+                       timegrid: DateTimeGrid,
                        portfolios: np.ndarray, 
-                       port_vec, days, val_date)->Tuple[np.ndarray, Dict[str, np.ndarray]]:
+                       portfolio_instruments: List[SpecificationDeepHedging],
+                       port_vec, 
+                       days, 
+                       val_date)->Tuple[np.ndarray, Dict[str, np.ndarray]]:
         payoff = np.zeros((n_sims,))
         states = {}
 
-        for k,v in hedge_ins.items():
-            for j in range(len(portfolio_list)): 
-                T = (portfolio_list[j].expiry - val_date).days
-                strike = portfolio_list[j].strike
-                long_short_flag = portfolio_list[j].long_short_flag
-                tpe = portfolio_list[j].type
-                selected = portfolio_list[j].portfolioid == port_vec
-                ins_payoff, ins_states = portfolio_list[j].compute_payoff(v[:,selected], T-1)
+        for i in range(portfolios.shape[0]): # for each portfolio
+            selected = i == port_vec # select the paths that shall be used for the portfolio
+            for j in range(len(portfolio_instruments)):
+                tmp={k:v[:,selected] for k,v in paths.items()}
+                ins_payoff, ins_states = portfolio_instruments[j].compute_payoff(tmp, timegrid)
                 if ins_states is not None:
-                    #tmp = np.zeros(v.shape)
-                    #tmp[:,selected] = ins_states TODO DO: States must be aligned with the paths
-                    states[f"portfolio_list[{j}]"] = ins_states
-                if long_short_flag == 'short':
-                    payoff[selected] -= ins_payoff
-                else:
-                    payoff[selected] += ins_payoff
-            if False:
-                for i in range(n_sims):
-                    if portfolio_list[j].portfolioid == port_vec[i]:
-                        if tpe == 'CALL':
-                            if long_short_flag == 'short':
-                                payoff[i] -= np.minimum(strike - v[T-1,i],0)
-                                continue
-                            else:
-                                payoff[i] -= np.maximum(v[T-1,i] - strike,0)
-                                continue
-                        if tpe == 'PUT':
-                            if long_short_flag == 'short':
-                                payoff[i] -= np.minimum(v[T-1,i] - strike,0)
-                                continue
-                            else:
-                                payoff[i] -= np.maximum(strike - v[T-1,i],0)
-                                continue
-
-                        if tpe == 'UIB_CALL':
-                            condition =  np.max(v[:T,i]) > portfolio_list[j].barrier
-                            payoff[i] -= np.maximum(v - strike,0)[T-1,i]*condition
-                            continue
-                        if tpe == 'UOB_CALL':
-                            condition =  np.max(v[:T,i]) <= portfolio_list[j].barrier
-                            payoff[i] -= np.maximum(v - strike,0)[T-1,i]*condition
-                            continue
-                        if tpe == 'DIB_CALL':
-                            condition =  np.min(v[:T,i]) < portfolio_list[j].barrier
-                            payoff[i] -= np.maximum(v - strike,0)[T-1,i]*condition
-                            continue
-                        if tpe == 'DOB_CALL':
-                            condition =  np.min(v[:T,i]) >= portfolio_list[j].barrier
-                            payoff[i] -= np.maximum(v - strike,0)[T-1,i]*condition
-                            continue
-
+                    state_key = portfolio_instruments[j].id+':states'
+                    if state_key not in states:
+                        states[state_key] = np.zeros((timegrid.shape[0], n_sims))
+                    states[state_key][:,selected] = ins_states # TODO: States should be onehot encoded?! Up to now if more than one state is given, it is just encoded by numbers....
+                payoff[selected] += portfolios[i,j]*ins_payoff
         return payoff, states
 
     @staticmethod
-    def generate_portfolio_data(seed: int,
-                                ptf_weights_min: np.ndarray|None,
-                                ptf_weights_max: np.ndarray|None, 
-                                n_portfolios: int, 
-                                paths: np.ndarray):
-        pass
+    def _generate_data(val_date: dt.datetime,
+                portfolios: np.ndarray|None,#EuropeanVanillaSpecification,
+                portfolio_instruments: List[SpecificationDeepHedging],
+                model_list: list|None, #HestonForDeepHedging,
+                timegrid: DateTimeGrid,
+                n_sims: int, 
+                seed: int = 42,
+                days: int = 30,
+                freq: str = 'D'):
+        print('compute paths:')
+        simulation_results,emb_vec = VanillaOptionDeepHedgingPricer._generate_paths(seed, model_list, timegrid, n_sims, days, freq)
         
+        hedge_ins = {}
+        additional_states_ = {}
+        additional_states_["emb:model"] = emb_vec
+        if portfolios.shape[0]>1: # if more then one portfolio is given, apply embedding of portfolios
+            port_vec_split = np.array_split(np.zeros((n_sims)),portfolios.shape[0], dtype=int)
+            for i in range(portfolios.shape[0]):
+                port_vec_split[i] = i
+            port_vec = np.concatenate(port_vec_split)
+            additional_states_["emd:portfolio"] = port_vec
+        key = portfolio_instruments[0].udl_id 
+        hedge_ins[key] = simulation_results
+        print('compute payoff:')
+        payoff, ins_states = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, 
+                                                                            portfolios,
+                                                                            port_vec,days,val_date) 
+        print('done.')
+        keys_additional_states = list(ins_states.keys())+list(additional_states_.keys())
+        paths = {}
+        paths.update(hedge_ins)
+        paths.update(ins_states)
+        paths.update(additional_states_) 
+        # create DeepHedgingData object
+        data_params = {'portfolio_list':hash(portfolios.data.tobytes()), 
+                        'model_list':[v.to_dict() for v in model_list],
+                        'n_sims':n_sims,
+                        'seed':seed}
+        return DeepHedgingData(hash_for_dict(data_params), 
+                                paths, list(hedge_ins.keys()), 
+                                keys_additional_states, 
+                                payoff=payoff)
+    
+    
 
 
     @staticmethod
-    def generate_paths(seed: int,
+    def _generate_paths(seed: int,
                        model_list: list,
                        timegrid: DateTimeGrid,
                        n_sims: int, 
@@ -195,7 +183,7 @@ class VanillaOptionDeepHedgingPricer:
         ## still a constant, fixed to 1.: TODO -> set variable!!
         S0 = 1. 
         emb_vec = np.zeros((n_sims))
-        if freq == '12H':
+        if freq == '12H': # TODO model anpassen und diese Zeilen sowie n entfernen
             n = days*2
         else:
             n = days
@@ -278,55 +266,18 @@ class VanillaOptionDeepHedgingPricer:
 
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
-        timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days,freq)
+        timegrid = DateTimeGrid(start=val_date, end=val_date+dt.timedelta(days=days), freq=freq)
 
         if data is None:
-            print('compute paths:')
-            simulation_results,emb_vec = VanillaOptionDeepHedgingPricer.generate_paths(seed,model_list,timegrid,n_sims,days,freq)
+            data = VanillaOptionDeepHedgingPricer._generate_data(val_date, portfolios, portfolio_instruments, model_list, timegrid, n_sims, seed, days, freq)
             
-            hedge_ins = {}
-            additional_states_ = {}
-            additional_states_["emb:model"] = emb_vec
-            if portfolios.shape[0]>1: # if more then one portfolio is given, apply embedding of portfolios
-                port_vec_split = np.array_split(np.zeros((n_sims)),portfolios.shape[0], dtype=int)
-                for i in range(portfolios.shape[0]):
-                    port_vec_split[i] = i
-                port_vec = np.concatenate(port_vec_split)
-                additional_states_["emd:portfolio"] = port_vec
-            key = portfolio_instruments[0].udl_id 
-            for i in range(portfolios.shape[0]):
-                T = days#(portfolio_list[i].expiry - val_date).days
-                if freq == '12H':
-                    hedge_ins[key] = simulation_results[:int(T*2),:]
-                else:
-                    hedge_ins[key] = simulation_results[:int(T),:]
-            print('compute payoff:')
-            payoff, ins_states = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, 
-                                                                               portfolios,
-                                                                               port_vec,days,val_date) 
-            print('done.')
-            keys_additional_states = list(ins_states.keys())+list(additional_states_.keys())
-            paths = {}
-            paths.update(hedge_ins)
-            paths.update(ins_states)
-            paths.update(additional_states_) 
-            # create DeepHedgingData object
-            data_params = {'portfolio_list':hash(portfolios.data.tobytes()), 
-                           'model_list':[v.to_dict() for v in model_list],
-                           'n_sims':n_sims,
-                           'seed':seed}
-            data = DeepHedgingData(hash_for_dict(data_params), 
-                                   paths, list(hedge_ins.keys()), 
-                                   keys_additional_states, 
-                                   payoff=payoff)
-        
         hedge_model = DeepHedgeModelwEmbedding(data.hedge_ins, data.additional_states, timegrid=timegrid, 
                                         regularization=regularization,
                                         depth=depth, n_neurons=nb_neurons, loss = loss,
                                         transaction_cost = transaction_cost,
                                         no_of_unique_model=len(model_list),
                                         embedding_size=embedding_size,
-                                        no_of_portfolios=maxid,
+                                        no_of_portfolios=portfolios.shape[0],
                                         embedding_size_port=embedding_size_port)
         
 
@@ -340,9 +291,8 @@ class VanillaOptionDeepHedgingPricer:
         print('train hedge model:')
         hedge_model.train(data.paths, data.payoff, lr_schedule, epochs=epochs, batch_size=batch_size, tensorboard_log=tensorboard_logdir, verbose=verbose)
         print('done.')
-        results = VanillaOptionDeepHedgingPricer.PricingResults(hedge_model, paths=paths, 
-                                                                sim_results=simulation_results, 
-                                                                payoff=payoff)
+        results = VanillaOptionDeepHedgingPricer.PricingResults(hedge_model, paths=data.paths, 
+                                                                payoff=data.payoff)
         return results, data
 
 if __name__=='__main__':
