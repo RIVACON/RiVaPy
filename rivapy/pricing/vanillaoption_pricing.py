@@ -1,6 +1,6 @@
 from typing import List, Dict, Protocol, Tuple
-import copy
-
+import os
+import json
 try:
     import tensorflow as tf
     try:
@@ -12,13 +12,12 @@ except:
     warnings.warn('Tensorflow is not installed. You cannot use the PPA Deep Hedging Pricer!')
     
 import numpy as np
-import sys
-import random
 
 import datetime as dt
 from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.pricing.deep_hedging_with_embedding import DeepHedgeModelwEmbedding
-             
+from rivapy.tools.interfaces import hash_for_dict
+
 class SpecificationDeepHedging(Protocol):
     """Class to define the interfaces for the specification of a portfolio for deep hedging.
     """
@@ -39,6 +38,55 @@ class SpecificationDeepHedging(Protocol):
 
     portfolioid: int
 
+    expiry: dt.datetime|dt.date
+
+
+class DeepHedgingData:
+    def __init__(self, 
+                 id: str,
+                 paths: Dict[str, np.ndarray], 
+                    hedge_ins: List[str], 
+                    additional_states: List[str],
+                    payoff: np.ndarray):
+        """Class to store the data for deep hedging.
+
+        Args:
+            paths (Dict[str, np.ndarray]): Dictionary of paths.
+            hedge_ins (List[str]): List of identifiers for the hedge instruments. 
+            additional_states (List[str]): List of additional states.
+            payoff (np.ndarray): The payoff of the portfolio.
+        """
+        self.id = id
+        self.paths: Dict[str, np.ndarray] = paths
+        self.hedge_ins: List[str] = hedge_ins
+        self.additional_states: List[str] = additional_states
+        self.payoff: np.ndarray = payoff
+
+    def save(self, path: str):
+        if not os.path.exists(path):
+            raise Exception(f'Path {path} does not exist.')
+        tmp = {'id': self.id,
+            'paths_keys': list(self.paths.keys()), 
+                'hedge_ins_keys': self.hedge_ins, 
+                'additional_states_keys': self.additional_states}
+        with open(os.path.join(path, 'data.json'), 'w') as f:
+            json.dump(tmp, f)
+            for k,v in self.paths.items():
+                np.save(os.path.join(path, k), v)
+            np.save(os.path.join(path, 'payoff'), self.payoff)
+
+    @staticmethod
+    def load(self, path: str):
+        if not os.path.exists(path):
+            raise Exception(f'Path {path} does not exist.')
+        with open(os.path.join(path, 'data.json'), 'r') as f:
+            tmp = json.load(f)
+        paths = {}
+        for k in tmp['paths_keys']:
+            paths[k] = np.load(os.path.join(path, k))
+        payoff = np.load(os.path.join(path, 'payoff'))
+        return VanillaOptionDeepHedgingPricer.Data(tmp['id'], paths, tmp['hedge_ins_keys'], tmp['additional_states_keys'], payoff)
+
 class VanillaOptionDeepHedgingPricer:
     class PricingResults:
         def __init__(self, hedge_model: DeepHedgeModelwEmbedding, paths: np.ndarray, sim_results, payoff):
@@ -57,9 +105,16 @@ class VanillaOptionDeepHedgingPricer:
         return timegrid
     
     @staticmethod
+    def compute_portfolio_payoff( 
+                       paths: Dict[str, np.ndarray], 
+                       portfolio_instruments: List[SpecificationDeepHedging], 
+                       portfolio_weights: np.ndarray, 
+                       val_date)->Tuple[np.ndarray, Dict[str, np.ndarray]]:
+
+    @staticmethod
     def compute_payoff(n_sims: int, 
                        hedge_ins: Dict[str, np.ndarray], 
-                       portfolio_list: List[SpecificationDeepHedging], 
+                       portfolios: np.ndarray, 
                        port_vec, days, val_date)->Tuple[np.ndarray, Dict[str, np.ndarray]]:
         payoff = np.zeros((n_sims,))
         states = {}
@@ -118,13 +173,22 @@ class VanillaOptionDeepHedgingPricer:
         return payoff, states
 
     @staticmethod
+    def generate_portfolio_data(seed: int,
+                                ptf_weights_min: np.ndarray|None,
+                                ptf_weights_max: np.ndarray|None, 
+                                n_portfolios: int, 
+                                paths: np.ndarray):
+        pass
+        
+
+
+    @staticmethod
     def generate_paths(seed: int,
                        model_list: list,
                        timegrid: DateTimeGrid,
-                n_sims: int, 
-                days: int,
-                freq: str):
-        tf.random.set_seed(seed)
+                       n_sims: int, 
+                       days: int,
+                       freq: str)->Tuple[np.ndarray,np.ndarray]:
         np.random.seed(seed+123)
 
         simulation_results = np.zeros((len(timegrid)+1, n_sims))
@@ -143,12 +207,11 @@ class VanillaOptionDeepHedgingPricer:
         return simulation_results, emb_vec
     
 
-    
-    
     @staticmethod
     def price(val_date: dt.datetime,
-        portfolio_list: list,#EuropeanVanillaSpecification,
-                model_list: list, #HestonForDeepHedging,
+                portfolios: np.ndarray|None,#EuropeanVanillaSpecification,
+                portfolio_instruments: List[SpecificationDeepHedging],
+                model_list: list|None, #HestonForDeepHedging,
                 depth: int, 
                 nb_neurons: int, 
                 n_sims: int, 
@@ -166,14 +229,16 @@ class VanillaOptionDeepHedgingPricer:
                 days: int = 30,
                 freq: str = 'D',
                 embedding_size: int = 1,
-                embedding_size_port: int = 1
+                embedding_size_port: int = 1,
+                data: DeepHedgingData|None = None,
                 #paths: Dict[str, np.ndarray] = None
-                ):
+                )->Tuple[PricingResults, DeepHedgingData]:
         """Price a vanilla option using deeep hedging
 
         Args:
             val_date (dt.dtetime): Valuation date
-            portfolio_list (PortfolioSpecification): Specification of a list of portfolios
+            portfolios (np.ndarray): Each row contains portfolio weights. Defaults to None.
+            portfolio_instruments (List[SpecificationDeepHedging]): List of portfolio instruments.
             model (GBM, HestonForDeepHedging): The list of models.
             depth (int): Number of layers of neural network.
             nb_neurons (int): Number of activation functions. 
@@ -195,6 +260,7 @@ class VanillaOptionDeepHedgingPricer:
             test_weighted_paths (bool): Option to Test "weighted" paths S(t), currently not possible. Defaults to False.
             parameter_uncertainty (bool): Option to test for parameter uncertainty in models (vol).Defaults to False.
             freq (str): Delta t for timegrid ('D' or '12H'). Defaults to 'D' (i.e., dt = 1day)
+            data (DeepHedgingData): Data object containing paths and additional states. If not None, no data will be generated. Defaults to None.
         Returns:
             _type_: _description_
 
@@ -204,55 +270,64 @@ class VanillaOptionDeepHedgingPricer:
                 The general deep hedging model used internally in this pricing method.
 
         """
-        if model_list is None:
-            raise Exception('A model must be specified.')
+        if (model_list is None) and (data is None):
+            raise Exception('Either a list of models or data must be specified.')
+        if portfolios is None: #  if no portfolio is given, we assume a single portfolio with weight -1.0
+            portfolios=np.ndarray([[-1.0]])
         tf.keras.backend.set_floatx('float32')
 
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
         timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days,freq)
 
-        maxid_old = 0
-        maxid = 0
-        for i in range(len(portfolio_list)):
-            if maxid_old < portfolio_list[i].portfolioid:
-                maxid = portfolio_list[i].portfolioid
-    
-        print('compute paths:')
-        simulation_results,emb_vec = VanillaOptionDeepHedgingPricer.generate_paths(seed,model_list,timegrid,n_sims,days,freq)
-        port_vec = np.random.randint(maxid+1, size=len(emb_vec)) # TODO: replace by portfolio weights/"Portfolio" class and give portfolio weights as arguments (do not create inside of this pricer)
-
-        if model_list[0].modelname == 'Heston with Volswap':
-            raise Exception('Heston with Volswap currently not running')
-            hedge_ins = {}
-            hedge_ins['S1'] = simulation_results[:,:,0]
-            hedge_ins['S2'] = simulation_results[:,:,1]
-        else:
+        if data is None:
+            print('compute paths:')
+            simulation_results,emb_vec = VanillaOptionDeepHedgingPricer.generate_paths(seed,model_list,timegrid,n_sims,days,freq)
+            
             hedge_ins = {}
             additional_states_ = {}
-            additional_states_["emb_key"] = emb_vec
-            additional_states_["port_key"] = port_vec
-            for i in range(len(portfolio_list)):
+            additional_states_["emb:model"] = emb_vec
+            if portfolios.shape[0]>1: # if more then one portfolio is given, apply embedding of portfolios
+                port_vec_split = np.array_split(np.zeros((n_sims)),portfolios.shape[0], dtype=int)
+                for i in range(portfolios.shape[0]):
+                    port_vec_split[i] = i
+                port_vec = np.concatenate(port_vec_split)
+                additional_states_["emd:portfolio"] = port_vec
+            key = portfolio_instruments[0].udl_id 
+            for i in range(portfolios.shape[0]):
                 T = days#(portfolio_list[i].expiry - val_date).days
-                key = portfolio_list[i].udl_id 
                 if freq == '12H':
                     hedge_ins[key] = simulation_results[:int(T*2),:]
-                    #hedge_ins['V'] = VanillaOptionDeepHedgingPricer.get_call_prices(simulation_results[:int(T*2),:], ins_list[i].strike, seed,model_list,timegrid[:int(T*2)],n_sims,days,freq)
                 else:
                     hedge_ins[key] = simulation_results[:int(T),:]
-                    #hedge_ins['V'] = VanillaOptionDeepHedgingPricer.get_call_prices(simulation_results[:int(T),:], ins_list[i].strike, seed,model_list,timegrid[:int(T)],n_sims,days,freq)
-        print('compute payoff:')
-        payoff, ins_states = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, portfolio_list,port_vec,days,val_date) 
-        print('done.')
-        keys_additional_states = list(ins_states.keys())+list(additional_states_.keys())
-        hedge_model = DeepHedgeModelwEmbedding(list(hedge_ins.keys()), keys_additional_states, timegrid=timegrid, 
-                                        regularization=regularization,depth=depth, n_neurons=nb_neurons, loss = loss,
-                                        transaction_cost = transaction_cost,no_of_unique_model=len(model_list),embedding_size=embedding_size,
-                                        no_of_portfolios=maxid,embedding_size_port=embedding_size_port)
-        paths = {}
-        paths.update(hedge_ins)
-        paths.update(ins_states)
-        paths.update(additional_states_) 
+            print('compute payoff:')
+            payoff, ins_states = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, 
+                                                                               portfolios,
+                                                                               port_vec,days,val_date) 
+            print('done.')
+            keys_additional_states = list(ins_states.keys())+list(additional_states_.keys())
+            paths = {}
+            paths.update(hedge_ins)
+            paths.update(ins_states)
+            paths.update(additional_states_) 
+            # create DeepHedgingData object
+            data_params = {'portfolio_list':hash(portfolios.data.tobytes()), 
+                           'model_list':[v.to_dict() for v in model_list],
+                           'n_sims':n_sims,
+                           'seed':seed}
+            data = DeepHedgingData(hash_for_dict(data_params), 
+                                   paths, list(hedge_ins.keys()), 
+                                   keys_additional_states, 
+                                   payoff=payoff)
+        
+        hedge_model = DeepHedgeModelwEmbedding(data.hedge_ins, data.additional_states, timegrid=timegrid, 
+                                        regularization=regularization,
+                                        depth=depth, n_neurons=nb_neurons, loss = loss,
+                                        transaction_cost = transaction_cost,
+                                        no_of_unique_model=len(model_list),
+                                        embedding_size=embedding_size,
+                                        no_of_portfolios=maxid,
+                                        embedding_size_port=embedding_size_port)
         
 
         lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
@@ -262,12 +337,13 @@ class VanillaOptionDeepHedgingPricer:
                 staircase=True)
         print('done.')
        
-        
-       
         print('train hedge model:')
-        hedge_model.train(paths, payoff, lr_schedule, epochs=epochs, batch_size=batch_size, tensorboard_log=tensorboard_logdir, verbose=verbose)
+        hedge_model.train(data.paths, data.payoff, lr_schedule, epochs=epochs, batch_size=batch_size, tensorboard_log=tensorboard_logdir, verbose=verbose)
         print('done.')
-        return VanillaOptionDeepHedgingPricer.PricingResults(hedge_model, paths=paths, sim_results=simulation_results, payoff=payoff)
+        results = VanillaOptionDeepHedgingPricer.PricingResults(hedge_model, paths=paths, 
+                                                                sim_results=simulation_results, 
+                                                                payoff=payoff)
+        return results, data
 
 if __name__=='__main__':
     pass
