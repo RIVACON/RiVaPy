@@ -16,7 +16,7 @@ import numpy as np
 import datetime as dt
 from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.pricing.deep_hedging_with_embedding import DeepHedgeModelwEmbedding
-from rivapy.tools.interfaces import hash_for_dict
+from rivapy.tools.interfaces import FactoryObject
 
 class SpecificationDeepHedging(Protocol):
     """Class to define the interfaces for the specification of a portfolio for deep hedging.
@@ -91,25 +91,17 @@ class VanillaOptionDeepHedgingPricer:
             self.paths = paths
             self.payoff = payoff
 
+   
     @staticmethod
-    def compute_portfolio_payoff( 
-                       paths: Dict[str, np.ndarray], 
-                       portfolio_instruments: List[SpecificationDeepHedging], 
-                       portfolio_weights: np.ndarray, 
-                       val_date)->Tuple[np.ndarray, Dict[str, np.ndarray]]:
-        pass
-    @staticmethod
-    def compute_payoff(n_sims: int, 
-                       paths: Dict[str, np.ndarray], 
+    def compute_payoff(paths: Dict[str, np.ndarray], 
                        timegrid: DateTimeGrid,
                        portfolios: np.ndarray, 
                        portfolio_instruments: List[SpecificationDeepHedging],
-                       port_vec, 
-                       days, 
-                       val_date)->Tuple[np.ndarray, Dict[str, np.ndarray]]:
-        payoff = np.zeros((n_sims,))
+                       port_vec)->Tuple[np.ndarray, Dict[str, np.ndarray]]:
+        
+        n_paths = next(iter(paths.values())).shape[1]
+        payoff = np.zeros((n_paths,))
         states = {}
-
         for i in range(portfolios.shape[0]): # for each portfolio
             selected = i == port_vec # select the paths that shall be used for the portfolio
             for j in range(len(portfolio_instruments)):
@@ -118,7 +110,7 @@ class VanillaOptionDeepHedgingPricer:
                 if ins_states is not None:
                     state_key = portfolio_instruments[j].id+':states'
                     if state_key not in states:
-                        states[state_key] = np.zeros((timegrid.shape[0], n_sims))
+                        states[state_key] = np.zeros((timegrid.shape[0], n_paths))
                     states[state_key][:,selected] = ins_states # TODO: States should be onehot encoded?! Up to now if more than one state is given, it is just encoded by numbers....
                 payoff[selected] += portfolios[i,j]*ins_payoff
         return payoff, states
@@ -162,7 +154,7 @@ class VanillaOptionDeepHedgingPricer:
                         'model_list':[v.to_dict() for v in model_list],
                         'n_sims':n_sims,
                         'seed':seed}
-        return DeepHedgingData(hash_for_dict(data_params), 
+        return DeepHedgingData(FactoryObject.hash_for_dict(data_params), 
                                 paths, list(hedge_ins.keys()), 
                                 keys_additional_states, 
                                 payoff=payoff)
