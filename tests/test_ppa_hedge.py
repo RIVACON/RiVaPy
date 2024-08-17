@@ -178,14 +178,17 @@ if tf_installed:
             payoffs.append(payoff)
             if state is not None:
                 states[ins.id+":states"] = state
-        for i in range(path.shape[1]):
-            total_payoff = 0.0
-            for j in range(len(portfolio_instruments)):
-                total_payoff += payoffs[j][i]*portfolios[j]
-            self.assertAlmostEqual(total_payoff, portfolio_payoff[i], places=8)
-            for k, v in states.items():
-                for l in range(timegrid.shape[0]):
-                    self.assertAlmostEqual(portfolio_states[k][l,i], v[l,i], places=8)
-                
+        for portfolio in range(portfolios.shape[0]):
+            portfolio_payoff_ = portfolio_payoff[portvec==portfolio] 
+            for i in range(portfolio_payoff_.shape[0]):
+                total_payoff = 0.0
+                for j in range(len(portfolio_instruments)):
+                    payoff_ = payoffs[j][portvec==portfolio][i]
+                    total_payoff += payoff_*portfolios[portfolio][j]
+                self.assertAlmostEqual(total_payoff, portfolio_payoff_[i], places=8)
+                for k, v in states.items():
+                    for l in range(timegrid.shape[0]):
+                        self.assertAlmostEqual(portfolio_states[k][l,i], v[l,i], places=8)
+                    
 if __name__ == '__main__':
     unittest.main()
