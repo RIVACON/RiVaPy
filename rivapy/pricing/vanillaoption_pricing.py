@@ -132,19 +132,17 @@ class VanillaOptionDeepHedgingPricer:
         additional_states_ = {}
         additional_states_["emb:model"] = emb_vec
         if portfolios.shape[0]>1: # if more then one portfolio is given, apply embedding of portfolios
-            port_vec_split = np.array_split(np.zeros((n_sims)),portfolios.shape[0], dtype=int)
+            port_vec_split = np.array_split(np.zeros((n_sims), dtype=int),portfolios.shape[0])
             for i in range(portfolios.shape[0]):
-                port_vec_split[i] = i
+                port_vec_split[i][:] = i
             port_vec = np.concatenate(port_vec_split)
-            additional_states_["emd:portfolio"] = port_vec
-        key = portfolio_instruments[0].udl_id 
+            additional_states_["emb:portfolio"] = port_vec
+        key = portfolio_instruments[0].udl_id # TODO: generalize to more then one underlying
         hedge_ins[key] = simulation_results
         print('compute payoff:')
-        payoff, ins_states = VanillaOptionDeepHedgingPricer.compute_payoff(n_sims, hedge_ins, 
-                                                                            portfolios,
-                                                                            port_vec,days,val_date) 
+        payoff, ins_states = VanillaOptionDeepHedgingPricer.compute_payoff(hedge_ins, timegrid, portfolios, portfolio_instruments, port_vec) 
         print('done.')
-        keys_additional_states = list(ins_states.keys())+list(additional_states_.keys())
+        keys_additional_states = list(ins_states.keys())+list(additional_states_.keys())  
         paths = {}
         paths.update(hedge_ins)
         paths.update(ins_states)
@@ -159,9 +157,6 @@ class VanillaOptionDeepHedgingPricer:
                                 keys_additional_states, 
                                 payoff=payoff)
     
-    
-
-
     @staticmethod
     def _generate_paths(seed: int,
                        model_list: list,
@@ -171,8 +166,8 @@ class VanillaOptionDeepHedgingPricer:
                        freq: str)->Tuple[np.ndarray,np.ndarray]:
         np.random.seed(seed+123)
 
-        simulation_results = np.zeros((len(timegrid)+1, n_sims))
-        ## still a constant, fixed to 1.: TODO -> set variable!!
+        simulation_results = np.zeros((timegrid.shape[0], n_sims))
+        ## TODO: still a constant, fixed to 1.: TODO -> set variable!!
         S0 = 1. 
         emb_vec = np.zeros((n_sims))
         if freq == '12H': # TODO model anpassen und diese Zeilen sowie n entfernen
@@ -182,11 +177,10 @@ class VanillaOptionDeepHedgingPricer:
         n_sims = int(n_sims/len(model_list))
         for i in range(len(model_list)):
             model= model_list[i]
-            simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid, S0=S0, v0=model.v0, M=n_sims,n=n, model_name=model_list[i].modelname)
+            simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid.timegrid, S0=S0, v0=model.v0, M=n_sims,n=n, model_name=model_list[i].modelname)
             emb_vec[i*n_sims:n_sims*(i+1)] = i    
         return simulation_results, emb_vec
     
-
     @staticmethod
     def price(val_date: dt.datetime,
                 portfolios: np.ndarray|None,#EuropeanVanillaSpecification,

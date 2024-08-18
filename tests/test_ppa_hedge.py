@@ -16,6 +16,7 @@ from rivapy.instruments.ppa_specification import GreenPPASpecification
 from rivapy.pricing.green_ppa_pricing import GreenPPADeepHedgingPricer, DeepHedgeModel
 from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.pricing.vanillaoption_pricing import VanillaOptionDeepHedgingPricer
+from rivapy.models.gbm import GBM
 
 
 class SpecificationDeepHedgingInterfaceTest(unittest.TestCase):
@@ -153,42 +154,64 @@ if tf_installed:
 
     class VanillaOptionDeepHedgingPricerTest(unittest.TestCase):
       
-      def test_compute_payoff(self):
-        portfolio_instruments=[ specs.BarrierOptionSpecification('TEST_BARRIER', 'UIB_CALL', dt.datetime(2020,2,1), 100.0, 110.0, udl_id='TEST'),
-            specs.EuropeanVanillaSpecification('TEST_CALL', 'CALL', dt.datetime(2020,2,1), 100.0, udl_id='TEST')
-        ]
-        portfolios = np.array([[1.0, 0.0], [0.0, 1.0], [0.5, 0.5]])
-        portvec = np.array([0,1,2])
-        timegrid = DateTimeGrid(start=dt.datetime(2020,1,1), end=dt.datetime(2020,2,2), freq='D', inclusive='both')
-        path = np.zeros((timegrid.shape[0],3))
-        # Test if the interface compute_payoff is implemented correctly
-        # we consider three cases: Barrier not hit, Barrier hit spot stays above barrier, barrier hit and spot drops below barrier
-        path[:,0] = 105.0
-        path[:,1] = 115.0
-        path[:,2] = 115.0
-        path[0,2] = 90.0
-        path[-5:,2] = 105.0
-        paths = {'TEST': path}
-        portfolio_payoff, portfolio_states = VanillaOptionDeepHedgingPricer.compute_payoff(paths, timegrid, portfolios, 
-                                                                                           portfolio_instruments, portvec)
-        payoffs = []
-        states = {}
-        for ins in portfolio_instruments:
-            payoff, state = ins.compute_payoff(paths, timegrid)
-            payoffs.append(payoff)
-            if state is not None:
-                states[ins.id+":states"] = state
-        for portfolio in range(portfolios.shape[0]):
-            portfolio_payoff_ = portfolio_payoff[portvec==portfolio] 
-            for i in range(portfolio_payoff_.shape[0]):
-                total_payoff = 0.0
-                for j in range(len(portfolio_instruments)):
-                    payoff_ = payoffs[j][portvec==portfolio][i]
-                    total_payoff += payoff_*portfolios[portfolio][j]
-                self.assertAlmostEqual(total_payoff, portfolio_payoff_[i], places=8)
-                for k, v in states.items():
-                    for l in range(timegrid.shape[0]):
-                        self.assertAlmostEqual(portfolio_states[k][l,i], v[l,i], places=8)
-                    
+        def test_compute_payoff(self):
+            portfolio_instruments=[ specs.BarrierOptionSpecification('TEST_BARRIER', 'UIB_CALL', dt.datetime(2020,2,1), 100.0, 110.0, udl_id='TEST'),
+                specs.EuropeanVanillaSpecification('TEST_CALL', 'CALL', dt.datetime(2020,2,1), 100.0, udl_id='TEST')
+            ]
+            portfolios = np.array([[1.0, 0.0], [0.0, 1.0], [0.5, 0.5]])
+            portvec = np.array([0,1,2])
+            timegrid = DateTimeGrid(start=dt.datetime(2020,1,1), end=dt.datetime(2020,2,2), freq='D', inclusive='both')
+            path = np.zeros((timegrid.shape[0],3))
+            # Test if the interface compute_payoff is implemented correctly
+            # we consider three cases: Barrier not hit, Barrier hit spot stays above barrier, barrier hit and spot drops below barrier
+            path[:,0] = 105.0
+            path[:,1] = 115.0
+            path[:,2] = 115.0
+            path[0,2] = 90.0
+            path[-5:,2] = 105.0
+            paths = {'TEST': path}
+            portfolio_payoff, portfolio_states = VanillaOptionDeepHedgingPricer.compute_payoff(paths, timegrid, portfolios, 
+                                                                                            portfolio_instruments, portvec)
+            payoffs = []
+            states = {}
+            for ins in portfolio_instruments:
+                payoff, state = ins.compute_payoff(paths, timegrid)
+                payoffs.append(payoff)
+                if state is not None:
+                    states[ins.id+":states"] = state
+            for portfolio in range(portfolios.shape[0]):
+                portfolio_payoff_ = portfolio_payoff[portvec==portfolio] 
+                for i in range(portfolio_payoff_.shape[0]):
+                    total_payoff = 0.0
+                    for j in range(len(portfolio_instruments)):
+                        payoff_ = payoffs[j][portvec==portfolio][i]
+                        total_payoff += payoff_*portfolios[portfolio][j]
+                    self.assertAlmostEqual(total_payoff, portfolio_payoff_[i], places=8)
+                    for k, v in states.items():
+                        for l in range(timegrid.shape[0]):
+                            self.assertAlmostEqual(portfolio_states[k][l,i], v[l,i], places=8)
+
+        def test_generate_data(self):
+            models = [
+                GBM(drift=0.0,volatility=0.2),
+                GBM(drift=0.1,volatility=0.3),
+                ]
+            val_date = dt.datetime(2020,1,1)
+            portfolios = np.array([[1.0, 0.0], [0.0, 1.0], [0.5, 0.5]])
+            portfolio_instruments=[ 
+                specs.BarrierOptionSpecification('TEST_BARRIER', 'UIB_CALL', 
+                                                dt.datetime(2020,2,1), 100.0, 110.0, udl_id='TEST'),
+                specs.EuropeanVanillaSpecification('TEST_CALL', 'CALL', 
+                                                dt.datetime(2020,2,1), 100.0, udl_id='TEST')
+            ]
+            portfolios = np.array([[1.0, 0.0], [0.0, 1.0], [0.5, 0.5]])
+            timegrid = DateTimeGrid(start=dt.datetime(2020,1,1), end=dt.datetime(2020,2,2), freq='D') 
+            
+            data = VanillaOptionDeepHedgingPricer._generate_data(val_date, portfolios, portfolio_instruments, 
+                                                        models, timegrid=timegrid, n_sims=10, days=(timegrid.dates[-1]-timegrid.dates[0]).days)
+            self.assertEqual(len(data.additional_states),3)# Three states: two for portfolio embedding, one for barrier state
+            self.assertEqual(len(data.hedge_ins),1)
+            self.assertEqual(len(data.paths), 4)
+            
 if __name__ == '__main__':
     unittest.main()
