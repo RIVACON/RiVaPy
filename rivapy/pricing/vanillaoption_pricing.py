@@ -14,6 +14,7 @@ except:
 import numpy as np
 
 import datetime as dt
+from rivapy.pricing._logger import logger
 from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.pricing.deep_hedging_with_embedding import DeepHedgeModelwEmbedding
 from rivapy.tools.interfaces import FactoryObject
@@ -125,11 +126,13 @@ class VanillaOptionDeepHedgingPricer:
                 seed: int = 42,
                 days: int = 30,
                 freq: str = 'D'):
-        print('compute paths:')
+        logger.info('Generate data for deep hedging.')
+        logger.debug('Generate paths.')
         simulation_results,emb_vec = VanillaOptionDeepHedgingPricer._generate_paths(seed, model_list, timegrid, n_sims, days, freq)
-        
+        logger.debug('Generation of paths done.')
         hedge_ins = {}
         additional_states_ = {}
+        logger.debug('Compute payoff and portfolio embeddings.')
         additional_states_["emb:model"] = emb_vec
         if portfolios.shape[0]>1: # if more then one portfolio is given, apply embedding of portfolios
             port_vec_split = np.array_split(np.zeros((n_sims), dtype=int),portfolios.shape[0])
@@ -139,9 +142,9 @@ class VanillaOptionDeepHedgingPricer:
             additional_states_["emb:portfolio"] = port_vec
         key = portfolio_instruments[0].udl_id # TODO: generalize to more then one underlying
         hedge_ins[key] = simulation_results
-        print('compute payoff:')
+        
         payoff, ins_states = VanillaOptionDeepHedgingPricer.compute_payoff(hedge_ins, timegrid, portfolios, portfolio_instruments, port_vec) 
-        print('done.')
+        logger.debug('Computation of payoff and portfolio embeddings done.')
         keys_additional_states = list(ins_states.keys())+list(additional_states_.keys())  
         paths = {}
         paths.update(hedge_ins)
@@ -152,6 +155,7 @@ class VanillaOptionDeepHedgingPricer:
                         'model_list':[v.to_dict() for v in model_list],
                         'n_sims':n_sims,
                         'seed':seed}
+        logger.info('Data for deep hedging generated.')
         return DeepHedgingData(FactoryObject.hash_for_dict(data_params), 
                                 paths, list(hedge_ins.keys()), 
                                 keys_additional_states, 
