@@ -173,7 +173,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         for i in range(self.timegrid.shape[0] - 2):
             t = (
                 [self.timegrid[-1] - self.timegrid[i]]
-                * tf.ones((tf.shape(x[0])[0], 1))
+                * tf.ones((tf.shape(x_in[0])[0], 1))
                 / self.timegrid[-1]
             )
             # inputs = [v[:, i] for v in x]
@@ -183,7 +183,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             #     inputs.append(params_port)
             inputs = self._create_timeslice_input(x_in, t, i)
             quantity = self.model(inputs,training)
-            for j in range(len(self.hedge_instruments)):
+            for j in range(len(self.hedge_instruments)): # we implicitely make the assumption that the additional states come after the hedge instruments in x_in
                 pnl += tf.math.multiply(
                     (self._prev_q[:, j] - quantity[:, j]), tf.squeeze(x_in[j][:, i])
                 )

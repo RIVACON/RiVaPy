@@ -213,5 +213,23 @@ if tf_installed:
             self.assertEqual(len(data.hedge_ins),1)
             self.assertEqual(len(data.paths), 4)
             
+        def test_price(self):
+            models = [
+                GBM(drift=0.0,volatility=0.2),
+                GBM(drift=0.1,volatility=0.3),
+                ]
+            val_date = dt.datetime(2020,1,1)
+            portfolios = np.array([[1.0, 0.0], [0.0, 1.0], [0.5, 0.5]])
+            portfolio_instruments=[ 
+                specs.BarrierOptionSpecification('TEST_BARRIER', 'UIB_CALL', 
+                                                dt.datetime(2020,2,1), 100.0, 110.0, udl_id='TEST'),
+                specs.EuropeanVanillaSpecification('TEST_CALL', 'CALL', 
+                                                dt.datetime(2020,2,1), 100.0, udl_id='TEST')
+            ]
+            portfolios = np.array([[1.0, 0.0], [0.0, 1.0], [0.5, 0.5]])
+            
+            result = VanillaOptionDeepHedgingPricer.price(val_date, portfolios, portfolio_instruments, models, depth=3, nb_neurons=32, n_sims=10, regularization=0.0,epochs=2, days=30)
+            
+
 if __name__ == '__main__':
     unittest.main()

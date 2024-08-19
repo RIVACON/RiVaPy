@@ -256,12 +256,12 @@ class VanillaOptionDeepHedgingPricer:
 
         tf.random.set_seed(seed)
         np.random.seed(seed+123)
-        timegrid = DateTimeGrid(start=val_date, end=val_date+dt.timedelta(days=days), freq=freq)
+        timegrid = DateTimeGrid(start=val_date, end=val_date+dt.timedelta(days=days), freq=freq, inclusive='both')
 
         if data is None:
             data = VanillaOptionDeepHedgingPricer._generate_data(val_date, portfolios, portfolio_instruments, model_list, timegrid, n_sims, seed, days, freq)
             
-        hedge_model = DeepHedgeModelwEmbedding(data.hedge_ins, data.additional_states, timegrid=timegrid, 
+        hedge_model = DeepHedgeModelwEmbedding(data.hedge_ins, data.additional_states, timegrid=timegrid.timegrid, 
                                         regularization=regularization,
                                         depth=depth, n_neurons=nb_neurons, loss = loss,
                                         transaction_cost = transaction_cost,
