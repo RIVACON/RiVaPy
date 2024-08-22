@@ -1,8 +1,10 @@
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Tuple
 import json
 import numpy as np
 import sys
 
+from tensorflow.python.ops.numpy_ops import np_config
+np_config.enable_numpy_behavior()
 try:
     import tensorflow as tf
 
@@ -29,13 +31,10 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         n_neurons: int,
         loss: str,
         transaction_cost: dict = None,
+        embedding_definitions: Dict[str, Tuple[int, int]]|None = None,
         # threshold: float = 0.0,
-        no_of_unique_model: int = 1,
-        embedding_size: int = 1,
-        no_of_portfolios: int = 1, 
-        embedding_size_port: int = 1,
         # cascading: bool = False,
-        model: tf.keras.Model = None,
+        model: tf.keras.Model|None = None,
         **kwargs
     ):
         """Class for Deep Hedging Model.
@@ -49,8 +48,12 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             n_neurons (int): If no model (neural network) is specified, the model is build as a fully connected neural network with this number of neurons per layer.
             loss (str): Determines whether mean variance or exponential utility are optimized.
             model (tf.keras.Model, optional): The model (neural network) used. If it is None, a fully connected neural network using the parameter depth and n_neurons. The network Input must equal the number of hedge instruments plus the number of additional states plus one input for the time to maturity. The output dimension must equal the number of hedge instruments. Defaults to None.
+            embedding_definitions (Dict[str, Tuple[int, int]], optional): Dictionary of embedding definitions. The key is the name of the additional state and the tuple contains the number of unique values and the embedding size. Defaults to None.
         """
         super().__init__(**kwargs)
+        self.embedding_layers = {}
+        if embedding_definitions is None:
+            embedding_definitions = {}
 
         self.hedge_instruments = hedge_instruments
         if additional_states is None:
@@ -61,29 +64,24 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
 
             #self._concat_layer = tf.keras.layers.Concatenate(name="Concatenate")
         if model is None:
-            if "emb_key" in self.additional_states:
-                self.no_of_unique_model = no_of_unique_model
-                self.embedding_size = embedding_size#32
-                self._embedding_layer = tf.keras.layers.Embedding(
-                    input_dim=self.no_of_unique_model+1,
-                    output_dim=self.embedding_size,
+            for v in self.additional_states:
+                if "emb_" in v:
+                    if v not in embedding_definitions:
+                        raise ValueError(
+                            f"Embedding definition for {v} is missing in embedding_definitions"
+                        )
+                    self.embedding_layers[v] = tf.keras.layers.Embedding(
+                    input_dim=embedding_definitions[v][0]+1,
+                    output_dim=embedding_definitions[v][1],
                     input_length=1,
-                    name="Embedding",
-                )
-            if "port_key" in self.additional_states:
-                self.no_of_portfolios = no_of_portfolios
-                self.embedding_size_port = embedding_size_port
-                self._embedding_layer_port = tf.keras.layers.Embedding(
-                    input_dim=self.no_of_portfolios+1,
-                    output_dim=self.embedding_size_port,
-                    input_length=1,
-                    name="Embedding_port",
-                )
+                    name=v,
+                    )
             self.model = self._build_model(depth, n_neurons)
         else:
             self.model = model
-            self._embedding_layer = self.model.get_layer('Embedding')
-            self._embedding_layer_port = self.model.get_layer('Embedding_port')
+            for v in self.additional_states:
+                if "emb_" in v:
+                    self.embedding_layers[v] = self.model.get_layer(v)
         self.timegrid = timegrid
         self.regularization = regularization
         self._prev_q = None
@@ -93,9 +91,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             self.transaction_cost = {}
         else:
             self.transaction_cost = transaction_cost
-        # self.threshold = threshold
-        # self.cascading = cascading
-
+        
     def __call__(self, x, training=True):
         if not self.transaction_cost:
             return self._compute_pnl(x, training)  # + self.price
@@ -112,21 +108,17 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         if self.additional_states is not None:
             for state in self.additional_states:
                 inputs.append(tf.keras.layers.Input(shape=(1,)))#, name="input:"+state)
-                if state == "emb_key":
-                    emb = self._embedding_layer(inputs[-1])
+                if state in self.embedding_layers.keys():
+                    emb = self.embedding_layers[state](inputs[-1])
                     inputs_inner_model.append(tf.keras.layers.Flatten()(emb))
-                elif state == "port_key":
-                    emb_port = self._embedding_layer_port(inputs[-1])
-                    inputs_inner_model.append(tf.keras.layers.Flatten()(emb_port))
                 else:
                     inputs_inner_model.append(inputs[-1])
-
         values_all = tf.keras.layers.Dense(
             nb_neurons,
             activation="selu",
             kernel_initializer=tf.keras.initializers.GlorotUniform(),
         )(tf.keras.layers.concatenate(inputs_inner_model))
-        for _ in range(depth):
+        for _ in range(depth-1):
             values_all = tf.keras.layers.Dense(
                 nb_neurons,
                 activation="selu",
@@ -145,7 +137,10 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
     def _create_timeslice_input(self, x_in, t: float, t_index: int):
         if self.additional_states is not None:
             length = len(self.additional_states)
-            x = x_in[:-length]
+            if length>1:
+                x = x_in[:-length]
+            else:
+                x = x_in
         else:
             x = x_in
         inputs = [v[:, t_index] for v in x]
@@ -160,12 +155,6 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
 
     @tf.function
     def _compute_pnl(self, x_in, training):
-        # if (("emb_key" in self.additional_states) and ("port_key" in self.additional_states)):   
-        #     x = x_in[:-2]
-        #     params = [x_in[-2]]
-        #     params_port = [x_in[-1]]
-        # else:
-        #     x = x_in
         pnl = tf.zeros((tf.shape(x_in[0])[0],))
         self._prev_q = tf.zeros(
             (tf.shape(x_in[0])[0], len(self.hedge_instruments)), name="prev_q"
@@ -176,11 +165,6 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
                 * tf.ones((tf.shape(x_in[0])[0], 1))
                 / self.timegrid[-1]
             )
-            # inputs = [v[:, i] for v in x]
-            # inputs.append(t)
-            # if "emb_key" in self.additional_states:
-            #     inputs.append(params)
-            #     inputs.append(params_port)
             inputs = self._create_timeslice_input(x_in, t, i)
             quantity = self.model(inputs,training)
             for j in range(len(self.hedge_instruments)): # we implicitely make the assumption that the additional states come after the hedge instruments in x_in
@@ -192,8 +176,6 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             pnl += self._prev_q[:, j] * tf.squeeze(x_in[j][:, -1])
         return pnl
 
-
-   
     
     @tf.function
     def _compute_pnl_withconstraints(self, x_in, training):
@@ -236,7 +218,6 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
                     tc = [0] * len(self.timegrid)
                 diff_q = self._prev_q[:, j] - quantity[:, j]
                 xx = tf.squeeze(x_in[j][:, i])
-
                 pnl += tf.where(
                     tf.greater(diff_q, 0),
                     tf.math.multiply(diff_q, tf.scalar_mul((1.0 - tc[0]), xx)),
@@ -326,6 +307,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             y_pred + y_true
         ) + tf.keras.backend.var(y_pred + y_true)
 
+    #@tf.function
     def _create_inputs(
         self, paths: Dict[str, np.ndarray], check_timegrid: bool = True
     ) -> List[np.ndarray]:
@@ -394,10 +376,6 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         params["hedge_instruments"] = self.hedge_instruments
         params["loss"] = self._loss
         params["transaction_cost"] = self.transaction_cost
-        params["no_of_unique_model"] = self.no_of_unique_model
-        params["embedding_size"] = self.embedding_size
-        params["no_of_portfolios"] = self.no_of_portfolios
-        params["embedding_size_port"] = self.embedding_size_port
         # params["threshold"] = self.threshold
         with open(folder + "/params.json", "w") as f:
             json.dump(params, f)
@@ -407,22 +385,15 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         with open(folder + "/params.json", "r") as f:
             params = json.load(f)
         base_model = tf.keras.models.load_model(folder + "/delta_model")
-        emb_layer = base_model.get_layer('Embedding')
-        (w,) = emb_layer.get_weights()
-        emb_layer2 = base_model.get_layer('Embedding_port')
-        (w2,) = emb_layer2.get_weights()
+        #emb_layer = base_model.get_layer('Embedding')
+        #(w,) = emb_layer.get_weights()
+        #emb_layer2 = base_model.get_layer('Embedding_port')
+        #(w2,) = emb_layer2.get_weights()
         
         params["timegrid"] = np.array(params["timegrid"])
-        params["additional_states"] = np.array(params["additional_states"])
-        params["hedge_instruments"] = np.array(params["hedge_instruments"])
-        params["no_of_unique_model"] = params["no_of_unique_model"]
-        params["embedding_size"] = params["embedding_size"]
-        params["no_of_portfolios"] = params["no_of_portfolios"]
-        params["embedding_size_port"] = params["embedding_size_port"]
         if not ("loss" in params.keys()):
             params["loss"] = "mean_variance"
-        return DeepHedgeModelwEmbedding(depth=None, n_neurons=None, model=base_model, **params), (w,), (w2,)
-    
+        return DeepHedgeModelwEmbedding(depth=None, n_neurons=None, model=base_model, **params)
 
     def get_params(self)->np.ndarray:
         emb_layer = self.model.get_layer('Embedding')
@@ -438,9 +409,9 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         emb_layer.set_weights([params])
 
 
-    def fit_param(self, optimizer, callbacks, paths: Dict[str, np.ndarray], payoff: np.ndarray,emb: int, emb_port: int):
-
-
+    def fit_param(self, optimizer, callbacks, 
+                  paths: Dict[str, np.ndarray], payoff: np.ndarray,
+                  emb: int, emb_port: int):
         for layer in self.model.layers:
             if layer.name == 'Embedding':
                 emb_layer = self.model.get_layer('Embedding')

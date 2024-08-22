@@ -67,10 +67,10 @@ class HestonForDeepHedging(FactoryObject):
         """
         self._set_params(S0,v0,M,n)
         self._set_timegrid(timegrid)
-        S = np.zeros((self._timegrid.shape[0]+1, M))
-        V =  np.zeros((self._timegrid.shape[0]+1, M))
-        L = np.zeros((self._timegrid.shape[0]+1,M))
-        X = np.zeros((self._timegrid.shape[0]+1, M, 2))
+        S = np.zeros((self._timegrid.shape[0], M))
+        V =  np.zeros((self._timegrid.shape[0], M))
+        L = np.zeros((self._timegrid.shape[0],M))
+        X = np.zeros((self._timegrid.shape[0], M, 2))
         S[0, :] = S0
         V[0, :] = v0
         
@@ -79,7 +79,7 @@ class HestonForDeepHedging(FactoryObject):
         z2 = self.correlation_rho * z1 + np.sqrt(1 - self.correlation_rho ** 2) * np.random.normal(size=(self._timegrid.shape[0], M))
 
         # Generate stock price and volatility paths
-        for t in range(1, self._timegrid.shape[0] + 1):
+        for t in range(1, self._timegrid.shape[0]):
             # Calculate volatility
             vol = np.sqrt(V[t - 1, :])
 
@@ -98,15 +98,7 @@ class HestonForDeepHedging(FactoryObject):
                 + self.vol_of_vol * np.sqrt(V[t - 1, :]) * np.sqrt(self._delta_t) * z2[t - 1, :]
             )
 
-        # Calculate S_k^1 and S_k^2 as in Deep Hedging by Bühler et al. 2019 Section 5.2:
-        t = self._timegrid.shape[0] + 1
-        X[t-1,:,0] = S[t-1,:]
-        X[t-1,:,1] = np.sum(V[:t-1, :],axis=0) 
-        
-        if model_name == 'Heston with Volswap':
-            return X
-        else:
-            return S
+        return S
         
 
 

@@ -41,11 +41,12 @@ class SpecificationDeepHedging(Protocol):
 
 class DeepHedgingData:
     def __init__(self, 
-                 id: str,
-                 paths: Dict[str, np.ndarray], 
-                    hedge_ins: List[str], 
-                    additional_states: List[str],
-                    payoff: np.ndarray):
+                id: str,
+                paths: Dict[str, np.ndarray], 
+                hedge_ins: List[str], 
+                additional_states: List[str],
+                payoff: np.ndarray, 
+                portfolios: np.ndarray|None = None,):
         """Class to store the data for deep hedging.
 
         Args:
@@ -59,6 +60,7 @@ class DeepHedgingData:
         self.hedge_ins: List[str] = hedge_ins
         self.additional_states: List[str] = additional_states
         self.payoff: np.ndarray = payoff
+        self.portfolios = portfolios
 
     def save(self, path: str):
         if not os.path.exists(path):
@@ -69,21 +71,25 @@ class DeepHedgingData:
                 'additional_states_keys': self.additional_states}
         with open(os.path.join(path, 'data.json'), 'w') as f:
             json.dump(tmp, f)
-            for k,v in self.paths.items():
-                np.save(os.path.join(path, k), v)
-            np.save(os.path.join(path, 'payoff'), self.payoff)
+        for k,v in self.paths.items():
+            np.save(os.path.join(path, k), v)
+        np.save(os.path.join(path, 'payoff'), self.payoff)
+        np.save(os.path.join(path, 'portfolios'), self.portfolios)
 
     @staticmethod
-    def load(self, path: str):
+    def load(path: str):
         if not os.path.exists(path):
             raise Exception(f'Path {path} does not exist.')
         with open(os.path.join(path, 'data.json'), 'r') as f:
             tmp = json.load(f)
         paths = {}
         for k in tmp['paths_keys']:
-            paths[k] = np.load(os.path.join(path, k))
-        payoff = np.load(os.path.join(path, 'payoff'))
-        return VanillaOptionDeepHedgingPricer.Data(tmp['id'], paths, tmp['hedge_ins_keys'], tmp['additional_states_keys'], payoff)
+            paths[k] = np.load(os.path.join(path, k+'.npy'))
+        portfolios = np.load(os.path.join(path, 'portfolios.npy'))
+        payoff = np.load(os.path.join(path, 'payoff.npy'))
+        return DeepHedgingData(tmp['id'], paths, 
+                            tmp['hedge_ins_keys'], tmp['additional_states_keys'], 
+                            payoff, portfolios)
 
 class VanillaOptionDeepHedgingPricer:
     class PricingResults:
@@ -98,11 +104,15 @@ class VanillaOptionDeepHedgingPricer:
                        timegrid: DateTimeGrid,
                        portfolios: np.ndarray, 
                        portfolio_instruments: List[SpecificationDeepHedging],
-                       port_vec)->Tuple[np.ndarray, Dict[str, np.ndarray]]:
+                       port_vec: np.ndarray|None)->Tuple[np.ndarray, Dict[str, np.ndarray]]:
         
         n_paths = next(iter(paths.values())).shape[1]
         payoff = np.zeros((n_paths,))
         states = {}
+        if port_vec is None:
+            if portfolios.shape[0]>1:
+                raise Exception("For more then one portfolio port_vec must be not None.")
+            port_vec = np.zeros((n_paths,))
         for i in range(portfolios.shape[0]): # for each portfolio
             selected = i == port_vec # select the paths that shall be used for the portfolio
             for j in range(len(portfolio_instruments)):
@@ -133,13 +143,15 @@ class VanillaOptionDeepHedgingPricer:
         hedge_ins = {}
         additional_states_ = {}
         logger.debug('Compute payoff and portfolio embeddings.')
-        additional_states_["emb:model"] = emb_vec
+        if len(model_list)>1:
+            additional_states_["emb_model"] = emb_vec
+        port_vec = None
         if portfolios.shape[0]>1: # if more then one portfolio is given, apply embedding of portfolios
             port_vec_split = np.array_split(np.zeros((n_sims), dtype=int),portfolios.shape[0])
             for i in range(portfolios.shape[0]):
                 port_vec_split[i][:] = i
             port_vec = np.concatenate(port_vec_split)
-            additional_states_["emb:portfolio"] = port_vec
+            additional_states_["emb_portfolio"] = port_vec
         key = portfolio_instruments[0].udl_id # TODO: generalize to more then one underlying
         hedge_ins[key] = simulation_results
         
@@ -159,7 +171,7 @@ class VanillaOptionDeepHedgingPricer:
         return DeepHedgingData(FactoryObject.hash_for_dict(data_params), 
                                 paths, list(hedge_ins.keys()), 
                                 keys_additional_states, 
-                                payoff=payoff)
+                                payoff=payoff, portfolios=portfolios)
     
     @staticmethod
     def _generate_paths(seed: int,
@@ -251,7 +263,7 @@ class VanillaOptionDeepHedgingPricer:
         if (model_list is None) and (data is None):
             raise Exception('Either a list of models or data must be specified.')
         if portfolios is None: #  if no portfolio is given, we assume a single portfolio with weight -1.0
-            portfolios=np.ndarray([[-1.0]])
+            portfolios=np.ones((1,len(portfolio_instruments)))
         tf.keras.backend.set_floatx('float32')
 
         tf.random.set_seed(seed)
@@ -259,16 +271,21 @@ class VanillaOptionDeepHedgingPricer:
         timegrid = DateTimeGrid(start=val_date, end=val_date+dt.timedelta(days=days), freq=freq, inclusive='both')
 
         if data is None:
+            logger.info('Generate data.')
             data = VanillaOptionDeepHedgingPricer._generate_data(val_date, portfolios, portfolio_instruments, model_list, timegrid, n_sims, seed, days, freq)
-            
+        else:
+            logger.info('Data given, no data creation necessary.')
+        
+        embedding_definitions  = {}
+        if "emb_model" in data.additional_states:
+            embedding_definitions["emb_model"] = (len(model_list)+1,embedding_size)
+        if "emb_portfolio" in data.additional_states:
+            embedding_definitions["emb_portfolio"] = (data.portfolios.shape[0]+1,embedding_size_port)
         hedge_model = DeepHedgeModelwEmbedding(data.hedge_ins, data.additional_states, timegrid=timegrid.timegrid, 
                                         regularization=regularization,
                                         depth=depth, n_neurons=nb_neurons, loss = loss,
                                         transaction_cost = transaction_cost,
-                                        no_of_unique_model=len(model_list),
-                                        embedding_size=embedding_size,
-                                        no_of_portfolios=portfolios.shape[0],
-                                        embedding_size_port=embedding_size_port)
+                                        embedding_definitions=embedding_definitions)
         
 
         lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
@@ -276,11 +293,10 @@ class VanillaOptionDeepHedgingPricer:
                 decay_steps=decay_steps,
                 decay_rate=decay_rate, 
                 staircase=True)
-        print('done.')
-       
-        print('train hedge model:')
+                
+        logger.info("Start training of deep hedging model.")
         hedge_model.train(data.paths, data.payoff, lr_schedule, epochs=epochs, batch_size=batch_size, tensorboard_log=tensorboard_logdir, verbose=verbose)
-        print('done.')
+        logger.info("Training done.")
         results = VanillaOptionDeepHedgingPricer.PricingResults(hedge_model, paths=data.paths, 
                                                                 payoff=data.payoff)
         return results, data
