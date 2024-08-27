@@ -75,7 +75,6 @@ class GreenPPADeepHedgingPricer:
             for i in range(len(timegrid.dates))
             if timegrid.dates[i].hour in forecast_hours
         ]
-        print(ppa_schedule)
         return timegrid, fwd_expiries, forecast_points
 
     @staticmethod
