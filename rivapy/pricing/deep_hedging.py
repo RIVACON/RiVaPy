@@ -246,7 +246,7 @@ class DeepHedgeModel(tf.keras.Model):
             )
         return pnl
 
-    def compute_delta(self, paths: Dict[str, np.ndarray], t: Union[int, float] = None):
+    def compute_delta(self, paths: Dict[str, np.ndarray], t: Union[int, float, None] = None):
         if t is None:
             result = np.zeros(
                 (
@@ -267,7 +267,7 @@ class DeepHedgeModel(tf.keras.Model):
             inputs = [inputs_[i] for i in range(len(inputs_))]
         # for k,v in paths.items():
         inputs.append(np.full(inputs[0].shape, fill_value=t))
-        return self.model.predict(inputs)
+        return self.model.predict(inputs, verbose=0)
 
     def _compute_delta_path(self, paths: Dict[str, np.ndarray]):
         result = np.zeros((self.timegrid.shape[0], next(iter(paths.values())).shape[0]))
