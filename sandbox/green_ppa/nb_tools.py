@@ -24,6 +24,7 @@ import analysis
 import pprint
 
 repo = None
+
 def set_repo(path:str):
     global repo
     repo = analysis.Repo(path)
@@ -36,8 +37,8 @@ def setup(experiments):
     specs = {}
     paths = {}
     pnl = {}
+    deltas = {}
     for k in experiments["models"]:
-        print(k[1])
         sim_results[k[1]], forecast_points[k[1]] = repo.simulate_model(k[0], n_sims=100_000)
         hedge_models[k[1]] = repo.get_hedge_model(k[0])
         specs[k[1]] = GreenPPASpecification.from_dict(repo.results[k[0]]['ppa_spec'])
@@ -48,7 +49,9 @@ def setup(experiments):
         #    'static_volume_hedge':compute_static_volume_hedge_pnl(paths[ref_key_volume_hedge], specs[ref_key_volume_hedge])
     for k,v in hedge_models.items():
         pnl[k] = compute_pnl(v, paths[k], specs[k])#specs['ec202973a34dfc5b71a86e0e7b2209a62c29b6a1'])#
-    return sim_results, forecast_points, hedge_models, specs, paths, pnl
+        deltas[k] = hedge_models[k].compute_delta(paths[k])
+    
+    return sim_results, forecast_points, hedge_models, specs, paths, pnl, deltas
 
 def compute_pnl(hedge_model, paths, green_ppa_spec):
     power_price = paths.get('Power_Germany_FWD0', None)
