@@ -2,17 +2,23 @@ from typing import List, Tuple, Union
 import copy
 import json
 import numpy as np
-import random
+import os
 import matplotlib.pyplot as plt
 import tensorflow as tf
-import hiplot as hip
+try:
+    import hiplot as hip
+except:
+    pass
 from rivapy.tools.interfaces import _JSONEncoder, _JSONDecoder, FactoryObject
 from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.models.gbm import GBM
 from rivapy.pricing.vanillaoption_pricing import (
     VanillaOptionDeepHedgingPricer,
     DeepHedgeModelwEmbedding,
+    DeepHedgingData,
+    SpecificationDeepHedging
 )
+from rivapy.pricing._logger import logger
 
 def _get_entry(path: str, x: dict):
     path_entry = path.split(".")
@@ -78,9 +84,10 @@ class Repo:
             "95%": np.percentile(pnl, 95),
         }
 
-    def run(self, val_date, spec, model, rerun=False, **kwargs):
+    def run(self, val_date, spec: List[SpecificationDeepHedging], model: list, n_portfolios: int|None, rerun=False, **kwargs)->VanillaOptionDeepHedgingPricer.PricingResults:
         params = {}
         params["val_date"] = val_date
+        params["n_portfolios"] = n_portfolios
         params["spec"] = {spec[k].id: spec[k]._to_dict() for k in range(len(spec))}
         params["model"] = [
             model[k].to_dict() for k in range(len(model))
@@ -100,14 +107,31 @@ class Repo:
         params["pricing_params_hash"] = FactoryObject.hash_for_dict(kwargs)
         if (hash_key in self.results.keys()) and (not rerun):
             return self.results[hash_key]
-        pricing_result = VanillaOptionDeepHedgingPricer.price(
-            val_date, spec, model, **kwargs
+        # now check if data has been cached
+        data_params = {}
+        data_params['model']=params["model"]
+        data_params['spec']=params["spec"]
+        data_params['n_portfolios']=params["n_portfolios"]
+        hash_key_data = FactoryObject.hash_for_dict(data_params)
+        data = None
+        if os.path.exists(self.repo_dir + "/data/" + hash_key_data + "/"):
+            logger.debug(f"Loading data from directory {self.repo_dir}/data/{hash_key_data}/")
+            data = DeepHedgingData.load(self.repo_dir + "/data/" + hash_key_data + "/")
+        rng_portfolio = np.random.default_rng(seed=42)
+        portfolios = None
+        if n_portfolios is not None:
+            portfolios = rng_portfolio.uniform(low=-1.0, high=1.0, size=(n_portfolios, len(spec)))
+        pricing_result, data = VanillaOptionDeepHedgingPricer.price(
+            val_date, portfolios, spec, model, data=data, **kwargs
         )
         params["pnl_result"] = Repo.compute_pnl_figures(pricing_result)
         self.results[hash_key] = params
         with open(self.repo_dir + "/results.json", "w") as f:
             json.dump(self.results, f, cls=_JSONEncoder)
         pricing_result.hedge_model.save(self.repo_dir + "/" + hash_key + "/")
+        if not os.path.exists(self.repo_dir + "/data/" + hash_key_data + "/"):
+            os.mkdir(self.repo_dir + "/data/" + hash_key_data + "/")
+            data.save(self.repo_dir + "/data/" + hash_key_data +"/")
         return pricing_result
 
     def save(self):
@@ -117,8 +141,8 @@ class Repo:
     def get_hedge_model(self, hashkey: str) -> DeepHedgeModelwEmbedding:
         return DeepHedgeModelwEmbedding.load(self.repo_dir + "/" + hashkey + "/")
 
-    def get_model(self, hashkey: str) -> GBM:
-        return GBM.from_dict(self.results[hashkey]["model"])
+    #def get_model(self, hashkey: str) -> GBM:
+    #    return GBM.from_dict(self.results[hashkey]["model"])
     
 
     def simulate_model(
