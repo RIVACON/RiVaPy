@@ -84,7 +84,16 @@ class Repo:
             "95%": np.percentile(pnl, 95),
         }
 
-    def run(self, val_date, spec: List[SpecificationDeepHedging], model: list, n_portfolios: int|None, rerun=False, **kwargs)->VanillaOptionDeepHedgingPricer.PricingResults:
+    @staticmethod
+    def _get_data_params(params: dict)->dict:
+        return {'model': params['model'], 'spec': params['spec'], 'n_portfolios': params['n_portfolios']}
+    
+    @staticmethod
+    def _get_data_params_hashkey(params: dict)->str:
+        return FactoryObject.hash_for_dict(Repo._get_data_params(params))
+    
+    def run(self, val_date, spec: List[SpecificationDeepHedging], model: list, 
+            n_portfolios: int|None, rerun=False, **kwargs)->VanillaOptionDeepHedgingPricer.PricingResults:
         params = {}
         params["val_date"] = val_date
         params["n_portfolios"] = n_portfolios
@@ -98,6 +107,8 @@ class Repo:
         )  # remove  parameters irrelevant for hashing before generating kashkey
         _kwargs.pop("verbose", None)
         params["pricing_param"] = _kwargs
+        hash_key_data = Repo._get_data_params_hashkey(params)
+        params['hash_key_data'] = hash_key_data
         hash_key = FactoryObject.hash_for_dict(params)
         params["pricing_param"] = kwargs
         params["spec_hash"] = {spec[k].id: spec[k].hash() for k in range(len(spec))}
@@ -108,11 +119,7 @@ class Repo:
         if (hash_key in self.results.keys()) and (not rerun):
             return self.results[hash_key]
         # now check if data has been cached
-        data_params = {}
-        data_params['model']=params["model"]
-        data_params['spec']=params["spec"]
-        data_params['n_portfolios']=params["n_portfolios"]
-        hash_key_data = FactoryObject.hash_for_dict(data_params)
+        
         data = None
         if os.path.exists(self.repo_dir + "/data/" + hash_key_data + "/"):
             logger.debug(f"Loading data from directory {self.repo_dir}/data/{hash_key_data}/")
@@ -129,6 +136,8 @@ class Repo:
         with open(self.repo_dir + "/results.json", "w") as f:
             json.dump(self.results, f, cls=_JSONEncoder)
         pricing_result.hedge_model.save(self.repo_dir + "/" + hash_key + "/")
+        if not os.path.exists(self.repo_dir + "/data/"):
+             os.mkdir(self.repo_dir + "/data/")
         if not os.path.exists(self.repo_dir + "/data/" + hash_key_data + "/"):
             os.mkdir(self.repo_dir + "/data/" + hash_key_data + "/")
             data.save(self.repo_dir + "/data/" + hash_key_data +"/")
@@ -141,9 +150,9 @@ class Repo:
     def get_hedge_model(self, hashkey: str) -> DeepHedgeModelwEmbedding:
         return DeepHedgeModelwEmbedding.load(self.repo_dir + "/" + hashkey + "/")
 
-    #def get_model(self, hashkey: str) -> GBM:
-    #    return GBM.from_dict(self.results[hashkey]["model"])
-    
+    def get_data(self, hashkey: str) -> DeepHedgingData:
+        hash_key_data = self.results[hashkey]['hash_key_data']
+        return DeepHedgingData.load(self.repo_dir + "/data/" + hash_key_data + "/")
 
     def simulate_model(
         self,
@@ -209,7 +218,7 @@ class Repo:
         self,
         conditions: List[Tuple[str, Union[str, float, int, Tuple]]] = None,
     ):
-        """Plot errorsw.r.t parameters from the given result file with HiPlot
+        """Plot errors w.r.t parameters from the given result file with HiPlot
 
         Args:
             result_file (str): Reultfile
@@ -223,7 +232,7 @@ class Repo:
             tmp = copy.deepcopy(v["pricing_param"])
             # tmp["x_volatility"] = v["model"]["x_volatility"]
             tmp.update(v["pnl_result"])
-
+            tmp["hash_key_data"] = v["hash_key_data"]
             if "tensorboard_logdir" in tmp.keys():
                 del tmp["tensorboard_logdir"]
 

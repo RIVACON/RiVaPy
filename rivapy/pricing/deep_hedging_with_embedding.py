@@ -137,7 +137,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
     def _create_timeslice_input(self, x_in, t: float, t_index: int):
         if self.additional_states is not None:
             length = len(self.additional_states)
-            if length>1:
+            if length>=1:
                 x = x_in[:-length]
             else:
                 x = x_in

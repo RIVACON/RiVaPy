@@ -33,13 +33,13 @@ from sys import exit
 
 
 import ast  
-with open('C:/Users/doeltz/development/RiVaPy/sandbox/embedding/model_params_dict.txt') as f: 
+with open('/home/doeltz/doeltz/development/RiVaPy/sandbox/embedding/model_params_dict.txt') as f: 
     data = f.read() 
 model_params = ast.literal_eval(data) 
 
 model = []
 
-n_models_per_model_type = 1#
+n_models_per_model_type = 2#
 
 for i in range(n_models_per_model_type):
     #model.append(HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.0707,
@@ -69,7 +69,8 @@ for i in range(n_models_per_model_type):
 
 
 repo = analysis.Repo(
-    "C:/Users/doeltz/development/RiVaPy/sandbox/embedding/test"
+    '/home/doeltz/doeltz/development/repos/embedding'
+    #"C:/Users/doeltz/development/RiVaPy/sandbox/embedding/test"
 )
 
 reg = {
@@ -120,11 +121,11 @@ for j in range(len(days)):
                 udl_id="ADS",
                 share_ratio=1,
             ))
-n_sims_per_model = 160    
+n_sims_per_model = 100    
 n_sims = n_models_per_model_type*n_sims_per_model*4
 n_portfolios = None # set to None to switch off embedding with respect to portfolios
 
-for emb_size in [64]:
+for emb_size in [8]:
     for seed in [42]:
         pricing_results = repo.run(
                             refdate,
@@ -135,7 +136,7 @@ for emb_size in [64]:
                             nb_neurons=128,
                             n_sims=n_sims,
                             regularization=0.,
-                            epochs=3,
+                            epochs=4,
                             verbose=1,
                             tensorboard_logdir="logs/"
                             + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
@@ -148,6 +149,6 @@ for emb_size in [64]:
                             n_portfolios=n_portfolios,
                             embedding_size=emb_size,
                             embedding_size_port=2,
-                            transaction_cost={'ADS':[1e-10]},#'DOB_ADS':[0.01]},
+                            transaction_cost={}#'ADS':[1e-10]},#'DOB_ADS':[0.01]},
                             #loss = "exponential_utility"
                         )
