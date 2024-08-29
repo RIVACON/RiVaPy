@@ -356,16 +356,40 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             callbacks.append(tensorboard_callback)
         self.compile(optimizer=optimizer, loss=self.custom_loss)
         inputs = self._create_inputs(paths)
-        return self.fit(
+        self.fit(
             inputs,
             payoff,
             epochs=epochs,
             batch_size=batch_size,
             callbacks=callbacks,
             verbose=verbose,
-            validation_split=0.1,
+            validation_split=0.0,
             validation_freq=5,
         )
+        optimizer = tf.keras.optimizers.Adam(
+            learning_rate=0.001#lr_schedule
+        )
+        self.compile(optimizer=optimizer, loss=self.custom_loss)
+        self.fit( inputs,
+            payoff,
+            epochs=epochs,
+            batch_size=4*batch_size,
+            callbacks=callbacks,
+            verbose=verbose,
+            validation_split=0.0,
+            validation_freq=5,)
+        optimizer = tf.keras.optimizers.Adam(
+            learning_rate=0.001#lr_schedule
+        )
+        self.compile(optimizer=optimizer, loss=self.custom_loss)
+        return self.fit( inputs,
+            payoff,
+            epochs=epochs,
+            batch_size=8*batch_size,
+            callbacks=callbacks,
+            verbose=verbose,
+            validation_split=0.0,
+            validation_freq=5,)
 
     def save(self, folder):
         self.model.save(folder + "/delta_model")
@@ -410,7 +434,8 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
 
 
     def fit_param(self, optimizer, callbacks, 
-                  paths: Dict[str, np.ndarray], payoff: np.ndarray,
+                  paths: Dict[str, np.ndarray], 
+                  payoff: np.ndarray,
                   emb: int, emb_port: int):
         for layer in self.model.layers:
             if layer.name == 'Embedding':

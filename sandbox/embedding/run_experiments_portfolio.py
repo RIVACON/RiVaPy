@@ -39,7 +39,7 @@ model_params = ast.literal_eval(data)
 
 model = []
 
-n_models_per_model_type = 2#
+n_models_per_model_type = 100#
 
 for i in range(n_models_per_model_type):
     #model.append(HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.0707,
@@ -79,8 +79,8 @@ reg = {
     "expected_shortfall": [0.1],
 }
 
-strike = [0.8, 0.9, 1.0, 1.1, 1.2]
-days = [20, 40, 60, 80, 100, 120]
+strike = [1.0]#[0.8, 0.9, 1.0, 1.1, 1.2]
+days = [30]#20, 40, 60, 80, 100, 120]
 refdate = dt.datetime(2023, 1, 1)
 issuer = "DBK"
 seclevel = "COLLATERALIZED"
@@ -90,7 +90,7 @@ tpe = "CALL"  # Change to 'PUT' if you want to calculate the price of an europea
 spec = []
 
 for i in range(len(strike)):
-    j=1
+    j=0
     expiry = refdate + dt.timedelta(days=days[j])
     spec.append(EuropeanVanillaSpecification(
                 'P'+str(len(spec))+str(tpe)+'K'+str(strike[i])+'T'+str(days[j]),
@@ -105,21 +105,21 @@ for i in range(len(strike)):
                 share_ratio=1,
             ))
         
-#for i in range(len(strike)):
-i=2
-for j in range(len(days)):
-    expiry = refdate + dt.timedelta(days=days[j])
-    spec.append(EuropeanVanillaSpecification(
-                'P'+str(len(spec))+str(tpe)+'K'+str(strike[i])+'T'+str(days[j]),
-                tpe,
-                expiry,
-                strike[i],
-                #barrier=0.95,
-                issuer=issuer,
-                sec_lvl=seclevel,
-                curr="EUR",
-                udl_id="ADS",
-                share_ratio=1,
+if False:
+    i=0
+    for j in range(len(days)):
+        expiry = refdate + dt.timedelta(days=days[j])
+        spec.append(EuropeanVanillaSpecification(
+                    'P'+str(len(spec))+str(tpe)+'K'+str(strike[i])+'T'+str(days[j]),
+                    tpe,
+                    expiry,
+                    strike[i],
+                    #barrier=0.95,
+                    issuer=issuer,
+                    sec_lvl=seclevel,
+                    curr="EUR",
+                    udl_id="ADS",
+                    share_ratio=1,
             ))
 n_sims_per_model = 100    
 n_sims = n_models_per_model_type*n_sims_per_model*4
@@ -136,13 +136,13 @@ for emb_size in [8]:
                             nb_neurons=128,
                             n_sims=n_sims,
                             regularization=0.,
-                            epochs=4,
+                            epochs=15,
                             verbose=1,
                             tensorboard_logdir="logs/"
                             + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
                             initial_lr=0.0005, 
                             decay_steps=16_000,
-                            batch_size=2024,
+                            batch_size=512,#2024,
                             decay_rate=0.9,
                             seed=seed,
                             days=int(np.max(days)),

@@ -12,6 +12,7 @@ except:
 from rivapy.tools.interfaces import _JSONEncoder, _JSONDecoder, FactoryObject
 from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.models.gbm import GBM
+import rivapy.models as models
 from rivapy.pricing.vanillaoption_pricing import (
     VanillaOptionDeepHedgingPricer,
     DeepHedgeModelwEmbedding,
@@ -93,8 +94,10 @@ class Repo:
         return FactoryObject.hash_for_dict(Repo._get_data_params(params))
     
     def run(self, val_date, spec: List[SpecificationDeepHedging], model: list, 
-            n_portfolios: int|None, rerun=False, **kwargs)->VanillaOptionDeepHedgingPricer.PricingResults:
+            days:int,
+            n_portfolios: int|None, rerun=False,  **kwargs)->VanillaOptionDeepHedgingPricer.PricingResults:
         params = {}
+        params['days'] = days
         params["val_date"] = val_date
         params["n_portfolios"] = n_portfolios
         params["spec"] = {spec[k].id: spec[k]._to_dict() for k in range(len(spec))}
@@ -176,10 +179,15 @@ class Repo:
             n = days*2
         else:
             n = days
-        model_list = [model]
+        if not isinstance(model, list):
+            model_list = [model]
+        else:
+            model_list = model
         n_sims = int(n_sims/len(model_list))
         for i in range(len(model_list)):
             model= model_list[i]
+            if isinstance(model,dict):
+                model = models.create(model)
             simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid, S0=S0, v0=model.v0, M=n_sims,n=n, model_name=model_list[i].modelname)
             emb_vec[i*n_sims:n_sims*(i+1)] = emb    
         return simulation_results, emb_vec
