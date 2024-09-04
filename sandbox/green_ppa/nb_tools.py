@@ -101,9 +101,9 @@ def compute_statistics(pnl):
                 #'10%':[], 
                 '5% ES':[], 
                 #'10% ES':[], 
-                '20% ES':[], 
+                '30% ES':[], 
                'utility, 0.05': [], 
-                'utility, 0.1': [],
+                'utility, 0.15': [],
                 #'utility, 0.15': [], 'utility, 0.2': [], 
                }
     for k,v in pnl.items():
@@ -120,17 +120,17 @@ def compute_statistics(pnl):
         tmp = v_[v_<tmp].mean()
         #pnl_stat['10% ES'].append(tmp) 
 
-        tmp = np.percentile(v_, 20)
+        tmp = np.percentile(v_, 30)
         #pnl_stat['20%'].append(tmp)
         tmp = v_[v_<tmp].mean()
-        pnl_stat['20% ES'].append(tmp)
+        pnl_stat['30% ES'].append(tmp)
         tmp = np.percentile(v_, 5)
         #pnl_stat['5%'].append(tmp)
         tmp = v_[v_<tmp].mean()
         pnl_stat['5% ES'].append(tmp)
         
         pnl_stat['utility, 0.05'].append(np.mean(np.exp(-0.05*v_)))
-        pnl_stat['utility, 0.1'].append(np.mean(np.exp(-0.1*v_)))
+        pnl_stat['utility, 0.15'].append(np.mean(np.exp(-0.15*v_)))
         #pnl_stat['utility, 0.15'].append(np.mean(np.exp(-0.15*v_)))
         #pnl_stat['utility, 0.2'].append( np.mean(np.exp(-0.2*v_)))
 
