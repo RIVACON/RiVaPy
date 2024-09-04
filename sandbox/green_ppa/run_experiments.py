@@ -2,14 +2,21 @@ import datetime as dt
 import sys
 
 sys.path.insert(0, "../..")
+sys.path.insert(0, '/home/doeltz/doeltz/development/RiVaPy2/')
+
 from typing import List
 import numpy as np
 import matplotlib.pyplot as plt
 import json
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-from rivapy.tools.datetime_grid import DateTimeGrid
+import tensorflow as tf
+
+tf.config.run_functions_eagerly(False)
+
+
+#os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 
 from rivapy.models.residual_demand_fwd_model import (
     WindPowerForecastModel,
@@ -17,7 +24,6 @@ from rivapy.models.residual_demand_fwd_model import (
     LinearDemandForwardModel,
 )
 from rivapy.instruments.ppa_specification import GreenPPASpecification
-from rivapy.models.residual_demand_model import SmoothstepSupplyCurve
 from rivapy.models import OrnsteinUhlenbeck
 from rivapy.pricing.green_ppa_pricing import GreenPPADeepHedgingPricer, DeepHedgeModel
 import numpy as np
@@ -48,12 +54,12 @@ wind = MultiRegionWindForecastModel("Wind_Germany", regions)
 
 
 val_date = dt.datetime(2023, 1, 1)
-strike = 1.0  # 0.22
+strike = 1.2  # 0.22
 # transaction_cost = 0.01
 days = 2
 
 repo = analysis.Repo(
-    "/home/doeltz/doeltz/development/RiVaPy/sandbox/green_ppa/experiments_new/"
+    "/home/doeltz/doeltz/development/RiVaPy2/sandbox/green_ppa/utility_vs_shortfall_OTM_50percCVaR/"
 )
 
 
@@ -62,8 +68,8 @@ repo = analysis.Repo(
 # 3 dtm
 
 reg = {  #'mean_variance':[10_000.0],#[0.0, 0.2, 0.5],
-    #'exponential_utility':[5.0], #[5.0, 10.0],#, 15.0, 20.0] ,
-    "expected_shortfall": [0.05, 0.1, 0.2, 0.3]
+    'exponential_utility':[5.0, 15.0], #[5.0, 10.0],#, 15.0, 20.0] ,
+    "expected_shortfall": [0.5]
 }
 for max_capacity in [
     1.0
@@ -79,7 +85,7 @@ for max_capacity in [
     )
     for x_volatility in [0.8]:  # [0.8]
         for vol_wind_onshore in [3.0]:  # [1.0,2.0,3.0,4.0]: #
-            for wind_onshore_ in [0.2, 0.5, 0.8]:
+            for wind_onshore_ in [0.5]:#0.2, 0.5, 0.8]:
                 wind_onshore = WindPowerForecastModel(
                     region="Onshore",
                     speed_of_mean_reversion=0.1,
@@ -105,11 +111,12 @@ for max_capacity in [
                     additive_correction=False,
                 )
                 for loss in [
-                    "expected_shortfall"
-                ]:  # , 'exponential_utility']:        #'exponential_utility', mean_variance
+                    "expected_shortfall",
+                    #'exponential_utility'
+                    ]:        #'exponential_utility', mean_variance
                     for regularization in reg[loss]:  #  [0.0, 0.1, 0.2, 0.5]:
                         for seed in [42]:
-                            for power_fwd_price in [1.0]:  # , 0.8, 1.2]:
+                            for power_fwd_price in [1.0]:#, 0.8, 1.2]:
 
                                 pricing_results = repo.run(
                                     val_date,
@@ -128,10 +135,10 @@ for max_capacity in [
                                     ],  # [8, 10, 12, 14, 16, 18, 20],
                                     additional_states=None,  # [],  # ['Offshore'],
                                     depth=3,
-                                    nb_neurons=32,
+                                    nb_neurons=64,
                                     n_sims=100_000,
                                     regularization=regularization,
-                                    epochs=20,  # 800,
+                                    epochs= 800,
                                     verbose=1,
                                     tensorboard_logdir="logs/"
                                     + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
