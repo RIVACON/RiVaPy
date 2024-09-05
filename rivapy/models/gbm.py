@@ -29,23 +29,22 @@ class GBM(FactoryObject):
         self.volatility = volatility
         self._timegrid = None
         self.modelname = 'GBM'
-        self.v0 = 0.
+        
 
     def _to_dict(self) -> dict:
         return {'drift': self.drift, 'volatility': self.volatility}
 
     def _set_timegrid(self, timegrid):
         self._timegrid = np.copy(timegrid)
-        self._delta_t = self._timegrid[1]-self._timegrid[0]
+        self._delta_t = self._timegrid[1:]-self._timegrid[:-1]
         self._sqrt_delta_t = np.sqrt(self._delta_t)
 
-    def _set_params(self,start_value,M,n):
+    def _set_params(self,start_value):
         self.start_value = start_value #S0
-        self.n_sims = M 
-        self.n = n #length of timegrid
+        
 
 
-    def simulate(self, timegrid, S0, v0, M,n, model_name):
+    def simulate(self, timegrid, S0, n_sims: int):
         """ Simulate the GBM Paths
             
             .. math:: 
@@ -57,17 +56,18 @@ class GBM(FactoryObject):
         Args:
             timegrid (np.ndarray): One dimensional array containing the time points where the process will be simulated (containing 0.0 as the first timepoint).
             S0 (Union[float, np.ndarray]): Either a float or an array (for each path) with the start value of the simulation.
-            M = number of simulations
-            n = number of timesteps
-            v0 and model_name are currently not used, defined just to be consistent with HestonModel for Deep Hedging.
+            n_sims = number of simulations
+            v0 is currently not used, defined just to be consistent with HestonModel for Deep Hedging.
         Returns:
             np.ndarray: Array r containing the simulations where r[:,i] is the path of the i-th simulation (r.shape[0] equals number of timepoints, r.shape[1] the number of simulations). 
         """
-        self._set_params(S0,M,n)
+        self._set_params(S0)
         self._set_timegrid(timegrid)
-        St = np.exp( (self.drift - self.volatility ** 2 / 2) * self._delta_t + self.volatility * np.random.normal(0, np.sqrt(self._delta_t), size=(M,n)).T)
-        St = np.vstack([np.ones(M), St]) 
-        result = S0 * np.cumprod(St,axis=0)
+        rnd =  np.random.normal(0, 1, size=(timegrid.shape[0],n_sims))
+        result = np.empty((timegrid.shape[0],n_sims))
+        result[0,:] = S0
+        for i in range(1,timegrid.shape[0]):
+            result[i,:] = result[i-1,:]*np.exp( (self.drift - 0.5 * self.volatility ** 2) * self._delta_t[i-1] + self.volatility * rnd[i-1,:]*self._sqrt_delta_t[i-1])
         return result
 
 

@@ -23,7 +23,7 @@ def _add_to_factory(cls):
     factory_entries = _factory()
     factory_entries[cls.__name__] = cls
 
-_add_to_factory(OrnsteinUhlenbeck)
+_add_to_factory(GBM)
 _add_to_factory(OrnsteinUhlenbeck)
 _add_to_factory(LuciaSchwartz)
 _add_to_factory(SupplyFunction)

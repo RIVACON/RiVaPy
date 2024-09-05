@@ -41,7 +41,7 @@ class BNS(FactoryObject):
         self.n = n #length of timegrid
 
 
-    def simulate(self, timegrid, S0, v0, M,n,model_name):
+    def simulate(self, timegrid, S0, v0, M,n):
         """ Simulate the BNS Model paths
         """
         self._set_params(S0,v0,M,n)

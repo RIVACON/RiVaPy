@@ -39,7 +39,7 @@ class NIG(FactoryObject):
         self.n = n 
 
 
-    def simulate(self, timegrid, S0, v0, M,n, model_name):
+    def simulate(self, timegrid, S0, v0, M,n):
         """ Simulate the paths
             
         """

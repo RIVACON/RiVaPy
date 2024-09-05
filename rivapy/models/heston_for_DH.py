@@ -52,7 +52,7 @@ class HestonForDeepHedging(FactoryObject):
         self.n = n #length of timegrid
 
 
-    def simulate(self, timegrid, S0, v0, M,n,model_name):
+    def simulate(self, timegrid, S0, v0, M,n):
         """ Simulate the Heston Model Paths
         
         
