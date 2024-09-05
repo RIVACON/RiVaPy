@@ -85,7 +85,7 @@ class EuropeanVanillaSpecification(interfaces.FactoryObject):
     def __init__(self, 
                  id: str,
                  type: str,
-                 expiry: datetime,
+                 expiry: datetime|str,
                  strike: float,
                  issuer: str = '',
                  sec_lvl: str = SecuritizationLevel.COLLATERALIZED,
@@ -103,7 +103,7 @@ class EuropeanVanillaSpecification(interfaces.FactoryObject):
         Args:
             id (str): Identifier (name) of the european vanilla specification.
             type (str): Type of the european vanilla option ('PUT','CALL').
-            expiry (datetime): Expiration date.
+            expiry (datetime or str): Expiration date. If it is a string, it must be in the format 'YYYY-MM-DDT'.
             strike (float): Strike price.
             issuer (str, optional): Issuer Id. Must not be set if pricing data is manually defined. Defaults to ''.
             sec_lvl (str, optional): Securitization level. Can be selected from rivapy.enums.SecuritizationLevel. Defaults to SecuritizationLevel.COLLATERALIZED.
@@ -118,7 +118,10 @@ class EuropeanVanillaSpecification(interfaces.FactoryObject):
         self.curr =  curr
         self.udl_id = udl_id
         self.type = type
-        self.expiry = expiry
+        if isinstance(expiry, str):
+            self.expiry = datetime.fromisoformat(expiry)
+        else:
+            self.expiry = expiry
         self.strike = strike
         self.share_ratio = share_ratio
         
