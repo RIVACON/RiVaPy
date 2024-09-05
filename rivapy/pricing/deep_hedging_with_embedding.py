@@ -356,7 +356,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             callbacks.append(tensorboard_callback)
         self.compile(optimizer=optimizer, loss=self.custom_loss)
         inputs = self._create_inputs(paths)
-        self.fit(
+        return self.fit(
             inputs,
             payoff,
             epochs=epochs,
@@ -367,10 +367,10 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             validation_freq=5,
         )
         optimizer = tf.keras.optimizers.Adam(
-            learning_rate=0.001#lr_schedule
+            learning_rate=lr_schedule
         )
         self.compile(optimizer=optimizer, loss=self.custom_loss)
-        self.fit( inputs,
+        return self.fit( inputs,
             payoff,
             epochs=epochs,
             batch_size=4*batch_size,

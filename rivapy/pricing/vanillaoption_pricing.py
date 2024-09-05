@@ -115,8 +115,10 @@ class VanillaOptionDeepHedgingPricer:
             port_vec = np.zeros((n_paths,))
         for i in range(portfolios.shape[0]): # for each portfolio
             selected = i == port_vec # select the paths that shall be used for the portfolio
+            tmp={k:v[:,selected] for k,v in paths.items() if len(v.shape)>1}
+            tmp.update({k:v for k,v in paths.items() if len(v.shape)==1})
+                
             for j in range(len(portfolio_instruments)):
-                tmp={k:v[:,selected] for k,v in paths.items()}
                 ins_payoff, ins_states = portfolio_instruments[j].compute_payoff(tmp, timegrid)
                 if ins_states is not None:
                     state_key = portfolio_instruments[j].id+':states'
@@ -193,7 +195,7 @@ class VanillaOptionDeepHedgingPricer:
         n_sims = int(n_sims/len(model_list))
         for i in range(len(model_list)):
             model= model_list[i]
-            simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid.timegrid, S0=S0, v0=model.v0, M=n_sims,n=n, model_name=model_list[i].modelname)
+            simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid.timegrid, S0=S0, n_sims=n_sims)
             emb_vec[i*n_sims:n_sims*(i+1)] = i    
         return simulation_results, emb_vec
     
