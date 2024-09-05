@@ -4,6 +4,7 @@ import json
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+import datetime as dt
 import tensorflow as tf
 try:
     import hiplot as hip
@@ -12,7 +13,9 @@ except:
 from rivapy.tools.interfaces import _JSONEncoder, _JSONDecoder, FactoryObject
 from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.models.gbm import GBM
+
 import rivapy.models as models
+import rivapy.models.factory
 from rivapy.pricing.vanillaoption_pricing import (
     VanillaOptionDeepHedgingPricer,
     DeepHedgeModelwEmbedding,
@@ -100,7 +103,7 @@ class Repo:
         params['days'] = days
         params["val_date"] = val_date
         params["n_portfolios"] = n_portfolios
-        params["spec"] = {spec[k].id: spec[k]._to_dict() for k in range(len(spec))}
+        params["spec"] = [spec[k].to_dict() for k in range(len(spec))]
         params["model"] = [
             model[k].to_dict() for k in range(len(model))
         ]  # model.to_dict()
@@ -159,26 +162,22 @@ class Repo:
 
     def simulate_model(
         self,
+        val_date: dt.datetime,
         n_sims: int,
         seed: int = 42,
         days: int = 30,
         freq: str = "D",
-        parameter_uncertainty: bool = False,
         model: list = [GBM(drift=0.0, volatility=0.25)],
         emb: int = 0
     ) -> np.ndarray:
         # res = self.results[hashkey]
         # spec = EuropeanVanillaSpecification.from_dict(res['spec'])
-        timegrid = VanillaOptionDeepHedgingPricer._compute_timegrid(days, freq)
+        timegrid = DateTimeGrid(start=val_date, end=val_date+dt.timedelta(days=days), freq=freq, inclusive='both')
         np.random.seed(seed)
         # model = self.get_model(hashkey)
-        simulation_results = np.zeros((len(timegrid)+1, n_sims))
+        simulation_results = np.zeros((timegrid.shape[0], n_sims))
         S0 = 1. #ATM option
         emb_vec = np.zeros((n_sims))
-        if freq == '12H':
-            n = days*2
-        else:
-            n = days
         if not isinstance(model, list):
             model_list = [model]
         else:
@@ -187,8 +186,8 @@ class Repo:
         for i in range(len(model_list)):
             model= model_list[i]
             if isinstance(model,dict):
-                model = models.create(model)
-            simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid, S0=S0, v0=model.v0, M=n_sims,n=n, model_name=model_list[i].modelname)
+                model = models.factory.create(model)
+            simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid.timegrid, S0=S0, n_sims=n_sims)
             emb_vec[i*n_sims:n_sims*(i+1)] = emb    
         return simulation_results, emb_vec
 

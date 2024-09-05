@@ -39,13 +39,13 @@ model_params = ast.literal_eval(data)
 
 model = []
 
-n_models_per_model_type = 100#
-
+n_models_per_model_type = 40#
+gbm_vols = np.linspace(0.05,2.0,n_models_per_model_type)
 for i in range(n_models_per_model_type):
     #model.append(HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.0707,
     #              vol_of_vol = 0.2928, correlation_rho = -0.757,v0 = 0.0654))
     #model.append(GBM(0.,vol_list[i]))
-    model.append(GBM(drift=model_params['GBM']['drift'][i],volatility=model_params['GBM']['vol'][i]))
+    model.append(GBM(drift=0.0,volatility=gbm_vols[i]))
     if False:
         model.append(HestonForDeepHedging(rate_of_mean_reversion = model_params['Heston']['rate_of_mean_reversion'][i],
                                         long_run_average = model_params['Heston']['long_run_average'][i],
@@ -93,7 +93,7 @@ for i in range(len(strike)):
     j=0
     expiry = refdate + dt.timedelta(days=days[j])
     spec.append(EuropeanVanillaSpecification(
-                'P'+str(len(spec))+str(tpe)+'K'+str(strike[i])+'T'+str(days[j]),
+                'C'+str(len(spec))+str(tpe)+'K'+str(strike[i])+'T'+str(days[j]),
                 tpe,
                 expiry,
                 strike[i],
@@ -121,34 +121,35 @@ if False:
                     udl_id="ADS",
                     share_ratio=1,
             ))
-n_sims_per_model = 100    
+n_sims_per_model = 1000    
 n_sims = n_models_per_model_type*n_sims_per_model*4
 n_portfolios = None # set to None to switch off embedding with respect to portfolios
 
-for emb_size in [8]:
-    for seed in [42]:
-        pricing_results = repo.run(
-                            refdate,
-                            spec,
-                            model,
-                            rerun=True,
-                            depth=3,
-                            nb_neurons=128,
-                            n_sims=n_sims,
-                            regularization=0.,
-                            epochs=15,
-                            verbose=1,
-                            tensorboard_logdir="logs/"
-                            + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
-                            initial_lr=0.0005, 
-                            decay_steps=16_000,
-                            batch_size=512,#2024,
-                            decay_rate=0.9,
-                            seed=seed,
-                            days=int(np.max(days)),
-                            n_portfolios=n_portfolios,
-                            embedding_size=emb_size,
-                            embedding_size_port=2,
-                            transaction_cost={}#'ADS':[1e-10]},#'DOB_ADS':[0.01]},
-                            #loss = "exponential_utility"
-                        )
+if __name__=='__main__':
+    for emb_size in [8]:
+        for seed in [42]:
+            pricing_results = repo.run(
+                                refdate,
+                                spec,
+                                model,
+                                rerun=True,
+                                depth=3,
+                                nb_neurons=128,
+                                n_sims=n_sims,
+                                regularization=0.,
+                                epochs=150,
+                                verbose=1,
+                                tensorboard_logdir="logs/"
+                                + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
+                                initial_lr=0.0005, 
+                                decay_steps=16_000,
+                                batch_size=512,#2024,
+                                decay_rate=0.9,
+                                seed=seed,
+                                days=int(np.max(days)),
+                                n_portfolios=n_portfolios,
+                                embedding_size=emb_size,
+                                embedding_size_port=2,
+                                transaction_cost={}#'ADS':[1e-10]},#'DOB_ADS':[0.01]},
+                                #loss = "exponential_utility"
+                            )
