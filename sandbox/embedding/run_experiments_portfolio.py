@@ -19,6 +19,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # set loglevel to warning
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.models.gbm import GBM
+from rivapy.models.historic_sim import HistoricSimulation
 from rivapy.models.heston_for_DH import HestonForDeepHedging
 from rivapy.models.heston_with_jumps import HestonWithJumps
 from rivapy.models.barndorff_nielsen_shephard import BNS
@@ -37,10 +38,11 @@ with open('/home/doeltz/doeltz/development/RiVaPy/sandbox/embedding/model_params
     data = f.read() 
 model_params = ast.literal_eval(data) 
 
+
 model = []
 
-n_models_per_model_type = 40#
-gbm_vols = np.linspace(0.05,2.0,n_models_per_model_type)
+n_models_per_model_type = 50#
+gbm_vols = np.linspace(0.05,1.5,n_models_per_model_type)
 for i in range(n_models_per_model_type):
     #model.append(HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.0707,
     #              vol_of_vol = 0.2928, correlation_rho = -0.757,v0 = 0.0654))
@@ -65,11 +67,18 @@ for i in range(n_models_per_model_type):
                         a=model_params['BNS']['a'][i],
                         v0 = model_params['BNS']['v0'][i]))
 
-
+# Historic Simulation models
+with open('/home/doeltz/doeltz/development/RiVaPy/sandbox/embedding/yfinance_data/data.json', "r") as f:
+    historic_data = json.load(f)
+n_models_old = len(model)
+for i in range(len(historic_data)):
+    if len(historic_data[i][1])>0:
+        model.append(HistoricSimulation(historic_data[i][1], description=historic_data[i][0]))
+print( "include historic data, number of historic models: ", len(historic_data)-n_models_old)
 
 
 repo = analysis.Repo(
-    '/home/doeltz/doeltz/development/repos/embedding'
+    '/home/doeltz/doeltz/development/repos/embedding_historic'
     #"C:/Users/doeltz/development/RiVaPy/sandbox/embedding/test"
 )
 
@@ -104,52 +113,39 @@ for i in range(len(strike)):
                 udl_id="ADS",
                 share_ratio=1,
             ))
-        
-if False:
-    i=0
-    for j in range(len(days)):
-        expiry = refdate + dt.timedelta(days=days[j])
-        spec.append(EuropeanVanillaSpecification(
-                    'P'+str(len(spec))+str(tpe)+'K'+str(strike[i])+'T'+str(days[j]),
-                    tpe,
-                    expiry,
-                    strike[i],
-                    #barrier=0.95,
-                    issuer=issuer,
-                    sec_lvl=seclevel,
-                    curr="EUR",
-                    udl_id="ADS",
-                    share_ratio=1,
-            ))
-n_sims_per_model = 1000    
-n_sims = n_models_per_model_type*n_sims_per_model*4
+
+n_sims_per_model = 1000   
+n_sims = n_sims_per_model*len(model)
 n_portfolios = None # set to None to switch off embedding with respect to portfolios
 
 if __name__=='__main__':
-    for emb_size in [8]:
+    for emb_size in [2]:
         for seed in [42]:
             pricing_results = repo.run(
                                 refdate,
                                 spec,
                                 model,
-                                rerun=True,
+                                rerun=False,
                                 depth=3,
                                 nb_neurons=128,
                                 n_sims=n_sims,
                                 regularization=0.,
-                                epochs=150,
+                                epochs=100,
                                 verbose=1,
-                                tensorboard_logdir="logs/"
+                                tensorboard_logdir=repo.repo_dir+"/logs/"
                                 + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
-                                initial_lr=0.0005, 
-                                decay_steps=16_000,
-                                batch_size=512,#2024,
-                                decay_rate=0.9,
+                                initial_lr=5e-5, 
+                                final_lr=1e-6,
+                                multiplier_lr=2.0,
+                                multiplier_batch_size=2,
+                                n_increase_batch_size=6,
+                                decay_steps=100,
+                                batch_size=64,#2024,
                                 seed=seed,
                                 days=int(np.max(days)),
                                 n_portfolios=n_portfolios,
                                 embedding_size=emb_size,
-                                embedding_size_port=2,
+                                embedding_size_port=None,
                                 transaction_cost={}#'ADS':[1e-10]},#'DOB_ADS':[0.01]},
                                 #loss = "exponential_utility"
                             )

@@ -3,7 +3,7 @@ import numpy as np
 import scipy
 from rivapy.tools.interfaces import FactoryObject
 
-class HistoricSim(FactoryObject):
+class HistoricSimulation(FactoryObject):
     def __init__(self, historic_values:np.ndarray, description:str):
         """Historic simulation model. It simulates price based on the discrete log-return distribution of the given historic values.
 

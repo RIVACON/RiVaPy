@@ -12,7 +12,7 @@ from rivapy.models.residual_demand_model import ResidualDemandModel,  WindPowerM
 from rivapy.models.residual_demand_fwd_model import WindPowerForecastModel, WindPowerForecastModelParameter, ResidualDemandForwardModel, MultiRegionWindForecastModel, LinearDemandForwardModel
 from rivapy.models.gas_fwd_model import GasFwdModel2Factor
 from rivapy.models.gbm import GBM
-from rivapy.models.historic_sim import HistoricSim
+from rivapy.models.historic_sim import HistoricSimulation
 from rivapy.models.heston_for_DH import HestonForDeepHedging
 from rivapy.models.roughbergomi_for_DH import rBergomiForDeepHedging
 from rivapy.models.SDE_for_DH import SDEForDeepHedging
@@ -25,7 +25,7 @@ def _add_to_factory(cls):
     factory_entries[cls.__name__] = cls
 
 _add_to_factory(GBM)
-_add_to_factory(HistoricSim)
+_add_to_factory(HistoricSimulation)
 _add_to_factory(OrnsteinUhlenbeck)
 _add_to_factory(LuciaSchwartz)
 _add_to_factory(SupplyFunction)
