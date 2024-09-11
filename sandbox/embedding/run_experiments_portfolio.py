@@ -41,7 +41,7 @@ model_params = ast.literal_eval(data)
 
 model = []
 
-n_models_per_model_type = 50#
+n_models_per_model_type = 100#
 gbm_vols = np.linspace(0.05,1.5,n_models_per_model_type)
 for i in range(n_models_per_model_type):
     #model.append(HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.0707,
@@ -68,17 +68,18 @@ for i in range(n_models_per_model_type):
                         v0 = model_params['BNS']['v0'][i]))
 
 # Historic Simulation models
-with open('/home/doeltz/doeltz/development/RiVaPy/sandbox/embedding/yfinance_data/data.json', "r") as f:
-    historic_data = json.load(f)
-n_models_old = len(model)
-for i in range(len(historic_data)):
-    if len(historic_data[i][1])>0:
-        model.append(HistoricSimulation(historic_data[i][1], description=historic_data[i][0]))
-print( "include historic data, number of historic models: ", len(historic_data)-n_models_old)
+if False:
+    with open('/home/doeltz/doeltz/development/RiVaPy/sandbox/embedding/yfinance_data/data.json', "r") as f:
+        historic_data = json.load(f)
+    n_models_old = len(model)
+    for i in range(len(historic_data)):
+        if len(historic_data[i][1])>0:
+            model.append(HistoricSimulation(historic_data[i][1], description=historic_data[i][0]))
+    print( "include historic data, number of historic models: ", len(historic_data)-n_models_old)
 
 
 repo = analysis.Repo(
-    '/home/doeltz/doeltz/development/repos/embedding_historic'
+    '/home/doeltz/doeltz/development/repos/embedding_gbm'
     #"C:/Users/doeltz/development/RiVaPy/sandbox/embedding/test"
 )
 
@@ -114,38 +115,84 @@ for i in range(len(strike)):
                 share_ratio=1,
             ))
 
-n_sims_per_model = 1000   
+n_sims_per_model = 4000  
 n_sims = n_sims_per_model*len(model)
 n_portfolios = None # set to None to switch off embedding with respect to portfolios
 
+def objective(trial):
+    # Define the hyperparameters to be tuned
+    params = {
+        "depth": trial.suggest_int("depth", 2, 4),
+        "nb_neurons": trial.suggest_categorical("nb_neurons", [32, 64,128,256]),
+        "epochs": trial.suggest_int("epochs", 30, 200),
+        "initial_lr": trial.suggest_float("initial_lr", 2e-5, 1e-3),
+        "final_lr": trial.suggest_float("final_lr", 1e-6, 1e-5),
+        "multiplier_lr": trial.suggest_float("multiplier_lr", 1.1, 4.0),
+        "multiplier_batch_size": trial.suggest_int("multiplier_batch_size", 2, 4),
+        "n_increase_batch_size": trial.suggest_int("n_increase_batch_size", 1, 5),
+        "decay_steps": trial.suggest_categorical("decay_steps", [10,50,100,200]),
+        "batch_size": trial.suggest_categorical("batch_size", [16,32,64,128,256]),
+        #"seed": trial.suggest_int("seed", 0, 100),
+        "days": int(np.max(days)),
+        "embedding_size": trial.suggest_categorical("embedding_size", [1,2,4,8]),
+        "embedding_size_port": None,
+        "transaction_cost": {},  # 'ADS':[1e-10]},#'DOB_ADS':[0.01]},
+        "loss": "exponential_utility",
+    }
+    print(params)
+    pricing_results = repo.run(
+        refdate,
+        spec,
+        model,
+        n_sims=n_sims,
+        rerun=False,
+        regularization=0.,
+        **params,
+        verbose=1,
+        seed=42,
+        n_portfolios=n_portfolios,
+        tensorboard_logdir=repo.repo_dir + "/logs/" + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
+    )
+    return pricing_results["pnl_result"]["var"]
+
 if __name__=='__main__':
-    for emb_size in [2]:
-        for seed in [42]:
-            pricing_results = repo.run(
-                                refdate,
-                                spec,
-                                model,
-                                rerun=False,
-                                depth=3,
-                                nb_neurons=128,
-                                n_sims=n_sims,
-                                regularization=0.,
-                                epochs=100,
-                                verbose=1,
-                                tensorboard_logdir=repo.repo_dir+"/logs/"
-                                + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
-                                initial_lr=5e-5, 
-                                final_lr=1e-6,
-                                multiplier_lr=2.0,
-                                multiplier_batch_size=2,
-                                n_increase_batch_size=6,
-                                decay_steps=100,
-                                batch_size=64,#2024,
-                                seed=seed,
-                                days=int(np.max(days)),
-                                n_portfolios=n_portfolios,
-                                embedding_size=emb_size,
-                                embedding_size_port=None,
-                                transaction_cost={}#'ADS':[1e-10]},#'DOB_ADS':[0.01]},
-                                #loss = "exponential_utility"
-                            )
+    import optuna
+    if False:
+        # Add stream handler of stdout to show the messages
+        optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
+        study_name = "GBM-Study"  # Unique identifier of the study.
+        storage_name = "sqlite:///{}.db".format(study_name)
+        study = optuna.create_study(study_name=study_name, storage=storage_name, load_if_exists=True)
+        study.optimize(objective, n_trials=2)
+    else:
+        for emb_size in [2]:
+            for seed in [42]:
+                pricing_results = repo.run(
+                                    refdate,
+                                    spec,
+                                    model,
+                                    rerun=False,
+                                    depth=3,
+                                    nb_neurons=128,
+                                    n_sims=n_sims,
+                                    regularization=0.,
+                                    epochs=10,
+                                    verbose=1,
+                                    tensorboard_logdir=repo.repo_dir+"/logs/"
+                                    + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
+                                    initial_lr=5e-5, 
+                                    final_lr=1e-6,
+                                    multiplier_lr=2.0,
+                                    multiplier_batch_size=2,
+                                    n_increase_batch_size=1,
+                                    decay_steps=100,
+                                    batch_size=256,#2024,
+                                    seed=seed,
+                                    days=int(np.max(days)),
+                                    n_portfolios=n_portfolios,
+                                    embedding_size=emb_size,
+                                    embedding_size_port=None,
+                                    transaction_cost={}#'ADS':[1e-10]},#'DOB_ADS':[0.01]},
+                                    #loss = "exponential_utility"
+                                )
+                pricing_results["pnl_result"]["var"]
