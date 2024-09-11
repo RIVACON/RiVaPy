@@ -1,5 +1,6 @@
 */__pycache__/*
 *.pyc
+logs/*
 docs/build/*
 *checkpoint.ipy*
 .vscode/settings.json
