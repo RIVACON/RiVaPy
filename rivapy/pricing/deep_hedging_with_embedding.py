@@ -19,7 +19,7 @@ except:
     warnings.warn(
         "Tensorflow is not installed. You cannot use the Deep Hedging Pricer!"
     )
-
+from rivapy.pricing._logger import logger
 
 class DeepHedgeModelwEmbedding(tf.keras.Model):
     def __init__(
@@ -406,31 +406,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             validation_split=0.0,
             validation_freq=5,
         )
-        optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
-        self.compile(optimizer=optimizer, loss=self.custom_loss)
-        return self.fit(
-            inputs,
-            payoff,
-            epochs=epochs,
-            batch_size=4 * batch_size,
-            callbacks=callbacks,
-            verbose=verbose,
-            validation_split=0.0,
-            validation_freq=5,
-        )
-        optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)  # lr_schedule
-        self.compile(optimizer=optimizer, loss=self.custom_loss)
-        return self.fit(
-            inputs,
-            payoff,
-            epochs=epochs,
-            batch_size=8 * batch_size,
-            callbacks=callbacks,
-            verbose=verbose,
-            validation_split=0.0,
-            validation_freq=5,
-        )
-
+        
     def save(self, folder):
         self.model.save(folder + "/delta_model")
         params = {}
@@ -483,35 +459,39 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         callbacks,
         paths: Dict[str, np.ndarray],
         payoff: np.ndarray,
-        emb: int,
-        emb_port: int,
+        epochs: int = 20,
+        batch_size: int = 5,
     ):
+        p = next(iter(paths.values()))
+        if len(p.shape) > 1:
+            n_sims = p.shape[1]
+        else:
+            n_sims = p.shape[0]
+        #paths_ = {}
         for layer in self.model.layers:
-            if layer.name == "Embedding":
-                emb_layer = self.model.get_layer("Embedding")
-                params = emb_layer.get_weights()
-                params[0][emb, :] = params[0][:-1, :].mean(axis=0)
-                emb_layer.set_weights(params)
-                emb_layer.trainable = True
-            elif layer.name == "Embedding_port":
-                emb_layer_port = self.model.get_layer("Embedding_port")
-                params2 = emb_layer_port.get_weights()
-                params2[0][emb_port, :] = params2[0][:-1, :].mean(axis=0)
-                emb_layer_port.set_weights(params2)
-                emb_layer_port.trainable = True
+            if "emb" in layer.name:
+                params = layer.get_weights()
+                params[0][-1, :] = params[0][:-1, :].mean(axis=0)
+                layer.set_weights(params)
+                layer.trainable = True
+                #paths_[layer.name]= np.full((n_sims,), layer.get_config()['input_dim']-1)
             else:
                 layer.trainable = False
-            print(layer, layer.name, layer.trainable)
+            logger.debug(f"layer {layer.name}, trainable: {layer.trainable}")        
+        #for k,v in paths.items():
+        #    if "emb" not in k:
+        #        paths_[k] = v
+
         self.compile(optimizer=optimizer, loss=self.custom_loss)
         inputs = self._create_inputs(paths)
         self.fit(
             inputs,
             payoff,
-            epochs=20,
-            batch_size=5,
+            epochs=epochs,
+            batch_size=batch_size,
             callbacks=callbacks,
             verbose=1,
-            validation_split=0.1,
+            validation_split=0.0,
             validation_freq=5,
         )
         for layer in self.model.layers:
@@ -525,12 +505,11 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         payoff: np.ndarray,
         paths_test: Dict[str, np.ndarray],
         payoff_test,
-        emb: int,
-        emb_port: int,
-        t: int,
         initial_lr=0.0001,
         decay_steps=200,
         decay_rate=0.95,
+        epochs=20,
+        batch_size=5,
     ):
 
         lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
@@ -555,12 +534,12 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
             callbacks=callbacks,
             paths=paths,
             payoff=payoff,
-            emb=emb,
-            emb_port=emb_port,
+            epochs=epochs,
+            batch_size=batch_size,
         )
         y_pred = model.compute_pnl(paths, payoff)
         y_test = model.compute_pnl(paths_test, payoff_test)
-        y_delta = model.compute_delta(paths_test, t=t, emb=emb, emb_port=emb_port)
-        inputs = model._create_inputs(paths_test)
-        y_loss = model.evaluate(inputs, payoff_test)
-        return y_pred, y_test, y_delta, y_loss
+        #y_delta = model.compute_delta(paths_test, t=t)
+        #inputs = model._create_inputs(paths_test)
+        #y_loss = model.evaluate(inputs, payoff_test)
+        return y_pred, y_test #y_delta #y_loss

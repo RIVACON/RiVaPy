@@ -27,9 +27,7 @@ class GBM(FactoryObject):
         """
         self.drift = drift
         self.volatility = volatility
-        self._timegrid = None
-        self.modelname = 'GBM'
-        
+        self._timegrid = None        
 
     def _to_dict(self) -> dict:
         return {'drift': self.drift, 'volatility': self.volatility}
@@ -44,7 +42,7 @@ class GBM(FactoryObject):
         
 
 
-    def simulate(self, timegrid, S0, n_sims: int):
+    def simulate(self, timegrid, S0, n_sims: int, seed: int = 42):
         """ Simulate the GBM Paths
             
             .. math:: 
@@ -63,7 +61,8 @@ class GBM(FactoryObject):
         """
         self._set_params(S0)
         self._set_timegrid(timegrid)
-        rnd =  np.random.normal(0, 1, size=(timegrid.shape[0],n_sims))
+        rng = np.random.default_rng(seed)
+        rnd =  rng.normal(0, 1, size=(timegrid.shape[0],n_sims))
         result = np.empty((timegrid.shape[0],n_sims))
         result[0,:] = S0
         for i in range(1,timegrid.shape[0]):

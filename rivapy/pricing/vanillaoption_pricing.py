@@ -1,5 +1,6 @@
 from typing import List, Dict, Protocol, Tuple
 import os
+import math
 import json
 try:
     import tensorflow as tf
@@ -212,8 +213,11 @@ class VanillaOptionDeepHedgingPricer:
                 verbose: bool=0,
                 tensorboard_logdir: str=None, 
                 initial_lr: float = 1e-4, 
+                final_lr: float = 1e-5,
+                multiplier_lr: float = 2.0,
+                multiplier_batch_size: float = 2,
+                n_increase_batch_size: int = 2,
                 batch_size: int = 100, 
-                decay_rate: float=0.7, 
                 decay_steps: int = 100_000,
                 seed: int = 42,
                 loss: str = 'mean_variance',
@@ -241,8 +245,11 @@ class VanillaOptionDeepHedgingPricer:
             verbose (bool, optional): Verbosity level (0, 1 or 2). Defaults to 0.
             tensorboard_logdir (str, optional): Pah to tensorboard log, if None, no log is written. Defaults to None.
             initial_lr (float, optional): Initial learning rate. Defaults to 1e-4.
+            final_lr (float, optional): Final learning rate. Defaults to 1e-5.
+            multiplier_lr (float, optional): Multiplier for learning rate when increasing batch size. Defaults to 0.1.
+            multiplier_batch_size (int, optional): Multiplier for batch size when increasing batch size. Defaults to 2.
+            n_increase_batch_size (int, optional): Number cycles increasing batch size. Defaults to 2.
             batch_size (int, optional): The batch size. Defaults to 100.
-            decay_rate (float, optional): Decay of learning rate after each epoch. Defaults to 0.7.
             seed (int, optional): Seed that is set to make results reproducible. Defaults to 42.
             loss (str, optional): Either 'mean_variance' or 'exponential_utility'.
             transaction_cost (dict, optional): Proportional transaction cost dependent on instrument. Default is empty dict.
@@ -265,7 +272,7 @@ class VanillaOptionDeepHedgingPricer:
         if (model_list is None) and (data is None):
             raise Exception('Either a list of models or data must be specified.')
         if portfolios is None: #  if no portfolio is given, we assume a single portfolio with weight -1.0
-            portfolios=np.ones((1,len(portfolio_instruments)))
+            portfolios=-1.0*np.ones((1,len(portfolio_instruments)))
         tf.keras.backend.set_floatx('float32')
 
         tf.random.set_seed(seed)
@@ -289,15 +296,20 @@ class VanillaOptionDeepHedgingPricer:
                                         transaction_cost = transaction_cost,
                                         embedding_definitions=embedding_definitions)
         
-
-        lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
-                initial_learning_rate=initial_lr,#1e-3,
-                decay_steps=decay_steps,
-                decay_rate=decay_rate, 
-                staircase=True)
-                
+        total_steps = int(epochs*n_sims/batch_size)
+        decay_rate = (initial_lr - final_lr) / (math.floor(total_steps / decay_steps) * final_lr)
+        logger.info(f'Computed decay_rate: {decay_rate}')
+        
         logger.info("Start training of deep hedging model.")
-        hedge_model.train(data.paths, data.payoff, lr_schedule, epochs=epochs, batch_size=batch_size, tensorboard_log=tensorboard_logdir, verbose=verbose)
+        for i in range(n_increase_batch_size):
+            lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
+                    initial_learning_rate=initial_lr*(multiplier_lr**i),
+                    decay_steps=decay_steps,
+                    decay_rate=decay_rate, 
+                    staircase=True)
+            hedge_model.train(data.paths, data.payoff, lr_schedule, epochs=epochs, batch_size=batch_size*(multiplier_batch_size**i),
+                              tensorboard_log=tensorboard_logdir, verbose=verbose)
+
         logger.info("Training done.")
         results = VanillaOptionDeepHedgingPricer.PricingResults(hedge_model, paths=data.paths, 
                                                                 payoff=data.payoff)

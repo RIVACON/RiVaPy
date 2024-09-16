@@ -16,6 +16,7 @@ from rivapy.models.gbm import GBM
 
 import rivapy.models as models
 import rivapy.models.factory
+import rivapy.instruments.factory
 from rivapy.pricing.vanillaoption_pricing import (
     VanillaOptionDeepHedgingPricer,
     DeepHedgeModelwEmbedding,
@@ -118,9 +119,6 @@ class Repo:
         hash_key = FactoryObject.hash_for_dict(params)
         params["pricing_param"] = kwargs
         params["spec_hash"] = {spec[k].id: spec[k].hash() for k in range(len(spec))}
-        params["model_hash"] = {
-            model[k].modelname: model[k].hash() for k in range(len(model))
-        }
         params["pricing_params_hash"] = FactoryObject.hash_for_dict(kwargs)
         if (hash_key in self.results.keys()) and (not rerun):
             return self.results[hash_key]
@@ -141,20 +139,20 @@ class Repo:
         self.results[hash_key] = params
         with open(self.repo_dir + "/results.json", "w") as f:
             json.dump(self.results, f, cls=_JSONEncoder)
-        pricing_result.hedge_model.save(self.repo_dir + "/" + hash_key + "/")
+        pricing_result.hedge_model.save(self.repo_dir + "/models/" + hash_key + "/")
         if not os.path.exists(self.repo_dir + "/data/"):
              os.mkdir(self.repo_dir + "/data/")
         if not os.path.exists(self.repo_dir + "/data/" + hash_key_data + "/"):
             os.mkdir(self.repo_dir + "/data/" + hash_key_data + "/")
             data.save(self.repo_dir + "/data/" + hash_key_data +"/")
-        return pricing_result
+        return pricing_result, params
 
     def save(self):
         with open(self.repo_dir + "/results.json", "w") as f:
             json.dump(self.results, f, cls=_JSONEncoder)
 
     def get_hedge_model(self, hashkey: str) -> DeepHedgeModelwEmbedding:
-        return DeepHedgeModelwEmbedding.load(self.repo_dir + "/" + hashkey + "/")
+        return DeepHedgeModelwEmbedding.load(self.repo_dir + "/models/" + hashkey + "/")
 
     def get_data(self, hashkey: str) -> DeepHedgingData:
         hash_key_data = self.results[hashkey]['hash_key_data']
@@ -215,7 +213,10 @@ class Repo:
             call_price = model.compute_call_price(1.,model.v0,1.,ttm)
         return call_price
 
-
+    def get_specs(self, hashkey: str) -> List[SpecificationDeepHedging]:
+        res = self.results[hashkey]["spec"]
+        return [rivapy.instruments.factory.create(spec) for spec in res]
+    
     def select(
         self, conditions: List[Tuple[str, Union[str, float, int, Tuple]]]
     ) -> dict:
@@ -240,6 +241,7 @@ class Repo:
             # tmp["x_volatility"] = v["model"]["x_volatility"]
             tmp.update(v["pnl_result"])
             tmp["hash_key_data"] = v["hash_key_data"]
+            tmp['n_models'] = len(v['model'])
             if "tensorboard_logdir" in tmp.keys():
                 del tmp["tensorboard_logdir"]
 
