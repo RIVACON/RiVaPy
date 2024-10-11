@@ -182,6 +182,7 @@ class DayCounterType(_MyEnum):
     ThirtyU360 = '30U360'
     ThirtyE360 = '30E360'
     ACT252 = 'Act252'
+    Thirty360ISDA = '30360ISDA'
 @_unique
 class InflationInterpolation(_MyEnum):
     UNDEFINED = 'UNDEFINED'
@@ -189,7 +190,7 @@ class InflationInterpolation(_MyEnum):
     JAPAN = 'JAPAN'
     CONSTANT = 'CONSTANT'
 
-@_unique
+@_unique 
 class Sector(_MyEnum):
     UNDEFINED = 'UNDEFINED'
     # BASIC_MATERIALS = 'BasicMaterials'
