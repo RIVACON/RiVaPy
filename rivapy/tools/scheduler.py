@@ -8,7 +8,7 @@ from rivapy.tools.datetime_grid import DateTimeGrid
 class SimpleSchedule(interfaces.FactoryObject):
 	def __init__(self, start: dt.datetime, end:dt.datetime, 
 					freq: str='1H', weekdays: Set[int] = None, 
-					hours: Set[int] = None, tz: str=None ):
+					hours: Set[int] = None,  ignore_hours_for_weekdays: Set[int] = None,tz: str=None):
 		"""Simple schedule of fixed datetime points.
 
 		Args:
@@ -19,9 +19,10 @@ class SimpleSchedule(interfaces.FactoryObject):
 											Integers according to datetime weekdays (0->Monay, 1->Tuesday,...,6->Sunday). 
 											If None, all weekdays are used. Defaults to None.
 			hours (Set[int], optional): List of hours where schedule is defined. If None, all hours are included. Defaults to None.
-			tz (str or tzinfo): Time zone name for returning localized datetime points, for example ‘Asia/Hong_Kong’. 
+			ignor_hours_for_weekdays (Set[int], optional): List of days for which the hours setting is ignored and each hour is considered where the schedule is defined. Defaults to None.		
+   			tz (str or tzinfo): Time zone name for returning localized datetime points, for example ‘Asia/Hong_Kong’. 
 								By default, the resulting datetime points are timezone-naive. See documentation for pandas.date_range for further details on tz.
-		Examples:
+  		Examples:
 		
 		.. highlight:: python
 		.. code-block:: python
@@ -44,9 +45,11 @@ class SimpleSchedule(interfaces.FactoryObject):
 		self.end = end
 		self.freq = freq
 		self.weekdays = weekdays
-		self.hours = hours
+		self.hours = hours  		
 		self.tz = tz
 		self._df = None
+		self.ignore_hours_for_weekdays = ignore_hours_for_weekdays
+        	
 
 	def _to_dict(self)->dict:
 		return {
@@ -68,7 +71,10 @@ class SimpleSchedule(interfaces.FactoryObject):
 		if self.weekdays is not None:
 			d_ = [d for d in d_ if d.weekday() in self.weekdays]
 		if self.hours is not None:
-			d_ = [d for d in d_ if d.hour in self.hours]
+			if self.ignore_hours_for_weekdays is not None:
+				d_ = [d for d in d_ if (d.hour in self.hours) or (d.weekday() in self.ignore_hours_for_weekdays)]
+			else:
+				d_ = [d for d in d_ if d.hour in self.hours]
 		if refdate is not None:
 			d_ = [d for d in d_ if d >= refdate]
 		return d_

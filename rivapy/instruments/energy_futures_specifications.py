@@ -14,10 +14,10 @@ class EnergyFutureSpecifications(interfaces.FactoryObject):
         return self.price
     
     def get_start(self):
-        return self.schedule.start
+        return self.schedule.start#get_schedule()[0]
     
     def get_end(self):
-        return self.schedule.end
+        return self.schedule.end#get_schedule()[-1]
     
     def get_start_end(self):
         return (self.get_start(), self.get_end())

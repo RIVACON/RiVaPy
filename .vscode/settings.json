@@ -12,5 +12,6 @@
     "files.exclude": {
         "**/__pycache__": true,
         "docs/build/*": true
-    }
+    },
+    
 }
