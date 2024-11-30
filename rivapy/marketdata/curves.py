@@ -122,7 +122,7 @@ class DiscountCurve:
         if self._pyvacon_obj is None:
             self._pyvacon_obj = _DiscountCurve(self.id, self.refdate, 
                                             [x for x in self.get_dates()], [x for x in self.get_df()], 
-                                            self.daycounter, 
+                                            self.daycounter.value, 
                                             self.interpolation,
                                             self.extrapolation)
         return self._pyvacon_obj
