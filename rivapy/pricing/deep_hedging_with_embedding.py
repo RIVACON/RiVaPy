@@ -75,6 +75,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
                         output_dim=embedding_definitions[v][1],
                         input_length=1,
                         name=v,
+                        embeddings_initializer=tf.keras.initializers.Zeros(),
                     )
             self.model = self._build_model(depth, n_neurons)
         else:
@@ -159,7 +160,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
         self._prev_q = tf.zeros(
             (tf.shape(x_in[0])[0], len(self.hedge_instruments)), name="prev_q"
         )
-        for i in range(self.timegrid.shape[0] - 2):
+        for i in range(self.timegrid.shape[0] - 1):
             t = (
                 [self.timegrid[-1] - self.timegrid[i]]
                 * tf.ones((tf.shape(x_in[0])[0], 1))
@@ -394,7 +395,7 @@ class DeepHedgeModelwEmbedding(tf.keras.Model):
                 logdir, histogram_freq=0
             )
             callbacks.append(tensorboard_callback)
-        self.compile(optimizer=optimizer, loss=self.custom_loss)
+        self.compile(optimizer=optimizer, loss=self.custom_loss)#, run_eagerly=True)
         inputs = self._create_inputs(paths)
         return self.fit(
             inputs,
