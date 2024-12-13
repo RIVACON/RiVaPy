@@ -40,7 +40,8 @@ class DayCounter:
             DayCounterType.ACT360.value: DayCounter.yf_Act360,
             DayCounterType.ThirtyU360.value: DayCounter.yf_30U360,
             DayCounterType.ThirtyE360.value: DayCounter.yf_30E360,
-            DayCounterType.Thirty360ISDA.value: DayCounter.yf_30360ISDA
+            DayCounterType.Thirty360ISDA.value: DayCounter.yf_30360ISDA,
+            DayCounterType.ActActICMA: DayCounter.yf_ActActICMA
         }
 
         if dc in mapping:
@@ -48,6 +49,30 @@ class DayCounter:
         else:
             raise NotImplementedError(f"{dc} not yet implemented.")
 
+    @staticmethod
+    def yf_ActActICMA(d1: _Union[date, datetime], d2: _Union[date, datetime], coupon_period_in_days, coupon_frequency)->float:
+        """This method implements the Act/Act ICMA day count convention which is used for Bonds..
+
+        Args:
+            d1 (_Union[date, datetime]): start date
+            d2 (_Union[date, datetime]): end date
+            coupon_period_in_days (int): The length of the current coupon period in days.
+            coupon_frequency (int): Number of coupon payments per year (e.g., 1 for annual, 2 for semi-annual)
+
+        Returns:
+            float: year fraction
+        """
+        # Actual number of days in the period
+        actual_days = (d2 - d1).days
+        
+        # Length of the year in days based on the coupon frequency and period
+        coupon_year_days = coupon_period_in_days * coupon_frequency
+        
+        # Calculate the day count fraction
+        year_fraction = actual_days / coupon_year_days
+        
+        return year_fraction
+    
     @staticmethod
     def yf_Act365Fixed(d1: _Union[date, datetime], d2: _Union[date, datetime])->float:
         """This method implements the Act/365f day count convention.
@@ -77,8 +102,29 @@ class DayCounter:
         Returns:
             float: year fraction
         """
-        return d2.year - d1.year - ((d1 - datetime(d1.year, 1, 1)).days)/(datetime(d1.year+1, 1, 1) - datetime(d1.year, 1, 1)) + ((d2 - datetime(d2.year, 1, 1)).days)/(datetime(d2.year+1, 1, 1) - datetime(d2.year, 1, 1))
+        if d1 >= d2:
+            raise ValueError("d1 must be before d2")
     
+        # Calculate the fraction for each year the period spans
+        current_date = d1
+        year_fraction = 0.0
+    
+        while current_date < d2:
+            year_end = date(current_date.year, 12, 31)
+            days_in_year = (year_end - date(current_date.year, 1, 1)).days + 1  # Actual days in the year
+    
+            # If the period ends within the same year
+            if d2.year == current_date.year:
+                year_fraction += (d2 - current_date).days / days_in_year
+                break
+    
+            # Add the fraction for the remaining days in the current year
+            year_fraction += (year_end - current_date).days / days_in_year
+            # Move to the start of the next year
+            current_date = date(current_date.year + 1, 1, 1)
+    
+        return year_fraction
+       
     
     @staticmethod
     def yf_Act360(d1: _Union[date, datetime], d2: _Union[date, datetime])->float:

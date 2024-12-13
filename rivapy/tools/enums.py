@@ -167,13 +167,6 @@ class RollConvention(_MyEnum):
     NEAREST = 'Nearest'
     UNADJUSTED = 'Unadjusted'
 
-# class RollConvention:
-#     FOLLOWING = 'Following'
-#     MODIFIED_FOLLOWING = 'ModifiedFollowing'
-#     MODIFIED_FOLLOWING_EOM = 'ModifiedFollowingEOM'
-#     PRECEDING = 'Preceding'
-#     MODIFIED_PRECEDING = 'ModifiedPreceding'
-#     UNADJUSTED = 'Unadjusted'
 @_unique
 class DayCounterType(_MyEnum):
     ACT_ACT = 'ActAct'
@@ -183,6 +176,8 @@ class DayCounterType(_MyEnum):
     ThirtyE360 = '30E360'
     ACT252 = 'Act252'
     Thirty360ISDA = '30360ISDA'
+    ActActICMA = 'ActActICMA'
+    
 @_unique
 class InflationInterpolation(_MyEnum):
     UNDEFINED = 'UNDEFINED'
