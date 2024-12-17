@@ -90,10 +90,10 @@ class DayCounter:
 
     @staticmethod
     def yf_ActAct(d1: _Union[date, datetime], d2: _Union[date, datetime])->float:
-        """This method implements the Act/Act day count convention.
+        """This method implements the Act/Act ISDA day count convention.
         The acutal number of days between d2 and d1 is divded by the acutal number of days in the respective year.
         In cases where d2 and d1 are located in different years, the period is split into sub periods and the year fraction is calculated on each sub period with its respective
-        number of days in that year. This is especially important if d1 is located in a regular year and d2 is located in a lap year.
+        number of days in that year. This is especially important if d1 is located in a regular year and d2 is located in a leap year.
 
         Args:
             d1 (_Union[date, datetime]): start date
@@ -119,7 +119,7 @@ class DayCounter:
                 break
     
             # Add the fraction for the remaining days in the current year
-            year_fraction += (year_end - current_date).days / days_in_year
+            year_fraction += ((year_end - current_date).days + 1) / days_in_year
             # Move to the start of the next year
             current_date = date(current_date.year + 1, 1, 1)
     
@@ -1188,7 +1188,7 @@ def modified_following(day: _Union[date, datetime],
               the day is not already a business day. Otherwise the (unadjusted) day is returned.
     """
     next_day = next_or_previous_business_day(day, calendar, True)
-    if next_day.month > day.month:
+    if next_day.month != day.month:
         return preceding(day, calendar)
     else:
         return next_day
@@ -1240,7 +1240,7 @@ def modified_following_bimonthly(day: _Union[date, datetime],
               calendar if the day is not already a business day. Otherwise the (unadjusted) day is returned.
     """
     next_day = next_or_previous_business_day(day, calendar, True)
-    if (next_day.month > day.month) | ((next_day.day > 15) & (day.day <= 15)):
+    if (next_day.month != day.month) | ((next_day.day > 15) & (day.day <= 15)):
         return preceding(day, calendar)
     else:
         return next_day
@@ -1263,7 +1263,7 @@ def modified_preceding(day: _Union[date, datetime],
               the day is not already a business day. Otherwise the (unadjusted) day is returned.
     """
     prev_day = next_or_previous_business_day(day, calendar, False)
-    if prev_day.month < day.month:
+    if prev_day.month != day.month:
         return following(day, calendar)
     else:
         return prev_day
