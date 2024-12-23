@@ -18,7 +18,7 @@ import datetime as dt
 from rivapy.pricing._logger import logger
 from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.pricing.deep_hedging_with_embedding import DeepHedgeModelwEmbedding
-from rivapy.tools.interfaces import FactoryObject
+from rivapy.tools.interfaces import FactoryObject, ModelDeepHedging
 
 class SpecificationDeepHedging(Protocol):
     """Class to define the interfaces for the specification of a portfolio for deep hedging.
@@ -38,6 +38,7 @@ class SpecificationDeepHedging(Protocol):
     expiry: dt.datetime|dt.date
 
     id: str
+
 
 
 class DeepHedgingData:
@@ -146,7 +147,7 @@ class VanillaOptionDeepHedgingPricer:
         hedge_ins = {}
         additional_states_ = {}
         logger.debug('Compute payoff and portfolio embeddings.')
-        if len(model_list)>1:
+        if len(model_list)>0: #TODO set back to 1
             additional_states_["emb_model"] = emb_vec
         port_vec = None
         if portfolios.shape[0]>1: # if more then one portfolio is given, apply embedding of portfolios
@@ -204,7 +205,7 @@ class VanillaOptionDeepHedgingPricer:
     def price(val_date: dt.datetime,
                 portfolios: np.ndarray|None,#EuropeanVanillaSpecification,
                 portfolio_instruments: List[SpecificationDeepHedging],
-                model_list: list|None, #HestonForDeepHedging,
+                model_list: List[ModelDeepHedging]|None, #HestonForDeepHedging,
                 depth: int, 
                 nb_neurons: int, 
                 n_sims: int, 
@@ -297,7 +298,10 @@ class VanillaOptionDeepHedgingPricer:
                                         embedding_definitions=embedding_definitions)
         
         total_steps = int(epochs*n_sims/batch_size)
-        decay_rate = (initial_lr - final_lr) / (math.floor(total_steps / decay_steps) * final_lr)
+        if (math.floor(total_steps / decay_steps) == 0) and (abs(initial_lr - final_lr) < 1e-10):
+            decay_rate=0.0
+        else:
+            decay_rate = (initial_lr - final_lr) / (math.floor(total_steps / decay_steps) * final_lr)
         logger.info(f'Computed decay_rate: {decay_rate}')
         
         logger.info("Start training of deep hedging model.")
