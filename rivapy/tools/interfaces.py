@@ -1,6 +1,6 @@
 
 import abc
-from typing import List, Tuple
+from typing import List, Tuple, Protocol
 import datetime as dt
 import numpy as np
 import json
@@ -72,3 +72,19 @@ class HasExpectedCashflows(abc.ABC):
     @abc.abstractmethod
     def expected_cashflows(self)->List[Tuple[dt.datetime, float]]:
         pass
+
+class ModelDeepHedging(Protocol):
+    """Class to define the interfaces for the model used in deep hedging.
+    """
+    def simulate(self, timegrid: np.ndarray, S0: float, n_sims: int)->np.ndarray:
+        """Simulate the model.
+
+        Args:
+            timegrid (np.ndarray): Timegrid used for simulation.
+            S0 (float): Initial value of the model.
+            n_sims (int): Number of simulations.
+
+        Returns:
+            np.ndarray: The simulated paths.
+        """
+        ...

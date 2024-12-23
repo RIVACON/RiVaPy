@@ -23,7 +23,6 @@ class BNS(FactoryObject):
         self.a = a
         self.k = self.a*self.rho/(self.b - self.rho)
         self._timegrid = None
-        self.modelname = 'BNS'
         self.v0 = v0
 
     def _to_dict(self) -> dict:
@@ -34,33 +33,32 @@ class BNS(FactoryObject):
         self._delta_t = self._timegrid[1]-self._timegrid[0]
         self._sqrt_delta_t = np.sqrt(self._delta_t)
 
-    def _set_params(self,S0,v0,M,n):
-        self.S0 = S0
-        self.v0 = v0
-        self.n_sims = M 
-        self.n = n #length of timegrid
+    
 
-
-    def simulate(self, timegrid, S0, v0, M,n):
+    def simulate(self, timegrid: np.ndarray, S0:float|np.ndarray, n_sims: int):
         """ Simulate the BNS Model paths
+        Args:
+            timegrid (np.ndarray): One dimensional array containing the time points where the process will be simulated (containing 0.0 as the first timepoint).
+            S0 (Union[float, np.ndarray]): Either a float or an array (for each path) with the start value of the simulation.
+            n_sims (int): Number of simulations.
         """
-        self._set_params(S0,v0,M,n)
+        
         self._set_timegrid(timegrid)
 
-        S = np.zeros((self._timegrid.shape[0], M))
-        V =  np.zeros((self._timegrid.shape[0], M))
+        S = np.zeros((self._timegrid.shape[0], n_sims))
+        V =  np.zeros((self._timegrid.shape[0], n_sims))
         S[0, :] = np.log(S0)
-        V[0, :] = v0
+        V[0, :] = self.v0
         
         # Generate correlated Brownian motions
-        z1 = np.random.normal(size=(self._timegrid.shape[0], M))
+        z1 = np.random.normal(size=(self._timegrid.shape[0], n_sims))
 
         # Generate stock price and volatility paths
         for t in range(1, self._timegrid.shape[0] ):
             # Calculate volatility
             vol = np.sqrt(V[t - 1, :])
 
-            P = ss.poisson.rvs(self.a * self.lmbda*self._delta_t,size=M)
+            P = ss.poisson.rvs(self.a * self.lmbda*self._delta_t,size=n_sims)
             jumps = np.asarray([np.sum(np.random.exponential(1./self.b, size=int(i))) for i in P])
 
             # Update the stock price and volatility

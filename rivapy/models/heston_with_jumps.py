@@ -2,9 +2,9 @@ from typing import Union, Callable
 import numpy as np
 import scipy
 import scipy.stats as ss
-from rivapy.tools.interfaces import FactoryObject
+from rivapy.tools.interfaces import FactoryObject, ModelDeepHedging
 
-class HestonWithJumps(FactoryObject):
+class HestonWithJumps(FactoryObject, ModelDeepHedging):
 
     def _eval_grid(f, timegrid):
         try:
@@ -39,36 +39,27 @@ class HestonWithJumps(FactoryObject):
         self._delta_t = self._timegrid[1]-self._timegrid[0]
         self._sqrt_delta_t = np.sqrt(self._delta_t)
 
-    def _set_params(self,S0,v0,M,n):
-        self.S0 = S0
-        self.v0 = v0
-        self.n_sims = M 
-        self.n = n #length of timegrid
 
-
-    def simulate(self, timegrid, S0, v0, M,n,model_name):
+    def simulate(self, timegrid, S0, n_sims: int):
         """ Simulate the Heston Model Paths
         
         
         Args:
             timegrid (np.ndarray): One dimensional array containing the time points where the process will be simulated (containing 0.0 as the first timepoint).
             S0 (Union[float, np.ndarray]): Either a float or an array (for each path) with the start value of the simulation.
-            v0 (Union[float, np.ndarray]): Either a float or an array (for each path) with the start value of the simulation.
-            M = number of simulations
-            n = number of timesteps
+            n_sims (int): Number of simulations.
         Returns:
             np.ndarray: Array r containing the simulations where r[:,i] is the path of the i-th simulation (r.shape[0] equals number of timepoints, r.shape[1] the number of simulations). 
         """
-        self._set_params(S0,v0,M,n)
         self._set_timegrid(timegrid)
-        S = np.zeros((self._timegrid.shape[0], M))
-        V =  np.zeros((self._timegrid.shape[0], M))
+        S = np.zeros((self._timegrid.shape[0], n_sims))
+        V =  np.zeros((self._timegrid.shape[0], n_sims))
         S[0, :] = S0
-        V[0, :] = v0
+        V[0, :] = self.v0
         
         # Generate correlated Brownian motions
-        z1 = np.random.normal(size=(self._timegrid.shape[0], M))
-        z2 = self.correlation_rho * z1 + np.sqrt(1 - self.correlation_rho ** 2) * np.random.normal(size=(self._timegrid.shape[0], M))
+        z1 = np.random.normal(size=(self._timegrid.shape[0], n_sims))
+        z2 = self.correlation_rho * z1 + np.sqrt(1 - self.correlation_rho ** 2) * np.random.normal(size=(self._timegrid.shape[0], n_sims))
 
     
         # Generate stock price and volatility paths
@@ -76,7 +67,7 @@ class HestonWithJumps(FactoryObject):
             # Calculate volatility
             vol = np.sqrt(V[t - 1, :])
 
-            P = ss.poisson.rvs(self.lmbda * self._delta_t,size=M)
+            P = ss.poisson.rvs(self.lmbda * self._delta_t,size=n_sims)
             jumps = np.asarray([np.sum(np.exp(ss.norm.rvs(np.log(self.muj+1.)-0.5*self.sigmaj*self.sigmaj, self.sigmaj,i)) -1.) for i in P])
 
             # Update the stock price and volatility
