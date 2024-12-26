@@ -38,17 +38,16 @@ class HestonForDeepHedging(FactoryObject, ModelDeepHedging):
         self.v0 = v0
 
     def _to_dict(self) -> dict:
-        return {'rate_of_mean_reversion': self.rate_of_mean_reversion, 'long_run_average': self.long_run_average,
-                'vol_of_vol':self.vol_of_vol , 'correlation_rho': self.correlation_rho}
+        return {'rate_of_mean_reversion': self.rate_of_mean_reversion, 
+                'long_run_average': self.long_run_average,
+                'vol_of_vol':self.vol_of_vol , 
+                'correlation_rho': self.correlation_rho,
+                'v0': self.v0}
 
     def _set_timegrid(self, timegrid):
         self._timegrid = np.copy(timegrid)
         self._delta_t = self._timegrid[1]-self._timegrid[0]
         self._sqrt_delta_t = np.sqrt(self._delta_t)
-
-    
-        
-
 
     def simulate(self, timegrid, S0, n_sims: int):
         """ Simulate the Heston Model Paths
@@ -97,8 +96,6 @@ class HestonForDeepHedging(FactoryObject, ModelDeepHedging):
 
         return S
         
-
-
     def _characteristic_func(self, xi, s0, v0, tau):
         """Characteristic function needed internally to compute call prices with analytic formula.
 		"""
@@ -113,8 +110,7 @@ class HestonForDeepHedging(FactoryObject, ModelDeepHedging):
 			(1 - ee) / (1 - g * ee)
 		)
         return np.exp(C + D*v0 + ixi * np.log(s0))
-    
-	    
+      
     def compute_call_price(self, s0: float, v0: float, K: Union[np.ndarray, float], ttm: Union[np.ndarray, float])->Union[np.ndarray, float]:
         """Computes a call price for the Heston model via integration over characteristic function.
 		Args:
