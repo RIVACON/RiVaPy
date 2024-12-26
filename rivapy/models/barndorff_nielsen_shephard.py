@@ -26,14 +26,12 @@ class BNS(FactoryObject):
         self.v0 = v0
 
     def _to_dict(self) -> dict:
-        return {'rho': self.rho, 'lmbda':self.lmbda,'b':self.b,'a':self.a}
+        return {'rho': self.rho, 'lmbda':self.lmbda,'b':self.b,'a':self.a, 'v0': self.v0}
 
     def _set_timegrid(self, timegrid):
         self._timegrid = np.copy(timegrid)
         self._delta_t = self._timegrid[1]-self._timegrid[0]
         self._sqrt_delta_t = np.sqrt(self._delta_t)
-
-    
 
     def simulate(self, timegrid: np.ndarray, S0:float|np.ndarray, n_sims: int):
         """ Simulate the BNS Model paths
@@ -67,8 +65,6 @@ class BNS(FactoryObject):
                 0.0,V[t - 1, :] - self.lmbda*V[t - 1, :]*self._delta_t + jumps)
         return np.exp(S)
         
-
-
     def _characteristic_func(self, xi, s0, v0, tau):
             """Characteristic function needed internally to compute call prices with analytic formula.
             """
