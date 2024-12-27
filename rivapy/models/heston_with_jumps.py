@@ -45,7 +45,6 @@ class HestonWithJumps(FactoryObject, ModelDeepHedging):
         self._delta_t = self._timegrid[1]-self._timegrid[0]
         self._sqrt_delta_t = np.sqrt(self._delta_t)
 
-
     def simulate(self, timegrid, S0, n_sims: int):
         """ Simulate the Heston Model Paths
         
@@ -84,8 +83,6 @@ class HestonWithJumps(FactoryObject, ModelDeepHedging):
             )
         return S
         
-
-
     def _characteristic_func(self, xi, s0, v0, tau):
         """Characteristic function needed internally to compute call prices with analytic formula.
 		"""
@@ -102,7 +99,6 @@ class HestonWithJumps(FactoryObject, ModelDeepHedging):
         E = -self.lmbda*self.muj*ixi*tau + self.lmbda*tau*((1.+self.muj)**ixi * np.exp(self.sigmaj*0.5*ixi*(ixi-1.))-1.)
         return np.exp(E + C + D*v0 + ixi * np.log(s0))
     
-	    
     def compute_call_price(self, s0: float, v0: float, K: Union[np.ndarray, float], ttm: Union[np.ndarray, float])->Union[np.ndarray, float]:
         """Computes a call price for the Heston model via integration over characteristic function.
 		Args:
