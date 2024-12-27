@@ -50,7 +50,7 @@ class HestonForDeepHedging(FactoryObject, ModelDeepHedging, OptionCalibratableMo
         self._delta_t = self._timegrid[1]-self._timegrid[0]
         self._sqrt_delta_t = np.sqrt(self._delta_t)
 
-    def simulate(self, timegrid, S0, n_sims: int):
+    def simulate(self, timegrid, S0, n_sims: int, seed: int|None =None) -> np.ndarray:
         """ Simulate the Heston Model Paths
         
         
@@ -62,7 +62,7 @@ class HestonForDeepHedging(FactoryObject, ModelDeepHedging, OptionCalibratableMo
         Returns:
             np.ndarray: Array r containing the simulations where r[:,i] is the path of the i-th simulation (r.shape[0] equals number of timepoints, r.shape[1] the number of simulations). 
         """
-        
+        rng = np.random.default_rng(seed)
         self._set_timegrid(timegrid)
         S = np.zeros((self._timegrid.shape[0], n_sims))
         V =  np.zeros((self._timegrid.shape[0], n_sims))
@@ -72,14 +72,13 @@ class HestonForDeepHedging(FactoryObject, ModelDeepHedging, OptionCalibratableMo
         V[0, :] = self.v0
         
         # Generate correlated Brownian motions
-        z1 = np.random.normal(size=(self._timegrid.shape[0], n_sims))
+        z1 = rng.normal(size=(self._timegrid.shape[0], n_sims))
         z2 = self.correlation_rho * z1 + np.sqrt(1 - self.correlation_rho ** 2) * np.random.normal(size=(self._timegrid.shape[0], n_sims))
 
         # Generate stock price and volatility paths
         for t in range(1, self._timegrid.shape[0]):
             # Calculate volatility
             vol = np.sqrt(V[t - 1, :])
-
 
             # Calculate S_k^1 and S_k^2 as in Deep Hedging by Bühler et al. 2019 Section 5.2:
             X[t-1,:,0] = S[t-1,:]
@@ -94,7 +93,6 @@ class HestonForDeepHedging(FactoryObject, ModelDeepHedging, OptionCalibratableMo
                 0.0, V[t - 1, :] + self.rate_of_mean_reversion * (self.long_run_average - V[t - 1, :]) * self._delta_t 
                 + self.vol_of_vol * np.sqrt(V[t - 1, :]) * np.sqrt(self._delta_t) * z2[t - 1, :]
             )
-
         return S
         
     def _characteristic_func(self, xi, s0, v0, tau):
@@ -136,9 +134,9 @@ class HestonForDeepHedging(FactoryObject, ModelDeepHedging, OptionCalibratableMo
         if ttm < 1e-3:
             res = (s0-K > 0) * (s0-K)
         else:
-            "Simplified form, with only one integration. "
+            #Simplified form, with only one integration.
             h = lambda xi: s0 * integ_func(xi, s0, self.v0, K, ttm, 1) - K * integ_func(xi, s0, self.v0, K, ttm, 2)
-            res = 0.5 * (s0 - K) + 1/scipy.pi * scipy.integrate.quad_vec(h, 0, 500.)[0]  #vorher 500
+            res = 0.5 * (s0 - K) + 1.0/scipy.constants.pi * scipy.integrate.quad_vec(h, 0, 500.)[0]  #vorher 500
         return res
 
     def get_parameters(self) -> np.ndarray:
@@ -156,6 +154,6 @@ class HestonForDeepHedging(FactoryObject, ModelDeepHedging, OptionCalibratableMo
                                     x[0],
                                     x[4] ] )
         lb = np.array( [ 0.,-1.,0.01] )
-        ub = np.array( [ np.inf,1.,1.] )
+        ub = np.array( [ np.inf,1.,3.] )
         return lb, constraint, ub
     
