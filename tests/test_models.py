@@ -114,6 +114,26 @@ class HestonModelTest(unittest.TestCase):
 		for i in range(strikes.shape[0]):
 			cp_mc = np.mean(np.maximum(simulated_values[:,0]-strikes[i], 0.0))
 			self.assertAlmostEqual(cp_anayltic[i], cp_mc, delta=1e-3)
+
+	def test_callprice_formula_DH(self):
+		"""Test analytic call price formula by comparing with MC simulated values. Same as test above but for HestonForDeepHedging model
+		"""
+		heston = models.HestonForDeepHedging(long_run_average=0.3**2, 
+                             rate_of_mean_reversion=0.5 , 
+                             vol_of_vol=0.2, 
+                             v0=0.1**2, 
+                             correlation_rho = -0.9)
+
+		n_sims = 40_000
+		np.random.seed(42)
+		strikes = np.array([0.9,1.0,1.1])
+		timegrid = np.linspace(0.0,1.0,365)
+		simulated_values = heston.simulate(timegrid, 1.0, n_sims, seed=42)
+		
+		for i in range(strikes.shape[0]):
+			cp_mc = np.mean(np.maximum(simulated_values[-1,:]-strikes[i], 0.0))
+			cp_analytic = heston.compute_call_price(1.0, K = strikes[i], ttm = 1.0)
+			self.assertAlmostEqual(cp_analytic, cp_mc, delta=1e-3)
 		
 class HestonLocalVolModelTest(unittest.TestCase):
 	@staticmethod
