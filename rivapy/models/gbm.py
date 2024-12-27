@@ -2,8 +2,9 @@ from typing import Union, Callable
 import numpy as np
 import scipy
 from rivapy.tools.interfaces import FactoryObject
+from rivapy.models.calibration import OptionCalibratableModel
 
-class GBM(FactoryObject):
+class GBM(FactoryObject, OptionCalibratableModel):
 
     def _eval_grid(f, timegrid):
         try:
@@ -77,7 +78,7 @@ class GBM(FactoryObject):
         return delta_BS
 
 
-    def compute_call_price(self, S0: Union[float, np.ndarray], v0: Union[float, np.ndarray], K:Union[float, np.ndarray], ttm: float):
+    def compute_call_price(self, S0: Union[float, np.ndarray], K:Union[float, np.ndarray], ttm: float):
         """Computes the price of a call option with strike K and time to maturity ttm for a spot following the GBM.
             -> Black Scholes closed formula.
 
@@ -86,5 +87,21 @@ class GBM(FactoryObject):
             return np.maximum(S0 - K, 0.0)
         d1 = (np.log(S0 / K) + (self.drift + self.volatility*self.volatility*0.5) * ttm) / (self.volatility * np.sqrt(ttm))
         d2 = (np.log(S0 / K) + (self.drift - self.volatility*self.volatility*0.5) * ttm) / (self.volatility * np.sqrt(ttm))
-
         return S0 * scipy.stats.norm.cdf(d1) - K * np.exp(-self.drift*ttm)*scipy.stats.norm.cdf(d2)
+    
+    
+    def get_parameters(self) -> np.ndarray:
+        """Interface method to get the parameters of the model for model calibration (see OptionCalibratableModel).
+
+        Returns:
+            np.ndarray: Vector containing the impilied vol.
+        """
+        return np.array([self.volatility])
+    
+    def set_parameters(self, params: np.ndarray) -> None:
+        """Interface method to set the parameters of the model for model calibration (see OptionCalibratableModel).
+
+        Args:
+            params (np.ndarray): Vector containing the impilied vol.
+        """
+        self.volatility = params[0]
