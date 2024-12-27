@@ -13,10 +13,11 @@ import numpy as np
 from rivapy.models.residual_demand_fwd_model import MultiRegionWindForecastModel, WindPowerForecastModel, OrnsteinUhlenbeck, ResidualDemandForwardModel
 from rivapy.models.residual_demand_model import SmoothstepSupplyCurve
 from rivapy.instruments.ppa_specification import GreenPPASpecification
-from rivapy.pricing.green_ppa_pricing import GreenPPADeepHedgingPricer, DeepHedgeModel
-from rivapy.tools.datetime_grid import DateTimeGrid
-from rivapy.pricing.vanillaoption_pricing import VanillaOptionDeepHedgingPricer
 from rivapy.models.gbm import GBM
+if tf_installed:
+    from rivapy.pricing.green_ppa_pricing import GreenPPADeepHedgingPricer, DeepHedgeModel
+    from rivapy.tools.datetime_grid import DateTimeGrid
+    from rivapy.pricing.vanillaoption_pricing import VanillaOptionDeepHedgingPricer
 
 
 class SpecificationDeepHedgingInterfaceTest(unittest.TestCase):
