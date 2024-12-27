@@ -17,8 +17,8 @@ ttm=[]
 vol = 0.3
 prices = []
 
-for j in range(len(x_strikes)):
-    for i in range(len(ttm)):
+for j in range(len(x_strikes_)):
+    for i in range(len(ttm_)):
         x_strikes.append(x_strikes_[j])
         ttm.append(ttm_[i])
         model = GBM(0.,vol)
