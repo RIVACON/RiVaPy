@@ -31,8 +31,14 @@ class HestonWithJumps(FactoryObject, ModelDeepHedging):
         self.v0 = v0
 
     def _to_dict(self) -> dict:
-        return {'rate_of_mean_reversion': self.rate_of_mean_reversion, 'long_run_average': self.long_run_average,
-                'vol_of_vol':self.vol_of_vol , 'correlation_rho': self.correlation_rho,'muj':self.muj,'sigmaj':self.sigmaj,'lmbda':self.lmbda}
+        return {'rate_of_mean_reversion': self.rate_of_mean_reversion, 
+                'long_run_average': self.long_run_average,
+                'vol_of_vol':self.vol_of_vol , 
+                'correlation_rho': self.correlation_rho,
+                'muj':self.muj,
+                'sigmaj':self.sigmaj,
+                'lmbda':self.lmbda,
+                'v0': self.v0}
 
     def _set_timegrid(self, timegrid):
         self._timegrid = np.copy(timegrid)
