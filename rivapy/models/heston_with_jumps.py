@@ -1,10 +1,12 @@
-from typing import Union, Callable
+from typing import Union, Callable, Tuple
 import numpy as np
 import scipy
 import scipy.stats as ss
 from rivapy.tools.interfaces import FactoryObject, ModelDeepHedging
+from rivapy.models.calibration import OptionCalibratableModel
 
-class HestonWithJumps(FactoryObject, ModelDeepHedging):
+
+class HestonWithJumps(FactoryObject, ModelDeepHedging, OptionCalibratableModel):
 
     def _eval_grid(f, timegrid):
         try:
@@ -99,7 +101,7 @@ class HestonWithJumps(FactoryObject, ModelDeepHedging):
         E = -self.lmbda*self.muj*ixi*tau + self.lmbda*tau*((1.+self.muj)**ixi * np.exp(self.sigmaj*0.5*ixi*(ixi-1.))-1.)
         return np.exp(E + C + D*v0 + ixi * np.log(s0))
     
-    def compute_call_price(self, s0: float, v0: float, K: Union[np.ndarray, float], ttm: Union[np.ndarray, float])->Union[np.ndarray, float]:
+    def compute_call_price(self, s0: float, K: Union[np.ndarray, float], ttm: Union[np.ndarray, float])->Union[np.ndarray, float]:
         """Computes a call price for the Heston model via integration over characteristic function.
 		Args:
 			s0 (float): current spot
@@ -112,7 +114,7 @@ class HestonWithJumps(FactoryObject, ModelDeepHedging):
             for i in range(ttm.shape[0]):
 				#for j in range(K.shape[0]):
 					#result[i,j] = self.call_price(s0,v0,K[j], tau[i])
-                result[i,:] = self.compute_call_price(s0,v0,K, ttm[i])
+                result[i,:] = self.compute_call_price(s0,self.v0,K, ttm[i])
             return result
 
         def integ_func(xi, s0, v0, K, tau, num):
@@ -125,12 +127,37 @@ class HestonWithJumps(FactoryObject, ModelDeepHedging):
         if ttm < 1e-3:
             res = (s0-K > 0) * (s0-K)
         else:
-            "Simplified form, with only one integration. "
-            h = lambda xi: s0 * integ_func(xi, s0, v0, K, ttm, 1) - K * integ_func(xi, s0, v0, K, ttm, 2)
-            res = 0.5 * (s0 - K) + 1/scipy.pi * scipy.integrate.quad_vec(h, 0, 500.)[0]  #vorher 500
+            #"Simplified form, with only one integration. "
+            h = lambda xi: s0 * integ_func(xi, s0, self.v0, K, ttm, 1) - K * integ_func(xi, s0, self.v0, K, ttm, 2)
+            res = 0.5 * (s0 - K) + 1/scipy.constants.pi * scipy.integrate.quad_vec(h, 0, 500.)[0]  #vorher 500
         return res
 
-  
+    def get_parameters(self) -> np.ndarray:
+        return np.array([self.correlation_rho, self.vol_of_vol, 
+                         self.long_run_average, self.rate_of_mean_reversion, 
+                         self.v0, self.muj, self.sigmaj, self.lmbda])
+    
+    def set_parameters(self, params: np.ndarray) -> None:
+        self.correlation_rho = params[0]
+        self.vol_of_vol = params[1]
+        self.long_run_average = params[2]
+        self.rate_of_mean_reversion = params[3]
+        self.v0 = params[4]
+        self.muj = params[5]
+        self.sigmaj = params[6]
+        self.lmbda = params[7]
+
+    def get_nonlinear_constraints(self) -> Tuple[Callable, np.ndarray, np.ndarray|None]:
+        constr_func = lambda x: np.array( [ 2*x[3] * x[2] - x[1]**2 - 1e-6,
+                                    x[0],
+                                    x[4],
+                                    x[5],x[6], x[7] ] )
+
+        lb = np.array( [ 0.,-1.,0.01,0.01,0.01,0.01] )
+        ub = np.array( [ np.inf,1.,2.,8.,10.,10.] )
+        return lb, constr_func, ub
+
+    
 
 
 
