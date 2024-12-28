@@ -13,10 +13,11 @@ class OptionCalibratableModel(Protocol):
     @abc.abstractmethod
     def set_parameters(self, params: np.ndarray) -> None:
         ...
+    
     def get_bounds(self) -> Tuple[np.ndarray, np.ndarray]|None :
         return None
     
-    def get_nonlinear_constraints(self) -> Tuple[Callable, np.ndarray, np.ndarray|None]:
+    def get_nonlinear_constraints(self) -> Tuple[np.ndarray, Callable, np.ndarray]|None:
         return None
     
 
