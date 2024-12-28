@@ -40,23 +40,52 @@ calib_data = pyvacon.finance.calibration.BaseCalibrationData.load(data_dir+data[
 fwd = calib_data.fwdCurve
 dsc = calib_data.dsc
 qt = calib_data.quoteTable
-cal_date = calib_data.calDate
-qt_df = qt.getDataFrame()
+cal_date = pyvacon.converter.create_datetime(calib_data.calDate)
 
-qt_df_selected = qt_df[(qt_df['BID_IV']>0.0) & (qt_df['ASK_IV']>0.0) & (qt_df['IS_CALL']==1)]
-x_strikes = qt_df_selected['STRIKE'].values.copy()
-expiries =  qt_df_selected['EXPIRY'].values.copy()
-x_prices = qt_df_selected['BID'].values.copy()
-ttm = np.empty(x_strikes.shape[0])
+if False:
+    qt_df = qt.getDataFrame()
+    qt_df_selected = qt_df[(qt_df['BID_IV']>0.0) & (qt_df['ASK_IV']>0.0) & (qt_df['IS_CALL']==1)]
+    x_strikes = qt_df_selected['STRIKE'].values.copy()
+    expiries =  qt_df_selected['EXPIRY'].values.copy()
+    x_prices = qt_df_selected['BID'].values.copy()
+    ttm = np.empty(x_strikes.shape[0])
+    dc = pyvacon.finance.definition.DayCounter('Act365Fixed')
+    for i in range(x_strikes.shape[0]):
+        ttm[i] = dc.yf( cal_date, expiries[i])
+        x_strike, x_price = transform_to_X_price_and_strike(cal_date, expiries[i], fwd, dsc, x_prices[i], x_strikes[i])
+        x_strikes[i] = x_strike
+        x_prices[i] = x_price
+
+expiries_ = [cal_date + dt.timedelta(days=days) for days in [30, 180, 365]]
+x_strikes_ = np.array([[0.9, 1.0, 1.1],
+                      [0.8,1.0,1.2],
+                      [0.8,1.0,1.2]])
+x_prices = []
+ttm = []
+x_strikes = []
 dc = pyvacon.finance.definition.DayCounter('Act365Fixed')
-for i in range(x_strikes.shape[0]):
-    ttm[i] = dc.yf( cal_date, expiries[i])
-    x_strike, x_price = transform_to_X_price_and_strike(cal_date, expiries[i], fwd, dsc, x_prices[i], x_strikes[i])
-    x_strikes[i] = x_strike
-    x_prices[i] = x_price
+for i in range(len(expiries_)):
+    ttm_ = dc.yf(cal_date, expiries_[i])
+    for j in range(len(x_strikes_[i])):
+        ttm.append(ttm_)
+        x_strikes.append(x_strikes_[i][j])
+        vol = calib_data.startVol.calcImpliedVol(cal_date, expiries_[i], x_strikes_[i][j])
+        x_prices.append(pyvacon.finance.utils.calcEuropeanCallPrice(x_strikes_[i][j],ttm_,1.0,1.0,vol))
+        
+calibrated_models = []
+models = [
+    HestonForDeepHedging(rate_of_mean_reversion=0.6,long_run_average=0.2*0.2,
+                             vol_of_vol=1.1, correlation_rho=-0.7,v0=0.2*0.2),
+    HestonWithJumps(rate_of_mean_reversion=0.6,long_run_average=0.2*0.2,
+                        vol_of_vol=1.1,correlation_rho=-0.7,
+                        muj = 0.1, sigmaj=0.1, lmbda=0.1,v0 = 0.2*0.2),
+]
+for m in models:
+    result = calibrate(m, x_prices, ttm, x_strikes)
+    if not result.success:
+        print('Calibration of model not successful!')
+    calibrated_models.append(m.to_dict())
 
-model = HestonForDeepHedging(rate_of_mean_reversion=0.6,long_run_average=0.2*0.2,vol_of_vol=1.1, correlation_rho=-0.7,v0=0.2*0.2)
-result = calibrate(model, x_prices, ttm, x_strikes)
 #model_call_prices = model.compute_call_price(1.0, x_strikes, ttm)
-print(result)
-print(model._to_dict())
+
+print(calibrated_models)
