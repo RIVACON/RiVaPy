@@ -149,7 +149,7 @@ class HestonForDeepHedging(FactoryObject, ModelDeepHedging, OptionCalibratableMo
         self.rate_of_mean_reversion = params[3]
         self.v0 = params[4]
 
-    def get_nonlinear_constraints(self) -> Tuple[np.ndarray, Callable, np.ndarray|None]:
+    def get_nonlinear_constraints(self) -> Tuple[np.ndarray, Callable, np.ndarray]|None:
         constraint = lambda x: np.array( [ 2*x[3] * x[2] - x[1]**2 - 1e-6,
                                     x[0],
                                     x[4] ] )
