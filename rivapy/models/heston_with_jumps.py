@@ -6,6 +6,21 @@ from rivapy.tools.interfaces import FactoryObject, ModelDeepHedging, OptionCalib
 
 class HestonWithJumps(FactoryObject, ModelDeepHedging, OptionCalibratableModel):
 
+    @staticmethod
+    def get_default_model():
+        sigma_1 = 0.0576
+        kappa = 0.4963
+        eta = 0.0650
+        theta = 0.2286
+        rho = -0.99
+        muj = 0.1791
+        sigmaj = 0.1346
+        lambda_ = 0.1382
+        return HestonWithJumps(rate_of_mean_reversion=kappa,
+                               long_run_average=theta, vol_of_vol=eta,
+                               correlation_rho=rho, muj = muj, sigmaj=sigmaj, 
+                               lmbda=lambda_, v0 = sigma_1)
+    
     def _eval_grid(f, timegrid):
         try:
             return f(timegrid)
@@ -45,7 +60,7 @@ class HestonWithJumps(FactoryObject, ModelDeepHedging, OptionCalibratableModel):
         self._delta_t = self._timegrid[1]-self._timegrid[0]
         self._sqrt_delta_t = np.sqrt(self._delta_t)
 
-    def simulate(self, timegrid, S0, n_sims: int):
+    def simulate(self, timegrid, S0, n_sims: int, seed: int|None =None):
         """ Simulate the Heston Model Paths
         
         
@@ -63,8 +78,9 @@ class HestonWithJumps(FactoryObject, ModelDeepHedging, OptionCalibratableModel):
         V[0, :] = self.v0
         
         # Generate correlated Brownian motions
-        z1 = np.random.normal(size=(self._timegrid.shape[0], n_sims))
-        z2 = self.correlation_rho * z1 + np.sqrt(1 - self.correlation_rho ** 2) * np.random.normal(size=(self._timegrid.shape[0], n_sims))
+        rng = np.random.default_rng(seed)
+        z1 = rng.normal(size=(self._timegrid.shape[0], n_sims))
+        z2 = self.correlation_rho * z1 + np.sqrt(1 - self.correlation_rho ** 2) * rng.normal(size=(self._timegrid.shape[0], n_sims))
 
     
         # Generate stock price and volatility paths
