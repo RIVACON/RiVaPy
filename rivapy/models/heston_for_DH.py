@@ -1,8 +1,8 @@
 from typing import Union, Callable, Tuple
 import numpy as np
 import scipy
-from rivapy.tools.interfaces import FactoryObject, ModelDeepHedging
-from rivapy.models.calibration import OptionCalibratableModel
+from rivapy.tools.interfaces import FactoryObject, ModelDeepHedging, OptionCalibratableModel
+
 
 class HestonForDeepHedging(FactoryObject, ModelDeepHedging, OptionCalibratableModel):
 

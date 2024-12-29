@@ -1,10 +1,11 @@
-from typing import Union, Callable
+from typing import Union, Callable, Tuple
 import numpy as np
 import scipy
 import scipy.stats as ss
-from rivapy.tools.interfaces import FactoryObject
+from rivapy.tools.interfaces import FactoryObject, ModelDeepHedging, OptionCalibratableModel
 
-class BNS(FactoryObject):
+
+class BNS(FactoryObject, ModelDeepHedging, OptionCalibratableModel):
 
     def _eval_grid(f, timegrid):
         try:
@@ -77,11 +78,10 @@ class BNS(FactoryObject):
             return np.exp(ixi * np.log(s0) + A + v0*B + C)
         
 	    
-    def compute_call_price(self, s0: float, v0: float, K: Union[np.ndarray, float], ttm: Union[np.ndarray, float])->Union[np.ndarray, float]:
+    def compute_call_price(self, s0: float, K: Union[np.ndarray, float], ttm: Union[np.ndarray, float])->Union[np.ndarray, float]:
         """Computes a call price for the Heston model via integration over characteristic function.
 		Args:
 			s0 (float): current spot
-			v0 (float): current variance
 			K (float): strike
 			ttm (float): time to maturity
 		"""
@@ -90,7 +90,7 @@ class BNS(FactoryObject):
             for i in range(ttm.shape[0]):
 				#for j in range(K.shape[0]):
 					#result[i,j] = self.call_price(s0,v0,K[j], tau[i])
-                result[i,:] = self.compute_call_price(s0,v0,K, ttm[i])
+                result[i,:] = self.compute_call_price(s0,self.v0,K, ttm[i])
             return result
 
         def integ_func(xi, s0, v0, K, tau, num):
@@ -104,10 +104,25 @@ class BNS(FactoryObject):
             res = (s0-K > 0) * (s0-K)
         else:
             "Simplified form, with only one integration. "
-            h = lambda xi: s0 * integ_func(xi, s0, v0, K, ttm, 1) - K * integ_func(xi, s0, v0, K, ttm, 2)
-            res = 0.5 * (s0 - K) + 1/scipy.pi * scipy.integrate.quad_vec(h, 0, 500.)[0]  #vorher 500
+            h = lambda xi: s0 * integ_func(xi, s0, self.v0, K, ttm, 1) - K * integ_func(xi, s0, self.v0, K, ttm, 2)
+            res = 0.5 * (s0 - K) + 1/scipy.constants.pi * scipy.integrate.quad_vec(h, 0, 500.)[0]  #vorher 500
         return res
   
+    def get_parameters(self) -> np.ndarray:
+        return np.array([self.rho, self.lmbda, self.b, self.a, self.v0])
+
+    def set_parameters(self, params: np.ndarray) -> None:
+        self.rho = params[0]
+        self.lmbda = params[1]
+        self.b = params[2]
+        self.a = params[3]
+        self.v0 = params[4]
+        
+    def get_bounds(self) -> Tuple[np.ndarray, np.ndarray]|None :
+        return np.array([-10.0,0.5,1e-15,0.6,1e-15]), np.array([10.0,50,50,10,1.0])
+        
+    def get_nonlinear_constraints(self) -> Tuple[np.ndarray, Callable, np.ndarray]|None:
+        return None
 
 
 

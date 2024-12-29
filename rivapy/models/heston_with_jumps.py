@@ -2,9 +2,7 @@ from typing import Union, Callable, Tuple
 import numpy as np
 import scipy
 import scipy.stats as ss
-from rivapy.tools.interfaces import FactoryObject, ModelDeepHedging
-from rivapy.models.calibration import OptionCalibratableModel
-
+from rivapy.tools.interfaces import FactoryObject, ModelDeepHedging, OptionCalibratableModel
 
 class HestonWithJumps(FactoryObject, ModelDeepHedging, OptionCalibratableModel):
 

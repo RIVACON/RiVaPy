@@ -1,6 +1,6 @@
 
 import abc
-from typing import List, Tuple, Protocol
+from typing import List, Tuple, Protocol, Callable
 import datetime as dt
 import numpy as np
 import json
@@ -88,3 +88,29 @@ class ModelDeepHedging(Protocol):
             np.ndarray: The simulated paths.
         """
         ...
+
+class OptionCalibratableModel(Protocol):
+    @abc.abstractmethod 
+    def compute_call_price(self, S0: float, K: float, ttm: float) -> float:
+        ...
+    @abc.abstractmethod
+    def get_parameters(self) -> np.ndarray:
+        ...
+    @abc.abstractmethod
+    def set_parameters(self, params: np.ndarray) -> None:
+        ...
+    
+    def get_bounds(self) -> Tuple[np.ndarray, np.ndarray]|None :
+        return None
+    
+    def get_nonlinear_constraints(self) -> Tuple[np.ndarray, Callable, np.ndarray]|None:
+        return None
+    
+    def get_linear_constraints(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]|None:
+        """Get linear constraints for the optimization.
+
+        Returns:
+            Tuple[np.ndarray, np.ndarray, np.ndarray]|None: The lower bounds, the matrix of the linear constraints and the upper bounds.
+        """
+        return None
+    

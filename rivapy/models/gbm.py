@@ -1,10 +1,10 @@
 from typing import Union, Callable
 import numpy as np
 import scipy
-from rivapy.tools.interfaces import FactoryObject
-from rivapy.models.calibration import OptionCalibratableModel
+from rivapy.tools.interfaces import FactoryObject, OptionCalibratableModel, ModelDeepHedging
 
-class GBM(FactoryObject, OptionCalibratableModel):
+
+class GBM(FactoryObject, ModelDeepHedging, OptionCalibratableModel):
 
     def _eval_grid(f, timegrid):
         try:
