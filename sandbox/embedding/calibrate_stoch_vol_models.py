@@ -73,12 +73,14 @@ for i in range(len(expiries_)):
         x_prices.append(pyvacon.finance.utils.calcEuropeanCallPrice(x_strikes_[i][j],ttm_,1.0,1.0,vol))
         
 calibrated_models = []
+
 models = [
     HestonForDeepHedging(rate_of_mean_reversion=0.6,long_run_average=0.2*0.2,
                              vol_of_vol=1.1, correlation_rho=-0.7,v0=0.2*0.2),
     HestonWithJumps(rate_of_mean_reversion=0.6,long_run_average=0.2*0.2,
                         vol_of_vol=1.1,correlation_rho=-0.7,
                         muj = 0.1, sigmaj=0.1, lmbda=0.1,v0 = 0.2*0.2),
+    BNS(a=0.1, b=0.1, lmbda=0.1, rho=-0.2, v0=0.1),
 ]
 for m in models:
     result = calibrate(m, x_prices, ttm, x_strikes)
