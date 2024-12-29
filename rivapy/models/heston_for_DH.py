@@ -53,7 +53,6 @@ class HestonForDeepHedging(FactoryObject, ModelDeepHedging, OptionCalibratableMo
     def simulate(self, timegrid, S0, n_sims: int, seed: int|None =None) -> np.ndarray:
         """ Simulate the Heston Model Paths
         
-        
         Args:
             timegrid (np.ndarray): One dimensional array containing the time points where the process will be simulated (containing 0.0 as the first timepoint).
             S0 (Union[float, np.ndarray]): Either a float or an array (for each path) with the start value of the simulation.
