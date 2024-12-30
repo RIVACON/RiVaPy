@@ -41,6 +41,8 @@ _add_to_factory(GasFwdModel2Factor)
 _add_to_factory(HestonForDeepHedging)
 _add_to_factory(HestonWithJumps)
 _add_to_factory(BNS)
+_add_to_factory(NIG)
+_add_to_factory(VG)
 
 
 
