@@ -6,7 +6,24 @@ import rivapy.models as models
 import rivapy.marketdata as mktdata
 import rivapy.pricing.analytics as analytics
 import rivapy.tools.enums as enums
+
 from rivapy import _pyvacon_available
+
+def _test_call_price(model, x_strikes: np.ndarray|None=None, 
+					 timegrid: np.ndarray|None=None, 
+					 n_sims: int=40_000, seed: int = 42):
+	if timegrid is None:
+		timegrid = np.linspace(0.0,1.0,365)
+	if x_strikes is None:
+		x_strikes = np.array([0.9,1.0,1.1])
+	simulated_values = model.simulate(timegrid, 1.0, n_sims, seed=42)
+	call_prices_sim = np.empty((x_strikes.shape[0],))
+	call_prices_analytic = np.empty((x_strikes.shape[0],))
+	for i in range(x_strikes.shape[0]):
+		call_prices_sim[i] = np.mean(np.maximum(simulated_values[-1,:]-x_strikes[i], 0.0))
+		call_prices_analytic[i] = model.compute_call_price(1.0, K = x_strikes[i], ttm = timegrid[-1])
+	return call_prices_analytic, call_prices_sim
+
 
 class LocalVolModelTest(unittest.TestCase):
 	
@@ -84,7 +101,7 @@ class LocalVolModelTest(unittest.TestCase):
 			self.assertLess(error, 2E-2)
 
 
-class HestonModelTest(unittest.TestCase):
+class HestonTest(unittest.TestCase):
 	
 	def test_callprice_formula(self):
 		"""Test analytic call price formula by comparing with MC simulated values
@@ -125,7 +142,6 @@ class HestonModelTest(unittest.TestCase):
                              correlation_rho = -0.9)
 
 		n_sims = 40_000
-		np.random.seed(42)
 		strikes = np.array([0.9,1.0,1.1])
 		timegrid = np.linspace(0.0,1.0,365)
 		simulated_values = heston.simulate(timegrid, 1.0, n_sims, seed=42)
@@ -134,7 +150,23 @@ class HestonModelTest(unittest.TestCase):
 			cp_mc = np.mean(np.maximum(simulated_values[-1,:]-strikes[i], 0.0))
 			cp_analytic = heston.compute_call_price(1.0, K = strikes[i], ttm = 1.0)
 			self.assertAlmostEqual(cp_analytic, cp_mc, delta=1e-3)
-		
+
+class HestonWithJumpsTest(unittest.TestCase):
+	"""
+	Tests for stochastic volatility models: Comparison between MC simulated call prices and analytic (integration of characteristic function) call prices
+	"""	
+	def test_callprice_formula(self):
+		model = models.HestonWithJumps.get_default_model()
+		timegrid= np.linspace(0,0.5,2*365)
+
+		analytic_prices, simulated_prices = _test_call_price(model, timegrid=timegrid,n_sims=20_000)
+		for i in range(analytic_prices.shape[0]):
+			self.assertAlmostEqual(analytic_prices[i], simulated_prices[i], delta=1e-2, msg=f'Analytic price: {analytic_prices[i]}, Simulated price: {simulated_prices[i]}, i: {i}')
+
+class BNSTest(unittest.TestCase):
+	pass
+
+
 class HestonLocalVolModelTest(unittest.TestCase):
 	@staticmethod
 	def calc_imlied_vol_grid(expiries, strikes, call_prices):
