@@ -60,7 +60,7 @@ class HestonWithJumps(FactoryObject, ModelDeepHedging, OptionCalibratableModel):
         self._delta_t = self._timegrid[1]-self._timegrid[0]
         self._sqrt_delta_t = np.sqrt(self._delta_t)
 
-    def simulate(self, timegrid, S0, n_sims: int, seed: int|None =None):
+    def simulate_old(self, timegrid, S0, n_sims: int, seed: int|None =None):
         """ Simulate the Heston Model Paths
         
         
@@ -81,22 +81,53 @@ class HestonWithJumps(FactoryObject, ModelDeepHedging, OptionCalibratableModel):
         rng = np.random.default_rng(seed)
         z1 = rng.normal(size=(self._timegrid.shape[0], n_sims))
         z2 = self.correlation_rho * z1 + np.sqrt(1 - self.correlation_rho ** 2) * rng.normal(size=(self._timegrid.shape[0], n_sims))
-
-    
+        P = rng.poisson(self.lmbda*self._delta_t, size=(self._timegrid.shape[0], n_sims))
         # Generate stock price and volatility paths
         for t in range(1, self._timegrid.shape[0]):
             # Calculate volatility
             vol = np.sqrt(V[t - 1, :])
-
             P = ss.poisson.rvs(self.lmbda * self._delta_t,size=n_sims)
-            jumps = np.asarray([np.sum(np.exp(ss.norm.rvs(np.log(self.muj+1.)-0.5*self.sigmaj*self.sigmaj, self.sigmaj,i)) -1.) for i in P])
-
+            jumps = np.asarray([np.sum(np.exp(ss.norm.rvs(np.log(self.muj+1.)-0.5*self.sigmaj*self.sigmaj, self.sigmaj,i)) -1.) for i in P[t,:]])
+            
             # Update the stock price and volatility
             S[t, :] = S[t - 1, :]*(1.  - self.lmbda*self.muj*self._delta_t + vol * np.sqrt(self._delta_t) * z1[t - 1, :] + jumps)
             V[t, :] = np.maximum(
                 0.0, V[t - 1, :] + self.rate_of_mean_reversion * (self.long_run_average - V[t - 1, :]) * self._delta_t 
                 + self.vol_of_vol * np.sqrt(V[t - 1, :]) * np.sqrt(self._delta_t) * z2[t - 1, :]
             )
+        return S
+
+    def simulate(self, timegrid, S0, n_sims: int, seed: int|None =None):
+        """ Simulate the Heston Model Paths
+        
+        
+        Args:
+            timegrid (np.ndarray): One dimensional array containing the time points where the process will be simulated (containing 0.0 as the first timepoint).
+            S0 (Union[float, np.ndarray]): Either a float or an array (for each path) with the start value of the simulation.
+            n_sims (int): Number of simulations.
+        Returns:
+            np.ndarray: Array r containing the simulations where r[:,i] is the path of the i-th simulation (r.shape[0] equals number of timepoints, r.shape[1] the number of simulations). 
+        """
+        self._set_timegrid(timegrid)
+        S = np.zeros((self._timegrid.shape[0], n_sims))
+        v =  np.zeros((self._timegrid.shape[0], n_sims))
+        S[0, :] = S0
+        v[0, :] = self.v0
+        
+        # Generate correlated Brownian motions
+        rng = np.random.default_rng(seed)
+        for i in range(1, self._timegrid.shape[0]):
+            dW1 = rng.normal(0, self._sqrt_delta_t, n_sims)
+            dW2 = self.correlation_rho * dW1 + np.sqrt(1 - self.correlation_rho**2) * rng.normal(0, np.sqrt(self._delta_t), n_sims)
+            # Jump process
+            dN = rng.poisson(self.lmbda * self._delta_t, n_sims)
+            J = rng.normal(self.muj, self.sigmaj, n_sims) * dN
+            
+            v[i,:] = v[i-1,:] + self.rate_of_mean_reversion * (self.long_run_average - v[i-1,:]) * self._delta_t + self.vol_of_vol * np.sqrt(v[i-1,:]) * dW2
+            v[i,:] = np.maximum(v[i,:], 0)  # Ensure non-negative volatility
+            
+            S[i,:] = S[i-1,:] * np.exp(( - 0.5*v[i-1,:] - self.lmbda*(np.exp(self.muj + 0.5*self.sigmaj**2) - 1))*self._delta_t + 
+                                        np.sqrt(v[i-1,:])*dW1 + J)
         return S
         
     def _characteristic_func(self, xi, s0, v0, tau):
