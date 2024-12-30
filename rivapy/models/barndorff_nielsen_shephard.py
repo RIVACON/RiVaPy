@@ -7,6 +7,10 @@ from rivapy.tools.interfaces import FactoryObject, ModelDeepHedging, OptionCalib
 
 class BNS(FactoryObject, ModelDeepHedging, OptionCalibratableModel):
 
+    @staticmethod
+    def get_default_model():
+        return BNS(rho=-4.675, lmda=0.5474, b=18.6075, a=0.6069, v0=0.0433)
+    
     def _eval_grid(f, timegrid):
         try:
             return f(timegrid)
