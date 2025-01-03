@@ -156,3 +156,6 @@ class HestonForDeepHedging(FactoryObject, ModelDeepHedging, OptionCalibratableMo
         ub = np.array( [ np.inf,1.,3.] )
         return lb, constraint, ub
     
+    def get_bounds(self) -> Tuple[np.ndarray, np.ndarray]|None :
+        return np.array([-1.0,0.01,1e-15,0.01,0.005]), np.array([1.0,5.0,5.0,4.0,2.0])
+    
