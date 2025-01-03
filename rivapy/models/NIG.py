@@ -6,6 +6,10 @@ import scipy.stats as ss
 
 class NIG(FactoryObject, ModelDeepHedging, OptionCalibratableModel):
 
+    @staticmethod
+    def get_default_model():
+        return NIG(alpha=1.0, beta=0.0, delta=1.0, v0=0.1)
+    
     def _eval_grid(f, timegrid):
         try:
             return f(timegrid)
