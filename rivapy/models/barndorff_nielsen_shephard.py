@@ -38,7 +38,7 @@ class BNS(FactoryObject, ModelDeepHedging, OptionCalibratableModel):
         self._delta_t = self._timegrid[1]-self._timegrid[0]
         self._sqrt_delta_t = np.sqrt(self._delta_t)
 
-    def simulate(self, timegrid: np.ndarray, S0:float|np.ndarray, n_sims: int):
+    def simulate(self, timegrid: np.ndarray, S0:float|np.ndarray, n_sims: int, seed: int|None =None):
         """ Simulate the BNS Model paths
         Args:
             timegrid (np.ndarray): One dimensional array containing the time points where the process will be simulated (containing 0.0 as the first timepoint).
@@ -52,9 +52,9 @@ class BNS(FactoryObject, ModelDeepHedging, OptionCalibratableModel):
         V =  np.zeros((self._timegrid.shape[0], n_sims))
         S[0, :] = np.log(S0)
         V[0, :] = self.v0
-        
+        rng = np.random.default_rng(seed)
         # Generate correlated Brownian motions
-        z1 = np.random.normal(size=(self._timegrid.shape[0], n_sims))
+        z1 = rng.normal(size=(self._timegrid.shape[0], n_sims))
 
         # Generate stock price and volatility paths
         for t in range(1, self._timegrid.shape[0] ):
@@ -62,7 +62,7 @@ class BNS(FactoryObject, ModelDeepHedging, OptionCalibratableModel):
             vol = np.sqrt(V[t - 1, :])
 
             P = ss.poisson.rvs(self.a * self.lmbda*self._delta_t,size=n_sims)
-            jumps = np.asarray([np.sum(np.random.exponential(1./self.b, size=int(i))) for i in P])
+            jumps = np.asarray([np.sum(rng.exponential(1./self.b, size=int(i))) for i in P])
 
             # Update the stock price and volatility
             S[t, :] = S[t - 1, :]  + (-self.lmbda*self.k - 0.5*vol*vol)*self._delta_t + vol * np.sqrt(self._delta_t) * z1[t - 1, :] + self.rho*jumps
