@@ -76,7 +76,7 @@ class Repo:
             pricing_results.paths, pricing_results.payoff
         )
         inputs = pricing_results.hedge_model._create_inputs(pricing_results.paths)
-        loss = pricing_results.hedge_model.evaluate(inputs, pricing_results.payoff)
+        loss = pricing_results.hedge_model.evaluate(inputs, pricing_results.payoff, batch_size=10000)
         # delta = pricing_results.hedge_model.compute_delta(pricing_results.paths, -2).reshape((-1,))
 
         return {
@@ -91,7 +91,7 @@ class Repo:
 
     @staticmethod
     def _get_data_params(params: dict)->dict:
-        return {'model': params['model'], 'spec': params['spec'], 'n_portfolios': params['n_portfolios']}
+        return {'model': params['model'], 'spec': params['spec'], 'n_portfolios': params['n_portfolios'], 'n_sims': params['pricing_param']['n_sims'], 'days': params['days']}
     
     @staticmethod
     def _get_data_params_hashkey(params: dict)->str:
@@ -121,7 +121,7 @@ class Repo:
         params["spec_hash"] = {spec[k].id: spec[k].hash() for k in range(len(spec))}
         params["pricing_params_hash"] = FactoryObject.hash_for_dict(kwargs)
         if (hash_key in self.results.keys()) and (not rerun):
-            return self.results[hash_key]
+            return None, self.results[hash_key]
         # now check if data has been cached
         
         data = None
@@ -185,8 +185,9 @@ class Repo:
             model= model_list[i]
             if isinstance(model,dict):
                 model = models.factory.create(model)
-            simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid.timegrid, S0=S0, n_sims=n_sims)
-            emb_vec[i*n_sims:n_sims*(i+1)] = emb    
+            simulation_results[:,i*n_sims:n_sims*(i+1)] = model.simulate(timegrid.timegrid, S0=S0, n_sims=n_sims, seed=seed)
+            emb_vec[i*n_sims:n_sims*(i+1)] = emb  
+            emb += 1  
         return simulation_results, emb_vec
 
     def get_call_price(self,
