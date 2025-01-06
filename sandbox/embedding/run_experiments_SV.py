@@ -18,12 +18,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # set loglevel to warning
 #tf.keras.backend.set_floatx('float64')
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-from rivapy.tools.datetime_grid import DateTimeGrid
-from rivapy.models.gbm import GBM
+import rivapy.models
 from rivapy.models.historic_sim import HistoricSimulation
-from rivapy.models.heston_for_DH import HestonForDeepHedging
-from rivapy.models.heston_with_jumps import HestonWithJumps
-from rivapy.models.barndorff_nielsen_shephard import BNS
 from rivapy.instruments.specifications import EuropeanVanillaSpecification, BarrierOptionSpecification
 from rivapy.pricing.vanillaoption_pricing import (
     VanillaOptionDeepHedgingPricer,
@@ -34,41 +30,16 @@ import analysis
 from sys import exit
 
 repo = analysis.Repo(
-    '/home/doeltz/doeltz/development/repos/embedding_sv'
+    '/home/doeltz/doeltz/development/repos/embedding_calibrated_sv'
     #"C:/Users/doeltz/development/RiVaPy/sandbox/embedding/test"
 )
 
 import ast  
-with open('/home/doeltz/doeltz/development/RiVaPy/sandbox/embedding/model_params_dict.txt') as f: 
-    data = f.read() 
-model_params = ast.literal_eval(data) 
+with open('/home/doeltz/doeltz/development/RiVaPy/sandbox/embedding/calibrated_models.json', 'r') as f: 
+    models = json.load(f) 
 
-models =[] 
-for n_models_per_model_type in [20]:#[2, 8, 16, 32]:#
-    model = []
-    for i in range(n_models_per_model_type):
-        #model.append(HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.0707,
-        #              vol_of_vol = 0.2928, correlation_rho = -0.757,v0 = 0.0654))
-        #model.append(GBM(0.,vol_list[i]))
-        model.append(GBM(drift=0.0,volatility=model_params['GBM']['vol'][i]))
-        model.append(HestonForDeepHedging(rate_of_mean_reversion = model_params['Heston']['rate_of_mean_reversion'][i],
-                                        long_run_average = model_params['Heston']['long_run_average'][i],
-                                        vol_of_vol = model_params['Heston']['vol_of_vol'][i], 
-                                        correlation_rho = model_params['Heston']['correlation_rho'][i],
-                                        v0 = model_params['Heston']['v0'][i]))
-        model.append(HestonWithJumps(rate_of_mean_reversion = model_params['Heston with Jumps']['rate_of_mean_reversion'][i],
-                                    long_run_average = model_params['Heston with Jumps']['long_run_average'][i],
-                                    vol_of_vol = model_params['Heston with Jumps']['vol_of_vol'][i], 
-                                    correlation_rho = model_params['Heston with Jumps']['correlation_rho'][i],
-                                    muj = 0.1791,sigmaj = 0.1346, 
-                                    lmbda = model_params['Heston with Jumps']['lmbda'][i],
-                                    v0 = model_params['Heston with Jumps']['v0'][i]))
-        model.append(BNS(rho =model_params['BNS']['rho'][i],
-                        lmbda=model_params['BNS']['lmbda'][i],
-                        b=model_params['BNS']['b'][i],
-                        a=model_params['BNS']['a'][i],
-                        v0 = model_params['BNS']['v0'][i]))
-    models.append(model)    
+models = [rivapy.models.factory.create(c) for c in models] 
+#       model.append(GBM(drift=0.0,volatility=model_params['GBM']['vol'][i]))
 # Historic Simulation models
 if False:
     with open('/home/doeltz/doeltz/development/RiVaPy/sandbox/embedding/yfinance_data/data.json', "r") as f:
@@ -157,22 +128,22 @@ if __name__=='__main__':
         study = optuna.create_study(study_name=study_name, storage=storage_name, load_if_exists=True)
         study.optimize(objective, n_trials=20)
     else:
-        for n_sims_per_model in [1000]:#100, 200, 400, 800]:#[2000, 4000, 8000, 16000, 32000, 64000]:
+        for n_sims_per_model in [4000]:#100, 200, 400, 800]:#[2000, 4000, 8000, 16000, 32000, 64000]:
             for model in models:
-                n_sims = n_sims_per_model*len(model)
+                n_sims = n_sims_per_model*len(models)
                 print('nsims: ', n_sims)
-                for emb_size in [1]:
+                for emb_size in [8]:
                     for seed in [112]:
                         pricing_results, params = repo.run(
                                             refdate,
                                             spec,
-                                            model,
+                                            models,
                                             rerun=False,
                                             depth=3,
                                             nb_neurons=128,#128,
                                             n_sims=n_sims,
                                             regularization=0.,
-                                            epochs=10000,
+                                            epochs=5000,
                                             verbose=1,
                                             tensorboard_logdir=repo.repo_dir+"/logs/"
                                             + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
@@ -182,7 +153,7 @@ if __name__=='__main__':
                                             multiplier_batch_size=3,
                                             n_increase_batch_size=1,
                                             decay_steps=1000,#9000,#100,
-                                            batch_size=1000,
+                                            batch_size=10_000,
                                             seed=seed,
                                             days=int(np.max(days)),
                                             n_portfolios=n_portfolios,
