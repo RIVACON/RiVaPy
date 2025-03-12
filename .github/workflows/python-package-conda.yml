@@ -34,8 +34,16 @@ jobs:
           python-version: "3.8"
           auto-update-conda: false
   
-    - name: Check Conda Version
-      run: conda --version
+    - name: Remove Python 3.12 pin (if any)
+      run: conda config --remove pinned python || true  # Remove any pin for Python 3.12 if it's there
+
+    # - name: Remove Conda Telemetry
+    #   run: conda remove -n base conda-anaconda-telemetry -y || true  # Remove telemetry if it's causing conflicts
+
+    - name: Verify Conda and Python versions
+      run: |
+        conda --version  # Verify that Conda version 24.9.0 is installed
+        python --version  # Verify that Python 3.8 is in use
 
       # $CONDA is an environment variable pointing to the root of the miniconda directory
     - name: Install dependencies
