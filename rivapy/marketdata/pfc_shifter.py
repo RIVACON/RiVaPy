@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import rivapy.tools.interfaces as interfaces
 from rivapy.instruments import EnergyFutureSpecifications
-from typing import Dict, Set, List
+from typing import Dict, Set, List, Any
 from collections import defaultdict
 
 
@@ -42,6 +42,11 @@ class PFCShifter(interfaces.FactoryObject):
         _dict = {**self.contracts, **self._synthetic_contracts}
         return np.array([contract.get_price() for contract in  _dict.values()]).reshape(-1,1)
     
+    def __call__(self) -> pd.DataFrame:
+        transition_matrix = self.generate_transition_matrix()
+        transition_matrix = self.detect_redundant_contracts(transition_matrix=transition_matrix)
+        transition_matrix = self.generate_synthetic_contracts(transition_matrix=transition_matrix)
+        return self.shift(transition_matrix=transition_matrix)
     
     def generate_transition_matrix(self) -> pd.DataFrame:
         contract_start_and_end_dates = np.array(self._get_contract_start_end_dates())
@@ -81,12 +86,11 @@ class PFCShifter(interfaces.FactoryObject):
                     print(f'Found redundant contract: {transition_matrix.index[contract_idx]}')
                     detected_redundant_contracts.append(transition_matrix.index[contract_idx])
         
-        # update the contracts dictionary, but still keep te information about the redundant contracts
+        # update the contracts dictionary, but still keep the information about the redundant contracts
         self._redundant_contracts = {}
         for contract in detected_redundant_contracts:
             self._redundant_contracts[contract] = self.contracts[contract]
-            del self.contracts[contract] # MAYBE THIS IS WRONG, SINCE THIS COULD LEAD TO DELETION OF TIME GRIND POINTS 
-        #self._redundant_contracts = {contract: self.contracts[contract] for contract in detected_redundant_contracts}
+            del self.contracts[contract] # <- keep an eye on that line
         return transition_matrix.loc[~transition_matrix.index.isin(detected_redundant_contracts), :]
     
     
@@ -132,7 +136,7 @@ class PFCShifter(interfaces.FactoryObject):
             
             # get reference contract information to calculate a price for the synthetic contracts
             reference_contract = list(self.contracts.keys())[0]
-            reference_mean_shape = self.shape.loc[self.contracts[reference_contract].get_schedule(),:].mean()
+            reference_mean_shape = self.shape.loc[self.contracts[reference_contract].get_schedule(),:].mean(axis=0)
             reference_price = self.contracts[reference_contract].get_price()
             
             date_list = self._get_contract_start_end_dates()
@@ -150,8 +154,8 @@ class PFCShifter(interfaces.FactoryObject):
                     else:
                         _temp_df_shape = pd.concat([_temp_df_shape, self.shape.loc[(cond1) & (cond2),: ]], axis=0)
 
-                mean_shape = np.mean(_temp_df_shape)
-                name = f'Synth_Con_{row_id+1}'
+                mean_shape = np.mean(_temp_df_shape, axis=0)
+                name = f'Synth_Contr_{row_id+1}'
                 self._synthetic_contracts[name] = EnergyFutureSpecifications(schedule=None, price=(mean_shape*reference_price/reference_mean_shape)[0], name=name)
                 
                 _data = np.zeros((n))
@@ -170,18 +174,18 @@ class PFCShifter(interfaces.FactoryObject):
         # side='left since we do not want to consider a match as a delivery tick
         delivery_ticks = np.searchsorted(contract_schedules, contract_start_and_end_dates[1:], side='left')
         delivery_ticks_per_period = np.concatenate([np.array([delivery_ticks[0]]),(delivery_ticks[1:] - delivery_ticks[:-1])])
-        print(delivery_ticks_per_period)
+        # print(delivery_ticks_per_period)
         date_tpls = list(zip(contract_start_and_end_dates[:-1], contract_start_and_end_dates[1:]))
         # hours_btwn_dates = (pd.Series(contract_start_and_end_dates[1:] - contract_start_and_end_dates[:-1])/pd.Timedelta(hours=timeperiod_fraction)).to_numpy().reshape(1,-1) * delivery_period_units_per_day # 24 only for HPFC Base
         
         transition_matrix = transition_matrix.to_numpy() * delivery_ticks_per_period
-        print(np.sum(transition_matrix, axis=1))
+        # print(np.sum(transition_matrix, axis=1))
         transition_matrix = transition_matrix/np.sum(transition_matrix, axis=1).reshape(-1,1)
         fwd_price_vec = self._get_forward_price_vector()
 
         fwd_price_noc = np.linalg.inv(transition_matrix) @ fwd_price_vec
         pfc = self.shape.copy()
-        print(date_tpls)
+        # print(date_tpls)
         for i, date_tpl in enumerate(date_tpls):
             if i == len(date_tpls)-1:
                 row_filter = (pfc.index >= date_tpl[0]) & (pfc.index <= date_tpl[1])
