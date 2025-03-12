@@ -36,12 +36,12 @@ jobs:
   
     - name: Check Conda Version
       run: conda --version
-
+      
+      # $CONDA is an environment variable pointing to the root of the miniconda directory
     - name: Install dependencies
       run: |
-        # conda install -y python=3.8
         conda install -n base conda=24.9.0 python=3.8 -y
-        # $CONDA is an environment variable pointing to the root of the miniconda directory
+        
         $CONDA/bin/conda env update --file environment.yml --name base
     #- name: Install pyvacon from pypi test
     #  run: $CONDA/bin/python -m pip install pyvacon 
