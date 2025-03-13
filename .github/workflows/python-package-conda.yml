@@ -32,9 +32,10 @@ jobs:
         python-version: "3.8"
 
     - name: Setup Miniconda
-      uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v3
       with:
-          conda-version: 24.9.0
+          #conda-version: 24.9.0
+          miniconda-version: "py38_23.11.0-2"
           python-version: "3.8"
           auto-update-conda: false
   
