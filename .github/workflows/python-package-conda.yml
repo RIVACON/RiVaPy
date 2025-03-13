@@ -31,13 +31,22 @@ jobs:
       with:
         python-version: "3.8"
 
-    - name: Setup Miniconda
-      uses: conda-incubator/setup-miniconda@v3
-      with:
-          #conda-version: 24.9.0
-          miniconda-version: "23.11.0-2"
-          python-version: "3.8"
-          auto-update-conda: false
+    - name: Install Miniconda 23.11.0-2
+      run: |
+        wget https://repo.anaconda.com/miniconda/Miniconda3-py38_23.11.0-2-Linux-x86_64.sh -O miniconda.sh
+        bash Miniconda3-py38_23.11.0-2-Linux-x86_64.sh -b -p $HOME/miniconda
+        echo "$HOME/miniconda/bin" >> $GITHUB_PATH
+        echo "CONDA=$HOME/miniconda" >> $GITHUB_ENV
+        source $HOME/miniconda/bin/activate
+        conda --version
+
+    # - name: Setup Miniconda
+    #   uses: conda-incubator/setup-miniconda@v3
+    #   with:
+    #       #conda-version: 24.9.0
+    #       miniconda-version: "23.11.0-2"
+    #       python-version: "3.8"
+    #       auto-update-conda: false
   
     #- name: Remove Python 3.12 pin (if any)
     #  run: conda config --remove pinned python || true  # Remove any pin for Python 3.12 if it's there
