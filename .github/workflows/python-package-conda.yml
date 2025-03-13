@@ -40,25 +40,6 @@ jobs:
         source $HOME/miniconda/bin/activate
         conda --version
 
-    # - name: Setup Miniconda
-    #   uses: conda-incubator/setup-miniconda@v3
-    #   with:
-    #       #conda-version: 24.9.0
-    #       miniconda-version: "23.11.0-2"
-    #       python-version: "3.8"
-    #       auto-update-conda: false
-  
-    #- name: Remove Python 3.12 pin (if any)
-    #  run: conda config --remove pinned python || true  # Remove any pin for Python 3.12 if it's there
-
-    # - name: Remove Conda Telemetry
-    #   run: conda remove -n base conda-anaconda-telemetry -y || true  # Remove telemetry if it's causing conflicts
-
-    - name: Verify Conda and Python versions
-      run: |
-        conda --version  # Verify that Conda version 24.9.0 is installed
-        python --version  # Verify that Python 3.8 is in use
-
       # $CONDA is an environment variable pointing to the root of the miniconda directory
     - name: Install dependencies
       run: |
@@ -77,6 +58,12 @@ jobs:
     - name: Test with unittest
       run: $CONDA/bin/python -m unittest discover tests
       shell: bash
+    
+    - name: Run tests with coverage
+      run: |
+        coverage run -m unittest discover -s tests
+        coverage report
+        coverage xml
     #- name: Coverage of tests
     #  run: coverage run -m unittest discover tests
     #- name: Add codecov uploader
