@@ -64,6 +64,12 @@ jobs:
         coverage run -m unittest discover -s tests
         coverage report
         coverage xml
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage.xml
     #- name: Coverage of tests
     #  run: coverage run -m unittest discover tests
     #- name: Add codecov uploader
