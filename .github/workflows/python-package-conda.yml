@@ -19,9 +19,13 @@ jobs:
     - uses: r-lib/actions/setup-pandoc@v2
       with:
         pandoc-version: '2.9' # The pandoc version to download (if necessary) and use.
-
+    
+    - name: Remove Preinstalled Miniconda
+      run: sudo rm -rf /usr/share/miniconda /usr/local/bin/conda
+    
     #- name: Install boost
     #  run: sudo apt-get install libboost-dev
+    
     - name: Set up Python 3.8
       uses: actions/setup-python@v4
       with:
@@ -34,8 +38,8 @@ jobs:
           python-version: "3.8"
           auto-update-conda: false
   
-    - name: Remove Python 3.12 pin (if any)
-      run: conda config --remove pinned python || true  # Remove any pin for Python 3.12 if it's there
+    #- name: Remove Python 3.12 pin (if any)
+    #  run: conda config --remove pinned python || true  # Remove any pin for Python 3.12 if it's there
 
     # - name: Remove Conda Telemetry
     #   run: conda remove -n base conda-anaconda-telemetry -y || true  # Remove telemetry if it's causing conflicts
