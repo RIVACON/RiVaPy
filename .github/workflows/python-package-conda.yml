@@ -34,7 +34,7 @@ jobs:
     - name: Install Miniconda 23.11.0-2
       run: |
         wget https://repo.anaconda.com/miniconda/Miniconda3-py38_23.11.0-2-Linux-x86_64.sh -O miniconda.sh
-        bash Miniconda3-py38_23.11.0-2-Linux-x86_64.sh -b -p $HOME/miniconda
+        bash miniconda.sh -b -p $HOME/miniconda
         echo "$HOME/miniconda/bin" >> $GITHUB_PATH
         echo "CONDA=$HOME/miniconda" >> $GITHUB_ENV
         source $HOME/miniconda/bin/activate
