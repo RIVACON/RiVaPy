@@ -79,7 +79,7 @@ jobs:
     - name: Run tests with coverage
       run: |
         coverage run -m unittest discover -s tests
-        coverage report
+        coverage report --fail-under=$TOTAL_COVERAGE
         coverage xml
         coverage html
 
