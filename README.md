@@ -39,6 +39,6 @@ derivative products from various asset classes are introduced and their pricing 
 
 Thanks to our sponsors [RIVACON](https://www.rivacon.com/) and [frontmark](https://www.frontmark.de/).
 
-[<img src="images/rivacon_logo.png" width='100px'>](https://www.rivacon.com/)
+[<img src="images/rivacon_logo.svg" width='100px'>](https://www.rivacon.com/)
 
 [<img src="images/favicon.png" width='70px'>](https://www.frontmark.de/)
