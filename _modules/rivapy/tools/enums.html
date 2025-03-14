@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,9 +13,9 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
-      <script src="../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -148,7 +148,9 @@
     <span class="kn">from</span> <span class="nn">pyvacon.numerics.interpolation</span> <span class="kn">import</span> <span class="n">InterpolationType</span>
     <span class="kn">from</span> <span class="nn">pyvacon.numerics.extrapolation</span> <span class="kn">import</span> <span class="n">ExtrapolationType</span>
 <span class="k">else</span><span class="p">:</span>
-<div class="viewcode-block" id="InterpolationType"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.InterpolationType">[docs]</a>    <span class="nd">@_unique</span>
+<div class="viewcode-block" id="InterpolationType">
+<a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.InterpolationType">[docs]</a>
+    <span class="nd">@_unique</span>
     <span class="k">class</span> <span class="nc">InterpolationType</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
         <span class="n">CONSTANT</span> <span class="o">=</span> <span class="s1">&#39;CONSTANT&#39;</span>
         <span class="n">LINEAR</span> <span class="o">=</span> <span class="s1">&#39;LINEAR&#39;</span>
@@ -158,14 +160,20 @@
         <span class="n">HAGAN_DF</span> <span class="o">=</span> <span class="s1">&#39;HAGAN_DF&#39;</span></div>
 
 
-<div class="viewcode-block" id="ExtrapolationType"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.ExtrapolationType">[docs]</a>    <span class="nd">@_unique</span>
+
+<div class="viewcode-block" id="ExtrapolationType">
+<a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.ExtrapolationType">[docs]</a>
+    <span class="nd">@_unique</span>
     <span class="k">class</span> <span class="nc">ExtrapolationType</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
         <span class="n">NONE</span> <span class="o">=</span> <span class="s1">&#39;NONE&#39;</span>
         <span class="n">CONSTANT</span> <span class="o">=</span> <span class="s1">&#39;CONSTANT&#39;</span>
         <span class="n">LINEAR</span> <span class="o">=</span> <span class="s1">&#39;LINEAR&#39;</span>
         <span class="n">LINEAR_LOG</span> <span class="o">=</span> <span class="s1">&#39;LINEARLOG&#39;</span></div>
+
         
-<div class="viewcode-block" id="SecuritizationLevel"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.SecuritizationLevel">[docs]</a><span class="nd">@_unique</span>
+<div class="viewcode-block" id="SecuritizationLevel">
+<a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.SecuritizationLevel">[docs]</a>
+<span class="nd">@_unique</span>
 <span class="k">class</span> <span class="nc">SecuritizationLevel</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
     <span class="n">NONE</span> <span class="o">=</span> <span class="s1">&#39;NONE&#39;</span>
     <span class="n">COLLATERALIZED</span> <span class="o">=</span> <span class="s1">&#39;COLLATERALIZED&#39;</span>
@@ -176,6 +184,7 @@
     <span class="n">EQUITY</span> <span class="o">=</span> <span class="s1">&#39;EQUITY&#39;</span>
     <span class="n">PREFERRED_SENIOR</span> <span class="o">=</span> <span class="s1">&#39;PREFERRED_SENIOR&#39;</span>
     <span class="n">NON_PREFERRED_SENIOR</span> <span class="o">=</span> <span class="s1">&#39;NON_PREFERRED_SENIOR&#39;</span></div>
+
 
 <span class="c1"># class SecuritizationLevel:</span>
 <span class="c1">#     NONE = &#39;NONE&#39;</span>
@@ -237,7 +246,9 @@
 <span class="c1">#     M = &#39;M&#39;</span>
 <span class="c1">#     D = &#39;D&#39;</span>
 
-<div class="viewcode-block" id="RollConvention"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.RollConvention">[docs]</a><span class="nd">@_unique</span>
+<div class="viewcode-block" id="RollConvention">
+<a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.RollConvention">[docs]</a>
+<span class="nd">@_unique</span>
 <span class="k">class</span> <span class="nc">RollConvention</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
     <span class="n">FOLLOWING</span> <span class="o">=</span> <span class="s1">&#39;Following&#39;</span>
     <span class="n">MODIFIED_FOLLOWING</span> <span class="o">=</span> <span class="s1">&#39;ModifiedFollowing&#39;</span>
@@ -248,6 +259,7 @@
     <span class="n">NEAREST</span> <span class="o">=</span> <span class="s1">&#39;Nearest&#39;</span>
     <span class="n">UNADJUSTED</span> <span class="o">=</span> <span class="s1">&#39;Unadjusted&#39;</span></div>
 
+
 <span class="c1"># class RollConvention:</span>
 <span class="c1">#     FOLLOWING = &#39;Following&#39;</span>
 <span class="c1">#     MODIFIED_FOLLOWING = &#39;ModifiedFollowing&#39;</span>
@@ -255,7 +267,9 @@
 <span class="c1">#     PRECEDING = &#39;Preceding&#39;</span>
 <span class="c1">#     MODIFIED_PRECEDING = &#39;ModifiedPreceding&#39;</span>
 <span class="c1">#     UNADJUSTED = &#39;Unadjusted&#39;</span>
-<div class="viewcode-block" id="DayCounterType"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.DayCounterType">[docs]</a><span class="nd">@_unique</span>
+<div class="viewcode-block" id="DayCounterType">
+<a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.DayCounterType">[docs]</a>
+<span class="nd">@_unique</span>
 <span class="k">class</span> <span class="nc">DayCounterType</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
     <span class="n">ACT_ACT</span> <span class="o">=</span> <span class="s1">&#39;ActAct&#39;</span>
     <span class="n">Act365Fixed</span> <span class="o">=</span> <span class="s1">&#39;Act365Fixed&#39;</span>
@@ -263,12 +277,16 @@
     <span class="n">ThirtyU360</span> <span class="o">=</span> <span class="s1">&#39;30U360&#39;</span>
     <span class="n">ThirtyE360</span> <span class="o">=</span> <span class="s1">&#39;30E360&#39;</span>
     <span class="n">ACT252</span> <span class="o">=</span> <span class="s1">&#39;Act252&#39;</span></div>
-<div class="viewcode-block" id="InflationInterpolation"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.InflationInterpolation">[docs]</a><span class="nd">@_unique</span>
+
+<div class="viewcode-block" id="InflationInterpolation">
+<a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.InflationInterpolation">[docs]</a>
+<span class="nd">@_unique</span>
 <span class="k">class</span> <span class="nc">InflationInterpolation</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
     <span class="n">UNDEFINED</span> <span class="o">=</span> <span class="s1">&#39;UNDEFINED&#39;</span>
     <span class="n">GERMAN</span> <span class="o">=</span> <span class="s1">&#39;GERMAN&#39;</span>
     <span class="n">JAPAN</span> <span class="o">=</span> <span class="s1">&#39;JAPAN&#39;</span>
     <span class="n">CONSTANT</span> <span class="o">=</span> <span class="s1">&#39;CONSTANT&#39;</span></div>
+
 
 <span class="nd">@_unique</span>
 <span class="k">class</span> <span class="nc">Sector</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
@@ -343,12 +361,15 @@
     <span class="n">COMBO</span> <span class="o">=</span> <span class="s1">&#39;COMBO&#39;</span>
     
        
-<div class="viewcode-block" id="VolatilityStickyness"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.VolatilityStickyness">[docs]</a><span class="nd">@_unique</span>
+<div class="viewcode-block" id="VolatilityStickyness">
+<a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.VolatilityStickyness">[docs]</a>
+<span class="nd">@_unique</span>
 <span class="k">class</span> <span class="nc">VolatilityStickyness</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
     <span class="n">NONE</span> <span class="o">=</span> <span class="s1">&#39;NONE&#39;</span>
     <span class="n">StickyStrike</span> <span class="o">=</span> <span class="s1">&#39;StickyStrike&#39;</span>
     <span class="n">StickyXStrike</span> <span class="o">=</span> <span class="s1">&#39;StickyXStrike&#39;</span>
     <span class="n">StickyFwdMoneyness</span> <span class="o">=</span> <span class="s1">&#39;StickyFwdMoneyness&#39;</span></div>
+
 
 <span class="nd">@_unique</span>
 <span class="k">class</span> <span class="nc">Currency</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>

@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,9 +13,9 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
-      <script src="../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -127,7 +127,9 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_monthly_profiles</span><span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">month</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">hour</span><span class="p">]</span>
         
 
-<div class="viewcode-block" id="SolarPowerModel"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.SolarPowerModel">[docs]</a><span class="k">class</span> <span class="nc">SolarPowerModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<div class="viewcode-block" id="SolarPowerModel">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.SolarPowerModel">[docs]</a>
+<span class="k">class</span> <span class="nc">SolarPowerModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">_eval_grid</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">timegrid</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
@@ -146,10 +148,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_profile</span> <span class="o">=</span> <span class="n">profile</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mean_level</span> <span class="o">=</span> <span class="n">mean_level</span>
 
-<div class="viewcode-block" id="SolarPowerModel.rnd_shape"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.SolarPowerModel.rnd_shape">[docs]</a>    <span class="k">def</span> <span class="nf">rnd_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_timepoints</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">:</span>
+<div class="viewcode-block" id="SolarPowerModel.rnd_shape">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.SolarPowerModel.rnd_shape">[docs]</a>
+    <span class="k">def</span> <span class="nf">rnd_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_timepoints</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_daily_maximum_process</span><span class="o">.</span><span class="n">rnd_shape</span><span class="p">(</span><span class="n">n_sims</span><span class="p">,</span> <span class="n">n_timepoints</span><span class="p">)</span></div>
+
     
-<div class="viewcode-block" id="SolarPowerModel.simulate"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.SolarPowerModel.simulate">[docs]</a>    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">:</span> <span class="n">DateTimeGrid</span><span class="p">,</span> <span class="n">start_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">rnd</span><span class="p">):</span>
+<div class="viewcode-block" id="SolarPowerModel.simulate">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.SolarPowerModel.simulate">[docs]</a>
+    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">:</span> <span class="n">DateTimeGrid</span><span class="p">,</span> <span class="n">start_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">rnd</span><span class="p">):</span>
         <span class="c1"># daily timegrid for daily maximum simulation</span>
         <span class="n">tg_</span> <span class="o">=</span> <span class="n">timegrid</span><span class="o">.</span><span class="n">get_daily_subgrid</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean_level</span><span class="p">,</span> <span class="s1">&#39;compute&#39;</span><span class="p">):</span>
@@ -168,20 +175,27 @@
                 <span class="n">d</span> <span class="o">=</span> <span class="n">timegrid</span><span class="o">.</span><span class="n">dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
             <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">_inv_logit</span><span class="p">(</span><span class="n">daily_maximum</span><span class="p">[</span><span class="n">day</span><span class="p">,:]</span> <span class="o">+</span> <span class="n">ml</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span> <span class="n">profile</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> 
         <span class="k">return</span> <span class="n">result</span></div>
+
     
-<div class="viewcode-block" id="SolarPowerModel.udls"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.SolarPowerModel.udls">[docs]</a>    <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="SolarPowerModel.udls">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.SolarPowerModel.udls">[docs]</a>
+    <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of all underlyings modeled</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Set[str]: Set of the modeled underlyings.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">set</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">])</span></div>
+
     
     <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
         
     
-<div class="viewcode-block" id="WindPowerModel"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerModel">[docs]</a><span class="k">class</span> <span class="nc">WindPowerModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<div class="viewcode-block" id="WindPowerModel">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerModel">[docs]</a>
+<span class="k">class</span> <span class="nc">WindPowerModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
     
     <span class="k">def</span> <span class="nf">_eval_grid</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
@@ -208,18 +222,26 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_timegrid</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="WindPowerModel.udls"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerModel.udls">[docs]</a>    <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="WindPowerModel.udls">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerModel.udls">[docs]</a>
+    <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of all underlyings modeled</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Set[str]: Set of the modeled underlyings.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">set</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">])</span></div>
+
     
-<div class="viewcode-block" id="WindPowerModel.rnd_shape"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerModel.rnd_shape">[docs]</a>    <span class="k">def</span> <span class="nf">rnd_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_timepoints</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">:</span>
+<div class="viewcode-block" id="WindPowerModel.rnd_shape">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerModel.rnd_shape">[docs]</a>
+    <span class="k">def</span> <span class="nf">rnd_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_timepoints</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deviation_process</span><span class="o">.</span><span class="n">rnd_shape</span><span class="p">(</span><span class="n">n_sims</span><span class="p">,</span> <span class="n">n_timepoints</span><span class="p">)</span></div>
+
     
-<div class="viewcode-block" id="WindPowerModel.simulate"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerModel.simulate">[docs]</a>    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">:</span> <span class="n">DateTimeGrid</span><span class="p">,</span> <span class="n">start_value</span><span class="p">,</span> <span class="n">rnd</span><span class="p">):</span>
+<div class="viewcode-block" id="WindPowerModel.simulate">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerModel.simulate">[docs]</a>
+    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">:</span> <span class="n">DateTimeGrid</span><span class="p">,</span> <span class="n">start_value</span><span class="p">,</span> <span class="n">rnd</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seasonal_function</span><span class="p">,</span> <span class="s1">&#39;compute&#39;</span><span class="p">):</span>
             <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seasonal_function</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">timegrid</span><span class="p">)[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -227,8 +249,11 @@
         <span class="n">start_value_</span> <span class="o">=</span> <span class="n">_logit</span><span class="p">(</span><span class="n">start_value</span><span class="p">)</span> <span class="o">-</span> <span class="n">mean</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">deviation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">deviation_process</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">timegrid</span><span class="o">.</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">start_value_</span><span class="p">,</span> <span class="n">rnd</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">_inv_logit</span><span class="p">(</span><span class="n">mean</span> <span class="o">+</span> <span class="n">deviation</span><span class="p">)</span></div>
+
     
-<div class="viewcode-block" id="WindPowerModel.calibrate"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerModel.calibrate">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="WindPowerModel.calibrate">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerModel.calibrate">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">calibrate</span><span class="p">(</span><span class="n">deviation_model</span><span class="p">,</span> <span class="n">capacities</span><span class="p">:</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">seasonality_function</span><span class="p">,</span> <span class="n">min_efficiency</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">max_efficiency</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">capacities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="s1">&#39;efficiency&#39;</span> <span class="ow">in</span>  <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
@@ -243,8 +268,10 @@
         <span class="n">deviation_model</span><span class="o">.</span><span class="n">calibrate</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;des_logit_efficiency&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span><span class="n">dt</span><span class="o">=</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">24.0</span><span class="o">*</span><span class="mf">365.0</span><span class="p">),</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">WindPowerModel</span><span class="p">(</span><span class="n">deviation_model</span><span class="p">,</span> <span class="n">pf_target</span><span class="p">)</span></div>
 
+
     <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
     
 <span class="k">class</span> <span class="nc">SmoothstepSupplyCurve</span><span class="p">(</span><span class="n">FactoryObject</span><span class="p">):</span> 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
@@ -269,7 +296,9 @@
         <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">residual</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">SmoothstepSupplyCurve</span><span class="o">.</span><span class="n">smoothstep</span><span class="p">(</span><span class="n">residual</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SupplyFunction"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.SupplyFunction">[docs]</a><span class="k">class</span> <span class="nc">SupplyFunction</span><span class="p">:</span>
+<div class="viewcode-block" id="SupplyFunction">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.SupplyFunction">[docs]</a>
+<span class="k">class</span> <span class="nc">SupplyFunction</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">floor</span><span class="p">:</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">cap</span><span class="p">:</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">peak</span><span class="p">:</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">offpeak</span><span class="p">:</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">peak_hours</span><span class="p">:</span> <span class="nb">set</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">floor</span> <span class="o">=</span> <span class="n">floor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cap</span> <span class="o">=</span> <span class="n">cap</span>
@@ -277,7 +306,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">offpeak</span> <span class="o">=</span> <span class="n">offpeak</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">peak_hours</span> <span class="o">=</span> <span class="n">peak_hours</span>
 
-<div class="viewcode-block" id="SupplyFunction.compute"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.SupplyFunction.compute">[docs]</a>    <span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+<div class="viewcode-block" id="SupplyFunction.compute">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.SupplyFunction.compute">[docs]</a>
+    <span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">cutoff</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cap</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">floor</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">q</span><span class="o">&lt;=</span><span class="bp">self</span><span class="o">.</span><span class="n">floor</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
@@ -288,7 +319,10 @@
             <span class="k">return</span> <span class="n">cutoff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offpeak</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">offpeak</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">q</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">floor</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">offpeak</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">cutoff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peak</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">peak</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cap</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">q</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="SupplyFunction.plot"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.SupplyFunction.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">res_demand_low</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">res_demand_high</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SupplyFunction.plot">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.SupplyFunction.plot">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">res_demand_low</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">res_demand_high</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">res_demand_low</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">res_demand_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">floor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">res_demand_high</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -297,9 +331,13 @@
         <span class="n">f</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">q</span><span class="p">]</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">q</span><span class="p">,</span><span class="n">f</span><span class="p">,</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;residual demand&#39;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;price&#39;</span><span class="p">)</span></div></div>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;price&#39;</span><span class="p">)</span></div>
+</div>
 
-<div class="viewcode-block" id="LoadModel"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LoadModel">[docs]</a><span class="k">class</span> <span class="nc">LoadModel</span><span class="p">:</span>
+
+<div class="viewcode-block" id="LoadModel">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LoadModel">[docs]</a>
+<span class="k">class</span> <span class="nc">LoadModel</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">deviation_process</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">load_profile</span><span class="p">:</span> <span class="nb">object</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Model the power load. </span>
 
@@ -310,16 +348,25 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">load_profile</span> <span class="o">=</span> <span class="n">load_profile</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">deviation_process</span> <span class="o">=</span> <span class="n">deviation_process</span>
 
-<div class="viewcode-block" id="LoadModel.rnd_shape"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LoadModel.rnd_shape">[docs]</a>    <span class="k">def</span> <span class="nf">rnd_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_timepoints</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">:</span>
+<div class="viewcode-block" id="LoadModel.rnd_shape">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LoadModel.rnd_shape">[docs]</a>
+    <span class="k">def</span> <span class="nf">rnd_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_timepoints</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deviation_process</span><span class="o">.</span><span class="n">rnd_shape</span><span class="p">(</span><span class="n">n_sims</span><span class="p">,</span> <span class="n">n_timepoints</span><span class="p">)</span></div>
+
     
-<div class="viewcode-block" id="LoadModel.simulate"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LoadModel.simulate">[docs]</a>    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">:</span> <span class="n">DateTimeGrid</span><span class="p">,</span> <span class="n">start_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">rnd</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<div class="viewcode-block" id="LoadModel.simulate">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LoadModel.simulate">[docs]</a>
+    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">:</span> <span class="n">DateTimeGrid</span><span class="p">,</span> <span class="n">start_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">rnd</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">timegrid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rnd</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">start_value</span>
         <span class="n">deviation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">deviation_process</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">timegrid</span><span class="o">.</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">start_value</span><span class="p">,</span> <span class="n">rnd</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_profile</span><span class="o">.</span><span class="n">get_profile</span><span class="p">(</span><span class="n">timegrid</span><span class="p">)[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">+</span> <span class="n">deviation</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_profile</span><span class="o">.</span><span class="n">get_profile</span><span class="p">(</span><span class="n">timegrid</span><span class="p">)[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">+</span> <span class="n">deviation</span></div>
+</div>
 
-<div class="viewcode-block" id="ResidualDemandModel"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandModel">[docs]</a><span class="k">class</span> <span class="nc">ResidualDemandModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ResidualDemandModel">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandModel">[docs]</a>
+<span class="k">class</span> <span class="nc">ResidualDemandModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wind_model</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> 
                  <span class="n">capacity_wind</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
                     <span class="n">solar_model</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> 
@@ -366,7 +413,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">supply_curve</span> <span class="o">=</span> <span class="n">supply_curve</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">power_name</span> <span class="o">=</span> <span class="n">power_name</span>
         
-<div class="viewcode-block" id="ResidualDemandModel.udls"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandModel.udls">[docs]</a>    <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="ResidualDemandModel.udls">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandModel.udls">[docs]</a>
+    <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of all underlyings modeled</span>
 
 <span class="sd">        Returns:</span>
@@ -377,7 +426,10 @@
         <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">solar_model</span><span class="o">.</span><span class="n">udls</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="ResidualDemandModel.simulate"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandModel.simulate">[docs]</a>    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">:</span> <span class="n">DateTimeGrid</span><span class="p">,</span> 
+
+<div class="viewcode-block" id="ResidualDemandModel.simulate">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandModel.simulate">[docs]</a>
+    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">:</span> <span class="n">DateTimeGrid</span><span class="p">,</span> 
                     <span class="n">start_value_wind</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
                     <span class="n">start_value_solar</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
                     <span class="n">start_value_load</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -425,8 +477,10 @@
         <span class="n">result</span><span class="p">[</span><span class="s1">&#39;price&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">power_price</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
+
     <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
     
 <span class="k">if</span> <span class="vm">__name__</span><span class="o">==</span><span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
    <span class="k">pass</span>

@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,9 +13,9 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
-      <script src="../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -123,7 +123,9 @@
         <span class="k">return</span> <span class="p">((</span><span class="n">d2</span><span class="o">-</span><span class="n">d1</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span><span class="o">/</span><span class="p">(</span><span class="mf">365.0</span><span class="o">*</span><span class="mi">24</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="mi">60</span><span class="p">))</span>
 
 
-<div class="viewcode-block" id="Period"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.Period">[docs]</a><span class="k">class</span> <span class="nc">Period</span><span class="p">:</span>
+<div class="viewcode-block" id="Period">
+<a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.Period">[docs]</a>
+<span class="k">class</span> <span class="nc">Period</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">years</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                  <span class="n">months</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -140,7 +142,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">months</span> <span class="o">=</span> <span class="n">months</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">days</span> <span class="o">=</span> <span class="n">days</span>
 
-<div class="viewcode-block" id="Period.from_string"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.Period.from_string">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Period.from_string">
+<a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.Period.from_string">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span><span class="n">period</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a Period from a string</span>
 
@@ -165,6 +169,7 @@
         <span class="k">elif</span> <span class="n">period_type</span> <span class="o">==</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">Period</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">period_length</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">period</span> <span class="o">+</span> <span class="s1">&#39; is not a valid period string. See documentation of tools.datetools.Period for deocumentation of valid strings.&#39;</span><span class="p">)</span></div>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">years</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -226,7 +231,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__days</span> <span class="o">=</span> <span class="n">days</span></div>
 
 
-<div class="viewcode-block" id="Schedule"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.Schedule">[docs]</a><span class="k">class</span> <span class="nc">Schedule</span><span class="p">:</span>
+
+<div class="viewcode-block" id="Schedule">
+<a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.Schedule">[docs]</a>
+<span class="k">class</span> <span class="nc">Schedule</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">start_day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
                  <span class="n">end_day</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
@@ -428,7 +436,9 @@
                 <span class="n">dates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_</span>
         <span class="k">return</span> <span class="n">dates</span>
 
-<div class="viewcode-block" id="Schedule.generate_dates"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.Schedule.generate_dates">[docs]</a>    <span class="k">def</span> <span class="nf">generate_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ends_only</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">date</span><span class="p">]:</span>
+<div class="viewcode-block" id="Schedule.generate_dates">
+<a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.Schedule.generate_dates">[docs]</a>
+    <span class="k">def</span> <span class="nf">generate_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ends_only</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">date</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate list of schedule days according to the schedule specification, in particular with regards to business</span>
 <span class="sd">        day convention and calendar given.</span>
@@ -460,7 +470,9 @@
 
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Schedule dates successfully calculated from &#39;&quot;</span>
                      <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__start_day</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; to &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__end_day</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39;.&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">rolled_schedule_dates</span></div></div>
+        <span class="k">return</span> <span class="n">rolled_schedule_dates</span></div>
+</div>
+
 
 
 

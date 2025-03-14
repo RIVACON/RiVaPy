@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,9 +13,9 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=b3ba4146"></script>
-      <script src="../../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -115,7 +115,9 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">curves</span><span class="p">)):</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">result</span> <span class="o">+</span> <span class="n">weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">curves</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get_curve</span><span class="p">(</span><span class="n">rating</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span>
-<div class="viewcode-block" id="SpreadCurveCollection"><a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.spread_curves.SpreadCurveCollection">[docs]</a><span class="k">class</span> <span class="nc">SpreadCurveCollection</span><span class="p">(</span><span class="n">FactoryObject</span><span class="p">):</span>
+<div class="viewcode-block" id="SpreadCurveCollection">
+<a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.spread_curves.SpreadCurveCollection">[docs]</a>
+<span class="k">class</span> <span class="nc">SpreadCurveCollection</span><span class="p">(</span><span class="n">FactoryObject</span><span class="p">):</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_create_curve_or_float</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">FactoryObject</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
@@ -189,7 +191,9 @@
                <span class="p">}</span>
         <span class="k">return</span> <span class="n">tmp</span>
     
-<div class="viewcode-block" id="SpreadCurveCollection.get_curve"><a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.spread_curves.SpreadCurveCollection.get_curve">[docs]</a>    <span class="k">def</span> <span class="nf">get_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issuer</span><span class="p">:</span> <span class="n">Issuer</span><span class="p">,</span> <span class="n">bond</span><span class="p">:</span> <span class="n">PlainVanillaCouponBondSpecification</span><span class="p">):</span>
+<div class="viewcode-block" id="SpreadCurveCollection.get_curve">
+<a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.spread_curves.SpreadCurveCollection.get_curve">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issuer</span><span class="p">:</span> <span class="n">Issuer</span><span class="p">,</span> <span class="n">bond</span><span class="p">:</span> <span class="n">PlainVanillaCouponBondSpecification</span><span class="p">):</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;computing curve for issuer &#39;</span> <span class="o">+</span> <span class="n">issuer</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; and bond &#39;</span> <span class="o">+</span> <span class="n">bond</span><span class="o">.</span><span class="n">obj_id</span><span class="p">)</span>
         <span class="n">rating_weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rating_weights</span><span class="p">[</span><span class="n">issuer</span><span class="o">.</span><span class="n">rating</span><span class="p">]</span>
         <span class="n">w1</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">-</span><span class="n">rating_weight</span>
@@ -201,10 +205,14 @@
         <span class="n">currency_spread</span> <span class="o">=</span> <span class="n">w1</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">currency_spread</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">currency</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">w2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">currency_spread</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">currency</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">securitization_spread</span> <span class="o">=</span> <span class="n">w1</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">sec_level_spreads</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">securitization_level</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">w2</span><span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sec_level_spreads</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">securitization_level</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">curve</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">rating_curve</span> <span class="o">+</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="mf">0.3</span><span class="o">*</span><span class="n">country_spread</span> <span class="o">+</span> <span class="mf">0.3</span><span class="o">*</span><span class="n">securitization_spread</span> <span class="o">+</span> <span class="mf">0.2</span><span class="o">*</span><span class="n">esg_spread</span> <span class="o">+</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">sector_spread</span><span class="o">+</span><span class="mf">0.1</span><span class="o">*</span><span class="n">currency_spread</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">curve</span></div></div>
+        <span class="k">return</span> <span class="n">curve</span></div>
+</div>
 
 
-<div class="viewcode-block" id="SpreadCurveSampler"><a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.spread_curves.SpreadCurveSampler">[docs]</a><span class="k">class</span> <span class="nc">SpreadCurveSampler</span><span class="p">:</span>
+
+<div class="viewcode-block" id="SpreadCurveSampler">
+<a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.spread_curves.SpreadCurveSampler">[docs]</a>
+<span class="k">class</span> <span class="nc">SpreadCurveSampler</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sector_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">country_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This class samples spreadcurves used to price bonds. It creates different curves according to</span>
 <span class="sd">            </span>
@@ -230,7 +238,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sector_weights</span> <span class="o">=</span> <span class="n">sector_weights</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">country_weights</span> <span class="o">=</span> <span class="n">country_weights</span>
     
-<div class="viewcode-block" id="SpreadCurveSampler.sample"><a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.spread_curves.SpreadCurveSampler.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_date</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">dict</span><span class="p">:</span>
+<div class="viewcode-block" id="SpreadCurveSampler.sample">
+<a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.spread_curves.SpreadCurveSampler.sample">[docs]</a>
+    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_date</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">dict</span><span class="p">:</span>
         <span class="n">min_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;min_short_term_rate&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> 
                           <span class="s1">&#39;max_short_term_rate&#39;</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">,</span> 
                           <span class="s1">&#39;min_long_run_rate&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
@@ -266,6 +276,7 @@
                   <span class="s1">&#39;rating_weights&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rating_weights</span><span class="p">,</span> <span class="s1">&#39;sector_spreads&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sector_spreads</span><span class="p">,</span> <span class="s1">&#39;country_curves&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">country_curves</span><span class="p">,</span>
                   <span class="s1">&#39;securitization_spreads&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">securitization_spreads</span><span class="p">}</span></div>
 
+
     <span class="k">def</span> <span class="nf">_get_num_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_currencies</span><span class="p">):</span>
         <span class="n">result</span> <span class="o">=</span> <span class="mi">4</span> <span class="c1">#curve_best_rating</span>
         <span class="n">result</span> <span class="o">+=</span> <span class="mi">4</span> <span class="c1"># curve_worst_rating</span>
@@ -277,7 +288,9 @@
         <span class="n">result</span> <span class="o">+=</span> <span class="mi">3</span><span class="c1">#_sample_sec_level_spreads</span>
         <span class="k">return</span> <span class="n">result</span>
 
-<div class="viewcode-block" id="SpreadCurveSampler.sample_new"><a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.spread_curves.SpreadCurveSampler.sample_new">[docs]</a>    <span class="k">def</span> <span class="nf">sample_new</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_date</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">SpreadCurveCollection</span><span class="p">:</span>
+<div class="viewcode-block" id="SpreadCurveSampler.sample_new">
+<a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.spread_curves.SpreadCurveSampler.sample_new">[docs]</a>
+    <span class="k">def</span> <span class="nf">sample_new</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_date</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">SpreadCurveCollection</span><span class="p">:</span>
         <span class="n">min_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;min_short_term_rate&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> 
                           <span class="s1">&#39;max_short_term_rate&#39;</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">,</span> 
                           <span class="s1">&#39;min_long_run_rate&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
@@ -312,6 +325,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">spread_curve_collection</span> <span class="o">=</span> <span class="n">SpreadCurveCollection</span><span class="p">(</span><span class="n">ref_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rating_curve</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency_spread</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">esg_rating_spread</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rating_weights</span><span class="p">,</span> 
                                      <span class="bp">self</span><span class="o">.</span><span class="n">sector_spreads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">country_curves</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">securitization_spreads</span> <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spread_curve_collection</span></div>
+
   
     <span class="k">def</span> <span class="nf">_sample_currency_spread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">currency_spread</span> <span class="o">=</span> <span class="p">{}</span>
@@ -387,7 +401,9 @@
         <span class="n">result</span><span class="p">[</span><span class="n">SecuritizationLevel</span><span class="o">.</span><span class="n">SUBORDINATED</span><span class="o">.</span><span class="n">value</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">low</span> <span class="o">+</span> <span class="mf">0.03</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">securitization_spreads</span> <span class="o">=</span> <span class="n">result</span>
 
-<div class="viewcode-block" id="SpreadCurveSampler.set_params"><a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.spread_curves.SpreadCurveSampler.set_params">[docs]</a>    <span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<div class="viewcode-block" id="SpreadCurveSampler.set_params">
+<a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.spread_curves.SpreadCurveSampler.set_params">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rating_curve</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;rating_curves&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">currency_spread</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;currency_spread&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">esg_rating_spread</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;esg_rating_spread&#39;</span><span class="p">]</span>
@@ -396,9 +412,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">country_curves</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;country_curves&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">securitization_spreads</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;securitization_spreads&#39;</span><span class="p">]</span></div>
 
+
         
         
-<div class="viewcode-block" id="SpreadCurveSampler.get_curve"><a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.spread_curves.SpreadCurveSampler.get_curve">[docs]</a>    <span class="k">def</span> <span class="nf">get_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issuer</span><span class="p">:</span> <span class="n">Issuer</span><span class="p">,</span> <span class="n">bond</span><span class="p">:</span> <span class="n">PlainVanillaCouponBondSpecification</span><span class="p">):</span>
+<div class="viewcode-block" id="SpreadCurveSampler.get_curve">
+<a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.spread_curves.SpreadCurveSampler.get_curve">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issuer</span><span class="p">:</span> <span class="n">Issuer</span><span class="p">,</span> <span class="n">bond</span><span class="p">:</span> <span class="n">PlainVanillaCouponBondSpecification</span><span class="p">):</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;computing curve for issuer &#39;</span> <span class="o">+</span> <span class="n">issuer</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; and bond &#39;</span> <span class="o">+</span> <span class="n">bond</span><span class="o">.</span><span class="n">obj_id</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spread_curve_collection</span><span class="o">.</span><span class="n">get_curve</span><span class="p">(</span><span class="n">issuer</span><span class="p">,</span> <span class="n">bond</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_curve</span><span class="p">(</span><span class="n">issuer</span><span class="o">.</span><span class="n">rating</span><span class="p">,</span> <span class="n">issuer</span><span class="o">.</span><span class="n">country</span><span class="p">,</span> <span class="n">issuer</span><span class="o">.</span><span class="n">esg_rating</span><span class="p">,</span> <span class="n">issuer</span><span class="o">.</span><span class="n">sector</span><span class="p">,</span> <span class="n">bond</span><span class="o">.</span><span class="n">currency</span><span class="p">,</span> <span class="n">bond</span><span class="o">.</span><span class="n">securitization_level</span><span class="p">)</span>
@@ -416,6 +435,7 @@
         <span class="c1">#curve = 0.5*rating_curve + 0.5*esg_spread#(0.3*country_spread + 0.3*securitization_spread </span>
         <span class="c1">#                #+ 0.2*esg_spread + 0.1*sector_spread+0.1*currency_spread)</span>
         <span class="k">return</span> <span class="n">curve</span></div>
+
     
     <span class="k">def</span> <span class="nf">_get_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rating</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">country</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">esg_rating</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>  <span class="n">sector</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">securitization_level</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">rating_weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rating_weights</span><span class="p">[</span><span class="n">rating</span><span class="p">]</span>
@@ -432,6 +452,7 @@
         <span class="c1">#curve = 0.5*rating_curve + 0.5*esg_spread#(0.3*country_spread + 0.3*securitization_spread </span>
         <span class="c1">#                #+ 0.2*esg_spread + 0.1*sector_spread+0.1*currency_spread)</span>
         <span class="k">return</span> <span class="n">curve</span></div>
+
 </pre></div>
 
            </div>

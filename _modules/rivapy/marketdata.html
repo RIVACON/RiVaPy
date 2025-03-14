@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,9 +13,9 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
-      <script src="../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -109,7 +109,9 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Up to now only implemented in pyvacon that has not been installed.&#39;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="DividendTable"><a class="viewcode-back" href="../../rivapy/marketdata/dividends.html#rivapy.marketdata.DividendTable">[docs]</a><span class="k">class</span> <span class="nc">DividendTable</span><span class="p">:</span>
+<div class="viewcode-block" id="DividendTable">
+<a class="viewcode-back" href="../../rivapy/marketdata/dividends.html#rivapy.marketdata.DividendTable">[docs]</a>
+<span class="k">class</span> <span class="nc">DividendTable</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                 <span class="n">refdate</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> 
                 <span class="n">ex_dates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
@@ -144,6 +146,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">DividendTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ex_dates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">div_yield</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">div_cash</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tax_factors</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pay_dates</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span></div>
+
 
 <span class="k">class</span> <span class="nc">_VolatilityParametrizationExpiry</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expiries</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">params_at_expiry</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]):</span>
@@ -220,7 +223,9 @@
         
         <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">x</span>
     
-<div class="viewcode-block" id="VolatilityParametrizationFlat"><a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationFlat">[docs]</a><span class="k">class</span> <span class="nc">VolatilityParametrizationFlat</span><span class="p">:</span>
+<div class="viewcode-block" id="VolatilityParametrizationFlat">
+<a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationFlat">[docs]</a>
+<span class="k">class</span> <span class="nc">VolatilityParametrizationFlat</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">vol</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Flat volatility parametrization</span>
 
@@ -234,8 +239,11 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">VolatilityParametrizationFlat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol</span><span class="p">)</span>  
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span></div>
+
     
-<div class="viewcode-block" id="VolatilityParametrizationTerm"><a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationTerm">[docs]</a><span class="k">class</span> <span class="nc">VolatilityParametrizationTerm</span><span class="p">:</span>
+<div class="viewcode-block" id="VolatilityParametrizationTerm">
+<a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationTerm">[docs]</a>
+<span class="k">class</span> <span class="nc">VolatilityParametrizationTerm</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expiries</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">fwd_atm_vols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Term volatility parametrization</span>
 
@@ -252,7 +260,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">VolatilityParametrizationTerm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fwd_atm_vols</span><span class="p">)</span>  
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span></div>
 
-<div class="viewcode-block" id="VolatilityParametrizationSVI"><a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSVI">[docs]</a><span class="k">class</span>   <span class="nc">VolatilityParametrizationSVI</span><span class="p">(</span><span class="n">_VolatilityParametrizationExpiry</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VolatilityParametrizationSVI">
+<a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSVI">[docs]</a>
+<span class="k">class</span>   <span class="nc">VolatilityParametrizationSVI</span><span class="p">(</span><span class="n">_VolatilityParametrizationExpiry</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expiries</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">svi_params</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Raw SVI parametrization (definition 3.1 in  https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2033323)</span>
 
@@ -269,7 +280,10 @@
     <span class="k">def</span> <span class="nf">_calc_implied_vol_at_expiry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">ttm</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">-</span><span class="n">params</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">-</span><span class="n">params</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">params</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="VolatilityParametrizationSSVI"><a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSSVI">[docs]</a><span class="k">class</span> <span class="nc">VolatilityParametrizationSSVI</span><span class="p">:</span>
+
+<div class="viewcode-block" id="VolatilityParametrizationSSVI">
+<a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSSVI">[docs]</a>
+<span class="k">class</span> <span class="nc">VolatilityParametrizationSSVI</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expiries</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">fwd_atm_vols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">rho</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">eta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">gamma</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;SSVI volatility parametrization</span>
 <span class="sd">        https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2033323</span>
@@ -292,7 +306,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_x</span><span class="p">(</span><span class="n">fwd_atm_vols</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span><span class="n">gamma</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_fwd_atm_vols</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fwd_atm_vols</span><span class="p">)</span>
 
-<div class="viewcode-block" id="VolatilityParametrizationSSVI.calc_implied_vol"><a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSSVI.calc_implied_vol">[docs]</a>    <span class="k">def</span> <span class="nf">calc_implied_vol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ttm</span><span class="p">,</span> <span class="n">strike</span><span class="p">):</span>
+<div class="viewcode-block" id="VolatilityParametrizationSSVI.calc_implied_vol">
+<a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSSVI.calc_implied_vol">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_implied_vol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ttm</span><span class="p">,</span> <span class="n">strike</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate implied volatility for given expiry and strike</span>
 
 <span class="sd">        Args:</span>
@@ -303,6 +319,7 @@
 <span class="sd">            [float]: Implied volatility.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">()</span><span class="o">.</span><span class="n">calcImpliedVol</span><span class="p">(</span><span class="n">ttm</span><span class="p">,</span> <span class="n">strike</span><span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -325,19 +342,34 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">x</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
         
-<div class="viewcode-block" id="VolatilityParametrizationSSVI.get_rho"><a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSSVI.get_rho">[docs]</a>    <span class="k">def</span> <span class="nf">get_rho</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="VolatilityParametrizationSSVI.get_rho">
+<a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSSVI.get_rho">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_rho</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span></div>
-    
-<div class="viewcode-block" id="VolatilityParametrizationSSVI.get_eta"><a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSSVI.get_eta">[docs]</a>    <span class="k">def</span> <span class="nf">get_eta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span></div>
-    
-<div class="viewcode-block" id="VolatilityParametrizationSSVI.get_gamma"><a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSSVI.get_gamma">[docs]</a>    <span class="k">def</span> <span class="nf">get_gamma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
-    
-<div class="viewcode-block" id="VolatilityParametrizationSSVI.get_fwd_atm_vols"><a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSSVI.get_fwd_atm_vols">[docs]</a>    <span class="k">def</span> <span class="nf">get_fwd_atm_vols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">n_fwd_atm_vols</span><span class="p">]</span></div></div>
 
-<div class="viewcode-block" id="VolatilityParametrizationSABR"><a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSABR">[docs]</a><span class="k">class</span> <span class="nc">VolatilityParametrizationSABR</span><span class="p">(</span><span class="n">_VolatilityParametrizationExpiry</span><span class="p">):</span>
+    
+<div class="viewcode-block" id="VolatilityParametrizationSSVI.get_eta">
+<a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSSVI.get_eta">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_eta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span></div>
+
+    
+<div class="viewcode-block" id="VolatilityParametrizationSSVI.get_gamma">
+<a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSSVI.get_gamma">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_gamma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+
+    
+<div class="viewcode-block" id="VolatilityParametrizationSSVI.get_fwd_atm_vols">
+<a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSSVI.get_fwd_atm_vols">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_fwd_atm_vols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">n_fwd_atm_vols</span><span class="p">]</span></div>
+</div>
+
+
+<div class="viewcode-block" id="VolatilityParametrizationSABR">
+<a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSABR">[docs]</a>
+<span class="k">class</span> <span class="nc">VolatilityParametrizationSABR</span><span class="p">(</span><span class="n">_VolatilityParametrizationExpiry</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expiries</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">sabr_params</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;SABR parametrization</span>
 <span class="sd">        https://bsic.it/sabr-stochastic-volatility-model-volatility-smile/</span>
@@ -403,8 +435,11 @@
             <span class="n">sigma</span> <span class="o">=</span> <span class="n">alpha</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">24</span><span class="o">*</span><span class="n">alpha</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">f</span><span class="o">*</span><span class="n">K</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="o">*</span><span class="n">rho</span><span class="o">*</span><span class="n">beta</span><span class="o">*</span><span class="n">nu</span><span class="o">*</span><span class="n">alpha</span><span class="o">/</span><span class="p">(</span><span class="n">f</span><span class="o">*</span><span class="n">K</span><span class="p">)</span><span class="o">**</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="mi">2</span><span class="o">-</span><span class="mi">3</span><span class="o">*</span><span class="n">rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">24</span><span class="o">*</span><span class="n">nu</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">ttm</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">f</span><span class="o">*</span><span class="n">K</span><span class="p">)</span><span class="o">**</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">24</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">f</span><span class="o">/</span><span class="n">K</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span><span class="o">**</span><span class="mi">4</span><span class="o">/</span><span class="mi">1920</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">f</span><span class="o">/</span><span class="n">K</span><span class="p">)</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="n">zeta</span><span class="o">/</span><span class="n">chi_zeta</span>
 
         <span class="k">return</span> <span class="n">sigma</span><span class="o">**</span><span class="mi">2</span></div>
+
             
-<div class="viewcode-block" id="VolatilityGridParametrization"><a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityGridParametrization">[docs]</a><span class="k">class</span> <span class="nc">VolatilityGridParametrization</span><span class="p">:</span>
+<div class="viewcode-block" id="VolatilityGridParametrization">
+<a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityGridParametrization">[docs]</a>
+<span class="k">class</span> <span class="nc">VolatilityGridParametrization</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expiries</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">strikes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">vols</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Grid parametrization</span>
 <span class="sd">        This parametrization stores a set of strike-vol grids for a given list of expiries and computes a volatility by</span>
@@ -424,7 +459,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">vols</span> <span class="o">=</span> <span class="n">vols</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="VolatilityGridParametrization.calc_implied_vol"><a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityGridParametrization.calc_implied_vol">[docs]</a>    <span class="k">def</span> <span class="nf">calc_implied_vol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ttm</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">strike</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+<div class="viewcode-block" id="VolatilityGridParametrization.calc_implied_vol">
+<a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityGridParametrization.calc_implied_vol">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_implied_vol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ttm</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">strike</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate implied volatility for given expiry and strike</span>
 
 <span class="sd">        Args:</span>
@@ -436,16 +473,23 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">()</span><span class="o">.</span><span class="n">calcImpliedVol</span><span class="p">(</span><span class="n">ttm</span><span class="p">,</span> <span class="n">strike</span><span class="p">)</span></div>
 
+
     <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">vol_params</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">VolatilityParametrizationTimeSlice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">strikes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vols</span><span class="p">)</span>  
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span></div>
+
     
-<div class="viewcode-block" id="VolatilitySurface"><a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilitySurface">[docs]</a><span class="k">class</span> <span class="nc">VolatilitySurface</span><span class="p">:</span>
-<div class="viewcode-block" id="VolatilitySurface.load"><a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilitySurface.load">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="VolatilitySurface">
+<a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilitySurface">[docs]</a>
+<span class="k">class</span> <span class="nc">VolatilitySurface</span><span class="p">:</span>
+<div class="viewcode-block" id="VolatilitySurface.load">
+<a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilitySurface.load">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">VolatilitySurface</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
+
     
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_create_param_pyvacon_obj</span><span class="p">(</span><span class="n">vol_param</span><span class="p">):</span>
@@ -492,7 +536,9 @@
                 <span class="n">VolatilitySurface</span><span class="o">.</span><span class="n">_create_param_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_param</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span>
     
-<div class="viewcode-block" id="VolatilitySurface.calc_implied_vol"><a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilitySurface.calc_implied_vol">[docs]</a>    <span class="k">def</span> <span class="nf">calc_implied_vol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">expiry</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">strike</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">forward_curve</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="VolatilitySurface.calc_implied_vol">
+<a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilitySurface.calc_implied_vol">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_implied_vol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">expiry</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">strike</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">forward_curve</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate implied volatility</span>
 
 <span class="sd">        Args:</span>
@@ -522,8 +568,11 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The given strike value seems implausible compared to the discounted future cash dividends</span><span class="se">\</span>
 <span class="s1">                (</span><span class="si">{</span><span class="n">forward_curve_obj</span><span class="o">.</span><span class="n">discountedFutureCashDivs</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span><span class="w"> </span><span class="n">expiry</span><span class="p">)</span><span class="si">}</span><span class="s1">).&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">vol</span><span class="o">.</span><span class="n">calcImpliedVol</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">x_strike</span><span class="p">)</span></div>
+
       
-<div class="viewcode-block" id="VolatilitySurface.set_stickyness"><a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilitySurface.set_stickyness">[docs]</a>    <span class="nd">@staticmethod</span>        
+<div class="viewcode-block" id="VolatilitySurface.set_stickyness">
+<a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilitySurface.set_stickyness">[docs]</a>
+    <span class="nd">@staticmethod</span>        
     <span class="k">def</span> <span class="nf">set_stickyness</span><span class="p">(</span><span class="n">vol_stickyness</span><span class="p">:</span> <span class="n">enums</span><span class="o">.</span><span class="n">VolatilityStickyness</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">vol_stickyness</span> <span class="ow">is</span> <span class="n">enums</span><span class="o">.</span><span class="n">VolatilityStickyness</span><span class="o">.</span><span class="n">StickyXStrike</span><span class="p">:</span>
             <span class="n">_pricing</span><span class="o">.</span><span class="n">GlobalSettings</span><span class="o">.</span><span class="n">setVolatilitySurfaceFwdStickyness</span><span class="p">(</span><span class="n">_pricing</span><span class="o">.</span><span class="n">VolatilitySurfaceFwdStickyness</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">StickyXStrike</span><span class="p">)</span>
@@ -534,7 +583,9 @@
         <span class="k">elif</span> <span class="n">vol_stickyness</span> <span class="ow">is</span> <span class="n">enums</span><span class="o">.</span><span class="n">VolatilityStickyness</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
             <span class="n">_pricing</span><span class="o">.</span><span class="n">GlobalSettings</span><span class="o">.</span><span class="n">setVolatilitySurfaceFwdStickyness</span><span class="p">(</span><span class="n">_pricing</span><span class="o">.</span><span class="n">VolatilitySurfaceFwdStickyness</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">NONE</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span> <span class="p">(</span><span class="s1">&#39;Error&#39;</span><span class="p">)</span></div></div>
+            <span class="k">raise</span> <span class="ne">Exception</span> <span class="p">(</span><span class="s1">&#39;Error&#39;</span><span class="p">)</span></div>
+</div>
+
 
 <span class="k">def</span> <span class="nf">_add_to_factory</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
     <span class="n">factory_entries</span> <span class="o">=</span> <span class="n">_factory</span><span class="p">()</span>

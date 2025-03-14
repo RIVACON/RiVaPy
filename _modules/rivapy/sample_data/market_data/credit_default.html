@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,9 +13,9 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=b3ba4146"></script>
-      <script src="../../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -93,8 +93,12 @@
     <span class="n">Economimc_factor</span> <span class="o">=</span> <span class="mi">4</span>
     <span class="n">ZIP_code</span> <span class="o">=</span> <span class="mi">5</span>
 
-<div class="viewcode-block" id="CreditDefaultData"><a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.credit_default.CreditDefaultData">[docs]</a><span class="k">class</span> <span class="nc">CreditDefaultData</span><span class="p">:</span>
-<div class="viewcode-block" id="CreditDefaultData.sample"><a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.credit_default.CreditDefaultData.sample">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="CreditDefaultData">
+<a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.credit_default.CreditDefaultData">[docs]</a>
+<span class="k">class</span> <span class="nc">CreditDefaultData</span><span class="p">:</span>
+<div class="viewcode-block" id="CreditDefaultData.sample">
+<a class="viewcode-back" href="../../../../sample_data/index.html#rivapy.sample_data.market_data.credit_default.CreditDefaultData.sample">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">n_data</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> 
                 <span class="n">cov</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span> 
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sample credit default data. </span>
@@ -176,6 +180,7 @@
         <span class="n">defaulted</span><span class="p">[</span><span class="n">tmp</span><span class="o">&lt;</span><span class="n">default_prob</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
         <span class="n">df</span><span class="p">[</span><span class="s1">&#39;defaulted&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaulted</span>
         <span class="k">return</span> <span class="n">df</span></div>
+
     
     
     <span class="nd">@staticmethod</span>
@@ -195,6 +200,7 @@
         <span class="n">x2</span> <span class="o">=</span> <span class="mf">1.5</span><span class="o">*</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;savings&#39;</span><span class="p">]</span>
         <span class="n">x3</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;regime&#39;</span><span class="p">]</span>
         <span class="k">return</span> <span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="p">(</span><span class="n">x0</span><span class="o">+</span><span class="n">x1</span><span class="o">+</span><span class="n">x2</span><span class="o">+</span><span class="n">x3</span><span class="p">)))</span></div>
+
     
 
 <span class="k">class</span> <span class="nc">CreditDefaultData2</span><span class="p">:</span>

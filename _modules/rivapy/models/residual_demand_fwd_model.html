@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,9 +13,9 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
-      <script src="../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -136,10 +136,14 @@
                     <span class="s1">&#39;min_strike&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_strike</span><span class="p">,</span>
                     <span class="s1">&#39;max_strike&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_strike</span><span class="p">}</span>
 
-<div class="viewcode-block" id="WindPowerForecastModel"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel">[docs]</a><span class="k">class</span> <span class="nc">WindPowerForecastModel</span><span class="p">(</span><span class="n">BaseFwdModel</span><span class="p">):</span>
+<div class="viewcode-block" id="WindPowerForecastModel">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel">[docs]</a>
+<span class="k">class</span> <span class="nc">WindPowerForecastModel</span><span class="p">(</span><span class="n">BaseFwdModel</span><span class="p">):</span>
     
         
-<div class="viewcode-block" id="WindPowerForecastModel.ForwardSimulationResult"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel.ForwardSimulationResult">[docs]</a>    <span class="k">class</span> <span class="nc">ForwardSimulationResult</span><span class="p">(</span><span class="n">ForwardSimulationResult</span><span class="p">):</span>
+<div class="viewcode-block" id="WindPowerForecastModel.ForwardSimulationResult">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel.ForwardSimulationResult">[docs]</a>
+    <span class="k">class</span> <span class="nc">ForwardSimulationResult</span><span class="p">(</span><span class="n">ForwardSimulationResult</span><span class="p">):</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
                         <span class="n">wind_forecast_model</span><span class="p">,</span> 
                         <span class="n">timegrid</span><span class="p">,</span> 
@@ -153,16 +157,25 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">initial_forecasts</span> <span class="o">=</span> <span class="n">initial_forecasts</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ou_additive_forward_corrections</span> <span class="o">=</span> <span class="n">wind_forecast_model</span><span class="o">.</span><span class="n">_compute_ou_additive_forward_correction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_forecasts</span><span class="p">)</span>
 
-<div class="viewcode-block" id="WindPowerForecastModel.ForwardSimulationResult.n_forwards"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel.ForwardSimulationResult.n_forwards">[docs]</a>        <span class="k">def</span> <span class="nf">n_forwards</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="WindPowerForecastModel.ForwardSimulationResult.n_forwards">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel.ForwardSimulationResult.n_forwards">[docs]</a>
+        <span class="k">def</span> <span class="nf">n_forwards</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="WindPowerForecastModel.ForwardSimulationResult.udls"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel.ForwardSimulationResult.udls">[docs]</a>        <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="WindPowerForecastModel.ForwardSimulationResult.udls">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel.ForwardSimulationResult.udls">[docs]</a>
+        <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">udls</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="WindPowerForecastModel.ForwardSimulationResult.get"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel.ForwardSimulationResult.get">[docs]</a>        <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+
+<div class="viewcode-block" id="WindPowerForecastModel.ForwardSimulationResult.get">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel.ForwardSimulationResult.get">[docs]</a>
+        <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
                 <span class="n">forecast_timepoints</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
             <span class="n">expiry</span> <span class="o">=</span>  <span class="n">BaseFwdModel</span><span class="o">.</span><span class="n">get_expiry_from_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="n">expiry</span><span class="p">,</span> <span class="n">forecast_timepoints</span><span class="p">)</span></div>
+
 
         <span class="k">def</span> <span class="nf">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expiry</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">forecast_timepoints</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_paths</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -183,6 +196,7 @@
                     <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_timegrid</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">[</span><span class="n">expiry</span><span class="p">])</span><span class="o">&gt;</span><span class="mf">1e-6</span><span class="p">:</span>
                         <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
             <span class="k">return</span> <span class="n">result</span></div>
+
         
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">region</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                     <span class="n">speed_of_mean_reversion</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
@@ -280,24 +294,35 @@
         <span class="k">return</span> <span class="n">strikes</span><span class="p">,</span> <span class="n">weights</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="WindPowerForecastModel.eval_call_functions"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel.eval_call_functions">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="WindPowerForecastModel.eval_call_functions">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel.eval_call_functions">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">eval_call_functions</span><span class="p">(</span><span class="n">strikes</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">approx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">strikes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mf">0.0</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
             <span class="n">approx</span> <span class="o">+=</span> <span class="n">weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">strikes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="mf">0.0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">approx</span></div>
+
     
-<div class="viewcode-block" id="WindPowerForecastModel.get_forward"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel.get_forward">[docs]</a>    <span class="k">def</span> <span class="nf">get_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="n">ttm</span><span class="p">,</span> <span class="n">ou_additive_forward_correction</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<div class="viewcode-block" id="WindPowerForecastModel.get_forward">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel.get_forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="n">ttm</span><span class="p">,</span> <span class="n">ou_additive_forward_correction</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="n">expected_ou</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ou</span><span class="o">.</span><span class="n">compute_expected_value</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">ttm</span><span class="p">)</span><span class="c1">#+correction</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">_inv_logit</span><span class="p">(</span><span class="n">expected_ou</span> <span class="o">+</span> <span class="n">ou_additive_forward_correction</span><span class="p">)</span>
         <span class="c1">#expected_ou = self.ou.compute_expected_value(paths[1], ttm)#+correction</span>
         <span class="c1">#result += (1.0-ttm)*_inv_logit(expected_ou + ou_additive_forward_correction)</span>
         <span class="k">return</span> <span class="n">result</span></div>
+
             
-<div class="viewcode-block" id="WindPowerForecastModel.rnd_shape"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel.rnd_shape">[docs]</a>    <span class="k">def</span> <span class="nf">rnd_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">:</span>
+<div class="viewcode-block" id="WindPowerForecastModel.rnd_shape">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel.rnd_shape">[docs]</a>
+    <span class="k">def</span> <span class="nf">rnd_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">n_timesteps</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">)</span></div>
+
     
-<div class="viewcode-block" id="WindPowerForecastModel.simulate"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel.simulate">[docs]</a>    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">,</span> 
+<div class="viewcode-block" id="WindPowerForecastModel.simulate">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel.simulate">[docs]</a>
+    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">,</span> 
                 <span class="n">rnd</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                 <span class="n">expiries</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
                 <span class="n">initial_forecasts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
@@ -307,23 +332,40 @@
         <span class="c1">#paths[1,:,:] = self.ou.simulate(timegrid, startvalue, rnd[1])</span>
         <span class="k">return</span> <span class="n">WindPowerForecastModel</span><span class="o">.</span><span class="n">ForwardSimulationResult</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">,</span> <span class="n">expiries</span><span class="p">,</span> <span class="n">initial_forecasts</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="WindPowerForecastModel.udls"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel.udls">[docs]</a>    <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="nb">set</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">region</span><span class="p">])</span></div></div>
 
-<div class="viewcode-block" id="MultiRegionWindForecastModel"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel">[docs]</a><span class="k">class</span> <span class="nc">MultiRegionWindForecastModel</span><span class="p">(</span><span class="n">BaseFwdModel</span><span class="p">):</span>
-<div class="viewcode-block" id="MultiRegionWindForecastModel.ForwardSimulationResult"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.ForwardSimulationResult">[docs]</a>    <span class="k">class</span> <span class="nc">ForwardSimulationResult</span><span class="p">(</span><span class="n">ForwardSimulationResult</span><span class="p">):</span>
+<div class="viewcode-block" id="WindPowerForecastModel.udls">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.WindPowerForecastModel.udls">[docs]</a>
+    <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">region</span><span class="p">])</span></div>
+</div>
+
+
+<div class="viewcode-block" id="MultiRegionWindForecastModel">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel">[docs]</a>
+<span class="k">class</span> <span class="nc">MultiRegionWindForecastModel</span><span class="p">(</span><span class="n">BaseFwdModel</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiRegionWindForecastModel.ForwardSimulationResult">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.ForwardSimulationResult">[docs]</a>
+    <span class="k">class</span> <span class="nc">ForwardSimulationResult</span><span class="p">(</span><span class="n">ForwardSimulationResult</span><span class="p">):</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">regions_result</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_results</span> <span class="o">=</span> <span class="n">regions_result</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">model</span>
 
-<div class="viewcode-block" id="MultiRegionWindForecastModel.ForwardSimulationResult.n_forwards"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.ForwardSimulationResult.n_forwards">[docs]</a>        <span class="k">def</span> <span class="nf">n_forwards</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="MultiRegionWindForecastModel.ForwardSimulationResult.n_forwards">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.ForwardSimulationResult.n_forwards">[docs]</a>
+        <span class="k">def</span> <span class="nf">n_forwards</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="k">return</span> <span class="n">v</span><span class="o">.</span><span class="n">n_forwards</span><span class="p">()</span></div>
+
             
-<div class="viewcode-block" id="MultiRegionWindForecastModel.ForwardSimulationResult.udls"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.ForwardSimulationResult.udls">[docs]</a>        <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="MultiRegionWindForecastModel.ForwardSimulationResult.udls">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.ForwardSimulationResult.udls">[docs]</a>
+        <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">udls</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="MultiRegionWindForecastModel.ForwardSimulationResult.get"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.ForwardSimulationResult.get">[docs]</a>        <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">forecast_timepoints</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+
+<div class="viewcode-block" id="MultiRegionWindForecastModel.ForwardSimulationResult.get">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.ForwardSimulationResult.get">[docs]</a>
+        <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">forecast_timepoints</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
             <span class="n">udl</span> <span class="o">=</span> <span class="n">BaseFwdModel</span><span class="o">.</span><span class="n">get_udl_from_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">udl</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                 <span class="n">expiry</span> <span class="o">=</span> <span class="n">BaseFwdModel</span><span class="o">.</span><span class="n">get_expiry_from_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
@@ -332,6 +374,7 @@
                 <span class="k">if</span> <span class="n">udl</span> <span class="ow">in</span> <span class="n">v</span><span class="o">.</span><span class="n">udls</span><span class="p">():</span>
                     <span class="k">return</span> <span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">forecast_timepoints</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot find key &#39;</span><span class="o">+</span> <span class="n">key</span><span class="p">)</span></div>
+
 
         <span class="k">def</span> <span class="nf">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expiry</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">forecast_timepoints</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
@@ -343,24 +386,37 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">result</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">region_relative_capacity</span><span class="p">(</span><span class="n">udl</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">BaseFwdModel</span><span class="o">.</span><span class="n">get_key</span><span class="p">(</span><span class="n">udl</span><span class="p">,</span> <span class="n">expiry</span><span class="p">),</span> <span class="n">forecast_timepoints</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">result</span></div>
+
         
-<div class="viewcode-block" id="MultiRegionWindForecastModel.Region"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.Region">[docs]</a>    <span class="k">class</span> <span class="nc">Region</span><span class="p">(</span><span class="n">FactoryObject</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiRegionWindForecastModel.Region">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.Region">[docs]</a>
+    <span class="k">class</span> <span class="nc">Region</span><span class="p">(</span><span class="n">FactoryObject</span><span class="p">):</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">WindPowerForecastModel</span><span class="p">,</span>  <span class="n">capacity</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">rnd_weights</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">_create</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span>  <span class="o">=</span> <span class="n">capacity</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rnd_weights</span> <span class="o">=</span> <span class="n">rnd_weights</span>
 
-<div class="viewcode-block" id="MultiRegionWindForecastModel.Region.name"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.Region.name">[docs]</a>        <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiRegionWindForecastModel.Region.name">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.Region.name">[docs]</a>
+        <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">region</span></div>
 
-<div class="viewcode-block" id="MultiRegionWindForecastModel.Region.n_random"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.Region.n_random">[docs]</a>        <span class="k">def</span> <span class="nf">n_random</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MultiRegionWindForecastModel.Region.n_random">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.Region.n_random">[docs]</a>
+        <span class="k">def</span> <span class="nf">n_random</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rnd_weights</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MultiRegionWindForecastModel.Region.udls"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.Region.udls">[docs]</a>        <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="MultiRegionWindForecastModel.Region.udls">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.Region.udls">[docs]</a>
+        <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">udls</span><span class="p">()</span></div>
+
 
         <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">dict</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="s1">&#39;capacity&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="p">,</span> <span class="s1">&#39;rnd_weights&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rnd_weights</span><span class="p">}</span></div>
+
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">region_forecast_models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Region</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Simple model to simulate power forecasts for more then one wind region and a total efficiency over all regions.</span>
@@ -419,22 +475,33 @@
     <span class="k">def</span> <span class="nf">rnd_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_region_forecast_models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rnd_weights</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MultiRegionWindForecastModel.total_capacity"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.total_capacity">[docs]</a>    <span class="k">def</span> <span class="nf">total_capacity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiRegionWindForecastModel.total_capacity">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.total_capacity">[docs]</a>
+    <span class="k">def</span> <span class="nf">total_capacity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">result</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_region_forecast_models</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">+=</span> <span class="n">r</span><span class="o">.</span><span class="n">capacity</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="MultiRegionWindForecastModel.region_relative_capacity"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.region_relative_capacity">[docs]</a>    <span class="k">def</span> <span class="nf">region_relative_capacity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">region</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MultiRegionWindForecastModel.region_relative_capacity">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.region_relative_capacity">[docs]</a>
+    <span class="k">def</span> <span class="nf">region_relative_capacity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">region</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_region_forecast_models</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">name</span><span class="p">()</span> <span class="o">==</span> <span class="n">region</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">capacity</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">total_capacity</span><span class="p">()</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Model does not contain a region with name &#39;</span> <span class="o">+</span> <span class="n">region</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MultiRegionWindForecastModel.region_names"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.region_names">[docs]</a>    <span class="k">def</span> <span class="nf">region_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="MultiRegionWindForecastModel.region_names">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.region_names">[docs]</a>
+    <span class="k">def</span> <span class="nf">region_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">name</span><span class="p">()</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_region_forecast_models</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="MultiRegionWindForecastModel.simulate"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.simulate">[docs]</a>    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">,</span> <span class="n">rnd</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">expiries</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+
+<div class="viewcode-block" id="MultiRegionWindForecastModel.simulate">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.simulate">[docs]</a>
+    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">,</span> <span class="n">rnd</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">expiries</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
                 
                 <span class="n">initial_forecasts</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span> <span class="n">startvalue</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
         <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
@@ -445,30 +512,50 @@
             <span class="n">results</span><span class="p">[</span><span class="n">region</span><span class="o">.</span><span class="n">name</span><span class="p">()]</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">rnd_</span><span class="p">,</span> <span class="n">expiries</span><span class="p">,</span> <span class="n">initial_forecasts</span><span class="p">[</span><span class="n">region</span><span class="o">.</span><span class="n">name</span><span class="p">()],</span> <span class="n">startvalue</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">MultiRegionWindForecastModel</span><span class="o">.</span><span class="n">ForwardSimulationResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MultiRegionWindForecastModel.rnd_shape"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.rnd_shape">[docs]</a>    <span class="k">def</span> <span class="nf">rnd_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">:</span>
+
+<div class="viewcode-block" id="MultiRegionWindForecastModel.rnd_shape">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.rnd_shape">[docs]</a>
+    <span class="k">def</span> <span class="nf">rnd_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_region_forecast_models</span><span class="p">),</span> <span class="n">n_timesteps</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MultiRegionWindForecastModel.udls"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.udls">[docs]</a>    <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="MultiRegionWindForecastModel.udls">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.MultiRegionWindForecastModel.udls">[docs]</a>
+    <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_region_forecast_models</span><span class="p">:</span>
             <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">udls</span><span class="p">())</span>
-        <span class="k">return</span> <span class="n">result</span></div></div>
+        <span class="k">return</span> <span class="n">result</span></div>
+</div>
 
-<div class="viewcode-block" id="LinearDemandForwardModel"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel">[docs]</a><span class="k">class</span> <span class="nc">LinearDemandForwardModel</span><span class="p">(</span><span class="n">BaseFwdModel</span><span class="p">):</span>
-<div class="viewcode-block" id="LinearDemandForwardModel.ForwardSimulationResult"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel.ForwardSimulationResult">[docs]</a>    <span class="k">class</span> <span class="nc">ForwardSimulationResult</span><span class="p">(</span><span class="n">ForwardSimulationResult</span><span class="p">):</span>
+
+<div class="viewcode-block" id="LinearDemandForwardModel">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel">[docs]</a>
+<span class="k">class</span> <span class="nc">LinearDemandForwardModel</span><span class="p">(</span><span class="n">BaseFwdModel</span><span class="p">):</span>
+<div class="viewcode-block" id="LinearDemandForwardModel.ForwardSimulationResult">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel.ForwardSimulationResult">[docs]</a>
+    <span class="k">class</span> <span class="nc">ForwardSimulationResult</span><span class="p">(</span><span class="n">ForwardSimulationResult</span><span class="p">):</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">highest_price</span><span class="p">,</span> <span class="n">wind_results</span><span class="p">,</span> <span class="n">additive_correction</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">model</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_highest_price</span> <span class="o">=</span> <span class="n">highest_price</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_wind</span> <span class="o">=</span> <span class="n">wind_results</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_additive_correction</span> <span class="o">=</span> <span class="n">additive_correction</span>
             
-<div class="viewcode-block" id="LinearDemandForwardModel.ForwardSimulationResult.n_forwards"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel.ForwardSimulationResult.n_forwards">[docs]</a>        <span class="k">def</span> <span class="nf">n_forwards</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="LinearDemandForwardModel.ForwardSimulationResult.n_forwards">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel.ForwardSimulationResult.n_forwards">[docs]</a>
+        <span class="k">def</span> <span class="nf">n_forwards</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wind</span><span class="o">.</span><span class="n">n_forwards</span><span class="p">()</span></div>
+
             
-<div class="viewcode-block" id="LinearDemandForwardModel.ForwardSimulationResult.udls"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel.ForwardSimulationResult.udls">[docs]</a>        <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="LinearDemandForwardModel.ForwardSimulationResult.udls">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel.ForwardSimulationResult.udls">[docs]</a>
+        <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">udls</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="LinearDemandForwardModel.ForwardSimulationResult.get"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel.ForwardSimulationResult.get">[docs]</a>        <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">forecast_timepoints</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+
+<div class="viewcode-block" id="LinearDemandForwardModel.ForwardSimulationResult.get">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel.ForwardSimulationResult.get">[docs]</a>
+        <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">forecast_timepoints</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
             <span class="n">udl</span> <span class="o">=</span> <span class="n">BaseFwdModel</span><span class="o">.</span><span class="n">get_udl_from_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">udl</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">power_name</span><span class="p">:</span>
                 <span class="n">expiry</span> <span class="o">=</span> <span class="n">BaseFwdModel</span><span class="o">.</span><span class="n">get_expiry_from_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
@@ -476,12 +563,14 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wind</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">forecast_timepoints</span><span class="p">)</span></div>
 
+
         <span class="k">def</span> <span class="nf">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expiry</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">forecast_timepoints</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
             <span class="n">total_produced</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wind</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">BaseFwdModel</span><span class="o">.</span><span class="n">get_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wind</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">expiry</span><span class="p">),</span> <span class="n">forecast_timepoints</span><span class="p">)</span>
             <span class="n">power_fwd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">total_produced</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">total_produced</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">total_produced</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
                 <span class="n">power_fwd</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span>  <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">total_produced</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_highest_price</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_additive_correction</span><span class="p">[</span><span class="n">expiry</span><span class="p">])</span>
             <span class="k">return</span> <span class="n">power_fwd</span></div>
+
         
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wind_power_forecast</span><span class="p">:</span> <span class="n">MultiRegionWindForecastModel</span><span class="p">,</span>
                         <span class="n">x_volatility</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -502,19 +591,25 @@
                 <span class="s1">&#39;power_name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">power_name</span><span class="p">,</span>
                 <span class="p">}</span>
 
-<div class="viewcode-block" id="LinearDemandForwardModel.rnd_shape"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel.rnd_shape">[docs]</a>    <span class="k">def</span> <span class="nf">rnd_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">:</span>
+<div class="viewcode-block" id="LinearDemandForwardModel.rnd_shape">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel.rnd_shape">[docs]</a>
+    <span class="k">def</span> <span class="nf">rnd_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">:</span>
         <span class="n">rnd_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wind_power_forecast</span><span class="o">.</span><span class="n">rnd_shape</span><span class="p">(</span><span class="n">n_sims</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rnd_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span><span class="n">rnd_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">rnd_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">rnd_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
         <span class="k">return</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">rnd_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rnd_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="LinearDemandForwardModel.get_technology"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel.get_technology">[docs]</a>    <span class="k">def</span> <span class="nf">get_technology</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">str</span><span class="p">:</span>
+
+<div class="viewcode-block" id="LinearDemandForwardModel.get_technology">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel.get_technology">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_technology</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return name of the technology modeled.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            str: Name of instrument.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wind_power_forecast</span><span class="o">.</span><span class="n">region</span></div>
+
     
     <span class="k">def</span> <span class="nf">_compute_additive_correction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expiries</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
                                      <span class="n">power_fwd_prices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
@@ -529,7 +624,9 @@
                 <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">power_fwd_prices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">tmp</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">highest_price_ou_model</span><span class="o">.</span><span class="n">compute_expected_value</span><span class="p">(</span><span class="n">startvalue</span><span class="p">,</span> <span class="n">expiries</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">result</span>
     
-<div class="viewcode-block" id="LinearDemandForwardModel.simulate"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel.simulate">[docs]</a>    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+<div class="viewcode-block" id="LinearDemandForwardModel.simulate">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel.simulate">[docs]</a>
+    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
                 <span class="n">rnd</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
                 <span class="n">expiries</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
                 <span class="n">power_fwd_prices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
@@ -538,29 +635,46 @@
         <span class="n">highest_prices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">highest_price_ou_model</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">rnd</span><span class="p">[</span><span class="mi">0</span><span class="p">,:])</span>
         <span class="n">simulated_wind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wind_power_forecast</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">rnd</span><span class="p">[</span><span class="mi">1</span><span class="p">:,:],</span> <span class="n">expiries</span><span class="p">,</span> <span class="n">initial_forecasts</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">LinearDemandForwardModel</span><span class="o">.</span><span class="n">ForwardSimulationResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">highest_prices</span><span class="p">,</span> <span class="n">simulated_wind</span><span class="p">,</span> <span class="n">additive_correction</span><span class="p">)</span></div>
+
     
-<div class="viewcode-block" id="LinearDemandForwardModel.udls"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel.udls">[docs]</a>    <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="LinearDemandForwardModel.udls">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel.udls">[docs]</a>
+    <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wind_power_forecast</span><span class="o">.</span><span class="n">udls</span><span class="p">()</span>
         <span class="n">result</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">power_name</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span></div></div>
+        <span class="k">return</span> <span class="n">result</span></div>
+</div>
+
         
     
 
 
-<div class="viewcode-block" id="ResidualDemandForwardModel"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandForwardModel">[docs]</a><span class="k">class</span> <span class="nc">ResidualDemandForwardModel</span><span class="p">(</span><span class="n">BaseFwdModel</span><span class="p">):</span>
-<div class="viewcode-block" id="ResidualDemandForwardModel.ForwardSimulationResult"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandForwardModel.ForwardSimulationResult">[docs]</a>    <span class="k">class</span> <span class="nc">ForwardSimulationResult</span><span class="p">(</span><span class="n">ForwardSimulationResult</span><span class="p">):</span>
+<div class="viewcode-block" id="ResidualDemandForwardModel">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandForwardModel">[docs]</a>
+<span class="k">class</span> <span class="nc">ResidualDemandForwardModel</span><span class="p">(</span><span class="n">BaseFwdModel</span><span class="p">):</span>
+<div class="viewcode-block" id="ResidualDemandForwardModel.ForwardSimulationResult">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandForwardModel.ForwardSimulationResult">[docs]</a>
+    <span class="k">class</span> <span class="nc">ForwardSimulationResult</span><span class="p">(</span><span class="n">ForwardSimulationResult</span><span class="p">):</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">highest_price</span><span class="p">,</span> <span class="n">wind_results</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">model</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_highest_price</span> <span class="o">=</span> <span class="n">highest_price</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_wind</span> <span class="o">=</span> <span class="n">wind_results</span>
             
-<div class="viewcode-block" id="ResidualDemandForwardModel.ForwardSimulationResult.n_forwards"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandForwardModel.ForwardSimulationResult.n_forwards">[docs]</a>        <span class="k">def</span> <span class="nf">n_forwards</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="ResidualDemandForwardModel.ForwardSimulationResult.n_forwards">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandForwardModel.ForwardSimulationResult.n_forwards">[docs]</a>
+        <span class="k">def</span> <span class="nf">n_forwards</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wind</span><span class="o">.</span><span class="n">n_forwards</span><span class="p">()</span></div>
+
             
-<div class="viewcode-block" id="ResidualDemandForwardModel.ForwardSimulationResult.udls"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandForwardModel.ForwardSimulationResult.udls">[docs]</a>        <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="ResidualDemandForwardModel.ForwardSimulationResult.udls">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandForwardModel.ForwardSimulationResult.udls">[docs]</a>
+        <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">udls</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="ResidualDemandForwardModel.ForwardSimulationResult.get"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandForwardModel.ForwardSimulationResult.get">[docs]</a>        <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">forecast_timepoints</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+
+<div class="viewcode-block" id="ResidualDemandForwardModel.ForwardSimulationResult.get">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandForwardModel.ForwardSimulationResult.get">[docs]</a>
+        <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">forecast_timepoints</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
             <span class="n">udl</span> <span class="o">=</span> <span class="n">BaseFwdModel</span><span class="o">.</span><span class="n">get_udl_from_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">udl</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">power_name</span><span class="p">:</span>
                 <span class="n">expiry</span> <span class="o">=</span> <span class="n">BaseFwdModel</span><span class="o">.</span><span class="n">get_expiry_from_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
@@ -568,12 +682,14 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wind</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">forecast_timepoints</span><span class="p">)</span></div>
 
+
         <span class="k">def</span> <span class="nf">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expiry</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">forecast_timepoints</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
             <span class="n">total_produced</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wind</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">BaseFwdModel</span><span class="o">.</span><span class="n">get_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wind</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">expiry</span><span class="p">),</span> <span class="n">forecast_timepoints</span><span class="p">)</span>
             <span class="n">power_fwd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">total_produced</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">total_produced</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">total_produced</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
                 <span class="n">power_fwd</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">supply_curve</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">total_produced</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_highest_price</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span>
             <span class="k">return</span> <span class="n">power_fwd</span></div>
+
         
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wind_power_forecast</span><span class="p">,</span>
                         <span class="n">highest_price_ou_model</span><span class="p">,</span> 
@@ -600,13 +716,18 @@
                 <span class="c1">#&#39;region_to_capacity&#39;: self.region_to_capacity</span>
                 <span class="p">}</span>
 
-<div class="viewcode-block" id="ResidualDemandForwardModel.rnd_shape"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandForwardModel.rnd_shape">[docs]</a>    <span class="k">def</span> <span class="nf">rnd_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">:</span>
+<div class="viewcode-block" id="ResidualDemandForwardModel.rnd_shape">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandForwardModel.rnd_shape">[docs]</a>
+    <span class="k">def</span> <span class="nf">rnd_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">:</span>
         <span class="n">rnd_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wind_power_forecast</span><span class="o">.</span><span class="n">rnd_shape</span><span class="p">(</span><span class="n">n_sims</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rnd_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span><span class="n">rnd_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">rnd_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">rnd_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
         <span class="k">return</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">rnd_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rnd_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="ResidualDemandForwardModel.get_technology"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandForwardModel.get_technology">[docs]</a>    <span class="k">def</span> <span class="nf">get_technology</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">str</span><span class="p">:</span>
+
+<div class="viewcode-block" id="ResidualDemandForwardModel.get_technology">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandForwardModel.get_technology">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_technology</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return name of the technology modeled.</span>
 
 <span class="sd">        Returns:</span>
@@ -614,18 +735,26 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wind_power_forecast</span><span class="o">.</span><span class="n">region</span></div>
 
-<div class="viewcode-block" id="ResidualDemandForwardModel.simulate"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandForwardModel.simulate">[docs]</a>    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+
+<div class="viewcode-block" id="ResidualDemandForwardModel.simulate">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandForwardModel.simulate">[docs]</a>
+    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
                 <span class="n">rnd</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
                 <span class="n">expiries</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
                 <span class="n">initial_forecasts</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]):</span>
         <span class="n">highest_prices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">highest_price_ou_model</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">rnd</span><span class="p">[</span><span class="mi">0</span><span class="p">,:])</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">max_price</span>
         <span class="n">simulated_wind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wind_power_forecast</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">timegrid</span><span class="p">,</span> <span class="n">rnd</span><span class="p">[</span><span class="mi">1</span><span class="p">:,:],</span> <span class="n">expiries</span><span class="p">,</span> <span class="n">initial_forecasts</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ResidualDemandForwardModel</span><span class="o">.</span><span class="n">ForwardSimulationResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">highest_prices</span><span class="p">,</span> <span class="n">simulated_wind</span><span class="p">)</span></div>
+
     
-<div class="viewcode-block" id="ResidualDemandForwardModel.udls"><a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandForwardModel.udls">[docs]</a>    <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="ResidualDemandForwardModel.udls">
+<a class="viewcode-back" href="../../../rivapy/models/energy/energy_weather.html#rivapy.models.ResidualDemandForwardModel.udls">[docs]</a>
+    <span class="k">def</span> <span class="nf">udls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wind_power_forecast</span><span class="o">.</span><span class="n">udls</span><span class="p">()</span>
         <span class="n">result</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">power_name</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span></div></div>
+        <span class="k">return</span> <span class="n">result</span></div>
+</div>
+
         
     
 

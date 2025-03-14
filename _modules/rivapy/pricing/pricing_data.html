@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,9 +13,9 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
-      <script src="../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -121,11 +121,16 @@
     <span class="n">BondPricingParameter</span> <span class="o">=</span> <span class="n">_add_converter</span><span class="p">(</span><span class="n">_analytics</span><span class="o">.</span><span class="n">BondPricingParameter</span><span class="p">)</span>
     <span class="c1"># getPricingData = _converter(_analytics.getPricingData)</span>
 <span class="k">else</span><span class="p">:</span>
-<div class="viewcode-block" id="BondPricingParameter"><a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.BondPricingParameter">[docs]</a>    <span class="k">class</span> <span class="nc">BondPricingParameter</span><span class="p">:</span>
+<div class="viewcode-block" id="BondPricingParameter">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.BondPricingParameter">[docs]</a>
+    <span class="k">class</span> <span class="nc">BondPricingParameter</span><span class="p">:</span>
         <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="BasePricingData"><a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.BasePricingData">[docs]</a><span class="k">class</span> <span class="nc">BasePricingData</span><span class="p">:</span>
+
+<div class="viewcode-block" id="BasePricingData">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.BasePricingData">[docs]</a>
+<span class="k">class</span> <span class="nc">BasePricingData</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pricer</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                  <span class="n">pricing_request</span><span class="p">:</span> <span class="n">PricingRequest</span>
                  <span class="p">):</span>
@@ -174,7 +179,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__pricing_request</span> <span class="o">=</span> <span class="n">pricing_request</span></div>
 
 
-<div class="viewcode-block" id="BondPricingData"><a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.BondPricingData">[docs]</a><span class="k">class</span> <span class="nc">BondPricingData</span><span class="p">(</span><span class="n">BasePricingData</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BondPricingData">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.BondPricingData">[docs]</a>
+<span class="k">class</span> <span class="nc">BondPricingData</span><span class="p">(</span><span class="n">BasePricingData</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bond</span><span class="p">:</span> <span class="n">BondBaseSpecification</span><span class="p">,</span> <span class="n">valuation_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
                  <span class="n">fixing_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">BondPricingParameter</span><span class="p">,</span> <span class="n">pricing_request</span><span class="p">:</span> <span class="n">BondPricingRequest</span><span class="p">,</span>
                  <span class="n">pricer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;BondPricer&#39;</span><span class="p">,</span> <span class="n">past_fixing</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">survival_curve</span><span class="p">:</span> <span class="n">SurvivalCurve</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -251,7 +259,10 @@
 
 
 
-<div class="viewcode-block" id="ResultType"><a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.ResultType">[docs]</a><span class="k">class</span> <span class="nc">ResultType</span><span class="p">(</span><span class="n">_IntEnum</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ResultType">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.ResultType">[docs]</a>
+<span class="k">class</span> <span class="nc">ResultType</span><span class="p">(</span><span class="n">_IntEnum</span><span class="p">):</span>
     <span class="n">PRICE</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">DELTA</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">GAMMA</span> <span class="o">=</span> <span class="mi">2</span>
@@ -260,12 +271,22 @@
     <span class="n">VEGA</span> <span class="o">=</span> <span class="mi">5</span>
     <span class="n">VANNA</span> <span class="o">=</span> <span class="mi">6</span></div>
 
-<div class="viewcode-block" id="PricingResults"><a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.PricingResults">[docs]</a><span class="k">class</span> <span class="nc">PricingResults</span><span class="p">:</span>
-<div class="viewcode-block" id="PricingResults.set_price"><a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.PricingResults.set_price">[docs]</a>    <span class="k">def</span> <span class="nf">set_price</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">price</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PricingResults">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.PricingResults">[docs]</a>
+<span class="k">class</span> <span class="nc">PricingResults</span><span class="p">:</span>
+<div class="viewcode-block" id="PricingResults.set_price">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.PricingResults.set_price">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_price</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">price</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_price</span> <span class="o">=</span> <span class="n">price</span></div>
 
-<div class="viewcode-block" id="PricingResults.getPrice"><a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.PricingResults.getPrice">[docs]</a>    <span class="k">def</span> <span class="nf">getPrice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_price</span></div></div>
+
+<div class="viewcode-block" id="PricingResults.getPrice">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.PricingResults.getPrice">[docs]</a>
+    <span class="k">def</span> <span class="nf">getPrice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_price</span></div>
+</div>
+
 
 <span class="k">def</span> <span class="nf">_create_pricing_request</span><span class="p">(</span><span class="n">pr_dict</span> <span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ResultType</span><span class="p">]):</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">PricingRequest</span><span class="p">()</span>
@@ -282,7 +303,9 @@
             <span class="n">result</span><span class="o">.</span><span class="n">setVanna</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">result</span>
 
-<div class="viewcode-block" id="Black76PricingData"><a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.Black76PricingData">[docs]</a><span class="k">class</span> <span class="nc">Black76PricingData</span><span class="p">:</span>
+<div class="viewcode-block" id="Black76PricingData">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.Black76PricingData">[docs]</a>
+<span class="k">class</span> <span class="nc">Black76PricingData</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">vol_surface</span><span class="p">,</span> <span class="n">pricing_request</span> <span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ResultType</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for Black76PricingDate</span>
 
@@ -312,10 +335,16 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">pricingRequest</span> <span class="o">=</span> <span class="n">_create_pricing_request</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pricing_request</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span>
 
-<div class="viewcode-block" id="Black76PricingData.price"><a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.Black76PricingData.price">[docs]</a>    <span class="k">def</span> <span class="nf">price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">BasePricer</span><span class="o">.</span><span class="n">price</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">())</span></div></div>
+<div class="viewcode-block" id="Black76PricingData.price">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.Black76PricingData.price">[docs]</a>
+    <span class="k">def</span> <span class="nf">price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">BasePricer</span><span class="o">.</span><span class="n">price</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">())</span></div>
+</div>
+
         
-<div class="viewcode-block" id="AmericanPdePricingData"><a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.AmericanPdePricingData">[docs]</a><span class="k">class</span> <span class="nc">AmericanPdePricingData</span><span class="p">:</span>
+<div class="viewcode-block" id="AmericanPdePricingData">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.AmericanPdePricingData">[docs]</a>
+<span class="k">class</span> <span class="nc">AmericanPdePricingData</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">vol_surface</span><span class="p">,</span> <span class="n">pricing_request</span> <span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ResultType</span><span class="p">],</span> <span class="n">time_steps_year</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span> <span class="n">spot_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for AmericanPdePricingDate</span>
 
@@ -352,11 +381,17 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">pricingRequest</span> <span class="o">=</span> <span class="n">_create_pricing_request</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pricing_request</span><span class="p">)</span>   
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span>
 
-<div class="viewcode-block" id="AmericanPdePricingData.price"><a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.AmericanPdePricingData.price">[docs]</a>    <span class="k">def</span> <span class="nf">price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">BasePricer</span><span class="o">.</span><span class="n">price</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">())</span></div></div>
+<div class="viewcode-block" id="AmericanPdePricingData.price">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.AmericanPdePricingData.price">[docs]</a>
+    <span class="k">def</span> <span class="nf">price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">BasePricer</span><span class="o">.</span><span class="n">price</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">())</span></div>
+</div>
+
 
     
-<div class="viewcode-block" id="CDSPricingData"><a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.CDSPricingData">[docs]</a><span class="k">class</span> <span class="nc">CDSPricingData</span><span class="p">:</span>
+<div class="viewcode-block" id="CDSPricingData">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.CDSPricingData">[docs]</a>
+<span class="k">class</span> <span class="nc">CDSPricingData</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">CDSSpecification</span><span class="p">,</span> <span class="n">val_date</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">survival_curve</span><span class="p">,</span> 
                 <span class="n">recovery_curve</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">integration_step</span> <span class="o">=</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">)):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
@@ -407,7 +442,9 @@
                 <span class="n">premium_period_start</span> <span class="o">=</span> <span class="n">premium_payment</span>
         <span class="k">return</span> <span class="n">risk_adj_factor_premium</span><span class="p">,</span> <span class="n">accrued</span>
 
-<div class="viewcode-block" id="CDSPricingData.par_spread"><a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.CDSPricingData.par_spread">[docs]</a>    <span class="k">def</span> <span class="nf">par_spread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">valuation_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">integration_stepsize</span><span class="p">:</span> <span class="n">relativedelta</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="CDSPricingData.par_spread">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.CDSPricingData.par_spread">[docs]</a>
+    <span class="k">def</span> <span class="nf">par_spread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">valuation_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">integration_stepsize</span><span class="p">:</span> <span class="n">relativedelta</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
         <span class="n">prev_date</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">protection_start</span><span class="p">)</span>
         <span class="n">current_date</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">prev_date</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">integration_step</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">)</span>
         <span class="n">pv_protection</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -449,7 +486,10 @@
         <span class="n">par_spread_i</span><span class="o">=</span><span class="p">(</span><span class="n">PV_protection</span><span class="p">)</span><span class="o">/</span><span class="p">((</span><span class="n">PV_premium</span><span class="o">+</span><span class="n">PV_accrued</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">par_spread_i</span></div>
 
-<div class="viewcode-block" id="CDSPricingData.price"><a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.CDSPricingData.price">[docs]</a>    <span class="k">def</span> <span class="nf">price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CDSPricingData.price">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.CDSPricingData.price">[docs]</a>
+    <span class="k">def</span> <span class="nf">price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">pv_protection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pv_protection_leg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">integration_step</span><span class="p">)</span>
         <span class="n">pr_results</span> <span class="o">=</span> <span class="n">PricingResults</span><span class="p">()</span>
         <span class="n">pr_results</span><span class="o">.</span><span class="n">pv_protection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">notional</span><span class="o">*</span><span class="n">pv_protection</span>
@@ -458,7 +498,9 @@
         <span class="n">pr_results</span><span class="o">.</span><span class="n">accrued</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">premium</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">notional</span><span class="o">*</span><span class="n">accrued</span>
         <span class="n">pr_results</span><span class="o">.</span><span class="n">par_spread</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">par_spread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">integration_step</span><span class="p">)</span>
         <span class="n">pr_results</span><span class="o">.</span><span class="n">set_price</span><span class="p">(</span><span class="n">pr_results</span><span class="o">.</span><span class="n">pv_protection</span><span class="o">-</span><span class="n">pr_results</span><span class="o">.</span><span class="n">premium_leg</span><span class="o">-</span><span class="n">pr_results</span><span class="o">.</span><span class="n">accrued</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">pr_results</span></div></div>
+        <span class="k">return</span> <span class="n">pr_results</span></div>
+</div>
+
 
 </pre></div>
 

@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -15,9 +15,9 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
-      <script src="../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
       <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -103,7 +103,7 @@
              
   <img alt="notebooks/images/rivacon_frontmark_combined_header.png" src="notebooks/images/rivacon_frontmark_combined_header.png" />
 <section id="Discount-Curves">
-<h1>Discount Curves<a class="headerlink" href="#Discount-Curves" title="Permalink to this heading"></a></h1>
+<h1>Discount Curves<a class="headerlink" href="#Discount-Curves" title="Link to this heading"></a></h1>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -124,7 +124,7 @@
 </div>
 </div>
 <section id="Definition-of-Discount-Curves">
-<h2>Definition of Discount Curves<a class="headerlink" href="#Definition-of-Discount-Curves" title="Permalink to this heading"></a></h2>
+<h2>Definition of Discount Curves<a class="headerlink" href="#Definition-of-Discount-Curves" title="Link to this heading"></a></h2>
 <p>A discount curve</p>
 <ul class="simple">
 <li><p>stores discount factors for different maturities,</p></li>
@@ -138,9 +138,9 @@
 <p>where <span class="math notranslate nohighlight">\(T\)</span> is the time to maturity as year fraction.</p>
 </section>
 <section id="Creating-Discount-Curves">
-<h2>Creating Discount Curves<a class="headerlink" href="#Creating-Discount-Curves" title="Permalink to this heading"></a></h2>
+<h2>Creating Discount Curves<a class="headerlink" href="#Creating-Discount-Curves" title="Link to this heading"></a></h2>
 <section id="Setup-the-specification">
-<h3>Setup the specification<a class="headerlink" href="#Setup-the-specification" title="Permalink to this heading"></a></h3>
+<h3>Setup the specification<a class="headerlink" href="#Setup-the-specification" title="Link to this heading"></a></h3>
 <p>To setup a discount curve, we need the following information:</p>
 <p><strong>Object id</strong></p>
 <p>Nearly every structure in the analytics library has an object id. An object id allows for nice logging and exceptions (which object created the message/error) and is also used as identifier for retrieving objects from containers.</p>
@@ -217,7 +217,7 @@
 </div>
 </section>
 <section id="Setup-the-discount-curve">
-<h3>Setup the discount curve<a class="headerlink" href="#Setup-the-discount-curve" title="Permalink to this heading"></a></h3>
+<h3>Setup the discount curve<a class="headerlink" href="#Setup-the-discount-curve" title="Link to this heading"></a></h3>
 <p>Our discount curve is given the name <em>dc</em> and is defined as an analytics.DiscountCurve object which we provide with the information described before.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -234,7 +234,7 @@
 </section>
 </section>
 <section id="Compute-Discount-Factors">
-<h2>Compute Discount Factors<a class="headerlink" href="#Compute-Discount-Factors" title="Permalink to this heading"></a></h2>
+<h2>Compute Discount Factors<a class="headerlink" href="#Compute-Discount-Factors" title="Link to this heading"></a></h2>
 <p>This section is only to manually derive some discount factors from the recently created discount curve.</p>
 <p><strong>a. Maturity in 180 days from the reference date</strong></p>
 <p>The value function returning a discount factor needs two arguments: the calculation date (here we use the current reference date) and the maturity for which the discount factor shall be computed. Hence, in a first step, the maturity in 180 days has to be converted into a date. Subsequently, the discount factor is computed using the value function. Finally, the print function gives us the computed discount factor of the value function.</p>
@@ -304,7 +304,7 @@ Fwd-DF (manual calculation):  0.9926300321180352
 </div>
 </section>
 <section id="Plotting-Discount-Curves">
-<h2>Plotting Discount Curves<a class="headerlink" href="#Plotting-Discount-Curves" title="Permalink to this heading"></a></h2>
+<h2>Plotting Discount Curves<a class="headerlink" href="#Plotting-Discount-Curves" title="Link to this heading"></a></h2>
 <p>To plot a curve one can simply call the curve’s <em>plot</em> method. This method plots either the discoutn factors or the rates (depending on the argument <em>discount_factors</em>). The granularity of the timegrid on which the curve is plotted can be determined by the argument <em>days</em>. Arguments to matplotlibs plot function can be given using the respective <strong>kwargs</strong>.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
@@ -334,7 +334,7 @@ Fwd-DF (manual calculation):  0.9926300321180352
 </div>
 </section>
 <section id="Exercises">
-<h2>Exercises<a class="headerlink" href="#Exercises" title="Permalink to this heading"></a></h2>
+<h2>Exercises<a class="headerlink" href="#Exercises" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Create a second discount curve with non-flat rate structure.</p></li>
 </ul>

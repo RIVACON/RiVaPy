@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,9 +13,9 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
-      <script src="../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -111,7 +111,9 @@
     <span class="kn">from</span> <span class="nn">pyvacon.finance.marketdata</span> <span class="kn">import</span> <span class="n">DiscountCurve</span> <span class="k">as</span> <span class="n">_DiscountCurve</span>
     <span class="kn">import</span> <span class="nn">pyvacon</span> <span class="k">as</span> <span class="nn">_pyvacon</span>
 
-<div class="viewcode-block" id="DiscountCurve"><a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve">[docs]</a><span class="k">class</span> <span class="nc">DiscountCurve</span><span class="p">:</span>
+<div class="viewcode-block" id="DiscountCurve">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve">[docs]</a>
+<span class="k">class</span> <span class="nc">DiscountCurve</span><span class="p">:</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                 <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -164,7 +166,9 @@
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Dates must be given in monotonically increasing order.&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="DiscountCurve.get_dates"><a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve.get_dates">[docs]</a>    <span class="k">def</span> <span class="nf">get_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
+<div class="viewcode-block" id="DiscountCurve.get_dates">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve.get_dates">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return list of dates of curve</span>
 
 <span class="sd">        Returns:</span>
@@ -173,7 +177,10 @@
         <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
-<div class="viewcode-block" id="DiscountCurve.get_df"><a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve.get_df">[docs]</a>    <span class="k">def</span> <span class="nf">get_df</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="DiscountCurve.get_df">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve.get_df">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_df</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return list of discount factors</span>
 
 <span class="sd">        Returns:</span>
@@ -182,7 +189,10 @@
         <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">y</span></div>
 
-<div class="viewcode-block" id="DiscountCurve.value"><a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve.value">[docs]</a>    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DiscountCurve.value">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve.value">[docs]</a>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return discount factor for a given date</span>
 
 <span class="sd">        Args:</span>
@@ -200,6 +210,7 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The given reference date is before the curves reference date.&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span></div>
 
+
     <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_DiscountCurve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> 
@@ -209,7 +220,9 @@
                                             <span class="bp">self</span><span class="o">.</span><span class="n">extrapolation</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span>
 
-<div class="viewcode-block" id="DiscountCurve.plot"><a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">days</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">discount_factors</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="DiscountCurve.plot">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve.plot">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">days</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">discount_factors</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots the discount curve using matplotlibs plot function.</span>
 <span class="sd">        The timegrid includes the dates of the discount curve. Here either the discount factors or the zero rates (continuously compounded, ACT365 yearfraction) are plotted.</span>
 
@@ -231,12 +244,16 @@
                 <span class="n">dt</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">dates_new</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">)</span><span class="o">.</span><span class="n">days</span><span class="p">)</span><span class="o">/</span><span class="mf">365.0</span>
                 <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">/</span><span class="n">dt</span>
         <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dates_new</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dates_new</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
 
 
 
 
-<div class="viewcode-block" id="NelsonSiegel"><a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.NelsonSiegel">[docs]</a><span class="k">class</span> <span class="nc">NelsonSiegel</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
+
+<div class="viewcode-block" id="NelsonSiegel">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.NelsonSiegel">[docs]</a>
+<span class="k">class</span> <span class="nc">NelsonSiegel</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">beta1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
                         <span class="n">beta2</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Nelson-Siegel parametrization for rates and yields, see :footcite:t:`Nelson1987`.</span>
@@ -282,7 +299,9 @@
         <span class="n">result</span><span class="o">.</span><span class="n">_multiplier</span> <span class="o">=</span> <span class="n">x</span>
         <span class="k">return</span> <span class="n">result</span>
 
-<div class="viewcode-block" id="NelsonSiegel.compute"><a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.NelsonSiegel.compute">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="NelsonSiegel.compute">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.NelsonSiegel.compute">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="n">beta0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">beta1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
                             <span class="n">beta2</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
@@ -299,6 +318,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">)</span><span class="o">/</span><span class="n">tau</span>
         <span class="k">return</span> <span class="n">beta0</span> <span class="o">+</span> <span class="n">beta1</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">t</span><span class="p">))</span><span class="o">/</span><span class="n">t</span> <span class="o">+</span> <span class="n">beta2</span><span class="o">*</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">t</span><span class="p">))</span><span class="o">/</span><span class="n">t</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span></div>
+
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -341,7 +361,10 @@
             <span class="k">return</span> <span class="n">beta0</span> <span class="o">+</span> <span class="n">beta1</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">t</span><span class="p">))</span><span class="o">/</span><span class="n">t</span> <span class="o">+</span> <span class="n">beta2</span><span class="o">*</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">t</span><span class="p">))</span><span class="o">/</span><span class="n">t</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span></div>
 
 
-<div class="viewcode-block" id="ConstantRate"><a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.ConstantRate">[docs]</a><span class="k">class</span> <span class="nc">ConstantRate</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ConstantRate">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.ConstantRate">[docs]</a>
+<span class="k">class</span> <span class="nc">ConstantRate</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Continuously compounded flat rate object that can be used  in conjunction with :class:`rivapy.marketdata.DiscountCurveParametrized`.</span>
 <span class="sd">        </span>
@@ -366,6 +389,7 @@
     
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span></div>
+
 
 <span class="k">class</span> <span class="nc">LinearRate</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortterm_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">longterm_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">max_maturity</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span> <span class="mf">10.0</span><span class="p">):</span>
@@ -403,7 +427,9 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortterm_rate</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coeff</span><span class="o">*</span><span class="n">t</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">longterm_rate</span>
 
-<div class="viewcode-block" id="NelsonSiegelSvensson"><a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.NelsonSiegelSvensson">[docs]</a><span class="k">class</span> <span class="nc">NelsonSiegelSvensson</span><span class="p">(</span><span class="n">NelsonSiegel</span><span class="p">):</span>
+<div class="viewcode-block" id="NelsonSiegelSvensson">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.NelsonSiegelSvensson">[docs]</a>
+<span class="k">class</span> <span class="nc">NelsonSiegelSvensson</span><span class="p">(</span><span class="n">NelsonSiegel</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">beta1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
                             <span class="n">beta2</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">beta3</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">tau2</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">beta0</span><span class="p">,</span> <span class="n">beta1</span><span class="p">,</span> <span class="n">beta2</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
@@ -418,10 +444,14 @@
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">NelsonSiegelSvensson</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau2</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
 
-<div class="viewcode-block" id="NelsonSiegelSvensson.compute"><a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.NelsonSiegelSvensson.compute">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="NelsonSiegelSvensson.compute">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.NelsonSiegelSvensson.compute">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="n">beta0</span><span class="p">,</span> <span class="n">beta1</span><span class="p">,</span> <span class="n">beta2</span><span class="p">,</span> <span class="n">beta3</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">tau2</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">)</span><span class="o">/</span><span class="n">tau2</span>
-        <span class="k">return</span> <span class="n">NelsonSiegel</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">beta0</span><span class="p">,</span> <span class="n">beta1</span><span class="p">,</span> <span class="n">beta2</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="n">beta3</span><span class="o">*</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">t</span><span class="p">))</span><span class="o">/</span><span class="n">t</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span></div></div>
+        <span class="k">return</span> <span class="n">NelsonSiegel</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">beta0</span><span class="p">,</span> <span class="n">beta1</span><span class="p">,</span> <span class="n">beta2</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="n">beta3</span><span class="o">*</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">t</span><span class="p">))</span><span class="o">/</span><span class="n">t</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span></div>
+</div>
+
     
 <span class="k">class</span> <span class="nc">DiscountCurveComposition</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
@@ -497,7 +527,9 @@
     <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">DiscountCurveComposition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
 
-<div class="viewcode-block" id="DiscountCurveParametrized"><a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurveParametrized">[docs]</a><span class="k">class</span> <span class="nc">DiscountCurveParametrized</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
+<div class="viewcode-block" id="DiscountCurveParametrized">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurveParametrized">[docs]</a>
+<span class="k">class</span> <span class="nc">DiscountCurveParametrized</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                 <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                 <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">],</span> 
@@ -531,7 +563,9 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Missing implementation of to_dict() in parametrization of type &#39;</span> <span class="o">+</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rate_parametrization</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;obj_id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_id</span><span class="p">,</span> <span class="s1">&#39;refdate&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="s1">&#39;rate_parametrization&#39;</span><span class="p">:</span> <span class="n">parametrization</span><span class="p">}</span>
 
-<div class="viewcode-block" id="DiscountCurveParametrized.value"><a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurveParametrized.value">[docs]</a>    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="DiscountCurveParametrized.value">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurveParametrized.value">[docs]</a>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return discount factor for a given date</span>
 
 <span class="sd">        Args:</span>
@@ -550,7 +584,10 @@
         <span class="n">yf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">rate_parametrization</span><span class="p">(</span><span class="n">yf</span><span class="p">)</span><span class="o">*</span><span class="n">yf</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DiscountCurveParametrized.value_rate"><a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurveParametrized.value_rate">[docs]</a>    <span class="k">def</span> <span class="nf">value_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DiscountCurveParametrized.value_rate">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurveParametrized.value_rate">[docs]</a>
+    <span class="k">def</span> <span class="nf">value_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the continuous rate for a given date</span>
 
 <span class="sd">        Args:</span>
@@ -568,6 +605,7 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The given reference date is before the curves reference date.&#39;</span><span class="p">)</span>
         <span class="n">yf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate_parametrization</span><span class="p">(</span><span class="n">yf</span><span class="p">)</span></div>
+
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
@@ -591,7 +629,10 @@
     <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">DiscountCurveComposition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="EquityForwardCurve"><a class="viewcode-back" href="../../../rivapy/marketdata/equity.html#rivapy.marketdata.EquityForwardCurve">[docs]</a><span class="k">class</span> <span class="nc">EquityForwardCurve</span><span class="p">:</span>
+
+<div class="viewcode-block" id="EquityForwardCurve">
+<a class="viewcode-back" href="../../../rivapy/marketdata/equity.html#rivapy.marketdata.EquityForwardCurve">[docs]</a>
+<span class="k">class</span> <span class="nc">EquityForwardCurve</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                     <span class="n">spot</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
                     <span class="n">funding_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span> 
@@ -643,10 +684,15 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span>
            
-<div class="viewcode-block" id="EquityForwardCurve.value"><a class="viewcode-back" href="../../../rivapy/marketdata/equity.html#rivapy.marketdata.EquityForwardCurve.value">[docs]</a>    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">,</span> <span class="n">expiry</span><span class="p">):</span>
+<div class="viewcode-block" id="EquityForwardCurve.value">
+<a class="viewcode-back" href="../../../rivapy/marketdata/equity.html#rivapy.marketdata.EquityForwardCurve.value">[docs]</a>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">,</span> <span class="n">expiry</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">expiry</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="EquityForwardCurve.plot"><a class="viewcode-back" href="../../../rivapy/marketdata/equity.html#rivapy.marketdata.EquityForwardCurve.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">days</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">days_end</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="o">*</span><span class="mi">365</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="EquityForwardCurve.plot">
+<a class="viewcode-back" href="../../../rivapy/marketdata/equity.html#rivapy.marketdata.EquityForwardCurve.plot">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">days</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">days_end</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="o">*</span><span class="mi">365</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots the forward curve using matplotlibs plot function.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -658,7 +704,9 @@
         <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">]</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;expiry&#39;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;forward value&#39;</span><span class="p">)</span></div></div>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;forward value&#39;</span><span class="p">)</span></div>
+</div>
+
 
 <span class="k">class</span> <span class="nc">BootstrapHazardCurve</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
@@ -776,7 +824,9 @@
     <span class="c1">#                                         self.calibrate_hazard_rate[1], self.calibrate_hazard_rate[0])                                    </span>
     <span class="c1">#     return self._pyvacon_obj</span>
 
-<div class="viewcode-block" id="PowerPriceForwardCurve"><a class="viewcode-back" href="../../../rivapy/marketdata/power.html#rivapy.marketdata.PowerPriceForwardCurve">[docs]</a><span class="k">class</span> <span class="nc">PowerPriceForwardCurve</span><span class="p">:</span>
+<div class="viewcode-block" id="PowerPriceForwardCurve">
+<a class="viewcode-back" href="../../../rivapy/marketdata/power.html#rivapy.marketdata.PowerPriceForwardCurve">[docs]</a>
+<span class="k">class</span> <span class="nc">PowerPriceForwardCurve</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                 <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">],</span> 
                 <span class="n">start</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> 
@@ -811,7 +861,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;dates&#39;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span> <span class="n">tz</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tz</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">(),</span> 
                                 <span class="s1">&#39;values&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">})</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;dates&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
         
-<div class="viewcode-block" id="PowerPriceForwardCurve.value"><a class="viewcode-back" href="../../../rivapy/marketdata/power.html#rivapy.marketdata.PowerPriceForwardCurve.value">[docs]</a>    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">schedule</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<div class="viewcode-block" id="PowerPriceForwardCurve.value">
+<a class="viewcode-back" href="../../../rivapy/marketdata/power.html#rivapy.marketdata.PowerPriceForwardCurve.value">[docs]</a>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">schedule</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tg</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_tg</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;dates&#39;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span> <span class="n">tz</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tz</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">(),</span> <span class="s1">&#39;values&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">})</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
@@ -824,8 +876,13 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;There are &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">tg</span><span class="p">[</span><span class="s1">&#39;index&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span> <span class="o">+</span> <span class="s1">&#39; dates in the schedule not covered by the forward curve.&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">tg</span><span class="p">[</span><span class="s1">&#39;index&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="PowerPriceForwardCurve.get_df"><a class="viewcode-back" href="../../../rivapy/marketdata/power.html#rivapy.marketdata.PowerPriceForwardCurve.get_df">[docs]</a>    <span class="k">def</span> <span class="nf">get_df</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span></div></div>
+
+<div class="viewcode-block" id="PowerPriceForwardCurve.get_df">
+<a class="viewcode-back" href="../../../rivapy/marketdata/power.html#rivapy.marketdata.PowerPriceForwardCurve.get_df">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_df</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span></div>
+</div>
+
         
 
         

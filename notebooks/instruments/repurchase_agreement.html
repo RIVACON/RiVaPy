@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -14,9 +14,9 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
-      <script src="../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
       <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -104,9 +104,9 @@
            <div itemprop="articleBody">
              
   <section id="Repurchase-Agreements">
-<h1>Repurchase Agreements<a class="headerlink" href="#Repurchase-Agreements" title="Permalink to this heading"></a></h1>
+<h1>Repurchase Agreements<a class="headerlink" href="#Repurchase-Agreements" title="Link to this heading"></a></h1>
 <section id="Basic-Idea">
-<h2>Basic Idea<a class="headerlink" href="#Basic-Idea" title="Permalink to this heading"></a></h2>
+<h2>Basic Idea<a class="headerlink" href="#Basic-Idea" title="Link to this heading"></a></h2>
 <p>Repurchase Agreements (repos) can be viewed as a collateralized loan. Generally, the borrower (in repo terms called <em>seller</em>) agrees to sell an asset to the lender (in repo terms called <em>buyer</em>) for a specific amount of cash. The seller also agrees to buy the sold asset back at expiry of the contract for a larger amount of cash. The price for which the asset is sold is called the <em>purchase price</em>, while the price at which the asset is bought back is called <em>repurchase price</em>. Effectively, the
 seller borrowed collateralized cash from the buyer. The interest rate (repo rate) paid for the borrowed cash is implicit in the repurchase price and is quoted as a percentage per annum rate.</p>
 <p>From the perspective of the buyer, the transaction described above is called a <em>reverse repo</em>.</p>
@@ -114,9 +114,9 @@ seller borrowed collateralized cash from the buyer. The interest rate (repo rate
 <img alt="Repo schema" src="../../_images/repo_schema.png" />
 </section>
 <section id="The-Repo-Market">
-<h2>The Repo Market<a class="headerlink" href="#The-Repo-Market" title="Permalink to this heading"></a></h2>
+<h2>The Repo Market<a class="headerlink" href="#The-Repo-Market" title="Link to this heading"></a></h2>
 <section id="Economic-Functions">
-<h3>Economic Functions<a class="headerlink" href="#Economic-Functions" title="Permalink to this heading"></a></h3>
+<h3>Economic Functions<a class="headerlink" href="#Economic-Functions" title="Link to this heading"></a></h3>
 <p>The repo market plays a key role in facilitating the flow of cash and securities in the financial system. Additionally, repos and reverse repos are often carried out by central banks in order to temporarily provide liquidity to (or remove liquidity from) the financial system to support implementation of monetary policy and to promote financial stability.</p>
 <p>A few economic functions of the repo market are ([1,2]):</p>
 <ol class="arabic">
@@ -138,36 +138,36 @@ seller borrowed collateralized cash from the buyer. The interest rate (repo rate
 </ol>
 </section>
 <section id="The-Size-of-the-European-Repo-Market">
-<h3>The Size of the European Repo Market<a class="headerlink" href="#The-Size-of-the-European-Repo-Market" title="Permalink to this heading"></a></h3>
+<h3>The Size of the European Repo Market<a class="headerlink" href="#The-Size-of-the-European-Repo-Market" title="Link to this heading"></a></h3>
 <p>The International Capital Market Accociation (ICMA) conducted an European repo market surveys in June of 2022 [3]. In this survey the ICMA asked financial institutions operating in Europe for the value of the cash side of (reverse) repos that were still outstanding at close of business on June 8th 2022. According to the ICMA survey, the total value of the repo contracts outstanding on the books of the 56 participated institutions was at 9,680 Billion EUR. The ICMA conducted prior a similar
 survey with 59 participants one year earlier, where the total value of outstanding repo transactions was at 8,726 Billion EUR [4].</p>
 </section>
 <section id="Typical-Terms-for-Repos">
-<h3>Typical Terms for Repos<a class="headerlink" href="#Typical-Terms-for-Repos" title="Permalink to this heading"></a></h3>
+<h3>Typical Terms for Repos<a class="headerlink" href="#Typical-Terms-for-Repos" title="Link to this heading"></a></h3>
 <p>The market survey in [3] also compared the different maturities for repos between the financial institutions participated in the survey (main survey), automatic repo trading systems (ATS), and tri-party agents (more on that later).</p>
 <img alt="Repo maturities" src="../../_images/repo_maturities.png" />
 </section>
 </section>
 <section id="Different-Types-of-Collateral">
-<h2>Different Types of Collateral<a class="headerlink" href="#Different-Types-of-Collateral" title="Permalink to this heading"></a></h2>
+<h2>Different Types of Collateral<a class="headerlink" href="#Different-Types-of-Collateral" title="Link to this heading"></a></h2>
 <div class="line-block">
 <div class="line">The quality of the underlying collateral of a repo is a key parameter for determination of the repo rate in a repo contract. Hence, repos collateralised by HQLAs will have a lower repo rate than repos collateralised by non HQLAs. The most commonly used type of collateral are government bonds, but equities and coporate bonds are also used very frequently.</div>
 <div class="line">Generally, assets provided as collateral in a repo contract can be classified as general collateral (GC) or special/specific collateral (SC). Both of these classes represent the two drivers for repo transactions: <em>cash-driven</em> and <em>security-driven</em> repo transactions [1,6].</div>
 </div>
 <section id="General-Collateral">
-<h3>General Collateral<a class="headerlink" href="#General-Collateral" title="Permalink to this heading"></a></h3>
+<h3>General Collateral<a class="headerlink" href="#General-Collateral" title="Link to this heading"></a></h3>
 <p>General collateral is a set or basekt of securities which trade in the repo market at the same or a very similar repo rate (GC repo rate). This means that GC securities can be substituted for one another. Hence, the buyer in a GC repo is indifferent to which security is given as collateral. Due to the fact that securities can be substituted for one another, the driver of the GC repo rate is not the supply and demand of particular issues of securities, but of cash. Furthermore, a buyer in a repo
 may grant the seller permission to substitute some or all collateral during the term of the transaction [5]. General collateral repos are <em>cash-driven</em> repos as the underlying collateral plays a subordinate role. Cash-driven repos are primarily used for funding [1,6].</p>
 </section>
 <section id="Special-Collateral">
-<h3>Special Collateral<a class="headerlink" href="#Special-Collateral" title="Permalink to this heading"></a></h3>
+<h3>Special Collateral<a class="headerlink" href="#Special-Collateral" title="Link to this heading"></a></h3>
 <p>While in GC repos the specific asset demanded as collateral is not important, as long as it comes from a specific GC basket, the specification of a certain asset privoded as collateral in SC repos is very much so. A special is an issue of securities that is subject to exceptional demand in the repo and cash markets compared to similar issues. A security is said to be <em>on special</em> (a special collateral) if the repo rate for that collateral is distinctly lower than the GC repo rate. The demand for
 some specials can become so large, that the special repo rate becomes negative [1,7]. The repo spread, which is the difference between the GC repo rate and the SC repo rate, can be seen as an implicit borrowing fee for the security on special. Thus, the lower repo rate for specials can be understood as the GC repo rate paid for the cash reduced by the borrowing fee for the security in high demand. Since the main intention of special repos is the ‘borrowing’ of sought after securities, these
 repos are security-driven repos. One of the most common reasons for an security to go special is when that security becomes the <em>cheapest-to-deliver</em> in the futures market.</p>
 </section>
 </section>
 <section id="Risks">
-<h2>Risks<a class="headerlink" href="#Risks" title="Permalink to this heading"></a></h2>
+<h2>Risks<a class="headerlink" href="#Risks" title="Link to this heading"></a></h2>
 <p>Generally, there are two sources of risk in repos, collateral and counterparty risk. The primary driver for counterparty risk is the credit risk, meaning the counterpartys inability to repay a loan or meet a contractual obligation. Counterparties with a higher credit risk also pay higher repo rates as compensation for the risk. The collateral risk consists of the liquidity risk, the volatility of the collateral’s market price and the collateral’s credit risk, which influence the quality of the
 collateral. The liqudity risk plays an important role in the event of the sellers default, since collateral taken from a risky counterparty is more likely to be liquidated to mitigate the buyers (cash lenders) losses, than collateral take from a non risky counterparty [1]. Additionally, repos with a longer time to maturity also have a higher repo rate. Further descriptions of best practices in cases of counterparty default will be provided in the next section. If the credit risk of the assets
 provided as collateral has a certain correlation to the credit risk of the party providing this asset, the collateral also has a <em>wrong-way risk</em>. In order to account for the collateral risk in repo transactions, so called <em>haircuts</em> or <em>initial margins</em> are included. The inital margin/ haircut is a risk adjustment of the current market price of the collateral [1,8-10]. In other words, haircuts/ initial marigns are an adjustment to the quoted market value of a collateral in order to account for
@@ -202,37 +202,37 @@ P_\text{market}\cdot(1-\frac{h}{100}) &= \frac{P_\text{market}\cdot100}{IM}\\
 <p>The example above demonstrated a possible scenario, where the buyer of a repo is exposed to the default of the seller of a repo, once the market value of a collateral significantly decreases. In such cases the buyer will call for variational margin such that the exposure is the buyer is minimised. Additionally, both parties agree on a minimum exposure below which they will not call a margin for each other. The parties exposure is conducted daily [5,10,11].</p>
 </section>
 <section id="Collateral---Coupons-and-Dividends">
-<h2>Collateral - Coupons and Dividends<a class="headerlink" href="#Collateral---Coupons-and-Dividends" title="Permalink to this heading"></a></h2>
+<h2>Collateral - Coupons and Dividends<a class="headerlink" href="#Collateral---Coupons-and-Dividends" title="Link to this heading"></a></h2>
 <p>During the life of a repo, the buyer holds legal title to the collateral. This means that all payments produced by the security are paid by the issuer directly to the buyer. However, the seller of the collateral retains the risk on the collateral, as the seller has committed to buy the collateral back in the future for its original value plus repo interest. A key principle in the operation of repos is that only the seller should be exposed to the risks of the collateral. Hence, the seller will
 expect to receive the corresponding return. So, the buyer agrees to immediately pay compensatory amounts to the seller equivalent to any income payment received on the collateral (<em>manufactured payments</em>) [1,8,14].</p>
 </section>
 <section id="Collateral---Voting-Rights">
-<h2>Collateral - Voting Rights<a class="headerlink" href="#Collateral---Voting-Rights" title="Permalink to this heading"></a></h2>
+<h2>Collateral - Voting Rights<a class="headerlink" href="#Collateral---Voting-Rights" title="Link to this heading"></a></h2>
 <p>Since the buyer holds legal title to the collateral, he/she is entitled to any benefits of ownership such as voting rights. The buyer can use this voting right to vote in accordance with the seller but the buyer is not obligated to do so. However, under the Equities Annex to the ICMA’s Global Master Repurchase Agreement (GMRA), the right to take decisions on corporate actions in the case of equity being used as collateral is the seller’s, provided that the seller gives the buyer requisite notice
 of the decision [1,14].</p>
 </section>
 <section id="Different-Types-of-Repos">
-<h2>Different Types of Repos<a class="headerlink" href="#Different-Types-of-Repos" title="Permalink to this heading"></a></h2>
+<h2>Different Types of Repos<a class="headerlink" href="#Different-Types-of-Repos" title="Link to this heading"></a></h2>
 <section id="Tri-party-Repos">
-<h3>Tri-party Repos<a class="headerlink" href="#Tri-party-Repos" title="Permalink to this heading"></a></h3>
+<h3>Tri-party Repos<a class="headerlink" href="#Tri-party-Repos" title="Link to this heading"></a></h3>
 <p>Tri-party repos are repos for which collateral selection, payments and deliveries, custody of collateral securities, collateral management and other operations during the life of the transaction are outsourced by the parties to a third-party agent. Such a tr-party agent can be a custodian bank, an international central securities depository or a national central securities depository. In Europe, the principle tri-party agents are Clearstream Bank Luxembourg, Euroclear Bank and JP Morgan. Once a
 transaction has been agreed directly between the parties (usually by phone or electronic messaging) both parties independently notify the tri-party agent. The agent will automatically select, from the securities account of the seller, sufficient collateral. The tri-party agent manages the regular revaluation of the collateral, variation margining, income payments on the collateral and the substitution of collateral [1,10,15].</p>
 </section>
 <section id="Open-Repos">
-<h3>Open Repos<a class="headerlink" href="#Open-Repos" title="Permalink to this heading"></a></h3>
+<h3>Open Repos<a class="headerlink" href="#Open-Repos" title="Link to this heading"></a></h3>
 <p>In an open repo (also called on demand or open-ended repo) the transactions is agreed without a ficed maturity date. Thus, the repo can be terminated on any business day by either party, provided they give notice within an agreed period of time. It is common for the repo rate on an open repo rate to be changed up or down (<em>re-rated</em>) only at request of one of the parties and only with agreement of the other. Alternatively, the repo rate can be linked to a one-day interest rate index, which means
 that the repo rate would change automatically. These both approaches can be combined by quoting the repo rate as a floating interest rate plus/minus a spread, which either party can request to change [1,10,16]. Practitioners often use basis points (BP) to refer to interest rates or spreads. The relation of BP and percentage is the following: <span class="math notranslate nohighlight">\(1BP=0.01\%\)</span>. Repo interest is accrued dailty without compounding. Accrued interest can be paid by either, paying it on the repurchase date (as usual
 in repos), on the re-rate date as a discrete interest payment or once a month also as a discrete interest payment.</p>
 </section>
 <section id="Securities-Lending">
-<h3>Securities Lending<a class="headerlink" href="#Securities-Lending" title="Permalink to this heading"></a></h3>
+<h3>Securities Lending<a class="headerlink" href="#Securities-Lending" title="Link to this heading"></a></h3>
 <p>Securities lendings and repos have many similarities. In a securities lending transaction one part gives legal title to a security or a basket of securities to another party, in exchange for legal ownership of collateral. The <em>seller</em> in a repo is the <em>lender</em> in the securities lending and the <em>buyer</em> is called <em>borrower</em>. The borrower pays a fee to the lender for the usage of the loaned security. The collateral in securities lending can either be cash or other securities. Securities lending
 against cash look very similar to security driven repos. When the collateral is cash, the lender is obliged to reinvest the cash and rebate an agreed proportion of the reinvestment return back to the borrower. Hence, the the analogon to the repo rate in securities lending is the <em>rebate rate</em> [1]. Another way to view this is, that the lender who recevies the cash needs to pay certain interest on that cash, while simulatneously the borrower pays a borrowing fee for the borrowed security. The net
 value of those two cash flows is the rebate rate.</p>
 </section>
 </section>
 <section id="Sources:">
-<h2>Sources:<a class="headerlink" href="#Sources:" title="Permalink to this heading"></a></h2>
+<h2>Sources:<a class="headerlink" href="#Sources:" title="Link to this heading"></a></h2>
 <div class="line-block">
 <div class="line"><a class="reference external" href="https://www.icmagroup.org/assets/documents/Regulatory/Repo/Repo-FAQs-January-2019.pdf">[1] Repo-FAQs-January-2019</a></div>
 <div class="line"><a class="reference external" href="https://www.bis.org/publ/cgfs59.pdf">[2] Repo market functioning</a></div>

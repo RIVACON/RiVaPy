@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,9 +13,9 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
-      <script src="../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -90,7 +90,9 @@
 <span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">DayCounter</span>
 
 
-<div class="viewcode-block" id="DateTimeGrid"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.DateTimeGrid">[docs]</a><span class="k">class</span> <span class="nc">DateTimeGrid</span><span class="p">:</span>
+<div class="viewcode-block" id="DateTimeGrid">
+<a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.DateTimeGrid">[docs]</a>
+<span class="k">class</span> <span class="nc">DateTimeGrid</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                 <span class="n">datetime_grid</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">start</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
@@ -132,7 +134,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="kc">None</span>
 
         
-<div class="viewcode-block" id="DateTimeGrid.get_daily_subgrid"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.DateTimeGrid.get_daily_subgrid">[docs]</a>    <span class="k">def</span> <span class="nf">get_daily_subgrid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="s1">&#39;DateTimeGrid&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="DateTimeGrid.get_daily_subgrid">
+<a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.DateTimeGrid.get_daily_subgrid">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_daily_subgrid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="s1">&#39;DateTimeGrid&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new datetime grid that is a subgrid of the current grid consisting of just daily values.</span>
 
 <span class="sd">        Returns:</span>
@@ -147,25 +151,39 @@
         <span class="n">result</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;dates&#39;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">dates</span><span class="p">,</span> <span class="s1">&#39;tg&#39;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">timegrid</span><span class="p">})</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="DateTimeGrid.get_day_of_year"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.DateTimeGrid.get_day_of_year">[docs]</a>    <span class="k">def</span> <span class="nf">get_day_of_year</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="DateTimeGrid.get_day_of_year">
+<a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.DateTimeGrid.get_day_of_year">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_day_of_year</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="s1">&#39;day_of_year&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;day_of_year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">dayofyear</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;day_of_year&#39;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="DateTimeGrid.get_day_of_week"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.DateTimeGrid.get_day_of_week">[docs]</a>    <span class="k">def</span> <span class="nf">get_day_of_week</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="DateTimeGrid.get_day_of_week">
+<a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.DateTimeGrid.get_day_of_week">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_day_of_week</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="s1">&#39;day_of_week&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;day_of_week&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">dayofweek</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;day_of_week&#39;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="DateTimeGrid.get_hour_of_day"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.DateTimeGrid.get_hour_of_day">[docs]</a>    <span class="k">def</span> <span class="nf">get_hour_of_day</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="DateTimeGrid.get_hour_of_day">
+<a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.DateTimeGrid.get_hour_of_day">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_hour_of_day</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="s1">&#39;hour_of_day&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;hour_of_day&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">hour</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;hour_of_day&#39;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="DateTimeGrid.get_minute_of_day"><a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.DateTimeGrid.get_minute_of_day">[docs]</a>    <span class="k">def</span> <span class="nf">get_minute_of_day</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="DateTimeGrid.get_minute_of_day">
+<a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.DateTimeGrid.get_minute_of_day">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_minute_of_day</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="s1">&#39;minute_of_day&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;minute_of_day&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">minute</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;minute_of_day&#39;</span><span class="p">]</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;minute_of_day&#39;</span><span class="p">]</span></div>
+</div>
+
 
 
 <span class="k">class</span> <span class="nc">__TimeGridFunction</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>

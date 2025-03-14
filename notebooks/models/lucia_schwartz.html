@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -15,9 +15,9 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
-      <script src="../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
       <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -103,7 +103,7 @@
            <div itemprop="articleBody">
              
   <section id="Lucia-Schwartz-Model">
-<h1>Lucia-Schwartz Model<a class="headerlink" href="#Lucia-Schwartz-Model" title="Permalink to this heading"></a></h1>
+<h1>Lucia-Schwartz Model<a class="headerlink" href="#Lucia-Schwartz-Model" title="Link to this heading"></a></h1>
 <p>The Lucia-Schwartz two-factor model for power prices is a mathematical model used to explain the behavior of electricity prices. The model assumes that electricity prices are determined by two factors: a short-term factor and a long-term factor.</p>
 <p>The short-term factor is related to the current supply and demand conditions in the electricity market. This factor is influenced by factors such as weather conditions, maintenance schedules, and unexpected events such as power plant failures. The short-term factor is modeled using a mean-reverting process, which means that prices tend to move back towards their long-term average over time.</p>
 <p>The long-term factor is related to the overall trends in the economy and the energy market. This factor is influenced by factors such as changes in fuel prices, technological advances, and government policies. The long-term factor is modeled using a random walk process, which means that prices tend to move in a random and unpredictable manner over time. Overall, the Lucia-Schwartz two-factor model provides a useful framework for understanding the complex factors that influence electricity
@@ -133,7 +133,7 @@ C:\Users\doeltz\development\RiVaPy\docs\source\notebooks\models\../../../..\riva
 </pre></div></div>
 </div>
 <section id="Simulation-of-Spot">
-<h2>Simulation of Spot<a class="headerlink" href="#Simulation-of-Spot" title="Permalink to this heading"></a></h2>
+<h2>Simulation of Spot<a class="headerlink" href="#Simulation-of-Spot" title="Link to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
@@ -164,7 +164,7 @@ C:\Users\doeltz\development\RiVaPy\docs\source\notebooks\models\../../../..\riva
 </div>
 </section>
 <section id="Forward-Values">
-<h2>Forward Values<a class="headerlink" href="#Forward-Values" title="Permalink to this heading"></a></h2>
+<h2>Forward Values<a class="headerlink" href="#Forward-Values" title="Link to this heading"></a></h2>
 <p>In commodity markets the (liquidly) traded products are most often Forward contracts that fix a price (the forward value) for the delivery of product over a certain time intervall. The forward value may be approximated by the integral of a forward function <span class="math notranslate nohighlight">\(F(t,T)\)</span> that describes the forward price for delivery at exactly one time point <span class="math notranslate nohighlight">\(T\)</span></p>
 <div class="math notranslate nohighlight">
 \[F(t,T_1,T_2) = \frac{\int_{T_1}^{T_2}F(t,T)}{T_2-T_1}.\]</div>

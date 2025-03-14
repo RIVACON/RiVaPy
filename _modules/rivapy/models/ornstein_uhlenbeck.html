@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,9 +13,9 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
-      <script src="../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -84,7 +84,9 @@
 <span class="kn">import</span> <span class="nn">scipy</span>
 <span class="kn">from</span> <span class="nn">rivapy.tools.interfaces</span> <span class="kn">import</span> <span class="n">FactoryObject</span>
 
-<div class="viewcode-block" id="OrnsteinUhlenbeck"><a class="viewcode-back" href="../../../rivapy/models/stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck">[docs]</a><span class="k">class</span> <span class="nc">OrnsteinUhlenbeck</span><span class="p">(</span><span class="n">FactoryObject</span><span class="p">):</span>
+<div class="viewcode-block" id="OrnsteinUhlenbeck">
+<a class="viewcode-back" href="../../../rivapy/models/stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck">[docs]</a>
+<span class="k">class</span> <span class="nc">OrnsteinUhlenbeck</span><span class="p">(</span><span class="n">FactoryObject</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">_eval_grid</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
@@ -128,11 +130,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_volatility_grid</span> <span class="o">=</span> <span class="n">OrnsteinUhlenbeck</span><span class="o">.</span><span class="n">_eval_grid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">volatility</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mean_reversion_level_grid</span> <span class="o">=</span> <span class="n">OrnsteinUhlenbeck</span><span class="o">.</span><span class="n">_eval_grid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean_reversion_level</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">)</span>
         
-<div class="viewcode-block" id="OrnsteinUhlenbeck.rnd_shape"><a class="viewcode-back" href="../../../rivapy/models/stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.rnd_shape">[docs]</a>    <span class="k">def</span> <span class="nf">rnd_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_timepoints</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">:</span>
+<div class="viewcode-block" id="OrnsteinUhlenbeck.rnd_shape">
+<a class="viewcode-back" href="../../../rivapy/models/stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.rnd_shape">[docs]</a>
+    <span class="k">def</span> <span class="nf">rnd_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_timepoints</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">n_timepoints</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="OrnsteinUhlenbeck.simulate"><a class="viewcode-back" href="../../../rivapy/models/stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.simulate">[docs]</a>    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">,</span> <span class="n">start_value</span><span class="p">,</span> <span class="n">rnd</span><span class="p">):</span>
+
+<div class="viewcode-block" id="OrnsteinUhlenbeck.simulate">
+<a class="viewcode-back" href="../../../rivapy/models/stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.simulate">[docs]</a>
+    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timegrid</span><span class="p">,</span> <span class="n">start_value</span><span class="p">,</span> <span class="n">rnd</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Simulate the Ornstein Uhlenbeck process on the given timegrid using simple explicit euler scheme:</span>
 <span class="sd">            </span>
 <span class="sd">            .. math:: </span>
@@ -160,7 +167,10 @@
                         <span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="OrnsteinUhlenbeck.compute_expected_value"><a class="viewcode-back" href="../../../rivapy/models/stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.compute_expected_value">[docs]</a>    <span class="k">def</span> <span class="nf">compute_expected_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">T</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+
+<div class="viewcode-block" id="OrnsteinUhlenbeck.compute_expected_value">
+<a class="viewcode-back" href="../../../rivapy/models/stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.compute_expected_value">[docs]</a>
+    <span class="k">def</span> <span class="nf">compute_expected_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">T</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">speed_of_mean_reversion</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Expected value is only implemented for constant speed of mean reversion&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">volatility</span><span class="p">):</span>
@@ -169,7 +179,10 @@
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Expected value is only implemented for constant mean reversion level&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">x0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">speed_of_mean_reversion</span><span class="o">*</span><span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_reversion_level</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">speed_of_mean_reversion</span><span class="o">*</span><span class="n">T</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="OrnsteinUhlenbeck.compute_call_price"><a class="viewcode-back" href="../../../rivapy/models/stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.compute_call_price">[docs]</a>    <span class="k">def</span> <span class="nf">compute_call_price</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X0</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">K</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ttm</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+
+<div class="viewcode-block" id="OrnsteinUhlenbeck.compute_call_price">
+<a class="viewcode-back" href="../../../rivapy/models/stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.compute_call_price">[docs]</a>
+    <span class="k">def</span> <span class="nf">compute_call_price</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X0</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">K</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ttm</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Computes the price of a call option with strike K and time to maturity ttm for a spot following the Ornstein-Uhlenbeck process.</span>
 
 <span class="sd">        It works only for constant speed of mean reversion, volatility and mean reversion level and throws a NotImplementedError otherwise. It does not encounter dividends or interest rates.</span>
@@ -200,7 +213,10 @@
         <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">g</span> <span class="o">-</span> <span class="n">K</span><span class="p">)</span> <span class="o">/</span> <span class="n">sigma_bar</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">g</span> <span class="o">-</span> <span class="n">K</span><span class="p">)</span> <span class="o">*</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">+</span> <span class="n">sigma_bar</span> <span class="o">*</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">d</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="OrnsteinUhlenbeck.apply_mc_step"><a class="viewcode-back" href="../../../rivapy/models/stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.apply_mc_step">[docs]</a>    <span class="k">def</span> <span class="nf">apply_mc_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+
+<div class="viewcode-block" id="OrnsteinUhlenbeck.apply_mc_step">
+<a class="viewcode-back" href="../../../rivapy/models/stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.apply_mc_step">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_mc_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
                         <span class="n">t0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
                         <span class="n">rnd</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
                         <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> 
@@ -221,8 +237,11 @@
             <span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">volatility</span>
         <span class="n">x_</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span>  <span class="o">-</span> <span class="n">mu</span><span class="o">*</span><span class="n">dt</span><span class="p">)</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">*</span><span class="n">sqrt_dt</span><span class="o">*</span><span class="n">rnd</span>   
         <span class="k">return</span> <span class="n">x_</span></div>
+
         
-<div class="viewcode-block" id="OrnsteinUhlenbeck.conditional_probability_density"><a class="viewcode-back" href="../../../rivapy/models/stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.conditional_probability_density">[docs]</a>    <span class="k">def</span> <span class="nf">conditional_probability_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_delta_t</span><span class="p">,</span> <span class="n">delta_t</span><span class="p">,</span> <span class="n">X0</span><span class="p">,</span> 
+<div class="viewcode-block" id="OrnsteinUhlenbeck.conditional_probability_density">
+<a class="viewcode-back" href="../../../rivapy/models/stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.conditional_probability_density">[docs]</a>
+    <span class="k">def</span> <span class="nf">conditional_probability_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_delta_t</span><span class="p">,</span> <span class="n">delta_t</span><span class="p">,</span> <span class="n">X0</span><span class="p">,</span> 
                                         <span class="n">volatility</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                                         <span class="n">speed_of_mean_reversion</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                                         <span class="n">mean_reversion_level</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
@@ -239,7 +258,10 @@
                     <span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">volatility_2_</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="OrnsteinUhlenbeck.calibrate"><a class="viewcode-back" href="../../../rivapy/models/stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.calibrate">[docs]</a>    <span class="k">def</span> <span class="nf">calibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;maximum_likelihood&#39;</span><span class="p">):</span>
+
+<div class="viewcode-block" id="OrnsteinUhlenbeck.calibrate">
+<a class="viewcode-back" href="../../../rivapy/models/stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck.calibrate">[docs]</a>
+    <span class="k">def</span> <span class="nf">calibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;maximum_likelihood&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calibrate the Ornstein Uhlenbeck model with constant parameters to the given data.</span>
 
 <span class="sd">        Args:</span>
@@ -272,7 +294,9 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Fitting method not defined (&#39;</span><span class="o">+</span><span class="n">method</span><span class="o">+</span><span class="s1">&#39;)&#39;</span><span class="p">)</span>        
         <span class="bp">self</span><span class="o">.</span><span class="n">speed_of_mean_reversion</span> <span class="o">=</span> <span class="n">speed_mr</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">volatility</span> <span class="o">=</span> <span class="n">sigma</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mean_reversion_level</span> <span class="o">=</span> <span class="n">mu</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean_reversion_level</span> <span class="o">=</span> <span class="n">mu</span></div>
+</div>
+
 </pre></div>
 
            </div>
