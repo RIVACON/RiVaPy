@@ -20,8 +20,8 @@ if _pyvacon_available:
     #RainbowBarrierSpec = _spec.RainbowBarrierSpec
     LocalVolMonteCarloSpecification = _spec.LocalVolMonteCarloSpecification
     RainbowSpecification = _spec.RainbowSpecification
-    MultiMemoryExpressSpecification = _spec.MultiMemoryExpressSpecification
-    MemoryExpressSpecification = _spec.MemoryExpressSpecification
+    #MultiMemoryExpressSpecification = _spec.MultiMemoryExpressSpecification
+    #MemoryExpressSpecification = _spec.MemoryExpressSpecification
     ExpressPlusSpecification = _spec.ExpressPlusSpecification
     AsianVanillaSpecification = _spec.AsianVanillaSpecification
     RiskControlStrategy = _spec.RiskControlStrategy
