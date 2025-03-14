@@ -77,7 +77,6 @@ jobs:
         coverage run -m unittest discover -s tests
         coverage report
         coverage html
-        coverage-badge -o docs/badges/coverage.svg
 
     - name: Upload coverage report
       uses: actions/upload-artifact@v4
@@ -108,8 +107,6 @@ jobs:
       run: |
         git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/RIVACON/RiVaPy.git --branch gh-pages --single-branch gh-pages
         cp -r docs/build/* gh-pages/
-        cp -r docs/badges/* gh-pages/badges/
-        cp -r htmlcov/* gh-pages/coverage-report/
         cd gh-pages
         touch .nojekyll
         git config --local user.email "action@github.com"
