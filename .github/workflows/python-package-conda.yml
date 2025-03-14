@@ -68,7 +68,7 @@ jobs:
 
         # Parse the previous coverage.xml file and extract the total coverage percentage
         if [ -f "previous_coverage.xml" ]; then
-          TOTAL_COVERAGE=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('previous_coverage.xml'); root = tree.getroot(); print(float(root.attrib['line-rate']) * 100)")
+          TOTAL_COVERAGE=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('previous_coverage.xml'); root = tree.getroot(); print(round(float(root.attrib['line-rate'])) * 100)")
           echo "TOTAL_COVERAGE=$TOTAL_COVERAGE" >> $GITHUB_ENV
           echo "Previous coverage: $TOTAL_COVERAGE%"  # Just for logging
         else
