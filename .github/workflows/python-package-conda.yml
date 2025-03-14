@@ -59,6 +59,23 @@ jobs:
       run: $CONDA/bin/python -m unittest discover tests
       shell: bash
 
+
+    - name: Fetch previous coverage from gh-pages
+      run: |
+        # Fetch the previous coverage.xml from the gh-pages branch
+        git fetch origin gh-pages:gh-pages || echo "No gh-pages branch yet"
+        curl -s https://raw.githubusercontent.com/RIVACON/RiVaPy/gh-pages/coverage/coverage.xml -o previous_coverage.xml || echo "No previous coverage.xml found"
+
+        # Parse the previous coverage.xml file and extract the total coverage percentage
+        if [ -f "previous_coverage.xml" ]; then
+          TOTAL_COVERAGE=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('previous_coverage.xml'); root = tree.getroot(); print(float(root.attrib['line-rate'] * 100))")
+          echo "TOTAL_COVERAGE=$TOTAL_COVERAGE" >> $GITHUB_ENV
+          echo "Previous coverage: $TOTAL_COVERAGE%"  # Just for logging
+        else
+          echo "TOTAL_COVERAGE=0" >> $GITHUB_ENV
+          echo "No previous coverage found, using 0%."  # Default to 0% if no previous coverage
+        fi
+
     - name: Run tests with coverage
       run: |
         coverage run -m unittest discover -s tests
