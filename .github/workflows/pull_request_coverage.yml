@@ -1,4 +1,4 @@
-name: build
+name: pr_coverage
 on: 
   workflow_dispatch:
   pull_request:
