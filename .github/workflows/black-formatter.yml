@@ -3,13 +3,13 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - develop
+      - "**"
   pull_request:
     branches:
-      - develop
+      - "**"
 jobs:
   linter_name:
-    name: runner / black formatter
+    name: runner/black formatter
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
