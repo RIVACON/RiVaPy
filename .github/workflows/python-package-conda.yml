@@ -9,7 +9,7 @@ on:
   #     - develop
 
 jobs:
-  build-linux-push:
+  build-linux:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
