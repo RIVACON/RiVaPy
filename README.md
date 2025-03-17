@@ -2,6 +2,7 @@
 [![documentation](https://img.shields.io/badge/-documentation-blue.svg)](https://rivacon.github.io/RiVaPy/)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/RIVACON/RiVaPy/HEAD)
 ![build](https://github.com/RIVACON/RiVaPy/workflows/build/badge.svg)
+[![Coverage](https://raw.githubusercontent.com/RIVACON/RiVaPy/gh-pages/coverage/coverage.svg)](https://rivacon.github.io/RiVaPy/coverage_report/)
 [![RIVACON](https://img.shields.io/badge/powered%20by-RIVACON-lightgrey.svg)](https://www.rivacon.com/en/)
 [![frontmark](https://img.shields.io/badge/powered%20by-frontmark-lightgrey.svg)](https://www.frontmark.de/)
 
@@ -38,6 +39,11 @@ derivative products from various asset classes are introduced and their pricing 
 
 Thanks to our sponsors [RIVACON](https://www.rivacon.com/) and [frontmark](https://www.frontmark.de/).
 
-[<img src="images/rivacon_logo.png" width='100px'>](https://www.rivacon.com/)
+<picture>
+  <source srcset="images/rivacon_logo_white.svg" media="(prefers-color-scheme: dark)" width="200">
+  <img src="images/rivacon_logo.svg" alt="RIVACON Logo" width="200">
+</picture>
+
+<!-- [<img src="images/rivacon_logo.svg" width='100px'>](https://www.rivacon.com/) -->
 
 [<img src="images/favicon.png" width='70px'>](https://www.frontmark.de/)
