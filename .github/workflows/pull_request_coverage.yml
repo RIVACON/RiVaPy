@@ -1,12 +1,9 @@
-name: build
+name: pr_coverage
 on: 
   workflow_dispatch:
-  push:
+  pull_request:
     branches:
       - develop
-  # pull_request:
-  #   branches:
-  #     - develop
 
 jobs:
   build-linux:
@@ -83,47 +80,47 @@ jobs:
         coverage xml
         coverage html
 
-    - name: Generate Coverage Badge
-      run: |
-        pip install genbadge[coverage]
-        genbadge coverage -i coverage.xml -o coverage.svg
+    # - name: Generate Coverage Badge
+    #   run: |
+    #     pip install genbadge[coverage]
+    #     genbadge coverage -i coverage.xml -o coverage.svg
 
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report
-        path: htmlcov/
+    # - name: Upload coverage report
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: coverage-report
+    #     path: htmlcov/
       
-    - name: Install rtd theme for sphinx doc from pypi
-      run: $CONDA/bin/python -m pip install sphinx_rtd_theme 
-    - name: Build docs with sphinx
-      run: $CONDA/bin/sphinx-build -b html docs/source/ docs/build
-    - name: Store doc as artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: DocumentationHTML
-        path: docs/build/
+    # - name: Install rtd theme for sphinx doc from pypi
+    #   run: $CONDA/bin/python -m pip install sphinx_rtd_theme 
+    # - name: Build docs with sphinx
+    #   run: $CONDA/bin/sphinx-build -b html docs/source/ docs/build
+    # - name: Store doc as artifact
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: DocumentationHTML
+    #     path: docs/build/
         
-    - name: Commit documentation changes
-      run: |
-        git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/RIVACON/RiVaPy.git --branch gh-pages --single-branch gh-pages
-        cp -r docs/build/* gh-pages/
-        mkdir -p gh-pages/coverage_report       # Ensure coverage_report directory exists
-        cp -r htmlcov/* gh-pages/coverage_report/  # Move coverage report
-        mkdir -p gh-pages/coverage              # Ensure coverage directory exists
-        mv coverage.svg gh-pages/coverage/      # Move coverage badge
-        mv coverage.xml gh-pages/coverage/coverage.xml
-        cd gh-pages
-        touch .nojekyll
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add .
-        git commit -m "Update documentation and Coverage" -a || true
-        # The above command will fail if no changes were present, so we ignore
-        # that.
-    - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        branch: gh-pages
-        directory: gh-pages
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+    # - name: Commit documentation changes
+    #   run: |
+    #     git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/RIVACON/RiVaPy.git --branch gh-pages --single-branch gh-pages
+    #     cp -r docs/build/* gh-pages/
+    #     mkdir -p gh-pages/coverage_report       # Ensure coverage_report directory exists
+    #     cp -r htmlcov/* gh-pages/coverage_report/  # Move coverage report
+    #     mkdir -p gh-pages/coverage              # Ensure coverage directory exists
+    #     mv coverage.svg gh-pages/coverage/      # Move coverage badge
+    #     mv coverage.xml gh-pages/coverage/coverage.xml
+    #     cd gh-pages
+    #     touch .nojekyll
+    #     git config --local user.email "action@github.com"
+    #     git config --local user.name "GitHub Action"
+    #     git add .
+    #     git commit -m "Update documentation and Coverage" -a || true
+    #     # The above command will fail if no changes were present, so we ignore
+    #     # that.
+    # - name: Push changes
+    #   uses: ad-m/github-push-action@master
+    #   with:
+    #     branch: gh-pages
+    #     directory: gh-pages
+    #     github_token: ${{ secrets.GITHUB_TOKEN }}
