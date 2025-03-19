@@ -15,12 +15,8 @@ Green Power Purchase Agreement
     :members:
     :undoc-members:
    
-
-Schedules
-^^^^^^^^^^^^^^^^^^
-.. autoclass:: rivapy.instruments.SimpleSchedule
+Energy Futures
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: rivapy.instruments.EnergyFutureSpecifications
     :members:
     :undoc-members:
-    
-
-

@@ -131,6 +131,33 @@ class SimpleSchedule(interfaces.FactoryObject):
 
 class PeakSchedule(SimpleSchedule):
     def __init__(self, start: dt.datetime, end: dt.datetime, tz: str = None):
+        """Scheduler, which returns the peak time grid between the start and end date times.
+
+        Args:
+                start (dt.datetime): Start of schedule (including this timepoint).
+                end (dt.datetime): End of schedule (excluding this timepoint).
+                tz (str or tzinfo): Time zone name for returning localized datetime points, for example ‘Asia/Hong_Kong’.
+                                                        By default, the resulting datetime points are timezone-naive. See documentation for pandas.date_range for further details on tz.
+        Examples:
+
+        .. highlight:: python
+        .. code-block:: python
+
+                >>> peak_schedule = PeakSchedule(dt.datetime(2023,1,5), dt.datetime(2023,1,6))
+                >>> peak_schedule.get_schedule()
+                [datetime.datetime(2023, 1, 5, 8, 0),
+                 datetime.datetime(2023, 1, 5, 9, 0),
+                 datetime.datetime(2023, 1, 5, 10, 0),
+                 datetime.datetime(2023, 1, 5, 11, 0),
+                 datetime.datetime(2023, 1, 5, 12, 0),
+                 datetime.datetime(2023, 1, 5, 13, 0),
+                 datetime.datetime(2023, 1, 5, 14, 0),
+                 datetime.datetime(2023, 1, 5, 15, 0),
+                 datetime.datetime(2023, 1, 5, 16, 0),
+                 datetime.datetime(2023, 1, 5, 17, 0),
+                 datetime.datetime(2023, 1, 5, 18, 0),
+                 datetime.datetime(2023, 1, 5, 19, 0)]
+        """
         super().__init__(
             start=start,
             end=end,
@@ -143,6 +170,33 @@ class PeakSchedule(SimpleSchedule):
 
 class OffPeakSchedule(SimpleSchedule):
     def __init__(self, start: dt.datetime, end: dt.datetime, tz: str = None):
+        """Scheduler, which returns the offpeak time grid between the start and end date times.
+
+        Args:
+                start (dt.datetime): Start of schedule (including this timepoint).
+                end (dt.datetime): End of schedule (excluding this timepoint).
+                tz (str or tzinfo): Time zone name for returning localized datetime points, for example ‘Asia/Hong_Kong’.
+                                                        By default, the resulting datetime points are timezone-naive. See documentation for pandas.date_range for further details on tz.
+        Examples:
+
+        .. highlight:: python
+        .. code-block:: python
+
+                >>> offpeak_schedule = OffPeakSchedule(dt.datetime(2023,1,5), dt.datetime(2023,1,6))
+                >>> offpeak_schedule.get_schedule()
+                [datetime.datetime(2023, 1, 5, 0, 0),
+                 datetime.datetime(2023, 1, 5, 1, 0),
+                 datetime.datetime(2023, 1, 5, 2, 0),
+                 datetime.datetime(2023, 1, 5, 3, 0),
+                 datetime.datetime(2023, 1, 5, 4, 0),
+                 datetime.datetime(2023, 1, 5, 5, 0),
+                 datetime.datetime(2023, 1, 5, 6, 0),
+                 datetime.datetime(2023, 1, 5, 7, 0),
+                 datetime.datetime(2023, 1, 5, 20, 0),
+                 datetime.datetime(2023, 1, 5, 21, 0),
+                 datetime.datetime(2023, 1, 5, 22, 0),
+                 datetime.datetime(2023, 1, 5, 23, 0)]
+        """
         super().__init__(
             start=start,
             end=end,
@@ -155,6 +209,22 @@ class OffPeakSchedule(SimpleSchedule):
 
 class GasSchedule(SimpleSchedule):
     def __init__(self, start: dt.datetime, end: dt.datetime, tz: str = None):
+        """Scheduler, which returns the gas day time grid (from 6 am to 6 am) between the start and end date times.
+
+        Args:
+                start (dt.datetime): Start of schedule (including this timepoint).
+                end (dt.datetime): End of schedule (excluding this timepoint).
+                tz (str or tzinfo): Time zone name for returning localized datetime points, for example ‘Asia/Hong_Kong’.
+                                                        By default, the resulting datetime points are timezone-naive. See documentation for pandas.date_range for further details on tz.
+        Examples:
+
+        .. highlight:: python
+        .. code-block:: python
+
+                >>> gas_schedule = GasSchedule(dt.datetime(2023,1,5), dt.datetime(2023,1,7))
+                >>> gas_schedule.get_schedule()
+                [datetime.datetime(2023, 1, 5, 6, 0), datetime.datetime(2023, 1, 6, 6, 0)]
+        """
         super().__init__(
             start=start,
             end=end,
