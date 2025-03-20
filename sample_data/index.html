@@ -73,6 +73,10 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#dummy-power-spot-price">Dummy Power Spot Price</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rivapy.sample_data.dummy_power_spot_price.spot_price_model"><code class="docutils literal notranslate"><span class="pre">spot_price_model()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../developer_guide.html">Developer Guide</a></li>
@@ -241,6 +245,68 @@ generated sample of features.</p>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+</section>
+<section id="dummy-power-spot-price">
+<h2>Dummy Power Spot Price<a class="headerlink" href="#dummy-power-spot-price" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="rivapy.sample_data.dummy_power_spot_price.spot_price_model">
+<span class="sig-prename descclassname"><span class="pre">rivapy.sample_data.dummy_power_spot_price.</span></span><span class="sig-name descname"><span class="pre">spot_price_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spot_price_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peak_price_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solar_price_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weekend_price_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">winter_price_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon_mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/rivapy/sample_data/dummy_power_spot_price.html#spot_price_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.sample_data.dummy_power_spot_price.spot_price_model" title="Link to this definition"></a></dt>
+<dd><p>Dummy power spot price model.</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}S(t) = S_0 +
+\begin{cases}
+    0, &amp; 0 \leq h(t) &lt; 8\\    P_p, &amp; 8 \leq h(t) &lt; 11\\    -P_{pv}, &amp; 11 \leq h(t) &lt; 16\\    P_p, &amp; 16 \leq h(t) \leq 20\\    0, &amp; 20 &lt; h(t) \leq 23
+\end{cases}
++
+\begin{cases}
+    0, &amp; 1\leq d(t) \leq 5\\    -P_{we}, &amp; 6\leq d(t) \leq 7
+\end{cases}
++
+\begin{cases}
+    0, &amp; m(t) \in \{4,5,6,7,8,9\}\\    P_{W}, &amp; m(t) \in \{1,2,3,10,11,12\}
+\end{cases}
++ \varepsilon\end{aligned}\end{align} \]</div>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\begin{aligned}
+    S_0 &amp;\quad \text{Spot price level}\\    P_p &amp;\quad \text{Peak price level}\\    P_{pv} &amp;\quad \text{Price level with regard to solar power}\\    P_{we} &amp;\quad \text{Price level for weekends}\\    P_W &amp;\quad \text{Price level for winter}\\    h(t) &amp;\quad \text{Hour of the time step } t\\    d(t) &amp;\quad \text{Weekday of the time step } t\\    m(t) &amp;\quad \text{Month of the time step } t\\    \varepsilon &amp;\sim \mathcal{N}(\mu, \sigma^2)
+\end{aligned}\end{aligned}\end{align} \]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timestamp</strong> (<em>dt.datetime</em>) – Time stamp</p></li>
+<li><p><strong>spot_price_level</strong> (<em>float</em>) – Spot price level</p></li>
+<li><p><strong>peak_price_level</strong> (<em>float</em>) – Peak price level</p></li>
+<li><p><strong>solar_price_level</strong> (<em>float</em>) – Price level with regard to solar power</p></li>
+<li><p><strong>weekend_price_level</strong> (<em>float</em>) – Price level for weekends</p></li>
+<li><p><strong>winter_price_level</strong> (<em>float</em>) – Price level for winter</p></li>
+<li><p><strong>epsilon_mean</strong> (<em>float</em><em>, </em><em>optional</em>) – Additional additive noise mean. Defaults to 0.</p></li>
+<li><p><strong>epsilon_var</strong> (<em>float</em><em>, </em><em>optional</em>) – Additional additive noise standard deviation. Defaults to 1.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Random seed. Defaults to 42.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>spot price</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameter_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;spot_price_level&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="s1">&#39;peak_price_level&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s1">&#39;solar_price_level&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="s1">&#39;weekend_price_level&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s1">&#39;winter_price_level&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="s1">&#39;epsilon_mean&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s1">&#39;epsilon_var&#39;</span><span class="p">:</span> <span class="mi">5</span>
+<span class="p">}</span>
+<span class="n">date_range</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="s1">&#39;1/1/2023&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;1/1/2025&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+<span class="n">spot_prices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">spot_price_model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">parameter_dict</span><span class="p">),</span> <span class="n">date_range</span><span class="p">))</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>

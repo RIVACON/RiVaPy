@@ -49,14 +49,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/index.html">Notebook Gallery</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Module Documentation</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="marketdata/index.html">Marketdata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="marketdata/index.html">Market Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="marketdata_tools/index.html">Market Data Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="instruments/index.html">Instruments</a></li>
 <li class="toctree-l2"><a class="reference internal" href="models/index.html">Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pricing/index.html">Pricing</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Tools</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#date-tools">Date Tools</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#rivapy.tools.Period"><code class="docutils literal notranslate"><span class="pre">Period</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#rivapy.tools.Schedule"><code class="docutils literal notranslate"><span class="pre">Schedule</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#period">Period</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#schedules">Schedules</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#datetimegrid">DateTimeGrid</a><ul>
@@ -115,6 +116,8 @@
 <h1>Tools<a class="headerlink" href="#tools" title="Link to this heading"></a></h1>
 <section id="date-tools">
 <h2>Date Tools<a class="headerlink" href="#date-tools" title="Link to this heading"></a></h2>
+<section id="period">
+<h3>Period<a class="headerlink" href="#period" title="Link to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="rivapy.tools.Period">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.</span></span><span class="sig-name descname"><span class="pre">Period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">years</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">months</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivapy/tools/datetools.html#Period"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.tools.Period" title="Link to this definition"></a></dt>
@@ -194,6 +197,9 @@
 
 </dd></dl>
 
+</section>
+<section id="schedules">
+<h3>Schedules<a class="headerlink" href="#schedules" title="Link to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="rivapy.tools.Schedule">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.</span></span><span class="sig-name descname"><span class="pre">Schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_day</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_day</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rivapy.tools.Period" title="rivapy.tools.datetools.Period"><span class="pre">Period</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backwards</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stub</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">business_day_convention</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rivapy.tools.enums.RollConvention" title="rivapy.tools.enums.RollConvention"><span class="pre">RollConvention</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">RollConvention.MODIFIED_FOLLOWING</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calendar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">HolidayBase</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivapy/tools/datetools.html#Schedule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.tools.Schedule" title="Link to this definition"></a></dt>
@@ -333,6 +339,137 @@ False, if only a longer period is allowed.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.tools.SimpleSchedule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.</span></span><span class="sig-name descname"><span class="pre">SimpleSchedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'1H'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weekdays</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hours</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_hours_for_weekdays</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivapy/tools/scheduler.html#SimpleSchedule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.tools.SimpleSchedule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FactoryObject</span></code></p>
+<p>Simple schedule of fixed datetime points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<em>dt.datetime</em>) – Start of schedule (including this timepoint).</p></li>
+<li><p><strong>end</strong> (<em>dt.datetime</em>) – End of schedule (excluding this timepoint).</p></li>
+<li><p><strong>freq</strong> (<em>str</em><em>, </em><em>optional</em>) – Frequency of timepoints. Defaults to ‘1H’. See documentation for pandas.date_range for further details on freq.</p></li>
+<li><p><strong>weekdays</strong> (<em>Set</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – List of integers representing the weekdays where the schedule is defined.
+Integers according to datetime weekdays (0-&gt;Monay, 1-&gt;Tuesday,…,6-&gt;Sunday).
+If None, all weekdays are used. Defaults to None.</p></li>
+<li><p><strong>hours</strong> (<em>Set</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – List of hours where schedule is defined. If None, all hours are included. Defaults to None.</p></li>
+<li><p><strong>ignor_hours_for_weekdays</strong> (<em>Set</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – List of days for which the hours setting is ignored and each hour is considered where the schedule is defined. Defaults to None.</p></li>
+<li><p><strong>tz</strong> (<em>str</em><em> or </em><em>tzinfo</em>) – Time zone name for returning localized datetime points, for example ‘Asia/Hong_Kong’.
+By default, the resulting datetime points are timezone-naive. See documentation for pandas.date_range for further details on tz.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">simple_schedule</span> <span class="o">=</span> <span class="n">SimpleSchedule</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">simple_schedule</span><span class="o">.</span><span class="n">get_schedule</span><span class="p">()</span>
+<span class="go">[datetime(2023,1,1,0,0,0), datetime(2023,1,1,1,0,0), datetime(2023,1,1,2,0,0), datetime(2023,1,1,3,0,0)]</span>
+
+<span class="go"># We include only hours 2 and 3 into schedule</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">simple_schedule</span> <span class="o">=</span> <span class="n">SimpleSchedule</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span> <span class="n">hours</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">simple_schedule</span><span class="o">.</span><span class="n">get_schedule</span><span class="p">()</span>
+<span class="go">[datetime.datetime(2023, 1, 1, 2, 0), datetime.datetime(2023, 1, 1, 3, 0)]</span>
+
+<span class="go"># We restrict further to only mondays as weekdays included</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">simple_schedule</span> <span class="o">=</span> <span class="n">SimpleSchedule</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span> <span class="n">hours</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="n">weekdays</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">simple_schedule</span><span class="o">.</span><span class="n">get_schedule</span><span class="p">()</span>
+<span class="go">[datetime.datetime(2023, 1, 2, 2, 0), datetime.datetime(2023, 1, 2, 3, 0)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.tools.PeakSchedule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.</span></span><span class="sig-name descname"><span class="pre">PeakSchedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivapy/tools/scheduler.html#PeakSchedule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.tools.PeakSchedule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rivapy.tools.SimpleSchedule" title="rivapy.tools.scheduler.SimpleSchedule"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleSchedule</span></code></a></p>
+<p>Scheduler, which returns the peak time grid between the start and end date times.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<em>dt.datetime</em>) – Start of schedule (including this timepoint).</p></li>
+<li><p><strong>end</strong> (<em>dt.datetime</em>) – End of schedule (excluding this timepoint).</p></li>
+<li><p><strong>tz</strong> (<em>str</em><em> or </em><em>tzinfo</em>) – Time zone name for returning localized datetime points, for example ‘Asia/Hong_Kong’.
+By default, the resulting datetime points are timezone-naive. See documentation for pandas.date_range for further details on tz.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">peak_schedule</span> <span class="o">=</span> <span class="n">PeakSchedule</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">peak_schedule</span><span class="o">.</span><span class="n">get_schedule</span><span class="p">()</span>
+<span class="go">[datetime.datetime(2023, 1, 5, 8, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 9, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 10, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 11, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 12, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 13, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 14, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 15, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 16, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 17, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 18, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 19, 0)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.tools.OffPeakSchedule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.</span></span><span class="sig-name descname"><span class="pre">OffPeakSchedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivapy/tools/scheduler.html#OffPeakSchedule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.tools.OffPeakSchedule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rivapy.tools.SimpleSchedule" title="rivapy.tools.scheduler.SimpleSchedule"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleSchedule</span></code></a></p>
+<p>Scheduler, which returns the offpeak time grid between the start and end date times.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<em>dt.datetime</em>) – Start of schedule (including this timepoint).</p></li>
+<li><p><strong>end</strong> (<em>dt.datetime</em>) – End of schedule (excluding this timepoint).</p></li>
+<li><p><strong>tz</strong> (<em>str</em><em> or </em><em>tzinfo</em>) – Time zone name for returning localized datetime points, for example ‘Asia/Hong_Kong’.
+By default, the resulting datetime points are timezone-naive. See documentation for pandas.date_range for further details on tz.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">offpeak_schedule</span> <span class="o">=</span> <span class="n">OffPeakSchedule</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">offpeak_schedule</span><span class="o">.</span><span class="n">get_schedule</span><span class="p">()</span>
+<span class="go">[datetime.datetime(2023, 1, 5, 0, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 1, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 2, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 3, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 4, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 5, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 6, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 7, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 20, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 21, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 22, 0),</span>
+<span class="go"> datetime.datetime(2023, 1, 5, 23, 0)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.tools.GasSchedule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.</span></span><span class="sig-name descname"><span class="pre">GasSchedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivapy/tools/scheduler.html#GasSchedule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.tools.GasSchedule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rivapy.tools.SimpleSchedule" title="rivapy.tools.scheduler.SimpleSchedule"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleSchedule</span></code></a></p>
+<p>Scheduler, which returns the gas day time grid (from 6 am to 6 am) between the start and end date times.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<em>dt.datetime</em>) – Start of schedule (including this timepoint).</p></li>
+<li><p><strong>end</strong> (<em>dt.datetime</em>) – End of schedule (excluding this timepoint).</p></li>
+<li><p><strong>tz</strong> (<em>str</em><em> or </em><em>tzinfo</em>) – Time zone name for returning localized datetime points, for example ‘Asia/Hong_Kong’.
+By default, the resulting datetime points are timezone-naive. See documentation for pandas.date_range for further details on tz.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gas_schedule</span> <span class="o">=</span> <span class="n">GasSchedule</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">7</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gas_schedule</span><span class="o">.</span><span class="n">get_schedule</span><span class="p">()</span>
+<span class="go">[datetime.datetime(2023, 1, 5, 6, 0), datetime.datetime(2023, 1, 6, 6, 0)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
 </section>
 <section id="datetimegrid">
 <h2>DateTimeGrid<a class="headerlink" href="#datetimegrid" title="Link to this heading"></a></h2>

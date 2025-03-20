@@ -1,0 +1,267 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Power &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Instruments" href="../instruments/index.html" />
+    <link rel="prev" title="Market Data Tools" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Module Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../marketdata/index.html">Market Data</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Market Data Tools</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Power</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#price-forward-curves">Price Forward Curves</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../instruments/index.html">Instruments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../models/index.html">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pricing/index.html">Pricing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rivapy.tools.html">Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rivapy.interfaces.html">Interfaces</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer_guide.html#logging-usage">Logging Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../search.html">Search Page</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module Documentation</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Market Data Tools</a></li>
+      <li class="breadcrumb-item active">Power</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/rivapy/marketdata_tools/power.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="power">
+<h1>Power<a class="headerlink" href="#power" title="Link to this heading"></a></h1>
+<section id="price-forward-curves">
+<h2>Price Forward Curves<a class="headerlink" href="#price-forward-curves" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.marketdata_tools.PFCShifter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata_tools.</span></span><span class="sig-name descname"><span class="pre">PFCShifter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">contracts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../instruments/power.html#rivapy.instruments.EnergyFutureSpecifications" title="rivapy.instruments.energy_futures_specifications.EnergyFutureSpecifications"><span class="pre">EnergyFutureSpecifications</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shifter.html#PFCShifter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShifter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FactoryObject</span></code></p>
+<p>A shifting methodology for PFC shapes. This class gets a PFC shape as an input and shifts it in such a way, that the resulting PFC contains the future prices defined in the <code class="docutils literal notranslate"><span class="pre">contracts</span></code> dictionary.
+We follow the methodology described here: <a class="reference external" href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2706366">https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2706366</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<em>pd.DataFrame</em>) – PFC shape, where the <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> index are <code class="docutils literal notranslate"><span class="pre">datetime</span></code> objects.</p></li>
+<li><p><strong>contracts</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="../instruments/power.html#rivapy.instruments.EnergyFutureSpecifications" title="rivapy.instruments.EnergyFutureSpecifications"><em>EnergyFutureSpecifications</em></a><em>]</em>) – Dictionary containing the future contracts (<code class="docutils literal notranslate"><span class="pre">EnergyFutureSpecifications</span></code> objects)</p></li>
+</ul>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># iterative usage</span>
+<span class="n">pfc_shifter</span> <span class="o">=</span> <span class="n">PFCShifter</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">contracts</span><span class="o">=</span><span class="n">contracts</span><span class="p">)</span>
+<span class="n">transition_matrix</span> <span class="o">=</span> <span class="n">pfc_shifter</span><span class="o">.</span><span class="n">generate_transition_matrix</span><span class="p">()</span>
+<span class="n">transition_matrix</span> <span class="o">=</span> <span class="n">pfc_shifter</span><span class="o">.</span><span class="n">detect_redundant_contracts</span><span class="p">(</span><span class="n">transition_matrix</span><span class="p">)</span>
+<span class="n">transition_matrix</span> <span class="o">=</span> <span class="n">pfc_shifter</span><span class="o">.</span><span class="n">generate_synthetic_contracts</span><span class="p">(</span><span class="n">transition_matrix</span><span class="p">)</span>
+<span class="n">pfc</span> <span class="o">=</span> <span class="n">pfc_shifter</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="n">transition_matrix</span><span class="p">)</span>
+
+<span class="c1"># direct call</span>
+<span class="n">pfc_shifter</span> <span class="o">=</span> <span class="n">PFCShifter</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">contracts</span><span class="o">=</span><span class="n">contracts</span><span class="p">)</span>
+<span class="n">pfc</span> <span class="o">=</span> <span class="n">pfc_shifter</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata_tools.PFCShifter.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shifter.html#PFCShifter.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShifter.compute" title="Link to this definition"></a></dt>
+<dd><p>Compute method to directly call all the individual steps involved for the shifting</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Shifted PFC shape</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata_tools.PFCShifter.detect_redundant_contracts">
+<span class="sig-name descname"><span class="pre">detect_redundant_contracts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transition_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shifter.html#PFCShifter.detect_redundant_contracts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShifter.detect_redundant_contracts" title="Link to this definition"></a></dt>
+<dd><p>In order to obtain an invertable matrix, the matrix must be of full rank. Linear dependent contracts will yield linear dependent row vectors.
+This is the case if e.g. a Cal Base and all four quarter contracts are provided. This method finds all redundant (linear dependent) contracts and
+omits the last found linear dependent contract in order to make sure that the row vectors are linearly independent.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>transition_matrix</strong> (<em>pd.DataFrame</em>) – Transition matrix generated by the <code class="docutils literal notranslate"><span class="pre">generate_transition_matrix</span></code> method.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Transition matrix without linearly dependent row vectors.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata_tools.PFCShifter.generate_synthetic_contracts">
+<span class="sig-name descname"><span class="pre">generate_synthetic_contracts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transition_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shifter.html#PFCShifter.generate_synthetic_contracts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShifter.generate_synthetic_contracts" title="Link to this definition"></a></dt>
+<dd><p>In order to fulfill the requirement of an invertable transition matrix, not only the row vectors but also the
+column vectors must generate a basis. In cases where m &gt; n, we need to additionally generate synthetic contracts.
+The delivery period for the synthetic contracts are chosen in such a way that the column vectors become linearly independent.
+The forward price for each synthetic contract is computed based on the rations of the average shape values over the corresponding delivery period of the synthetic contract and a reference contract.
+The shape ratio is multiplied with the forward price of the reference contract in order to obtain a forward price for the synthetic contract.
+The reference contract is implemented to be always the first contract in the <code class="docutils literal notranslate"><span class="pre">contracts</span></code> dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>transition_matrix</strong> (<em>pd.DataFrame</em>) – Transition matrix generated by the <code class="docutils literal notranslate"><span class="pre">detect_redundant_contracts</span></code> method.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Full rank transition matrix</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata_tools.PFCShifter.generate_transition_matrix">
+<span class="sig-name descname"><span class="pre">generate_transition_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shifter.html#PFCShifter.generate_transition_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShifter.generate_transition_matrix" title="Link to this definition"></a></dt>
+<dd><p>The transition matrix is the basis of the shifting algorithm. This method generates a (n x m) matrix with zero and one entries, where n is the number of contracts and m are start and end dates for the delivery periods.
+Hence, the matrix row vectors indicate the delivery periods of each contract. Note that the latest delivery end date is not displayed in the transition matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Transition matrix containing zeros and ones indicating delivery periods of individual contracts.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata_tools.PFCShifter.shift">
+<span class="sig-name descname"><span class="pre">shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transition_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shifter.html#PFCShifter.shift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShifter.shift" title="Link to this definition"></a></dt>
+<dd><p>This method is the final step in the shifting algorithm. The transition matrix is inversed and multiplied with the forward price vector to obtain a non overlapping forward price vector.</p>
+<div class="math notranslate nohighlight">
+\[f^{no} = T^{-1}\cdot f\]</div>
+<p>where:</p>
+<p><span class="math notranslate nohighlight">\(f^{no}\)</span> is the Non-overlapping forward price vector</p>
+<p><span class="math notranslate nohighlight">\(T\)</span> is the Transition matrix</p>
+<p><span class="math notranslate nohighlight">\(f\)</span> is the Forward price vector</p>
+<p>Afterwards the PFC <span class="math notranslate nohighlight">\(S(t)\)</span> is obtained from the shape <span class="math notranslate nohighlight">\(s(t)\)</span> by the follwoing formular:</p>
+<div class="math notranslate nohighlight">
+\[S(t) = s(t)\cdot \frac{\sum_{u=T_s}^{T_e} f^{no}(u)}{\sum_{u=T_s}^{T_e} s(u)}\]</div>
+<p>with <span class="math notranslate nohighlight">\(T_s\)</span> and <span class="math notranslate nohighlight">\(T_e\)</span> being the start and end dates of the individual delivery periods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>transition_matrix</strong> (<em>pd.DataFrame</em>) – Full rank transition matrix generated by the <code class="docutils literal notranslate"><span class="pre">generate_synthetic_contracts</span></code> method</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Shifted shape.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Market Data Tools" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../instruments/index.html" class="btn btn-neutral float-right" title="Instruments" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

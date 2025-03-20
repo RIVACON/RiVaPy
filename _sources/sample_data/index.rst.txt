@@ -26,3 +26,7 @@ Credit Default Data
    :members:
    :undoc-members:
    :show-inheritance:
+
+Dummy Power Spot Price
+---------------------------------------
+.. autofunction:: rivapy.sample_data.dummy_power_spot_price.spot_price_model

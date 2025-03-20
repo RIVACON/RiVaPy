@@ -1,0 +1,212 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rivapy.sample_data.dummy_power_spot_price &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html#logging-usage">Logging Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../search.html">Search Page</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rivapy.sample_data.dummy_power_spot_price</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rivapy.sample_data.dummy_power_spot_price</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+
+
+<div class="viewcode-block" id="spot_price_model">
+<a class="viewcode-back" href="../../../sample_data/index.html#rivapy.sample_data.dummy_power_spot_price.spot_price_model">[docs]</a>
+<span class="k">def</span> <span class="nf">spot_price_model</span><span class="p">(</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
+    <span class="n">spot_price_level</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">peak_price_level</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">solar_price_level</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">weekend_price_level</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">winter_price_level</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">epsilon_mean</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">epsilon_var</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Dummy power spot price model.</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        S(t) = S_0 +</span>
+<span class="sd">        \\begin{cases}</span>
+<span class="sd">            0, &amp; 0 \leq h(t) &lt; 8 \n</span>
+<span class="sd">            P_p, &amp; 8 \leq h(t) &lt; 11 \n</span>
+<span class="sd">            -P_{pv}, &amp; 11 \leq h(t) &lt; 16 \n</span>
+<span class="sd">            P_p, &amp; 16 \leq h(t) \leq 20 \n</span>
+<span class="sd">            0, &amp; 20 &lt; h(t) \leq 23</span>
+<span class="sd">        \\end{cases}</span>
+<span class="sd">        +</span>
+<span class="sd">        \\begin{cases}</span>
+<span class="sd">            0, &amp; 1\leq d(t) \leq 5 \n</span>
+<span class="sd">            -P_{we}, &amp; 6\leq d(t) \leq 7</span>
+<span class="sd">        \\end{cases}</span>
+<span class="sd">        +</span>
+<span class="sd">        \\begin{cases}</span>
+<span class="sd">            0, &amp; m(t) \in \\{4,5,6,7,8,9\\} \n</span>
+<span class="sd">            P_{W}, &amp; m(t) \in \\{1,2,3,10,11,12\\}</span>
+<span class="sd">        \\end{cases}</span>
+<span class="sd">        + \\varepsilon</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \\begin{aligned}</span>
+<span class="sd">            S_0 &amp;\quad \\text{Spot price level} \n</span>
+<span class="sd">            P_p &amp;\quad \\text{Peak price level} \n</span>
+<span class="sd">            P_{pv} &amp;\quad \\text{Price level with regard to solar power} \n</span>
+<span class="sd">            P_{we} &amp;\quad \\text{Price level for weekends} \n</span>
+<span class="sd">            P_W &amp;\quad \\text{Price level for winter} \n</span>
+<span class="sd">            h(t) &amp;\quad \\text{Hour of the time step } t \n</span>
+<span class="sd">            d(t) &amp;\quad \\text{Weekday of the time step } t \n</span>
+<span class="sd">            m(t) &amp;\quad \\text{Month of the time step } t \n</span>
+<span class="sd">            \\varepsilon &amp;\sim \\mathcal{N}(\\mu, \\sigma^2)</span>
+<span class="sd">        \\end{aligned}</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        timestamp (dt.datetime): Time stamp</span>
+<span class="sd">        spot_price_level (float): Spot price level</span>
+<span class="sd">        peak_price_level (float): Peak price level</span>
+<span class="sd">        solar_price_level (float): Price level with regard to solar power</span>
+<span class="sd">        weekend_price_level (float): Price level for weekends</span>
+<span class="sd">        winter_price_level (float): Price level for winter</span>
+<span class="sd">        epsilon_mean (float, optional): Additional additive noise mean. Defaults to 0.</span>
+<span class="sd">        epsilon_var (float, optional): Additional additive noise standard deviation. Defaults to 1.</span>
+<span class="sd">        seed (int, optional): Random seed. Defaults to 42.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: spot price</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">            parameter_dict = {</span>
+<span class="sd">                &#39;spot_price_level&#39;: 100,</span>
+<span class="sd">                &#39;peak_price_level&#39;: 10,</span>
+<span class="sd">                &#39;solar_price_level&#39;: 8,</span>
+<span class="sd">                &#39;weekend_price_level&#39;: 10,</span>
+<span class="sd">                &#39;winter_price_level&#39;: 20,</span>
+<span class="sd">                &#39;epsilon_mean&#39;: 0,</span>
+<span class="sd">                &#39;epsilon_var&#39;: 5</span>
+<span class="sd">            }</span>
+<span class="sd">            date_range = pd.date_range(start=&#39;1/1/2023&#39;, end=&#39;1/1/2025&#39;, freq=&#39;h&#39;, inclusive=&#39;left&#39;)</span>
+<span class="sd">            spot_prices = list(map(lambda x: spot_price_model(x, **parameter_dict), date_range))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">spot_price</span> <span class="o">=</span> <span class="n">spot_price_level</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">timestamp</span><span class="o">.</span><span class="n">hour</span> <span class="o">&gt;=</span> <span class="mi">8</span> <span class="ow">and</span> <span class="n">timestamp</span><span class="o">.</span><span class="n">hour</span> <span class="o">&lt;</span> <span class="mi">11</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">timestamp</span><span class="o">.</span><span class="n">hour</span> <span class="o">&gt;=</span> <span class="mi">16</span> <span class="ow">and</span> <span class="n">timestamp</span><span class="o">.</span><span class="n">hour</span> <span class="o">&lt;=</span> <span class="mi">20</span><span class="p">):</span>
+        <span class="n">spot_price</span> <span class="o">+=</span> <span class="n">peak_price_level</span>
+    <span class="k">elif</span> <span class="n">timestamp</span><span class="o">.</span><span class="n">hour</span> <span class="o">&gt;=</span> <span class="mi">11</span> <span class="ow">and</span> <span class="n">timestamp</span><span class="o">.</span><span class="n">hour</span> <span class="o">&lt;</span> <span class="mi">16</span><span class="p">:</span>
+        <span class="n">spot_price</span> <span class="o">-=</span> <span class="n">solar_price_level</span>
+
+    <span class="k">if</span> <span class="n">timestamp</span><span class="o">.</span><span class="n">weekday</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="n">spot_price</span> <span class="o">-=</span> <span class="n">weekend_price_level</span>
+
+    <span class="k">if</span> <span class="n">timestamp</span><span class="o">.</span><span class="n">month</span> <span class="ow">in</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">}:</span>
+        <span class="n">spot_price</span> <span class="o">+=</span> <span class="n">winter_price_level</span>
+
+    <span class="n">spot_price</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">epsilon_mean</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">epsilon_var</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">spot_price</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -79,13 +79,12 @@
            <div itemprop="articleBody">
              
   <h1>Source code for rivapy.marketdata</h1><div class="highlight"><pre>
-<span></span>
-
-<span class="c1">#from pyvacon.marketdata.analytics_classes import *  # TODO: Clarify why this is necessary for imports in pricing_data.</span>
-<span class="c1">#from pyvacon.marketdata import analytics_classes</span>
-<span class="c1">#__all__ = [&#39;analytics_classes&#39;, &#39;bootstrapping&#39;]</span>
+<span></span><span class="c1"># from pyvacon.marketdata.analytics_classes import *  # TODO: Clarify why this is necessary for imports in pricing_data.</span>
+<span class="c1"># from pyvacon.marketdata import analytics_classes</span>
+<span class="c1"># __all__ = [&#39;analytics_classes&#39;, &#39;bootstrapping&#39;]</span>
 <span class="kn">import</span> <span class="nn">abc</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
 <span class="c1"># from pyvacon.pyvacon_swig import EquityOptionQuoteTable</span>
 <span class="kn">from</span> <span class="nn">rivapy</span> <span class="kn">import</span> <span class="n">enums</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
@@ -96,6 +95,7 @@
 
 <span class="k">if</span> <span class="n">_pyvacon_available</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">pyvacon.finance.marketdata</span> <span class="k">as</span> <span class="nn">_mkt_data</span>
+
     <span class="n">InflationIndexForwardCurve</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">InflationIndexForwardCurve</span>
     <span class="n">SurvivalCurve</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">SurvivalCurve</span>
     <span class="n">DatedCurve</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">DatedCurve</span>
@@ -103,22 +103,28 @@
     <span class="kn">import</span> <span class="nn">pyvacon.finance.marketdata</span> <span class="k">as</span> <span class="nn">_mkt_data</span>
     <span class="kn">import</span> <span class="nn">pyvacon.finance.utils</span> <span class="k">as</span> <span class="nn">_utils</span>
     <span class="kn">import</span> <span class="nn">pyvacon.finance.pricing</span> <span class="k">as</span> <span class="nn">_pricing</span>
-    <span class="c1">#DividendTable = _mkt_data.DividendTable</span>
+
+    <span class="c1"># DividendTable = _mkt_data.DividendTable</span>
 <span class="k">else</span><span class="p">:</span>
+
     <span class="k">class</span> <span class="nc">SurvivalCurve</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Up to now only implemented in pyvacon that has not been installed.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Up to now only implemented in pyvacon that has not been installed.&quot;</span><span class="p">)</span>
+
 
 <div class="viewcode-block" id="DividendTable">
 <a class="viewcode-back" href="../../rivapy/marketdata/dividends.html#rivapy.marketdata.DividendTable">[docs]</a>
 <span class="k">class</span> <span class="nc">DividendTable</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                <span class="n">refdate</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> 
-                <span class="n">ex_dates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
-                <span class="n">pay_dates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
-                <span class="n">div_yield</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
-                <span class="n">div_cash</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
-                <span class="n">tax_factors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">refdate</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+        <span class="n">ex_dates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">pay_dates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">div_yield</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+        <span class="n">div_cash</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+        <span class="n">tax_factors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;[summary]</span>
 
 <span class="sd">        Args:</span>
@@ -144,8 +150,11 @@
 
     <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">DividendTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ex_dates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">div_yield</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">div_cash</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tax_factors</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pay_dates</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">DividendTable</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ex_dates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">div_yield</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">div_cash</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tax_factors</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pay_dates</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span></div>
+
 
 
 <span class="k">class</span> <span class="nc">_VolatilityParametrizationExpiry</span><span class="p">:</span>
@@ -153,8 +162,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n_params</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">params_at_expiry</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">expiries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">expiries</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_x</span><span class="p">(</span><span class="n">params_at_expiry</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">get_params_at_expiry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expiry</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">get_params_at_expiry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expiry</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get parameters for given expiry.</span>
 
 <span class="sd">        Args:</span>
@@ -163,8 +172,8 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            np.array: Parameter Tuple for given expiry.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">n_params</span><span class="o">*</span><span class="n">expiry</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">n_params</span><span class="o">*</span><span class="p">(</span><span class="n">expiry</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
-    
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">n_params</span> <span class="o">*</span> <span class="n">expiry</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_params</span> <span class="o">*</span> <span class="p">(</span><span class="n">expiry</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+
     <span class="k">def</span> <span class="nf">calc_implied_vol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ttm</span><span class="p">,</span> <span class="n">strike</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate implied volatility for given expiry and strike</span>
 
@@ -179,54 +188,56 @@
         <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
                 <span class="n">i</span> <span class="o">-=</span> <span class="mi">1</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calc_implied_vol_at_expiry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_params_at_expiry</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="n">ttm</span><span class="p">,</span><span class="n">strike</span><span class="p">))</span>
-        <span class="n">w0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_implied_vol_at_expiry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_params_at_expiry</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">strike</span><span class="p">)</span>
-        <span class="n">w1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_implied_vol_at_expiry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_params_at_expiry</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">strike</span><span class="p">)</span>
-        <span class="c1">#linear n total variance</span>
-        <span class="n">delta_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">w</span> <span class="o">=</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">ttm</span><span class="p">)</span><span class="o">*</span><span class="n">w0</span> <span class="o">+</span> <span class="p">(</span><span class="n">ttm</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">w1</span><span class="p">)</span><span class="o">/</span><span class="n">delta_t</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">w</span><span class="o">/</span><span class="n">ttm</span><span class="p">)</span>
-    
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calc_implied_vol_at_expiry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_params_at_expiry</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">ttm</span><span class="p">,</span> <span class="n">strike</span><span class="p">))</span>
+        <span class="n">w0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_implied_vol_at_expiry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_params_at_expiry</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">strike</span><span class="p">)</span>
+        <span class="n">w1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_implied_vol_at_expiry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_params_at_expiry</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">strike</span><span class="p">)</span>
+        <span class="c1"># linear n total variance</span>
+        <span class="n">delta_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">ttm</span><span class="p">)</span> <span class="o">*</span> <span class="n">w0</span> <span class="o">+</span> <span class="p">(</span><span class="n">ttm</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">w1</span><span class="p">)</span> <span class="o">/</span> <span class="n">delta_t</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">w</span> <span class="o">/</span> <span class="n">ttm</span><span class="p">)</span>
+
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">_calc_implied_vol_at_expiry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">ttm</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">strike</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="k">pass</span>
-    
-    <span class="k">def</span> <span class="nf">_get_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">n_params</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_params</span><span class="p">)</span>
         <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)):</span>
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_params</span><span class="p">):</span>
                 <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
                 <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">x</span>
-    
-    <span class="k">def</span> <span class="nf">_set_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">_set_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">x</span>
-        
-    <span class="k">def</span> <span class="nf">calibrate_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quotes</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">calibrate_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quotes</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calibrate parameters to given implied volatility quotes.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            quotes (pd.DataFrame): pd.DataFrame with columns EXPIRY as year fraction, STRIKE asm moneyness, BID_IV, ASK_IV.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">def</span> <span class="nf">cost_function</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_param</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-            <span class="n">quotes</span><span class="p">[</span><span class="s1">&#39;VOLS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_implied_vol</span><span class="p">(</span><span class="n">expiry</span><span class="p">,</span><span class="n">strike</span><span class="p">)</span> <span class="k">for</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">strike</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">quotes</span><span class="p">[</span><span class="s1">&#39;EXPIRY&#39;</span><span class="p">],</span><span class="n">quotes</span><span class="p">[</span><span class="s1">&#39;STRIKE&#39;</span><span class="p">])]</span>
-            <span class="n">quotes</span><span class="p">[</span><span class="s1">&#39;DIST_ASK&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">vol</span><span class="o">-</span><span class="n">ask</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">ask</span><span class="p">,</span> <span class="n">vol</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">quotes</span><span class="p">[</span><span class="s1">&#39;ASK_IV&#39;</span><span class="p">],</span><span class="n">quotes</span><span class="p">[</span><span class="s1">&#39;VOLS&#39;</span><span class="p">])]</span>
-            <span class="n">quotes</span><span class="p">[</span><span class="s1">&#39;DIST_BID&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">bid</span><span class="o">-</span><span class="n">vol</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">bid</span><span class="p">,</span> <span class="n">vol</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">quotes</span><span class="p">[</span><span class="s1">&#39;BID_IV&#39;</span><span class="p">],</span><span class="n">quotes</span><span class="p">[</span><span class="s1">&#39;VOLS&#39;</span><span class="p">])]</span>
-            <span class="n">quotes</span><span class="p">[</span><span class="s1">&#39;DIST_TOTAL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">quotes</span><span class="p">[</span><span class="s1">&#39;DIST_ASK&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">quotes</span><span class="p">[</span><span class="s1">&#39;DIST_BID&#39;</span><span class="p">]</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">quotes</span><span class="p">[</span><span class="s1">&#39;DIST_TOTAL&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-        
+            <span class="n">quotes</span><span class="p">[</span><span class="s2">&quot;VOLS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_implied_vol</span><span class="p">(</span><span class="n">expiry</span><span class="p">,</span> <span class="n">strike</span><span class="p">)</span> <span class="k">for</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">strike</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">quotes</span><span class="p">[</span><span class="s2">&quot;EXPIRY&quot;</span><span class="p">],</span> <span class="n">quotes</span><span class="p">[</span><span class="s2">&quot;STRIKE&quot;</span><span class="p">])]</span>
+            <span class="n">quotes</span><span class="p">[</span><span class="s2">&quot;DIST_ASK&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">vol</span> <span class="o">-</span> <span class="n">ask</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">ask</span><span class="p">,</span> <span class="n">vol</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">quotes</span><span class="p">[</span><span class="s2">&quot;ASK_IV&quot;</span><span class="p">],</span> <span class="n">quotes</span><span class="p">[</span><span class="s2">&quot;VOLS&quot;</span><span class="p">])]</span>
+            <span class="n">quotes</span><span class="p">[</span><span class="s2">&quot;DIST_BID&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">bid</span> <span class="o">-</span> <span class="n">vol</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">bid</span><span class="p">,</span> <span class="n">vol</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">quotes</span><span class="p">[</span><span class="s2">&quot;BID_IV&quot;</span><span class="p">],</span> <span class="n">quotes</span><span class="p">[</span><span class="s2">&quot;VOLS&quot;</span><span class="p">])]</span>
+            <span class="n">quotes</span><span class="p">[</span><span class="s2">&quot;DIST_TOTAL&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">quotes</span><span class="p">[</span><span class="s2">&quot;DIST_ASK&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">quotes</span><span class="p">[</span><span class="s2">&quot;DIST_BID&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">quotes</span><span class="p">[</span><span class="s2">&quot;DIST_TOTAL&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;method&#39;</span><span class="p">:</span><span class="s1">&#39;lm&#39;</span><span class="p">}</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">least_squares</span><span class="p">(</span><span class="n">cost_function</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;lm&quot;</span><span class="p">}</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">least_squares</span><span class="p">(</span><span class="n">cost_function</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">x</span>
-    
+
+
 <div class="viewcode-block" id="VolatilityParametrizationFlat">
 <a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationFlat">[docs]</a>
 <span class="k">class</span> <span class="nc">VolatilityParametrizationFlat</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">vol</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Flat volatility parametrization</span>
 
 <span class="sd">        Args:</span>
@@ -234,13 +245,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vol</span> <span class="o">=</span> <span class="n">vol</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
-        
+
     <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">VolatilityParametrizationFlat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol</span><span class="p">)</span>  
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">VolatilityParametrizationFlat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span></div>
 
-    
+
+
 <div class="viewcode-block" id="VolatilityParametrizationTerm">
 <a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationTerm">[docs]</a>
 <span class="k">class</span> <span class="nc">VolatilityParametrizationTerm</span><span class="p">:</span>
@@ -254,31 +266,33 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">expiries</span> <span class="o">=</span> <span class="n">expiries</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fwd_atm_vols</span> <span class="o">=</span> <span class="n">fwd_atm_vols</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
-        
+
     <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">VolatilityParametrizationTerm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fwd_atm_vols</span><span class="p">)</span>  
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">VolatilityParametrizationTerm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fwd_atm_vols</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span></div>
+
 
 
 <div class="viewcode-block" id="VolatilityParametrizationSVI">
 <a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSVI">[docs]</a>
-<span class="k">class</span>   <span class="nc">VolatilityParametrizationSVI</span><span class="p">(</span><span class="n">_VolatilityParametrizationExpiry</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">VolatilityParametrizationSVI</span><span class="p">(</span><span class="n">_VolatilityParametrizationExpiry</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expiries</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">svi_params</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Raw SVI parametrization (definition 3.1 in  https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2033323)</span>
 
 <span class="sd">        .. math::</span>
 <span class="sd">            w(k) = a + b(\\rho (k-m) + \\sqrt{(k-m)^2+\\sigma^2 })</span>
-<span class="sd">        </span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            expiries (List[float]): List of expiries (sorted from nearest to farest).</span>
 <span class="sd">            svi_params (List[Tuple]): List of SVI parameters (one Tuple for each expiry). Tuple in the order (a, b, rho, m, sigma).</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">expiries</span><span class="p">,</span><span class="n">svi_params</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">expiries</span><span class="p">,</span> <span class="n">svi_params</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_calc_implied_vol_at_expiry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">ttm</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">-</span><span class="n">params</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">-</span><span class="n">params</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">params</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span></div>
+        <span class="k">return</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">-</span> <span class="n">params</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">-</span> <span class="n">params</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">params</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span></div>
+
 
 
 <div class="viewcode-block" id="VolatilityParametrizationSSVI">
@@ -302,8 +316,8 @@
         <span class="c1"># self.eta = eta</span>
         <span class="c1"># self.gamma = gamma</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_x</span><span class="p">(</span><span class="n">fwd_atm_vols</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span><span class="n">gamma</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_x</span><span class="p">(</span><span class="n">fwd_atm_vols</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_fwd_atm_vols</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fwd_atm_vols</span><span class="p">)</span>
 
 <div class="viewcode-block" id="VolatilityParametrizationSSVI.calc_implied_vol">
@@ -323,48 +337,51 @@
 
     <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># self._pyvacon_obj = _mkt_data.VolatilityParametrizationSSVI(self.expiries, self.fwd_atm_vols, self.rho, self.eta, self.gamma) </span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">VolatilityParametrizationSSVI</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">n_fwd_atm_vols</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>   
+            <span class="c1"># self._pyvacon_obj = _mkt_data.VolatilityParametrizationSSVI(self.expiries, self.fwd_atm_vols, self.rho, self.eta, self.gamma)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">VolatilityParametrizationSSVI</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_fwd_atm_vols</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span>
-    
-    <span class="k">def</span> <span class="nf">_get_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fwd_atm_vols</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fwd_atm_vols</span><span class="p">)</span><span class="o">+</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fwd_atm_vols</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fwd_atm_vols</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span>
         <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fwd_atm_vols</span><span class="p">)):</span>
             <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fwd_atm_vols</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">rho</span>
-        <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">eta</span>
-        <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">gamma</span>
-        
+        <span class="n">x</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">rho</span>
+        <span class="n">x</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">eta</span>
+        <span class="n">x</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">gamma</span>
+
         <span class="k">return</span> <span class="n">x</span>
-    
-    <span class="k">def</span> <span class="nf">_set_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">_set_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">x</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
-        
+
 <div class="viewcode-block" id="VolatilityParametrizationSSVI.get_rho">
 <a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSSVI.get_rho">[docs]</a>
     <span class="k">def</span> <span class="nf">get_rho</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span></div>
 
-    
+
 <div class="viewcode-block" id="VolatilityParametrizationSSVI.get_eta">
 <a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSSVI.get_eta">[docs]</a>
     <span class="k">def</span> <span class="nf">get_eta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span></div>
 
-    
+
 <div class="viewcode-block" id="VolatilityParametrizationSSVI.get_gamma">
 <a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSSVI.get_gamma">[docs]</a>
     <span class="k">def</span> <span class="nf">get_gamma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
 
-    
+
 <div class="viewcode-block" id="VolatilityParametrizationSSVI.get_fwd_atm_vols">
 <a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSSVI.get_fwd_atm_vols">[docs]</a>
     <span class="k">def</span> <span class="nf">get_fwd_atm_vols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">n_fwd_atm_vols</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_fwd_atm_vols</span><span class="p">]</span></div>
 </div>
+
 
 
 <div class="viewcode-block" id="VolatilityParametrizationSABR">
@@ -376,18 +393,18 @@
 
 <span class="sd">        The SABR model assumes that the forward rate and the instantaneous volatility are driven by two correlated Brownian motions:</span>
 
-<span class="sd">        .. math::                </span>
+<span class="sd">        .. math::</span>
 <span class="sd">            df_t = \\alpha_t f_t^\\beta dW_t^1</span>
 <span class="sd">        .. math::</span>
 <span class="sd">            d\\alpha_t = \\nu\\alpha_t dW_t^2</span>
 <span class="sd">        .. math::</span>
 <span class="sd">            E\\bigl[dW_t^1 dW_T^2\\bigr] = \\rho dt</span>
 
-<span class="sd">        The expression that the implied volatility must satisfy is </span>
-<span class="sd">        </span>
+<span class="sd">        The expression that the implied volatility must satisfy is</span>
+
 <span class="sd">        .. math::</span>
 <span class="sd">            \\sigma_B(K,f) = \\frac{\\alpha\\biggl\{1+\\biggl[\\frac {(1-\\beta)^2}{24}\\frac {\\alpha^2}{(fK)^{1-\\beta}}+\\frac {1}{4}\\frac {\\rho\\beta\\nu\\alpha}{(FK)^{(1-\\beta)/2}}+\\frac {2-3\\rho^2}{24}\\nu^2\\biggr ]T\\biggr \\}}{(fK)^{(1-\\beta)/2}\\biggl[1+\\frac {(1-\\beta)^2}{24}{ln}^2\\frac {f}{K}+\\frac {(1-\\beta)^4}{1920}{ln}^4\\frac {f}{K}\\biggr]} \\frac {z}{\\chi(z)}</span>
-<span class="sd">              </span>
+
 <span class="sd">        .. math::</span>
 <span class="sd">            z = \\frac {\\nu }{\\alpha }(fK)^{(1-\\beta )/2} ln \\frac {f}{K}</span>
 
@@ -400,13 +417,13 @@
 <span class="sd">            \\sigma_{ATM} = \\sigma_B(f,f)=\\frac{\\alpha\\biggl\{1+\\biggl[\\frac{(1-\\beta)^2}{24}\\frac{\\alpha^2}{f^{2-2\\beta}}+\\frac{1}{4}\\frac{\\rho\\beta\\nu\\alpha}{f^{1-\\beta}}\\frac{2-3\\rho^2}{24}\\nu^2\\biggr]T\\biggr\}}{f^{1-\\beta}}</span>
 
 <span class="sd">        where</span>
-<span class="sd">                </span>
+
 <span class="sd">        &gt; :math:`\\alpha` is the instantaneous vol;</span>
-<span class="sd">            </span>
+
 <span class="sd">        &gt; :math:`\\nu` is the vol of vol;</span>
-<span class="sd">        </span>
+
 <span class="sd">        &gt; :math:`\\rho` is the correlation between the Brownian motions driving the forward rate and the instantaneous vol;</span>
-<span class="sd">        </span>
+
 <span class="sd">        &gt; :math:`\\beta` is the CEV component for forward rate (determines shape of forward rates, leverage effect and backbond of ATM vol).</span>
 
 <span class="sd">        Args:</span>
@@ -414,29 +431,56 @@
 <span class="sd">            sabr_params (List[Tuple]): List of SABR parameters (one Tuple for each expiry). Tuple in the order (alpha, nu, beta, rho).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">expiries</span><span class="p">,</span><span class="n">sabr_params</span><span class="p">)</span>
-    
-    
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">expiries</span><span class="p">,</span> <span class="n">sabr_params</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">_calc_implied_vol_at_expiry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">ttm</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">strike</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="n">K</span> <span class="o">=</span> <span class="n">strike</span>
-        <span class="n">alpha</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
-        <span class="n">nu</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> 
-        <span class="n">beta</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> 
-        <span class="n">rho</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> 
+        <span class="n">alpha</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">nu</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">rho</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
         <span class="n">f</span> <span class="o">=</span> <span class="mi">1</span>
-        
-        <span class="n">zeta</span> <span class="o">=</span> <span class="n">nu</span><span class="o">/</span><span class="n">alpha</span><span class="o">*</span><span class="p">(</span><span class="n">f</span><span class="o">*</span><span class="n">K</span><span class="p">)</span><span class="o">**</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">f</span><span class="o">/</span><span class="n">K</span><span class="p">)</span>
-        <span class="n">chi_zeta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">rho</span><span class="o">*</span><span class="n">zeta</span><span class="o">+</span><span class="n">zeta</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="n">zeta</span><span class="o">-</span><span class="n">rho</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">rho</span><span class="p">))</span>
-        
+
+        <span class="n">zeta</span> <span class="o">=</span> <span class="n">nu</span> <span class="o">/</span> <span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span><span class="n">f</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span> <span class="o">**</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">f</span> <span class="o">/</span> <span class="n">K</span><span class="p">)</span>
+        <span class="n">chi_zeta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">rho</span> <span class="o">*</span> <span class="n">zeta</span> <span class="o">+</span> <span class="n">zeta</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">zeta</span> <span class="o">-</span> <span class="n">rho</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">rho</span><span class="p">))</span>
+
         <span class="k">if</span> <span class="n">f</span> <span class="o">==</span> <span class="n">K</span><span class="p">:</span>
-            <span class="n">sigma</span> <span class="o">=</span> <span class="n">alpha</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">24</span><span class="o">*</span><span class="n">alpha</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">f</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">beta</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="o">*</span><span class="n">rho</span><span class="o">*</span><span class="n">beta</span><span class="o">*</span><span class="n">nu</span><span class="o">*</span><span class="n">alpha</span><span class="o">/</span><span class="n">f</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="mi">2</span><span class="o">-</span><span class="mi">3</span><span class="o">*</span><span class="n">rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">24</span><span class="o">*</span><span class="n">nu</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">ttm</span><span class="p">)</span><span class="o">/</span><span class="n">f</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">alpha</span>
+                <span class="o">*</span> <span class="p">(</span>
+                    <span class="mi">1</span>
+                    <span class="o">+</span> <span class="p">(</span>
+                        <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">24</span> <span class="o">*</span> <span class="n">alpha</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">f</span> <span class="o">**</span> <span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">beta</span><span class="p">)</span>
+                        <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">rho</span> <span class="o">*</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">nu</span> <span class="o">*</span> <span class="n">alpha</span> <span class="o">/</span> <span class="n">f</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">)</span>
+                        <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">24</span> <span class="o">*</span> <span class="n">nu</span><span class="o">**</span><span class="mi">2</span>
+                    <span class="p">)</span>
+                    <span class="o">*</span> <span class="n">ttm</span>
+                <span class="p">)</span>
+                <span class="o">/</span> <span class="n">f</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">)</span>
+            <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">sigma</span> <span class="o">=</span> <span class="n">alpha</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">24</span><span class="o">*</span><span class="n">alpha</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">f</span><span class="o">*</span><span class="n">K</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="o">*</span><span class="n">rho</span><span class="o">*</span><span class="n">beta</span><span class="o">*</span><span class="n">nu</span><span class="o">*</span><span class="n">alpha</span><span class="o">/</span><span class="p">(</span><span class="n">f</span><span class="o">*</span><span class="n">K</span><span class="p">)</span><span class="o">**</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="mi">2</span><span class="o">-</span><span class="mi">3</span><span class="o">*</span><span class="n">rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">24</span><span class="o">*</span><span class="n">nu</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">ttm</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">f</span><span class="o">*</span><span class="n">K</span><span class="p">)</span><span class="o">**</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">24</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">f</span><span class="o">/</span><span class="n">K</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span><span class="o">**</span><span class="mi">4</span><span class="o">/</span><span class="mi">1920</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">f</span><span class="o">/</span><span class="n">K</span><span class="p">)</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="n">zeta</span><span class="o">/</span><span class="n">chi_zeta</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">alpha</span>
+                <span class="o">*</span> <span class="p">(</span>
+                    <span class="mi">1</span>
+                    <span class="o">+</span> <span class="p">(</span>
+                        <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">24</span> <span class="o">*</span> <span class="n">alpha</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">f</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">)</span>
+                        <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">rho</span> <span class="o">*</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">nu</span> <span class="o">*</span> <span class="n">alpha</span> <span class="o">/</span> <span class="p">(</span><span class="n">f</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span> <span class="o">**</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                        <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">24</span> <span class="o">*</span> <span class="n">nu</span><span class="o">**</span><span class="mi">2</span>
+                    <span class="p">)</span>
+                    <span class="o">*</span> <span class="n">ttm</span>
+                <span class="p">)</span>
+                <span class="o">/</span> <span class="p">(</span><span class="n">f</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span> <span class="o">**</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">24</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">f</span> <span class="o">/</span> <span class="n">K</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">/</span> <span class="mi">1920</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">f</span> <span class="o">/</span> <span class="n">K</span><span class="p">)</span> <span class="o">**</span> <span class="mi">4</span><span class="p">)</span>
+                <span class="o">*</span> <span class="n">zeta</span>
+                <span class="o">/</span> <span class="n">chi_zeta</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">sigma</span><span class="o">**</span><span class="mi">2</span></div>
 
-            
+
+
 <div class="viewcode-block" id="VolatilityGridParametrization">
 <a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityGridParametrization">[docs]</a>
 <span class="k">class</span> <span class="nc">VolatilityGridParametrization</span><span class="p">:</span>
@@ -449,19 +493,19 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            expiries (np.array): An array of the expiries.</span>
-<span class="sd">            strikes (np.ndarray): </span>
+<span class="sd">            strikes (np.ndarray):</span>
 <span class="sd">            vols (np.ndarray): Two dimensional array of volatilities where each row i contains the values for expiry i</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">expiries</span> <span class="o">=</span> <span class="n">expiries</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">strikes</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">strikes</span> <span class="o">=</span> <span class="p">[</span><span class="n">strikes</span><span class="p">]</span><span class="o">*</span><span class="n">expiries</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">strikes</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">strikes</span> <span class="o">=</span> <span class="p">[</span><span class="n">strikes</span><span class="p">]</span> <span class="o">*</span> <span class="n">expiries</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">strikes</span> <span class="o">=</span> <span class="n">strikes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vols</span> <span class="o">=</span> <span class="n">vols</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="VolatilityGridParametrization.calc_implied_vol">
 <a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityGridParametrization.calc_implied_vol">[docs]</a>
-    <span class="k">def</span> <span class="nf">calc_implied_vol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ttm</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">strike</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calc_implied_vol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ttm</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">strike</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate implied volatility for given expiry and strike</span>
 
 <span class="sd">        Args:</span>
@@ -477,25 +521,26 @@
     <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">vol_params</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">VolatilityParametrizationTimeSlice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">strikes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vols</span><span class="p">)</span>  
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">VolatilityParametrizationTimeSlice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expiries</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">strikes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vols</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span></div>
 
-    
+
+
 <div class="viewcode-block" id="VolatilitySurface">
 <a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilitySurface">[docs]</a>
 <span class="k">class</span> <span class="nc">VolatilitySurface</span><span class="p">:</span>
 <div class="viewcode-block" id="VolatilitySurface.load">
 <a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilitySurface.load">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">VolatilitySurface</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
 
-    
+
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_create_param_pyvacon_obj</span><span class="p">(</span><span class="n">vol_param</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">vol_param</span><span class="p">,</span> <span class="s1">&#39;_get_pyvacon_obj&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">vol_param</span><span class="p">,</span> <span class="s2">&quot;_get_pyvacon_obj&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">vol_param</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">vol_param</span><span class="p">,</span> <span class="s1">&#39;expiries&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">vol_param</span><span class="p">,</span> <span class="s2">&quot;expiries&quot;</span><span class="p">):</span>
             <span class="n">expiries</span> <span class="o">=</span> <span class="n">vol_param</span><span class="o">.</span><span class="n">expiries</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">expiries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -503,7 +548,7 @@
         <span class="n">vols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">expiries</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">strikes</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">expiries</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">strikes</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
-                <span class="n">vols</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">vol_param</span><span class="o">.</span><span class="n">calc_implied_vol</span><span class="p">(</span><span class="n">expiries</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">strikes</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="n">vols</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">vol_param</span><span class="o">.</span><span class="n">calc_implied_vol</span><span class="p">(</span><span class="n">expiries</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">strikes</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">VolatilityGridParametrization</span><span class="p">(</span><span class="n">expiries</span><span class="p">,</span> <span class="n">strikes</span><span class="p">,</span> <span class="n">vols</span><span class="p">)</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">forward_curve</span><span class="p">,</span> <span class="n">daycounter</span><span class="p">,</span> <span class="n">vol_param</span><span class="p">):</span>
@@ -521,8 +566,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">forward_curve</span> <span class="o">=</span> <span class="n">forward_curve</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">daycounter</span> <span class="o">=</span> <span class="n">daycounter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vol_param</span> <span class="o">=</span> <span class="n">vol_param</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>  
-           
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
+
     <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fwd_curve</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">fwd_curve</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -531,14 +576,14 @@
                 <span class="n">_py_fwd_curve</span> <span class="o">=</span> <span class="n">fwd_curve</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">()</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">_py_fwd_curve</span> <span class="o">=</span> <span class="n">fwd_curve</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">VolatilitySurface</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span>
-                <span class="n">_py_fwd_curve</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">daycounter</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> 
-                <span class="n">VolatilitySurface</span><span class="o">.</span><span class="n">_create_param_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_param</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">VolatilitySurface</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="n">_py_fwd_curve</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">daycounter</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">VolatilitySurface</span><span class="o">.</span><span class="n">_create_param_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_param</span><span class="p">)</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span>
-    
+
 <div class="viewcode-block" id="VolatilitySurface.calc_implied_vol">
 <a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilitySurface.calc_implied_vol">[docs]</a>
-    <span class="k">def</span> <span class="nf">calc_implied_vol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">expiry</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">strike</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">forward_curve</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">calc_implied_vol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expiry</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">strike</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">forward_curve</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate implied volatility</span>
 
 <span class="sd">        Args:</span>
@@ -552,27 +597,31 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            float: Implied volatility.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># convert strike into x_strike </span>
+        <span class="c1"># convert strike into x_strike</span>
         <span class="k">if</span> <span class="n">refdate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">refdate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_curve</span><span class="o">.</span><span class="n">refdate</span>
         <span class="k">if</span> <span class="n">forward_curve</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_curve</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Please specify a forward curve&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Please specify a forward curve&quot;</span><span class="p">)</span>
         <span class="n">vol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">forward_curve</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">forward_curve</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_curve</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_curve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">vol</span> <span class="o">=</span> <span class="n">_mkt_data</span><span class="o">.</span><span class="n">VolatilitySurface</span><span class="o">.</span><span class="n">createVolatilitySurfaceShiftedFwd</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">forward_curve</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">())</span>
-        <span class="n">forward_curve_obj</span> <span class="o">=</span> <span class="n">forward_curve</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">()</span> 
-        <span class="n">x_strike</span> <span class="o">=</span> <span class="n">_utils</span><span class="o">.</span><span class="n">computeXStrike</span><span class="p">(</span><span class="n">strike</span><span class="p">,</span> <span class="n">forward_curve_obj</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">expiry</span><span class="p">),</span> <span class="n">forward_curve_obj</span><span class="o">.</span><span class="n">discountedFutureCashDivs</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">expiry</span><span class="p">))</span>
+        <span class="n">forward_curve_obj</span> <span class="o">=</span> <span class="n">forward_curve</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">()</span>
+        <span class="n">x_strike</span> <span class="o">=</span> <span class="n">_utils</span><span class="o">.</span><span class="n">computeXStrike</span><span class="p">(</span>
+            <span class="n">strike</span><span class="p">,</span> <span class="n">forward_curve_obj</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">expiry</span><span class="p">),</span> <span class="n">forward_curve_obj</span><span class="o">.</span><span class="n">discountedFutureCashDivs</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">expiry</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="n">x_strike</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The given strike value seems implausible compared to the discounted future cash dividends</span><span class="se">\</span>
-<span class="s1">                (</span><span class="si">{</span><span class="n">forward_curve_obj</span><span class="o">.</span><span class="n">discountedFutureCashDivs</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span><span class="w"> </span><span class="n">expiry</span><span class="p">)</span><span class="si">}</span><span class="s1">).&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The given strike value seems implausible compared to the discounted future cash dividends</span><span class="se">\</span>
+<span class="s2">                (</span><span class="si">{</span><span class="n">forward_curve_obj</span><span class="o">.</span><span class="n">discountedFutureCashDivs</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span><span class="w"> </span><span class="n">expiry</span><span class="p">)</span><span class="si">}</span><span class="s2">).&quot;</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="n">vol</span><span class="o">.</span><span class="n">calcImpliedVol</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">x_strike</span><span class="p">)</span></div>
 
-      
+
 <div class="viewcode-block" id="VolatilitySurface.set_stickyness">
 <a class="viewcode-back" href="../../rivapy/marketdata/equity.html#rivapy.marketdata.VolatilitySurface.set_stickyness">[docs]</a>
-    <span class="nd">@staticmethod</span>        
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">set_stickyness</span><span class="p">(</span><span class="n">vol_stickyness</span><span class="p">:</span> <span class="n">enums</span><span class="o">.</span><span class="n">VolatilityStickyness</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">vol_stickyness</span> <span class="ow">is</span> <span class="n">enums</span><span class="o">.</span><span class="n">VolatilityStickyness</span><span class="o">.</span><span class="n">StickyXStrike</span><span class="p">:</span>
             <span class="n">_pricing</span><span class="o">.</span><span class="n">GlobalSettings</span><span class="o">.</span><span class="n">setVolatilitySurfaceFwdStickyness</span><span class="p">(</span><span class="n">_pricing</span><span class="o">.</span><span class="n">VolatilitySurfaceFwdStickyness</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">StickyXStrike</span><span class="p">)</span>
@@ -583,13 +632,15 @@
         <span class="k">elif</span> <span class="n">vol_stickyness</span> <span class="ow">is</span> <span class="n">enums</span><span class="o">.</span><span class="n">VolatilityStickyness</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
             <span class="n">_pricing</span><span class="o">.</span><span class="n">GlobalSettings</span><span class="o">.</span><span class="n">setVolatilitySurfaceFwdStickyness</span><span class="p">(</span><span class="n">_pricing</span><span class="o">.</span><span class="n">VolatilitySurfaceFwdStickyness</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">NONE</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span> <span class="p">(</span><span class="s1">&#39;Error&#39;</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Error&quot;</span><span class="p">)</span></div>
 </div>
+
 
 
 <span class="k">def</span> <span class="nf">_add_to_factory</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
     <span class="n">factory_entries</span> <span class="o">=</span> <span class="n">_factory</span><span class="p">()</span>
     <span class="n">factory_entries</span><span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span>
+
 
 <span class="n">_add_to_factory</span><span class="p">(</span><span class="n">NelsonSiegel</span><span class="p">)</span>
 <span class="n">_add_to_factory</span><span class="p">(</span><span class="n">NelsonSiegelSvensson</span><span class="p">)</span>
@@ -598,15 +649,17 @@
 <span class="n">_add_to_factory</span><span class="p">(</span><span class="n">DiscountCurveParametrized</span><span class="p">)</span>
 <span class="n">_add_to_factory</span><span class="p">(</span><span class="n">DiscountCurveComposition</span><span class="p">)</span>
 
-<span class="k">if</span> <span class="vm">__name__</span><span class="o">==</span><span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">svi</span> <span class="o">=</span> <span class="n">VolatilityParametrizationSVI</span><span class="p">(</span><span class="n">expiries</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">365.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]),</span> <span class="n">svi_params</span><span class="o">=</span><span class="p">[</span>
-        <span class="p">(</span><span class="mf">0.0001</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0001</span><span class="p">),</span>
-        <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">),</span>
-    <span class="p">])</span>
-    <span class="n">expiry</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="mf">365.0</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">svi</span> <span class="o">=</span> <span class="n">VolatilityParametrizationSVI</span><span class="p">(</span>
+        <span class="n">expiries</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">365.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]),</span>
+        <span class="n">svi_params</span><span class="o">=</span><span class="p">[</span>
+            <span class="p">(</span><span class="mf">0.0001</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0001</span><span class="p">),</span>
+            <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">),</span>
+        <span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">expiry</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">365.0</span>
     <span class="n">x_strike</span> <span class="o">=</span> <span class="mf">1.0</span>
     <span class="n">svi</span><span class="o">.</span><span class="n">calc_implied_vol</span><span class="p">(</span><span class="n">expiry</span><span class="p">,</span> <span class="n">x_strike</span><span class="p">)</span>
-
 </pre></div>
 
            </div>

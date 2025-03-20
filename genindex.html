@@ -134,11 +134,9 @@
 </li>
       <li><a href="rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.AmericanPdePricingData">AmericanPdePricingData (class in rivapy.pricing.pricing_data)</a>
 </li>
-      <li><a href="rivapy/instruments/equity.html#rivapy.instruments.AmericanVanillaSpecification">AmericanVanillaSpecification (class in rivapy.instruments)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="rivapy/instruments/power.html#rivapy.instruments.SimpleSchedule.applies">applies() (rivapy.instruments.SimpleSchedule method)</a>
+      <li><a href="rivapy/instruments/equity.html#rivapy.instruments.AmericanVanillaSpecification">AmericanVanillaSpecification (class in rivapy.instruments)</a>
 </li>
       <li><a href="rivapy/models/equity.html#rivapy.models.HestonModel.apply_mc_step">apply_mc_step() (rivapy.models.HestonModel method)</a>
 
@@ -217,6 +215,8 @@
       <ul>
         <li><a href="rivapy/marketdata/discountcurves.html#rivapy.marketdata.NelsonSiegelSvensson.compute">(rivapy.marketdata.NelsonSiegelSvensson static method)</a>
 </li>
+        <li><a href="rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShifter.compute">(rivapy.marketdata_tools.PFCShifter method)</a>
+</li>
         <li><a href="rivapy/models/energy/energy_weather.html#rivapy.models.SupplyFunction.compute">(rivapy.models.SupplyFunction method)</a>
 </li>
         <li><a href="rivapy/rivapy.interfaces.html#rivapy.tools.interfaces.DateTimeFunction.compute">(rivapy.tools.interfaces.DateTimeFunction method)</a>
@@ -282,6 +282,8 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShifter.detect_redundant_contracts">detect_redundant_contracts() (rivapy.marketdata_tools.PFCShifter method)</a>
+</li>
       <li><a href="rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.BondPricingData.discount_curve">discount_curve (rivapy.pricing.pricing_data.BondPricingData property)</a>
 </li>
       <li><a href="rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve">DiscountCurve (class in rivapy.marketdata)</a>
@@ -299,6 +301,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="rivapy/rivapy.tools.html#rivapy.tools.Schedule.end_day">end_day (rivapy.tools.Schedule property)</a>
+</li>
+      <li><a href="rivapy/instruments/power.html#rivapy.instruments.EnergyFutureSpecifications">EnergyFutureSpecifications (class in rivapy.instruments)</a>
 </li>
       <li><a href="rivapy/rivapy.tools.html#rivapy.tools.enums.SecuritizationLevel.EQUITY">EQUITY (rivapy.tools.enums.SecuritizationLevel attribute)</a>
 </li>
@@ -346,7 +350,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.ResultType.GAMMA">GAMMA (rivapy.pricing.pricing_data.ResultType attribute)</a>
 </li>
+      <li><a href="rivapy/rivapy.tools.html#rivapy.tools.GasSchedule">GasSchedule (class in rivapy.tools)</a>
+</li>
       <li><a href="rivapy/rivapy.tools.html#rivapy.tools.Schedule.generate_dates">generate_dates() (rivapy.tools.Schedule method)</a>
+</li>
+      <li><a href="rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShifter.generate_synthetic_contracts">generate_synthetic_contracts() (rivapy.marketdata_tools.PFCShifter method)</a>
+</li>
+      <li><a href="rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShifter.generate_transition_matrix">generate_transition_matrix() (rivapy.marketdata_tools.PFCShifter method)</a>
 </li>
       <li><a href="rivapy/rivapy.tools.html#rivapy.tools.enums.InflationInterpolation.GERMAN">GERMAN (rivapy.tools.enums.InflationInterpolation attribute)</a>
 </li>
@@ -374,14 +384,14 @@
 </li>
       <li><a href="rivapy/rivapy.tools.html#rivapy.tools.DateTimeGrid.get_day_of_year">get_day_of_year() (rivapy.tools.DateTimeGrid method)</a>
 </li>
-      <li><a href="rivapy/instruments/power.html#rivapy.instruments.SimpleSchedule.get_df">get_df() (rivapy.instruments.SimpleSchedule method)</a>
+      <li><a href="rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve.get_df">get_df() (rivapy.marketdata.DiscountCurve method)</a>
 
       <ul>
-        <li><a href="rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve.get_df">(rivapy.marketdata.DiscountCurve method)</a>
-</li>
         <li><a href="rivapy/marketdata/power.html#rivapy.marketdata.PowerPriceForwardCurve.get_df">(rivapy.marketdata.PowerPriceForwardCurve method)</a>
 </li>
       </ul></li>
+      <li><a href="rivapy/instruments/power.html#rivapy.instruments.EnergyFutureSpecifications.get_end">get_end() (rivapy.instruments.EnergyFutureSpecifications method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSSVI.get_eta">get_eta() (rivapy.marketdata.VolatilityParametrizationSSVI method)</a>
@@ -402,16 +412,20 @@
       </ul></li>
       <li><a href="rivapy/rivapy.tools.html#rivapy.tools.DateTimeGrid.get_minute_of_day">get_minute_of_day() (rivapy.tools.DateTimeGrid method)</a>
 </li>
-      <li><a href="rivapy/instruments/power.html#rivapy.instruments.SimpleSchedule.get_params">get_params() (rivapy.instruments.SimpleSchedule method)</a>
+      <li><a href="rivapy/instruments/power.html#rivapy.instruments.EnergyFutureSpecifications.get_price">get_price() (rivapy.instruments.EnergyFutureSpecifications method)</a>
 </li>
       <li><a href="rivapy/marketdata/equity.html#rivapy.marketdata.VolatilityParametrizationSSVI.get_rho">get_rho() (rivapy.marketdata.VolatilityParametrizationSSVI method)</a>
 </li>
-      <li><a href="rivapy/instruments/power.html#rivapy.instruments.PPASpecification.get_schedule">get_schedule() (rivapy.instruments.PPASpecification method)</a>
+      <li><a href="rivapy/instruments/power.html#rivapy.instruments.EnergyFutureSpecifications.get_schedule">get_schedule() (rivapy.instruments.EnergyFutureSpecifications method)</a>
 
       <ul>
-        <li><a href="rivapy/instruments/power.html#rivapy.instruments.SimpleSchedule.get_schedule">(rivapy.instruments.SimpleSchedule method)</a>
+        <li><a href="rivapy/instruments/power.html#rivapy.instruments.PPASpecification.get_schedule">(rivapy.instruments.PPASpecification method)</a>
 </li>
       </ul></li>
+      <li><a href="rivapy/instruments/power.html#rivapy.instruments.EnergyFutureSpecifications.get_start">get_start() (rivapy.instruments.EnergyFutureSpecifications method)</a>
+</li>
+      <li><a href="rivapy/instruments/power.html#rivapy.instruments.EnergyFutureSpecifications.get_start_end">get_start_end() (rivapy.instruments.EnergyFutureSpecifications method)</a>
+</li>
       <li><a href="rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel.get_technology">get_technology() (rivapy.models.LinearDemandForwardModel method)</a>
 
       <ul>
@@ -583,6 +597,8 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="rivapy/rivapy.tools.html#rivapy.tools.OffPeakSchedule">OffPeakSchedule (class in rivapy.tools)</a>
+</li>
       <li><a href="rivapy/models/stochastic_processes.html#rivapy.models.OrnsteinUhlenbeck">OrnsteinUhlenbeck (class in rivapy.models)</a>
 </li>
   </ul></td>
@@ -597,7 +613,11 @@
 </li>
       <li><a href="rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.BondPricingData.past_fixing">past_fixing (rivapy.pricing.pricing_data.BondPricingData property)</a>
 </li>
+      <li><a href="rivapy/rivapy.tools.html#rivapy.tools.PeakSchedule">PeakSchedule (class in rivapy.tools)</a>
+</li>
       <li><a href="rivapy/rivapy.tools.html#rivapy.tools.Period">Period (class in rivapy.tools)</a>
+</li>
+      <li><a href="rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShifter">PFCShifter (class in rivapy.marketdata_tools)</a>
 </li>
       <li><a href="rivapy/instruments/credit.html#rivapy.instruments.bond_specifications.PlainVanillaCouponBondSpecification">PlainVanillaCouponBondSpecification (class in rivapy.instruments.bond_specifications)</a>
 </li>
@@ -609,10 +629,10 @@
         <li><a href="rivapy/models/energy/energy_weather.html#rivapy.models.SupplyFunction.plot">(rivapy.models.SupplyFunction method)</a>
 </li>
       </ul></li>
-      <li><a href="rivapy/marketdata/power.html#rivapy.marketdata.PowerPriceForwardCurve">PowerPriceForwardCurve (class in rivapy.marketdata)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="rivapy/marketdata/power.html#rivapy.marketdata.PowerPriceForwardCurve">PowerPriceForwardCurve (class in rivapy.marketdata)</a>
+</li>
       <li><a href="rivapy/instruments/power.html#rivapy.instruments.PPASpecification">PPASpecification (class in rivapy.instruments)</a>
 </li>
       <li><a href="rivapy/rivapy.tools.html#rivapy.tools.enums.RollConvention.PRECEDING">PRECEDING (rivapy.tools.enums.RollConvention attribute)</a>
@@ -740,7 +760,9 @@
 </li>
       <li><a href="rivapy/marketdata/equity.html#rivapy.marketdata.VolatilitySurface.set_stickyness">set_stickyness() (rivapy.marketdata.VolatilitySurface static method)</a>
 </li>
-      <li><a href="rivapy/instruments/power.html#rivapy.instruments.SimpleSchedule">SimpleSchedule (class in rivapy.instruments)</a>
+      <li><a href="rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShifter.shift">shift() (rivapy.marketdata_tools.PFCShifter method)</a>
+</li>
+      <li><a href="rivapy/rivapy.tools.html#rivapy.tools.SimpleSchedule">SimpleSchedule (class in rivapy.tools)</a>
 </li>
       <li><a href="rivapy/models/energy/energy_weather.html#rivapy.models.LinearDemandForwardModel.simulate">simulate() (rivapy.models.LinearDemandForwardModel method)</a>
 
@@ -769,6 +791,8 @@
       <li><a href="rivapy/models/energy/energy_weather.html#rivapy.models.SolarPowerModel">SolarPowerModel (class in rivapy.models)</a>
 </li>
       <li><a href="glossary.html#term-Specification"><strong>Specification</strong></a>
+</li>
+      <li><a href="sample_data/index.html#rivapy.sample_data.dummy_power_spot_price.spot_price_model">spot_price_model() (in module rivapy.sample_data.dummy_power_spot_price)</a>
 </li>
       <li><a href="sample_data/index.html#rivapy.sample_data.market_data.spread_curves.SpreadCurveCollection">SpreadCurveCollection (class in rivapy.sample_data.market_data.spread_curves)</a>
 </li>

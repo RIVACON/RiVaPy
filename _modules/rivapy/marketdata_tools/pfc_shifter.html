@@ -1,0 +1,429 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rivapy.marketdata_tools.pfc_shifter &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            rivapy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html#logging-usage">Logging Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../search.html">Search Page</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rivapy.marketdata_tools.pfc_shifter</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rivapy.marketdata_tools.pfc_shifter</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">rivapy.tools.interfaces</span> <span class="k">as</span> <span class="nn">interfaces</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments</span> <span class="kn">import</span> <span class="n">EnergyFutureSpecifications</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+
+<span class="k">def</span> <span class="nf">validate_class_input</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">validate_wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">contracts</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EnergyFutureSpecifications</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The index of the shape DataFrame is not of type pd.DatetimeIndex!&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The shape argument is not of type pd.DataFrame!&quot;</span><span class="p">)</span>
+
+        <span class="n">contract_scheduled_dates</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">contract</span><span class="o">.</span><span class="n">get_schedule</span><span class="p">()</span> <span class="k">for</span> <span class="n">contract</span> <span class="ow">in</span> <span class="n">contracts</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span>
+        <span class="n">expected_dates</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">date_diff</span> <span class="o">=</span> <span class="n">expected_dates</span> <span class="o">-</span> <span class="n">contract_scheduled_dates</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">date_diff</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The contract dates do not cover each date provided by the shape DataFrame!&quot;</span><span class="p">)</span>
+        <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">contracts</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">validate_wrapper</span>
+
+
+<div class="viewcode-block" id="PFCShifter">
+<a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShifter">[docs]</a>
+<span class="k">class</span> <span class="nc">PFCShifter</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A shifting methodology for PFC shapes. This class gets a PFC shape as an input and shifts it in such a way, that the resulting PFC contains the future prices defined in the ``contracts`` dictionary.</span>
+<span class="sd">    We follow the methodology described here: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2706366</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        shape (pd.DataFrame): PFC shape, where the ``DataFrame`` index are ``datetime`` objects.</span>
+<span class="sd">        contracts (Dict[str, EnergyFutureSpecifications]): Dictionary containing the future contracts (``EnergyFutureSpecifications`` objects)</span>
+
+<span class="sd">    Usage:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">            # iterative usage</span>
+<span class="sd">            pfc_shifter = PFCShifter(shape=shape, contracts=contracts)</span>
+<span class="sd">            transition_matrix = pfc_shifter.generate_transition_matrix()</span>
+<span class="sd">            transition_matrix = pfc_shifter.detect_redundant_contracts(transition_matrix)</span>
+<span class="sd">            transition_matrix = pfc_shifter.generate_synthetic_contracts(transition_matrix)</span>
+<span class="sd">            pfc = pfc_shifter.shift(transition_matrix)</span>
+
+<span class="sd">            # direct call</span>
+<span class="sd">            pfc_shifter = PFCShifter(shape=shape, contracts=contracts)</span>
+<span class="sd">            pfc = pfc_shifter.compute()</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@validate_class_input</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">contracts</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EnergyFutureSpecifications</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contracts</span> <span class="o">=</span> <span class="n">contracts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_redundant_contracts</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EnergyFutureSpecifications</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_synthetic_contracts</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EnergyFutureSpecifications</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">_get_contract_start_end_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a sorted list combined of all start and end ``datetime`` objects for each contract.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[dt.datetime]: Sorted list of start and end dates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">contract_schedule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">contracts</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">dates</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">contract_schedule</span><span class="o">.</span><span class="n">get_start_end</span><span class="p">())</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">dates</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_get_forward_price_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a vector containing the forward/future prices of the contracts and potentiall synthetic contracts.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Numpy array of forward/future prices</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_dict</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">contracts</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_synthetic_contracts</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">contract</span><span class="o">.</span><span class="n">get_price</span><span class="p">()</span> <span class="k">for</span> <span class="n">contract</span> <span class="ow">in</span> <span class="n">_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PFCShifter.compute">
+<a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShifter.compute">[docs]</a>
+    <span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute method to directly call all the individual steps involved for the shifting</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Shifted PFC shape</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">transition_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_transition_matrix</span><span class="p">()</span>
+        <span class="n">transition_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_redundant_contracts</span><span class="p">(</span><span class="n">transition_matrix</span><span class="o">=</span><span class="n">transition_matrix</span><span class="p">)</span>
+        <span class="n">transition_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_synthetic_contracts</span><span class="p">(</span><span class="n">transition_matrix</span><span class="o">=</span><span class="n">transition_matrix</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="n">transition_matrix</span><span class="o">=</span><span class="n">transition_matrix</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PFCShifter.generate_transition_matrix">
+<a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShifter.generate_transition_matrix">[docs]</a>
+    <span class="k">def</span> <span class="nf">generate_transition_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The transition matrix is the basis of the shifting algorithm. This method generates a (n x m) matrix with zero and one entries, where n is the number of contracts and m are start and end dates for the delivery periods.</span>
+<span class="sd">        Hence, the matrix row vectors indicate the delivery periods of each contract. Note that the latest delivery end date is not displayed in the transition matrix.</span>
+
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Transition matrix containing zeros and ones indicating delivery periods of individual contracts.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">contract_start_and_end_dates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_contract_start_end_dates</span><span class="p">())</span>
+
+        <span class="n">transition_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contracts</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="nb">len</span><span class="p">(</span><span class="n">contract_start_and_end_dates</span><span class="p">))),</span>
+            <span class="n">index</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contracts</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+            <span class="n">columns</span><span class="o">=</span><span class="n">contract_start_and_end_dates</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">contract_name</span><span class="p">,</span> <span class="n">contract_schedule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">contracts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">contract_start_and_end_dates</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">contract_schedule</span><span class="o">.</span><span class="n">get_start_end</span><span class="p">()),</span> <span class="s2">&quot;right&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">idx</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">transition_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">transition_df</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="n">contract_name</span><span class="p">,</span> <span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">transition_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">transition_df</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="n">contract_name</span><span class="p">,</span> <span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">idx</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">transition_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># drop the last column for the transition matrix</span></div>
+
+
+<div class="viewcode-block" id="PFCShifter.detect_redundant_contracts">
+<a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShifter.detect_redundant_contracts">[docs]</a>
+    <span class="k">def</span> <span class="nf">detect_redundant_contracts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transition_matrix</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;In order to obtain an invertable matrix, the matrix must be of full rank. Linear dependent contracts will yield linear dependent row vectors.</span>
+<span class="sd">        This is the case if e.g. a Cal Base and all four quarter contracts are provided. This method finds all redundant (linear dependent) contracts and</span>
+<span class="sd">        omits the last found linear dependent contract in order to make sure that the row vectors are linearly independent.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            transition_matrix (pd.DataFrame): Transition matrix generated by the ``generate_transition_matrix`` method.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Transition matrix without linearly dependent row vectors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">potential_redundant_contracts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">np_transition_matrix</span> <span class="o">=</span> <span class="n">transition_matrix</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">transition_matrix</span><span class="p">)):</span>
+            <span class="n">lst</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">transition_matrix</span><span class="p">)))</span>
+            <span class="n">lst</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">matrix_rank</span><span class="p">(</span><span class="n">np_transition_matrix</span><span class="p">[</span><span class="n">lst</span><span class="p">,</span> <span class="p">:])</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">matrix_rank</span><span class="p">(</span><span class="n">np_transition_matrix</span><span class="p">):</span>
+                <span class="n">potential_redundant_contracts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+        <span class="n">base_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">np_transition_matrix</span><span class="p">,</span> <span class="n">potential_redundant_contracts</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">detected_redundant_contracts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">potential_redundant_contracts</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">contract_idx</span> <span class="ow">in</span> <span class="n">potential_redundant_contracts</span><span class="p">:</span>
+                <span class="n">_temp_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">base_matrix</span><span class="p">,</span> <span class="n">np_transition_matrix</span><span class="p">[</span><span class="n">contract_idx</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="c1"># in case all contracts are potentially redundant</span>
+                <span class="k">if</span> <span class="n">base_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ref_rank</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ref_rank</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">matrix_rank</span><span class="p">(</span><span class="n">base_matrix</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">matrix_rank</span><span class="p">(</span><span class="n">_temp_matrix</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">ref_rank</span><span class="p">:</span>
+                    <span class="n">base_matrix</span> <span class="o">=</span> <span class="n">_temp_matrix</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found redundant contract: </span><span class="si">{</span><span class="n">transition_matrix</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">contract_idx</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">detected_redundant_contracts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">transition_matrix</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">contract_idx</span><span class="p">])</span>
+
+        <span class="c1"># update the contracts dictionary, but still keep the information about the redundant contracts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_redundant_contracts</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">contract</span> <span class="ow">in</span> <span class="n">detected_redundant_contracts</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_redundant_contracts</span><span class="p">[</span><span class="n">contract</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">contracts</span><span class="p">[</span><span class="n">contract</span><span class="p">]</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">contracts</span><span class="p">[</span><span class="n">contract</span><span class="p">]</span>  <span class="c1"># &lt;- keep an eye on that line</span>
+        <span class="k">return</span> <span class="n">transition_matrix</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">transition_matrix</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">detected_redundant_contracts</span><span class="p">),</span> <span class="p">:]</span></div>
+
+
+<div class="viewcode-block" id="PFCShifter.generate_synthetic_contracts">
+<a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShifter.generate_synthetic_contracts">[docs]</a>
+    <span class="k">def</span> <span class="nf">generate_synthetic_contracts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transition_matrix</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;In order to fulfill the requirement of an invertable transition matrix, not only the row vectors but also the</span>
+<span class="sd">        column vectors must generate a basis. In cases where m &gt; n, we need to additionally generate synthetic contracts.</span>
+<span class="sd">        The delivery period for the synthetic contracts are chosen in such a way that the column vectors become linearly independent.</span>
+<span class="sd">        The forward price for each synthetic contract is computed based on the rations of the average shape values over the corresponding delivery period of the synthetic contract and a reference contract.</span>
+<span class="sd">        The shape ratio is multiplied with the forward price of the reference contract in order to obtain a forward price for the synthetic contract.</span>
+<span class="sd">        The reference contract is implemented to be always the first contract in the ``contracts`` dictionary.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            transition_matrix (pd.DataFrame): Transition matrix generated by the ``detect_redundant_contracts`` method.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Full rank transition matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">transition_matrix</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">target_rank</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="n">transition_matrix</span> <span class="o">=</span> <span class="n">transition_matrix</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">np_transition_matrix</span> <span class="o">=</span> <span class="n">transition_matrix</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="n">current_rank</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">matrix_rank</span><span class="p">(</span><span class="n">np_transition_matrix</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">current_rank</span> <span class="o">==</span> <span class="n">target_rank</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">transition_matrix</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">synthetic_contracts</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">target_rank</span> <span class="o">-</span> <span class="n">m</span><span class="p">):</span>
+                <span class="c1"># compute the most current rank</span>
+                <span class="n">updated_rank</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">matrix_rank</span><span class="p">(</span><span class="n">np_transition_matrix</span><span class="p">)</span>
+                <span class="n">linear_dep_candidates</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                    <span class="n">lst</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+                    <span class="n">lst</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+                    <span class="n">tmp_rank</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">matrix_rank</span><span class="p">(</span><span class="n">np_transition_matrix</span><span class="p">[:,</span> <span class="n">lst</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">tmp_rank</span> <span class="o">==</span> <span class="n">updated_rank</span><span class="p">:</span>
+                        <span class="c1"># linear dependent</span>
+                        <span class="n">linear_dep_candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+
+                <span class="c1"># iteratively test if, adding a further row with a &#39;1&#39; entry for the specific column</span>
+                <span class="c1"># yields a larger matrix rank</span>
+                <span class="n">tmp_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np_transition_matrix</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">))],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">tmp_rank</span> <span class="o">=</span> <span class="n">updated_rank</span>
+                <span class="k">for</span> <span class="n">ld_id</span> <span class="ow">in</span> <span class="n">linear_dep_candidates</span><span class="p">:</span>
+                    <span class="n">tmp_matrix</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">ld_id</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">test_rank</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">matrix_rank</span><span class="p">(</span><span class="n">tmp_matrix</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">test_rank</span> <span class="o">&gt;</span> <span class="n">tmp_rank</span><span class="p">:</span>
+                        <span class="n">tmp_rank</span> <span class="o">=</span> <span class="n">test_rank</span>
+                        <span class="n">synthetic_contracts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ld_id</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># if the column does not yield a higher matrix rank, revoke the changes</span>
+                        <span class="n">tmp_matrix</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">ld_id</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="c1"># set the new matrix, such that the most current rank can be computed</span>
+                <span class="n">np_transition_matrix</span> <span class="o">=</span> <span class="n">tmp_matrix</span>
+
+            <span class="c1"># get reference contract information to calculate a price for the synthetic contracts</span>
+            <span class="n">reference_contract</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contracts</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">reference_mean_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">contracts</span><span class="p">[</span><span class="n">reference_contract</span><span class="p">]</span><span class="o">.</span><span class="n">get_schedule</span><span class="p">(),</span> <span class="p">:]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">reference_price</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">contracts</span><span class="p">[</span><span class="n">reference_contract</span><span class="p">]</span><span class="o">.</span><span class="n">get_price</span><span class="p">()</span>
+
+            <span class="n">date_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_contract_start_end_dates</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">row_id</span><span class="p">,</span> <span class="n">column_ids</span> <span class="ow">in</span> <span class="nb">dict</span><span class="p">(</span><span class="n">synthetic_contracts</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">_temp_df_shape</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">for</span> <span class="n">column_id</span> <span class="ow">in</span> <span class="n">column_ids</span><span class="p">:</span>
+                    <span class="n">cond1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">index</span> <span class="o">&gt;=</span> <span class="n">date_list</span><span class="p">[</span><span class="n">column_id</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">column_id</span> <span class="o">==</span> <span class="n">n</span><span class="p">:</span>
+                        <span class="n">cond2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">index</span> <span class="o">&lt;=</span> <span class="n">date_list</span><span class="p">[</span><span class="n">column_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">cond2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">index</span> <span class="o">&lt;</span> <span class="n">date_list</span><span class="p">[</span><span class="n">column_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">_temp_df_shape</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">_temp_df_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">cond1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cond2</span><span class="p">),</span> <span class="p">:]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">_temp_df_shape</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">_temp_df_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">cond1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cond2</span><span class="p">),</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+                <span class="n">mean_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">_temp_df_shape</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Synth_Contr_</span><span class="si">{</span><span class="n">row_id</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_synthetic_contracts</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">EnergyFutureSpecifications</span><span class="p">(</span>
+                    <span class="n">schedule</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">price</span><span class="o">=</span><span class="p">(</span><span class="n">mean_shape</span> <span class="o">*</span> <span class="n">reference_price</span> <span class="o">/</span> <span class="n">reference_mean_shape</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span>
+                <span class="p">)</span>
+
+                <span class="n">_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">))</span>
+                <span class="n">_data</span><span class="p">[</span><span class="n">column_ids</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">_data</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="n">transition_matrix</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+                <span class="n">transition_matrix</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">transition_matrix</span><span class="p">,</span> <span class="n">_df</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">transition_matrix</span></div>
+
+
+<div class="viewcode-block" id="PFCShifter.shift">
+<a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShifter.shift">[docs]</a>
+    <span class="k">def</span> <span class="nf">shift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transition_matrix</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This method is the final step in the shifting algorithm. The transition matrix is inversed and multiplied with the forward price vector to obtain a non overlapping forward price vector.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            f^{no} = T^{-1}\cdot f</span>
+
+<span class="sd">        where:\n</span>
+<span class="sd">        :math:`f^{no}` is the Non-overlapping forward price vector\n</span>
+<span class="sd">        :math:`T` is the Transition matrix\n</span>
+<span class="sd">        :math:`f` is the Forward price vector\n</span>
+
+<span class="sd">        Afterwards the PFC :math:`S(t)` is obtained from the shape :math:`s(t)` by the follwoing formular:</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            S(t) = s(t)\cdot \\frac{\sum_{u=T_s}^{T_e} f^{no}(u)}{\sum_{u=T_s}^{T_e} s(u)}</span>
+
+<span class="sd">        with :math:`T_s` and :math:`T_e` being the start and end dates of the individual delivery periods.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            transition_matrix (pd.DataFrame): Full rank transition matrix generated by the ``generate_synthetic_contracts`` method</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Shifted shape.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">contract_start_and_end_dates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_contract_start_end_dates</span><span class="p">())</span>
+        <span class="n">contract_schedules</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">contract</span><span class="o">.</span><span class="n">get_schedule</span><span class="p">()</span> <span class="k">for</span> <span class="n">contract</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">contracts</span><span class="o">.</span><span class="n">values</span><span class="p">()])))</span>
+
+        <span class="c1"># starting after the first start date, since we want to get the delivery ticks until the next starting date</span>
+        <span class="c1"># side=&#39;left since we do not want to consider a match as a delivery tick</span>
+        <span class="n">delivery_ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">contract_schedules</span><span class="p">,</span> <span class="n">contract_start_and_end_dates</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+        <span class="n">delivery_ticks_per_period</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">delivery_ticks</span><span class="p">[</span><span class="mi">0</span><span class="p">]]),</span> <span class="p">(</span><span class="n">delivery_ticks</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">delivery_ticks</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])])</span>
+
+        <span class="n">date_tpls</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">contract_start_and_end_dates</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">contract_start_and_end_dates</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+
+        <span class="n">transition_matrix</span> <span class="o">=</span> <span class="n">transition_matrix</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span> <span class="o">*</span> <span class="n">delivery_ticks_per_period</span>
+        <span class="n">transition_matrix</span> <span class="o">=</span> <span class="n">transition_matrix</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">transition_matrix</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">fwd_price_vec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_forward_price_vector</span><span class="p">()</span>
+
+        <span class="n">fwd_price_noc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">transition_matrix</span><span class="p">)</span> <span class="o">@</span> <span class="n">fwd_price_vec</span>
+        <span class="n">pfc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="c1"># print(date_tpls)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">date_tpl</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">date_tpls</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">date_tpls</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">row_filter</span> <span class="o">=</span> <span class="p">(</span><span class="n">pfc</span><span class="o">.</span><span class="n">index</span> <span class="o">&gt;=</span> <span class="n">date_tpl</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pfc</span><span class="o">.</span><span class="n">index</span> <span class="o">&lt;=</span> <span class="n">date_tpl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">row_filter</span> <span class="o">=</span> <span class="p">(</span><span class="n">pfc</span><span class="o">.</span><span class="n">index</span> <span class="o">&gt;=</span> <span class="n">date_tpl</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pfc</span><span class="o">.</span><span class="n">index</span> <span class="o">&lt;</span> <span class="n">date_tpl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="n">pfc</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">row_filter</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pfc</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">row_filter</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pfc</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">row_filter</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">pfc</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">row_filter</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">fwd_price_noc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">pfc</span></div>
+
+
+    <span class="c1">## TODO</span>
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
