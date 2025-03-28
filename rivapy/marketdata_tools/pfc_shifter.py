@@ -3,20 +3,22 @@ import pandas as pd
 import numpy as np
 import datetime as dt
 import rivapy.tools.interfaces as interfaces
+import rivapy.tools._validators as validators
 from rivapy.instruments import EnergyFutureSpecifications
 from typing import Dict, Set, List, Any
 from collections import defaultdict
 
 
 def validate_class_input(func):
-    def validate_wrapper(self, shape: pd.DataFrame, contracts: Dict[str, EnergyFutureSpecifications]):
-        if isinstance(shape, pd.DataFrame):
-            if not isinstance(shape.index, pd.DatetimeIndex):
-                raise TypeError("The index of the shape DataFrame is not of type pd.DatetimeIndex!")
-        else:
-            raise TypeError("The shape argument is not of type pd.DataFrame!")
+    def validate_wrapper(self, shape: pd.DataFrame, contracts: List[EnergyFutureSpecifications]):
+        validators._check_pandas_index_for_datetime(dataframe=shape)
+        # if isinstance(shape, pd.DataFrame):
+        #     if not isinstance(shape.index, pd.DatetimeIndex):
+        #         raise TypeError("The index of the shape DataFrame is not of type pd.DatetimeIndex!")
+        # else:
+        #     raise TypeError("The shape argument is not of type pd.DataFrame!")
 
-        contract_scheduled_dates = set(np.concatenate([contract.get_schedule() for contract in contracts.values()]))
+        contract_scheduled_dates = set(np.concatenate([contract.get_schedule() for contract in contracts]))
         expected_dates = set(shape.index)
         date_diff = expected_dates - contract_scheduled_dates
         if len(date_diff) != 0:
@@ -53,9 +55,9 @@ class PFCShifter(interfaces.FactoryObject):
     """
 
     @validate_class_input
-    def __init__(self, shape: pd.DataFrame, contracts: Dict[str, EnergyFutureSpecifications]) -> None:
+    def __init__(self, shape: pd.DataFrame, contracts: List[EnergyFutureSpecifications]) -> None:
         self.shape = shape
-        self.contracts = contracts
+        self.contracts = {contract.name: contract for contract in contracts}
         self._redundant_contracts: Dict[str, EnergyFutureSpecifications] = {}
         self._synthetic_contracts: Dict[str, EnergyFutureSpecifications] = {}
 
@@ -235,7 +237,7 @@ class PFCShifter(interfaces.FactoryObject):
                 mean_shape = np.mean(_temp_df_shape, axis=0)
                 name = f"Synth_Contr_{row_id+1}"
                 self._synthetic_contracts[name] = EnergyFutureSpecifications(
-                    schedule=None, price=(mean_shape * reference_price / reference_mean_shape)[0], name=name
+                    schedule=None, price=(mean_shape * reference_price / reference_mean_shape).iloc[0], name=name
                 )
 
                 _data = np.zeros((n))
@@ -295,6 +297,5 @@ class PFCShifter(interfaces.FactoryObject):
             pfc.iloc[row_filter, 0] = pfc.iloc[row_filter, 0] / np.sum(pfc.iloc[row_filter, 0]) * len(pfc.iloc[row_filter, 0]) * fwd_price_noc[i, 0]
         return pfc
 
-    ## TODO
     def _to_dict(self) -> dict:
-        self.to_dict()
+        return {**{"shape": self.shape}, **{"contracts": [v.to_dict() for v in self.contracts.values()]}}

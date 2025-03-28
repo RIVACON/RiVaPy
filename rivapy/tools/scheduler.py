@@ -4,14 +4,22 @@ import pandas as pd
 import datetime as dt
 import rivapy.tools.interfaces as interfaces
 from rivapy.tools.datetime_grid import DateTimeGrid
+from rivapy.tools.enums import EnergyTimeGridStructure as ets
+from abc import abstractmethod
 
 
 class SimpleSchedule(interfaces.FactoryObject):
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if not hasattr(cls, "_name"):
+            raise TypeError(f"Class {cls.__name__} must define a class attribute '_name' from the 'EnergyTimeGridStructure' Enum.")
+
     def __init__(
         self,
         start: dt.datetime,
         end: dt.datetime,
-        freq: str = "1H",
+        freq: str = "h",
         weekdays: Set[int] = None,
         hours: Set[int] = None,
         ignore_hours_for_weekdays: Set[int] = None,
@@ -22,7 +30,7 @@ class SimpleSchedule(interfaces.FactoryObject):
         Args:
                 start (dt.datetime): Start of schedule (including this timepoint).
                 end (dt.datetime): End of schedule (excluding this timepoint).
-                freq (str, optional): Frequency of timepoints. Defaults to '1H'. See documentation for pandas.date_range for further details on freq.
+                freq (str, optional): Frequency of timepoints. Defaults to 'h'. See documentation for pandas.date_range for further details on freq.
                 weekdays (Set[int], optional): List of integers representing the weekdays where the schedule is defined.
                                                                                 Integers according to datetime weekdays (0->Monay, 1->Tuesday,...,6->Sunday).
                                                                                 If None, all weekdays are used. Defaults to None.
@@ -35,17 +43,17 @@ class SimpleSchedule(interfaces.FactoryObject):
         .. highlight:: python
         .. code-block:: python
 
-                >>> simple_schedule = SimpleSchedule(dt.datetime(2023,1,1), dt.datetime(2023,1,1,4,0,0), freq='1H')
+                >>> simple_schedule = SimpleSchedule(dt.datetime(2023,1,1), dt.datetime(2023,1,1,4,0,0), freq='h')
                 >>> simple_schedule.get_schedule()
                 [datetime(2023,1,1,0,0,0), datetime(2023,1,1,1,0,0), datetime(2023,1,1,2,0,0), datetime(2023,1,1,3,0,0)]
 
                 # We include only hours 2 and 3 into schedule
-                >>> simple_schedule = SimpleSchedule(dt.datetime(2023,1,1), dt.datetime(2023,1,1,4,0,0), freq='1H', hours=[2,3])
+                >>> simple_schedule = SimpleSchedule(dt.datetime(2023,1,1), dt.datetime(2023,1,1,4,0,0), freq='h', hours=[2,3])
                 >>> simple_schedule.get_schedule()
                 [datetime.datetime(2023, 1, 1, 2, 0), datetime.datetime(2023, 1, 1, 3, 0)]
 
                 # We restrict further to only mondays as weekdays included
-                >>> simple_schedule = SimpleSchedule(dt.datetime(2023,1,1), dt.datetime(2023,1,2,4,0,0), freq='1H', hours=[2,3], weekdays=[0])
+                >>> simple_schedule = SimpleSchedule(dt.datetime(2023,1,1), dt.datetime(2023,1,2,4,0,0), freq='h', hours=[2,3], weekdays=[0])
                 >>> simple_schedule.get_schedule()
                 [datetime.datetime(2023, 1, 2, 2, 0), datetime.datetime(2023, 1, 2, 3, 0)]
         """
@@ -129,7 +137,39 @@ class SimpleSchedule(interfaces.FactoryObject):
         return result
 
 
+class BaseSchedule(SimpleSchedule):
+    _name = ets.BASE
+
+    def __init__(self, start: dt.datetime, end: dt.datetime, tz: str = None):
+        """Scheduler, which returns the base time grid between the start and end date times.
+
+        Args:
+                start (dt.datetime): Start of schedule (including this timepoint).
+                end (dt.datetime): End of schedule (excluding this timepoint).
+                tz (str or tzinfo): Time zone name for returning localized datetime points, for example ‘Asia/Hong_Kong’.
+                                                        By default, the resulting datetime points are timezone-naive. See documentation for pandas.date_range for further details on tz.
+        Examples:
+
+        .. highlight:: python
+        .. code-block:: python
+
+                >>> base_schedule = BaseSchedule(dt.datetime(2023,1,5), dt.datetime(2023,1,6))
+                >>> base_schedule.get_schedule()
+
+        """
+        super().__init__(
+            start=start,
+            end=end,
+            freq="h",
+            hours=None,
+            weekdays=None,
+            tz=tz,
+        )
+
+
 class PeakSchedule(SimpleSchedule):
+    _name = ets.PEAK
+
     def __init__(self, start: dt.datetime, end: dt.datetime, tz: str = None):
         """Scheduler, which returns the peak time grid between the start and end date times.
 
@@ -169,6 +209,8 @@ class PeakSchedule(SimpleSchedule):
 
 
 class OffPeakSchedule(SimpleSchedule):
+    _name = ets.OFFPEAK
+
     def __init__(self, start: dt.datetime, end: dt.datetime, tz: str = None):
         """Scheduler, which returns the offpeak time grid between the start and end date times.
 
@@ -208,6 +250,8 @@ class OffPeakSchedule(SimpleSchedule):
 
 
 class GasSchedule(SimpleSchedule):
+    _name = ets.BASE
+
     def __init__(self, start: dt.datetime, end: dt.datetime, tz: str = None):
         """Scheduler, which returns the gas day time grid (from 6 am to 6 am) between the start and end date times.
 
