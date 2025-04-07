@@ -5,6 +5,7 @@ Module Documentation
    :caption: Contents:
  
    marketdata/index
+   marketdata_tools/index
    instruments/index
    models/index
    pricing/index
