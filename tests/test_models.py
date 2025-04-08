@@ -151,11 +151,11 @@ class HestonTest(unittest.TestCase):
 			cp_analytic = heston.compute_call_price(1.0, K = strikes[i], ttm = 1.0)
 			self.assertAlmostEqual(cp_analytic, cp_mc, delta=1e-3)
 
-class HestonWithJumpsTest(unittest.TestCase):
+class CallPriceVsMCTest(unittest.TestCase):
 	"""
 	Tests for stochastic volatility models: Comparison between MC simulated call prices and analytic (integration of characteristic function) call prices
 	"""	
-	def test_callprice_formula(self):
+	def test_HestonWithJumps(self):
 		model = models.HestonWithJumps.get_default_model()
 		timegrid= np.linspace(0,0.5,2*365)
 
@@ -163,10 +163,22 @@ class HestonWithJumpsTest(unittest.TestCase):
 		for i in range(analytic_prices.shape[0]):
 			self.assertAlmostEqual(analytic_prices[i], simulated_prices[i], delta=1e-2, msg=f'Analytic price: {analytic_prices[i]}, Simulated price: {simulated_prices[i]}, i: {i}')
 
-class BNSTest(unittest.TestCase):
-	pass
+	def test_BNS(self):
+		model = models.BNSModel.get_default_model()
+		timegrid= np.linspace(0,0.5,2*365)
 
+		analytic_prices, simulated_prices = _test_call_price(model, timegrid=timegrid,n_sims=20_000)
+		for i in range(analytic_prices.shape[0]):
+			self.assertAlmostEqual(analytic_prices[i], simulated_prices[i], delta=1e-2, msg=f'Analytic price: {analytic_prices[i]}, Simulated price: {simulated_prices[i]}, i: {i}')
 
+	def test_NIG(self):
+		model = models.NIGModel.get_default_model()
+		timegrid= np.linspace(0,0.5,2*365)
+
+		analytic_prices, simulated_prices = _test_call_price(model, timegrid=timegrid,n_sims=20_000)
+		for i in range(analytic_prices.shape[0]):
+			self.assertAlmostEqual(analytic_prices[i], simulated_prices[i], delta=1e-2, msg=f'Analytic price: {analytic_prices[i]}, Simulated price: {simulated_prices[i]}, i: {i}')
+			
 class HestonLocalVolModelTest(unittest.TestCase):
 	@staticmethod
 	def calc_imlied_vol_grid(expiries, strikes, call_prices):

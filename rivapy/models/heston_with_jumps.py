@@ -98,7 +98,7 @@ class HestonWithJumps(FactoryObject, ModelDeepHedging, OptionCalibratableModel):
         return S
 
     def simulate(self, timegrid, S0, n_sims: int, seed: int|None =None):
-        """ Simulate the Heston Model Paths
+        """ Simulate the Heston with Jumps Model Paths
         
         
         Args:
