@@ -53,15 +53,20 @@ def compute_pnl_bshedge(timegrid: DateTimeGrid, paths:np.ndarray, strike: float,
         pnl -= np.maximum(strike-paths[-1,:],0.0)
     return pnl, deltas
 
-result_dir = '/home/doeltz/doeltz/development/RiVaPy/sandbox/embedding/figures/'
+
 repo = analysis.Repo('/home/doeltz/doeltz/development/repos/embedding_gbm')
 
+### GBM models
 axis_label_fontsize = 12
 plot_vol_embeddings = False
 statistics_n_sims = False
 plot_pnl_distributions = False
 single_vs_multi_task = False
-sv_embeddings = True
+### SV models
+sv_pnl_distributions = True
+sv_embeddings = False
+
+result_dir = '/home/doeltz/doeltz/development/RiVaPy/sandbox/embedding/figures/gbm/'
 
 #region ============ plot vol embeddings ====================
 if plot_vol_embeddings:
@@ -74,8 +79,8 @@ if plot_vol_embeddings:
         plt.plot(vols,emb[0][:-2,0] ,'-o', label=m[1])
     plt.grid(visible=True, linestyle='--',color='0.8')
     plt.legend()
-    plt.xlabel('volatility')
-    plt.ylabel('embedding')
+    plt.xlabel('volatility',fontsize=axis_label_fontsize)
+    plt.ylabel('embedding', fontsize=axis_label_fontsize)
     plt.savefig(os.path.join(result_dir, 'embedding_vs_volatility_GBM_1D.png'), dpi=300)
 #endregion
 
@@ -133,13 +138,14 @@ if statistics_n_sims:
     result = pd.DataFrame(results).transpose()
     result = result.style.format(decimal=',', thousands='.', precision=2)
     result.to_latex(os.path.join(result_dir, 'pnl_var_n_simulations.csv'))
+    plt.figure()
     plt.plot(n_sims, std_dev, '-o', label='mean of std dev of PnL')
     plt.plot(n_sims, [pnl_bs_max]*len(n_sims), '--', color='k', label='PnL BS hedge, vol=0.1')
     plt.plot(n_sims, [pnl_bs_min]*len(n_sims), ':', color='k', label='PnL BS hedge, vol=0.8')
     plt.grid(visible=True, linestyle='--',color='0.8')
     plt.fill_between(n_sims, std_dev_min, std_dev_max, color='b', alpha=.15)
-    plt.xlabel('number of simulations')
-    plt.ylabel('standard deviation of PnL')
+    plt.xlabel('number of simulations', fontsize=axis_label_fontsize)
+    plt.ylabel('standard deviation of PnL', fontsize=axis_label_fontsize)
     plt.legend()
     plt.savefig(os.path.join(result_dir, 'pnl_var_n_simulations.png'), dpi=300)
 
@@ -171,9 +177,9 @@ if plot_pnl_distributions:
             model = repo.get_hedge_model(m[0])
             pnl = model.compute_pnl(paths, payoff)
             plt.hist(pnl[model_embed_vec[:]==vol], bins=100, alpha=0.5, density=True,label='model: {} sims'.format(m[1]))
-        plt.grid(visible=True, linestyle='--',color='0.8')
-        plt.xlabel('PnL')
-        plt.ylabel('frequency')
+        #plt.grid(visible=True, linestyle='--',color='0.8')
+        plt.xlabel('PnL', fontsize=axis_label_fontsize)
+        plt.ylabel('frequency', fontsize=axis_label_fontsize)
         plt.legend()
         plt.savefig(os.path.join(result_dir, f'pnl_dist_n_simulations_{v["volatility"] }.png'), dpi=300)
 
@@ -182,64 +188,71 @@ if plot_pnl_distributions:
 #region ============== retraining comparison multitask vs normal =================
 if single_vs_multi_task:
     model_key = 'cdac6aa560d2ac12d57b7707dc41ec072ecd009c'
-    #single_task_model_key = ('f40c1cfe45bb2d6af6cd1e8f99307be89ffe2623',10)
-    #single_task_model_key =('64d1b8a2dd2ac44ed16b4843e23246a04fa97884',100) 
-    single_task_model_key = ('3c28eba8bceef8978276fc25572c3dfa9fbf0ea9',1000)
-    #('4b44d9bbf9cbe85bfe6da4273c810d670571b6ca', 100)# ##
-     #  100 sims
-    # 
-    model = repo.get_hedge_model(model_key) # 128000
-    single_task_model = repo.get_hedge_model(single_task_model_key[0])
-    params = repo.results[model_key]
-    n_tasks = len(params['model'])
-    vol = repo.results[single_task_model_key[0]]['model'][0]['volatility'] 
-    spec = spec_fac.create(params['spec'][0])
-    timegrid = DateTimeGrid(start=valdate, end=valdate+dt.timedelta(days= params['days']), freq="D", inclusive='both')
+    for single_task_model_key in [
+        ('f40c1cfe45bb2d6af6cd1e8f99307be89ffe2623',10),
+        ('64d1b8a2dd2ac44ed16b4843e23246a04fa97884',100),
+        ('3c28eba8bceef8978276fc25572c3dfa9fbf0ea9',1000),
+      
+    ]:
+        #single_task_model_key = ('f40c1cfe45bb2d6af6cd1e8f99307be89ffe2623',10)
+        #single_task_model_key =('64d1b8a2dd2ac44ed16b4843e23246a04fa97884',100) 
+        #single_task_model_key = ('3c28eba8bceef8978276fc25572c3dfa9fbf0ea9',1000)
+        #('4b44d9bbf9cbe85bfe6da4273c810d670571b6ca', 100)# ##
+        #  100 sims
+        # 
+        model = repo.get_hedge_model(model_key) # 128000
+        single_task_model = repo.get_hedge_model(single_task_model_key[0])
+        params = repo.results[model_key]
+        n_tasks = len(params['model'])
+        vol = repo.results[single_task_model_key[0]]['model'][0]['volatility'] 
+        spec = spec_fac.create(params['spec'][0])
+        timegrid = DateTimeGrid(start=valdate, end=valdate+dt.timedelta(days= params['days']), freq="D", inclusive='both')
 
-    stoch_model = GBM(drift=0.0, volatility=vol)
-    X=stoch_model.simulate(timegrid.timegrid, 1.0, n_sims=single_task_model_key[1] , seed=112)
-    paths = {'ADS': X, 'emb_model': np.full((X.shape[1],), n_tasks+1)}
-    X=stoch_model.simulate(timegrid.timegrid, 1.0, n_sims=10_000, seed=645)
-    paths_test = {'ADS': X, 'emb_model': np.full((X.shape[1],),n_tasks+1)}
-    payoff, states = VanillaOptionDeepHedgingPricer.compute_payoff(paths, timegrid, np.array([[-1.0]]), [spec] , port_vec=None)
-    payoff_test, states_test = VanillaOptionDeepHedgingPricer.compute_payoff(paths_test, timegrid, np.array([[-1.0]]), [spec], port_vec=None)
-    pnl_train, pnl_test = model.train_task(model, paths, payoff, paths_test, payoff_test,
-                                        initial_lr=1e-3,
-                                            decay_steps=200,
-                                            decay_rate=1.0,
-                                            epochs=500,
-                                            batch_size=1000,)
-    pnl_bs, delta_bs = compute_pnl_bshedge(timegrid, X, spec.strike, True, stoch_model.volatility)
-    plt.hist(pnl_bs, bins=100, alpha=1.0, density=True, label='BS hedge')
-    paths_test = {'ADS': X, 'emb_model': np.full((X.shape[1],),0)}
-    pnl_single_task = single_task_model.compute_pnl(paths_test, payoff_test)
-    #print(np.var(pnl_bs), np.var(pnl_test), np.var(pnl_single_task))
-    plt.hist(pnl_single_task, bins=100, alpha=0.5, density=True, label='single-task')
-    plt.hist(pnl_test, bins=100, alpha=0.5, density=True, label='multi-task')
-    
-    plt.grid(visible=True, linestyle='--',color='0.8')
-    plt.xlabel('PnL')
-    plt.ylabel('frequency')
-    plt.legend()
-    plt.savefig(os.path.join(result_dir, f'pnl_dist_single_vs_multi_task_{single_task_model_key[1]}.png'), dpi=300)
-    ### delta plot
-    t = -10
-    plt.figure()
-    plt.plot(X[t-1,:],delta_bs[t-1,:], '.', label='BS delta')
-    delta = single_task_model.compute_delta(paths_test, t=t).reshape((-1,))
-    plt.plot(X[t,:],delta, '.', label='single-task delta')
-    paths_test['emb_model'] = np.full((X.shape[1],),n_tasks+1)
-    delta = model.compute_delta(paths_test, t=t).reshape((-1,))
-    plt.plot(X[t,:],delta, '.', label='multi-task delta')
-    plt.grid(visible=True, linestyle='--',color='0.8')
-    plt.xlabel('spot')
-    plt.ylabel('delta')
-    plt.legend()
-    plt.savefig(os.path.join(result_dir, f'delta_single_vs_multi_task_{single_task_model_key[1]}.png'), dpi=300)
+        stoch_model = GBM(drift=0.0, volatility=vol)
+        X=stoch_model.simulate(timegrid.timegrid, 1.0, n_sims=single_task_model_key[1] , seed=112)
+        paths = {'ADS': X, 'emb_model': np.full((X.shape[1],), n_tasks+1)}
+        X=stoch_model.simulate(timegrid.timegrid, 1.0, n_sims=10_000, seed=645)
+        paths_test = {'ADS': X, 'emb_model': np.full((X.shape[1],),n_tasks+1)}
+        payoff, states = VanillaOptionDeepHedgingPricer.compute_payoff(paths, timegrid, np.array([[-1.0]]), [spec] , port_vec=None)
+        payoff_test, states_test = VanillaOptionDeepHedgingPricer.compute_payoff(paths_test, timegrid, np.array([[-1.0]]), [spec], port_vec=None)
+        pnl_train, pnl_test = model.train_task(model, paths, payoff, paths_test, payoff_test,
+                                            initial_lr=1e-3,
+                                                decay_steps=200,
+                                                decay_rate=1.0,
+                                                epochs=500,
+                                                batch_size=1000,)
+        pnl_bs, delta_bs = compute_pnl_bshedge(timegrid, X, spec.strike, True, stoch_model.volatility)
+        plt.figure()
+        plt.hist(pnl_bs, bins=100, alpha=1.0, density=True, label='BS hedge')
+        paths_test = {'ADS': X, 'emb_model': np.full((X.shape[1],),0)}
+        pnl_single_task = single_task_model.compute_pnl(paths_test, payoff_test)
+        #print(np.var(pnl_bs), np.var(pnl_test), np.var(pnl_single_task))
+        plt.hist(pnl_single_task, bins=100, alpha=0.5, density=True, label='single-task')
+        plt.hist(pnl_test, bins=100, alpha=0.5, density=True, label='multi-task')
+        
+        #plt.grid(visible=True, linestyle='--',color='0.8')
+        plt.xlabel('PnL')
+        plt.ylabel('frequency')
+        plt.legend()
+        plt.savefig(os.path.join(result_dir, f'pnl_dist_single_vs_multi_task_{single_task_model_key[1]}.png'), dpi=300)
+        ### delta plot
+        t = -10
+        plt.figure()
+        plt.plot(X[t-1,:],delta_bs[t-1,:], '.', label='BS delta')
+        delta = single_task_model.compute_delta(paths_test, t=t).reshape((-1,))
+        plt.plot(X[t,:],delta, '.', label='single-task delta')
+        paths_test['emb_model'] = np.full((X.shape[1],),n_tasks+1)
+        delta = model.compute_delta(paths_test, t=t).reshape((-1,))
+        plt.plot(X[t,:],delta, '.', label='multi-task delta')
+        plt.grid(visible=True, linestyle='--',color='0.8')
+        plt.xlabel('spot', fontsize=axis_label_fontsize)
+        plt.ylabel('delta', fontsize=axis_label_fontsize)
+        plt.legend()
+        plt.savefig(os.path.join(result_dir, f'delta_single_vs_multi_task_{single_task_model_key[1]}.png'), dpi=300)
 
 #endregion   
 
-# region create serialized models 
+#region create serialized models 
 if False:
     import ast  
     with open('/home/doeltz/doeltz/development/RiVaPy/sandbox/embedding/model_params_dict.txt') as f: 
@@ -276,14 +289,76 @@ if False:
             json.dump(models, f, cls=_JSONEncoder)   
 #endregion
 
+repo = analysis.Repo('/home/doeltz/doeltz/development/repos/embedding_calibrated_sv')
+result_dir = '/home/doeltz/doeltz/development/RiVaPy/sandbox/embedding/figures/sv/'
+#region sv models histogram, different embedding sizes,
+if sv_pnl_distributions:
+    models = [
+        #('07ae18beb792c45f4a4969d3f7a0483c056cf0d1', 4),
+        ('5ce2b1bee94f3921bbec17c78b845864b351d346', 8),
+        #('6e190f220350c794e5b38946ae7a5c360ebbeeef', 16)
+    ] 
+    ref_model = repo.get_hedge_model(models[0][0])
+    params = repo.results[models[0][0]]
+    spec = spec_fac.create(params['spec'][0])
+    timegrid = DateTimeGrid(start=valdate, end=valdate+dt.timedelta(days= params['days']), freq="D", inclusive='both')   
+    spec = spec_fac.create(params['spec'][0])
+
+    data = repo.get_data(models[0][0])
+    pnl = ref_model.compute_pnl(data.paths, data.payoff)
+    plt.figure()
+    plt.hist(pnl, bins=100, alpha=0.3, density=True,label='embedding size: {}'.format(models[0][1]))
+    plt.xlabel('PnL', fontsize=axis_label_fontsize)
+    plt.savefig(os.path.join(result_dir, 'pnl_dist_sv_embeddings.png'), dpi=300)
+
+    for i in range(3):
+        stoch_models = [params['model'][i]]
+        paths, model_embed_vec = repo.simulate_model(valdate, 20_000*len(stoch_models), seed=1783, days=30, model=stoch_models )
+        #model_embed_vec[:]=i
+        log_return = np.log(paths[1:,:1000]/paths[:-1,:1000])
+        print('realized volatility: ', np.sqrt(252*np.var(log_return)))
+        #vol = np.sqrt(stoch_models[0]['v0'])
+        vol =  np.sqrt(252*np.var(log_return))
+        pnl_bs, deltas = compute_pnl_bshedge(ref_model.timegrid, paths, 1.0, True, vol)
+        
+        #pnl_bs = np.clip(pnl_bs, -0.2, 0.1)
+        plt.figure()
+        plt.hist(pnl_bs, bins=200, alpha=0.3, density=True,label='BS hedging, vol={:.2f}'.format(vol))
+        #vol = np.sqrt(stoch_models[0]['long_run_average'])
+        #pnl_bs, deltas = compute_pnl_bshedge(ref_model.timegrid, paths, 1.0, True, vol)
+        #pnl_bs = np.clip(pnl_bs, -0.2, 0.1)
+        #plt.hist(pnl_bs, bins=200, alpha=0.3, density=True,label='BS hedging, vol={:.2f}'.format(vol))
+
+        paths = {spec.udl_id: paths, 'emb_model': model_embed_vec}
+        payoff,_ = VanillaOptionDeepHedgingPricer.compute_payoff(paths, timegrid, np.array([[-1.0]]), [spec], port_vec=None)
+        
+        for m in models:
+            model = repo.get_hedge_model(m[0])
+            pnl = model.compute_pnl(paths, payoff)
+            print(stoch_models[0]["cls"], ' variance BS hedge:', np.var(pnl_bs), ', deep hedging: ', np.var(pnl))
+            pnl = np.clip(pnl, -0.5, 0.5)
+            plt.hist(pnl, bins=200, alpha=0.7, density=True,label='embedding size: {}'.format(m[1]))
+        plt.xlabel('PnL', fontsize=axis_label_fontsize)
+        plt.legend()
+        #plt.xlim(-0.2,0.1)
+        plt.savefig(os.path.join(result_dir, f'pnl_dist_{stoch_models[0]["cls"]}.png'), dpi=300)
+
+        plt.figure()
+        plt.plot(pnl, pnl_bs, '.')
+        plt.xlabel('PnL', fontsize=axis_label_fontsize)
+        plt.ylabel('PnL BS', fontsize=axis_label_fontsize)
+        plt.savefig(os.path.join(result_dir, f'pnl_scatter_{stoch_models[0]["cls"]}_DEEPvsBS.png'), dpi=300)
+    
+#endregion
+
 #region sv models histogram, different embedding sizes,
 if sv_embeddings:
     repo = analysis.Repo('/home/doeltz/doeltz/development/repos/embedding_sv')
     sv_result_dir = os.path.join(result_dir,'sv')
     models = [
-            ('ed59c329abfc2053a5bd1a76f80c9546cf2731ab', 4),
-            ('a942c45b39ead4a609d33a307175fa23929b7820', 8),
-            ('6c2b9753b1853ce3a5c8c744f3d857c870a48e36', 16)
+            ('07ae18beb792c45f4a4969d3f7a0483c056cf0d1', 4),
+            ('5ce2b1bee94f3921bbec17c78b845864b351d346', 8),
+            ('6e190f220350c794e5b38946ae7a5c360ebbeeef', 16)
         ] 
     ref_model = repo.get_hedge_model(models[0][0])
     params = repo.results[models[0][0]]
@@ -293,7 +368,7 @@ if sv_embeddings:
     paths, model_embed_vec = repo.simulate_model(valdate, 10_000*len(stoch_models), seed=1783, days=30, model=stoch_models )
     paths = {spec.udl_id: paths, 'emb_model': model_embed_vec}
     payoff,_ = VanillaOptionDeepHedgingPricer.compute_payoff(paths, timegrid, np.array([[-1.0]]), [spec], port_vec=None)
-
+    plt.figure()
     for m in models:
         model = repo.get_hedge_model(m[0])
         pnl = model.compute_pnl(paths, payoff)
