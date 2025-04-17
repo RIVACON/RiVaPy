@@ -20,5 +20,13 @@ class DPBaseModel(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def get_start_state(self):
+        pass
+
+    @abc.abstractmethod
+    def get_end_state(self):
+        pass
+
+    @abc.abstractmethod
     def create_output(self, actions: List[int], states: List[int], values: np.ndarray):
         pass
