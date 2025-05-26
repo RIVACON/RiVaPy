@@ -3,6 +3,7 @@ import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
 from numba import njit
+from numba import float32 as numba_float32, int32 as numba_int32
 from rivapy.marketdata import EnergyPriceForwardCurve
 from typing import Union, Optional, Literal, Dict
 
@@ -14,10 +15,10 @@ def _value_wrapper(
     action: float,
     max_state: float,
     min_state: float,
-    prices: np.ndarray,
+    prices: numba_float32[:],  # np.ndarray,
     t: int,
-    states: np.ndarray,
-    value_matrix: np.ndarray,
+    states: numba_float32[:],  # np.ndarray,
+    value_matrix: numba_float32[:, :, :],  # np.ndarray,
     eff_out: float,
     max_capacity: float,
     mode: int,
@@ -33,14 +34,23 @@ def _value_wrapper(
         reward = (-1) * action / 100.0 * eff_out * prices[t - 1] * max_capacity
 
     elif mode == 0:
-        reward = 0
+        reward = 0.0
 
     value = __value(state=state, charge=charge, t=t, states=states, value_matrix=value_matrix, reward=reward, mode=mode, penalty=penalty)
     return value
 
 
 @njit
-def __value(state: float, charge: int, t: int, states: np.ndarray, value_matrix: np.ndarray, reward: float, mode: int, penalty: float) -> float:
+def __value(
+    state: float,
+    charge: int,
+    t: int,
+    states: numba_float32[:],  # np.ndarray,
+    value_matrix: numba_float32[:, :, :],  # np.ndarray,
+    reward: float,
+    mode: int,
+    penalty: float,
+) -> float:
 
     idx = np.searchsorted(states, state)
     mode_value = np.abs(mode)
@@ -80,9 +90,9 @@ def backward(
     eff_in: float,
     eff_out: float,
     max_capacity: float,
-    states: np.ndarray,
-    actions: np.ndarray,
-    prices: np.ndarray,
+    states: numba_float32[:],  # np.ndarray,
+    actions: numba_float32[:],  # np.ndarray,
+    prices: numba_float32[:],  # np.ndarray,
     max_charges: int,
     end_state: Optional[float] = None,
     penalty: float = -1e12,
@@ -97,11 +107,11 @@ def backward(
     max_state_id = len(states) - 1
 
     if end_state is None:
-        value_matrix = np.zeros((T, len(states), max_charges + 1))
+        value_matrix = np.zeros((T, len(states), max_charges + 1), dtype=np.float32)
     else:
         end_state_id = np.searchsorted(states, end_state)
-        value_matrix = np.ones((T, len(states), max_charges + 1)) * penalty
-        value_matrix[:, end_state_id, :] = 0
+        value_matrix = np.ones((T, len(states), max_charges + 1), dtype=np.float32) * penalty
+        value_matrix[:, end_state_id, :] = 0.0
 
     for i in range(1, T):
         t = T - i - 1
@@ -192,9 +202,9 @@ def forward(
     eff_out: float,
     max_capacity: float,
     value_matrix: np.ndarray,
-    states: np.ndarray,
-    actions: np.ndarray,
-    prices: np.ndarray,
+    states: numba_float32[:],  # np.ndarray,
+    actions: numba_float32[:],  # np.ndarray,
+    prices: numba_float32[:],  # np.ndarray,
     max_charges: int,
     start_state: Optional[float] = None,
     start_charges: Optional[int] = None,
@@ -203,10 +213,10 @@ def forward(
 ):
     T = len(prices)
 
-    state_choices = np.zeros(T)
-    charges_choices = np.zeros(T)
-    objective = np.zeros(T - 1)
-    action_choices = np.zeros(T - 1)
+    state_choices = np.zeros(T, dtype=np.float32)
+    charges_choices = np.zeros(T, dtype=np.int32)
+    objective = np.zeros(T - 1, dtype=np.float32)
+    action_choices = np.zeros(T - 1, dtype=np.float32)
 
     max_state = np.max(states)
     min_state = np.min(states)
@@ -453,9 +463,9 @@ class BatteryStorage:
 
         eff_in = self._eff_in
         eff_out = self._eff_out
-        states = np.array([0, 100])
-        actions = np.array([-100, 0, 100])
-        prices = np.array([1.0, 1.0])
+        states = np.array([0, 100], dtype=np.float32)
+        actions = np.array([-100, 0, 100], dtype=np.float32)
+        prices = np.array([1.0, 1.0], dtype=np.float32)
         max_charges = 1
         max_capacity = 100.0
 
@@ -488,9 +498,6 @@ class BatteryStorage:
             end_state=end_state,
             penalty=self._penalty,
         )
-
-        print(backward.signatures)
-        print(forward.signatures)
 
     def optimize(self):
         value_matrix = backward(
@@ -552,22 +559,25 @@ if __name__ == "__main__":
     eff_out = 0.97
     np.random.seed(25)
     # states = np.array([0, 1])
-    states = np.arange(0, 100.5, step=0.5)
+    states = np.arange(0, 100.5, step=0.5, dtype=np.float32)
     # states = np.arange(0, 101)
     # actions = np.array([-25, 0,25])
     actions = np.arange(-25, 26)
-    prices = np.random.uniform(low=1, high=10, size=8)
+
+    timesteps = 100
+
+    prices = np.random.uniform(low=1, high=10, size=timesteps).astype(np.float32)
     max_charges = 200
     max_capacity = 100.0
 
-    dates = [dt.datetime(2024, month + 1, 1) for month in range(8)]
+    dates = [dt.datetime(2024, 1, 1) + dt.timedelta(days=i) for i in range(timesteps)]
     pfc = EnergyPriceForwardCurve.from_existing_pfc(id="1", pfc=pd.DataFrame(data=prices, index=dates), refdate=dt.datetime.today())
 
+    start = time.time()
     batterystorage = BatteryStorage(
-        eff_in=eff_in, eff_out=eff_out, max_capacity=max_capacity, pfc=pfc, max_charges=max_charges, states=states, actions=actions, precompile=True
+        eff_in=eff_in, eff_out=eff_out, max_capacity=max_capacity, pfc=pfc, max_charges=max_charges, states=states, actions=actions, precompile=False
     )
 
-    start = time.time()
     batterystorage.optimize()
     end = time.time()
     print(end - start)
