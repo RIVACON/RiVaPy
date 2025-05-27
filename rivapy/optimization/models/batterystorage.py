@@ -1,11 +1,12 @@
+import os
 import numpy as np
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
 from numba import njit
-from numba import float32 as numba_float32, int32 as numba_int32
+from numba import float32 as numba_float32, float64 as numba_float64, int32 as numba_int32
 from rivapy.marketdata import EnergyPriceForwardCurve
-from typing import Union, Optional, Literal, Dict
+from typing import Union, Optional
 
 
 @njit
@@ -15,12 +16,11 @@ def _value_wrapper(
     action: float,
     max_state: float,
     min_state: float,
-    prices: numba_float32[:],  # np.ndarray,
+    discharge_gain: float,
+    charge_costs: float,
     t: int,
-    states: numba_float32[:],  # np.ndarray,
-    value_matrix: numba_float32[:, :, :],  # np.ndarray,
-    eff_out: float,
-    max_capacity: float,
+    states: numba_float32[:],
+    value_matrix: numba_float64[:, :, :],
     mode: int,
     penalty: float,
 ) -> float:
@@ -28,10 +28,10 @@ def _value_wrapper(
         value = penalty
         return value
     if mode == 1:
-        reward = (-1) * action / 100.0 * prices[t - 1] * max_capacity
+        reward = (-1) * action * charge_costs  # / 100.0 * price * max_capacity
 
     elif mode == -1:
-        reward = (-1) * action / 100.0 * eff_out * prices[t - 1] * max_capacity
+        reward = (-1) * action * discharge_gain  # / 100.0 * eff_out * price * max_capacity
 
     elif mode == 0:
         reward = 0.0
@@ -45,8 +45,8 @@ def __value(
     state: float,
     charge: int,
     t: int,
-    states: numba_float32[:],  # np.ndarray,
-    value_matrix: numba_float32[:, :, :],  # np.ndarray,
+    states: numba_float32[:],
+    value_matrix: numba_float64[:, :, :],
     reward: float,
     mode: int,
     penalty: float,
@@ -90,9 +90,9 @@ def backward(
     eff_in: float,
     eff_out: float,
     max_capacity: float,
-    states: numba_float32[:],  # np.ndarray,
-    actions: numba_float32[:],  # np.ndarray,
-    prices: numba_float32[:],  # np.ndarray,
+    states: numba_float32[:],
+    actions: numba_float32[:],
+    prices: numba_float32[:],
     max_charges: int,
     end_state: Optional[float] = None,
     penalty: float = -1e12,
@@ -107,14 +107,21 @@ def backward(
     max_state_id = len(states) - 1
 
     if end_state is None:
-        value_matrix = np.zeros((T, len(states), max_charges + 1), dtype=np.float32)
+        value_matrix = np.zeros((T, len(states), max_charges + 1), dtype=np.float64)
     else:
         end_state_id = np.searchsorted(states, end_state)
-        value_matrix = np.ones((T, len(states), max_charges + 1), dtype=np.float32) * penalty
+        value_matrix = np.ones((T, len(states), max_charges + 1), dtype=np.float64) * penalty
         value_matrix[:, end_state_id, :] = 0.0
 
     for i in range(1, T):
         t = T - i - 1
+
+        price = prices[t]
+
+        discharge_price = eff_out * price * max_capacity / 100
+        charge_price_volume = (1 / eff_in) * price * max_capacity / 100
+        charge_price = price * max_capacity / 100
+
         for state_id in range(len(states)):
             state = states[state_id]
             for charge in range(max_charges + 1):
@@ -144,12 +151,11 @@ def backward(
                         action=action,
                         max_state=max_state,
                         min_state=min_state,
-                        prices=prices,
+                        discharge_gain=discharge_price,
+                        charge_costs=charge_price,
                         t=t + 1,
                         states=states,
                         value_matrix=value_matrix,
-                        eff_out=eff_out,
-                        max_capacity=max_capacity,
                         mode=mode,
                         penalty=penalty,
                     )
@@ -158,14 +164,18 @@ def backward(
 
                 # Check if continuous action could fill the storage
                 if (max_state - state) <= (max_action * eff_in):
-                    value = value_matrix[t + 1, max_state_id, charge + 1] - (max_state - state) / 100.0 * (1 / eff_in) * prices[t] * max_capacity
+                    value = (
+                        value_matrix[t + 1, max_state_id, charge + 1] - (max_state - state) * charge_price_volume
+                    )  # / 100.0 * (1 / eff_in) * price * max_capacity
 
                     if min_value < value:
                         min_value = value
 
                 # Check if continuous action could empty the storage
                 if np.abs((min_state - state)) <= np.abs(min_action):
-                    value = value_matrix[t + 1, 0, charge + 1] + np.abs((min_state - state)) / 100.0 * eff_out * prices[t] * max_capacity
+                    value = (
+                        value_matrix[t + 1, 0, charge + 1] + np.abs((min_state - state)) * discharge_price
+                    )  # / 100.0 * eff_out * price * max_capacity
 
                     if min_value < value:
                         min_value = value
@@ -175,8 +185,8 @@ def backward(
                     if end_state > state:
                         if (end_state - state) <= (max_action * eff_in):
                             value = (
-                                value_matrix[t + 1, end_state_id, charge + 1] - (end_state - state) / 100.0 * (1 / eff_in) * prices[t] * max_capacity
-                            )
+                                value_matrix[t + 1, end_state_id, charge + 1] - (end_state - state) * charge_price_volume
+                            )  # / 100.0 * (1 / eff_in) * price * max_capacity
 
                         if min_value < value:
                             min_value = value
@@ -185,7 +195,7 @@ def backward(
                         if np.abs((end_state - state)) <= np.abs(min_action):
                             value = (
                                 value_matrix[t + 1, end_state_id, charge + 1]
-                                + np.abs((end_state - state)) / 100.0 * eff_out * prices[t] * max_capacity
+                                + np.abs((end_state - state)) * discharge_price  # / 100.0 * eff_out * price * max_capacity
                             )
 
                         if min_value < value:
@@ -201,7 +211,7 @@ def forward(
     eff_in: float,
     eff_out: float,
     max_capacity: float,
-    value_matrix: np.ndarray,
+    value_matrix: numba_float64[:, :, :],  # np.ndarray,
     states: numba_float32[:],  # np.ndarray,
     actions: numba_float32[:],  # np.ndarray,
     prices: numba_float32[:],  # np.ndarray,
@@ -233,6 +243,12 @@ def forward(
 
     for t in range(T):
         value_matrix_slice = value_matrix[t]
+
+        price = prices[t - 1]
+        discharge_price = eff_out * price * max_capacity / 100
+        charge_price_volume = (1 / eff_in) * price * max_capacity / 100
+        charge_price = price * max_capacity / 100
+
         if t == 0:
             if start_state is None and start_charges is None:
                 # min_index = np.argmin(value_matrix_slice)
@@ -305,12 +321,11 @@ def forward(
                 action=action,
                 max_state=max_state,
                 min_state=min_state,
-                prices=prices,
+                discharge_gain=discharge_price,
+                charge_costs=charge_price,
                 t=t,
                 states=states,
                 value_matrix=value_matrix,
-                eff_out=eff_out,
-                max_capacity=max_capacity,
                 mode=mode,
                 penalty=penalty,
             )
@@ -323,7 +338,9 @@ def forward(
 
         # Check if continuous action could fill the storage
         if (max_state - prev_state) <= (max_action * eff_in):
-            value = value_matrix[t, max_state_id, prev_charge + 1] - (max_state - prev_state) / 100.0 * (1 / eff_in) * prices[t - 1] * max_capacity
+            value = (
+                value_matrix[t, max_state_id, prev_charge + 1] - (max_state - prev_state) * charge_price_volume
+            )  # / 100.0 * (1 / eff_in) * price * max_capacity
 
             next_state = max_state
             action = (max_state - prev_state) * (1 / eff_in)
@@ -336,7 +353,9 @@ def forward(
 
         # Check if continuous action could empty the storage
         if np.abs((min_state - prev_state)) <= np.abs(min_action):
-            value = value_matrix[t, 0, prev_charge + 1] + np.abs((min_state - prev_state)) / 100.0 * eff_out * prices[t - 1] * max_capacity
+            value = (
+                value_matrix[t, 0, prev_charge + 1] + np.abs((min_state - prev_state)) * discharge_price
+            )  # / 100.0 * eff_out * price * max_capacity
 
             next_state = min_state
             action = (-1) * np.abs((min_state - prev_state))
@@ -352,9 +371,8 @@ def forward(
             if end_state > prev_state:
                 if (end_state - prev_state) <= (max_action * eff_in):
                     value = (
-                        value_matrix[t, end_state_id, prev_charge + 1]
-                        - (end_state - prev_state) / 100.0 * (1 / eff_in) * prices[t - 1] * max_capacity
-                    )
+                        value_matrix[t, end_state_id, prev_charge + 1] - (end_state - prev_state) * charge_price_volume
+                    )  # / 100.0 * (1 / eff_in) * price * max_capacity
 
                     next_state = end_state
                     action = (end_state - prev_state) * (1 / eff_in)
@@ -368,9 +386,8 @@ def forward(
             elif end_state < prev_state:
                 if np.abs((end_state - prev_state)) <= np.abs(min_action):
                     value = (
-                        value_matrix[t, end_state_id, prev_charge + 1]
-                        + np.abs((end_state - prev_state)) / 100.0 * eff_out * prices[t - 1] * max_capacity
-                    )
+                        value_matrix[t, end_state_id, prev_charge + 1] + np.abs((end_state - prev_state)) * discharge_price
+                    )  # / 100.0 * eff_out * price * max_capacity
 
                     next_state = end_state
                     action = end_state - prev_state
@@ -386,9 +403,9 @@ def forward(
         action_choices[t - 1] = chosen_action
 
         if chosen_action > 0:
-            objective[t - 1] = chosen_action / 100.0 * prices[t - 1] * (-1) * max_capacity
+            objective[t - 1] = chosen_action * (-1) * charge_price
         else:
-            objective[t - 1] = chosen_action / 100.0 * eff_out * prices[t - 1] * (-1) * max_capacity
+            objective[t - 1] = chosen_action * (-1) * discharge_price
 
         # print(print_value)
     return state_choices, charges_choices, action_choices, objective
@@ -564,7 +581,7 @@ if __name__ == "__main__":
     # actions = np.array([-25, 0,25])
     actions = np.arange(-25, 26)
 
-    timesteps = 100
+    timesteps = 1000
 
     prices = np.random.uniform(low=1, high=10, size=timesteps).astype(np.float32)
     max_charges = 200
