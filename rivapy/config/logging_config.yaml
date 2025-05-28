@@ -1,0 +1,88 @@
+version: 1
+disable_existing_loggers: true
+
+
+filters:
+    info_filter:
+        (): logging_filters.InfoFilter
+
+formatters:
+    standard:
+        format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    error:
+        format: "%(levelname)s <PID %(process)d:%(processName)s> %(name)s.%(funcName)s(): %(message)s"
+
+handlers:
+    console:
+        class: logging.StreamHandler
+        level: DEBUG
+        formatter: standard
+        filters: [info_filter]
+        stream: ext://sys.stdout
+
+    error_console:
+        class: logging.StreamHandler
+        level: ERROR
+        formatter: error
+        stream: ext://sys.stdout
+
+    debug_file_handler:
+        class: logging.handlers.RotatingFileHandler
+        level: DEBUG
+        formatter: standard
+        filename: /temp/debug.log
+        maxBytes: 10485760
+        backupCount: 20
+        encoding: utf8
+
+    info_file_handler:
+        class: logging.handlers.RotatingFileHandler
+        level: INFO
+        formatter: standard
+        filename: /temp/info.log
+        maxBytes: 10485760
+        backupCount: 20
+        encoding: utf8
+
+    warn_file_handler:
+        class: logging.handlers.RotatingFileHandler
+        level: WARN
+        formatter: standard
+        filename: /temp/warn.log
+        maxBytes: 10485760
+        backupCount: 20
+        encoding: utf8
+
+    error_file_handler:
+        class: logging.handlers.RotatingFileHandler
+        level: ERROR
+        formatter: error
+        filename: /temp/errors.log
+        maxBytes: 10485760
+        backupCount: 20
+        encoding: utf8
+
+    critical_file_handler:
+        class: logging.handlers.RotatingFileHandler
+        level: CRITICAL
+        formatter: standard
+        filename: /temp/critical.log
+        maxBytes: 10485760
+        backupCount: 20
+        encoding: utf8
+
+root:
+    level: NOTSET
+    handlers: [console, error_console]
+    propagate: no
+
+loggers:
+    default:
+        level: INFO
+        handlers: [console, debug_file_handler, info_file_handler, warn_file_handler, error_file_handler, critical_file_handler]
+        propagate: no
+
+    default.module:
+        level: DEBUG
+        handlers: [debug_file_handler, info_file_handler, warn_file_handler, error_file_handler, critical_file_handler]
+        propagate: yes

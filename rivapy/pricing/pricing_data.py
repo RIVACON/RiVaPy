@@ -1,10 +1,174 @@
-
 from typing import Tuple, Iterable
 from datetime import datetime 
 from dateutil.relativedelta import relativedelta
 from enum import IntEnum as _IntEnum
-import pyvacon as _pyvacon
+
+from rivapy import _pyvacon_available
+if _pyvacon_available:
+    import pyvacon as _pyvacon
+
+
 from rivapy.instruments import CDSSpecification
+
+from rivapy.marketdata import DiscountCurve, SurvivalCurve 
+from rivapy.tools.interfaces import BaseDatedCurve
+from typing import Union as _Union
+from datetime import date, datetime
+from rivapy.instruments.bond_specifications import BondBaseSpecification
+from rivapy.tools._converter import _add_converter
+from rivapy.tools.datetools import _date_to_datetime
+from rivapy.pricing.pricing_request import PricingRequest, BondPricingRequest
+
+
+
+
+
+class CDSPricingData:
+    def __init__(self, spec, val_date, discount_curve, survival_curve, recovery_curve=None):
+        self.spec = spec
+        self.val_date = val_date
+        self.discount_curve = discount_curve
+        self.survival_curve = survival_curve
+        self.recovery_curve = recovery_curve
+        self._pricer_type = 'ISDA'
+        
+    def price(self):
+        pass
+
+if _pyvacon_available:
+    import pyvacon.pyvacon_swig as _analytics
+    BondPricingParameter = _add_converter(_analytics.BondPricingParameter)
+    # getPricingData = _converter(_analytics.getPricingData)
+else:
+    class BondPricingParameter:
+        pass
+
+
+class BasePricingData:
+    def __init__(self, pricer: str,
+                 pricing_request: PricingRequest
+                 ):
+        self.pricer = pricer
+        self.pricing_request = pricing_request
+        # TODO: analyse if simulationData is needed (here)
+
+    @property
+    def pricer(self) -> str:
+        """
+        Getter for configured pricer.
+
+        Returns:
+            str: Configured pricer.
+        """
+        return self.__pricer
+
+    @pricer.setter
+    def pricer(self, pricer: str):
+        """
+        Setter for pricer configuration.
+
+        Args:
+            pricer (str): Pricer to be applied.
+        """
+        self.__pricer = pricer
+
+    @property
+    def pricing_request(self):
+        """
+        Getter for configured pricing request.
+
+        Returns:
+            PricingRequest: Configured pricing request.
+        """
+        return self.pricing_request
+
+    @pricing_request.setter
+    def pricing_request(self, pricing_request: PricingRequest):
+        """
+        Setter for pricing request configuration.
+
+        Args:
+            pricing_request (PricingRequest): Configured pricing request.
+        """
+        self.__pricing_request = pricing_request
+
+
+class BondPricingData(BasePricingData):
+    def __init__(self, bond: BondBaseSpecification, valuation_date: _Union[date, datetime], discount_curve: DiscountCurve,
+                 fixing_curve: DiscountCurve, parameters: BondPricingParameter, pricing_request: BondPricingRequest,
+                 pricer: str = 'BondPricer', past_fixing: float = None, survival_curve: SurvivalCurve = None,
+                 recovery_curve: BaseDatedCurve = None):
+        super().__init__(pricer, pricing_request)
+        self.__bond = bond  # spec
+        self.valuation_date = valuation_date  # valDate
+        self.discount_curve = discount_curve  # discountCurve
+        self.fixing_curve = fixing_curve  # fixingCurve
+        self.parameters = parameters  # param
+        self.past_fixing = past_fixing  # pastFixing
+        self.survival_curve = survival_curve  # sc
+        self.recovery_curve = recovery_curve  # recoveryCurve
+
+    @property
+    def bond(self):
+        return self.__bond
+
+    @property
+    def valuation_date(self):
+        return self.__valuation_date
+
+    @valuation_date.setter
+    def valuation_date(self, valuation_date: _Union[date, datetime]):
+        self.__valuation_date = _date_to_datetime(valuation_date)
+
+    @property
+    def discount_curve(self):
+        return self.__discount_curve
+
+    @discount_curve.setter
+    def discount_curve(self, discount_curve: DiscountCurve):
+        self.__discount_curve = discount_curve
+
+    @property
+    def fixing_curve(self):
+        return self.__fixing_curve
+
+    @fixing_curve.setter
+    def fixing_curve(self, fixing_curve: DiscountCurve):
+        self.__fixing_curve = fixing_curve
+
+    @property
+    def parameters(self):
+        return self.__parameters
+
+    @parameters.setter
+    def parameters(self, parameters: BondPricingParameter):
+        self.__parameters = parameters
+
+    @property
+    def past_fixing(self):
+        return self.__past_fixing
+
+    @past_fixing.setter
+    def past_fixing(self, past_fixing):
+        self.__past_fixing = past_fixing
+
+    @property
+    def survival_curve(self):
+        return self.__survival_curve
+
+    @survival_curve.setter
+    def survival_curve(self, survival_curve: SurvivalCurve):
+        self.__survival_curve = survival_curve
+
+    @property
+    def recovery_curve(self):
+        return self.__recovery_curve
+
+    @recovery_curve.setter
+    def recovery_curve(self, recovery_curve: BaseDatedCurve):
+        self.__recovery_curve = recovery_curve
+
+
 
 class ResultType(_IntEnum):
     PRICE = 0
@@ -38,7 +202,17 @@ def _create_pricing_request(pr_dict : Iterable[ResultType]):
     return result
 
 class Black76PricingData:
-    def __init__(self, val_date, spec, discount_curve, vol_surface, pricing_request : Iterable[ResultType]):
+    def __init__(self, val_date: datetime, spec, discount_curve, vol_surface, pricing_request : Iterable[ResultType]):
+        """Constructor for Black76PricingDate
+
+        Args:
+            val_date ([datetime]): Valuation date.
+            spec ([type]): Specification.
+            discount_curve ([type]): Discount curve.
+            vol_surface ([type]): Volatility surface.
+            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.
+        """
+        
         self.spec = spec
         self.val_date = val_date
         self.discount_curve = discount_curve
@@ -59,6 +233,48 @@ class Black76PricingData:
 
     def price(self):
         return _pyvacon.finance.pricing.BasePricer.price(self._get_pyvacon_obj())
+        
+class AmericanPdePricingData:
+    def __init__(self, val_date: datetime, spec, discount_curve, vol_surface, pricing_request : Iterable[ResultType], time_steps_year: int = 60, spot_steps: int = 200):
+        """Constructor for AmericanPdePricingDate
+
+        Args:
+            val_date ([datetime]): Valuation date.
+            spec ([type]): Specification
+            discount_curve ([type]): Discount curve.
+            vol_surface ([type]): Volatility surface.
+            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.
+            time_steps_year (int, optional): [description]. Defaults to 60.
+            spot_steps (int, optional): [description]. Defaults to 200.
+        """
+        
+        self.val_date = val_date
+        self.spec = spec
+        self.discount_curve = discount_curve
+        self.vol_surface = vol_surface
+        self.pricing_request = pricing_request
+        self.time_steps_year = time_steps_year
+        self.spot_steps = spot_steps
+        self._pyvacon_obj = None
+    
+    
+    def _get_pyvacon_obj(self):
+        if self._pyvacon_obj is None:
+            self._pyvacon_obj = _pyvacon.finance.pricing.LocalVolPdePricingData()
+            self._pyvacon_obj.valDate = self.val_date
+            self._pyvacon_obj.spec = self.spec._get_pyvacon_obj().convertIntoBarrierSpecification()
+            self._pyvacon_obj.dsc = self.discount_curve._get_pyvacon_obj()
+            self._pyvacon_obj.param = _pyvacon.finance.pricing.PdePricingParameter()
+            self._pyvacon_obj.param.nTimeStepsPerYear = self.time_steps_year
+            self._pyvacon_obj.param.nSpotSteps = self.spot_steps   
+            self._pyvacon_obj.vol = self.vol_surface._get_pyvacon_obj()
+            self._pyvacon_obj.pricingRequest = _create_pricing_request(self.pricing_request)   
+        return self._pyvacon_obj
+
+    def price(self):
+        return _pyvacon.finance.pricing.BasePricer.price(self._get_pyvacon_obj())
+
+    
 class CDSPricingData:
     def __init__(self, spec: CDSSpecification, val_date, discount_curve, survival_curve, 
                 recovery_curve=None, integration_step = relativedelta(days=30)):
@@ -162,3 +378,4 @@ class CDSPricingData:
         pr_results.par_spread=self.par_spread(self.val_date, self.integration_step)
         pr_results.set_price(pr_results.pv_protection-pr_results.premium_leg-pr_results.accrued)
         return pr_results
+

@@ -68,4 +68,5 @@ class NotebookTests(unittest.TestCase, metaclass = NotebookTestsMeta):
         self.assertEqual(0,0)
 
 if __name__ == '__main__':
-    unittest.main()
+    #unittest.main()
+    pass

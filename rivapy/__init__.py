@@ -1,20 +1,23 @@
 import warnings
-import pyvacon.version as version
-#from pyvacon.analytics import setLogLevel as set_log_level
-#from pyvacon.analytics import registerSerialization as _register_serialization
-#import pyvacon.analytics as _analytics
 
-#_register_serialization('depp')
-_pyvacon_available = True
-if version.is_beta:
-    warnings.warn('Imported pyvacon is just beta version.')
+_pyvacon_available = False
+try:
+    import pyvacon
+    _pyvacon_available = True
+    import pyvacon.version as version
+    if version.is_beta:
+        warnings.warn('Imported pyvacon is just beta version.')
+except Exception as e:
+    warnings.warn('The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.')
 
 
-from rivapy import enums
+
+from rivapy.tools import enums
 import rivapy.instruments as instruments
 import rivapy.pricing as pricing
 import rivapy.marketdata as marketdata
 import rivapy.credit as credit
+import rivapy.models as models
 #import rivapy
 
 

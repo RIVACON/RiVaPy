@@ -6,17 +6,21 @@
 Welcome to rivapy's documentation!
 ==================================
 
+rivapy is a python package for the valuation and analysis of financial instruments. It 
+provides classes to handle market data such as yieldcurves or volatility surface,
+to define financial instruments such as options and different models that can be used to evaluate 
+these instruments.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-
-   rivapy.instruments
-   rivapy.pricing
-   rivapy.marketdata
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+ 
+   install
+   notebooks/index
+   rivapy/index
+   sample_data/index
+   developer_guide
+   glossary
+   genindex
+   search
+   

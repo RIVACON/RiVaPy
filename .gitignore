@@ -3,3 +3,9 @@
 docs/build/*
 *checkpoint.ipy*
 .vscode/settings.json
+notebooks/test_data/*
+rivapy/user_settings.py
+docs/source/notebooks/models/geo_data/*
+sandbox/green_ppa/experiments/*
+sandbox/green_ppa/logs/*
+.vscode/launch.json

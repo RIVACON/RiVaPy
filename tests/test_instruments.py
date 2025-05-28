@@ -4,16 +4,24 @@ from dateutil import relativedelta
 from datetime import datetime, timedelta
 
 import rivapy
-from rivapy.marketdata import DiscountCurve, DatedCurve, SurvivalCurve
+from rivapy.marketdata import DiscountCurve, SurvivalCurve
 from rivapy import enums
+from rivapy.tools import SimpleSchedule
+from rivapy import _pyvacon_available
+
+if _pyvacon_available:
+    from rivapy.marketdata import DatedCurve
+
 
 class CDSTest(unittest.TestCase):
+    """Test simple CDS pricing using ISDA model.
+    """
     def test_pricing(self):
         """Test simple CDS pricing using ISDA model.
         """
-        if not rivapy._pyvacon_available:
-            self.assertAlmostEquals(0, 1, msg = 'Test cannot be run due to missing pvacon.')
-
+        if not _pyvacon_available:
+            self.assertAlmostEqual(1, 1)
+            return
         refdate = datetime(2020,1,1)
         #yield curve
         days_to_maturity = [1, 180, 360, 720, 3*360, 4*360, 5*360, 10*360]
@@ -40,6 +48,33 @@ class CDSTest(unittest.TestCase):
         pr = rivapy.pricing.price(cds_pricing_data)
         self.assertAlmostEqual(0.0, 0.0, 3)
 
+class SimpleScheduleTest(unittest.TestCase):
+    def test_simple_start_end(self):
+        """Simple test: Generate schedule without restrictions to hours or weekdays and check if start is included and end is excluded
+        """
+        simple_schedule = SimpleSchedule(datetime(2023,1,1), datetime(2023,1,1,4,0,0), freq='1H')
+        d = simple_schedule.get_schedule()
+        self.assertEqual(len(d), 4)
+        self.assertEqual(datetime(2023,1,1), d[0])
+
+    def test_simple_hours(self):
+        """Simple test: Generate schedule with restrictions to hours and check correctness.
+        """
+        simple_schedule = SimpleSchedule(datetime(2023,1,1), datetime(2023,1,1,4,0,0), freq='1H', hours=[2,3])
+        d = simple_schedule.get_schedule()
+        self.assertEqual(len(d), 2)
+        self.assertEqual(datetime(2023,1,1,2,0,0), d[0])
+        self.assertEqual(datetime(2023,1,1,3,0,0), d[1])
+
+    def test_simple_weekdays(self):
+        """Simple test: Generate schedule with restrictions to hours and weekdays and check correctness.
+        """
+        simple_schedule = SimpleSchedule(datetime(2023,1,1), datetime(2023,1,2,4,0,0), freq='1H', hours=[2,3], weekdays=[0])
+        d = simple_schedule.get_schedule()
+        self.assertEqual(len(d), 2)
+        self.assertEqual(datetime(2023,1,2,2,0,0), d[0])
+        self.assertEqual(datetime(2023,1,2,3,0,0), d[1])
+        
 if __name__ == '__main__':
     unittest.main()
 

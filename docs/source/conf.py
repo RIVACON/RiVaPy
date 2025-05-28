@@ -22,8 +22,8 @@ sys.path.insert(0, os.path.abspath('../../'))
 # -- Project information -----------------------------------------------------
 
 project = 'rivapy'
-copyright = '2020, RIVACON GmbH'
-author = 'RIVACON GmbH'
+#copyright = '2020, RIVACON GmbH'
+#author = 'RIVACON GmbH'
 
 
 # -- General configuration ---------------------------------------------------
@@ -41,7 +41,16 @@ extensions = [
     'sphinx.ext.githubpages',
     'sphinx.ext.napoleon',
     'sphinx_rtd_theme',
+    'sphinxcontrib.bibtex',
+    'nbsphinx',
+    "sphinx_gallery.load_style",
+    'sphinx.ext.viewcode'
 ]
+
+intersphinx_mapping ={'pandas': ('https://pandas.pydata.org/docs/', None)}
+
+# Add bibtex file
+bibtex_bibfiles = ['refs.bib']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -54,14 +63,27 @@ exclude_patterns = []
 
 # -- Options for HTML output -------------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
+# The theme to use for HTML and HTML Help pages. See the documentation for
 # a list of builtin themes.
-#
 html_theme = 'sphinx_rtd_theme'
+
+html_theme_options = {
+    'logo_only': True
+}
+html_logo = "img/logo.svg"
+html_favicon = 'img/favicon.svg'
+github_url = "https://github.com/RIVACON/RiVaPy"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-#html_static_path = ['_static']
+html_static_path = ['_static']
+html_css_files = [
+    'css/custom.css',
+]
 
 autoclass_content = 'both'
+
+# thumbnail image paths should be relative to the _static folder
+nbsphinx_thumbnails = {
+    'notebooks/instruments/repurchase_agreement': "../../source/figs/repo_schema.png"}

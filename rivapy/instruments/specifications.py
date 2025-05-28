@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
-from datetime import datetime as _datetime
-from rivapy.enums import SecuritizationLevel
-from rivapy.enums import Currency
+
+from datetime import datetime 
+from rivapy.tools.enums import SecuritizationLevel, Currency
+#from rivapy.enums import Currency
 from rivapy import _pyvacon_available
 if _pyvacon_available:
     import pyvacon.finance.specification as _spec
@@ -15,13 +15,13 @@ if _pyvacon_available:
     BarrierPayoff = _spec.BarrierPayoff
     BarrierSpecification = _spec.BarrierSpecification
     # EuropeanVanillaSpecification = _spec.EuropeanVanillaSpecification
-    AmericanVanillaSpecification = _spec.AmericanVanillaSpecification
+    # AmericanVanillaSpecification = _spec.AmericanVanillaSpecification
     #RainbowUnderlyingSpec = _spec.RainbowUnderlyingSpec
     #RainbowBarrierSpec = _spec.RainbowBarrierSpec
     LocalVolMonteCarloSpecification = _spec.LocalVolMonteCarloSpecification
     RainbowSpecification = _spec.RainbowSpecification
-    MultiMemoryExpressSpecification = _spec.MultiMemoryExpressSpecification
-    MemoryExpressSpecification = _spec.MemoryExpressSpecification
+    #MultiMemoryExpressSpecification = _spec.MultiMemoryExpressSpecification
+    #MemoryExpressSpecification = _spec.MemoryExpressSpecification
     ExpressPlusSpecification = _spec.ExpressPlusSpecification
     AsianVanillaSpecification = _spec.AsianVanillaSpecification
     RiskControlStrategy = _spec.RiskControlStrategy
@@ -53,12 +53,20 @@ else:
     #empty placeholder...
     class BondSpecification:
         pass
+    class ComboSpecification:
+        pass
+    class BarrierSpecification:
+        pass
+    class RainbowSpecification:
+        pass
+    class MemoryExpressSpecification:
+        pass
 
 class EuropeanVanillaSpecification:
     def __init__(self, 
                  id: str,
                  type: str,
-                 expiry: _datetime,
+                 expiry: datetime,
                  strike: float,
                  issuer: str = '',
                  sec_lvl: str = SecuritizationLevel.COLLATERALIZED,
@@ -75,15 +83,13 @@ class EuropeanVanillaSpecification:
         Args:
             id (str): Identifier (name) of the european vanilla specification.
             type (str): Type of the european vanilla option ('PUT','CALL').
-            expiry (_datetime): Expiration date.
+            expiry (datetime): Expiration date.
             strike (float): Strike price.
-            issuer (str, optional): Issuer Id. Only used if pricing data is manually defined. Defaults to ''.
+            issuer (str, optional): Issuer Id. Must not be set if pricing data is manually defined. Defaults to ''.
             sec_lvl (str, optional): Securitization level. Can be selected from rivapy.enums.SecuritizationLevel. Defaults to SecuritizationLevel.COLLATERALIZED.
             curr (str, optional): Currency (ISO-4217 Code). Must not be set if pricing data is manually defined. Can be selected from rivapy.enums.Currency. Defaults to Currency.EUR.
-            udl_id (str, optional): Underlying Id. Only used if pricing data is manually defined. Defaults to ''.
+            udl_id (str, optional): Underlying Id. Must not be set if pricing data is manually defined. Defaults to ''.
             share_ratio (float, optional): Ratio of covered shares of the underlying by a single option contract. Defaults to 1.0.
-            # ex_settle (int, optional): Days between expiry date and settlement (to delivery of cash or shares). Defaults to 0.
-            # trade_settle (int, optional): Days between trade date and settlement date. Defaults to 0.
         """
         
         self.id = id
@@ -117,27 +123,70 @@ class EuropeanVanillaSpecification:
                                             0)
                                             
         return self._pyvacon_obj
+    
+class AmericanVanillaSpecification:
+    def __init__(self
+                 ,id: str
+                 ,type: str
+                 ,expiry: datetime
+                 ,strike: float
+                 ,issuer: str = ''
+                 ,sec_lvl: str = SecuritizationLevel.COLLATERALIZED
+                 ,curr: str = Currency.EUR
+                 ,udl_id: str = ''
+                 ,share_ratio: float = 1.0
+                 ,exercise_before_ex_date: bool = False
+                #  ,holidays: str
+                #  ,ex_settle: str
+                #  ,trade_settle: str
+                 ):
+        """Constructor for american vanilla option
+
+        Args:
+            id (str): Identifier (name) of the american vanilla specification.
+            type (str): Type of the american vanilla option ('PUT','CALL').
+            expiry (datetime): Expiration date.
+            strike (float): Strike price.
+            issuer (str, optional): Issuer Id. Must not be set if pricing data is manually defined. Defaults to ''.
+            sec_lvl (str, optional): Securitization level. Can be selected from rivapy.enums.SecuritizationLevel. Defaults to SecuritizationLevel.COLLATERALIZED.
+            curr (str, optional): Currency (ISO-4217 Code). Must not be set if pricing data is manually defined. Can be selected from rivapy.enums.Currency. Defaults to Currency.EUR.
+            udl_id (str, optional): Underlying Id. Must not be set if pricing data is manually defined. Defaults to ''.
+            share_ratio (float, optional): Ratio of covered shares of the underlying by a single option contract. Defaults to 1.0.
+            exercise_before_ex_date (bool, optional): Indicates if option can be exercised within two days before dividend ex-date. Defaults to False.
+        """
+     
+        self.id = id
+        self.type = type
+        self.expiry = expiry
+        self.strike = strike
+        self.issuer = issuer
+        self.sec_lvl = sec_lvl
+        self.curr =  curr
+        self.udl_id = udl_id
+        self.share_ratio = share_ratio
+        self.exercise_before_ex_date = exercise_before_ex_date
+        # self.holidays = holidays
+        # self.ex_settle = ex_settle
+        # self.trade_settle = trade_settle
+            
+        self._pyvacon_obj = None
+        
+    def _get_pyvacon_obj(self):
+        if self._pyvacon_obj is None:
+            self._pyvacon_obj = _spec.AmericanVanillaSpecification(self.id
+                                            ,self.issuer
+                                            ,self.sec_lvl
+                                            ,self.curr
+                                            ,self.udl_id
+                                            ,self.type
+                                            ,self.expiry
+                                            ,self.strike
+                                            ,self.share_ratio
+                                            ,self.exercise_before_ex_date
+                                            ,''
+                                            ,0
+                                            ,0)
+                                            
+        return self._pyvacon_obj   
 
 
-def ZeroBondSpecification(obj_id: str, curr: str,  issue_date: _datetime, expiry: _datetime, notional: float = 100.0, 
-                        issuer: str = 'dummy_issuer', sec_level: str='NONE')->BondSpecification:
-    """[summary]
-
-    Args:
-        obj_id (str: [description]
-        curr (str: [description]
-        issue_date (_datetime: [description]
-        expiry (_datetime: [description]
-        notional (float, optional: [description]. Defaults to 100.0.
-        issuer (str, optional: [description]. Defaults to 'dummy_issuer'.
-        sec_level (str, optional: [description]. Defaults to 'NONE'.
-
-    Returns:
-        BondSpecification: [description]
-    """
-    return BondSpecification(obj_id, issuer, sec_level, curr, expiry, issue_date, notional, 'ACT365FIXED', [], [], '', [], [])
-
-
-
-#ProjectToCorrelation = _analytics.ProjectToCorrelation
-  

@@ -4,7 +4,7 @@
         "-s",
         "./tests",
         "-p",
-        "*test*.py"
+        "test_*.py"
     ],
     "python.testing.pytestEnabled": false,
     "python.testing.nosetestsEnabled": false,
@@ -13,5 +13,12 @@
         "**/__pycache__": true,
         "docs/build/*": true
     },
-    "python.pythonPath": "C:\\Users\\Anwender\\anaconda3\\python.exe",
+    "python.formatting.provider": "black",
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "black-formatter.args": ["--line-length", "150"]
 }
