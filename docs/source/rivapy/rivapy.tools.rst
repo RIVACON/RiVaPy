@@ -3,13 +3,38 @@ Tools
 
 Date Tools
 --------------------------------
+Period
+^^^^^^^^^^^^^^^^^^
 .. autoclass:: rivapy.tools.Period
    :members:
    :undoc-members:
 
+Schedules
+^^^^^^^^^^^^^^^^^^
 .. autoclass:: rivapy.tools.Schedule
    :members:
    :undoc-members:
+
+.. autoclass:: rivapy.tools.SimpleSchedule
+    :undoc-members:
+    :show-inheritance:
+    
+
+.. autoclass:: rivapy.tools.PeakSchedule
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+.. autoclass:: rivapy.tools.OffPeakSchedule
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. autoclass:: rivapy.tools.GasSchedule
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 DateTimeGrid
 -------------------------------

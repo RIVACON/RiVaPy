@@ -1,6 +1,7 @@
 from typing import Union, Callable, Tuple, List
 import numpy as np
 import scipy
+import scipy.integrate
 from rivapy.tools.interfaces import FactoryObject
 from rivapy.models.ornstein_uhlenbeck import OrnsteinUhlenbeck
 
@@ -122,8 +123,8 @@ class LuciaSchwartz(FactoryObject):
         if T2<=T1:
             raise ValueError("T2 must be larger than T1.")
         if qm is None:
-            qm = scipy.integrate.romberg
-        result = qm(lambda t: self.compute_expected_value(x0,t), T1, T2, **qm_kwargs)
+            qm = scipy.integrate.quad
+        result, err = qm(lambda t: self.compute_expected_value(x0,t), T1, T2, **qm_kwargs)
         return result/(T2-T1)
 
     def simulate(self, timegrid, start_value, rnd, 
@@ -167,7 +168,7 @@ class LuciaSchwartz(FactoryObject):
                 for i in range(len(forwards)):
                     forward_start_values[i] = self.compute_fwd_value(start_value, forwards[i][0], forwards[i][1])
         
-            result = np.full((timegrid.shape[0], rnd.shape[1], n_assets), np.NaN)
+            result = np.full((timegrid.shape[0], rnd.shape[1], n_assets), np.nan)
             result[:,:,0] = X1 + X2  + self._f_grid[:,np.newaxis]
             dW1 = self.X1._volatility_grid[:1,np.newaxis]*rnd_[:,:,0]*self.X1._sqrt_delta_t[:,np.newaxis]
             dW2 = self._sigma2_grid[:1,np.newaxis]*rnd_[:,:,0]*self.X1._sqrt_delta_t[:,np.newaxis] 

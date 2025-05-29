@@ -6,7 +6,7 @@ import rivapy
 from rivapy.marketdata import VolatilityGridParametrization, VolatilityParametrizationSABR, VolatilitySurface
 from rivapy.marketdata import DiscountCurve, EquityForwardCurve, enums, PowerPriceForwardCurve, \
     DiscountCurveComposition, DiscountCurveParametrized, ConstantRate, LinearRate
-from rivapy.instruments import SimpleSchedule
+from rivapy.tools import SimpleSchedule
 from rivapy import enums
 from rivapy import _pyvacon_available
 
