@@ -1,11 +1,16 @@
-from typing import Union, Callable
+from typing import Union, Callable, Tuple
 import numpy as np
 import scipy
 import scipy.stats as ss
-from rivapy.tools.interfaces import FactoryObject
+from rivapy.tools.interfaces import FactoryObject, ModelDeepHedging, OptionCalibratableModel
 
-class BNS(FactoryObject):
 
+class BNS(FactoryObject, ModelDeepHedging, OptionCalibratableModel):
+
+    @staticmethod
+    def get_default_model():
+        return BNS(rho=-4.675, lmda=0.5474, b=18.6075, a=0.6069, v0=0.0433)
+    
     def _eval_grid(f, timegrid):
         try:
             return f(timegrid)
@@ -23,45 +28,41 @@ class BNS(FactoryObject):
         self.a = a
         self.k = self.a*self.rho/(self.b - self.rho)
         self._timegrid = None
-        self.modelname = 'BNS'
         self.v0 = v0
 
     def _to_dict(self) -> dict:
-        return {'rho': self.rho, 'lmbda':self.lmbda,'b':self.b,'a':self.a}
+        return {'rho': self.rho, 'lmbda':self.lmbda,'b':self.b,'a':self.a, 'v0': self.v0}
 
     def _set_timegrid(self, timegrid):
         self._timegrid = np.copy(timegrid)
         self._delta_t = self._timegrid[1]-self._timegrid[0]
         self._sqrt_delta_t = np.sqrt(self._delta_t)
 
-    def _set_params(self,S0,v0,M,n):
-        self.S0 = S0
-        self.v0 = v0
-        self.n_sims = M 
-        self.n = n #length of timegrid
-
-
-    def simulate(self, timegrid, S0, v0, M,n,model_name):
+    def simulate(self, timegrid: np.ndarray, S0:float|np.ndarray, n_sims: int, seed: int|None =None):
         """ Simulate the BNS Model paths
+        Args:
+            timegrid (np.ndarray): One dimensional array containing the time points where the process will be simulated (containing 0.0 as the first timepoint).
+            S0 (Union[float, np.ndarray]): Either a float or an array (for each path) with the start value of the simulation.
+            n_sims (int): Number of simulations.
         """
-        self._set_params(S0,v0,M,n)
+        
         self._set_timegrid(timegrid)
 
-        S = np.zeros((self._timegrid.shape[0]+1, M))
-        V =  np.zeros((self._timegrid.shape[0]+1, M))
+        S = np.zeros((self._timegrid.shape[0], n_sims))
+        V =  np.zeros((self._timegrid.shape[0], n_sims))
         S[0, :] = np.log(S0)
-        V[0, :] = v0
-        
+        V[0, :] = self.v0
+        rng = np.random.default_rng(seed)
         # Generate correlated Brownian motions
-        z1 = np.random.normal(size=(self._timegrid.shape[0], M))
+        z1 = rng.normal(size=(self._timegrid.shape[0], n_sims))
 
         # Generate stock price and volatility paths
-        for t in range(1, self._timegrid.shape[0] + 1):
+        for t in range(1, self._timegrid.shape[0] ):
             # Calculate volatility
             vol = np.sqrt(V[t - 1, :])
 
-            P = ss.poisson.rvs(self.a * self.lmbda*self._delta_t,size=M)
-            jumps = np.asarray([np.sum(np.random.exponential(1./self.b, size=int(i))) for i in P])
+            P = ss.poisson.rvs(self.a * self.lmbda*self._delta_t,size=n_sims)
+            jumps = np.asarray([np.sum(rng.exponential(1./self.b, size=int(i))) for i in P])
 
             # Update the stock price and volatility
             S[t, :] = S[t - 1, :]  + (-self.lmbda*self.k - 0.5*vol*vol)*self._delta_t + vol * np.sqrt(self._delta_t) * z1[t - 1, :] + self.rho*jumps
@@ -69,8 +70,6 @@ class BNS(FactoryObject):
                 0.0,V[t - 1, :] - self.lmbda*V[t - 1, :]*self._delta_t + jumps)
         return np.exp(S)
         
-
-
     def _characteristic_func(self, xi, s0, v0, tau):
             """Characteristic function needed internally to compute call prices with analytic formula.
             """
@@ -83,11 +82,10 @@ class BNS(FactoryObject):
             return np.exp(ixi * np.log(s0) + A + v0*B + C)
         
 	    
-    def compute_call_price(self, s0: float, v0: float, K: Union[np.ndarray, float], ttm: Union[np.ndarray, float])->Union[np.ndarray, float]:
+    def compute_call_price(self, s0: float, K: Union[np.ndarray, float], ttm: Union[np.ndarray, float])->Union[np.ndarray, float]:
         """Computes a call price for the Heston model via integration over characteristic function.
 		Args:
 			s0 (float): current spot
-			v0 (float): current variance
 			K (float): strike
 			ttm (float): time to maturity
 		"""
@@ -96,7 +94,7 @@ class BNS(FactoryObject):
             for i in range(ttm.shape[0]):
 				#for j in range(K.shape[0]):
 					#result[i,j] = self.call_price(s0,v0,K[j], tau[i])
-                result[i,:] = self.compute_call_price(s0,v0,K, ttm[i])
+                result[i,:] = self.compute_call_price(s0,self.v0,K, ttm[i])
             return result
 
         def integ_func(xi, s0, v0, K, tau, num):
@@ -110,10 +108,25 @@ class BNS(FactoryObject):
             res = (s0-K > 0) * (s0-K)
         else:
             "Simplified form, with only one integration. "
-            h = lambda xi: s0 * integ_func(xi, s0, v0, K, ttm, 1) - K * integ_func(xi, s0, v0, K, ttm, 2)
-            res = 0.5 * (s0 - K) + 1/scipy.pi * scipy.integrate.quad_vec(h, 0, 500.)[0]  #vorher 500
+            h = lambda xi: s0 * integ_func(xi, s0, self.v0, K, ttm, 1) - K * integ_func(xi, s0, self.v0, K, ttm, 2)
+            res = 0.5 * (s0 - K) + 1/scipy.constants.pi * scipy.integrate.quad_vec(h, 0, 500.)[0]  #vorher 500
         return res
   
+    def get_parameters(self) -> np.ndarray:
+        return np.array([self.rho, self.lmbda, self.b, self.a, self.v0])
+
+    def set_parameters(self, params: np.ndarray) -> None:
+        self.rho = params[0]
+        self.lmbda = params[1]
+        self.b = params[2]
+        self.a = params[3]
+        self.v0 = params[4]
+        
+    def get_bounds(self) -> Tuple[np.ndarray, np.ndarray]|None :
+        return np.array([-10.0,0.5,1e-15,0.6,1e-15]), np.array([10.0,50,50,10,1.0])
+        
+    def get_nonlinear_constraints(self) -> Tuple[np.ndarray, Callable, np.ndarray]|None:
+        return None
 
 
 

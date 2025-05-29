@@ -5,6 +5,17 @@ from scipy.special import ndtr
 import numpy as np
 
 
+def d1(S, K, r, sigma, T):
+    return (np.log(S/K) + (r+sigma*sigma/2)*T)/(sigma*np.sqrt(T))
+
+def d2(S, K, r, sigma, T):
+    return d1(S, K, r, sigma, T) - sigma*np.sqrt(T)
+
+def compute_european_delta(S, K, r, sigma, T, is_call: bool=True):
+        if is_call:
+            return norm.cdf(d1(S, K, r, sigma, T))
+        return norm.cdf(d1(S, K, r, sigma, T)) - 1
+
 def compute_european_price_Buehler(strike:float, maturity:float, volatility:float, is_call: bool=True)->float:
     """Compute a call/put option price for the Buehler model (w.r.t. x-process), i.e. no dividends, rates etc.
     Args:

@@ -21,6 +21,7 @@ def _add_to_factory(cls):
 _add_to_factory(Issuer)
 _add_to_factory(PPASpecification)
 _add_to_factory(GreenPPASpecification)
+_add_to_factory(EuropeanVanillaSpecification)
 _add_to_factory(ZeroCouponBondSpecification)
 _add_to_factory(FixedRateBondSpecification)
 _add_to_factory(PlainVanillaCouponBondSpecification)

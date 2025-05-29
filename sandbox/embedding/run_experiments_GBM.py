@@ -14,6 +14,7 @@ logging.basicConfig(level=logging.DEBUG)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # set loglevel to warning
 #import tensorflow as tf
 #tf.config.run_functions_eagerly(True)
+#tf.compat.v1.enable_eager_execution() 
 #tf.keras.backend.set_floatx('float64')
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
@@ -32,43 +33,47 @@ from scipy.special import comb
 import analysis
 from sys import exit
 
+repo = analysis.Repo(
+    '/home/doeltz/doeltz/development/repos/embedding_gbm'
+    #"C:/Users/doeltz/development/RiVaPy/sandbox/embedding/test"
+)
 
 import ast  
 with open('/home/doeltz/doeltz/development/RiVaPy/sandbox/embedding/model_params_dict.txt') as f: 
     data = f.read() 
 model_params = ast.literal_eval(data) 
 
-
-model = []
-
-n_models_per_model_type = 30#
-gbm_vols = np.linspace(0.05,1.5,n_models_per_model_type)
-for i in range(n_models_per_model_type):
-    #model.append(HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.0707,
-    #              vol_of_vol = 0.2928, correlation_rho = -0.757,v0 = 0.0654))
-    #model.append(GBM(0.,vol_list[i]))
-    model.append(GBM(drift=0.0,volatility=gbm_vols[i]))
-    if False:
-        model.append(HestonForDeepHedging(rate_of_mean_reversion = model_params['Heston']['rate_of_mean_reversion'][i],
-                                        long_run_average = model_params['Heston']['long_run_average'][i],
-                                        vol_of_vol = model_params['Heston']['vol_of_vol'][i], 
-                                        correlation_rho = model_params['Heston']['correlation_rho'][i],
-                                        v0 = model_params['Heston']['v0'][i]))
-        model.append(HestonWithJumps(rate_of_mean_reversion = model_params['Heston with Jumps']['rate_of_mean_reversion'][i],
-                                    long_run_average = model_params['Heston with Jumps']['long_run_average'][i],
-                                    vol_of_vol = model_params['Heston with Jumps']['vol_of_vol'][i], 
-                                    correlation_rho = model_params['Heston with Jumps']['correlation_rho'][i],
-                                    muj = 0.1791,sigmaj = 0.1346, 
-                                    lmbda = model_params['Heston with Jumps']['lmbda'][i],
-                                    v0 = model_params['Heston with Jumps']['v0'][i]))
-        model.append(BNS(rho =model_params['BNS']['rho'][i],
-                        lmbda=model_params['BNS']['lmbda'][i],
-                        b=model_params['BNS']['b'][i],
-                        a=model_params['BNS']['a'][i],
-                        v0 = model_params['BNS']['v0'][i]))
-
+models =[] 
+for n_models_per_model_type in [32]:#[2, 8, 16, 32]:#
+    model = []
+    gbm_vols = np.linspace(0.1,0.8,n_models_per_model_type)
+    gbm_vols = [0.2] 
+    for i in range(len(gbm_vols)):
+        #model.append(HestonForDeepHedging(rate_of_mean_reversion = 0.6067,long_run_average = 0.0707,
+        #              vol_of_vol = 0.2928, correlation_rho = -0.757,v0 = 0.0654))
+        #model.append(GBM(0.,vol_list[i]))
+        model.append(GBM(drift=0.0,volatility=gbm_vols[i]))
+        if False:
+            model.append(HestonForDeepHedging(rate_of_mean_reversion = model_params['Heston']['rate_of_mean_reversion'][i],
+                                            long_run_average = model_params['Heston']['long_run_average'][i],
+                                            vol_of_vol = model_params['Heston']['vol_of_vol'][i], 
+                                            correlation_rho = model_params['Heston']['correlation_rho'][i],
+                                            v0 = model_params['Heston']['v0'][i]))
+            model.append(HestonWithJumps(rate_of_mean_reversion = model_params['Heston with Jumps']['rate_of_mean_reversion'][i],
+                                        long_run_average = model_params['Heston with Jumps']['long_run_average'][i],
+                                        vol_of_vol = model_params['Heston with Jumps']['vol_of_vol'][i], 
+                                        correlation_rho = model_params['Heston with Jumps']['correlation_rho'][i],
+                                        muj = 0.1791,sigmaj = 0.1346, 
+                                        lmbda = model_params['Heston with Jumps']['lmbda'][i],
+                                        v0 = model_params['Heston with Jumps']['v0'][i]))
+            model.append(BNS(rho =model_params['BNS']['rho'][i],
+                            lmbda=model_params['BNS']['lmbda'][i],
+                            b=model_params['BNS']['b'][i],
+                            a=model_params['BNS']['a'][i],
+                            v0 = model_params['BNS']['v0'][i]))
+    models.append(model)    
 # Historic Simulation models
-if True:
+if False:
     with open('/home/doeltz/doeltz/development/RiVaPy/sandbox/embedding/yfinance_data/data.json', "r") as f:
         historic_data = json.load(f)
     n_models_old = len(model)
@@ -78,10 +83,6 @@ if True:
     print( "include historic data, number of historic models: ", len(historic_data)-n_models_old)
 
 
-repo = analysis.Repo(
-    '/home/doeltz/doeltz/development/repos/embedding_historic'
-    #"C:/Users/doeltz/development/RiVaPy/sandbox/embedding/test"
-)
 
 reg = {
     "mean_variance": [0.0],
@@ -95,7 +96,6 @@ refdate = dt.datetime(2023, 1, 1)
 issuer = "DBK"
 seclevel = "COLLATERALIZED"
 tpe = "CALL"  # Change to 'PUT' if you want to calculate the price of an european put option.
-
 
 spec = []
 
@@ -115,8 +115,6 @@ for i in range(len(strike)):
                 share_ratio=1,
             ))
 
-n_sims_per_model = 1000  
-n_sims = n_sims_per_model*len(model)
 n_portfolios = None # set to None to switch off embedding with respect to portfolios
 
 def objective(trial):
@@ -127,7 +125,7 @@ def objective(trial):
                                     model,
                                     rerun=True,
                                     depth=trial.suggest_int("depth", 2, 4),
-                                    nb_neurons=trial.suggest_categorical("nb_neurons", [32, 64,128,256]),
+                                    nb_neurons=trial.suggest_categorical("nb_neurons", [32,64,128,256]),
                                     n_sims=n_sims,
                                     regularization=0.,
                                     epochs=trial.suggest_int("epochs", 30, 200),
@@ -162,34 +160,39 @@ if __name__=='__main__':
         study = optuna.create_study(study_name=study_name, storage=storage_name, load_if_exists=True)
         study.optimize(objective, n_trials=20)
     else:
-        for emb_size in [4]:
-            for seed in [42]:
-                pricing_results, params = repo.run(
-                                    refdate,
-                                    spec,
-                                    model,
-                                    rerun=False,
-                                    depth=3,
-                                    nb_neurons=128,
-                                    n_sims=n_sims,
-                                    regularization=0.,
-                                    epochs=185,
-                                    verbose=1,
-                                    tensorboard_logdir=repo.repo_dir+"/logs/"
-                                    + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
-                                    initial_lr=0.00015, 
-                                    final_lr=0.000005,
-                                    multiplier_lr=2.8,
-                                    multiplier_batch_size=3,
-                                    n_increase_batch_size=3,
-                                    decay_steps=50,
-                                    batch_size=32,#2024,
-                                    seed=seed,
-                                    days=int(np.max(days)),
-                                    n_portfolios=n_portfolios,
-                                    embedding_size=emb_size,
-                                    embedding_size_port=None,
-                                    transaction_cost={}#'ADS':[1e-10]},#'DOB_ADS':[0.01]},
-                                    #loss = "exponential_utility"
-                                )
-                params["pnl_result"]["var"]
+        for n_sims_per_model in [10]:#100, 200, 400, 800]:#[2000, 4000, 8000, 16000, 32000, 64000]:
+            for model in models:
+                n_sims = n_sims_per_model*len(model)
+                print('nsims: ', n_sims)
+                for emb_size in [1]:
+                    for seed in [112]:
+                        pricing_results, params = repo.run(
+                                            refdate,
+                                            spec,
+                                            model,
+                                            rerun=False,
+                                            depth=3,
+                                            nb_neurons=128,#128,
+                                            n_sims=n_sims,
+                                            regularization=0.,
+                                            epochs=10000,
+                                            verbose=1,
+                                            tensorboard_logdir=repo.repo_dir+"/logs/"
+                                            + dt.datetime.now().strftime("%Y%m%dT%H%M%S"),
+                                            initial_lr=5e-4, 
+                                            final_lr=5e-5, #1e-4,
+                                            multiplier_lr=2.8,
+                                            multiplier_batch_size=3,
+                                            n_increase_batch_size=1,
+                                            decay_steps=1000,#9000,#100,
+                                            batch_size=5,
+                                            seed=seed,
+                                            days=int(np.max(days)),
+                                            n_portfolios=n_portfolios,
+                                            embedding_size=emb_size,
+                                            embedding_size_port=None,
+                                            #rerun=True,
+                                            transaction_cost={}#'ADS':[1e-10]},#'DOB_ADS':[0.01]},
+                                            #loss = "exponential_utility"
+                                        )
+                        params["pnl_result"]["var"]
