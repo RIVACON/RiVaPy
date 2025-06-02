@@ -113,36 +113,34 @@ class VolatilitySurfaceTest(unittest.TestCase):
         self.assertAlmostEqual(vol, vol_grid_param.calc_implied_vol(1.0, 1.3), delta=1e-7)
 
 
-# class PowerPriceForwardCurveTest(unittest.TestCase):
-#     def test_simple_schedule(self):
-#         """Test value with SimpleSchedule
-#         """
-#         simple_schedule = SimpleSchedule(dt.datetime(2022,12,1), dt.datetime(2023,11,1,4,0,0), freq='1H')
-#         values = np.ones((len(simple_schedule.get_schedule()),)).cumsum()
-#         hpfc = PowerPriceForwardCurve(dt.datetime(2022,12,1), dt.datetime(2022,12,1), dt.datetime(2023,11,1,4,0,0), freq='1H', values = values)
-#         simple_schedule = SimpleSchedule(dt.datetime(2022,12,1), dt.datetime(2022,12,1,4,0,0), freq='1H')
-#         values = hpfc.value(dt.datetime(2022,1,1), simple_schedule)
-#         self.assertEqual(values.shape[0], 4)
-#         self.assertEqual(values[0],1)
-#         self.assertEqual(values[-1], 4)
-#         # same with hours excluded
-#         simple_schedule = SimpleSchedule(dt.datetime(2022,12,1), dt.datetime(2022,12,1,4,0,0), freq='1H', hours=[2])
-#         values = hpfc.value(dt.datetime(2022,1,1), simple_schedule)
-#         self.assertEqual(values.shape[0], 1)
-#         self.assertEqual(values[0],3)
+class PowerPriceForwardCurveTest(unittest.TestCase):
+    def test_simple_schedule(self):
+        """Test value with SimpleSchedule"""
+        simple_schedule = SimpleSchedule(dt.datetime(2022, 12, 1), dt.datetime(2023, 11, 1, 4, 0, 0), freq="1H")
+        values = np.ones((len(simple_schedule.get_schedule()),)).cumsum()
+        hpfc = PowerPriceForwardCurve(dt.datetime(2022, 12, 1), dt.datetime(2022, 12, 1), dt.datetime(2023, 11, 1, 4, 0, 0), freq="1H", values=values)
+        simple_schedule = SimpleSchedule(dt.datetime(2022, 12, 1), dt.datetime(2022, 12, 1, 4, 0, 0), freq="1H")
+        values = hpfc.value(dt.datetime(2022, 1, 1), simple_schedule)
+        self.assertEqual(values.shape[0], 4)
+        self.assertEqual(values[0], 1)
+        self.assertEqual(values[-1], 4)
+        # same with hours excluded
+        simple_schedule = SimpleSchedule(dt.datetime(2022, 12, 1), dt.datetime(2022, 12, 1, 4, 0, 0), freq="1H", hours=[2])
+        values = hpfc.value(dt.datetime(2022, 1, 1), simple_schedule)
+        self.assertEqual(values.shape[0], 1)
+        self.assertEqual(values[0], 3)
 
-#     def test_exceptions(self):
-#         """Test consistency checks in forward curve.
-#         """
-#         simple_schedule = SimpleSchedule(dt.datetime(2022,12,1), dt.datetime(2023,11,1,4,0,0), freq='1H')
-#         values = np.ones((len(simple_schedule.get_schedule()),)).cumsum()
-#         hpfc = PowerPriceForwardCurve(dt.datetime(2022,12,1), dt.datetime(2022,12,1), dt.datetime(2023,11,1,4,0,0), freq='1H', values = values)
-#         # schedule starts before first date of forward curve
-#         simple_schedule = SimpleSchedule(dt.datetime(2022,11,30), dt.datetime(2022,12,1,4,0,0), freq='1H')
-#         self.assertRaises(Exception, lambda: hpfc.value(dt.datetime(2022,1,1), simple_schedule))
-#         # schedule ends after last date of forward curve
-#         simple_schedule = SimpleSchedule(dt.datetime(2022,11,30), dt.datetime(2023,12,1,4,0,0), freq='1H')
-#         self.assertRaises(Exception, lambda: hpfc.value(dt.datetime(2022,1,1), simple_schedule))
+    def test_exceptions(self):
+        """Test consistency checks in forward curve."""
+        simple_schedule = SimpleSchedule(dt.datetime(2022, 12, 1), dt.datetime(2023, 11, 1, 4, 0, 0), freq="1H")
+        values = np.ones((len(simple_schedule.get_schedule()),)).cumsum()
+        hpfc = PowerPriceForwardCurve(dt.datetime(2022, 12, 1), dt.datetime(2022, 12, 1), dt.datetime(2023, 11, 1, 4, 0, 0), freq="1H", values=values)
+        # schedule starts before first date of forward curve
+        simple_schedule = SimpleSchedule(dt.datetime(2022, 11, 30), dt.datetime(2022, 12, 1, 4, 0, 0), freq="1H")
+        self.assertRaises(Exception, lambda: hpfc.value(dt.datetime(2022, 1, 1), simple_schedule))
+        # schedule ends after last date of forward curve
+        simple_schedule = SimpleSchedule(dt.datetime(2022, 11, 30), dt.datetime(2023, 12, 1, 4, 0, 0), freq="1H")
+        self.assertRaises(Exception, lambda: hpfc.value(dt.datetime(2022, 1, 1), simple_schedule))
 
 
 class DiscountCurveCompositionTest(unittest.TestCase):

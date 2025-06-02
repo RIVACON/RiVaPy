@@ -707,64 +707,64 @@ class BootstrapHazardCurve:
     #     return self._pyvacon_obj
 
 
-# class PowerPriceForwardCurve:
-#     def __init__(
-#         self, refdate: Union[datetime, date], start: datetime, end: datetime, values: np.ndarray, freq: str = "1H", tz: str = None, id: str = None
-#     ):
-#         """Simple forward curve for power.
+class PowerPriceForwardCurve:
+    def __init__(
+        self, refdate: Union[datetime, date], start: datetime, end: datetime, values: np.ndarray, freq: str = "1H", tz: str = None, id: str = None
+    ):
+        """Simple forward curve for power.
 
-#         Args:
-#             refdate (Union[datetime, date]): Reference date of curve
-#             start (dt.datetime): Start of forward curve datetimepoints (including this timepoint).
-#                         end (dt.datetime): End of forad curve datetimepoints (excluding this timepoint).
-#             values (np.ndarray): One dimensional array holding the price for each datetimepint in the curve. The method value will raise an exception if the number of values is not equal to the number of datetimepoints.
-#                         freq (str, optional): Frequency of timepoints. Defaults to '1H'. See documentation for pandas.date_range for further details on freq.
-#                         tz (str or tzinfo): Time zone name for returning localized datetime points, for example ‘Asia/Hong_Kong’.
-#                                                                 By default, the resulting datetime points are timezone-naive. See documentation for pandas.date_range for further details on tz.
-#             id (str): Identifier for the curve. It has no impact on the valuation functionality. If None, a uuid will be generated. Defaults to None.
-#         """
-#         self.id = id
-#         if id is None:
-#             self.id = "PFC/" + str(datetime.now())
-#         self.refdate = refdate
-#         self.start = start
-#         self.end = end
-#         self.freq = freq
-#         self.tz = tz
-#         self.values = values
-#         # timegrid used to compute prices for a certain schedule
-#         self._tg = None
-#         self._df = (
-#             pd.DataFrame(
-#                 {"dates": pd.date_range(self.start, self.end, freq=self.freq, tz=self.tz, inclusive="left").to_pydatetime(), "values": self.values}
-#             )
-#             .set_index(["dates"])
-#             .sort_index()
-#         )
+        Args:
+            refdate (Union[datetime, date]): Reference date of curve
+            start (dt.datetime): Start of forward curve datetimepoints (including this timepoint).
+                        end (dt.datetime): End of forad curve datetimepoints (excluding this timepoint).
+            values (np.ndarray): One dimensional array holding the price for each datetimepint in the curve. The method value will raise an exception if the number of values is not equal to the number of datetimepoints.
+                        freq (str, optional): Frequency of timepoints. Defaults to '1H'. See documentation for pandas.date_range for further details on freq.
+                        tz (str or tzinfo): Time zone name for returning localized datetime points, for example ‘Asia/Hong_Kong’.
+                                                                By default, the resulting datetime points are timezone-naive. See documentation for pandas.date_range for further details on tz.
+            id (str): Identifier for the curve. It has no impact on the valuation functionality. If None, a uuid will be generated. Defaults to None.
+        """
+        self.id = id
+        if id is None:
+            self.id = "PFC/" + str(datetime.now())
+        self.refdate = refdate
+        self.start = start
+        self.end = end
+        self.freq = freq
+        self.tz = tz
+        self.values = values
+        # timegrid used to compute prices for a certain schedule
+        self._tg = None
+        self._df = (
+            pd.DataFrame(
+                {"dates": pd.date_range(self.start, self.end, freq=self.freq, tz=self.tz, inclusive="left").to_pydatetime(), "values": self.values}
+            )
+            .set_index(["dates"])
+            .sort_index()
+        )
 
-#     def value(self, refdate: Union[date, datetime], schedule) -> np.ndarray:
-#         if self._tg is None:
-#             self._tg = pd.DataFrame(
-#                 {"dates": pd.date_range(self.start, self.end, freq=self.freq, tz=self.tz, inclusive="left").to_pydatetime(), "values": self.values}
-#             ).reset_index()
-#             if self._tg.shape[0] != self.values.shape[0]:
-#                 raise Exception(
-#                     "The number of dates ("
-#                     + str(self._tg.shape[0])
-#                     + ") does not equal number of values ("
-#                     + str(self.values.shape[0])
-#                     + ") in forward curve."
-#                 )
-#         tg = self._tg[(self._tg.dates >= schedule.start) & (self._tg.dates < schedule.end)].set_index("dates")
-#         _schedule = pd.DataFrame({"dates": schedule.get_schedule(refdate)})
-#         tg = _schedule.join(tg, on="dates")
-#         # tg = tg[tg['dates']>=refdate]
-#         if tg["index"].isna().sum() > 0:
-#             raise Exception("There are " + str(tg["index"].isna().sum()) + " dates in the schedule not covered by the forward curve.")
-#         return self.values[tg["index"].values]
+    def value(self, refdate: Union[date, datetime], schedule) -> np.ndarray:
+        if self._tg is None:
+            self._tg = pd.DataFrame(
+                {"dates": pd.date_range(self.start, self.end, freq=self.freq, tz=self.tz, inclusive="left").to_pydatetime(), "values": self.values}
+            ).reset_index()
+            if self._tg.shape[0] != self.values.shape[0]:
+                raise Exception(
+                    "The number of dates ("
+                    + str(self._tg.shape[0])
+                    + ") does not equal number of values ("
+                    + str(self.values.shape[0])
+                    + ") in forward curve."
+                )
+        tg = self._tg[(self._tg.dates >= schedule.start) & (self._tg.dates < schedule.end)].set_index("dates")
+        _schedule = pd.DataFrame({"dates": schedule.get_schedule(refdate)})
+        tg = _schedule.join(tg, on="dates")
+        # tg = tg[tg['dates']>=refdate]
+        if tg["index"].isna().sum() > 0:
+            raise Exception("There are " + str(tg["index"].isna().sum()) + " dates in the schedule not covered by the forward curve.")
+        return self.values[tg["index"].values]
 
-#     def get_df(self) -> pd.DataFrame:
-#         return self._df
+    def get_df(self) -> pd.DataFrame:
+        return self._df
 
 
 class EnergyPriceForwardCurve:
