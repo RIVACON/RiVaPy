@@ -681,9 +681,10 @@ def forward(
             objective[t - 1] = chosen_action * (-1) * discharge_price
 
         # print(print_value)
-        state_choices *= max_capacity / 100.0
-        charges_choices *= max_capacity / 100.0
-        action_choices *= max_capacity / 100.0
+
+    state_choices *= max_capacity / 100.0
+    charges_choices *= max_capacity / 100.0
+    action_choices *= max_capacity / 100.0
 
     return state_choices, charges_choices, action_choices, objective
 
