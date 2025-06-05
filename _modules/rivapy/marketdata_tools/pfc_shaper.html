@@ -1,0 +1,359 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rivapy.marketdata_tools.pfc_shaper &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=d2ebc91c" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.svg"/>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../search.html">Search Page</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rivapy.marketdata_tools.pfc_shaper</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rivapy.marketdata_tools.pfc_shaper</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">holidays</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">rivapy.tools.interfaces</span> <span class="k">as</span> <span class="nn">interfaces</span>
+<span class="kn">import</span> <span class="nn">rivapy.tools._validators</span> <span class="k">as</span> <span class="nn">validator</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.scheduler</span> <span class="kn">import</span> <span class="n">SimpleSchedule</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
+
+
+<div class="viewcode-block" id="PFCShaper">
+<a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShaper">[docs]</a>
+<span class="k">class</span> <span class="nc">PFCShaper</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;PFCShaper interface. Each shaping model for energy price forward curves must inherit from this base class.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        spot_prices (pd.DataFrame): Data used to calibrate the shaping model.</span>
+<span class="sd">        holiday_calendar (holidays.HolidayBase): Calendar object to obtain country specific holidays.</span>
+<span class="sd">        normalization_config (Optional[Dict[Literal[&quot;D&quot;, &quot;W&quot;, &quot;ME&quot;], Optional[int]]], optional): A dictionary configurating the shape normalization periods.</span>
+<span class="sd">            Here ``D`` defines the number of days at the beginning of the shape over which the individual mean is normalized to one.</span>
+<span class="sd">            ``W`` defines the number of weeks at the beginning of the shape over which the individual mean is normalized to one.</span>
+<span class="sd">            ``ME`` defines the number of months at the beginning of the shape over which the individual mean is normalized to one. The remaining shape is then normalized over the individual years.Defaults to None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">spot_prices</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">holiday_calendar</span><span class="p">:</span> <span class="n">holidays</span><span class="o">.</span><span class="n">HolidayBase</span><span class="p">,</span>
+        <span class="n">normalization_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;W&quot;</span><span class="p">,</span> <span class="s2">&quot;ME&quot;</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="n">validator</span><span class="o">.</span><span class="n">_check_pandas_index_for_datetime</span><span class="p">(</span><span class="n">spot_prices</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spot_prices</span> <span class="o">=</span> <span class="n">spot_prices</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">holiday_calendar</span> <span class="o">=</span> <span class="n">holiday_calendar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalization_config</span> <span class="o">=</span> <span class="n">normalization_config</span>
+
+        <span class="c1"># normalization order containing also the resampling string pattern for pandas resample method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__normalization_order</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;W&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%G</span><span class="s2">-%V&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;ME&quot;</span><span class="p">,</span> <span class="s2">&quot;%Y-%m&quot;</span><span class="p">)]</span>
+
+<div class="viewcode-block" id="PFCShaper.calibrate">
+<a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShaper.calibrate">[docs]</a>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">calibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calibration of the shaping model</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Numpy array containing the fit.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="PFCShaper.apply">
+<a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShaper.apply">[docs]</a>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apply_schedule</span><span class="p">:</span> <span class="n">SimpleSchedule</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Applies the model on a schedule in order to generate a shape for future dates.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            apply_schedule (SimpleSchedule): Schedule object in order to generate a shape for future dates.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_set_regression_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_regression_parameters</span> <span class="o">=</span> <span class="n">params</span>
+
+<div class="viewcode-block" id="PFCShaper.normalize_shape">
+<a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShaper.normalize_shape">[docs]</a>
+    <span class="k">def</span> <span class="nf">normalize_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Normalizes the shape based on ``normalization_config``.\n</span>
+<span class="sd">        ``D`` defines the number of days at the beginning of the shape over which the individual mean is normalized to one.\n</span>
+<span class="sd">        ``W`` defines the number of weeks at the beginning of the shape over which the individual mean is normalized to one.\n</span>
+<span class="sd">        ``ME`` defines the number of months at the beginning of the shape over which the individual mean is normalized to one.</span>
+<span class="sd">        The remaining shape is then normalized over the individual years.\n</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">        ``D`` is 2, ``W`` is 2 and ``ME`` is 1. The shape starts at 03.03.2025 (monday).</span>
+<span class="sd">        Since ``D`` is 2, the shape is normalized for 03.03.2025 and 04.03.2025 individually.\n</span>
+<span class="sd">        The weeks are normalized from 05.03.2025 to 09.03.2025 and from 10.03.2025 to 16.03.2025.\n</span>
+<span class="sd">        The month is then normalized from 17.03.2025 to 31.03.2025.</span>
+<span class="sd">        The remaining shape (starting from 01.04.2025) is normalized on a yearly level.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            shape (pd.DataFrame): Shape which should be normalized</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Normalized shape</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">datetime_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+
+        <span class="c1"># yearly normalization</span>
+        <span class="k">def</span> <span class="nf">_normalize_year</span><span class="p">(</span><span class="n">shape</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">datetime_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+            <span class="n">base_y</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s2">&quot;YE&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">_shape</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">base_y</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y&quot;</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
+
+            <span class="n">shape_df</span> <span class="o">=</span> <span class="n">_shape</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">shape_df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">datetime_list</span>
+            <span class="k">return</span> <span class="n">shape_df</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">shape_df</span> <span class="o">=</span> <span class="n">_normalize_year</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">datetime_list</span><span class="o">=</span><span class="n">datetime_list</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">shape_df</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># the normalization through the normalization_config is done in different parts</span>
+            <span class="n">normalized_datetimes</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">normalized_shapes</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># iterate over the correct normalization order</span>
+            <span class="k">for</span> <span class="n">resample_freq</span><span class="p">,</span> <span class="n">resample_format</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__normalization_order</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">resample_freq</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># if the whole shape is already normalized by the previous normalization processes, the loop is stopped</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">normalized_datetimes</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
+                        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">normalized_shapes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                    <span class="c1"># get the part of the shape which was not part of any previous normalizations</span>
+                    <span class="n">temp_shape</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">shape</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">normalized_datetimes</span><span class="p">),</span> <span class="p">:]</span>
+
+                    <span class="c1"># normalize shape by the cofigured amount of days, weeks or months</span>
+                    <span class="n">resampled_shape</span> <span class="o">=</span> <span class="n">temp_shape</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">resample_freq</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                    <span class="n">resampled_shape</span> <span class="o">=</span> <span class="n">resampled_shape</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization_config</span><span class="p">[</span><span class="n">resample_freq</span><span class="p">],</span> <span class="p">:]</span>
+
+                    <span class="n">partially_normalized_shape</span> <span class="o">=</span> <span class="n">temp_shape</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">resample_format</span><span class="p">))</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span>
+                        <span class="n">resampled_shape</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">resample_format</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;index&quot;</span>
+                    <span class="p">)</span>
+
+                    <span class="c1"># Due to the operations done in the previous lines, the partially_normalized_shape does not contain the exact datetime but rather</span>
+                    <span class="c1"># a datetime corresponding to the resampled frequency. Hence, the correct datetimes are added to the DataFrame and set as an index.</span>
+                    <span class="c1"># This allows to concatenate the partially normalized shapes more easily at a later stage</span>
+                    <span class="n">partially_normalized_shape</span><span class="p">[</span><span class="s2">&quot;datetimes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">temp_shape</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+                    <span class="n">partially_normalized_shape</span> <span class="o">=</span> <span class="n">partially_normalized_shape</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;datetimes&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+                    <span class="n">normalized_datetimes</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">partially_normalized_shape</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+                    <span class="n">normalized_shapes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">partially_normalized_shape</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">normalized_datetimes</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">normalized_shapes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># the remaining shape is normalized on a yearly basis</span>
+            <span class="n">leftover_shape</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">shape</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">normalized_datetimes</span><span class="p">),</span> <span class="p">:]</span>
+            <span class="n">leftover_datetime</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">leftover_shape</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+            <span class="n">yearly_normalized_shape</span> <span class="o">=</span> <span class="n">_normalize_year</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">leftover_shape</span><span class="p">,</span> <span class="n">datetime_list</span><span class="o">=</span><span class="n">leftover_datetime</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">normalized_shapes</span> <span class="o">+</span> <span class="p">[</span><span class="n">yearly_normalized_shape</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;spot_prices&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">spot_prices</span><span class="p">,</span> <span class="s2">&quot;holiday_calendar&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">holiday_calendar</span><span class="p">,</span> <span class="s2">&quot;normalization_config&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization_config</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="CategoricalRegression">
+<a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.CategoricalRegression">[docs]</a>
+<span class="k">class</span> <span class="nc">CategoricalRegression</span><span class="p">(</span><span class="n">PFCShaper</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Linear regression model using categorical predictor variables to construct a PFC shape.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        S(t) = S_0 + \sum^{23}_{i=1}\\beta^h_i\cdot\mathbb{I}_{h(t)=i} + \\beta^d\cdot\mathbb{I}_{d(t)=1}  + \\beta^H\cdot\mathbb{I}_{H(t)=1} + \sum^{12}_{i=2}\\beta^m_i\cdot\mathbb{I}_{m(t)=i}</span>
+
+<span class="sd">    where:\n</span>
+<span class="sd">    :math:`S_0`: Spot price level\n</span>
+<span class="sd">    :math:`\mathbb{I}_x = \\begin{cases} 1, &amp; \\text{if the } x \\text{ expression renders true} \\\\ 0, &amp; \\text{if the } x \\text{ expression renders false} \\end{cases}` \n</span>
+<span class="sd">    :math:`h(t)`: Hour of t\n</span>
+<span class="sd">    :math:`d(t) = \\begin{cases} 1, &amp; \\text{if t is a weekday} \\\\ 0, &amp; \\text{if t is a day on a weekend} \\end{cases}` \n</span>
+<span class="sd">    :math:`H(t) = \\begin{cases} 1, &amp; \\text{if t public holidy} \\\\ 0, &amp; \\text{if t is not a public holiday} \\end{cases}` \n</span>
+<span class="sd">    :math:`m(t)`: Month of t\n</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        spot_prices (pd.DataFrame): Data used to calibrate the shaping model.</span>
+<span class="sd">        holiday_calendar (holidays.HolidayBase): Calendar object to obtain country specific holidays.</span>
+<span class="sd">        normalization_config (Optional[Dict[Literal[&quot;D&quot;, &quot;W&quot;, &quot;ME&quot;], Optional[int]]], optional): A dictionary configurating the shape normalization periods.</span>
+<span class="sd">            Here ``D`` defines the number of days at the beginning of the shape over which the individual mean is normalized to one.</span>
+<span class="sd">            ``W`` defines the number of weeks at the beginning of the shape over which the individual mean is normalized to one.</span>
+<span class="sd">            ``ME`` defines the number of months at the beginning of the shape over which the individual mean is normalized to one. The remaining shape is then normalized over the individual years.Defaults to None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">spot_prices</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">holiday_calendar</span><span class="p">:</span> <span class="n">holidays</span><span class="o">.</span><span class="n">HolidayBase</span><span class="p">,</span>
+        <span class="n">normalization_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;W&quot;</span><span class="p">,</span> <span class="s2">&quot;M&quot;</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">spot_prices</span><span class="o">=</span><span class="n">spot_prices</span><span class="p">,</span> <span class="n">holiday_calendar</span><span class="o">=</span><span class="n">holiday_calendar</span><span class="p">,</span> <span class="n">normalization_config</span><span class="o">=</span><span class="n">normalization_config</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datetimes_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transforms a list of datetimes in a numpy array which can then be used for the linear regression.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            datetimes_list (List[dt.datetime]): List of datetimes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Numpy array containing the transformed datetimes list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_datetime_series</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">datetimes_list</span><span class="p">)</span>
+
+        <span class="n">weekday</span> <span class="o">=</span> <span class="n">_datetime_series</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">weekday</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">holiday</span> <span class="o">=</span> <span class="n">_datetime_series</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">holiday_calendar</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">predictors</span> <span class="o">=</span> <span class="p">[</span><span class="n">weekday</span><span class="p">,</span> <span class="n">holiday</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_datetime_series</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">hour</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">hours</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">_datetime_series</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;hour&quot;</span><span class="p">,</span> <span class="n">drop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+                <span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">_datetime_series</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">hour</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">predictors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hours</span><span class="p">)</span>
+
+        <span class="n">month</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">_datetime_series</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;month&quot;</span><span class="p">,</span> <span class="n">drop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">)</span>
+
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">_datetime_series</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">offset</span><span class="p">,</span> <span class="n">weekday</span><span class="p">,</span> <span class="n">holiday</span><span class="p">,</span> <span class="n">hours</span><span class="p">,</span> <span class="n">month</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_regression_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_set_regression_parameters</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CategoricalRegression.calibrate">
+<a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.CategoricalRegression.calibrate">[docs]</a>
+    <span class="k">def</span> <span class="nf">calibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">data_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="p">(</span><span class="n">datetimes_list</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spot_prices</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_regression_parameters</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">data_array</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">data_array</span><span class="p">)</span> <span class="o">@</span> <span class="n">data_array</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">spot_prices</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data_array</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regression_parameters</span></div>
+
+
+<div class="viewcode-block" id="CategoricalRegression.apply">
+<a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.CategoricalRegression.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apply_schedule</span><span class="p">:</span> <span class="n">SimpleSchedule</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="n">apply_schedule_datetime_list</span> <span class="o">=</span> <span class="n">apply_schedule</span><span class="o">.</span><span class="n">get_schedule</span><span class="p">()</span>
+        <span class="n">data_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="p">(</span><span class="n">datetimes_list</span><span class="o">=</span><span class="n">apply_schedule_datetime_list</span><span class="p">)</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">data_array</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regression_parameters</span>
+
+        <span class="n">shape_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="n">shape</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()},</span> <span class="n">index</span><span class="o">=</span><span class="n">apply_schedule_datetime_list</span><span class="p">)</span>
+        <span class="n">shape_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_shape</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape_df</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">shape_df</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_to_dict</span><span class="p">()</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

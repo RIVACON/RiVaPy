@@ -87,16 +87,24 @@
 <span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
 <span class="kn">import</span> <span class="nn">rivapy.tools.interfaces</span> <span class="k">as</span> <span class="nn">interfaces</span>
 <span class="kn">from</span> <span class="nn">rivapy.tools.datetime_grid</span> <span class="kn">import</span> <span class="n">DateTimeGrid</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.enums</span> <span class="kn">import</span> <span class="n">EnergyTimeGridStructure</span> <span class="k">as</span> <span class="n">ets</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
 
 
 <div class="viewcode-block" id="SimpleSchedule">
 <a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.SimpleSchedule">[docs]</a>
 <span class="k">class</span> <span class="nc">SimpleSchedule</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;_name&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Class </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> must define a class attribute &#39;_name&#39; from the &#39;EnergyTimeGridStructure&#39; Enum.&quot;</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">start</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
         <span class="n">end</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
-        <span class="n">freq</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;1H&quot;</span><span class="p">,</span>
+        <span class="n">freq</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span>
         <span class="n">weekdays</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">hours</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ignore_hours_for_weekdays</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -107,7 +115,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">                start (dt.datetime): Start of schedule (including this timepoint).</span>
 <span class="sd">                end (dt.datetime): End of schedule (excluding this timepoint).</span>
-<span class="sd">                freq (str, optional): Frequency of timepoints. Defaults to &#39;1H&#39;. See documentation for pandas.date_range for further details on freq.</span>
+<span class="sd">                freq (str, optional): Frequency of timepoints. Defaults to &#39;h&#39;. See documentation for pandas.date_range for further details on freq.</span>
 <span class="sd">                weekdays (Set[int], optional): List of integers representing the weekdays where the schedule is defined.</span>
 <span class="sd">                                                                                Integers according to datetime weekdays (0-&gt;Monay, 1-&gt;Tuesday,...,6-&gt;Sunday).</span>
 <span class="sd">                                                                                If None, all weekdays are used. Defaults to None.</span>
@@ -120,17 +128,17 @@
 <span class="sd">        .. highlight:: python</span>
 <span class="sd">        .. code-block:: python</span>
 
-<span class="sd">                &gt;&gt;&gt; simple_schedule = SimpleSchedule(dt.datetime(2023,1,1), dt.datetime(2023,1,1,4,0,0), freq=&#39;1H&#39;)</span>
+<span class="sd">                &gt;&gt;&gt; simple_schedule = SimpleSchedule(dt.datetime(2023,1,1), dt.datetime(2023,1,1,4,0,0), freq=&#39;h&#39;)</span>
 <span class="sd">                &gt;&gt;&gt; simple_schedule.get_schedule()</span>
 <span class="sd">                [datetime(2023,1,1,0,0,0), datetime(2023,1,1,1,0,0), datetime(2023,1,1,2,0,0), datetime(2023,1,1,3,0,0)]</span>
 
 <span class="sd">                # We include only hours 2 and 3 into schedule</span>
-<span class="sd">                &gt;&gt;&gt; simple_schedule = SimpleSchedule(dt.datetime(2023,1,1), dt.datetime(2023,1,1,4,0,0), freq=&#39;1H&#39;, hours=[2,3])</span>
+<span class="sd">                &gt;&gt;&gt; simple_schedule = SimpleSchedule(dt.datetime(2023,1,1), dt.datetime(2023,1,1,4,0,0), freq=&#39;h&#39;, hours=[2,3])</span>
 <span class="sd">                &gt;&gt;&gt; simple_schedule.get_schedule()</span>
 <span class="sd">                [datetime.datetime(2023, 1, 1, 2, 0), datetime.datetime(2023, 1, 1, 3, 0)]</span>
 
 <span class="sd">                # We restrict further to only mondays as weekdays included</span>
-<span class="sd">                &gt;&gt;&gt; simple_schedule = SimpleSchedule(dt.datetime(2023,1,1), dt.datetime(2023,1,2,4,0,0), freq=&#39;1H&#39;, hours=[2,3], weekdays=[0])</span>
+<span class="sd">                &gt;&gt;&gt; simple_schedule = SimpleSchedule(dt.datetime(2023,1,1), dt.datetime(2023,1,2,4,0,0), freq=&#39;h&#39;, hours=[2,3], weekdays=[0])</span>
 <span class="sd">                &gt;&gt;&gt; simple_schedule.get_schedule()</span>
 <span class="sd">                [datetime.datetime(2023, 1, 2, 2, 0), datetime.datetime(2023, 1, 2, 3, 0)]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -215,9 +223,41 @@
 
 
 
+<span class="k">class</span> <span class="nc">BaseSchedule</span><span class="p">(</span><span class="n">SimpleSchedule</span><span class="p">):</span>
+    <span class="n">_name</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">BASE</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">tz</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Scheduler, which returns the base time grid between the start and end date times.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">                start (dt.datetime): Start of schedule (including this timepoint).</span>
+<span class="sd">                end (dt.datetime): End of schedule (excluding this timepoint).</span>
+<span class="sd">                tz (str or tzinfo): Time zone name for returning localized datetime points, for example ‘Asia/Hong_Kong’.</span>
+<span class="sd">                                                        By default, the resulting datetime points are timezone-naive. See documentation for pandas.date_range for further details on tz.</span>
+<span class="sd">        Examples:</span>
+
+<span class="sd">        .. highlight:: python</span>
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">                &gt;&gt;&gt; base_schedule = BaseSchedule(dt.datetime(2023,1,5), dt.datetime(2023,1,6))</span>
+<span class="sd">                &gt;&gt;&gt; base_schedule.get_schedule()</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
+            <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span>
+            <span class="n">freq</span><span class="o">=</span><span class="s2">&quot;h&quot;</span><span class="p">,</span>
+            <span class="n">hours</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">weekdays</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">tz</span><span class="o">=</span><span class="n">tz</span><span class="p">,</span>
+        <span class="p">)</span>
+
+
 <div class="viewcode-block" id="PeakSchedule">
 <a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.PeakSchedule">[docs]</a>
 <span class="k">class</span> <span class="nc">PeakSchedule</span><span class="p">(</span><span class="n">SimpleSchedule</span><span class="p">):</span>
+    <span class="n">_name</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">PEAK</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">tz</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Scheduler, which returns the peak time grid between the start and end date times.</span>
 
@@ -260,6 +300,8 @@
 <div class="viewcode-block" id="OffPeakSchedule">
 <a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.OffPeakSchedule">[docs]</a>
 <span class="k">class</span> <span class="nc">OffPeakSchedule</span><span class="p">(</span><span class="n">SimpleSchedule</span><span class="p">):</span>
+    <span class="n">_name</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">OFFPEAK</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">tz</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Scheduler, which returns the offpeak time grid between the start and end date times.</span>
 
@@ -302,6 +344,8 @@
 <div class="viewcode-block" id="GasSchedule">
 <a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.GasSchedule">[docs]</a>
 <span class="k">class</span> <span class="nc">GasSchedule</span><span class="p">(</span><span class="n">SimpleSchedule</span><span class="p">):</span>
+    <span class="n">_name</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">BASE</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">tz</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Scheduler, which returns the gas day time grid (from 6 am to 6 am) between the start and end date times.</span>
 

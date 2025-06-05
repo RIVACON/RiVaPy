@@ -56,7 +56,7 @@
 <li class="toctree-l3"><a class="reference internal" href="discountcurves.html">Discount Curve</a></li>
 <li class="toctree-l3"><a class="reference internal" href="equity.html">Equity</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Power</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#powerpriceforwardcurve">PowerPriceForwardCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#price-forward-curve">Price Forward Curve</a></li>
 </ul>
 </li>
 </ul>
@@ -104,39 +104,102 @@
              
   <section id="power">
 <h1>Power<a class="headerlink" href="#power" title="Link to this heading"></a></h1>
-<section id="powerpriceforwardcurve">
-<h2>PowerPriceForwardCurve<a class="headerlink" href="#powerpriceforwardcurve" title="Link to this heading"></a></h2>
+<section id="price-forward-curve">
+<h2>Price Forward Curve<a class="headerlink" href="#price-forward-curve" title="Link to this heading"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="rivapy.marketdata.PowerPriceForwardCurve">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata.</span></span><span class="sig-name descname"><span class="pre">PowerPriceForwardCurve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'1H'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/marketdata/curves.html#PowerPriceForwardCurve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.PowerPriceForwardCurve" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="rivapy.marketdata.EnergyPriceForwardCurve">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata.</span></span><span class="sig-name descname"><span class="pre">EnergyPriceForwardCurve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pfc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><span class="pre">DataFrame</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/marketdata/curves.html#EnergyPriceForwardCurve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.EnergyPriceForwardCurve" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Simple forward curve for power.</p>
+<p>Energy Price Forward Curve object.
+It is recommended to initialze this object via the class methods <code class="docutils literal notranslate"><span class="pre">from_existing_pfc</span></code>, <code class="docutils literal notranslate"><span class="pre">from_existing_shape</span></code> or <code class="docutils literal notranslate"><span class="pre">from_scratch</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>refdate</strong> (<em>Union</em><em>[</em><em>datetime</em><em>, </em><em>date</em><em>]</em>) – Reference date of curve</p></li>
-<li><p><strong>start</strong> (<em>dt.datetime</em>) – Start of forward curve datetimepoints (including this timepoint).
-end (dt.datetime): End of forad curve datetimepoints (excluding this timepoint).</p></li>
-<li><p><strong>values</strong> (<em>np.ndarray</em>) – <p>One dimensional array holding the price for each datetimepint in the curve. The method value will raise an exception if the number of values is not equal to the number of datetimepoints.
-freq (str, optional): Frequency of timepoints. Defaults to ‘1H’. See documentation for pandas.date_range for further details on freq.
-tz (str or tzinfo): Time zone name for returning localized datetime points, for example ‘Asia/Hong_Kong’.</p>
-<blockquote>
-<div><p>By default, the resulting datetime points are timezone-naive. See documentation for pandas.date_range for further details on tz.</p>
-</div></blockquote>
-</p></li>
-<li><p><strong>id</strong> (<em>str</em>) – Identifier for the curve. It has no impact on the valuation functionality. If None, a uuid will be generated. Defaults to None.</p></li>
+<li><p><strong>id</strong> (<em>_type_</em>) – ID for the PFC object</p></li>
+<li><p><strong>refdate</strong> (<em>Union</em><em>[</em><em>datetime</em><em>, </em><em>date</em><em>]</em>) – Reference date</p></li>
+<li><p><strong>pfc</strong> (<em>pd.DataFrame</em><em>, </em><em>optional</em>) – This object can be initialized with an existing pfc. Defaults to None.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="rivapy.marketdata.PowerPriceForwardCurve.get_df">
-<span class="sig-name descname"><span class="pre">get_df</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata/curves.html#PowerPriceForwardCurve.get_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.PowerPriceForwardCurve.get_df" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="rivapy.marketdata.EnergyPriceForwardCurve.from_existing_pfc">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_existing_pfc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pfc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#rivapy.marketdata.EnergyPriceForwardCurve" title="rivapy.marketdata.curves.EnergyPriceForwardCurve"><span class="pre">EnergyPriceForwardCurve</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata/curves.html#EnergyPriceForwardCurve.from_existing_pfc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.EnergyPriceForwardCurve.from_existing_pfc" title="Link to this definition"></a></dt>
+<dd><p>Initialization of the <code class="docutils literal notranslate"><span class="pre">EnergyPriceForwardCurve</span></code> given an existing PFC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>_type_</em>) – ID for the PFC object</p></li>
+<li><p><strong>refdate</strong> (<em>Union</em><em>[</em><em>datetime</em><em>, </em><em>date</em><em>]</em>) – Reference Date</p></li>
+<li><p><strong>pfc</strong> (<em>pd.DataFrame</em>) – Existing Pfc</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">EnergyPriceForwardCurve</span></code> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rivapy.marketdata.EnergyPriceForwardCurve" title="rivapy.marketdata.EnergyPriceForwardCurve">EnergyPriceForwardCurve</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="rivapy.marketdata.PowerPriceForwardCurve.value">
-<span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schedule</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata/curves.html#PowerPriceForwardCurve.value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.PowerPriceForwardCurve.value" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="rivapy.marketdata.EnergyPriceForwardCurve.from_existing_shape">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_existing_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pfc_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">future_contracts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../instruments/power.html#rivapy.instruments.EnergyFutureSpecifications" title="rivapy.instruments.energy_futures_specifications.EnergyFutureSpecifications"><span class="pre">EnergyFutureSpecifications</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#rivapy.marketdata.EnergyPriceForwardCurve" title="rivapy.marketdata.curves.EnergyPriceForwardCurve"><span class="pre">EnergyPriceForwardCurve</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata/curves.html#EnergyPriceForwardCurve.from_existing_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.EnergyPriceForwardCurve.from_existing_shape" title="Link to this definition"></a></dt>
+<dd><p>Initialization of the <code class="docutils literal notranslate"><span class="pre">EnergyPriceForwardCurve</span></code> given an existing PFC shape. The shape is then shifted in order to match the future contracts defined in the <code class="docutils literal notranslate"><span class="pre">future_contracts</span></code> list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>_type_</em>) – ID for the PFC object</p></li>
+<li><p><strong>refdate</strong> (<em>Union</em><em>[</em><em>datetime</em><em>, </em><em>date</em><em>]</em>) – Reference Date</p></li>
+<li><p><strong>pfc_shape</strong> (<em>pd.DataFrame</em>) – Existing PFC shape</p></li>
+<li><p><strong>future_contracts</strong> (<em>List</em><em>[</em><a class="reference internal" href="../instruments/power.html#rivapy.instruments.EnergyFutureSpecifications" title="rivapy.instruments.EnergyFutureSpecifications"><em>EnergyFutureSpecifications</em></a><em>]</em>) – List of future contracts (<code class="docutils literal notranslate"><span class="pre">EnergyFutureSpecifications</span></code> objects)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">EnergyPriceForwardCurve</span></code> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rivapy.marketdata.EnergyPriceForwardCurve" title="rivapy.marketdata.EnergyPriceForwardCurve">EnergyPriceForwardCurve</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata.EnergyPriceForwardCurve.from_scratch">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_scratch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply_schedule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.SimpleSchedule" title="rivapy.tools.scheduler.SimpleSchedule"><span class="pre">SimpleSchedule</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pfc_shaper</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata_tools/power.html#rivapy.marketdata_tools.PFCShaper" title="rivapy.marketdata_tools.pfc_shaper.PFCShaper"><span class="pre">PFCShaper</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">future_contracts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../instruments/power.html#rivapy.instruments.EnergyFutureSpecifications" title="rivapy.instruments.energy_futures_specifications.EnergyFutureSpecifications"><span class="pre">EnergyFutureSpecifications</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#rivapy.marketdata.EnergyPriceForwardCurve" title="rivapy.marketdata.curves.EnergyPriceForwardCurve"><span class="pre">EnergyPriceForwardCurve</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata/curves.html#EnergyPriceForwardCurve.from_scratch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.EnergyPriceForwardCurve.from_scratch" title="Link to this definition"></a></dt>
+<dd><p>Initialization of the <code class="docutils literal notranslate"><span class="pre">EnergyPriceForwardCurve</span></code> from scratch. First a shape is created using the <code class="docutils literal notranslate"><span class="pre">pfc_shaper</span></code>. Afterwards, shape is shifted in order to match the future contracts defined in the <code class="docutils literal notranslate"><span class="pre">future_contracts</span></code> list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>_type_</em>) – ID for the PFC object</p></li>
+<li><p><strong>refdate</strong> (<em>Union</em><em>[</em><em>datetime</em><em>, </em><em>date</em><em>]</em>) – Reference Date</p></li>
+<li><p><strong>apply_schedule</strong> (<a class="reference internal" href="../rivapy.tools.html#rivapy.tools.SimpleSchedule" title="rivapy.tools.SimpleSchedule"><em>SimpleSchedule</em></a>) – Schedule to apply the <code class="docutils literal notranslate"><span class="pre">pfc_shaper</span></code> on, in order to obtain shape values for future time points</p></li>
+<li><p><strong>pfc_shaper</strong> (<a class="reference internal" href="../marketdata_tools/power.html#rivapy.marketdata_tools.PFCShaper" title="rivapy.marketdata_tools.PFCShaper"><em>PFCShaper</em></a>) – PFC shaper</p></li>
+<li><p><strong>future_contracts</strong> (<em>List</em><em>[</em><a class="reference internal" href="../instruments/power.html#rivapy.instruments.EnergyFutureSpecifications" title="rivapy.instruments.EnergyFutureSpecifications"><em>EnergyFutureSpecifications</em></a><em>]</em>) – List of future contracts (<code class="docutils literal notranslate"><span class="pre">EnergyFutureSpecifications</span></code> objects)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">EnergyPriceForwardCurve</span></code> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rivapy.marketdata.EnergyPriceForwardCurve" title="rivapy.marketdata.EnergyPriceForwardCurve">EnergyPriceForwardCurve</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata.EnergyPriceForwardCurve.get_pfc">
+<span class="sig-name descname"><span class="pre">get_pfc</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata/curves.html#EnergyPriceForwardCurve.get_pfc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.EnergyPriceForwardCurve.get_pfc" title="Link to this definition"></a></dt>
+<dd><p>Returns the PFC</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>PFC</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

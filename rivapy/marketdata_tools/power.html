@@ -106,9 +106,11 @@
 <h1>Power<a class="headerlink" href="#power" title="Link to this heading"></a></h1>
 <section id="price-forward-curves">
 <h2>Price Forward Curves<a class="headerlink" href="#price-forward-curves" title="Link to this heading"></a></h2>
+<section id="shifting">
+<h3>Shifting<a class="headerlink" href="#shifting" title="Link to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="rivapy.marketdata_tools.PFCShifter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata_tools.</span></span><span class="sig-name descname"><span class="pre">PFCShifter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">contracts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../instruments/power.html#rivapy.instruments.EnergyFutureSpecifications" title="rivapy.instruments.energy_futures_specifications.EnergyFutureSpecifications"><span class="pre">EnergyFutureSpecifications</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shifter.html#PFCShifter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShifter" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata_tools.</span></span><span class="sig-name descname"><span class="pre">PFCShifter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">contracts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../instruments/power.html#rivapy.instruments.EnergyFutureSpecifications" title="rivapy.instruments.energy_futures_specifications.EnergyFutureSpecifications"><span class="pre">EnergyFutureSpecifications</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shifter.html#PFCShifter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShifter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FactoryObject</span></code></p>
 <p>A shifting methodology for PFC shapes. This class gets a PFC shape as an input and shifts it in such a way, that the resulting PFC contains the future prices defined in the <code class="docutils literal notranslate"><span class="pre">contracts</span></code> dictionary.
 We follow the methodology described here: <a class="reference external" href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2706366">https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2706366</a></p>
@@ -135,7 +137,7 @@ We follow the methodology described here: <a class="reference external" href="ht
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="rivapy.marketdata_tools.PFCShifter.compute">
-<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shifter.html#PFCShifter.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShifter.compute" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shifter.html#PFCShifter.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShifter.compute" title="Link to this definition"></a></dt>
 <dd><p>Compute method to directly call all the individual steps involved for the shifting</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -149,7 +151,7 @@ We follow the methodology described here: <a class="reference external" href="ht
 
 <dl class="py method">
 <dt class="sig sig-object py" id="rivapy.marketdata_tools.PFCShifter.detect_redundant_contracts">
-<span class="sig-name descname"><span class="pre">detect_redundant_contracts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transition_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shifter.html#PFCShifter.detect_redundant_contracts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShifter.detect_redundant_contracts" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">detect_redundant_contracts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transition_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shifter.html#PFCShifter.detect_redundant_contracts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShifter.detect_redundant_contracts" title="Link to this definition"></a></dt>
 <dd><p>In order to obtain an invertable matrix, the matrix must be of full rank. Linear dependent contracts will yield linear dependent row vectors.
 This is the case if e.g. a Cal Base and all four quarter contracts are provided. This method finds all redundant (linear dependent) contracts and
 omits the last found linear dependent contract in order to make sure that the row vectors are linearly independent.</p>
@@ -168,7 +170,7 @@ omits the last found linear dependent contract in order to make sure that the ro
 
 <dl class="py method">
 <dt class="sig sig-object py" id="rivapy.marketdata_tools.PFCShifter.generate_synthetic_contracts">
-<span class="sig-name descname"><span class="pre">generate_synthetic_contracts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transition_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shifter.html#PFCShifter.generate_synthetic_contracts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShifter.generate_synthetic_contracts" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">generate_synthetic_contracts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transition_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shifter.html#PFCShifter.generate_synthetic_contracts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShifter.generate_synthetic_contracts" title="Link to this definition"></a></dt>
 <dd><p>In order to fulfill the requirement of an invertable transition matrix, not only the row vectors but also the
 column vectors must generate a basis. In cases where m &gt; n, we need to additionally generate synthetic contracts.
 The delivery period for the synthetic contracts are chosen in such a way that the column vectors become linearly independent.
@@ -190,7 +192,7 @@ The reference contract is implemented to be always the first contract in the <co
 
 <dl class="py method">
 <dt class="sig sig-object py" id="rivapy.marketdata_tools.PFCShifter.generate_transition_matrix">
-<span class="sig-name descname"><span class="pre">generate_transition_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shifter.html#PFCShifter.generate_transition_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShifter.generate_transition_matrix" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">generate_transition_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shifter.html#PFCShifter.generate_transition_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShifter.generate_transition_matrix" title="Link to this definition"></a></dt>
 <dd><p>The transition matrix is the basis of the shifting algorithm. This method generates a (n x m) matrix with zero and one entries, where n is the number of contracts and m are start and end dates for the delivery periods.
 Hence, the matrix row vectors indicate the delivery periods of each contract. Note that the latest delivery end date is not displayed in the transition matrix.</p>
 <dl class="field-list simple">
@@ -205,7 +207,7 @@ Hence, the matrix row vectors indicate the delivery periods of each contract. No
 
 <dl class="py method">
 <dt class="sig sig-object py" id="rivapy.marketdata_tools.PFCShifter.shift">
-<span class="sig-name descname"><span class="pre">shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transition_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shifter.html#PFCShifter.shift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShifter.shift" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transition_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shifter.html#PFCShifter.shift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShifter.shift" title="Link to this definition"></a></dt>
 <dd><p>This method is the final step in the shifting algorithm. The transition matrix is inversed and multiplied with the forward price vector to obtain a non overlapping forward price vector.</p>
 <div class="math notranslate nohighlight">
 \[f^{no} = T^{-1}\cdot f\]</div>
@@ -232,6 +234,134 @@ Hence, the matrix row vectors indicate the delivery periods of each contract. No
 
 </dd></dl>
 
+</section>
+<section id="shaping">
+<h3>Shaping<a class="headerlink" href="#shaping" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.marketdata_tools.PFCShaper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata_tools.</span></span><span class="sig-name descname"><span class="pre">PFCShaper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spot_prices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">holiday_calendar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">HolidayBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'D'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'W'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'ME'</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shaper.html#PFCShaper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShaper" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FactoryObject</span></code></p>
+<p>PFCShaper interface. Each shaping model for energy price forward curves must inherit from this base class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spot_prices</strong> (<em>pd.DataFrame</em>) – Data used to calibrate the shaping model.</p></li>
+<li><p><strong>holiday_calendar</strong> (<em>holidays.HolidayBase</em>) – Calendar object to obtain country specific holidays.</p></li>
+<li><p><strong>normalization_config</strong> (<em>Optional</em><em>[</em><em>Dict</em><em>[</em><em>Literal</em><em>[</em><em>&quot;D&quot;</em><em>, </em><em>&quot;W&quot;</em><em>, </em><em>&quot;ME&quot;</em><em>]</em><em>, </em><em>Optional</em><em>[</em><em>int</em><em>]</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – A dictionary configurating the shape normalization periods.
+Here <code class="docutils literal notranslate"><span class="pre">D</span></code> defines the number of days at the beginning of the shape over which the individual mean is normalized to one.
+<code class="docutils literal notranslate"><span class="pre">W</span></code> defines the number of weeks at the beginning of the shape over which the individual mean is normalized to one.
+<code class="docutils literal notranslate"><span class="pre">ME</span></code> defines the number of months at the beginning of the shape over which the individual mean is normalized to one. The remaining shape is then normalized over the individual years.Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata_tools.PFCShaper.apply">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">apply_schedule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.SimpleSchedule" title="rivapy.tools.scheduler.SimpleSchedule"><span class="pre">SimpleSchedule</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shaper.html#PFCShaper.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShaper.apply" title="Link to this definition"></a></dt>
+<dd><p>Applies the model on a schedule in order to generate a shape for future dates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>apply_schedule</strong> (<a class="reference internal" href="../rivapy.tools.html#rivapy.tools.SimpleSchedule" title="rivapy.tools.SimpleSchedule"><em>SimpleSchedule</em></a>) – Schedule object in order to generate a shape for future dates.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata_tools.PFCShaper.calibrate">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calibrate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shaper.html#PFCShaper.calibrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShaper.calibrate" title="Link to this definition"></a></dt>
+<dd><p>Calibration of the shaping model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Numpy array containing the fit.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata_tools.PFCShaper.normalize_shape">
+<span class="sig-name descname"><span class="pre">normalize_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shaper.html#PFCShaper.normalize_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.PFCShaper.normalize_shape" title="Link to this definition"></a></dt>
+<dd><p>Normalizes the shape based on <code class="docutils literal notranslate"><span class="pre">normalization_config</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">D</span></code> defines the number of days at the beginning of the shape over which the individual mean is normalized to one.</p>
+<p><code class="docutils literal notranslate"><span class="pre">W</span></code> defines the number of weeks at the beginning of the shape over which the individual mean is normalized to one.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ME</span></code> defines the number of months at the beginning of the shape over which the individual mean is normalized to one.
+The remaining shape is then normalized over the individual years.</p>
+<p>Example:
+<code class="docutils literal notranslate"><span class="pre">D</span></code> is 2, <code class="docutils literal notranslate"><span class="pre">W</span></code> is 2 and <code class="docutils literal notranslate"><span class="pre">ME</span></code> is 1. The shape starts at 03.03.2025 (monday).
+Since <code class="docutils literal notranslate"><span class="pre">D</span></code> is 2, the shape is normalized for 03.03.2025 and 04.03.2025 individually.</p>
+<p>The weeks are normalized from 05.03.2025 to 09.03.2025 and from 10.03.2025 to 16.03.2025.</p>
+<p>The month is then normalized from 17.03.2025 to 31.03.2025.
+The remaining shape (starting from 01.04.2025) is normalized on a yearly level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>shape</strong> (<em>pd.DataFrame</em>) – Shape which should be normalized</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Normalized shape</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.marketdata_tools.CategoricalRegression">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata_tools.</span></span><span class="sig-name descname"><span class="pre">CategoricalRegression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spot_prices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">holiday_calendar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">HolidayBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'D'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'W'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'M'</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shaper.html#CategoricalRegression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.CategoricalRegression" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rivapy.marketdata_tools.PFCShaper" title="rivapy.marketdata_tools.pfc_shaper.PFCShaper"><code class="xref py py-class docutils literal notranslate"><span class="pre">PFCShaper</span></code></a></p>
+<p>Linear regression model using categorical predictor variables to construct a PFC shape.</p>
+<div class="math notranslate nohighlight">
+\[S(t) = S_0 + \sum^{23}_{i=1}\beta^h_i\cdot\mathbb{I}_{h(t)=i} + \beta^d\cdot\mathbb{I}_{d(t)=1}  + \beta^H\cdot\mathbb{I}_{H(t)=1} + \sum^{12}_{i=2}\beta^m_i\cdot\mathbb{I}_{m(t)=i}\]</div>
+<p>where:</p>
+<p><span class="math notranslate nohighlight">\(S_0\)</span>: Spot price level</p>
+<p><span class="math notranslate nohighlight">\(\mathbb{I}_x = \begin{cases} 1, &amp; \text{if the } x \text{ expression renders true} \\ 0, &amp; \text{if the } x \text{ expression renders false} \end{cases}\)</span></p>
+<p><span class="math notranslate nohighlight">\(h(t)\)</span>: Hour of t</p>
+<p><span class="math notranslate nohighlight">\(d(t) = \begin{cases} 1, &amp; \text{if t is a weekday} \\ 0, &amp; \text{if t is a day on a weekend} \end{cases}\)</span></p>
+<p><span class="math notranslate nohighlight">\(H(t) = \begin{cases} 1, &amp; \text{if t public holidy} \\ 0, &amp; \text{if t is not a public holiday} \end{cases}\)</span></p>
+<p><span class="math notranslate nohighlight">\(m(t)\)</span>: Month of t</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spot_prices</strong> (<em>pd.DataFrame</em>) – Data used to calibrate the shaping model.</p></li>
+<li><p><strong>holiday_calendar</strong> (<em>holidays.HolidayBase</em>) – Calendar object to obtain country specific holidays.</p></li>
+<li><p><strong>normalization_config</strong> (<em>Optional</em><em>[</em><em>Dict</em><em>[</em><em>Literal</em><em>[</em><em>&quot;D&quot;</em><em>, </em><em>&quot;W&quot;</em><em>, </em><em>&quot;ME&quot;</em><em>]</em><em>, </em><em>Optional</em><em>[</em><em>int</em><em>]</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – A dictionary configurating the shape normalization periods.
+Here <code class="docutils literal notranslate"><span class="pre">D</span></code> defines the number of days at the beginning of the shape over which the individual mean is normalized to one.
+<code class="docutils literal notranslate"><span class="pre">W</span></code> defines the number of weeks at the beginning of the shape over which the individual mean is normalized to one.
+<code class="docutils literal notranslate"><span class="pre">ME</span></code> defines the number of months at the beginning of the shape over which the individual mean is normalized to one. The remaining shape is then normalized over the individual years.Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata_tools.CategoricalRegression.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">apply_schedule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.SimpleSchedule" title="rivapy.tools.scheduler.SimpleSchedule"><span class="pre">SimpleSchedule</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shaper.html#CategoricalRegression.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.CategoricalRegression.apply" title="Link to this definition"></a></dt>
+<dd><p>Applies the model on a schedule in order to generate a shape for future dates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>apply_schedule</strong> (<a class="reference internal" href="../rivapy.tools.html#rivapy.tools.SimpleSchedule" title="rivapy.tools.SimpleSchedule"><em>SimpleSchedule</em></a>) – Schedule object in order to generate a shape for future dates.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata_tools.CategoricalRegression.calibrate">
+<span class="sig-name descname"><span class="pre">calibrate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shaper.html#CategoricalRegression.calibrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.CategoricalRegression.calibrate" title="Link to this definition"></a></dt>
+<dd><p>Calibration of the shaping model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Numpy array containing the fit.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 </section>
 </section>
 
