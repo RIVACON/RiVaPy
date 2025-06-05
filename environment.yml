@@ -12,6 +12,7 @@ dependencies:
   - sphinx
   - scikit-learn
   - pandoc
+  - openpyxl
   - pip:
     - python-dateutil
     - sphinx-rtd-theme
