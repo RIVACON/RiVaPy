@@ -145,15 +145,16 @@ class CategoricalRegression(PFCShaper):
 
     .. math::
 
-        S(t) = S_0 + \sum^{23}_{i=1}\\beta^h_i\cdot\mathbb{I}_{h(t)=i} + \\beta^d\cdot\mathbb{I}_{d(t)=1}  + \\beta^H\cdot\mathbb{I}_{H(t)=1} + \sum^{12}_{i=2}\\beta^m_i\cdot\mathbb{I}_{m(t)=i}
+        S(t) = S_0 + \\sum^{23}_{i=1}\\beta^h_i\\cdot\\mathbb{I}_{h(t)=i} + \\beta^d\\cdot\\mathbb{I}_{d(t)=1}  + \\beta^H\\cdot\\mathbb{I}_{H(t)=1} + \\sum^{12}_{i=2}\\beta^m_i\\cdot\\mathbb{I}_{m(t)=i}
 
-    where:\n
-    :math:`S_0`: Spot price level\n
-    :math:`\mathbb{I}_x = \\begin{cases} 1, & \\text{if the } x \\text{ expression renders true} \\\\ 0, & \\text{if the } x \\text{ expression renders false} \\end{cases}` \n
-    :math:`h(t)`: Hour of t\n
-    :math:`d(t) = \\begin{cases} 1, & \\text{if t is a weekday} \\\\ 0, & \\text{if t is a day on a weekend} \\end{cases}` \n
-    :math:`H(t) = \\begin{cases} 1, & \\text{if t public holidy} \\\\ 0, & \\text{if t is not a public holiday} \\end{cases}` \n
-    :math:`m(t)`: Month of t\n
+    Where:
+
+    - :math:`S_0`: Spot price level
+    - :math:`\\mathbb{I}_x = \\begin{cases} 1, & \\text{if the } x \\text{ expression renders true} \\\\ 0, & \\text{if the } x \\text{ expression renders false} \\end{cases}`
+    - :math:`h(t)`: Hour of t
+    - :math:`d(t) = \\begin{cases} 1, & \\text{if t is a weekday} \\\\ 0, & \\text{if t is a day on a weekend} \\end{cases}`
+    - :math:`H(t) = \\begin{cases} 1, & \\text{if t public holidy} \\\\ 0, & \\text{if t is not a public holiday} \\end{cases}`
+    - :math:`m(t)`: Month of t
 
     Args:
         spot_prices (pd.DataFrame): Data used to calibrate the shaping model.

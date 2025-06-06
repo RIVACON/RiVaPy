@@ -247,21 +247,22 @@ class PFCShifter(interfaces.FactoryObject):
             return transition_matrix
 
     def shift(self, transition_matrix: pd.DataFrame) -> pd.DataFrame:
-        """This method is the final step in the shifting algorithm. The transition matrix is inversed and multiplied with the forward price vector to obtain a non overlapping forward price vector.
+        r"""This method is the final step in the shifting algorithm. The transition matrix is inversed and multiplied with the forward price vector to obtain a non overlapping forward price vector.
 
         .. math::
 
-            f^{no} = T^{-1}\cdot f
+            f^{no} = T^{-1}\\cdot f
 
-        where:\n
-        :math:`f^{no}` is the Non-overlapping forward price vector\n
-        :math:`T` is the Transition matrix\n
-        :math:`f` is the Forward price vector\n
+        Where:
+
+        - :math:`f^{no}` is the Non-overlapping forward price vector
+        - :math:`T` is the Transition matrix
+        - :math:`f` is the Forward price vector
 
         Afterwards the PFC :math:`S(t)` is obtained from the shape :math:`s(t)` by the follwoing formular:
 
         .. math::
-            S(t) = s(t)\cdot \\frac{\sum_{u=T_s}^{T_e} f^{no}(u)}{\sum_{u=T_s}^{T_e} s(u)}
+            S(t) = s(t)\cdot \\frac{\\sum_{u=T_s}^{T_e} f^{no}(u)}{\\sum_{u=T_s}^{T_e} s(u)}
 
         with :math:`T_s` and :math:`T_e` being the start and end dates of the individual delivery periods.
 
