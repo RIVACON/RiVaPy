@@ -1,11 +1,28 @@
-import os
 import numpy as np
 import pandas as pd
 import datetime as dt
-from numba import njit
-from numba import float32 as numba_float32, float64 as numba_float64, int32 as numba_int32
+from numba import njit as numba_njit
+
 from rivapy.marketdata import EnergyPriceForwardCurve
-from typing import Union, Optional
+from typing import Union, Optional, Callable
+
+
+USE_NUMBA = True
+print(f"USE NUMBA: {USE_NUMBA}")
+
+
+def _default_decorator(func: Callable):
+    def _wraper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return _wraper
+
+
+def njit(func: Callable):
+    if USE_NUMBA:
+        return numba_njit(func)
+    else:
+        return _default_decorator(func)
 
 
 @njit
@@ -764,7 +781,7 @@ class BatteryStorage:
         actions = self._actions
         max_charges = self._max_charges
         max_capacity = self._max_capacity
-        prices = self.prices[: int(round(len(self.prices) * precompuile_timefraction))]
+        prices = self.prices[: max(int(round(len(self.prices) * precompuile_timefraction)), 2)]
 
         start_state = state_check(self._start_state, value=0.0)
         start_charges = state_check(self._start_charges, value=0.0)
