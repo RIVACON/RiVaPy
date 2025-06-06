@@ -262,7 +262,7 @@ class PFCShifter(interfaces.FactoryObject):
         Afterwards the PFC :math:`S(t)` is obtained from the shape :math:`s(t)` by the follwoing formular:
 
         .. math::
-            S(t) = s(t)\cdot \\frac{\\sum_{u=T_s}^{T_e} f^{no}(u)}{\\sum_{u=T_s}^{T_e} s(u)}
+            S(t) = s(t)\\cdot \\frac{\\sum_{u=T_s}^{T_e} f^{no}(u)}{\\sum_{u=T_s}^{T_e} s(u)}
 
         with :math:`T_s` and :math:`T_e` being the start and end dates of the individual delivery periods.
 
