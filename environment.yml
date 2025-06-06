@@ -24,5 +24,6 @@ dependencies:
     - coverage
     - coverage-badge
     - sphinx_gallery
+    - build
     #- --index-url https://test.pypi.org/simple/ pyvacon_depp
     #- jupyter-contrib-nbextensions==0.5.1
