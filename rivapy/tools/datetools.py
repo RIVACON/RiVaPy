@@ -50,28 +50,34 @@ class DayCounter:
             raise NotImplementedError(f"{dc} not yet implemented.")
 
     @staticmethod
-    def yf_ActActICMA(d1: _Union[date, datetime], d2: _Union[date, datetime], coupon_period_in_days, coupon_frequency)->float:
-        """This method implements the Act/Act ICMA day count convention which is used for Bonds..
+    def yf_ActActICMA(d1: _Union[date, datetime], d2: _Union[date, datetime], coupon_schedule:_List[_Union[date, datetime]], coupon_frequency:int)->float:
+        """This method implements the Act/Act ICMA day count convention which is used for Bonds.
 
         Args:
             d1 (_Union[date, datetime]): start date
             d2 (_Union[date, datetime]): end date
-            coupon_period_in_days (int): The length of the current coupon period in days.
+            coupon_schedule (_List[_Union[date, datetime]]): Sorted list of all coupon payment days.
             coupon_frequency (int): Number of coupon payments per year (e.g., 1 for annual, 2 for semi-annual)
 
         Returns:
             float: year fraction
         """
-        # Actual number of days in the period
-        actual_days = (d2 - d1).days
+        yf = 0.0
+        for i in range(len(coupon_schedule) - 1):
+            cp_start = coupon_schedule[i]
+            cp_end = coupon_schedule[i+1]
+            
+            # consider overlapping periods only
+            if d1 <= cp_end and d2 >= cp_start:
+                fraction_period_start = max(d1, cp_start)
+                fraction_period_end = min(d2, cp_end)
+                
+                days_cp = (cp_end - cp_start).days
+                days_fraction = (fraction_period_end - fraction_period_start).days
+                
+                yf += days_fraction / (days_cp * coupon_frequency)
         
-        # Length of the year in days based on the coupon frequency and period
-        coupon_year_days = coupon_period_in_days * coupon_frequency
-        
-        # Calculate the day count fraction
-        year_fraction = actual_days / coupon_year_days
-        
-        return year_fraction
+        return yf
     
     @staticmethod
     def yf_Act365Fixed(d1: _Union[date, datetime], d2: _Union[date, datetime])->float:
