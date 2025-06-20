@@ -90,7 +90,7 @@ if __name__=='__main__':
 	import datetime as dt
 	import matplotlib.pyplot as plt
 	from rivapy.tools.datetime_grid import DateTimeGrid
-	dg = DateTimeGrid(start=dt.datetime(2022, 1, 1), end=dt.datetime(2022,2,1), freq='1H')
+	dg = DateTimeGrid(start=dt.datetime(2022, 1, 1), end=dt.datetime(2022,2,1), freq='1h')
 	n_sims = 500
 	residual_demand_model = WagnerModel.residual_demand_model()
 	result = residual_demand_model.simulate(dg, 
