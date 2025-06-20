@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import datetime as dt
 import rivapy.tools.interfaces as interfaces
+import re
 from rivapy.tools.datetime_grid import DateTimeGrid
 from rivapy.tools.enums import EnergyTimeGridStructure as ets
 from abc import abstractmethod
@@ -85,6 +86,11 @@ class SimpleSchedule(interfaces.FactoryObject):
         Returns:
                 np.ndarray: Vector of all datetimepoints of the schedule.
         """
+        # if isinstance(self.freq, str) and self.freq.strip() == "H":
+        #    self.freq = "h"
+        if isinstance(self.freq, str):
+            # Ersetze "H" oder "h" am Ende des freq-Strings durch "h"
+            self.freq = re.sub(r"H$", "h", self.freq.strip())
         d_ = pd.date_range(self.start, self.end, freq=self.freq, tz=self.tz, inclusive="left").to_pydatetime()
         if self.weekdays is not None:
             d_ = [d for d in d_ if d.weekday() in self.weekdays]
