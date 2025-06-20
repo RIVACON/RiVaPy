@@ -1,6 +1,6 @@
 Developer Guide
 ================================
-This section contains some rules and best practices developers for rivapy should consider. It is not meant to be a strict rule set and there may be good reasons why someone decides to deviate from some rule. But please think about the points here when developing. And if you think one of the rules should be modified or deleted, just rais an issue ;-)
+This section contains some rules and best practices developers for rivapy should consider. It is not meant to be a strict rule set and there may be good reasons why someone decides to deviate from some rule. But please think about the points here when developing. And if you think one of the rules should be modified or deleted, just raise an issue ;-)
 
 Styleguide
 -------------------------------
@@ -82,3 +82,21 @@ one can use the usual logic, e.g.
 
 to set the loglevel of the rivapy.pricing module.
 
+
+GitHub
+
+------------
+
+Commit messages
+^^^^^^^^^^^^^^^^^^
+
+Reference issue with keywords, e.g.:
+
+  ``Fix login button. Closes #42``
+
+This will automatically close and link the issue when merged
+
+Pull requests
+^^^^^^^^^^^^^^^^^^
+
+Also link the issue in the description with ``Closes #XY``
