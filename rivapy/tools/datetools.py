@@ -22,13 +22,25 @@ class DayCounter:
         self._dc = DayCounterType.to_string(daycounter)
         self._yf = DayCounter.get(self._dc)
 
-    def yf(self, d1: _Union[date, datetime], d2: _Union[_Union[date, datetime],_List[_Union[date, datetime]]]):
-        try:
-            result = [self._yf(d1, d2_) for d2_ in d2]
-            return result
-        except:
-            return self._yf(d1,d2)
-
+    def yf(self, 
+           d1: _Union[date, datetime], 
+           d2: _Union[_Union[date, datetime], _List[_Union[date, datetime]]],
+           coupon_schedule: _List[_Union[date, datetime]] = None, # Added optional argument
+           coupon_frequency: int = None # Added optional argument
+          ) -> _Union[float, _List[float]]:
+        
+        if self._dc == DayCounterType.ActActICMA.value:
+            if coupon_schedule is None or coupon_frequency is None:
+                raise ValueError("For ActActICMA, 'coupon_schedule' and 'coupon_frequency' must be provided.")
+            if isinstance(d2, list):
+                return [self._yf(d1, d2_, coupon_schedule, coupon_frequency) for d2_ in d2]
+            else:
+                return self._yf(d1, d2, coupon_schedule, coupon_frequency)
+        else:
+            if isinstance(d2, list):
+                return [self._yf(d1, d2_) for d2_ in d2]
+            else:
+                return self._yf(d1, d2)
 
     @staticmethod
     def get(daycounter: _Union[str, DayCounterType])->Callable[[ _Union[date, datetime],  _Union[date, datetime]], float]:
@@ -41,7 +53,7 @@ class DayCounter:
             DayCounterType.ThirtyU360.value: DayCounter.yf_30U360,
             DayCounterType.ThirtyE360.value: DayCounter.yf_30E360,
             DayCounterType.Thirty360ISDA.value: DayCounter.yf_30360ISDA,
-            DayCounterType.ActActICMA: DayCounter.yf_ActActICMA
+            DayCounterType.ActActICMA.value: DayCounter.yf_ActActICMA
         }
 
         if dc in mapping:
@@ -54,26 +66,30 @@ class DayCounter:
         """This method implements the Act/Act ICMA day count convention which is used for Bonds.
 
         Args:
-            d1 (_Union[date, datetime]): start date
-            d2 (_Union[date, datetime]): end date
+            d1 (_Union[date, datetime]): start date of the period for which the year fraction is calculated.
+            d2 (_Union[date, datetime]): end date of the period for which the year fraction is calculated.
             coupon_schedule (_List[_Union[date, datetime]]): Sorted list of all coupon payment days.
             coupon_frequency (int): Number of coupon payments per year (e.g., 1 for annual, 2 for semi-annual)
 
         Returns:
             float: year fraction
         """
+        d1_dt = _date_to_datetime(d1)
+        d2_dt = _date_to_datetime(d2)
+        coupon_schedule_dt = [_date_to_datetime(cs_date) for cs_date in coupon_schedule]
+
         yf = 0.0
-        for i in range(len(coupon_schedule) - 1):
-            cp_start = coupon_schedule[i]
-            cp_end = coupon_schedule[i+1]
+        for i in range(len(coupon_schedule_dt) - 1):
+            cp_start_dt = coupon_schedule_dt[i]
+            cp_end_dt = coupon_schedule_dt[i+1]
             
             # consider overlapping periods only
-            if d1 <= cp_end and d2 >= cp_start:
-                fraction_period_start = max(d1, cp_start)
-                fraction_period_end = min(d2, cp_end)
+            if d1_dt <= cp_end_dt and d2_dt >= cp_start_dt:
+                fraction_period_start_dt = max(d1_dt, cp_start_dt)
+                fraction_period_end_dt = min(d2_dt, cp_end_dt)
                 
-                days_cp = (cp_end - cp_start).days
-                days_fraction = (fraction_period_end - fraction_period_start).days
+                days_cp = (cp_end_dt - cp_start_dt).days
+                days_fraction = (fraction_period_end_dt - fraction_period_start_dt).days
                 
                 yf += days_fraction / (days_cp * coupon_frequency)
         
@@ -91,7 +107,9 @@ class DayCounter:
         Returns:
             float: year fraction
         """
-        return ((d2-d1).total_seconds()/(365.0*24*60*60))
+        d1_dt = _date_to_datetime(d1)
+        d2_dt = _date_to_datetime(d2)
+        return ((d2_dt-d1_dt).total_seconds()/(365.0*24*60*60))
 
 
     @staticmethod
@@ -108,26 +126,31 @@ class DayCounter:
         Returns:
             float: year fraction
         """
-        if d1 >= d2:
+        d1_dt = _date_to_datetime(d1)
+        d2_dt = _date_to_datetime(d2)
+
+        if d1_dt >= d2_dt:
             raise ValueError("d1 must be before d2")
     
         # Calculate the fraction for each year the period spans
-        current_date = d1
+        current_date_dt = d1_dt
         year_fraction = 0.0
     
-        while current_date < d2:
-            year_end = date(current_date.year, 12, 31)
-            days_in_year = (year_end - date(current_date.year, 1, 1)).days + 1  # Actual days in the year
+        while current_date_dt < d2_dt:
+            # Ensure year_end_dt and start_of_year_dt are datetime, preserving tzinfo if present
+            year_end_dt = datetime(current_date_dt.year, 12, 31, tzinfo=current_date_dt.tzinfo)
+            start_of_year_dt = datetime(current_date_dt.year, 1, 1, tzinfo=current_date_dt.tzinfo)
+            days_in_year = (year_end_dt - start_of_year_dt).days + 1  # Actual days in the year
     
             # If the period ends within the same year
-            if d2.year == current_date.year:
-                year_fraction += (d2 - current_date).days / days_in_year
+            if d2_dt.year == current_date_dt.year:
+                year_fraction += (d2_dt - current_date_dt).days / days_in_year
                 break
     
             # Add the fraction for the remaining days in the current year
-            year_fraction += ((year_end - current_date).days + 1) / days_in_year
+            year_fraction += ((year_end_dt - current_date_dt).days + 1) / days_in_year
             # Move to the start of the next year
-            current_date = date(current_date.year + 1, 1, 1)
+            current_date_dt = datetime(current_date_dt.year + 1, 1, 1, tzinfo=current_date_dt.tzinfo)
     
         return year_fraction
        
@@ -144,7 +167,9 @@ class DayCounter:
         Returns:
             float: _description_
         """
-        return ((d2 - d1).days)/360
+        d1_dt = _date_to_datetime(d1)
+        d2_dt = _date_to_datetime(d2)
+        return ((d2_dt - d1_dt).days)/360.0 # Ensure float division
     
     
     # @staticmethod
@@ -178,24 +203,28 @@ class DayCounter:
         Returns:
             float: year fraction
         """
-        m_range1 = monthrange(d1.year, d1.month)
-        m_range2 = monthrange(d2.year, d2.month)
+        d1_dt = _date_to_datetime(d1)
+        d2_dt = _date_to_datetime(d2)
+
+        m_range1 = monthrange(d1_dt.year, d1_dt.month)
+        m_range2 = monthrange(d2_dt.year, d2_dt.month)
         
-        day1 = d1.day
-        day2 = d2.day
+        day1 = d1_dt.day
+        day2 = d2_dt.day
         
-        if (d2.day == 31) and (d1.day >= 30):
+        if (d2_dt.day == 31) and (d1_dt.day >= 30):
             day2 = 30
         
-        if d1.day == 31:
+        if d1_dt.day == 31:
             day1 = 30
         
-        if (d1.day==m_range1[-1] and d1.month==2) and (d2.day==m_range2[-1] and d1.month==2):
+        if (d1_dt.day==m_range1[-1] and d1_dt.month==2) and \
+           (d2_dt.day==m_range2[-1] and d2_dt.month==2): # Corrected d1.month to d2_dt.month
             day2 = 30
         
-        if (d1.day==m_range1[-1] and d1.month==2):
+        if (d1_dt.day==m_range1[-1] and d1_dt.month==2):
             day1 = 30
-        return d2.year - d1.year + (d2.month - d1.month)/12 + (day2-day1)/360
+        return (d2_dt.year - d1_dt.year) + (d2_dt.month - d1_dt.month)/12.0 + (day2-day1)/360.0
     
     
     @staticmethod
@@ -213,15 +242,18 @@ class DayCounter:
         Returns:
             float: year fraction
         """
-        day1 = d1.day
-        day2 = d2.day
+        d1_dt = _date_to_datetime(d1)
+        d2_dt = _date_to_datetime(d2)
+
+        day1 = d1_dt.day
+        day2 = d2_dt.day
         
-        if (d2.day == 31) and (d1.day >= 30):
+        if (d2_dt.day == 31) and (d1_dt.day >= 30): # Original logic used d1.day here
             day2 = 30
         
-        if d1.day == 31:
+        if d1_dt.day == 31:
             day1 = 30
-        return d2.year - d1.year + (d2.month - d1.month)/12 + (day2-day1)/360
+        return (d2_dt.year - d1_dt.year) + (d2_dt.month - d1_dt.month)/12.0 + (day2-day1)/360.0
     
     
     @staticmethod
@@ -239,15 +271,18 @@ class DayCounter:
         Returns:
             float: year fraction
         """
+        d1_dt = _date_to_datetime(d1)
+        d2_dt = _date_to_datetime(d2)
+
         def _adjust_day(day:int):
             if day >= 30:
                 return 30
             return day
         
-        day1 = _adjust_day(d1.day)
-        day2 = _adjust_day(d2.day)
+        day1 = _adjust_day(d1_dt.day)
+        day2 = _adjust_day(d2_dt.day)
         
-        return d2.year - d1.year + (d2.month - d1.month)/12 + (day2-day1)/360
+        return (d2_dt.year - d1_dt.year) + (d2_dt.month - d1_dt.month)/12.0 + (day2-day1)/360.0
         
         
         
@@ -827,7 +862,7 @@ class Schedule:
 
 
 def _date_to_datetime(date_time: _Union[datetime, date]
-                      ) -> date:
+                      ) -> datetime:
     """
     Converts a date to a datetime or leaves it unchanged if it is already of type datetime.
 
@@ -835,7 +870,7 @@ def _date_to_datetime(date_time: _Union[datetime, date]
         date_time (_Union[datetime, date]): Date(time) to be converted.
 
     Returns:
-        date: (Potentially) Converted datetime.
+        datetime: (Potentially) Converted datetime.
     """
     if isinstance(date_time, datetime):
         return date_time

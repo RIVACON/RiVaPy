@@ -1,6 +1,7 @@
 from datetime import date
 import QuantLib as ql
 from rivapy.tools.datetools import DayCounter
+from dateutil.relativedelta import relativedelta
 from rivapy.tools.enums import DayCounterType
 
 test_periods = [
@@ -34,26 +35,52 @@ def run_comparison(dc_name: str, riva_dc_type: DayCounterType, ql_dc_instance: q
     try:
         dc_riva = DayCounter(riva_dc_type)
         if is_icma:
-            coupon_period_days = (period_details['ref_end'] - period_details['ref_start']).days
             coupon_freq = period_details['freq']
-            yf_riva = dc_riva._yf(d1, d2, coupon_period_days, coupon_freq) 
+            
+            # Determine period_step based on frequency
+            if coupon_freq == 1: # Annual
+                period_step = relativedelta(years=1)
+            elif coupon_freq == 2: # Semi-annual
+                period_step = relativedelta(months=6)
+            elif coupon_freq == 4: # Quarterly
+                period_step = relativedelta(months=3)
+            else: # Default or error for unsupported frequencies in test
+                period_step = relativedelta(years=1) 
+                # Consider raising an error if freq is unexpected for ICMA tests
+
+            # Generate a comprehensive coupon_schedule_list for RiVaPy
+            # This schedule should bracket the d1 and d2 of the test period.
+            # Anchor the schedule generation around period_details['ref_start']
+            anchor_date = period_details['ref_start']
+            
+            current_schedule_nodes = {anchor_date}
+            
+            # Go backwards from anchor to cover d1
+            temp_date = anchor_date
+            while temp_date > d1:
+                temp_date -= period_step
+                current_schedule_nodes.add(temp_date)
+            
+            # Go forwards from anchor to cover d2
+            temp_date = anchor_date
+            while temp_date < d2:
+                temp_date += period_step
+                current_schedule_nodes.add(temp_date)
+
+            # Add one more period at each end for safety with stubs
+            current_schedule_nodes.add(min(current_schedule_nodes) - period_step)
+            current_schedule_nodes.add(max(current_schedule_nodes) + period_step)
+            
+            coupon_schedule_list = sorted(list(current_schedule_nodes))
+            yf_riva = dc_riva._yf(d1, d2, coupon_schedule_list, coupon_freq) 
         else:
             yf_riva = dc_riva.yf(d1, d2)
 
         if is_icma:
-            # Parameters for QuantLib call
+            # Parameters for QuantLib call should use the original ref_start and ref_end
+            # from test_periods to define the coupon structure.
             ql_ref_s_param = ql.Date(period_details['ref_start'].day, period_details['ref_start'].month, period_details['ref_start'].year)
             ql_ref_e_param = ql.Date(period_details['ref_end'].day, period_details['ref_end'].month, period_details['ref_end'].year)
-
-            # Adjust QL parameters to avoid exception if d1 is before QL's ref_start
-            # This makes QL use a potentially different reference period for its calculation
-            # than what RiVaPy's coupon_period_days implies from the original test_periods entry.
-            # This will likely lead to a 'deviation' instead of an 'error'.
-            if ql_d1 < ql_ref_s_param:
-                ql_ref_s_param = ql_d1 # Adjust ref_start for QL to be d1
-                # Ensure ref_end is not before the new ref_start for QL
-                if ql_ref_e_param < ql_ref_s_param:
-                    ql_ref_e_param = max(ql_d2, ql_ref_s_param) # Ensure valid period, e.g., [d1, d2]
             
             yf_ql = ql_dc_instance.yearFraction(ql_d1, ql_d2, ql_ref_s_param, ql_ref_e_param)
         else:
