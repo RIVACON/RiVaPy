@@ -129,7 +129,7 @@ class DayCounter:
         d1_dt = _date_to_datetime(d1)
         d2_dt = _date_to_datetime(d2)
 
-        if d1_dt >= d2_dt:
+        if d1_dt > d2_dt:
             raise ValueError("d1 must be before d2")
     
         # Calculate the fraction for each year the period spans

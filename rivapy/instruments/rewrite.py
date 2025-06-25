@@ -527,13 +527,13 @@ def run_comparison_example():
     obj_id = 'DE000CZ40NT7'
     issue_date_dt = date(2019, 2, 1)
     maturity_date_dt = date(2021, 2, 1)
-    coupon_rate_val = 0.025  
+    coupon_rate_val = 0.0  
     tenor_period = Period(years=1)  
     notional_val = 100000.0
     currency_val = 'EUR'
     issuer_val = 'Commerzbank'
     securitisation_level_val = SecuritizationLevel.NON_PREFERRED_SENIOR
-    valuation_date_dt = date(2020, 3, 1)
+    valuation_date_dt = date(2020, 2, 1)
     flat_rate_val = 0.02 
     
     # --- RiVaPy Setup ---
@@ -561,7 +561,7 @@ def run_comparison_example():
     # Create a simple flat discount curve
     rivapy_discount_curve = DiscountCurve(valuation_date=valuation_date_dt, 
                                           flat_rate=flat_rate_val,
-                                          day_counter_type=DayCounterType.Act365Fixed)  
+                                          day_counter_type=DayCounterType.ACT_ACT)  
 
     # --- RiVaPy Calculations ---
     rivapy_dirty_price = rivapy_bond.compute_price(rivapy_discount_curve)
@@ -574,6 +574,7 @@ def run_comparison_example():
     for cf_date, amount in rivapy_bond.expected_cashflows():
         logger.debug(f"Date: {cf_date.strftime('%Y-%m-%d')}, Amount: {amount:.4f}")
     logger.debug(f"RiVaPy Accrued Interest: {rivapy_accrued_interest:.4f}")
+    logger.debug(f"RiVaPy Dirty Price: {rivapy_dirty_price}")
     logger.debug(f"RiVaPy Discount Factors:")
     val_date_dt = _date_to_datetime(valuation_date_dt)
     for cf_date, amount in rivapy_bond.expected_cashflows():
@@ -587,7 +588,7 @@ def run_comparison_example():
 
     # Define QuantLib calendar and conventions
     ql_calendar = ql.TARGET() 
-    ql_convention = ql.ModifiedFollowing 
+    ql_convention = ql.Unadjusted 
     
     
     # Create QuantLib schedule
@@ -615,7 +616,7 @@ def run_comparison_example():
                                 
 
     # Create QuantLib discount curve (YieldTermStructure)
-    ql_discount_day_counter = ql.Actual365Fixed()
+    ql_discount_day_counter = ql.ActualActual(ql.ActualActual.ISDA)
     ql_discount_curve = ql.FlatForward(ql_valuation_date,
                                        ql.QuoteHandle(ql.SimpleQuote(flat_rate_val)),
                                        ql_discount_day_counter,
@@ -667,6 +668,7 @@ def run_comparison_example():
             logger.debug(f"  QL CF {cf_idx+1}: Date: {cf.date().ISO()}, Amount: {cf.amount():.4f} (Non-coupon, e.g., Notional)")
             
     logger.debug(f"QuantLib Accrued Interest: {ql_absolute_accrued_amount:.4f}")
+    logger.debug(f"QuantLib Clean Price: {ql_absolute_clean_price:.4f}")
     logger.debug(f"QuantLib Discount Factors:")
     for cf in ql_bond.cashflows():
         if cf.date() >= ql_valuation_date:
