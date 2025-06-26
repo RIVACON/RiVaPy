@@ -18,8 +18,8 @@ these instruments.
    install
    notebooks/index
    rivapy/index
-   logging
    sample_data/index
+   developer_guide
    glossary
    genindex
    search
