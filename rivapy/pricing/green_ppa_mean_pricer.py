@@ -60,7 +60,7 @@ def price(val_date: dt.datetime,
 
 if __name__=="__main__":
     import rivapy.sample_data.residual_demand_models as rdm_sample
-    from rivapy.instruments import SimpleSchedule
+    from rivapy.tools import SimpleSchedule
     simple_schedule = SimpleSchedule(dt.datetime(2022,12,1), dt.datetime(2023,12,1,4,0,0), freq='1H')
     green_ppa = GreenPPASpecification(simple_schedule, 
                                     fixed_price = 10.0, 

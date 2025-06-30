@@ -1,6 +1,7 @@
 from typing import Union
 import numpy as np
-import scipy 
+import scipy
+import scipy.constants 
 
 
 class HestonModel:
@@ -83,7 +84,7 @@ class HestonModel:
 		else:
 			"Simplified form, with only one integration. "
 			h = lambda xi: s0 * integ_func(xi, s0, v0, K, ttm, 1) - K * integ_func(xi, s0, v0, K, ttm, 2)
-			res = 0.5 * (s0 - K) + 1/scipy.pi * scipy.integrate.quad_vec(h, 0, 500.)[0]  #vorher 500
+			res = 0.5 * (s0 - K) + 1/scipy.constants.pi * scipy.integrate.quad_vec(h, 0, 500.)[0]  #vorher 500
 		return res
 	
 
