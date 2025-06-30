@@ -19,7 +19,8 @@ class SimpleCashflowPricer:
                 pv_cashflows += df*c[1]
         logger.info('Finished computing pv cashflows for bond ' + specification.obj_id + ', pv_cashflows: '+ str(pv_cashflows) )
         return pv_cashflows
-        
+    
+    # TODO: add accrued interest 
     @staticmethod
     def compute_yield(target_dirty_price: float, val_date: datetime, 
                     specification: HasExpectedCashflows)->float:

@@ -2,7 +2,7 @@
 
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
-from calendar import monthrange
+from calendar import monthrange, isleap
 from typing import List as _List, Union as _Union, Callable
 from holidays import \
     HolidayBase as _HolidayBase, \
@@ -22,26 +22,270 @@ class DayCounter:
         self._dc = DayCounterType.to_string(daycounter)
         self._yf = DayCounter.get(self._dc)
 
-    def yf(self, d1: _Union[date, datetime], d2: _Union[_Union[date, datetime],_List[_Union[date, datetime]]]):
-        try:
-            result = [self._yf(d1, d2_) for d2_ in d2]
-            return result
-        except:
-            return self._yf(d1,d2)
-
+    def yf(self, 
+           d1: _Union[date, datetime], 
+           d2: _Union[_Union[date, datetime], _List[_Union[date, datetime]]],
+           coupon_schedule: _List[_Union[date, datetime]] = None, # Added optional argument
+           coupon_frequency: int = None # Added optional argument
+          ) -> _Union[float, _List[float]]:
+        
+        if self._dc == DayCounterType.ActActICMA.value:
+            if coupon_schedule is None or coupon_frequency is None:
+                raise ValueError("For ActActICMA, 'coupon_schedule' and 'coupon_frequency' must be provided.")
+            if isinstance(d2, list):
+                return [self._yf(d1, d2_, coupon_schedule, coupon_frequency) for d2_ in d2]
+            else:
+                return self._yf(d1, d2, coupon_schedule, coupon_frequency)
+        else:
+            if isinstance(d2, list):
+                return [self._yf(d1, d2_) for d2_ in d2]
+            else:
+                return self._yf(d1, d2)
 
     @staticmethod
     def get(daycounter: _Union[str, DayCounterType])->Callable[[ _Union[date, datetime],  _Union[date, datetime]], float]:
         dc = DayCounterType.to_string(daycounter)
-        if dc == DayCounterType.Act365Fixed.value:
-            return DayCounter.yf_Act365Fixed
-        raise NotImplementedError(dc + ' not yet implemented.')
+        
+        mapping = {
+            DayCounterType.Act365Fixed.value: DayCounter.yf_Act365Fixed,
+            DayCounterType.ACT_ACT.value: DayCounter.yf_ActAct,
+            DayCounterType.ACT360.value: DayCounter.yf_Act360,
+            DayCounterType.ThirtyU360.value: DayCounter.yf_30U360,
+            DayCounterType.ThirtyE360.value: DayCounter.yf_30E360,
+            DayCounterType.Thirty360ISDA.value: DayCounter.yf_30360ISDA,
+            DayCounterType.ActActICMA.value: DayCounter.yf_ActActICMA
+        }
+
+        if dc in mapping:
+            return mapping[dc]
+        else:
+            raise NotImplementedError(f"{dc} not yet implemented.")
 
     @staticmethod
+    def yf_ActActICMA(d1: _Union[date, datetime], d2: _Union[date, datetime], coupon_schedule:_List[_Union[date, datetime]], coupon_frequency:int)->float:
+        """This method implements the Act/Act ICMA day count convention which is used for Bonds.
+
+        Args:
+            d1 (_Union[date, datetime]): start date of the period for which the year fraction is calculated.
+            d2 (_Union[date, datetime]): end date of the period for which the year fraction is calculated.
+            coupon_schedule (_List[_Union[date, datetime]]): Sorted list of all coupon payment days.
+            coupon_frequency (int): Number of coupon payments per year (e.g., 1 for annual, 2 for semi-annual)
+
+        Returns:
+            float: year fraction
+        """
+        d1_dt = _date_to_datetime(d1)
+        d2_dt = _date_to_datetime(d2)
+        coupon_schedule_dt = [_date_to_datetime(cs_date) for cs_date in coupon_schedule]
+
+        yf = 0.0
+        for i in range(len(coupon_schedule_dt) - 1):
+            cp_start_dt = coupon_schedule_dt[i]
+            cp_end_dt = coupon_schedule_dt[i+1]
+            
+            # consider overlapping periods only
+            if d1_dt <= cp_end_dt and d2_dt >= cp_start_dt:
+                fraction_period_start_dt = max(d1_dt, cp_start_dt)
+                fraction_period_end_dt = min(d2_dt, cp_end_dt)
+                
+                days_cp = (cp_end_dt - cp_start_dt).days
+                days_fraction = (fraction_period_end_dt - fraction_period_start_dt).days
+                
+                yf += days_fraction / (days_cp * coupon_frequency)
+        
+        return yf
+    
+    @staticmethod
     def yf_Act365Fixed(d1: _Union[date, datetime], d2: _Union[date, datetime])->float:
-        return ((d2-d1).total_seconds()/(365.0*24*60*60))
+        """This method implements the Act/365f day count convention.
+        The actual number of days between d2 and d1 is divided by 365.
+
+        Args:
+            d1 (_Union[date, datetime]): start date
+            d2 (_Union[date, datetime]): end date
+
+        Returns:
+            float: year fraction
+        """
+        d1_dt = _date_to_datetime(d1)
+        d2_dt = _date_to_datetime(d2)
+        return ((d2_dt-d1_dt).total_seconds()/(365.0*24*60*60))
 
 
+    @staticmethod
+    def yf_ActAct(d1: _Union[date, datetime], d2: _Union[date, datetime])->float:
+        """This method implements the Act/Act ISDA day count convention.
+        The acutal number of days between d2 and d1 is divded by the acutal number of days in the respective year.
+        In cases where d2 and d1 are located in different years, the period is split into sub periods and the year fraction is calculated on each sub period with its respective
+        number of days in that year. This is especially important if d1 is located in a regular year and d2 is located in a leap year.
+
+        Args:
+            d1 (_Union[date, datetime]): start date
+            d2 (_Union[date, datetime]): end date
+
+        Returns:
+            float: year fraction
+        """
+        d1_dt = _date_to_datetime(d1)
+        d2_dt = _date_to_datetime(d2)
+
+        if d1_dt > d2_dt:
+            raise ValueError("d1 must be before d2")
+    
+        # Calculate the fraction for each year the period spans
+        current_date_dt = d1_dt
+        year_fraction = 0.0
+    
+        while current_date_dt < d2_dt:
+            # Ensure year_end_dt and start_of_year_dt are datetime, preserving tzinfo if present
+            year_end_dt = datetime(current_date_dt.year, 12, 31, tzinfo=current_date_dt.tzinfo)
+            start_of_year_dt = datetime(current_date_dt.year, 1, 1, tzinfo=current_date_dt.tzinfo)
+            days_in_year = (year_end_dt - start_of_year_dt).days + 1  # Actual days in the year
+    
+            # If the period ends within the same year
+            if d2_dt.year == current_date_dt.year:
+                year_fraction += (d2_dt - current_date_dt).days / days_in_year
+                break
+    
+            # Add the fraction for the remaining days in the current year
+            year_fraction += ((year_end_dt - current_date_dt).days + 1) / days_in_year
+            # Move to the start of the next year
+            current_date_dt = datetime(current_date_dt.year + 1, 1, 1, tzinfo=current_date_dt.tzinfo)
+    
+        return year_fraction
+       
+    
+    @staticmethod
+    def yf_Act360(d1: _Union[date, datetime], d2: _Union[date, datetime])->float:
+        """This method implements the Act/360 day count convention. 
+        Here the actual number of days between d2 and d1 is computed and divided by 360, since this day count convention assumes that each year contains 360 days.
+
+        Args:
+            d1 (_Union[date, datetime]): start date
+            d2 (_Union[date, datetime]): end date
+
+        Returns:
+            float: _description_
+        """
+        d1_dt = _date_to_datetime(d1)
+        d2_dt = _date_to_datetime(d2)
+        return ((d2_dt - d1_dt).days)/360.0 # Ensure float division
+    
+    
+    # @staticmethod
+    # def yf_Bus252(d1: _Union[date, datetime], d2: _Union[date, datetime])->float:
+    #     """This method implements the Bus/252 day count convention. 
+
+    #     Args:
+    #         d1 (_Union[date, datetime]): start date
+    #         d2 (_Union[date, datetime]): end date
+
+    #     Returns:
+    #         float: _description_
+    #     """
+    #     return ((d2 - d1).days)/252
+   
+    
+    @staticmethod
+    def yf_30U360(d1: _Union[date, datetime], d2: _Union[date, datetime])->float:
+        """This method implements the 30U360 convention. 
+        The following logic is applied:
+        
+        1. If d2.day == 31 and d1.day >= 30 -> d2.day = 30
+        2. If d1.day == 31 -> d1.day = 30
+        3. If (d1.day == EndOfMonth(Feb) and d1.month==2) and (d2.day == EndOfMonth(Feb) and d2.month==2) -> d2.day = 30
+        4. If (d1.day == EndOfMonth(Feb) and d1.month==2) -> d1.day = 30
+        
+        Args:
+            d1 (_Union[date, datetime]): start date
+            d2 (_Union[date, datetime]): end date
+
+        Returns:
+            float: year fraction
+        """
+        d1_dt = _date_to_datetime(d1)
+        d2_dt = _date_to_datetime(d2)
+
+        m_range1 = monthrange(d1_dt.year, d1_dt.month)
+        m_range2 = monthrange(d2_dt.year, d2_dt.month)
+        
+        day1 = d1_dt.day
+        day2 = d2_dt.day
+        
+        if (d2_dt.day == 31) and (d1_dt.day >= 30):
+            day2 = 30
+        
+        if d1_dt.day == 31:
+            day1 = 30
+        
+        if (d1_dt.day==m_range1[-1] and d1_dt.month==2) and \
+           (d2_dt.day==m_range2[-1] and d2_dt.month==2): # Corrected d1.month to d2_dt.month
+            day2 = 30
+        
+        if (d1_dt.day==m_range1[-1] and d1_dt.month==2):
+            day1 = 30
+        return (d2_dt.year - d1_dt.year) + (d2_dt.month - d1_dt.month)/12.0 + (day2-day1)/360.0
+    
+    
+    @staticmethod
+    def yf_30360ISDA(d1: _Union[date, datetime], d2: _Union[date, datetime])->float:
+        """This method implements the 30/360 ISDA (Bond Basis) day count convention.
+        The following logic is applied:
+        
+        1. If d2.day == 31 and d1.day >= 30 -> d2.day = 30
+        2. If d1.day == 31 -> d1.day = 30
+
+        Args:
+            d1 (_Union[date, datetime]): start date
+            d2 (_Union[date, datetime]): end date
+
+        Returns:
+            float: year fraction
+        """
+        d1_dt = _date_to_datetime(d1)
+        d2_dt = _date_to_datetime(d2)
+
+        day1 = d1_dt.day
+        day2 = d2_dt.day
+        
+        if (d2_dt.day == 31) and (d1_dt.day >= 30): # Original logic used d1.day here
+            day2 = 30
+        
+        if d1_dt.day == 31:
+            day1 = 30
+        return (d2_dt.year - d1_dt.year) + (d2_dt.month - d1_dt.month)/12.0 + (day2-day1)/360.0
+    
+    
+    @staticmethod
+    def yf_30E360(d1: _Union[date, datetime], d2: _Union[date, datetime])->float:
+        """This day count convention implements the Eurobond Basis day count convention. 
+        The following logic is applied:
+        
+        1. If d1.day >= 30 -> d1.day = 30
+        2. If d2.day >= 30 -> d2.day = 30
+        
+        Args:
+            d1 (_Union[date, datetime]): start date
+            d2 (_Union[date, datetime]): end date
+
+        Returns:
+            float: year fraction
+        """
+        d1_dt = _date_to_datetime(d1)
+        d2_dt = _date_to_datetime(d2)
+
+        def _adjust_day(day:int):
+            if day >= 30:
+                return 30
+            return day
+        
+        day1 = _adjust_day(d1_dt.day)
+        day2 = _adjust_day(d2_dt.day)
+        
+        return (d2_dt.year - d1_dt.year) + (d2_dt.month - d1_dt.month)/12.0 + (day2-day1)/360.0
+        
+        
+        
 class Period:
     def __init__(self,
                  years: int = 0,
@@ -155,7 +399,7 @@ class Schedule:
                  business_day_convention: _Union[RollConvention, str] = RollConvention.MODIFIED_FOLLOWING,
                  calendar: _Union[_HolidayBase, str] = None):
         """
-        A schedule is a list of dates, e.g. of coupon payments, fixings, etc., which is defined by its fist (= start
+        A schedule is a list of dates, e.g. of coupon payments, fixings, etc., which is defined by its first (= start
         day) and last (= end day) day, by its distance between two consecutive dates (= time period) and by the
         procedure for rolling out the schedule, more precisely by the direction (backwards/forwards) and the dealing
         with incomplete periods (stubs). Moreover, the schedule ensures to comply to business day conventions with
@@ -168,7 +412,7 @@ class Schedule:
             backwards (bool, optional): Defines direction for rolling out the schedule. True means the schedule will be
                                         rolled out (backwards) from end day to start day. Defaults to True.
             stub (bool, optional): Defines if the first/last period is accepted (True), even though it is shorter than
-                                   the others, or if it remaining days are added to the neighbouring period (False).
+                                   the others, or if its remaining days are added to the neighbouring period (False).
                                    Defaults to True.
             business_day_convention (_Union[RollConvention, str], optional): Set of rules defining the adjustment of
                                                                              days to ensure each date being a business
@@ -186,7 +430,7 @@ class Schedule:
             .. code-block:: python
             
                 >>> from datetime import date
-                >>> from rivapy.tools import schedule
+                >>> from rivapy.tools import Schedule
                 >>> schedule = Schedule(date(2020, 8, 21), date(2021, 8, 21), Period(0, 3, 0), True, False, RollConvention.UNADJUSTED, holidays_de).generate_dates(False),
                        [date(2020, 8, 21), date(2020, 11, 21), date(2021, 2, 21), date(2021, 5, 21), date(2021, 8, 21)])
         """
@@ -618,7 +862,7 @@ class Schedule:
 
 
 def _date_to_datetime(date_time: _Union[datetime, date]
-                      ) -> date:
+                      ) -> datetime:
     """
     Converts a date to a datetime or leaves it unchanged if it is already of type datetime.
 
@@ -626,7 +870,7 @@ def _date_to_datetime(date_time: _Union[datetime, date]
         date_time (_Union[datetime, date]): Date(time) to be converted.
 
     Returns:
-        date: (Potentially) Converted datetime.
+        datetime: (Potentially) Converted datetime.
     """
     if isinstance(date_time, datetime):
         return date_time
@@ -985,7 +1229,7 @@ def modified_following(day: _Union[date, datetime],
               the day is not already a business day. Otherwise the (unadjusted) day is returned.
     """
     next_day = next_or_previous_business_day(day, calendar, True)
-    if next_day.month > day.month:
+    if next_day.month != day.month:
         return preceding(day, calendar)
     else:
         return next_day
@@ -1037,7 +1281,7 @@ def modified_following_bimonthly(day: _Union[date, datetime],
               calendar if the day is not already a business day. Otherwise the (unadjusted) day is returned.
     """
     next_day = next_or_previous_business_day(day, calendar, True)
-    if (next_day.month > day.month) | ((next_day.day > 15) & (day.day <= 15)):
+    if (next_day.month != day.month) | ((next_day.day > 15) & (day.day <= 15)):
         return preceding(day, calendar)
     else:
         return next_day
@@ -1060,7 +1304,7 @@ def modified_preceding(day: _Union[date, datetime],
               the day is not already a business day. Otherwise the (unadjusted) day is returned.
     """
     prev_day = next_or_previous_business_day(day, calendar, False)
-    if prev_day.month < day.month:
+    if prev_day.month != day.month:
         return following(day, calendar)
     else:
         return prev_day

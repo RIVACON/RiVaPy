@@ -180,7 +180,7 @@ class Period(_MyEnum):
 
 @_unique
 class RollConvention(_MyEnum):
-    FOLLOWING = "Following"
+   FOLLOWING = "Following"
     MODIFIED_FOLLOWING = "ModifiedFollowing"
     MODIFIED_FOLLOWING_EOM = "ModifiedFollowingEOM"
     MODIFIED_FOLLOWING_BIMONTHLY = "ModifiedFollowingBimonthly"
@@ -188,25 +188,18 @@ class RollConvention(_MyEnum):
     MODIFIED_PRECEDING = "ModifiedPreceding"
     NEAREST = "Nearest"
     UNADJUSTED = "Unadjusted"
-
-
-# class RollConvention:
-#     FOLLOWING = 'Following'
-#     MODIFIED_FOLLOWING = 'ModifiedFollowing'
-#     MODIFIED_FOLLOWING_EOM = 'ModifiedFollowingEOM'
-#     PRECEDING = 'Preceding'
-#     MODIFIED_PRECEDING = 'ModifiedPreceding'
-#     UNADJUSTED = 'Unadjusted'
+   
 @_unique
 class DayCounterType(_MyEnum):
-    ACT_ACT = "ActAct"
-    Act365Fixed = "Act365Fixed"
-    ACT360 = "Act360"
-    ThirtyU360 = "30U360"
-    ThirtyE360 = "30E360"
-    ACT252 = "Act252"
-
-
+    ACT_ACT = 'ActAct'
+    Act365Fixed = 'Act365Fixed'
+    ACT360 = 'Act360'
+    ThirtyU360 = '30U360'
+    ThirtyE360 = '30E360'
+    ACT252 = 'Act252'
+    Thirty360ISDA = '30360ISDA'
+    ActActICMA = 'ActActICMA'
+    
 @_unique
 class InflationInterpolation(_MyEnum):
     UNDEFINED = "UNDEFINED"
@@ -215,7 +208,7 @@ class InflationInterpolation(_MyEnum):
     CONSTANT = "CONSTANT"
 
 
-@_unique
+@_unique 
 class Sector(_MyEnum):
     UNDEFINED = "UNDEFINED"
     # BASIC_MATERIALS = 'BasicMaterials'
