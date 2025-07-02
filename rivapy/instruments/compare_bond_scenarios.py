@@ -61,6 +61,7 @@ def run_single_comparison(
                                 schedule=rivapy_schedule, 
                                 notional=notional,
                                 currency=currency,
+                                issue_date=issue_date,
                                 coupon_rate=coupon_rate,
                                 accrual_day_counter_type=DayCounterType.ActActICMA) 
     
@@ -68,7 +69,7 @@ def run_single_comparison(
                                           flat_rate=flat_rate,
                                           day_counter_type=DayCounterType.Act365Fixed)  
 
-    rivapy_dirty_price = rivapy_bond.compute_price(rivapy_discount_curve)
+    rivapy_dirty_price = rivapy_bond.compute_dirty_price(rivapy_discount_curve)
     rivapy_accrued_interest = rivapy_bond.compute_accrued_interest(valuation_date)
     rivapy_clean_price = rivapy_dirty_price - rivapy_accrued_interest 
     rivapy_ytm = rivapy_bond.compute_yield(dirty_price=rivapy_dirty_price, val_date=valuation_date)

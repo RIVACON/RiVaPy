@@ -3,6 +3,7 @@ from datetime import datetime, date
 from typing import List, Any, Optional, Union, Tuple
 from holidays import HolidayBase
 from holidays.financial import ECB
+from collections import defaultdict
 import QuantLib as ql
 from dateutil.relativedelta import relativedelta 
 import logging
@@ -132,7 +133,7 @@ class BondSpec(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def compute_price(self, discount_curve: 'DiscountCurve') -> float:
+    def compute_dirty_price(self, discount_curve: 'DiscountCurve') -> float:
         """
         Computes the dirty price of the bond.
         The dirty price is the price of a bond including any accrued interest.
@@ -141,7 +142,7 @@ class BondSpec(abc.ABC):
             discount_curve (DiscountCurve): The curve used to discount future cashflows.
 
         Returns:
-            float: The dirty price of the bond.
+            float: The calculated dirty price.
         """
         pass
     @abc.abstractmethod
@@ -275,35 +276,14 @@ class FixedRateBond(BondSpec):
             cashflows.append((maturity_payment_date, self.notional))
 
         # Use a dictionary to sum amounts for cashflows on the same date (e.g., last coupon + notional)
-        combined_cashflows = {}
+        combined_cashflows = defaultdict(float)
         for cf_date, amount in cashflows:
             # Normalize datetime to date to ensure correct grouping if time components differ
             normalized_date = cf_date.replace(hour=0, minute=0, second=0, microsecond=0)
-            combined_cashflows[normalized_date] = combined_cashflows.get(normalized_date, 0.0) + amount
+            combined_cashflows[normalized_date] += amount
         
         # Convert back to list of tuples and sort by date
-        result_cashflows = sorted([(dt, amt) for dt, amt in combined_cashflows.items()], key=lambda x: x[0])
-    
-        return result_cashflows
-
-    def _compute_dirty_price(self, discount_curve: 'DiscountCurve') -> float:
-        """
-        Internal method to compute the dirty price by discounting all future cashflows.
-        
-        Args:
-            discount_curve (DiscountCurve): The curve used for discounting.
-
-        Returns:
-            float: The calculated dirty price.
-        """
-        val_date_dt = _date_to_datetime(discount_curve.valuation_date)
-        cashflows = self.expected_cashflows()
-        pv_cashflows = 0.0
-        for c in cashflows:
-            if c[0] > val_date_dt:
-                df = discount_curve.value(val_date_dt, c[0])
-                pv_cashflows += df * c[1]
-        return pv_cashflows
+        return sorted(combined_cashflows.items(), key=lambda x: x[0])
 
     def compute_accrued_interest(self, valuation_date: Union[date, datetime]) -> float:
         """
@@ -317,6 +297,11 @@ class FixedRateBond(BondSpec):
                    outside the bond's life (before issue or on/after maturity).
         """
         val_date_dt = _date_to_datetime(valuation_date)
+
+        # For zero-coupon bonds, accrued interest is always zero. This also prevents division by zero errors.
+        if self.coupon_rate == 0.0:
+            return 0.0
+
         # No accrued interest if valuation is outside the bond's life
         if val_date_dt >= self.maturity_date or val_date_dt < self.issue_date:
             return 0.0
@@ -361,18 +346,25 @@ class FixedRateBond(BondSpec):
         
         return self.notional * self.coupon_rate * accrued_year_fraction
 
-    def compute_price(self, discount_curve: 'DiscountCurve') -> float:
+    def compute_dirty_price(self, discount_curve: 'DiscountCurve') -> float:
         """
-        Computes the dirty price of the bond.
+        Computes the dirty price of the bond by discounting all future cashflows.
         The dirty price is the price of a bond including any accrued interest.
 
         Args:
             discount_curve (DiscountCurve): The curve used to discount future cashflows.
 
         Returns:
-            float: The dirty price of the bond.
+            float: The calculated dirty price.
         """
-        return self._compute_dirty_price(discount_curve)
+        val_date_dt = _date_to_datetime(discount_curve.valuation_date)
+        cashflows = self.expected_cashflows()
+        pv_cashflows = 0.0
+        for c in cashflows:
+            if c[0] > val_date_dt:
+                df = discount_curve.value(val_date_dt, c[0])
+                pv_cashflows += df * c[1]
+        return pv_cashflows
 
     def compute_clean_price(self, discount_curve: 'DiscountCurve') -> float:
         """
@@ -385,7 +377,7 @@ class FixedRateBond(BondSpec):
         Returns:
             float: The clean price of the bond.
         """
-        dirty_price = self._compute_dirty_price(discount_curve)
+        dirty_price = self.compute_dirty_price(discount_curve)
         accrued = self.compute_accrued_interest(discount_curve.valuation_date)
         return dirty_price - accrued
 
@@ -564,7 +556,7 @@ def run_comparison_example():
                                           day_counter_type=DayCounterType.ACT_ACT)  
 
     # --- RiVaPy Calculations ---
-    rivapy_dirty_price = rivapy_bond.compute_price(rivapy_discount_curve)
+    rivapy_dirty_price = rivapy_bond.compute_dirty_price(rivapy_discount_curve)
     rivapy_accrued_interest = rivapy_bond.compute_accrued_interest(valuation_date_dt)
     rivapy_clean_price = rivapy_dirty_price - rivapy_accrued_interest 
     rivapy_ytm = rivapy_bond.compute_yield(dirty_price=rivapy_dirty_price, val_date=valuation_date_dt)
