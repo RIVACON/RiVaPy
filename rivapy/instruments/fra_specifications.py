@@ -136,11 +136,11 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
             self.start_date = roll_day(day =spot_date + relativedelta(months=start_period), #need holiday
                                 calendar = self.calendar,
                                 business_day_convention = self.rate_business_day_convention,
-                                start_day = None)spot_date + start_period #need roll convention: ddc, bdc, holiday, date
+                                start_day = None)#spot_date + start_period #need roll convention: ddc, bdc, holiday, date
             self.end_date = roll_day(day =self.start_date + relativedelta(months=start_period), #need holiday
                                 calendar = self.calendar,
                                 business_day_convention = self.rate_business_day_convention,
-                                start_day = None)start_date + end_period #need roll convention: ddc, bdc, holiday, date
+                                start_day = None)#start_date + end_period #need roll convention: ddc, bdc, holiday, date
 
 
 
