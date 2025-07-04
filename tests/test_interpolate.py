@@ -6,15 +6,21 @@ from rivapy.tools.enums import InterpolationType, ExtrapolationType
 class TestInterpolator(unittest.TestCase):
 
     def setUp(self):
+        """Test data, simple linear case. Extend to more robust if requested.
+        """
         self.x = [0, 1, 2, 3]
         self.y = [0, 10, 20, 30]
 
     def test_linear_interpolation_scalar(self):
+        """Test single target x argument
+        """
         interpolator = Interpolator(InterpolationType.LINEAR, ExtrapolationType.LINEAR)
         result = interpolator.interp(self.x, self.y, 1.5, "LINEAR")
         self.assertAlmostEqual(result, 15.0)
 
     def test_linear_interpolation_list(self):
+        """Test multi target x arguments
+        """
         interpolator = Interpolator(InterpolationType.LINEAR, ExtrapolationType.LINEAR)
         result = interpolator.interp(self.x, self.y, [0.5, 1.5, 2.5], "LINEAR")
         expected = [5.0, 15.0, 25.0]
@@ -23,7 +29,7 @@ class TestInterpolator(unittest.TestCase):
             self.assertAlmostEqual(r, e)
 
     def test_linear_extrapolation_left_right(self):
-        """_summary_
+        """Test both edges of extrapolation.
         """
         interpolator = Interpolator(InterpolationType.LINEAR, ExtrapolationType.LINEAR)
         result = interpolator.interp(self.x, self.y, -1, "LINEAR")
@@ -55,7 +61,7 @@ class TestInterpolator(unittest.TestCase):
 
 
     def test_mismatched_length_raises(self):
-        """Test the case of incorrect data input lenngth mismatch.
+        """Test the case of incorrect data input length mismatch.
         """
         interpolator = Interpolator(InterpolationType.LINEAR, ExtrapolationType.LINEAR)
         with self.assertRaises(ValueError):
