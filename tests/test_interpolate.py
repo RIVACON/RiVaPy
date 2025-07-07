@@ -2,25 +2,23 @@ import unittest
 from rivapy.tools.interpolate import Interpolator
 from rivapy.tools.enums import InterpolationType, ExtrapolationType
 
-#, delta=1e-5 ?
+
+# , delta=1e-5 ?
 class TestInterpolator(unittest.TestCase):
 
     def setUp(self):
-        """Test data, simple linear case. Extend to more robust if requested.
-        """
+        """Test data, simple linear case. Extend to more robust if requested."""
         self.x = [0, 1, 2, 3]
         self.y = [0, 10, 20, 30]
 
     def test_linear_interpolation_scalar(self):
-        """Test single target x argument
-        """
+        """Test single target x argument"""
         interpolator = Interpolator(InterpolationType.LINEAR, ExtrapolationType.LINEAR)
         result = interpolator.interp(self.x, self.y, 1.5, "LINEAR")
         self.assertAlmostEqual(result, 15.0)
 
     def test_linear_interpolation_list(self):
-        """Test multi target x arguments
-        """
+        """Test multi target x arguments"""
         interpolator = Interpolator(InterpolationType.LINEAR, ExtrapolationType.LINEAR)
         result = interpolator.interp(self.x, self.y, [0.5, 1.5, 2.5], "LINEAR")
         expected = [5.0, 15.0, 25.0]
@@ -29,8 +27,7 @@ class TestInterpolator(unittest.TestCase):
             self.assertAlmostEqual(r, e)
 
     def test_linear_extrapolation_left_right(self):
-        """Test both edges of extrapolation.
-        """
+        """Test both edges of extrapolation."""
         interpolator = Interpolator(InterpolationType.LINEAR, ExtrapolationType.LINEAR)
         result = interpolator.interp(self.x, self.y, -1, "LINEAR")
         expected = -10.0  # slope = 10/unit, so -1 → -10 from given self.x and self.y
@@ -41,8 +38,7 @@ class TestInterpolator(unittest.TestCase):
         self.assertAlmostEqual(result, expected)
 
     def test_constant_extrapolation(self):
-        """Test the case of CONSTANT extrapolation mode selected.
-        """
+        """Test the case of CONSTANT extrapolation mode selected."""
         interpolator = Interpolator(InterpolationType.LINEAR, ExtrapolationType.CONSTANT)
         result_left = interpolator.interp(self.x, self.y, -10, "CONSTANT")
         result_right = interpolator.interp(self.x, self.y, 10, "CONSTANT")
@@ -59,13 +55,22 @@ class TestInterpolator(unittest.TestCase):
         with self.assertRaises(ValueError):
             interpolator.interp(self.x, self.y, 4, "NONE")
 
+    def test_no_extrapolationType_raises(self):
+        """Test for the case that extrapolation was set to NONE and the extrapolation
+        argument given is ExtrapolationType and not a str
+        """
+        interpolator = Interpolator(InterpolationType.LINEAR, ExtrapolationType.NONE)
+        with self.assertRaises(ValueError):
+            interpolator.interp(self.x, self.y, -1, ExtrapolationType.NONE)
+        with self.assertRaises(ValueError):
+            interpolator.interp(self.x, self.y, 4, ExtrapolationType.NONE)
 
     def test_mismatched_length_raises(self):
-        """Test the case of incorrect data input length mismatch.
-        """
+        """Test the case of incorrect data input length mismatch."""
         interpolator = Interpolator(InterpolationType.LINEAR, ExtrapolationType.LINEAR)
         with self.assertRaises(ValueError):
             interpolator.interp([0, 1, 2], [10, 20], 1.5, "LINEAR")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

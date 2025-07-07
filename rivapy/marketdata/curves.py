@@ -12,8 +12,6 @@ from datetime import datetime, date, timedelta
 from collections import defaultdict
 
 
-
-
 try:
     import tensorflow as tf
 
@@ -146,54 +144,61 @@ class DiscountCurve:
             )
         return self._pyvacon_obj
 
-
-    #experimental
+    # experimental
     def rivapy_value(self, refdate: Union[date, datetime], d: Union[date, datetime]) -> float:
         """Return discount factor for a given date (without dependencies from pyvacon)
 
         Args:
-            refdate (Union[date, datetime]): The reference date. If the reference date is in the future 
-                                            (compared to the curves reference date), the forward discount 
+            refdate (Union[date, datetime]): The reference date. If the reference date is in the future
+                                            (compared to the curves reference date), the forward discount
                                             factor will be returned.
-            d (Union[date, datetime]): The date for which the discount factor will be returned. Assumption 
-                                        is that the day given already follows correct business logic 
+            d (Union[date, datetime]): The date for which the discount factor will be returned. Assumption
+                                        is that the day given already follows correct business logic
                                         (e.g., roll convention)
 
         Returns:
             float: discount factor
         """
 
+        # {
+        # 	Analytics_ASSERT(calcDate == validFrom_, "given calcdate must equal refdate of curve");
+        # 	double t = nP_.dc->yf(validFrom_, date);
+        # 	return nP_.interp->compute(t);
+        # }
 
-        #{
-		#	Analytics_ASSERT(calcDate == validFrom_, "given calcdate must equal refdate of curve");
-		#	double t = nP_.dc->yf(validFrom_, date);
-		#	return nP_.interp->compute(t);
-		#}
-
-
-
-        # check valid dates 
-        if not isinstance(refdate, datetime): # handling date object -> datetime
+        # check valid dates
+        if not isinstance(refdate, datetime):  # handling date object -> datetime
             refdate = datetime(refdate, 0, 0, 0)
         if not isinstance(d, datetime):
             d = datetime(d, 0, 0, 0)
         if refdate < self.refdate:
             raise Exception("The given reference date is before the curves reference date.")
-        
 
         # get yearfrac, taking into account DCC
-        dcc = DayCounter(self.daycounter)        
-        yf_list = dcc.yf(self.refdate, self.get_dates())#[dcc.yf(self.refdate, x) for x in self.get_dates()]
+        dcc = DayCounter(self.daycounter)
+
+        yf_list = [dcc.yf(self.refdate, x) for x in self.get_dates()]  # list(dcc.yf(self.refdate, self.get_dates()))
         df_list = [x for x in self.get_df()]
 
-
         # interpolate/extrapolate given a chosen method
-        interp =  Interpolator(self.interpolation, self.extrapolation) # TODO reconsider functionality of feeding extrapolation type here
-        df = interp(yf_list, df_list, dcc.yf(d), self.extrapolation)
-        
+        interp = Interpolator(self.interpolation, self.extrapolation)
+
+        # temp testing delete when working
+        # print(self.extrapolation)
+        # print(f"x_data: {yf_list}")
+        # print(f"y_data: {df_list}")
+        # print(f"x_target: {dcc.yf(self.refdate,d)}")
+        # print(dcc.yf(refdate, d))
+
+        # give FWD value if given refdate is greater than curves reference date
+        if refdate > self.refdate:
+            df1 = interp.interp(yf_list, df_list, dcc.yf(self.refdate, refdate), self.extrapolation)
+            df2 = interp.interp(yf_list, df_list, dcc.yf(self.refdate, d), self.extrapolation)
+            df = df2 / df1
+        else:
+            df = interp.interp(yf_list, df_list, dcc.yf(self.refdate, d), self.extrapolation)
+
         return df
-
-
 
     def plot(self, days: int = 10, discount_factors: bool = False, **kwargs):
         """Plots the discount curve using matplotlibs plot function.
@@ -202,7 +207,7 @@ class DiscountCurve:
         Args:
             days (int, optional): The number of days between two plotted rates/discount factors. Defaults to 10.
             discount_factors (bool, optional): If True, discount factors will be plotted, otherwise the rates. Defaults to False.
-            **kwargs: optional arguments that will be directly passed to the matplotlib plto function
+            **kwargs: optional arguments that will be directly passed to the matplotlib plot function
         """
         dates = self.get_dates()
         dates_new = [dates[0]]
@@ -210,7 +215,16 @@ class DiscountCurve:
             while dates_new[-1] + timedelta(days=days) < dates[i]:
                 dates_new.append(dates_new[-1] + timedelta(days=days))
         dates_new.append(dates[-1])
-        values = [self.value(self.refdate, d) for d in dates_new]
+        # TODO: consider how best to deal with pyvacon version vs rivapy version
+        # if self._pyvacon_obj is None:
+        #    values = [self.rivapy_value(self.refdate, d) for d in dates_new]
+        # else:
+        #    values = [self.value(self.refdate, d) for d in dates_new]
+        ##values = [self.value(self.refdate, d) for d in dates_new]
+        try:
+            values = [self.value(self.refdate, d) for d in dates_new]
+        except:
+            values = [self.rivapy_value(self.refdate, d) for d in dates_new]
 
         if not discount_factors:
             for i in range(1, len(values)):
