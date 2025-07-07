@@ -195,7 +195,7 @@ class DiscountCurve:
             df1 = interp.interp(yf_list, df_list, dcc.yf(self.refdate, refdate), self.extrapolation)
             df2 = interp.interp(yf_list, df_list, dcc.yf(self.refdate, d), self.extrapolation)
             df = df2 / df1
-        else:
+        else:  # this also co ers the case if refdates are the same, and avoids division by zero
             df = interp.interp(yf_list, df_list, dcc.yf(self.refdate, d), self.extrapolation)
 
         return df
