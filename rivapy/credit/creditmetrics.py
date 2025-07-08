@@ -33,10 +33,10 @@ class creditMetricsModel():
             transition_matrix (np.matrix): Transition matrix (format np.matrix). S&P 8x8 matrix is integrated.
             position_data (pd.DataFrame): Dataframe with position data. Specific format is needed.
             issuer_data (pd.DataFrame): Dataframe with issuer data. Specific format is needed.
-            stock_data (pd.DataFrame): Dataframe with stock data. Stock data needs to inlclude close values of the differen issuers as well as a reference time series (e.g. Dax)
+            stock_data (pd.DataFrame): Dataframe with stock data. Stock data needs to include close values of the different issuers as well as a reference time series (e.g. Dax)
             r (float): Risk-free rate. Needed to comupute expected value of positions as well as different states during transition process.
             t (float): Dipositon horizon for calculation of credit risk.
-            RR (float): Fix recovery rate for CVaR calaculation
+            RR (float): Fix recovery rate for CVaR calculation
             confidencelevel (int): Used confidence level in VaR-Calculation. Format Int.
             seed (int, optional): Seed for random number generator. Defaults to None.
         """
