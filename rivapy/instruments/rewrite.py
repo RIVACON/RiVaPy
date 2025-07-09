@@ -1,33 +1,38 @@
 import abc
 from datetime import datetime, date
-from typing import List, Any, Optional, Union, Tuple
+from typing import List, Any, Optional, Union, Tuple, Dict
 from holidays import HolidayBase
 from holidays.financial import ECB
 from collections import defaultdict
-import QuantLib as ql
-from dateutil.relativedelta import relativedelta 
+import rivapy.tools.interfaces as interfaces
+from dateutil.relativedelta import relativedelta
 import logging
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 from rivapy.tools.enums import Currency, Rating, SecuritizationLevel, RollConvention
 from rivapy.tools.datetools import _date_to_datetime, Schedule, Period, DayCounterType, DayCounter
 from rivapy.tools._validators import _check_positivity, _check_start_before_end, _string_to_calendar
-from rivapy.tools.interfaces import BaseDatedCurve 
+from rivapy.tools.interfaces import BaseDatedCurve
 from scipy.optimize import brentq
+import numpy as np
 
 
-class BondSpec(abc.ABC):
+class BondBaseSpecification(interfaces.FactoryObject):
     """Abstract base class for bond specifications."""
-    def __init__(self,
-                 obj_id: str,
-                 schedule: 'Schedule', 
-                 notional: float,
-                 currency: Union[Currency, str],
-                 issue_date: Union[date, datetime],
-                 issuer: Optional[str] = None,
-                 securitization_level: Optional[Union[SecuritizationLevel, str]] = SecuritizationLevel.NONE,
-                 rating: Optional[Union[Rating, str]] = Rating.NONE):
+
+    def __init__(
+        self,
+        obj_id: str,
+        schedule: Schedule,
+        notional: float,
+        currency: Union[Currency, str],
+        issue_date: Union[date, datetime],
+        issuer: Optional[str] = None,
+        securitization_level: Optional[Union[SecuritizationLevel, str]] = SecuritizationLevel.NONE,
+        rating: Optional[Union[Rating, str]] = Rating.NONE,
+    ):
         """
         Initializes the base bond specification.
 
@@ -42,28 +47,42 @@ class BondSpec(abc.ABC):
             rating (Optional[Union[Rating, str]], optional): The credit rating of the bond. Defaults to Rating.NONE.
         """
 
-        self.obj_id = obj_id 
+        self.obj_id = obj_id
 
         if not isinstance(schedule, Schedule):
-            raise TypeError("schedule must be an instance of rivapy.tools.datetools.Schedule.") 
-        
-        self._schedule = schedule 
-        self.notional = notional 
-        self.currency = currency 
-        self.issue_date = issue_date 
+            raise TypeError("schedule must be an instance of rivapy.tools.datetools.Schedule.")
+
+        self._schedule = schedule
+        self.notional = notional
+        self.currency = currency
+        self.issue_date = issue_date
         self.issuer = issuer
         self.securitization_level = securitization_level
         self.rating = rating
 
         _check_start_before_end(self.issue_date, self.maturity_date)
 
+    def _to_dict(self) -> Dict:
+        # TODO: further addtion to the dictionary like Schedule
+        return_dict = {
+            "obj_id": self.obj_id,
+            "issuer": self.issuer,
+            "securitization_level": self.securitization_level,
+            "issue_date": self.issue_date,
+            "maturity_date": self.maturity_date,
+            "currency": self.currency,
+            "notional": self.notional,
+            "rating": self.rating,
+        }
+        return return_dict
+
     @property
-    def schedule(self) -> 'Schedule':
+    def schedule(self) -> Schedule:
         """The bond's schedule of payments."""
         return self._schedule
 
     @property
-    def issue_date(self) -> datetime: 
+    def issue_date(self) -> datetime:
         """The bond's issue date as a datetime object."""
         return self._issue_date
 
@@ -72,9 +91,9 @@ class BondSpec(abc.ABC):
         self._issue_date = _date_to_datetime(value)
 
     @property
-    def maturity_date(self) -> datetime: 
+    def maturity_date(self) -> datetime:
         """The bond's maturity date, derived from the schedule's end date."""
-        return _date_to_datetime(self._schedule.end_day) 
+        return _date_to_datetime(self._schedule.end_day)
 
     @property
     def notional(self) -> float:
@@ -86,7 +105,7 @@ class BondSpec(abc.ABC):
         self._notional = _check_positivity(value)
 
     @property
-    def currency(self) -> str: 
+    def currency(self) -> str:
         """The bond's currency as a string."""
         return self._currency
 
@@ -104,7 +123,7 @@ class BondSpec(abc.ABC):
         self._issuer = value
 
     @property
-    def securitization_level(self) -> str: 
+    def securitization_level(self) -> str:
         """The bond's securitization level as a string."""
         return self._securitization_level
 
@@ -113,7 +132,7 @@ class BondSpec(abc.ABC):
         self._securitization_level = SecuritizationLevel.to_string(value)
 
     @property
-    def rating(self) -> str: 
+    def rating(self) -> str:
         """The bond's credit rating as a string."""
         return self._rating
 
@@ -125,7 +144,7 @@ class BondSpec(abc.ABC):
     def expected_cashflows(self) -> List[Tuple[datetime, float]]:
         """
         Computes all expected cashflows of the bond.
-        
+
         Returns:
             List[Tuple[datetime, float]]: A list of tuples, where each tuple contains
                                           the payment date and the cashflow amount.
@@ -133,7 +152,7 @@ class BondSpec(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def compute_dirty_price(self, discount_curve: 'DiscountCurve') -> float:
+    def compute_dirty_price(self, discount_curve: "DiscountCurve") -> float:
         """
         Computes the dirty price of the bond.
         The dirty price is the price of a bond including any accrued interest.
@@ -145,8 +164,23 @@ class BondSpec(abc.ABC):
             float: The calculated dirty price.
         """
         pass
+
     @abc.abstractmethod
-    def compute_yield(self, price: float, val_date: datetime) -> float: 
+    def compute_clean_price(self, discount_curve: "DiscountCurve") -> float:
+        """
+        Computes the clean price of the bond by discounting all future cashflows.
+        The clean price is the price of a bond including any accrued interest.
+
+        Args:
+            discount_curve (DiscountCurve): The curve used to discount future cashflows.
+
+        Returns:
+            float: The calculated clean price.
+        """
+        pass
+
+    @abc.abstractmethod
+    def compute_yield(self, price: float, val_date: datetime) -> float:
         """
         Computes the yield-to-maturity (YTM) of the bond.
 
@@ -159,21 +193,25 @@ class BondSpec(abc.ABC):
         """
         pass
 
-class FixedRateBond(BondSpec):
+
+class FixedRateBond(BondBaseSpecification):
     """
     Represents a fixed-rate bond with regular coupon payments.
     """
-    def __init__(self,
-                 obj_id: str,
-                 schedule: 'Schedule',
-                 notional: float,
-                 currency: Union[Currency, str],
-                 issue_date: Union[date, datetime],
-                 coupon_rate: float, 
-                 issuer: Optional[str] = None,
-                 securitization_level: Optional[Union[SecuritizationLevel, str]] = SecuritizationLevel.NONE, 
-                 rating: Optional[Union[Rating, str]] = Rating.NONE,
-                 accrual_day_counter_type: DayCounterType = DayCounterType.ActActICMA): 
+
+    def __init__(
+        self,
+        obj_id: str,
+        schedule: Schedule,
+        notional: float,
+        currency: Union[Currency, str],
+        issue_date: Union[date, datetime],
+        coupon_rate: float,
+        issuer: Optional[str] = None,
+        securitization_level: Optional[Union[SecuritizationLevel, str]] = SecuritizationLevel.NONE,
+        rating: Optional[Union[Rating, str]] = Rating.NONE,
+        accrual_day_counter_type: DayCounterType = DayCounterType.ActActICMA,
+    ):
         """
         Initializes a fixed-rate bond.
 
@@ -190,42 +228,66 @@ class FixedRateBond(BondSpec):
             accrual_day_counter_type (DayCounterType, optional): The day count convention for accrual calculations. Defaults to DayCounterType.ActActICMA.
         """
         super().__init__(obj_id, schedule, notional, currency, issue_date, issuer, securitization_level, rating)
-        if coupon_rate < 0: 
+        if coupon_rate < 0:
             raise ValueError("Coupon rate must be non-negative.")
-        self.coupon_rate = coupon_rate 
+        self.coupon_rate = coupon_rate
         self._accrual_day_counter = DayCounter(accrual_day_counter_type)
         self.accrual_day_counter_type = accrual_day_counter_type
-    
-    def _get_coupon_frequency_and_reference_period_days(self, payment_date: datetime) -> Tuple[float, int]:
-        """
-        Helper to get coupon frequency and days in reference period for a payment date.
-        This is primarily used for the Act/Act ICMA day count convention.
 
-        Args:
-            payment_date (datetime): The payment date of a coupon period.
+        self.coupon_freq = self._schedule.time_period
 
-        Returns:
-            Tuple[float, int]: A tuple containing the numeric coupon frequency (e.g., 1.0 for annual, 2.0 for semi-annual)
-                               and the number of days in a regular coupon period."""
-                
-        coupon_frequency = 0.0
-        if self._schedule.time_period.years > 0:
-            coupon_frequency = 1.0 / self._schedule.time_period.years
-        elif self._schedule.time_period.months > 0:
-            coupon_frequency = 12.0 / self._schedule.time_period.months
-        elif self._schedule.time_period.days > 0: 
-            coupon_frequency = 365.25 / self._schedule.time_period.days 
+        if self.accrual_day_counter_type == DayCounterType.ActActICMA:
+            _check = False
+            for cp_freq_str in ["1Y", "6M", "3M"]:
+                if self.coupon_freq == Period.from_string(cp_freq_str):
+                    _check = True
+                    break
+            if _check == False:
+                raise ValueError("For the Act/Act ICMA only a coupon frequency of 1Y, 6M or 3M is supported!")
+
+        self.cashflows = self.expected_cashflows()
+
+    def _to_dict(self):
+        return super()._to_dict()
+
+    @staticmethod
+    def _create_sample(n_samples: int, seed: int = None):
+        result = []
+        if seed is not None:
+            np.random.seed(seed)
+
+        issue_date = datetime(2025, 1, 1)
+        maturity_date = datetime(2027, 1, 1)
+        notional = 100.0
+        currency = Currency.EUR
+        securitization_level = SecuritizationLevel.SUBORDINATED
+        daycounter = DayCounterType.ACT_ACT
+        for i in range(n_samples):
+            coupon_rate = np.random.choice([0.0, 0.01, 0.03, 0.05])
+            period = np.random.choice(["1Y", "6M", "3M"])
+            schedule = Schedule(
+                start_day=issue_date, end_day=maturity_date, time_period=Period.from_string(period), business_day_convention=RollConvention.UNADJUSTED
+            )
+            result.append(
+                {
+                    "obj_id": f"ID_{i}",
+                    "schedule": schedule,
+                    "notional": notional,
+                    "currency": currency,
+                    "issue_date": issue_date,
+                    "coupon_rate": coupon_rate,
+                    "securitization_level": securitization_level,
+                    "accrual_day_counter_type": daycounter,
+                }
+            )
+
+    def _get_coupon_frequency(self):
+        if self.coupon_freq.years > 0:
+            coupon_frequency = 1.0 / self.coupon_freq.years
         else:
-            coupon_frequency = 1.0 
+            coupon_frequency = 12.0 / self.coupon_freq.months
 
-        
-        ref_period_start_dt = payment_date - relativedelta(
-            years=self._schedule.time_period.years,
-            months=self._schedule.time_period.months,
-            days=self._schedule.time_period.days
-        )
-        regular_coupon_period_in_days = (payment_date - ref_period_start_dt).days
-        return coupon_frequency, regular_coupon_period_in_days
+        return coupon_frequency
 
     def expected_cashflows(self) -> List[Tuple[datetime, float]]:
         """
@@ -235,40 +297,30 @@ class FixedRateBond(BondSpec):
             List[Tuple[datetime, float]]: A sorted list of (date, amount) tuples for each cashflow.
         """
         # Generate all schedule dates, which are already business-day adjusted
-        all_schedule_dates = self._schedule.generate_dates(ends_only=False)  
-
-        if len(all_schedule_dates) < 2:
-            # Only notional at maturity if it's after issue date
-            if self.maturity_date >= self.issue_date:
-                return [(self.maturity_date, self.notional)]
-            return []
+        all_schedule_dates = self._schedule.generate_dates(ends_only=False)
 
         cashflows = []
         # Get frequency information needed for Act/Act ICMA calculation
-        coupon_freq_numeric, _ = self._get_coupon_frequency_and_reference_period_days(all_schedule_dates[1])
-        coupon_frequency_int = int(coupon_freq_numeric)
+        coupon_freq = self._get_coupon_frequency()
 
         # --- Iterate over all coupon periods ---
         for i in range(len(all_schedule_dates) - 1):
             period_start_dt = _date_to_datetime(all_schedule_dates[i])
-            payment_date_dt = _date_to_datetime(all_schedule_dates[i+1])
+            payment_date_dt = _date_to_datetime(all_schedule_dates[i + 1])
 
             # Skip cashflows that are paid out before or on the issue date
             if payment_date_dt <= self.issue_date:
-                continue 
+                continue
 
             # The accrual for the coupon calculation always uses the full period from the schedule
             # to correctly handle stub periods (short/long first or last coupons).
             year_fraction_for_coupon = self._accrual_day_counter.yf(
-                period_start_dt, payment_date_dt,
-                coupon_schedule=all_schedule_dates,
-                coupon_frequency=coupon_frequency_int
+                period_start_dt, payment_date_dt, coupon_schedule=all_schedule_dates, coupon_frequency=coupon_freq  # coupon_frequency_int
             )
 
             coupon_amount = self.notional * self.coupon_rate * year_fraction_for_coupon
-            if coupon_amount > 0.0: 
+            if coupon_amount > 0.0:
                 cashflows.append((payment_date_dt, coupon_amount))
-            logger.debug(f"  RiVaPy YF Detail: Accrual {period_start_dt.strftime('%Y-%m-%d')} to {payment_date_dt.strftime('%Y-%m-%d')}, DayCount: {self.accrual_day_counter_type.name}, YF: {year_fraction_for_coupon:.8f}")
 
         # Add notional at maturity date (which is the last date in the schedule)
         maturity_payment_date = _date_to_datetime(all_schedule_dates[-1])
@@ -281,7 +333,7 @@ class FixedRateBond(BondSpec):
             # Normalize datetime to date to ensure correct grouping if time components differ
             normalized_date = cf_date.replace(hour=0, minute=0, second=0, microsecond=0)
             combined_cashflows[normalized_date] += amount
-        
+
         # Convert back to list of tuples and sort by date
         return sorted(combined_cashflows.items(), key=lambda x: x[0])
 
@@ -306,84 +358,72 @@ class FixedRateBond(BondSpec):
         if val_date_dt >= self.maturity_date or val_date_dt < self.issue_date:
             return 0.0
 
-        all_coupon_schedule_dates = self._schedule.generate_dates(ends_only=False) 
-        
+        all_coupon_schedule_dates = self._schedule.generate_dates(ends_only=False)
+
         current_accrual_start = None
         current_accrual_end = None
 
-        if len(all_coupon_schedule_dates) < 2: 
+        if len(all_coupon_schedule_dates) < 2:
             return 0.0
 
         # Find the coupon period that contains the valuation date
         for i in range(len(all_coupon_schedule_dates) - 1):
             p_start_dt = _date_to_datetime(all_coupon_schedule_dates[i])
-            p_end_dt = _date_to_datetime(all_coupon_schedule_dates[i+1])
-            
-            
+            p_end_dt = _date_to_datetime(all_coupon_schedule_dates[i + 1])
+
             if p_start_dt <= val_date_dt < p_end_dt:
                 current_accrual_start = p_start_dt
                 current_accrual_end = p_end_dt
                 break
-        
+
         if current_accrual_start is None or current_accrual_end is None:
             return 0.0
 
         # Get frequency information needed for Act/Act ICMA
-        coupon_frequency, regular_coupon_period_in_days = \
-            self._get_coupon_frequency_and_reference_period_days(current_accrual_end)
+        coupon_frequency = self._get_coupon_frequency()
 
         # Calculate accrued interest year fraction for the period [current_accrual_start, val_date_dt]
-        if self.accrual_day_counter_type == DayCounterType.ActActICMA:
-            accrued_year_fraction = self._accrual_day_counter.yf(
-                current_accrual_start, val_date_dt, 
-                all_coupon_schedule_dates, int(coupon_frequency)
-            )
-        else: 
-            accrued_year_fraction = self._accrual_day_counter.yf(
-                current_accrual_start, val_date_dt
-            )
-
-        
+        accrued_year_fraction = self._accrual_day_counter.yf(current_accrual_start, val_date_dt, all_coupon_schedule_dates, coupon_frequency)
         return self.notional * self.coupon_rate * accrued_year_fraction
 
-    def compute_dirty_price(self, discount_curve: 'DiscountCurve') -> float:
+    def compute_clean_price(self, discount_curve: "DiscountCurve") -> float:
         """
-        Computes the dirty price of the bond by discounting all future cashflows.
-        The dirty price is the price of a bond including any accrued interest.
+        Computes the clean price of the bond by discounting all future cashflows.
+        The clean price is the price of a bond including any accrued interest.
 
         Args:
             discount_curve (DiscountCurve): The curve used to discount future cashflows.
 
         Returns:
-            float: The calculated dirty price.
+            float: The calculated clean price.
         """
         val_date_dt = _date_to_datetime(discount_curve.valuation_date)
-        cashflows = self.expected_cashflows()
+        # cashflows = self.cashflows#self.expected_cashflows()
         pv_cashflows = 0.0
-        for c in cashflows:
+        for c in self.cashflows:
             if c[0] > val_date_dt:
                 df = discount_curve.value(val_date_dt, c[0])
                 pv_cashflows += df * c[1]
         return pv_cashflows
 
-    def compute_clean_price(self, discount_curve: 'DiscountCurve') -> float:
+    def compute_dirty_price(self, discount_curve: "DiscountCurve") -> float:
         """
-        Computes the clean price of the bond.
-        Clean Price = Dirty Price - Accrued Interest.
+        Computes the dirty price of the bond.
+        Dirty Price = Clean Price + Accrued Interest.
 
         Args:
             discount_curve (DiscountCurve): The curve used to discount future cashflows.
 
         Returns:
-            float: The clean price of the bond.
+            float: The dirty price of the bond.
         """
-        dirty_price = self.compute_dirty_price(discount_curve)
+        clean_price = self.compute_clean_price(discount_curve)
         accrued = self.compute_accrued_interest(discount_curve.valuation_date)
-        return dirty_price - accrued
+        return clean_price + accrued
 
-    def compute_yield(self, dirty_price: float, val_date: datetime,
-                        yield_search_lower_bound: float = -0.2, 
-                        yield_search_upper_bound: float = 1.5) -> float: 
+    def compute_yield(
+        self, dirty_price: float, val_date: datetime, yield_search_lower_bound: float = -0.2, yield_search_upper_bound: float = 1.5
+    ) -> float:
         """
         Computes the yield-to-maturity (YTM) for a given dirty price.
         This method uses the brentq root-finding algorithm to find the yield that
@@ -399,53 +439,47 @@ class FixedRateBond(BondSpec):
             float: The calculated yield-to-maturity (annually compounded).
         """
         valuation_datetime = _date_to_datetime(val_date)
-        cashflows = self.expected_cashflows()
-        
+        # cashflows = self.expected_cashflows()
+
         # For ActActICMA, we need the schedule and frequency for the day counter
-        all_schedule_dates = None
-        coupon_frequency_int = None
-        if self.accrual_day_counter_type == DayCounterType.ActActICMA:
-            all_schedule_dates = self._schedule.generate_dates(ends_only=False)
-            if len(all_schedule_dates) > 1:
-                coupon_freq_numeric, _ = self._get_coupon_frequency_and_reference_period_days(all_schedule_dates[1])
-                coupon_frequency_int = int(coupon_freq_numeric)
+        all_schedule_dates = [_date for _date, cpn in self.cashflows]
+        coupon_freq = self._get_coupon_frequency()
 
-        
-
-        def target_function(r: float)->float:
+        def target_function(r: float) -> float:
             """
             Calculates the difference between the PV of cashflows (for a given yield r) and the dirty price.
             The root of this function is the desired YTM.
             """
             # Calculate the dirty price for a given yield 'r' without creating a full DiscountCurve object. This ensures we use the bond's specific day counter for the yield calculation, matching QuantLib.
             pv_cashflows = 0.0
-            for cf_date, amount in cashflows:
+            for cf_date, amount in self.cashflows:
                 if cf_date > valuation_datetime:
                     # Calculate year fraction for discounting using the bond's accrual day counter
-                    yf = self._accrual_day_counter.yf(valuation_datetime, cf_date, 
-                                                      coupon_schedule=all_schedule_dates, 
-                                                      coupon_frequency=coupon_frequency_int)
-                    
+                    yf = self._accrual_day_counter.yf(valuation_datetime, cf_date, coupon_schedule=all_schedule_dates, coupon_frequency=coupon_freq)
+
                     # Discount the cashflow (annually compounded, matching QL's default)
                     df = 1.0 / ((1.0 + r) ** yf)
                     pv_cashflows += df * amount
-            
+
             return pv_cashflows - dirty_price
-        
+
         # Use brentq to find the root of the target function (i.e., the yield)
-        result =  brentq(target_function, yield_search_lower_bound, yield_search_upper_bound, 
-                         full_output = False)
+        result = brentq(target_function, yield_search_lower_bound, yield_search_upper_bound, full_output=False)
         return result
+
 
 class DiscountCurve(BaseDatedCurve):
     """
     A simple discount curve implementation based on a single flat interest rate.
     """
-    def __init__(self, 
-                 valuation_date: Union[date, datetime], 
-                 flat_rate: Optional[float] = 0.05,
-                 curve_data: Any = None,
-                 day_counter_type: DayCounterType = DayCounterType.Act365Fixed): 
+
+    def __init__(
+        self,
+        valuation_date: Union[date, datetime],
+        flat_rate: Optional[float] = 0.05,
+        curve_data: Any = None,
+        day_counter_type: DayCounterType = DayCounterType.Act365Fixed,
+    ):
         """
         Initializes the flat discount curve.
 
@@ -457,7 +491,7 @@ class DiscountCurve(BaseDatedCurve):
         """
         self.valuation_date = valuation_date
         self._flat_rate = flat_rate
-        self._curve_data = curve_data # Placeholder for more complex curve data
+        self._curve_data = curve_data  # Placeholder for more complex curve data
         self._day_counter = DayCounter(day_counter_type)
 
     @property
@@ -481,13 +515,13 @@ class DiscountCurve(BaseDatedCurve):
         """
         val_date_dt = _date_to_datetime(self.valuation_date)
         target_date_dt = _date_to_datetime(target_date)
-        
+
         if target_date_dt < val_date_dt:
-            return 0.0 
+            return 0.0
         time_to_maturity_years = self._day_counter.yf(val_date_dt, target_date_dt)
-        rate_to_use = self._flat_rate if self._flat_rate is not None else 0.02 # Fallback if flat_rate is None
+        rate_to_use = self._flat_rate if self._flat_rate is not None else 0.02  # Fallback if flat_rate is None
         return 1 / ((1 + rate_to_use) ** time_to_maturity_years)
-    
+
     def value(self, ref_date: datetime, target_date: datetime) -> float:
         """
         Returns the discount factor from a reference date to a target date.
@@ -508,180 +542,52 @@ class DiscountCurve(BaseDatedCurve):
             raise ValueError(f"Reference date {ref_date} does not match DiscountCurve valuation date {self.valuation_date}")
         return self.get_discount_factor(target_date)
 
-def run_comparison_example():
-    """
-    Runs a comparison example between the RiVaPy bond implementation and QuantLib.
-    This function sets up a specific bond and market scenario, calculates various
-    metrics (prices, accrued interest, yield) using both libraries, and prints
-    a summary of the differences.
-    """
-    # --- Bond and Market Parameters ---
-    obj_id = 'DE000CZ40NT7'
+
+if __name__ == "__main__":
+    obj_id = "DE000CZ40NT7"
     issue_date_dt = date(2019, 2, 1)
     maturity_date_dt = date(2021, 2, 1)
-    coupon_rate_val = 0.0  
-    tenor_period = Period(years=1)  
-    notional_val = 100000.0
-    currency_val = 'EUR'
-    issuer_val = 'Commerzbank'
+    coupon_rate_val = 0.03
+    tenor_period = Period(years=1)
+    notional_val = 100.0
+    currency_val = "EUR"
+    issuer_val = "Commerzbank"
     securitisation_level_val = SecuritizationLevel.NON_PREFERRED_SENIOR
     valuation_date_dt = date(2020, 2, 1)
-    flat_rate_val = 0.02 
-    
+    flat_rate_val = 0.02
+    coupon_freq = Period(months=6)
+
     # --- RiVaPy Setup ---
     # Create a payment schedule for the bond
-    rivapy_schedule = Schedule(start_day=issue_date_dt,           
-                               end_day=maturity_date_dt,           
-                               time_period=tenor_period,       
-                               backwards=True,
-                               stub=True, 
-                               business_day_convention=RollConvention.FOLLOWING,
-                               calendar=ECB(years=range(issue_date_dt.year, maturity_date_dt.year + 2)))
+    rivapy_schedule = Schedule(
+        start_day=issue_date_dt,
+        end_day=maturity_date_dt,
+        time_period=tenor_period,
+        backwards=True,
+        stub=True,
+        business_day_convention=RollConvention.FOLLOWING,
+        calendar=ECB(years=range(issue_date_dt.year, maturity_date_dt.year + 2)),
+    )
 
     # Create the RiVaPy FixedRateBond instance
-    rivapy_bond = FixedRateBond(obj_id=obj_id,
-                                schedule=rivapy_schedule, 
-                                notional=notional_val,
-                                currency=currency_val,
-                                issue_date=issue_date_dt,
-                                coupon_rate=coupon_rate_val,
-                                issuer=issuer_val, 
-                                securitization_level=securitisation_level_val, 
-                                accrual_day_counter_type=DayCounterType.ACT_ACT) 
-    
-    
-    # Create a simple flat discount curve
-    rivapy_discount_curve = DiscountCurve(valuation_date=valuation_date_dt, 
-                                          flat_rate=flat_rate_val,
-                                          day_counter_type=DayCounterType.ACT_ACT)  
+    rivapy_bond = FixedRateBond(
+        obj_id=obj_id,
+        schedule=rivapy_schedule,
+        notional=notional_val,
+        currency=currency_val,
+        issue_date=issue_date_dt,
+        coupon_rate=coupon_rate_val,
+        coupon_freq=coupon_freq,
+        issuer=issuer_val,
+        securitization_level=securitisation_level_val,
+        accrual_day_counter_type=DayCounterType.ACT_ACT,
+    )
+    valuation_date = date(2020, 4, 1)
+    curve = DiscountCurve(valuation_date=valuation_date, flat_rate=0.03, day_counter_type=DayCounterType.ACT_ACT)
 
-    # --- RiVaPy Calculations ---
-    rivapy_dirty_price = rivapy_bond.compute_dirty_price(rivapy_discount_curve)
-    rivapy_accrued_interest = rivapy_bond.compute_accrued_interest(valuation_date_dt)
-    rivapy_clean_price = rivapy_dirty_price - rivapy_accrued_interest 
-    rivapy_ytm = rivapy_bond.compute_yield(dirty_price=rivapy_dirty_price, val_date=valuation_date_dt)
-
-    # --- Debug Logging for RiVaPy ---
-    logger.debug("RiVaPy Cashflows:")
-    for cf_date, amount in rivapy_bond.expected_cashflows():
-        logger.debug(f"Date: {cf_date.strftime('%Y-%m-%d')}, Amount: {amount:.4f}")
-    logger.debug(f"RiVaPy Accrued Interest: {rivapy_accrued_interest:.4f}")
-    logger.debug(f"RiVaPy Dirty Price: {rivapy_dirty_price}")
-    logger.debug(f"RiVaPy Discount Factors:")
-    val_date_dt = _date_to_datetime(valuation_date_dt)
-    for cf_date, amount in rivapy_bond.expected_cashflows():
-        if cf_date >= val_date_dt:
-            df = rivapy_discount_curve.value(val_date_dt, cf_date)
-            logger.debug(f"Date: {cf_date.strftime('%Y-%m-%d')}, DF: {df:.8f}")
-
-    # --- QuantLib Setup ---
-    ql_valuation_date = ql.Date(valuation_date_dt.day, valuation_date_dt.month, valuation_date_dt.year)
-    ql.Settings.instance().evaluationDate = ql_valuation_date
-
-    # Define QuantLib calendar and conventions
-    ql_calendar = ql.TARGET() 
-    ql_convention = ql.Unadjusted 
-    
-    
-    # Create QuantLib schedule
-    ql_issue_date = ql.Date(issue_date_dt.day, issue_date_dt.month, issue_date_dt.year)
-    ql_maturity_date = ql.Date(maturity_date_dt.day, maturity_date_dt.month, maturity_date_dt.year)
-    ql_schedule = ql.Schedule(ql_issue_date, 
-                              ql_maturity_date, 
-                              ql.Period(ql.Annual), 
-                              ql_calendar,
-                              ql_convention,
-                              ql_convention, 
-                              ql.DateGeneration.Backward, 
-                              False) 
-
-    # Create QuantLib FixedRateBond instance
-    ql_accrual_day_counter = ql.ActualActual(ql.ActualActual.ISDA) 
-    ql_bond = ql.FixedRateBond(0, # SettlementTage
-                               notional_val,
-                               ql_schedule,
-                               [coupon_rate_val], 
-                               ql_accrual_day_counter,
-                               ql_convention, 
-                               100.0,
-                               ql_issue_date)
-                                
-
-    # Create QuantLib discount curve (YieldTermStructure)
-    ql_discount_day_counter = ql.ActualActual(ql.ActualActual.ISDA)
-    ql_discount_curve = ql.FlatForward(ql_valuation_date,
-                                       ql.QuoteHandle(ql.SimpleQuote(flat_rate_val)),
-                                       ql_discount_day_counter,
-                                       ql.Compounded, 
-                                       ql.Annual) 
-
-    # Set the pricing engine for the QuantLib bond
-    ql_bond_engine = ql.DiscountingBondEngine(ql.YieldTermStructureHandle(ql_discount_curve))
-    ql_bond.setPricingEngine(ql_bond_engine)
-
-    # --- QuantLib Calculations ---
-    # Prices are returned per 100 notional by default
-    ql_clean_price_per_100 = ql_bond.cleanPrice()
-    ql_dirty_price_per_100 = ql_bond.dirtyPrice()
-    ql_accrued_amount_per_100 = ql_bond.accruedAmount()
-
-    # Scale results to the bond's actual notional
-    scale_factor = notional_val / 100.0
-    ql_absolute_clean_price = ql_clean_price_per_100 * scale_factor
-    ql_absolute_dirty_price = ql_dirty_price_per_100 * scale_factor
-    ql_absolute_accrued_amount = ql_accrued_amount_per_100 * scale_factor
-
-    # Calculate Yield-to-Maturity in QuantLib
-    ql_dirty_price_object = ql.BondPrice(ql_dirty_price_per_100, ql.BondPrice.Dirty)
-    ql_ytm = ql_bond.bondYield(ql_dirty_price_object, 
-                               ql_accrual_day_counter,    
-                               ql.Compounded,             
-                               ql.Annual,                 
-                               ql_valuation_date,         
-                               1.0e-10, # Accuracy
-                               200) # Max iterations
-
-    # --- Debug Logging for QuantLib ---
-    logger.debug("\nQuantLib Cashflows and Year Fractions:")
-    for cf_idx, cf in enumerate(ql_bond.cashflows()):
-        coupon = ql.as_coupon(cf)
-        if coupon:
-            # For QuantLib coupons, the accrualPeriod() method directly gives the year fraction
-            # as calculated by its day counter for its specific accrual period.
-            yf_ql_coupon = coupon.accrualPeriod()
-            accrual_start_dt_ql = coupon.accrualStartDate()
-            accrual_end_dt_ql = coupon.accrualEndDate()
-            day_counter_name_ql = coupon.dayCounter().name()
-            
-            logger.debug(f"  QL CF {cf_idx+1}: Date: {cf.date().ISO()}, Amount: {cf.amount():.4f}, "
-                         f"Accrual: {accrual_start_dt_ql.ISO()} to {accrual_end_dt_ql.ISO()}, "
-                         f"DayCount: {day_counter_name_ql}, YF: {yf_ql_coupon:.8f}")
-        elif cf.amount() != 0: # e.g. Notional payment
-            logger.debug(f"  QL CF {cf_idx+1}: Date: {cf.date().ISO()}, Amount: {cf.amount():.4f} (Non-coupon, e.g., Notional)")
-            
-    logger.debug(f"QuantLib Accrued Interest: {ql_absolute_accrued_amount:.4f}")
-    logger.debug(f"QuantLib Clean Price: {ql_absolute_clean_price:.4f}")
-    logger.debug(f"QuantLib Discount Factors:")
-    for cf in ql_bond.cashflows():
-        if cf.date() >= ql_valuation_date:
-            t = ql_discount_day_counter.yearFraction(ql_valuation_date, cf.date())
-            df = ql_discount_curve.discount(cf.date())
-            logger.debug(f"Date: {cf.date().ISO()}, DF: {df:.8f}")
-
-    # --- Compare Differences ---
-    logger.debug("\nDetailed Differences:")
-    logger.debug(f"Accrued Interest Diff: {rivapy_accrued_interest - ql_absolute_accrued_amount:.4f}")
-    logger.debug(f"Clean Price Diff: {rivapy_clean_price - ql_absolute_clean_price:.4f}")
-    logger.debug(f"Dirty Price Diff: {rivapy_dirty_price - ql_absolute_dirty_price:.4f}")
-    logger.debug(f"YTM Diff: {(rivapy_ytm - ql_ytm)*100:.4f}%")
-
-    # --- Comparison Summary ---
-    print("\n--- Comparison Summary ---")
-    print(f"Clean Price Difference (RiVaPy - QuantLib): {currency_val} {rivapy_clean_price - ql_absolute_clean_price:,.4f}")
-    print(f"Dirty Price Difference (RiVaPy - QuantLib): {currency_val} {rivapy_dirty_price - ql_absolute_dirty_price:,.4f}")
-    print(f"Yield Difference (RiVaPy - QuantLib): {(rivapy_ytm - ql_ytm)*100:.4f}%")
-    print(f"RiVaPy Clean Price: {rivapy_clean_price:,.4f}, QuantLib Absolute Clean Price: {ql_absolute_clean_price:,.4f}")
-
-
-if __name__ == '__main__':
-    run_comparison_example()
+    rivapy_bond.expected_cashflows()
+    rivapy_bond.compute_accrued_interest(valuation_date=valuation_date)
+    rivapy_bond.compute_clean_price(discount_curve=curve)
+    dirty_price = rivapy_bond.compute_dirty_price(discount_curve=curve)
+    rivapy_bond.compute_yield(dirty_price=dirty_price, val_date=valuation_date)
+    print()
