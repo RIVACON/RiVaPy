@@ -590,7 +590,7 @@ class IRFloatLegSpecification(IRSwapBaseSpecification)
         return self.__reference_index
 
 
-class InterestRateSwap(IRFixedLegSpecification, IRFloatLegSpecification):
+class InterestRateSwapSpecification(IRFixedLegSpecification, IRFloatLegSpecification):
     def __init__(
         self,
         obj_id: str,
