@@ -13,7 +13,12 @@ from rivapy.instruments.bond_specifications import (
 from rivapy.instruments.energy_futures_specifications import EnergyFutureSpecifications
 from rivapy.instruments.deposit_specifications import DepositSpecification
 from rivapy.instruments.fra_specifications import ForwardRateAgreementSpecification
-from rivapy.instruments.ir_swap_specification import InterestRateSwapSpecification, IRFixedLegSpecification, IRFloatLegSpecification
+from rivapy.instruments.ir_swap_specification import (
+    IrSwapLegSpecification,
+    IrFixedLegSpecification,
+    IrFloatLegSpecification,
+    InterestRateSwapSpecification,
+)
 
 
 def _add_to_factory(cls):
@@ -24,12 +29,13 @@ def _add_to_factory(cls):
 _add_to_factory(Issuer)
 _add_to_factory(PPASpecification)
 _add_to_factory(GreenPPASpecification)
-_add_to_factory(ZeroCouponBondSpecification)
+_add_to_factory(ZeroCouponBondSpecification)  # do these need to be removed? if commented out in bond_specification
 _add_to_factory(FixedRateBondSpecification)
 _add_to_factory(PlainVanillaCouponBondSpecification)
 _add_to_factory(EnergyFutureSpecifications)
 _add_to_factory(DepositSpecification)
 _add_to_factory(ForwardRateAgreementSpecification)
+_add_to_factory(IrSwapLegSpecification)
+_add_to_factory(IrFixedLegSpecification)
+_add_to_factory(IrFloatLegSpecification)
 _add_to_factory(InterestRateSwapSpecification)
-_add_to_factory(IRFixedLegSpecification)
-_add_to_factory(IRFloatLegSpecification)
