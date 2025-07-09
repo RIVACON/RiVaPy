@@ -11,6 +11,9 @@ from rivapy.tools._validators import _check_positivity, _check_start_before_end,
 from datetime import datetime, date, timedelta
 from holidays import HolidayBase as _HolidayBase, ECB as _ECB
 
+# placeholder
+from rivapy.marketdata.curves import DummyFlatDiscountCurve as DiscountCurve
+
 
 class BondBaseSpecification(interfaces.FactoryObject):
     """Abstract base class for bond specifications."""
@@ -145,7 +148,7 @@ class BondBaseSpecification(interfaces.FactoryObject):
         pass
 
     @abc.abstractmethod
-    def compute_dirty_price(self, discount_curve: "DiscountCurve") -> float:
+    def compute_dirty_price(self, discount_curve: DiscountCurve) -> float:
         """
         Computes the dirty price of the bond.
         The dirty price is the price of a bond including any accrued interest.
@@ -159,7 +162,7 @@ class BondBaseSpecification(interfaces.FactoryObject):
         pass
 
     @abc.abstractmethod
-    def compute_clean_price(self, discount_curve: "DiscountCurve") -> float:
+    def compute_clean_price(self, discount_curve: DiscountCurve) -> float:
         """
         Computes the clean price of the bond by discounting all future cashflows.
         The clean price is the price of a bond including any accrued interest.
@@ -379,7 +382,7 @@ class FixedRateBond(BondBaseSpecification):
         accrued_year_fraction = self._accrual_day_counter.yf(current_accrual_start, val_date_dt, all_coupon_schedule_dates, coupon_frequency)
         return self.notional * self.coupon_rate * accrued_year_fraction
 
-    def compute_clean_price(self, discount_curve: "DiscountCurve") -> float:
+    def compute_clean_price(self, discount_curve: DiscountCurve) -> float:
         """
         Computes the clean price of the bond by discounting all future cashflows.
         The clean price is the price of a bond including any accrued interest.
@@ -399,7 +402,7 @@ class FixedRateBond(BondBaseSpecification):
                 pv_cashflows += df * c[1]
         return pv_cashflows
 
-    def compute_dirty_price(self, discount_curve: "DiscountCurve") -> float:
+    def compute_dirty_price(self, discount_curve: DiscountCurve) -> float:
         """
         Computes the dirty price of the bond.
         Dirty Price = Clean Price + Accrued Interest.
