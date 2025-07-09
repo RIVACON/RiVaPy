@@ -269,7 +269,7 @@ class DummyFlatDiscountCurve(interfaces.BaseDatedCurve):
     def valuation_date(self, value: Union[date, datetime]):
         self._valuation_date = _date_to_datetime(value)
 
-    def get_discount_factor(self, target_date: Union[date, datetime]) -> float:
+    def get_discount_factor(self, target_date: Union[date, datetime], spread: float) -> float:
         """
         Calculates the discount factor from the valuation date to a target date.
 
@@ -286,9 +286,9 @@ class DummyFlatDiscountCurve(interfaces.BaseDatedCurve):
             return 0.0
         time_to_maturity_years = self._day_counter.yf(val_date_dt, target_date_dt)
         rate_to_use = self._flat_rate if self._flat_rate is not None else 0.02  # Fallback if flat_rate is None
-        return 1 / ((1 + rate_to_use) ** time_to_maturity_years)
+        return 1 / ((1 + rate_to_use + spread) ** time_to_maturity_years)
 
-    def value(self, ref_date: datetime, target_date: datetime) -> float:
+    def value(self, ref_date: datetime, target_date: datetime, spread: float) -> float:
         """
         Returns the discount factor from a reference date to a target date.
         For this simple implementation, the reference date must be the curve's valuation date.
@@ -306,7 +306,7 @@ class DummyFlatDiscountCurve(interfaces.BaseDatedCurve):
         # Ensure ref_date matches the curve's valuation_date for this simple implementation
         if _date_to_datetime(ref_date).date() != self.valuation_date.date():
             raise ValueError(f"Reference date {ref_date} does not match DiscountCurve valuation date {self.valuation_date}")
-        return self.get_discount_factor(target_date)
+        return self.get_discount_factor(target_date, spread=spread)
 
 
 class NelsonSiegel(interfaces.FactoryObject):

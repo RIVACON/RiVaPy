@@ -203,6 +203,7 @@ class FixedRateBond(BondBaseSpecification):
         currency: Union[Currency, str],
         issue_date: Union[date, datetime],
         coupon_rate: float,
+        spread: float = 0.0,
         issuer: Optional[str] = None,
         securitization_level: Optional[Union[SecuritizationLevel, str]] = SecuritizationLevel.NONE,
         rating: Optional[Union[Rating, str]] = Rating.NONE,
@@ -219,6 +220,7 @@ class FixedRateBond(BondBaseSpecification):
             issue_date (Union[date, datetime]): The date the bond was issued.
             coupon_rate (float): The annual coupon rate (e.g., 0.05 for 5%).
             issuer (Optional[str], optional): The issuer of the bond. Defaults to None.
+            spread (float): Credit spread.
             securitization_level (Optional[Union[SecuritizationLevel, str]], optional): The securitization level. Defaults to SecuritizationLevel.NONE.
             rating (Optional[Union[Rating, str]], optional): The credit rating of the bond. Defaults to Rating.NONE.
             accrual_day_counter_type (DayCounterType, optional): The day count convention for accrual calculations. Defaults to DayCounterType.ActActICMA.
@@ -227,6 +229,8 @@ class FixedRateBond(BondBaseSpecification):
         if coupon_rate < 0:
             raise ValueError("Coupon rate must be non-negative.")
         self.coupon_rate = coupon_rate
+        self.spread = spread
+
         self._accrual_day_counter = DayCounter(accrual_day_counter_type)
         self.accrual_day_counter_type = accrual_day_counter_type
 
@@ -398,7 +402,7 @@ class FixedRateBond(BondBaseSpecification):
         pv_cashflows = 0.0
         for c in self.cashflows:
             if c[0] > val_date_dt:
-                df = discount_curve.value(val_date_dt, c[0])
+                df = discount_curve.value(val_date_dt, c[0], spread=self.spread)
                 pv_cashflows += df * c[1]
         return pv_cashflows
 
@@ -454,7 +458,7 @@ class FixedRateBond(BondBaseSpecification):
                     yf = self._accrual_day_counter.yf(valuation_datetime, cf_date, coupon_schedule=all_schedule_dates, coupon_frequency=coupon_freq)
 
                     # Discount the cashflow (annually compounded, matching QL's default)
-                    df = 1.0 / ((1.0 + r) ** yf)
+                    df = 1.0 / ((1.0 + r + self.spread) ** yf)
                     pv_cashflows += df * amount
 
             return pv_cashflows - dirty_price
