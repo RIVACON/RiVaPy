@@ -3,13 +3,14 @@ from rivapy.instruments.specifications import *
 from rivapy.instruments.components import Issuer
 from rivapy.instruments.cds_specification import CDSSpecification
 from rivapy.instruments.ppa_specification import PPASpecification, GreenPPASpecification
-from rivapy.instruments.bond_specifications import (
-    ZeroCouponBondSpecification,
-    FixedRateBondSpecification,
-    PlainVanillaCouponBondSpecification,
-    FloatingRateNoteSpecification,
-    FixedToFloatingRateNoteSpecification,
-)
+
+# from rivapy.instruments.bond_specifications import (
+#     ZeroCouponBondSpecification,
+#     FixedRateBondSpecification,
+#     PlainVanillaCouponBondSpecification,
+#     FloatingRateNoteSpecification,
+#     FixedToFloatingRateNoteSpecification,
+# )
 from rivapy.instruments.energy_futures_specifications import EnergyFutureSpecifications
 from rivapy.instruments.deposit_specifications import DepositSpecification
 from rivapy.instruments.fra_specifications import ForwardRateAgreementSpecification
@@ -29,9 +30,9 @@ def _add_to_factory(cls):
 _add_to_factory(Issuer)
 _add_to_factory(PPASpecification)
 _add_to_factory(GreenPPASpecification)
-_add_to_factory(ZeroCouponBondSpecification)  # do these need to be removed? if commented out in bond_specification
-_add_to_factory(FixedRateBondSpecification)
-_add_to_factory(PlainVanillaCouponBondSpecification)
+# _add_to_factory(ZeroCouponBondSpecification)
+# _add_to_factory(FixedRateBondSpecification)
+# _add_to_factory(PlainVanillaCouponBondSpecification)
 _add_to_factory(EnergyFutureSpecifications)
 _add_to_factory(DepositSpecification)
 _add_to_factory(ForwardRateAgreementSpecification)
