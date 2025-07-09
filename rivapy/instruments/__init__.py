@@ -3,13 +3,14 @@ from rivapy.instruments.specifications import *
 from rivapy.instruments.components import Issuer
 from rivapy.instruments.cds_specification import CDSSpecification
 from rivapy.instruments.ppa_specification import PPASpecification, GreenPPASpecification
-from rivapy.instruments.bond_specifications import (
-    ZeroCouponBondSpecification,
-    FixedRateBondSpecification,
-    PlainVanillaCouponBondSpecification,
-    FloatingRateNoteSpecification,
-    FixedToFloatingRateNoteSpecification,
-)
+
+# from rivapy.instruments.bond_specifications import (
+#     ZeroCouponBondSpecification,
+#     FixedRateBondSpecification,
+#     PlainVanillaCouponBondSpecification,
+#     FloatingRateNoteSpecification,
+#     FixedToFloatingRateNoteSpecification,
+# )
 from rivapy.instruments.energy_futures_specifications import EnergyFutureSpecifications
 from rivapy.instruments.deposit_specifications import DepositSpecification
 from rivapy.instruments.fra_specifications import ForwardRateAgreementSpecification
