@@ -7,7 +7,7 @@ import dateutil.relativedelta as relativedelta
 import rivapy.tools.interfaces as interfaces
 import rivapy.tools._validators as validators
 import rivapy.tools.interpolate as interpolate
-from typing import List, Union, Tuple, Literal, Dict, Optional
+from typing import List, Union, Tuple, Literal, Dict, Optional, Any
 from datetime import datetime, date, timedelta
 from collections import defaultdict
 
@@ -21,7 +21,7 @@ except ImportError:
 
 from rivapy.tools.enums import DayCounterType, InterpolationType, ExtrapolationType
 from rivapy.tools.enums import EnergyTimeGridStructure as ets
-from rivapy.tools.datetools import DayCounter
+from rivapy.tools.datetools import DayCounter, _date_to_datetime
 from rivapy.marketdata.factory import create as _create
 from rivapy.marketdata_tools.pfc_shaper import PFCShaper
 from rivapy.marketdata_tools.pfc_shifter import PFCShifter
@@ -232,6 +232,81 @@ class DiscountCurve:
                 values[i] = -math.log(values[i]) / dt
         values[0] = values[1]
         plt.plot(dates_new, values, label=self.id, **kwargs)
+
+
+class DummyFlatDiscountCurve(interfaces.BaseDatedCurve):
+    """
+    A simple discount curve implementation based on a single flat interest rate.
+    """
+
+    def __init__(
+        self,
+        valuation_date: Union[date, datetime],
+        flat_rate: Optional[float] = 0.05,
+        curve_data: Any = None,
+        day_counter_type: DayCounterType = DayCounterType.Act365Fixed,
+    ):
+        """
+        Initializes the flat discount curve.
+
+        Args:
+            valuation_date (Union[date, datetime]): The valuation date of the curve.
+            flat_rate (Optional[float], optional): The flat interest rate used for discounting. Defaults to 0.05.
+            curve_data (Any, optional): Placeholder for more complex curve data (not used in this implementation). Defaults to None.
+            day_counter_type (DayCounterType, optional): The day count convention for calculating year fractions. Defaults to DayCounterType.Act365Fixed.
+        """
+        self.valuation_date = valuation_date
+        self._flat_rate = flat_rate
+        self._curve_data = curve_data  # Placeholder for more complex curve data
+        self._day_counter = DayCounter(day_counter_type)
+
+    @property
+    def valuation_date(self) -> datetime:
+        """The valuation date of the curve as a datetime object."""
+        return self._valuation_date
+
+    @valuation_date.setter
+    def valuation_date(self, value: Union[date, datetime]):
+        self._valuation_date = _date_to_datetime(value)
+
+    def get_discount_factor(self, target_date: Union[date, datetime]) -> float:
+        """
+        Calculates the discount factor from the valuation date to a target date.
+
+        Args:
+            target_date (Union[date, datetime]): The date to which to discount.
+
+        Returns:
+            float: The discount factor. Returns 0.0 if the target date is before the valuation date.
+        """
+        val_date_dt = _date_to_datetime(self.valuation_date)
+        target_date_dt = _date_to_datetime(target_date)
+
+        if target_date_dt < val_date_dt:
+            return 0.0
+        time_to_maturity_years = self._day_counter.yf(val_date_dt, target_date_dt)
+        rate_to_use = self._flat_rate if self._flat_rate is not None else 0.02  # Fallback if flat_rate is None
+        return 1 / ((1 + rate_to_use) ** time_to_maturity_years)
+
+    def value(self, ref_date: datetime, target_date: datetime) -> float:
+        """
+        Returns the discount factor from a reference date to a target date.
+        For this simple implementation, the reference date must be the curve's valuation date.
+
+        Args:
+            ref_date (datetime): The reference date (must match the curve's valuation date).
+            target_date (datetime): The date to which to discount.
+
+        Raises:
+            ValueError: If the reference date does not match the curve's valuation date.
+
+        Returns:
+            float: The discount factor.
+        """
+        # Ensure ref_date matches the curve's valuation_date for this simple implementation
+        if _date_to_datetime(ref_date).date() != self.valuation_date.date():
+            raise ValueError(f"Reference date {ref_date} does not match DiscountCurve valuation date {self.valuation_date}")
+        return self.get_discount_factor(target_date)
 
 
 class NelsonSiegel(interfaces.FactoryObject):
