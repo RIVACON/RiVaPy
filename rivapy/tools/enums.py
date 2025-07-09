@@ -69,30 +69,49 @@ class _MyIntEnum(_Enum):
         raise Exception("Given value " + str(value) + " does not belong to enum " + cls.__name__)
 
 
-if _pyvacon_available:
-    from pyvacon.finance.definition import DayCounter as _DayCounter
+# if _pyvacon_available:
+#     from pyvacon.finance.definition import DayCounter as _DayCounter
 
-    DayCounterType = _DayCounter.Type
+#     # DayCounterType = _DayCounter.Type
 
-    from pyvacon.numerics.interpolation import InterpolationType
-    from pyvacon.numerics.extrapolation import ExtrapolationType
-else:
+#     from pyvacon.numerics.interpolation import InterpolationType
+#     from pyvacon.numerics.extrapolation import ExtrapolationType
+# else:
 
-    @_unique
-    class InterpolationType(_MyEnum):
-        CONSTANT = "CONSTANT"
-        LINEAR = "LINEAR"
-        LINEAR_LOG = "LINEARLOG"
-        CONSTRAINED_SPLINE = "CONSTRAINED_SPLINE"
-        HAGAN = "HAGAN"
-        HAGAN_DF = "HAGAN_DF"
+#     @_unique
+#     class InterpolationType(_MyEnum):
+#         CONSTANT = "CONSTANT"
+#         LINEAR = "LINEAR"
+#         LINEAR_LOG = "LINEARLOG"
+#         CONSTRAINED_SPLINE = "CONSTRAINED_SPLINE"
+#         HAGAN = "HAGAN"
+#         HAGAN_DF = "HAGAN_DF"
 
-    @_unique
-    class ExtrapolationType(_MyEnum):
-        NONE = "NONE"
-        CONSTANT = "CONSTANT"
-        LINEAR = "LINEAR"
-        LINEAR_LOG = "LINEARLOG"
+#     @_unique
+#     class ExtrapolationType(_MyEnum):
+#         NONE = "NONE"
+#         CONSTANT = "CONSTANT"
+#         LINEAR = "LINEAR"
+#         LINEAR_LOG = "LINEARLOG"
+
+
+# testing defintion of InterpolationType OUTSIDE of pyvacon
+@_unique
+class InterpolationType(_MyEnum):
+    CONSTANT = "CONSTANT"
+    LINEAR = "LINEAR"
+    LINEAR_LOG = "LINEARLOG"
+    CONSTRAINED_SPLINE = "CONSTRAINED_SPLINE"
+    HAGAN = "HAGAN"
+    HAGAN_DF = "HAGAN_DF"
+
+
+@_unique
+class ExtrapolationType(_MyEnum):
+    NONE = "NONE"
+    CONSTANT = "CONSTANT"
+    LINEAR = "LINEAR"
+    LINEAR_LOG = "LINEARLOG"
 
 
 @_unique
