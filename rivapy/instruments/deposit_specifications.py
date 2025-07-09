@@ -1,30 +1,32 @@
-from abc import  abstractmethod as _abstractmethod
+from abc import abstractmethod as _abstractmethod
 from typing import List as _List, Union as _Union, Tuple
 import numpy as np
 from datetime import datetime, date, timedelta
 from holidays import HolidayBase as _HolidayBase, ECB as _ECB
 from rivapy.tools.datetools import Period, Schedule, _date_to_datetime, _datetime_to_date_list, _term_to_period
 from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating
-from rivapy.tools._validators import _check_positivity, _check_start_before_end,  _string_to_calendar, _is_ascending_date_list
+from rivapy.tools._validators import _check_positivity, _check_start_before_end, _string_to_calendar, _is_ascending_date_list
 import rivapy.tools.interfaces as interfaces
 from rivapy.tools.datetools import Period, Schedule
 
 
 class DepositSpecification(interfaces.FactoryObject):
 
-    def __init__(self,
-                 obj_id: str,
-                 fixing_date: _Union[date, datetime],
-                 start_date: _Union[date, datetime],
-                 maturity_date: _Union[date, datetime],
-                 currency: _Union[Currency, str] = 'EUR',
-                 notional: float = 100.0,
-                 rate: float = 0.00,
-                 day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
-                 business_day_convention: _Union[RollConvention, str] = RollConvention.FOLLOWING,
-                 issuer: str = None,
-                 securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
-                 rating: _Union[Rating, str] = Rating.NONE):
+    def __init__(
+        self,
+        obj_id: str,
+        fixing_date: _Union[date, datetime],
+        start_date: _Union[date, datetime],
+        maturity_date: _Union[date, datetime],
+        currency: _Union[Currency, str] = "EUR",
+        notional: float = 100.0,
+        rate: float = 0.00,
+        day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
+        business_day_convention: _Union[RollConvention, str] = RollConvention.FOLLOWING,
+        issuer: str = None,
+        securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
+        rating: _Union[Rating, str] = Rating.NONE,
+    ):
         """Base Deposit specification.
 
         Args:
@@ -48,10 +50,9 @@ class DepositSpecification(interfaces.FactoryObject):
         """
         self.obj_id = obj_id
 
-
         if fixing_date is not None:
             self.fixing_date = fixing_date
-        
+
         self.start_date = start_date
         self.maturity_date = maturity_date
         self.currency = currency
@@ -67,35 +68,36 @@ class DepositSpecification(interfaces.FactoryObject):
         # validate dates
         self._validate_derived_issued_instrument()
 
-    @staticmethod #TODO: undeerstand what this does
-    def _create_sample(n_samples: int, seed: int = None, ref_date = None, 
-                    issuers: _List[str]= None,
-                    sec_levels: _List[str]=None,
-                    currencies: _List[str]= None)->_List[dict]:
+    @staticmethod
+    def _create_sample(
+        n_samples: int, seed: int = None, ref_date=None, issuers: _List[str] = None, sec_levels: _List[str] = None, currencies: _List[str] = None
+    ) -> _List[dict]:
         if seed is not None:
             np.random.seed(seed)
         if ref_date is None:
             ref_date = datetime.now()
-        else: 
+        else:
             ref_date = _date_to_datetime(ref_date)
         if issuers is None:
-            issuers = ['Issuer_'+str(i) for i in range(int(n_samples/2))]
+            issuers = ["Issuer_" + str(i) for i in range(int(n_samples / 2))]
         result = []
         if currencies is None:
             currencies = list(Currency)
         if sec_levels is None:
             sec_levels = list(SecuritizationLevel)
         for _ in range(n_samples):
-            days = int(15.0*365.0*np.random.beta(2.0,2.0)) + 1
-            start = ref_date + timedelta(days=np.random.randint(low=-365, high=0))
+            days = int(15.0 * 365.0 * np.random.beta(2.0, 2.0)) + 1
+            start_date = ref_date + timedelta(days=np.random.randint(low=-365, high=0))
             result.append(
                 {
-                'start_date': start_date,
-                'maturity_date': ref_date + timedelta(days=days),
-                'currency':np.random.choice(currencies),
-                'notional': np.random.choice([100.0, 1000.0, 10_000.0, 100_0000.0]),
-                'issuer': np.random.choice(issuers),
-                'securitization_level': np.random.choice(sec_levels)
+                    "fixing_date": start_date + timedelta(days=np.random.randint(low=-2, high=0)),
+                    "start_date": start_date,
+                    "maturity_date": ref_date + timedelta(days=days),
+                    "currency": np.random.choice(currencies),
+                    "notional": np.random.choice([100.0, 1000.0, 10_000.0, 100_0000.0]),
+                    "rate": np.random.choice([0.01, 0.02, 0.03, 0.04, 0.05]),
+                    "issuer": np.random.choice(issuers),
+                    "securitization_level": np.random.choice(sec_levels),
                 }
             )
         return result
@@ -103,18 +105,25 @@ class DepositSpecification(interfaces.FactoryObject):
     def _validate_derived_issued_instrument(self):
         self.__start_date, self.__maturity_date = _check_start_before_end(self.__start_date, self.__maturity_date)
 
-    def _to_dict(self)->dict:        
+    def _to_dict(self) -> dict:
         result = {
-            'obj_id': self.obj_id, 'issuer':self.issuer, 
-            'securitization_level': self.securitization_level,
-            'start_date': self.start_date, 'maturity_date':self.maturity_date, 
-            'currency': self.currency, 'notional': self.notional, 
-            'rating': self.rating
+            "obj_id": self.obj_id,
+            "fixing_date:": self.fixing_date,
+            "start_date": self.start_date,
+            "maturity_date": self.maturity_date,
+            "currency": self.currency,
+            "notional": self.notional,
+            "rate": self.rate,
+            "day_count_convention": self.day_count_convention,
+            "business_day_convention": self.business_day_convention,
+            "issuer": self.issuer,
+            "securitization_level": self.securitization_level,
+            "rating": self.rating,
         }
         return result
 
-    #region properties
-    
+    # region properties
+
     @property
     def issuer(self) -> str:
         """
@@ -136,11 +145,11 @@ class DepositSpecification(interfaces.FactoryObject):
         self.__issuer = issuer
 
     @property
-    def rating(self)->str:
+    def rating(self) -> str:
         return self.__rating
 
     @rating.setter
-    def rating(self, rating:_Union[Rating, str])->str:
+    def rating(self, rating: _Union[Rating, str]) -> str:
         self.__rating = Rating.to_string(rating)
 
     @property
@@ -154,7 +163,7 @@ class DepositSpecification(interfaces.FactoryObject):
         return self.__securitization_level
 
     @securitization_level.setter
-    def securitization_level(self, securitisation_level:  _Union[SecuritizationLevel, str]):
+    def securitization_level(self, securitisation_level: _Union[SecuritizationLevel, str]):
         self.__securitization_level = SecuritizationLevel.to_string(securitisation_level)
 
     @property
@@ -208,7 +217,7 @@ class DepositSpecification(interfaces.FactoryObject):
         return self.__currency
 
     @currency.setter
-    def currency(self, currency:str):
+    def currency(self, currency: str):
         self.__currency = Currency.to_string(currency)
 
     @property
@@ -225,42 +234,39 @@ class DepositSpecification(interfaces.FactoryObject):
     def notional(self, notional):
         self.__notional = _check_positivity(notional)
 
-    #endregion
- 
-    
-    def expected_cashflows(self)->_List[Tuple[datetime, float]]:
+    # endregion
+
+    def expected_cashflows(self) -> _List[Tuple[datetime, float]]:
         """Return a list of all expected cashflows (final notional and coupons) together with their payment date.
 
         Returns:
             _List[Tuple[datetime, float]]: The resulting list of all cashflows.
         """
-        #if self.coupon_freq != 'Y':
+        # if self.coupon_freq != 'Y':
         #    raise Exception('Cannot calc cashflows for other than yearly coupons. Missing transformation from yearly coupon to .... ')
-       
+
         # assume for this deposits it is like a short term zero-coupon bond
         # follwoing N*(1+r*t), N: notional, r:rate, t:period, ie.e yearfrac between start and end date
 
         # Adjust maturity date
         # assumption is ECB holiday schedule... from holiday module...
         adjusted_maturity = adjust_date(self.maturity_date, self.business_day_convention, _ECB)
-        #TODO needs verification
+        # TODO needs verification
         period_yf = day_count_fraction(self.start_date, adjusted_maturity, self.day_count_convention)
-        #TODO needs verification
+        # TODO needs verification
 
-        interest = self.notional *self.rate * self.period_yf
+        interest = self.notional * self.rate * period_yf
 
-        result=[(self.start_date, 0.0)]# the first entry of this schedule is the accrual start which has a cashflow of zero and is just used for accrual calculation
+        result = [
+            (self.start_date, 0.0)
+        ]  # the first entry of this schedule is the accrual start which has a cashflow of zero and is just used for accrual calculation
         result.append[(self.maturity_date, interest + self.notional)]
 
-
-        #schedule = Schedule(self.accrual_start, self.maturity_date, period, stub=self.stub).generate_dates(ends_only=True)
-        #result = [(d, self.coupon*coupon_multiplier*self.notional) for d in schedule]
-        #result.insert(0, (self.accrual_start, 0.0))# the first entry of this schedule is the accrual start which has a cashflow of zero and is just used for accrual calculation
-        #result.append((self.maturity_date, self.notional))
+        # schedule = Schedule(self.accrual_start, self.maturity_date, period, stub=self.stub).generate_dates(ends_only=True)
+        # result = [(d, self.coupon*coupon_multiplier*self.notional) for d in schedule]
+        # result.insert(0, (self.accrual_start, 0.0))# the first entry of this schedule is the accrual start which has a cashflow of zero and is just used for accrual calculation
+        # result.append((self.maturity_date, self.notional))
         return result
-    
-
-
 
     @property
     def coupon_payment_dates(self) -> _List[date]:
@@ -281,42 +287,44 @@ class DepositSpecification(interfaces.FactoryObject):
             List[float]: List of coupon amounts expressed as annualised fractions of deposit's face value.
         """
         return self.__coupons
-    
+
+
 ################################
-#Temporary helper function location until we implement with Rivapy's existing date time tools
+# Temporary helper function location until we implement with Rivapy's existing date time tools
 # Calculate day count fraction
 def day_count_fraction(start, end, convention):
     delta = (end - start).days
-    if convention == 'ACT/360':
+    if convention == "ACT/360":
         return delta / 360
-    elif convention == 'ACT/365':
+    elif convention == "ACT/365":
         return delta / 365
-    elif convention == '30/360':
+    elif convention == "30/360":
         # Simplified 30/360: assumes every month has 30 days
         d1, m1, y1 = start.day, start.month, start.year
         d2, m2, y2 = end.day, end.month, end.year
-        days = 360*(y2 - y1) + 30*(m2 - m1) + (d2 - d1)
+        days = 360 * (y2 - y1) + 30 * (m2 - m1) + (d2 - d1)
         return days / 360
     else:
         raise ValueError("Unsupported day count convention")
-        
+
 
 def is_business_day(date, holidays):
     return date.weekday() < 5 and date not in holidays
 
+
 def adjust_date(date, convention, holidays):
     if is_business_day(date, holidays):
         return date
-    if convention == 'following':
+    if convention == "following":
         while not is_business_day(date, holidays):
             date += dt.timedelta(days=1)
-    elif convention == 'preceding':
+    elif convention == "preceding":
         while not is_business_day(date, holidays):
             date -= dt.timedelta(days=1)
-    elif convention == 'modified_following':
+    elif convention == "modified_following":
         orig_month = date.month
         while not is_business_day(date, holidays):
             date += dt.timedelta(days=1)
         if date.month != orig_month:
-            date = adjust_date(date - dt.timedelta(days=1), 'preceding', holidays)
+            date = adjust_date(date - dt.timedelta(days=1), "preceding", holidays)
     return date

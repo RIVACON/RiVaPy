@@ -93,9 +93,9 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         self.rate_end_date = rate_end_date
 
         # optional arguments
-        self.__day_count_convention = day_count_convention  # TODO: correct syntax with setter?? HN
+        self.day_count_convention = day_count_convention  # TODO: correct syntax with setter?? HN
         self.business_day_convention = RollConvention.to_string(business_day_convention)
-        self.__rate_day_count_convention = rate_day_count_convention
+        self.rate_day_count_convention = rate_day_count_convention
         self.rate_business_day_convention = RollConvention.to_string(rate_business_day_convention)
         if calendar is None:
             self.calendar = _ECB(years=range(issue_date.year, maturity_date.year + 1))
@@ -170,12 +170,30 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         for _ in range(n_samples):
             days = int(15.0 * 365.0 * np.random.beta(2.0, 2.0)) + 1
             issue_date = ref_date + timedelta(days=np.random.randint(low=-365, high=0))
+            maturity_date = ref_date + timedelta(days=days)
+            start_date = ref_date + relativedelta(months=np.random.randint(low=1, high=3))
+            end_date = start_date + relativedelta(months=np.random.choice([3, 6]))
+            # spot_lag=2, fixing pre_lag =2
             result.append(
                 {
                     "issue_date": issue_date,
-                    "maturity_date": ref_date + timedelta(days=days),
-                    "currency": np.random.choice(currencies),
+                    "maturity_date": maturity_date,
                     "notional": np.random.choice([100.0, 1000.0, 10_000.0, 100_0000.0]),
+                    "rate": np.random.choice([0.01, 0.02, 0.03, 0.04, 0.05]),
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "udlID": "dummy_underlying_index",  #
+                    "rate_start_date": start_date - timedelta(days=2),  # does not account for roll convention ...
+                    "rate_end_date": end_date - timedelta(days=2),
+                    # "day_count_convention": self.day_count_convention, #TODO
+                    # "business_day_convention": self.business_day_convention,
+                    # "rate_day_count_convention": self.rate_day_count_convention,
+                    # "rate_business_day_convention": self.rate_business_day_convention,
+                    "calendar": _ECB(years=range(issue_date.year, maturity_date.year + 1)),
+                    "currency": np.random.choice(currencies),
+                    # "spot_lag": self.spot_lag, # not needed if start dates given
+                    # "start_period": self.start_period,
+                    # "end_period": self.end_period,
                     "issuer": np.random.choice(issuers),
                     "securitization_level": np.random.choice(sec_levels),
                 }
@@ -188,12 +206,26 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
     def _to_dict(self) -> dict:
         result = {
             "obj_id": self.obj_id,
-            "issuer": self.issuer,
-            "securitization_level": self.securitization_level,
             "issue_date": self.issue_date,
             "maturity_date": self.maturity_date,
-            "currency": self.currency,
             "notional": self.notional,
+            "rate": self.rate,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+            "udlID": self.udlID,
+            "rate_start_date": self.rate_start_date,
+            "rate_end_date": self.rate_end_date,
+            "day_count_convention": self.day_count_convention,
+            "business_day_convention": self.business_day_convention,
+            "rate_day_count_convention": self.rate_day_count_convention,
+            "rate_business_day_convention": self.rate_business_day_convention,
+            "calendar": self.calendar,
+            "currency": self.currency,
+            "spot_lag": self.spot_lag,
+            "start_period": self.start_period,
+            "end_period": self.end_period,
+            "issuer": self.issuer,
+            "securitization_level": self.securitization_level,
             "rating": self.rating,
         }
         return result
@@ -321,8 +353,8 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         return self.__day_count_convention
 
     @daycount_convention.setter
-    def daycount_convention(self, rate_day_count_convention: _Union[DayCounterType, str]) -> str:
-        self.__rate_day_count_convention = DayCounterType.to_string(rate_day_count_convention)
+    def daycount_convention(self, day_count_convention: _Union[DayCounterType, str]) -> str:
+        self.__day_count_convention = DayCounterType.to_string(day_count_convention)
 
     @property
     def rate_daycount_convention(self) -> str:
@@ -332,7 +364,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         Returns:
             str: FRA's day count convention.
         """
-        return self.__day_count_convention
+        return self.__rate_day_count_convention
 
     @rate_daycount_convention.setter
     def rate_daycount_convention(self, rate_day_count_convention: _Union[DayCounterType, str]) -> str:
