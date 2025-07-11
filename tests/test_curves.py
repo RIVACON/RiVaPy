@@ -179,6 +179,8 @@ class TestDiscountCurve(unittest.TestCase):
         # 30U360, LINEAR, CONSTANT
         # 30U360, LINEAR, NONE
 
+        # TODO: TEST LIST of given dates
+
     def test_rivapy_value_HAGAN(self):
         """_summary_"""
 

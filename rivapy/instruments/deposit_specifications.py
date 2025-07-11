@@ -53,18 +53,18 @@ class DepositSpecification(interfaces.FactoryObject):
         if fixing_date is not None:
             self.fixing_date = fixing_date
 
-        self.start_date = start_date
-        self.maturity_date = maturity_date
-        self.currency = currency
-        self.notional = notional
-        self.rate = rate
-        self.day_count_convention = day_count_convention
-        self.business_day_convention = business_day_convention
+        self._start_date = start_date
+        self._maturity_date = maturity_date
+        self._currency = currency
+        self._notional = notional
+        self._rate = rate
+        self._day_count_convention = day_count_convention
+        self._business_day_convention = business_day_convention
         if issuer is not None:
-            self.issuer = issuer
+            self._issuer = issuer
         if securitization_level is not None:
-            self.securitization_level = securitization_level
-        self.rating = Rating.to_string(rating)
+            self._securitization_level = securitization_level
+        self._rating = Rating.to_string(rating)
         # validate dates
         self._validate_derived_issued_instrument()
 
@@ -103,7 +103,7 @@ class DepositSpecification(interfaces.FactoryObject):
         return result
 
     def _validate_derived_issued_instrument(self):
-        self.__start_date, self.__maturity_date = _check_start_before_end(self.__start_date, self.__maturity_date)
+        self._start_date, self._maturity_date = _check_start_before_end(self._start_date, self._maturity_date)
 
     def _to_dict(self) -> dict:
         result = {
@@ -132,7 +132,7 @@ class DepositSpecification(interfaces.FactoryObject):
         Returns:
             str: Instrument's issuer.
         """
-        return self.__issuer
+        return self._issuer
 
     @issuer.setter
     def issuer(self, issuer: str):
@@ -142,15 +142,35 @@ class DepositSpecification(interfaces.FactoryObject):
         Args:
             issuer(str): Issuer of the instrument.
         """
-        self.__issuer = issuer
+        self._issuer = issuer
+
+    @property
+    def rate(self) -> float:
+        """
+        Getter for instrument's rate.
+
+        Returns:
+            float: Instrument's rate.
+        """
+        return self._rate
+
+    @issuer.setter
+    def rate(self, rate: str):
+        """
+        Setter for instrument's rate.
+
+        Args:
+            issuer(float): interest rate of the instrument.
+        """
+        self._rate = rate
 
     @property
     def rating(self) -> str:
-        return self.__rating
+        return self._rating
 
     @rating.setter
     def rating(self, rating: _Union[Rating, str]) -> str:
-        self.__rating = Rating.to_string(rating)
+        self._rating = Rating.to_string(rating)
 
     @property
     def securitization_level(self) -> str:
@@ -160,11 +180,11 @@ class DepositSpecification(interfaces.FactoryObject):
         Returns:
             str: Instrument's securitisation level.
         """
-        return self.__securitization_level
+        return self._securitization_level
 
     @securitization_level.setter
     def securitization_level(self, securitisation_level: _Union[SecuritizationLevel, str]):
-        self.__securitization_level = SecuritizationLevel.to_string(securitisation_level)
+        self._securitization_level = SecuritizationLevel.to_string(securitisation_level)
 
     @property
     def start_date(self) -> date:
@@ -174,7 +194,7 @@ class DepositSpecification(interfaces.FactoryObject):
         Returns:
             date: deposit's start date.
         """
-        return self.__start_date
+        return self._start_date
 
     @start_date.setter
     def start_date(self, start_date: _Union[datetime, date]):
@@ -184,7 +204,7 @@ class DepositSpecification(interfaces.FactoryObject):
         Args:
             start_date (Union[datetime, date]): deposit's start date.
         """
-        self.__start_date = _date_to_datetime(start_date)
+        self._start_date = _date_to_datetime(start_date)
 
     @property
     def maturity_date(self) -> date:
@@ -194,7 +214,7 @@ class DepositSpecification(interfaces.FactoryObject):
         Returns:
             date: deposit's maturity date.
         """
-        return self.__maturity_date
+        return self._maturity_date
 
     @maturity_date.setter
     def maturity_date(self, maturity_date: _Union[datetime, date]):
@@ -204,7 +224,7 @@ class DepositSpecification(interfaces.FactoryObject):
         Args:
             maturity_date (Union[datetime, date]): deposit's maturity date.
         """
-        self.__maturity_date = _date_to_datetime(maturity_date)
+        self._maturity_date = _date_to_datetime(maturity_date)
 
     @property
     def currency(self) -> str:
@@ -214,11 +234,11 @@ class DepositSpecification(interfaces.FactoryObject):
         Returns:
             str: deposit's  currency code
         """
-        return self.__currency
+        return self._currency
 
     @currency.setter
     def currency(self, currency: str):
-        self.__currency = Currency.to_string(currency)
+        self._currency = Currency.to_string(currency)
 
     @property
     def notional(self) -> float:
@@ -228,11 +248,39 @@ class DepositSpecification(interfaces.FactoryObject):
         Returns:
             float: deposit's face value.
         """
-        return self.__notional
+        return self._notional
 
     @notional.setter
     def notional(self, notional):
-        self.__notional = _check_positivity(notional)
+        self._notional = _check_positivity(notional)
+
+    @property
+    def day_count_convention(self) -> str:
+        """
+        Getter for FRA's day count convention.
+
+        Returns:
+            str: FRA's day count convention.
+        """
+        return self._day_count_convention
+
+    @day_count_convention.setter
+    def day_count_convention(self, day_count_convention: _Union[DayCounterType, str]) -> str:
+        self._day_count_convention = DayCounterType.to_string(day_count_convention)
+
+    @property
+    def business_day_convention(self) -> str:
+        """
+        Getter for FRA's day count convention.
+
+        Returns:
+            str: FRA's day count convention.
+        """
+        return self._business_day_convention
+
+    @business_day_convention.setter
+    def business_day_convention(self, business_day_convention: _Union[DayCounterType, str]) -> str:
+        self._business_day_convention = DayCounterType.to_string(business_day_convention)
 
     # endregion
 

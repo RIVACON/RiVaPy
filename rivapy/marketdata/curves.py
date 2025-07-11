@@ -195,8 +195,68 @@ class DiscountCurve:
             df1 = interp.interp(yf_list, df_list, dcc.yf(self.refdate, refdate), self.extrapolation)
             df2 = interp.interp(yf_list, df_list, dcc.yf(self.refdate, d), self.extrapolation)
             df = df2 / df1
-        else:  # this also co ers the case if refdates are the same, and avoids division by zero
+        else:  # this also covers the case if refdates are the same, and avoids division by zero
             df = interp.interp(yf_list, df_list, dcc.yf(self.refdate, d), self.extrapolation)
+
+        return df
+
+    def rivapy_valueFWD(self, valdate: Union[date, datetime], d1: Union[date, datetime], d2: Union[date, datetime]) -> float:
+        """Return discount factor for a given date (without dependencies from pyvacon)
+
+        Args:
+            refdate (Union[date, datetime]): The reference date. If the reference date is in the future
+                                            (compared to the curves reference date), the forward discount
+                                            factor will be returned.
+            d (Union[date, datetime]): The date for which the discount factor will be returned. Assumption
+                                        is that the day given already follows correct business logic
+                                        (e.g., roll convention)
+
+        Returns:
+            float: discount factor
+        """
+
+        # double DiscountCurve::valueFwd(
+        # 	const boost::posix_time::ptime &valDate,
+        # 	const boost::posix_time::ptime& d1,
+        # 	const boost::posix_time::ptime& d2) const
+        # {
+        # 	Analytics_ASSERT(d2 >= d1, "first date " << boost::posix_time::to_iso_string(d1)
+        # 		<< " must be less or equal to the second date " << boost::posix_time::to_iso_string(d2));
+        # 	double df1 = value(valDate, d1);
+        # 	double df2 = value(valDate, d2);
+        # 	return df2 / df1;
+        # }
+
+        # check valid dates
+        if not isinstance(valdate, datetime):  # handling date object -> datetime
+            valdate = datetime(valdate, 0, 0, 0)
+        if not isinstance(d1, datetime):
+            d1 = datetime(d1, 0, 0, 0)
+        if not isinstance(d2, datetime):
+            d2 = datetime(d21, 0, 0, 0)
+        if valdate < self.refdate:
+            raise Exception("The given value date is before the curves reference date.")
+
+        # get yearfrac, taking into account DCC
+        dcc = DayCounter(self.daycounter)
+
+        yf_list = [dcc.yf(self.refdate, x) for x in self.get_dates()]  # list(dcc.yf(self.refdate, self.get_dates()))
+        df_list = [x for x in self.get_df()]
+
+        # interpolate/extrapolate given a chosen method
+        interp = Interpolator(self.interpolation, self.extrapolation)
+
+        # temp testing delete when working
+        # print(self.extrapolation)
+        # print(f"x_data: {yf_list}")
+        # print(f"y_data: {df_list}")
+        # print(f"x_target: {dcc.yf(self.refdate,d)}")
+        # print(dcc.yf(refdate, d))
+
+        # give FWD value if given refdate is greater than curves reference date
+        df1 = interp.interp(yf_list, df_list, dcc.yf(valdate, d1), self.extrapolation)
+        df2 = interp.interp(yf_list, df_list, dcc.yf(valdate, d2), self.extrapolation)
+        df = df2 / df1
 
         return df
 

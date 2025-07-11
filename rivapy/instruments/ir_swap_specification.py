@@ -58,6 +58,7 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
         self.currency = Currency.to_string(currency)
         self.day_count_convention = day_count_convention
 
+    # region properties
     @property
     def notional(self) -> float:
         """The swap leg's notional amount (face value)."""
@@ -141,6 +142,7 @@ class IrFixedLegSpecification(IrSwapLegSpecification):
         super().__init__(obj_id, notional, start_dates, end_dates, pay_dates, currency, day_count_convention)
         self.fixed_rate = _check_positivity(fixed_rate)
 
+    # region properties
     @property
     def leg_type(self) -> str:
         return IrLegType.FIXED
@@ -158,12 +160,16 @@ class IrFixedLegSpecification(IrSwapLegSpecification):
         return ""  # fixed leg has no underlying
 
     def _to_dict(self):
-        # TODO does this add the fixed rate as well? i think not?
-        return super()._to_dict()
+
+        return_dict = super()._to_dict()
+        return_dict["fixed_rate"] = self.fixed_rate
+        return return_dict
 
     @staticmethod
     def _create_sample(n_samples: int, seed: int = None):
         pass  # TODO
+
+    # endregion
 
 
 class IrFloatLegSpecification(IrSwapLegSpecification):
@@ -188,11 +194,12 @@ class IrFloatLegSpecification(IrSwapLegSpecification):
         self.reset_dates = reset_dates  # TODO: ADD setters to get rid of error notification?
         self.rate_start_dates = rate_start_dates
         self.rate_end_dates = rate_end_dates
-        self.spread = spread
+        self._spread = spread
         self.udl_id = udl_id
         self.fixing_id = fixing_id
         self.rate_day_count_convention = DayCounterType.to_string(rate_day_count_convention)
 
+    # region properties
     @property
     def leg_type(self) -> str:
         return IrLegType.FLOAT
@@ -211,7 +218,7 @@ class IrFloatLegSpecification(IrSwapLegSpecification):
 
     @property
     def spread(self) -> float:
-        return self.spread
+        return self._spread
 
     @property
     def rate_day_count(self) -> str:
@@ -227,6 +234,8 @@ class IrFloatLegSpecification(IrSwapLegSpecification):
 
     def get_underlyings(self) -> Dict[str, str]:
         return {self.udl_id: self.fixing_id}
+
+    # endregion
 
 
 class InterestRateSwapSpecification(interfaces.FactoryObject):
@@ -322,6 +331,7 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
         }
         return result
 
+    # region properties
     @property
     def issuer(self) -> str:
         """
@@ -431,3 +441,5 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
     @notional.setter
     def notional(self, notional):
         self.__notional = _check_positivity(notional)
+
+    # endregion
