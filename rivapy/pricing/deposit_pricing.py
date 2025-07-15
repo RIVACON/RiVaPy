@@ -56,6 +56,11 @@ class DepositPricer:
         return (1.0 / (spread_df * df) - 1.0) / dt
 
     def price(self):
+        """Calculate the present value of the specified deposit given a discount curve and daycount convention
+
+        Returns:
+           float: present value of a deposit based on simple compounding
+        """
 
         dcc = DayCounter(self._discount_curve.daycounter)  # use the curves or the specification? TODO: they should be the same though...
         dt = dcc.yf(self._deposit_spec.start_date, self._deposit_spec.maturity_date)

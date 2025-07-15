@@ -5,54 +5,87 @@ from rivapy.marketdata import DiscountCurveParametrized, ConstantRate, DiscountC
 from rivapy.pricing.pricing_request import PricingRequest
 from rivapy.pricing._logger import logger
 from rivapy.instruments.deposit_specifications import DepositSpecification
+from rivapy.instruments.fra_specifications import ForwardRateAgreementSpecification
 from typing import List as _List, Union as _Union, Tuple
 from rivapy.tools.datetools import DayCounter
 
 
-class DepositPricer:
+class ForwardRateAgreementPricer:
 
     def __init__(
         self,
         val_date: _Union[date, datetime],
-        deposit_spec: DepositSpecification,
+        fra_spec: ForwardRateAgreementSpecification,
         discount_curve: DiscountCurve,
-        spread_curve: _Union[DiscountCurve, float] = 1.0,
+        forward_curve: DiscountCurve = None,
     ):
         """_summary_
 
         Args:
             val_date (_Union[date, datetime]): _description_
-            deposit_spec (DepositSpecification): _description_
+            fra_spec (ForwardRateAgreementSpecification): _description_
             discount_curve (DiscountCurve): _description_
-            spread_curve (_Union[DiscountCurve, float]): _description_
+            forward_curve(): from underlying index...
+
         """
 
         self._val_date = val_date
-        self._deposit_spec = deposit_spec
+        self._fra_spec = fra_spec
         self._discount_curve = discount_curve
-        self._spread_curve = spread_curve
 
-    def impliedSimplyCompoundedRate(self):
-        """Returns the fair rate such that the specification gives the contract a zero value.
-        Assumption is that it is a simply compounded rate
+        if forward_curve == None:
+            # generate forward curve from given discount curve?
+            self._forward_curve = discount_curve  # TODO implement functionality
+        else:
+            self._forward_curve = forward_curve
 
-        i.e. D(t) = 1 / ( 1+ rate(t) * t)
+    def price(self):
+        """Calculate the present value of the specified FRA given a discount curve and forward curve
 
         Returns:
-            float_: _description_
+           float: present value of a deposit based on simple compounding
         """
+        dcc = DayCounter(self._fra_spec.day_count_convention)
 
-        df = self._discount_curve.rivapy_value(self._val_date, self._deposit_spec.start_date, self._deposit_spec.maturity_date)
+        #        roll convention??
+        time_delta = dcc.yf(self._fra_spec.start_date, self._fra_spec.end_date)  # as yearfrac
+        fwd_rate = ForwardRateAgreementPricer.computeFairRate(
+            self._val_date, self._forward_curve, self._fra_spec._rate_start_date, self._fra_spec._rate_end_date
+        )  # 1.00  # self._fra_spec. # need forward curve
+        fra_rate = self._fra_spec._rate
+        pay_off = self._fra_spec.notional * time_delta * (fwd_rate - fra_rate)
+        pay_off_discounted_to_start_date = pay_off / (1 + fwd_rate * time_delta)
+        df_val_date = self._discount_curve.rivapy_value(
+            self._val_date, self._fra_spec.start_date
+        )  # discounted from payment datet, usually start-date to val_date
+        PV = pay_off_discounted_to_start_date * df_val_date
 
-        if isinstance(self._spread_curve, DiscountCurve):
-            spread_df = self._discount_curve.rivapy_value(self._val_date, self._deposit_spec.start_date, self._deposit_spec.maturity_date)
+        return PV
 
-        # obtain time interval
-        dcc = DayCounter(self._discount_curve.daycounter)  # use the curves or the specification? TODO: they should be the same though...
-        dt = dcc(self._deposit_spec.start_date, self._deposit_spec.maturity_date)
+    # {
+    # 	double fwdRate = ForwardRateAgreementPricer::computeFairRate(valDate, spec, forwardCurve);
+    # 	double yf = spec->getDc()->yf(spec->getStartDate(), spec->getEndDate());
+    # 	double pv = (fwdRate - spec->getRate()) / (1. + yf * fwdRate) * spec->getNotional() * yf *
+    # 		discountCurve->value(valDate, spec->getStartDate());
+    # 	if (!spec->isBuyer()) #TODO determine if is buyer or seller in specification
+    # 		pv = -pv;
+    # 	return pv;
+    # }
 
-        return (1.0 / (spread_df * df) - 1.0) / dt
+    @staticmethod
+    def computeFairRate(
+        val_date: _Union[datetime, date], forward_curve: DiscountCurve, rate_start_date: _Union[datetime, date], rate_end_date: _Union[datetime, date]
+    ):
 
-    # Determine fair rate
-    # fair_rate = DepositPricer.impliedSimplyCompoundedRate(
-    # ref_date, dc._get_pyvacon_obj(), None, deposit_spec)
+        dcc = DayCounter(forward_curve.daycounter)
+        yf = dcc.yf(rate_start_date, rate_end_date)
+        fwd_rate = forward_curve.rivapy_valueFWD(val_date, rate_start_date, rate_end_date)  # REF DATE is =
+
+        fair_rate = (1.0 / (fwd_rate - 1)) / yf
+
+        return fair_rate
+
+
+# fair rate:
+# 	double yf = spec->getDc()->yf(spec->getRateStartDate(), spec->getRateEndDate());
+# 			return  (1.0 / forwardCurve->valueFwd(refDate, spec->getRateStartDate(), spec->getRateEndDate()) - 1.) / yf;
