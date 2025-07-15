@@ -313,13 +313,13 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         """
         return self._rate
 
-    @issuer.setter
-    def rate(self, rate: str):
+    @rate.setter
+    def rate(self, rate: float):
         """
         Setter for instrument's rate.
 
         Args:
-            issuer(float): interest rate of the instrument.
+            (float): interest rate of the instrument.
         """
         self._rate = rate
 

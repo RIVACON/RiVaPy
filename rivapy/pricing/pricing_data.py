@@ -26,7 +26,7 @@ from rivapy.pricing.pricing_request import (
     BondPricingRequest,
     DepositPricingRequest,
     ForwardRateAgreementPricingRequest,
-    InterestRatetSwapPricingRequest,
+    InterestRateSwapPricingRequest,
 )
 
 from rivapy.pricing.deposit_pricing import DepositPricer
@@ -621,7 +621,7 @@ class DepositPricingData(BasePricingData):
         return val
 
 
-class ForwardrateAgreementPricingData(BasePricingData):
+class ForwardRateAgreementPricingData(BasePricingData):
 
     def __init__(
         self,
