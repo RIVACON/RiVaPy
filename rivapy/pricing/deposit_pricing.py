@@ -64,10 +64,6 @@ class DepositPricer:
 
         dcc = DayCounter(self._discount_curve.daycounter)  # use the curves or the specification? TODO: they should be the same though...
         dt = dcc.yf(self._deposit_spec.start_date, self._deposit_spec.maturity_date)
-        print(type(self._deposit_spec.rate))
-        print(self._deposit_spec.rate)
-        print(type(dt))
-        print(type(self._deposit_spec.notional))
         value_d1 = self._deposit_spec.notional * (1 + self._deposit_spec.rate * dt) / (1 + self._deposit_spec.rate * dt)
 
         value_d1 = self._deposit_spec.notional  # as deposits are par-rate instrument?????
