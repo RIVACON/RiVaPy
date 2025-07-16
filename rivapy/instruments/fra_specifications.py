@@ -82,39 +82,39 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         """
         # positional arguments
         self.obj_id = obj_id
-        self.issue_date = issue_date
-        self.maturity_date = maturity_date
-        self.notional = notional
-        self.rate = rate
-        self.start_date = start_date
-        self.end_date = end_date
-        self.udlID = udlID
-        self.rate_start_date = rate_start_date
-        self.rate_end_date = rate_end_date
+        self._issue_date = issue_date
+        self._maturity_date = maturity_date
+        self._notional = notional
+        self._rate = rate
+        self._start_date = start_date
+        self._end_date = end_date
+        self._udlID = udlID
+        self._rate_start_date = rate_start_date
+        self._rate_end_date = rate_end_date
 
         # optional arguments
-        self.day_count_convention = day_count_convention  # TODO: correct syntax with setter?? HN
-        self.business_day_convention = RollConvention.to_string(business_day_convention)
-        self.rate_day_count_convention = rate_day_count_convention
-        self.rate_business_day_convention = RollConvention.to_string(rate_business_day_convention)
+        self._day_count_convention = day_count_convention  # TODO: correct syntax with setter?? HN
+        self._business_day_convention = RollConvention.to_string(business_day_convention)
+        self._rate_day_count_convention = rate_day_count_convention
+        self._rate_business_day_convention = RollConvention.to_string(rate_business_day_convention)
         if calendar is None:
-            self.calendar = _ECB(years=range(issue_date.year, maturity_date.year + 1))
+            self._calendar = _ECB(years=range(issue_date.year, maturity_date.year + 1))
         else:
-            self.calendar = _string_to_calendar(calendar)
-        self.currency = currency
+            self._calendar = _string_to_calendar(calendar)
+        self._currency = currency
         # self.ex_settle = ex_settle
         # self.trade_settle = trade_settle
         if spot_lag is not None:
-            self.spot_lag = spot_lag
+            self._spot_lag = spot_lag
         if start_period is not None:
-            self.start_period = start_period
+            self._start_period = start_period
         if end_period is not None:
-            self.end_period = end_period
+            self._end_period = end_period
         if issuer is not None:
-            self.issuer = issuer
+            self._issuer = issuer
         if securitization_level is not None:
-            self.securitization_level = securitization_level
-        self.rating = Rating.to_string(rating)
+            self._securitization_level = securitization_level
+        self._rating = Rating.to_string(rating)
 
         # give dates where applicable as optional, if not given, calculate based on spot lag, index spot lag, and forward period YMxZM (e.g. 1Mx4M)
         # e.g. for trade date D1 and spotLag, S1, and start_period = 1Mx4M
@@ -134,13 +134,13 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
                 start_day=None,
             )
 
-            self.start_date = roll_day(
+            self._start_date = roll_day(
                 day=spot_date + relativedelta(months=start_period),  # need holiday
                 calendar=self.calendar,
                 business_day_convention=self.rate_business_day_convention,
                 start_day=None,
             )  # spot_date + start_period #need roll convention: ddc, bdc, holiday, date
-            self.end_date = roll_day(
+            self._end_date = roll_day(
                 day=self.start_date + relativedelta(months=start_period),  # need holiday
                 calendar=self.calendar,
                 business_day_convention=self.rate_business_day_convention,
@@ -230,7 +230,16 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         }
         return result
 
-    # region properties
+        # region properties
+
+    @property
+    def calendar(self):
+        """Calender used for this instrument
+
+        Returns:
+            _type_: _description_
+        """
+        return self._calendar
 
     @property
     def issuer(self) -> str:
@@ -240,7 +249,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         Returns:
             str: Instrument's issuer.
         """
-        return self.__issuer
+        return self._issuer
 
     @issuer.setter
     def issuer(self, issuer: str):
@@ -250,15 +259,35 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         Args:
             issuer(str): Issuer of the instrument.
         """
-        self.__issuer = issuer
+        self._issuer = issuer
+
+    @property
+    def udlID(self) -> str:
+        """
+        Getter for ID of the instruments underlying.
+
+        Returns:
+            str: Instrument's udlID.
+        """
+        return self._udlID
+
+    @udlID.setter
+    def udlID(self, udlID: str):
+        """
+        Setter for ID of the instruments underlying.
+
+        Args:
+            udlID(str): udlID of the instrument.
+        """
+        self._udlID = udlID
 
     @property
     def rating(self) -> str:
-        return self.__rating
+        return self._rating
 
     @rating.setter
     def rating(self, rating: _Union[Rating, str]) -> str:
-        self.__rating = Rating.to_string(rating)
+        self._rating = Rating.to_string(rating)
 
     @property
     def securitization_level(self) -> str:
@@ -268,11 +297,31 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         Returns:
             str: Instrument's securitisation level.
         """
-        return self.__securitization_level
+        return self._securitization_level
 
     @securitization_level.setter
     def securitization_level(self, securitisation_level: _Union[SecuritizationLevel, str]):
-        self.__securitization_level = SecuritizationLevel.to_string(securitisation_level)
+        self._securitization_level = SecuritizationLevel.to_string(securitisation_level)
+
+    @property
+    def rate(self) -> float:
+        """
+        Getter for instrument's rate.
+
+        Returns:
+            float: Instrument's rate.
+        """
+        return self._rate
+
+    @rate.setter
+    def rate(self, rate: float):
+        """
+        Setter for instrument's rate.
+
+        Args:
+            (float): interest rate of the instrument.
+        """
+        self._rate = rate
 
     @property
     def issue_date(self) -> date:
@@ -282,7 +331,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         Returns:
             date: FRA's issue date.
         """
-        return self.__issue_date
+        return self._issue_date
 
     @issue_date.setter
     def issue_date(self, issue_date: _Union[datetime, date]):
@@ -290,9 +339,89 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         Setter for FRA's issue date.
 
         Args:
-            issue_date (Union[datetime, date]): FRA's issue date.
+            issue (Union[datetime, date]): FRA's issue date.
         """
-        self.__issue_date = _date_to_datetime(issue_date)
+        self._issue_date = _date_to_datetime(issue_date)
+
+    @property
+    def start_date(self) -> date:
+        """
+        Getter for FRA's start date.
+
+        Returns:
+            date: FRA's start date.
+        """
+        return self._start_date
+
+    @start_date.setter
+    def start_date(self, start_date: _Union[datetime, date]):
+        """
+        Setter for FRA's start date.
+
+        Args:
+            start_date (Union[datetime, date]): FRA's start date.
+        """
+        self._start_date = _date_to_datetime(start_date)
+
+    @property
+    def end_date(self) -> date:
+        """
+        Getter for FRA's end date.
+
+        Returns:
+            date: FRA's end date.
+        """
+        return self._end_date
+
+    @end_date.setter
+    def end_date(self, end_date: _Union[datetime, date]):
+        """
+        Setter for FRA's end date.
+
+        Args:
+            end_date (Union[datetime, date]): FRA's end date.
+        """
+        self._end_date = _date_to_datetime(end_date)
+
+    @property
+    def rate_start_date(self) -> date:
+        """
+        Getter for FRA's underlying rate start date.
+
+        Returns:
+            date: FRA's underlaying rate start date.
+        """
+        return self._rate_start_date
+
+    @start_date.setter
+    def rate_start_date(self, start_date: _Union[datetime, date]):
+        """
+        Setter for FRA's underlying rate start date.
+
+        Args:
+            start_date (Union[datetime, date]): FRA's underlaying rate start date.
+        """
+        self._rate_start_date = _date_to_datetime(start_date)
+
+    @property
+    def rate_end_date(self) -> date:
+        """
+        Getter for FRA's underlying rate end date.
+
+        Returns:
+            date: FRA's underlying rate end date.
+        """
+        return self._rate_end_date
+
+    @end_date.setter
+    def rate_end_date(self, end_date: _Union[datetime, date]):
+        """
+        Setter for FRA's underlying rate end date.
+
+        Args:
+            end_date (Union[datetime, date]): FRA's underlying rate end date.
+        """
+        self._rate_end_date = _date_to_datetime(end_date)
 
     @property
     def maturity_date(self) -> date:
@@ -302,7 +431,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         Returns:
             date: FRA's maturity date.
         """
-        return self.__maturity_date
+        return self._maturity_date
 
     @maturity_date.setter
     def maturity_date(self, maturity_date: _Union[datetime, date]):
@@ -312,7 +441,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         Args:
             maturity_date (Union[datetime, date]): FRA's maturity date.
         """
-        self.__maturity_date = _date_to_datetime(maturity_date)
+        self._maturity_date = _date_to_datetime(maturity_date)
 
     @property
     def currency(self) -> str:
@@ -322,11 +451,11 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         Returns:
             str: FRA's  currency code
         """
-        return self.__currency
+        return self._currency
 
     @currency.setter
     def currency(self, currency: str):
-        self.__currency = Currency.to_string(currency)
+        self._currency = Currency.to_string(currency)
 
     @property
     def notional(self) -> float:
@@ -336,36 +465,93 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         Returns:
             float: FRA's face value.
         """
-        return self.__notional
+        return self._notional
 
     @notional.setter
     def notional(self, notional):
-        self.__notional = _check_positivity(notional)
+        self._notional = _check_positivity(notional)
 
     @property
-    def daycount_convention(self) -> str:
+    def day_count_convention(self) -> str:
         """
         Getter for FRA's day count convention.
 
         Returns:
             str: FRA's day count convention.
         """
-        return self.__day_count_convention
+        return self._day_count_convention
 
-    @daycount_convention.setter
-    def daycount_convention(self, day_count_convention: _Union[DayCounterType, str]) -> str:
-        self.__day_count_convention = DayCounterType.to_string(day_count_convention)
+    @day_count_convention.setter
+    def day_count_convention(self, day_count_convention: _Union[DayCounterType, str]) -> str:
+        self._day_count_convention = DayCounterType.to_string(day_count_convention)
 
     @property
-    def rate_daycount_convention(self) -> str:
+    def rate_day_count_convention(self) -> str:
         """
-        Getter for FRA's day count convention.
+        Getter for FRA's underlying rate's day count convention.
 
         Returns:
-            str: FRA's day count convention.
+            str: FRA's underlying rate's day count convention.
         """
-        return self.__rate_day_count_convention
+        return self._rate_day_count_convention
 
-    @rate_daycount_convention.setter
-    def rate_daycount_convention(self, rate_day_count_convention: _Union[DayCounterType, str]) -> str:
-        self.__rate_day_count_convention = DayCounterType.to_string(rate_day_count_convention)
+    @rate_day_count_convention.setter
+    def rate_day_count_convention(self, rate_day_count_convention: _Union[DayCounterType, str]) -> str:
+        self._rate_day_count_convention = DayCounterType.to_string(rate_day_count_convention)
+
+    @property
+    def business_day_convention(self) -> str:
+        """
+        Getter for FRA's underlying rate's business_day_convention.
+
+        Returns:
+            str: FRA's underlying rate's business_day_convention.
+        """
+        return self._business_day_convention
+
+    @business_day_convention.setter
+    def business_day_convention(self, business_day_convention: _Union[DayCounterType, str]) -> str:
+        self._business_day_convention = DayCounterType.to_string(business_day_convention)
+
+    @property
+    def rate_business_day_convention(self) -> str:
+        """
+        Getter for FRA's underlying rate's business_day_convention.
+
+        Returns:
+            str: FRA's underlying rate's business_day_convention.
+        """
+        return self._rate_business_day_convention
+
+    @rate_business_day_convention.setter
+    def rate_business_day_convention(self, business_day_convention: _Union[DayCounterType, str]) -> str:
+        self._rate_business_day_convention = DayCounterType.to_string(business_day_convention)
+
+    @property
+    def spot_lag(self) -> int:
+        """Getter for the spot lag given in days
+
+        Returns:
+            float: _description_
+        """
+        return self._spot_lag
+
+    @property
+    def start_period(self) -> int:
+        """Getter for the start period, given in Months
+
+        Returns:
+            float: _description_
+        """
+        return self._start_period
+
+    @property
+    def end_period(self) -> int:
+        """Getter for the spot lag
+
+        Returns:
+            float: _description_
+        """
+        return self._end_period
+
+    # endregion
