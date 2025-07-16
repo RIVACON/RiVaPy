@@ -12,7 +12,7 @@ class ScottChesneyModel:
 		Generates a timeseries according to
 
 			.. math:: dS =  e^y S dW_S
-			.. math:: dy = `{\kappa}` (`{\theta}`-y)dt `{\alpha}` dW_y
+			.. math:: dy = \kappa (\theta - y) dt + \alpha dW_y
 			.. math:: E[dW_s\\dot dW_y] = \\rho dt
 
 

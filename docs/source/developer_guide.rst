@@ -1,6 +1,6 @@
 Developer Guide
 ================================
-This section contains some rules and best practices developers for rivapy should consider. It is not meant to be a strict rule set and there may be good reasons why someone decides to deviate from some rule. But please think about the points here when developing. And if you think one of the rules should be modified or deleted, just rais an issue ;-)
+This section contains some rules and best practices developers for rivapy should consider. It is not meant to be a strict rule set and there may be good reasons why someone decides to deviate from some rule. But please think about the points here when developing. And if you think one of the rules should be modified or deleted, just raise an issue ;-)
 
 Styleguide
 -------------------------------
@@ -23,7 +23,7 @@ A docstring is mandatory for every function or method that has one or more of th
     - nontrivial size
     - non-obvious logic
 
-The docstring of class constructors describe also the principle working of the class and it should the thoroughly documented. As a sample docstring, we provide a template by the documentation of the 
+The docstring of class constructors describe also the principle working of the class and it should be thoroughly documented. As a sample docstring, we provide a template by the documentation of the 
 
 .. autoclass:: rivapy.tools.example_docstring.DocStringExample
    :members:
@@ -82,3 +82,21 @@ one can use the usual logic, e.g.
 
 to set the loglevel of the rivapy.pricing module.
 
+
+GitHub
+
+------------
+
+Commit messages
+^^^^^^^^^^^^^^^^^^
+
+Reference issue with keywords, e.g.:
+
+  ``Fix login button. Closes #42``
+
+This will automatically close and link the issue when merged
+
+Pull requests
+^^^^^^^^^^^^^^^^^^
+
+Also link the issue in the description with ``Closes #XY``

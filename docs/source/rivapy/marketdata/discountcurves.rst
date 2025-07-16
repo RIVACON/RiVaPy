@@ -1,5 +1,5 @@
-
-Discount Curve
+.. TODO Hier wird noch das alte Logo verwendet
+Discount Curve 
 ********************************************
 
 DiscountCurve
