@@ -563,7 +563,7 @@ class Schedule:
         to_ = _date_to_datetime(to_)
 
         # check input consistency:
-        if (~backwards) & (from_ < to_):
+        if (not backwards) & (from_ < to_):
             direction = +1
         elif backwards & (from_ > to_):
             direction = -1
@@ -581,7 +581,7 @@ class Schedule:
         # generates a list of dates ...
         dates = []
         # ... for forward rolling case  or  backward rolling case ...
-        while ((~backwards) & (from_ <= to_)) | (backwards & (to_ <= from_)):
+        while ((not backwards) & (from_ <= to_)) | (backwards & (to_ <= from_)):
             dates.append(from_)
             from_ += direction * relativedelta(years=term.years, months=term.months, days=term.days)
             # ... and compete list for fractional periods ...
