@@ -23,7 +23,7 @@ A docstring is mandatory for every function or method that has one or more of th
     - nontrivial size
     - non-obvious logic
 
-The docstring of class constructors describe also the principle working of the class and it should the thoroughly documented. As a sample docstring, we provide a template by the documentation of the 
+The docstring of class constructors describe also the principle working of the class and it should be thoroughly documented. As a sample docstring, we provide a template by the documentation of the 
 
 .. autoclass:: rivapy.tools.example_docstring.DocStringExample
    :members:
