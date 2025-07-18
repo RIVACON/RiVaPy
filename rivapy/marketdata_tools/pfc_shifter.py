@@ -129,6 +129,9 @@ class PFCShifter(interfaces.FactoryObject):
         Returns:
             pd.DataFrame: Transition matrix without linearly dependent row vectors.
         """
+        if transition_matrix.shape == (1, 1):
+            return transition_matrix
+
         potential_redundant_contracts = []
         np_transition_matrix = transition_matrix.to_numpy()
         for i in range(len(transition_matrix)):
@@ -175,6 +178,9 @@ class PFCShifter(interfaces.FactoryObject):
         Returns:
             pd.DataFrame: Full rank transition matrix
         """
+        if transition_matrix.shape == (1, 1):
+            return transition_matrix
+
         m, n = transition_matrix.shape
         target_rank = max(m, n)
         transition_matrix = transition_matrix.copy()
