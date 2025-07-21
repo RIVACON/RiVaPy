@@ -84,7 +84,13 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
         Returns:
             _List[datetime]: _description_
         """
-        return self.start_dates
+        return self._start_dates
+
+
+    @start_dates.setter
+    def start_dates(self, value: _List[datetime]):
+        self._start_dates = value
+
 
     @property
     def end_dates(self) -> _List[datetime]:
@@ -93,7 +99,11 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
         Returns:
             _List[datetime]: _description_
         """
-        return self.end_dates
+        return self._end_dates
+    
+    @end_dates.setter
+    def end_dates(self, value: _List[datetime]):
+        self._end_dates = value
 
     @property
     def pay_dates(self) -> _List[datetime]:
@@ -102,7 +112,11 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
         Returns:
             _List[datetime]: _description_
         """
-        return self.pay_dates
+        return self._pay_dates
+    
+    @pay_dates.setter
+    def pay_dates(self, value: _List[datetime]):
+        self._pay_dates = value
 
     @property
     def notional_structure(self) -> NotionalStructure:
@@ -149,17 +163,16 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
 
 
 class IrFixedLegSpecification(IrSwapLegSpecification):
-    def __init__(
-        self,
-        fixed_rate: float,
-        obj_id: str,
-        notional: _Union[float, NotionalStructure],
-        start_dates: _List[datetime],
-        end_dates: _List[datetime],
-        pay_dates: _List[datetime],
-        currency: _Union[Currency, str],
-        day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
-    ):
+    def __init__(self,
+                fixed_rate: float,
+                obj_id: str,
+                notional: _Union[float, NotionalStructure],
+                start_dates: _List[datetime],
+                end_dates: _List[datetime],
+                pay_dates: _List[datetime],
+                currency: _Union[Currency, str],
+                day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
+            ):
         super().__init__(obj_id, notional, start_dates, end_dates, pay_dates, currency, day_count_convention)
         self.fixed_rate = _check_positivity(fixed_rate)
 
@@ -170,7 +183,12 @@ class IrFixedLegSpecification(IrSwapLegSpecification):
 
     @property
     def fixed_rate(self) -> float:
-        return self.fixed_rate
+        return self._fixed_rate
+
+    @fixed_rate.setter
+    def fixed_rate(self, value:float):
+        self._fixed_rate = value
+
 
     # @property
     # def reset_dates(self) -> _List[datetime]:
@@ -231,19 +249,35 @@ class IrFloatLegSpecification(IrSwapLegSpecification):
 
     @property
     def reset_dates(self) -> _List[datetime]:
-        return self.reset_dates
+        return self._reset_dates
+
+    @reset_dates.setter
+    def reset_dates(self,value):
+        self._reset_dates = value
 
     @property
     def udl_id(self) -> str:
-        return self.udl_id
+        return self._udl_id
+    
+    @udl_id.setter
+    def udl_id(self,value):
+        self._udl_id = value
 
     @property
     def fixing_id(self) -> str:
-        return self.fixing_id
+        return self._fixing_id
+
+    @fixing_id.setter
+    def fixing_id(self,value):
+        self._fixing_id = value
 
     @property
     def spread(self) -> float:
         return self._spread
+
+    @spread.setter
+    def spread(self,value):
+        self._spread = value
 
     @property
     def rate_day_count(self) -> str:
@@ -251,11 +285,19 @@ class IrFloatLegSpecification(IrSwapLegSpecification):
 
     @property
     def rate_start_dates(self) -> _List[datetime]:
-        return self.rate_start_dates
+        return self._rate_start_dates
+    
+    @rate_start_dates.setter
+    def rate_start_dates(self,value):
+        self._rate_start_dates = value
 
     @property
     def rate_end_dates(self) -> _List[datetime]:
-        return self.rate_end_dates
+        return self._rate_end_dates
+    
+    @rate_end_dates.setter
+    def rate_end_dates(self,value):
+        self._rate_end_dates = value
 
     def get_underlyings(self) -> Dict[str, str]:
         return {self.udl_id: self.fixing_id}
@@ -275,8 +317,8 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
         notional: _Union[float, NotionalStructure],
         issue_date: _Union[date, datetime],
         maturity_date: _Union[date, datetime],
-        fixed_leg: IrFixedLegSpecification,
-        float_leg: IrFloatLegSpecification,
+        pay_leg: _Union[IrFixedLegSpecification, IrFloatLegSpecification],
+        receive_leg: _Union[IrFixedLegSpecification, IrFloatLegSpecification],
         currency: _Union[Currency, str] = "EUR",
         calendar: _Union[_HolidayBase, str] = None,
         day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
@@ -294,12 +336,12 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
         self.issue_date = issue_date
         self.maturity_date = maturity_date
         self.currency = currency
-        self.notional = notional
+        self.notional_structure = notional
         self.rating = Rating.to_string(rating)
         # validate dates
         self._validate_derived_issued_instrument()
-        self.fixed_leg = fixed_leg
-        self.float_leg = float_leg
+        self.pay_leg = pay_leg
+        self.receive_leg = receive_leg
         self.day_count_convention = day_count_convention  # TODO: correct syntax with setter?? HN
         self.business_day_convention = RollConvention.to_string(business_day_convention)
         if calendar is None:
@@ -350,10 +392,10 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
             "issue_date": self.issue_date,
             "maturity_date": self.maturity_date,
             "currency": self.currency,
-            "notional": self.notional,
+            "notional": self.notional_structure,
             "rating": self.rating,
-            "fixed_leg": self.fixed_leg,
-            "float_leg": self.float_leg,
+            "receive_leg": self.receive_leg,
+            "pay_leg": self.pay_leg,
             "calendar": self.calendar,
             "day_count_convention": self.day_count_convention,
             "business_day_convention": self.business_day_convention,
@@ -457,18 +499,36 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
     def currency(self, currency: str):
         self.__currency = Currency.to_string(currency)
 
+
     @property
-    def notional(self) -> float:
-        """
-        Getter for IR swap's face value.
+    def notional_structure(self) -> NotionalStructure:
+        """Return the notionals
 
         Returns:
-            float: IR swap's face value.
+            NotionalStructure: class object detailing the notionals, start dates, ...
         """
-        return self.__notional
+        return self._notional_structure
 
-    @notional.setter
-    def notional(self, notional):
-        self.__notional = _check_positivity(notional)
+    @notional_structure.setter
+    def notional_structure(self, value: _Union[float, NotionalStructure]):
+        """If only a float is given, assume a constant notional and create a ConstNotionalStructure.
+
+        Args:
+            value (_Union[float, NotionalStructure]): _description_
+        """
+        if isinstance(value, float):
+            self._notional_structure = ConstNotionalStructure(value)
+        else:
+            self._notional_structure = value
+
+
+    def get_pay_leg(self):
+        return self.pay_leg
+    
+    def get_receive_leg(self):
+        return self.receive_leg
+
+
+    #TODO getters for PAY and RECEIVE legs
 
     # endregion

@@ -683,25 +683,14 @@ class InterestRateSwapPricingData_rivapy: #TODO!!!!
         self.ccy = ccy
         self.leg_pricing_data = leg_pricing_data
         self.pricing_request = pricing_request
-        self._pyvacon_obj = None
 
-    def _get_pyvacon_obj(self):
-        if self._pyvacon_obj is None:
-            self._pyvacon_obj = _pyvacon.finance.pricing.InterestRateSwapPricingData()
-            self._pyvacon_obj.pricer = "InterestRateSwapPricer"
-            self._pyvacon_obj.pricingRequest = _create_pricing_request(self.pricing_request)
-            self._pyvacon_obj.valDate = self.val_date
-            self._pyvacon_obj.setCurr(self.ccy)
-            for leg_data in self.leg_pricing_data:
-                self._pyvacon_obj.addLegData(leg_data._get_pyvacon_obj())
-        return self._pyvacon_obj
 
     def price(self):
         return _pyvacon.finance.pricing.BasePricer.price(self._get_pyvacon_obj())
 
 
 class InterestRateSwapLegPricingData_rivapy:
-    def __init__(self, spec, discount_curve, forward_curve, fixing_map, desired_rate = None, fx_rate: float = 1.0, weight: float = None):
+    def __init__(self, spec, discount_curve:DiscountCurve, forward_curve:DiscountCurve, fixing_map, desired_rate = None, fx_rate: float = 1.0, weight: float = None):
         """Constructor for 
 
         Args:
@@ -724,7 +713,7 @@ class InterestRateSwapLegPricingData_rivapy:
             self.desired_rate = desired_rate
 
 class InterestRateSwapFloatLegPricingData_rivapy(InterestRateSwapLegPricingData_rivapy):
-    def __init__(self, spec, discount_curve, forward_curve, fixing_map, fixing_grace_period: int, spread: float=None, fx_rate: float = 1.0, weight: float=None, fixing_curve=None):
+    def __init__(self, spec, discount_curve, forward_curve, fixing_map, fixing_grace_period: int, spread: float=None, fx_rate: float = 1.0, weight: float=None, fixing_curve:DiscountCurve=None):
         """Constructor for 
 
         Args:

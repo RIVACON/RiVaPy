@@ -6,9 +6,10 @@ from rivapy.pricing.pricing_request import PricingRequest
 from rivapy.pricing._logger import logger
 from rivapy.instruments.deposit_specifications import DepositSpecification
 from rivapy.instruments.fra_specifications import ForwardRateAgreementSpecification
-from rivapy.instruments.ir_swap_specification import IrFixedLegSpecification, IrFloatLegSpecification, InterestRateSwapSpecification
+from rivapy.instruments.ir_swap_specification import IrFixedLegSpecification, IrFloatLegSpecification, InterestRateSwapSpecification, IrSwapLegSpecification
 #from rivapy.pricing.pricing_data import InterestRateSwapPricingData, InterestRateSwapLegPricingData, InterestRateSwapFloatLegPricingData
 from rivapy.pricing.pricing_data import InterestRateSwapPricingData_rivapy, InterestRateSwapLegPricingData_rivapy, InterestRateSwapFloatLegPricingData_rivapy
+from rivapy.pricing.pricing_request import InterestRateSwapPricingRequest
 from typing import List as _List, Union as _Union, Tuple, Dict, Any
 from rivapy.tools.datetools import DayCounter
 
@@ -109,13 +110,22 @@ class CashFlow:
 class InterestRateSwapPricer:
 
     def __init__(
-        self,
-        val_date: _Union[date, datetime],
-        spec: InterestRateSwapSpecification,
-        discount_curve: DiscountCurve,
-        forward_curve: DiscountCurve,
-    ):
-        """_summary_
+                    self,
+                    val_date: _Union[date, datetime],
+                    spec: InterestRateSwapSpecification,
+                    discount_curve_pay_leg: DiscountCurve,
+                    discount_curve_receive_leg: DiscountCurve,
+                    fixing_curve_pay_leg: DiscountCurve,
+                    fixing_curve_receive_leg: DiscountCurve,
+                    fx_fwd_curve_pay_leg: DiscountCurve, # TODO FxForwardCurve ... do we need anotheer class
+                    fx_fwd_curve_receive_leg: DiscountCurve,
+                    pricing_request: InterestRateSwapPricingRequest,
+                    pricing_param: Dict = {},
+                    fixing_map : FixingTable = None,
+                    fx_pay_leg : float = 1.0,
+                    fx_receive_leg : float = 1.0
+                ):
+        """#TODO
 
         Args:
             val_date (_Union[date, datetime]): _description_
@@ -126,15 +136,28 @@ class InterestRateSwapPricer:
 
         self._val_date = val_date
         self._spec = spec
-        self._fixed_leg = spec.fixed_leg
-        self._float_leg = spec.float_leg
-        self._discount_curve = discount_curve
-        self._forward_curve = forward_curve
-
-        self._discount_curve = discount_curve
-        self._forward_curve = forward_curve
+        self._pay_leg = spec.pay_leg
+        self._receive_leg = spec.receive_leg
 
 
+        self._discount_curve_pay_leg = discount_curve_pay_leg 
+        self._discount_curve_receive_leg= discount_curve_receive_leg 
+        
+        self._fixing_curve_pay_leg = fixing_curve_pay_leg # const std::shared_ptr<const DiscountCurve>& fixingCurvePayLeg,
+        self._fixing_curve_receive_leg= fixing_curve_receive_leg# const std::shared_ptr<const DiscountCurve>& fixingCurveReceiveLeg,
+        
+        self._fx_fwd_curve_pay_leg = fx_fwd_curve_pay_leg# const std::shared_ptr<const FxForwardCurve>& fxForwardCurvePayLeg,
+        self._fx_fwd_curve_receive_leg = fx_fwd_curve_receive_leg# const std::shared_ptr<const FxForwardCurve>& fxForwardCurveReceiveLeg,
+        
+        self._pricing_request = pricing_request# const PricingRequest& pricingRequest,
+        self._pricing_param = pricing_param# std::shared_ptr<const InterestRateSwapPricingParameter> pricingParam,
+        self._fixing_map = fixing_map# std::shared_ptr<const FixingTable> fixingMap,
+        
+        self._fx_pay_leg = fx_pay_leg# double fxPayLeg,
+        self._fx_receive_leg = fx_receive_leg# double fxReceiveLeg)
+
+
+        self._pricing_param = pricing_param
     # need cashFlowEntry - see class CashFlow
     # need cashFlowTable - ? 
 
@@ -410,7 +433,7 @@ class InterestRateSwapPricer:
 
 
     @staticmethod
-    def price_leg(val_date, pricing_data: InterestRateSwapLegPricingData_rivapy ,param):
+    def price_leg_pricing_data(val_date, pricing_data: InterestRateSwapLegPricingData_rivapy ,param):
         """Pricing a single Leg using Pricing Data architecture
 
         Args:
@@ -439,7 +462,7 @@ class InterestRateSwapPricer:
                                                                             set_rate=set_rate, 
                                                                             desired_rate=pricing_data.desired_rate)
         elif leg_spec.type == IrLegType.FLOAT:
-            if pricing_data.fx_rate is not None:
+            if pricing_data.spread is not None:
                 set_spread = True
             else:
                 set_spread = False
@@ -473,43 +496,101 @@ class InterestRateSwapPricer:
         return PV* pricing_data.fx_rate 
 
 
+    @staticmethod
+    def price_leg(val_date, discount_curve: DiscountCurve,
+                  forward_curve: DiscountCurve,
+                  fixing_curve: DiscountCurve,
+                  spec: _Union[IrFixedLegSpecification, IrFloatLegSpecification],
+                  fixing_map: FixingTable = None,
+                  fixing_grace_period: float = 0):
+        """Pricing a single Leg using Pricing Data architecture
+
+        Args:
+            val_date (_type_): _description_
+            pricing_data (InterestRateSwapLegPricingData): float leg or base leg pricing data ...
+            param (_type_): extra parameters (not yet used)
+
+        Raises:
+            ValueError: _description_
+
+        Returns:
+            _type_: _description_
+        """
+        #get leg info from PricingData ->spec 
+        leg_spec = spec # what kind of leg?
+
+        if leg_spec.type == IrLegType.FIXED:
+            cashflow_table = InterestRateSwapPricer._populate_cashflows_fix(val_date, leg_spec, 
+                                                                            discount_curve, 
+                                                                            forward_curve , 
+                                                                            fixing_map)# TODO assume no setting of optional rates for now)
+        elif leg_spec.type == IrLegType.FLOAT:
+            cashflow_table = InterestRateSwapPricer._populate_cashflows_float(val_date, leg_spec,
+                                                                            discount_curve, 
+                                                                            forward_curve , 
+                                                                            fixing_curve, 
+                                                                            fixing_map, 
+                                                                            fixing_grace_period) # TODO assume no setting of optional SPREAD for now)
+
+            
+        #elif leg_spec.type ==  IrLegType.OIS:
+        #    populateCashFlowTableOIS
+        else:
+            raise ValueError(f"Unknown leg type {leg_spec.type}")
+
+        PV=0
+        for entry in cashflow_table:
+
+            PV += entry.present_value
+
+        #return PV
+        return PV* pricing_data.fx_rate 
+
     def price(self):
         """price a full swap, with a pay leg and a receive leg
         """
-        self._val_date = val_date
-        self._spec = spec
-        self._fixed_leg = spec.fixed_leg
-        self._float_leg = spec.float_leg
-        self._discount_curve = discount_curve
-        self._forward_curve = forward_curve
 
-        # PricingResults& results, -> implement also?
-        val_date = self._val_date    # const  boost::posix_time::ptime& valDate,
-        discount_curve_pay_leg = self. # const std::shared_ptr<const DiscountCurve>& discountCurvePayLeg,
-        discount_curve_receive_leg= self. # const std::shared_ptr<const DiscountCurve>& discountCurveReceiveLeg,
-        fixing_curve_pay_leg = # const std::shared_ptr<const DiscountCurve>& fixingCurvePayLeg,
-        fixing_curve_receive_leg= # const std::shared_ptr<const DiscountCurve>& fixingCurveReceiveLeg,
-        fx_fwd_curve_pay_leg = # const std::shared_ptr<const FxForwardCurve>& fxForwardCurvePayLeg,
-        fx_fwd_curve_receive_leg = # const std::shared_ptr<const FxForwardCurve>& fxForwardCurveReceiveLeg,
-        interest_rate_swap_spec = # const std::shared_ptr<const InterestRateSwapSpecification>& spec,
-        pricing_request = # const PricingRequest& pricingRequest,
-        pricing_param = # std::shared_ptr<const InterestRateSwapPricingParameter> pricingParam,
-        fixing_map = # std::shared_ptr<const FixingTable> fixingMap,
-        fx_pay_leg = # double fxPayLeg,
-        fx_receive_leg = # double fxReceiveLeg)
+
+        # # PricingResults& results, -> implement also?
+        # val_date = self._val_date    # const  boost::posix_time::ptime& valDate,
+        # discount_curve_pay_leg = self. # const std::shared_ptr<const DiscountCurve>& discountCurvePayLeg,
+        # discount_curve_receive_leg= self. # const std::shared_ptr<const DiscountCurve>& discountCurveReceiveLeg,
+        # fixing_curve_pay_leg = # const std::shared_ptr<const DiscountCurve>& fixingCurvePayLeg,
+        # fixing_curve_receive_leg= # const std::shared_ptr<const DiscountCurve>& fixingCurveReceiveLeg,
+        # fx_fwd_curve_pay_leg = # const std::shared_ptr<const FxForwardCurve>& fxForwardCurvePayLeg,
+        # fx_fwd_curve_receive_leg = # const std::shared_ptr<const FxForwardCurve>& fxForwardCurveReceiveLeg,
+        # interest_rate_swap_spec = # const std::shared_ptr<const InterestRateSwapSpecification>& spec,
+        # pricing_request = # const PricingRequest& pricingRequest,
+        # pricing_param = # std::shared_ptr<const InterestRateSwapPricingParameter> pricingParam,
+        # fixing_map = # std::shared_ptr<const FixingTable> fixingMap,
+        # fx_pay_leg = # double fxPayLeg,
+        # fx_receive_leg = # double fxReceiveLeg)
 
         #unit in days
-        fixing_grace_period = pricing_param["fixing_grace_period"] # TODO - check when pricing params are properly implemented
+        fixing_grace_period = self._pricing_param["fixing_grace_period"] # TODO - check when pricing params are properly implemented
 
         #TODO check structure again....
-	    price = InterestRateSwapPricer.price_leg(valDate, discountCurveReceiveLeg, fixingCurveReceiveLeg, fxForwardCurveReceiveLeg, spec->getReceiveLeg(), fixingMap, fixingGracePeriod) * fxReceiveLeg;
-		price -= InterestRateSwapPricer.price_leg(valDate, discountCurvePayLeg, fixingCurvePayLeg, fxForwardCurvePayLeg, spec->getPayLeg(), fixingMap, fixingGracePeriod) * fxPayLeg;
-		#results.setPrice(price);
-
-
-
-        PV = 0
-        return PV
+	    #price = InterestRateSwapPricer.price_leg(valDate, discountCurveReceiveLeg, fixingCurveReceiveLeg, fxForwardCurveReceiveLeg, spec->getReceiveLeg(), fixingMap, fixingGracePeriod) * fxReceiveLeg;
+		#price -= InterestRateSwapPricer.price_leg(valDate, discountCurvePayLeg, fixingCurvePayLeg, fxForwardCurvePayLeg, spec->getPayLeg(), fixingMap, fixingGracePeriod) * fxPayLeg;
+		
+        #
+        price = InterestRateSwapPricer.price_leg(self._val_date, 
+                                                 discount_curve=self._discount_curve_receive_leg,
+                                                 forward_curve=self._fx_fwd_curve_receive_leg,
+                                                 fixing_curve=self._fixing_curve_receive_leg,
+                                                 spec = self._receive_leg,
+                                                 fixing_map=self._fixing_map,
+                                                 fixing_grace_period=fixing_grace_period)
+        price -= InterestRateSwapPricer.price_leg(self._val_date, 
+                                                 discount_curve=self._discount_curve_pay_leg,
+                                                 forward_curve=self._fx_fwd_curve_pay_leg,
+                                                 fixing_curve=self._fixing_curve_pay_leg,
+                                                 spec = self._pay_leg,
+                                                 fixing_map=self._fixing_map,
+                                                 fixing_grace_period=fixing_grace_period)
+        #results.setPrice(price);
+        #price is already discount to present value inside the price_leg method
+        return price
 
 #FUNCTIONS
 def get_projected_notionals(
