@@ -29,8 +29,9 @@ from rivapy.pricing.pricing_request import (
     InterestRateSwapPricingRequest,
 )
 
-from rivapy.pricing.deposit_pricing import DepositPricer
-from rivapy.pricing.fra_pricing import ForwardRateAgreementPricer
+from rivapy.pricing.factory import _factory
+#from rivapy.pricing.deposit_pricing import DepositPricer
+#from rivapy.pricing.fra_pricing import ForwardRateAgreementPricer
 
 # double declaration
 # class CDSPricingData:
@@ -612,9 +613,10 @@ class DepositPricingData(BasePricingData):
 
     def price(self):
         # obtain correct pricer
-        # pricer = _factory_entries[self.pricer]
-        pricer = DepositPricer(self.valuation_date, self.__spec, self.discount_curve)  # TODO ignore spread curve for now
-
+        pricer_obj = _factory()["DepositPricer"]
+        pricer = pricer_obj(self.valuation_date, self.__spec, self.discount_curve)# TODO ignore spread curve for now
+        #pricer = DepositPricer(self.valuation_date, self.__spec, self.discount_curve) 
+        
         # pass correct required pricer information and calculate
         val = pricer.price()
 
@@ -655,9 +657,87 @@ class ForwardRateAgreementPricingData(BasePricingData):
     def price(self):
         # obtain correct pricer
         # pricer = _factory_entries[self.pricer]
-        pricer = ForwardRateAgreementPricer(self.valuation_date, self.__spec, self.discount_curve, self.forward_curve)
+        pricer_obj = _factory()["ForwardRateAgreementPricer"]
+        pricer = pricer_obj(self.valuation_date, self.__spec, self.discount_curve, self.forward_curve)
 
         # pass correct required pricer information and calculate
         val = pricer.price()
 
         return val
+
+
+class InterestRateSwapPricingData_rivapy: #TODO!!!!
+    def __init__(self, val_date: datetime, spec, ccy, leg_pricing_data, pricing_request: Iterable[ResultType]):
+        """Constructor for 
+
+        Args:
+            val_date ([datetime]): Valuation date.
+            spec: Specification
+            discount_curve: Discount curve.
+            vol_surface ([type]): Volatility surface.
+            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.
+        """
+
+        self.val_date = val_date
+        self.spec = spec
+        self.ccy = ccy
+        self.leg_pricing_data = leg_pricing_data
+        self.pricing_request = pricing_request
+        self._pyvacon_obj = None
+
+    def _get_pyvacon_obj(self):
+        if self._pyvacon_obj is None:
+            self._pyvacon_obj = _pyvacon.finance.pricing.InterestRateSwapPricingData()
+            self._pyvacon_obj.pricer = "InterestRateSwapPricer"
+            self._pyvacon_obj.pricingRequest = _create_pricing_request(self.pricing_request)
+            self._pyvacon_obj.valDate = self.val_date
+            self._pyvacon_obj.setCurr(self.ccy)
+            for leg_data in self.leg_pricing_data:
+                self._pyvacon_obj.addLegData(leg_data._get_pyvacon_obj())
+        return self._pyvacon_obj
+
+    def price(self):
+        return _pyvacon.finance.pricing.BasePricer.price(self._get_pyvacon_obj())
+
+
+class InterestRateSwapLegPricingData_rivapy:
+    def __init__(self, spec, discount_curve, forward_curve, fixing_map, desired_rate = None, fx_rate: float = 1.0, weight: float = None):
+        """Constructor for 
+
+        Args:
+            val_date ([datetime]): Valuation date.
+            spec: Specification
+            discount_curve: Discount curve.
+            vol_surface ([type]): Volatility surface.
+            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.
+        """
+
+        self.discount_curve = discount_curve
+        self.forward_curve = forward_curve
+        self.fixing_map = fixing_map
+        self.spec = spec
+        if fx_rate is not None: #where to use?
+            self.fx_rate = fx_rate
+        if weight is not None: #where to use?
+            self.weight = weight
+        if desired_rate is not None:
+            self.desired_rate = desired_rate
+
+class InterestRateSwapFloatLegPricingData_rivapy(InterestRateSwapLegPricingData_rivapy):
+    def __init__(self, spec, discount_curve, forward_curve, fixing_map, fixing_grace_period: int, spread: float=None, fx_rate: float = 1.0, weight: float=None, fixing_curve=None):
+        """Constructor for 
+
+        Args:
+            val_date ([datetime]): Valuation date.
+            spec: Specification
+            discount_curve: Discount curve.
+            vol_surface ([type]): Volatility surface.
+            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.
+        """
+
+        #HERE the FX_RATE is ACTUALLY THE SPREAD
+        super().__init__(spec, discount_curve, forward_curve, fixing_map, fx_rate = fx_rate, weight= weight)
+
+        self.fixing_curve = fixing_curve
+        self.fixing_grace_period = fixing_grace_period
+        self.spread = spread

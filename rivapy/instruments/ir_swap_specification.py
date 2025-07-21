@@ -10,7 +10,7 @@ import rivapy.tools.interfaces as interfaces
 from rivapy.tools.datetools import Period, Schedule
 
 from rivapy.instruments.bond_specifications import BondBaseSpecification
-
+from rivapy.instruments.notional_structure import NotionalStructure, ConstNotionalStructure, VariableNotionalStructure, ResettingNotionalStructure
 
 # Base each swap leg, off of the IRSwapBaseSpecification
 # This IRSwapBaseSpecification is in turn, based off of the BondBaseSpecification
@@ -42,7 +42,7 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
     def __init__(
         self,
         obj_id: str,
-        notional: float,
+        notional: _Union[float, NotionalStructure],
         start_dates: _List[datetime],
         end_dates: _List[datetime],
         pay_dates: _List[datetime],
@@ -51,7 +51,7 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
     ):
         """_summary_ #TODO"""
         self.obj_id = obj_id
-        self.notional_structure = notional
+        self._notional_structure = notional
         self.start_dates = start_dates
         self.end_dates = end_dates
         self.pay_dates = pay_dates
@@ -59,14 +59,14 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
         self.day_count_convention = day_count_convention
 
     # region properties
-    @property
-    def notional(self) -> float:
-        """The swap leg's notional amount (face value)."""
-        return self._notional
+    # @property
+    # def notional(self) -> float:
+    #     """The swap leg's notional amount (face value)."""
+    #     return self._notional
 
-    @notional.setter
-    def notional(self, value: float):
-        self._notional = _check_positivity(value)
+    # @notional.setter
+    # def notional(self, value: float):
+    #     self._notional = _check_positivity(value)
 
     @property
     def currency(self) -> str:
@@ -104,6 +104,27 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
         """
         return self.pay_dates
 
+    @property
+    def notional_structure(self) -> NotionalStructure:
+        """Return the notionals
+
+        Returns:
+            NotionalStructure: class object detailing the notionals, start dates, ...
+        """
+        return self.notional_structure
+
+    @notional_structure.setter
+    def notional_structure(self, value: _Union[float, NotionalStructure]):
+        """If only a float is given, assume a constant notional and create a ConstNotionalStructure.
+
+        Args:
+            value (_Union[float, NotionalStructure]): _description_
+        """
+        if isinstance(value, float):
+            self._notional_structure = ConstNotionalStructure(value)
+        else:
+            self._notional_structure = value
+
     # @abstractmethod
     # def reset_dates(self) -> _List[datetime]:
     #    """ #TODO brought over from pyvacon, for float leg?
@@ -113,7 +134,7 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
     def _to_dict(self) -> Dict:
         return_dict = {
             "obj_id": self.obj_id,
-            "notional": self.notional,
+            "notional": self.notional_structure,
             "start_dates": self.start_dates,
             "end_dates": self.end_dates,
             "pay_dates": self.pay_dates,
@@ -132,7 +153,7 @@ class IrFixedLegSpecification(IrSwapLegSpecification):
         self,
         fixed_rate: float,
         obj_id: str,
-        notional: float,
+        notional: _Union[float, NotionalStructure],
         start_dates: _List[datetime],
         end_dates: _List[datetime],
         pay_dates: _List[datetime],
@@ -171,12 +192,16 @@ class IrFixedLegSpecification(IrSwapLegSpecification):
 
     # endregion
 
+    def get_NotionalStructure(self):
+
+        return self.notional_structure
+
 
 class IrFloatLegSpecification(IrSwapLegSpecification):
     def __init__(
         self,
         obj_id: str,
-        notional: float,
+        notional: _Union[float, NotionalStructure],
         reset_dates: _List[datetime],
         start_dates: _List[datetime],
         end_dates: _List[datetime],
@@ -237,13 +262,17 @@ class IrFloatLegSpecification(IrSwapLegSpecification):
 
     # endregion
 
+    def get_NotionalStructure(self):
+
+        return self.notional_structure
+
 
 class InterestRateSwapSpecification(interfaces.FactoryObject):
 
     def __init__(
         self,
         obj_id: str,
-        notional: float,
+        notional: _Union[float, NotionalStructure],
         issue_date: _Union[date, datetime],
         maturity_date: _Union[date, datetime],
         fixed_leg: IrFixedLegSpecification,

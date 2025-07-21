@@ -2,7 +2,7 @@
 # refactor of notional structurer from pyvacon
 # main objective is that for swaps at least, notionals are not always constant
 
-
+import abc
 import rivapy.tools.interfaces as interfaces
 from datetime import datetime
 from typing import List, Optional, Dict, Union
@@ -11,9 +11,11 @@ from typing import List, Optional, Dict, Union
 class NotionalStructure(interfaces.FactoryObject):
     """Abstract base class for notional structures."""
 
+    @abc.abstractmethod
     def __init__(self):
         pass
 
+    @abc.abstractmethod
     def get_amount(self, period: int) -> float:
         """here, period is the INDEX that maps to the notional amount"""
         pass
@@ -47,8 +49,15 @@ class NotionalStructure(interfaces.FactoryObject):
         """
         return None
 
-    @_abstract
-    def
+    @abc.abstractmethod
+    def get_size(self) -> int:
+        pass
+
+    @abc.abstractmethod
+    def _to_dict(self) -> Dict:
+        return_dict = {}
+        return return_dict
+
 
 class ConstNotionalStructure(NotionalStructure):
     def __init__(self, notional: float):
@@ -64,6 +73,20 @@ class ConstNotionalStructure(NotionalStructure):
             float: _description_
         """
         return self._notional
+
+    def get_size(self) -> int:
+        """If the notional structure is constant, we default the 'size' as 1
+
+        Returns:
+            int: _description_
+        """
+        return 1
+
+    def _to_dict(self) -> Dict:
+        return_dict = {
+            "notional": self._notional,
+        }
+        return return_dict
 
 
 class VariableNotionalStructure(NotionalStructure):
@@ -87,6 +110,21 @@ class VariableNotionalStructure(NotionalStructure):
 
     def get_pay_date_end(self, period: int) -> datetime:
         return self._pay_date_end[period]
+
+    def get_size(self) -> int:
+        """Returns the number of notionals
+
+        Returns:
+            int: _description_
+        """
+        return len(self._notional)
+
+    def _to_dict(self) -> Dict:
+        # TODO fill out more
+        return_dict = {
+            "notional": self._notional,
+        }
+        return return_dict
 
 
 class ResettingNotionalStructure(NotionalStructure):
@@ -131,6 +169,21 @@ class ResettingNotionalStructure(NotionalStructure):
 
     def get_reference_currency(self) -> str:
         return self._ref_currency
+
+    def get_size(self) -> int:
+        """Returns the number of notionals
+
+        Returns:
+            int: _description_
+        """
+        return len(self._notional)
+
+    def _to_dict(self) -> Dict:
+        # TODO fill out more
+        return_dict = {
+            "notional": self._notional,
+        }
+        return return_dict
 
 
 # #TODO implment in the case we need to build a notional structure from a given database...
