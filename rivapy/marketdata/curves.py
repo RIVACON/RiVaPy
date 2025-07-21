@@ -145,7 +145,7 @@ class DiscountCurve:
         return self._pyvacon_obj
 
     # experimental
-    def rivapy_value(self, refdate: Union[date, datetime], d: Union[date, datetime]) -> float:
+    def rivapy_value(self, refdate: Union[date, datetime], d: Union[date, datetime], payment_dates=None, annual_payment_frequency=None) -> float:
         """Return discount factor for a given date (without dependencies from pyvacon)
 
         Args:
@@ -177,7 +177,9 @@ class DiscountCurve:
         # get yearfrac, taking into account DCC
         dcc = DayCounter(self.daycounter)
 
-        yf_list = [dcc.yf(self.refdate, x) for x in self.get_dates()]  # list(dcc.yf(self.refdate, self.get_dates()))
+        yf_list = [
+            dcc.yf(self.refdate, x, payment_dates, annual_payment_frequency) for x in self.get_dates()
+        ]  # list(dcc.yf(self.refdate, self.get_dates()))
         df_list = [x for x in self.get_df()]
 
         # interpolate/extrapolate given a chosen method
@@ -192,11 +194,11 @@ class DiscountCurve:
 
         # give FWD value if given refdate is greater than curves reference date
         if refdate > self.refdate:
-            df1 = interp.interp(yf_list, df_list, dcc.yf(self.refdate, refdate), self.extrapolation)
-            df2 = interp.interp(yf_list, df_list, dcc.yf(self.refdate, d), self.extrapolation)
+            df1 = interp.interp(yf_list, df_list, dcc.yf(self.refdate, refdate, payment_dates, annual_payment_frequency), self.extrapolation)
+            df2 = interp.interp(yf_list, df_list, dcc.yf(self.refdate, d, payment_dates, annual_payment_frequency), self.extrapolation)
             df = df2 / df1
-        else:  # this also covers the case if refdates are the same, and avoids division by zero
-            df = interp.interp(yf_list, df_list, dcc.yf(self.refdate, d), self.extrapolation)
+        else:  # this also co ers the case if refdates are the same, and avoids division by zero
+            df = interp.interp(yf_list, df_list, dcc.yf(self.refdate, d, payment_dates, annual_payment_frequency), self.extrapolation)
 
         return df
 

@@ -210,6 +210,16 @@ class RollConvention(_MyEnum):
 
 
 @_unique
+class RollRule(_MyEnum):
+    """Roll Rules are used for calculateing daten when building a scheduel and, therefore, rolling forward (or backward) dates by periods or frequencies"""
+
+    NONE = "NONE"  # no roll rule applied,  day of a month drifts if adjustments are made acc. to bdc, i.e. the anchor date changes
+    EOM = "EOM"  # rolls from month end to month end, ambiguous days are adjusted to the end of the month, i.e. Mar 30,
+    DOM = "DOM"  # rolls from a specific day of month to the same day of month, ambiguous days are adjusted to the same day of month, i.e. Mar 30,
+    IMM = "IMM"  # rolls to the third Wednesday of the month, i.e. Mar 30, rolls to Mar 20, if Mar 20 is a weekend, it rolls to Mar 22
+
+
+@_unique
 class DayCounterType(_MyEnum):
     ACT_ACT = "ActAct"
     Act365Fixed = "Act365Fixed"

@@ -23,8 +23,18 @@ class PricingRequestBase(FactoryObject):
         return self.__dict__
 
 
-class GreenPPAPricingRequest(PricingRequestBase):
+class DepositPricingRequest(PricingRequestBase):
+
     def __init__(self, theo_val: bool, cf_paths: bool = False, cf_expected: bool = False):
+        """Configuration of set of information to be calculated for the Deposit's price.
+        Restrict the general PricingRequest to the sub-set relevant for the pricing of deposits.
+        """
+
+        super().__init__(theo_val=theo_val, cf_paths=cf_paths, cf_expected=cf_expected)
+
+
+class GreenPPAPricingRequest(PricingRequestBase):
+    def __init__(self, theo_val: bool = False, cf_paths: bool = False, cf_expected: bool = False):
         """PricingRequest for Green PPA pricing.
 
         Args:
@@ -570,17 +580,6 @@ class BondPricingRequest(PricingRequest):
             calc_convexity=calc_convexity,
             calc_macaulay_duration=calc_macaulay_duration,
         )
-
-
-class DepositPricingRequest(PricingRequest):
-
-    def __init__(self):
-        """Configuration of set of information to be calculated for the Deposit's price.
-        Restrict the general PricingRequest to the sub-set relevant for the pricing of deposits.
-        """
-
-        # super.__init__(self)
-        pass
 
 
 class ForwardRateAgreementPricingRequest(PricingRequest):

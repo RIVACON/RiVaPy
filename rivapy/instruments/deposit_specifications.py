@@ -1,10 +1,11 @@
 from abc import abstractmethod as _abstractmethod
-from typing import List as _List, Union as _Union, Tuple
+from typing import List as _List, Union as _Union, Tuple, Optional as _Optional
 import numpy as np
 from datetime import datetime, date, timedelta
-from holidays import HolidayBase as _HolidayBase, ECB as _ECB
-from rivapy.tools.datetools import Period, Schedule, _date_to_datetime, _datetime_to_date_list, _term_to_period
-from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating
+from holidays import HolidayBase as _HolidayBase
+from holidays import EuropeanCentralBank as _ECB
+from rivapy.tools.datetools import Period, _date_to_datetime, _datetime_to_date_list, _term_to_period
+from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating, RollRule
 from rivapy.tools._validators import _check_positivity, _check_start_before_end, _string_to_calendar, _is_ascending_date_list
 import rivapy.tools.interfaces as interfaces
 from rivapy.tools.datetools import Period, Schedule
@@ -13,6 +14,12 @@ from rivapy.tools.datetools import Period, Schedule
 class DepositSpecification(interfaces.FactoryObject):
 
     def __init__(
+        # ToDo:
+        # - check application of bdc
+        # - check application of roll convention
+        # - add term (and calculate maturity date from start date)
+        # - consider payment date vs end of accrual period date
+        # . spot days
         self,
         obj_id: str,
         fixing_date: _Union[date, datetime],
@@ -21,9 +28,13 @@ class DepositSpecification(interfaces.FactoryObject):
         currency: _Union[Currency, str] = "EUR",
         notional: float = 100.0,
         rate: float = 0.00,
-        day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
-        business_day_convention: _Union[RollConvention, str] = RollConvention.FOLLOWING,
-        issuer: str = None,
+        term: _Optional[_Union[Period, str]] = None,
+        day_count_convention: _Union[DayCounterType, str] = DayCounterType.ACT360,
+        business_day_convention: _Union[RollConvention, str] = RollConvention.MODIFIED_FOLLOWING,
+        roll_convention: _Union[RollRule, str] = RollRule.EOM,
+        spot_days: int = 0,
+        calendar: _Union[_HolidayBase, str] = _ECB(),
+        issuer: _Optional[str] = None,
         securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
         rating: _Union[Rating, str] = Rating.NONE,
     ):
@@ -37,6 +48,7 @@ class DepositSpecification(interfaces.FactoryObject):
             currency (str, optional): Currency as alphabetic, Defaults to 'EUR'.
             notional (float, optional): Deposit's notional/face value. Must be positive. Defaults to 100.0.
             rate (float): Deposit fixed interest rate.
+            term (_Union[Period, str], optional): Deposit term. If provided, it is used to calculate the maturity date from the start date.
             day_count_convention (Union[DayCounter, str], optional): Day count convention for determining period
                                                                      length. Defaults to DayCounter.ThirtyU360.
             business_day_convention (Union[RollConvention, str], optional): Set of rules defining the adjustment of
@@ -44,26 +56,39 @@ class DepositSpecification(interfaces.FactoryObject):
                                                                             day with respect to a given holiday
                                                                             calendar. Defaults to
                                                                             RollConvention.FOLLOWING
+            roll_convention (Union[RollRule],str], optional): Roll convention to be applied when building a schedule. Defaults to RollRule.NONE.
+            spot_days (int, optional): Number of days after fixing date when the deposit is actually settled. Defaults to 2.
             issuer (str, optional): Name/id of issuer. Defaults to None.
             securitization_level (_Union[SecuritizationLevel, str], optional): Securitization level. Defaults to None.
             rating (_Union[Rating, str]): Paper rating.
         """
         self.obj_id = obj_id
+        # TODO: check for combinations of dates / period
+        # if start date and period
+        # if start date and maturity date
+        # if T/N or O/N then reset spot lag
+        # if spot days is NONE and term not None
 
         if fixing_date is not None:
             self.fixing_date = fixing_date
+        elif start_date is not None:
+            self.fixing_date = start_date
 
         self._start_date = start_date
         self._maturity_date = maturity_date
         self._currency = currency
         self._notional = notional
         self._rate = rate
+        self._term = _term_to_period(term) if term is not None else None
+        self._roll_convention = RollRule.to_string(roll_convention)
+        self._spot_days = spot_days
         self._day_count_convention = day_count_convention
         self._business_day_convention = business_day_convention
+        self._calendar = _string_to_calendar(calendar)
         if issuer is not None:
             self._issuer = issuer
         if securitization_level is not None:
-            self._securitization_level = securitization_level
+            self._securitization_level = SecuritizationLevel.to_string(securitization_level)
         self._rating = Rating.to_string(rating)
         # validate dates
         self._validate_derived_issued_instrument()
@@ -115,6 +140,8 @@ class DepositSpecification(interfaces.FactoryObject):
             "notional": self.notional,
             "rate": self.rate,
             "day_count_convention": self.day_count_convention,
+            "roll_convention": self._roll_convention,
+            "spot_days": self._spot_days,
             "business_day_convention": self.business_day_convention,
             "issuer": self.issuer,
             "securitization_level": self.securitization_level,
@@ -169,22 +196,17 @@ class DepositSpecification(interfaces.FactoryObject):
         return self._rating
 
     @rating.setter
-    def rating(self, rating: _Union[Rating, str]) -> str:
+    def rating(self, rating: _Union[Rating, str]):
         self._rating = Rating.to_string(rating)
 
     @property
     def securitization_level(self) -> str:
-        """
-        Getter for instrument's securitisation level.
-
-        Returns:
-            str: Instrument's securitisation level.
-        """
+        """The bond's securitization level as a string."""
         return self._securitization_level
 
     @securitization_level.setter
-    def securitization_level(self, securitisation_level: _Union[SecuritizationLevel, str]):
-        self._securitization_level = SecuritizationLevel.to_string(securitisation_level)
+    def securitization_level(self, value: _Union[SecuritizationLevel, str]):
+        self._securitization_level = SecuritizationLevel.to_string(value)
 
     @property
     def start_date(self) -> date:
@@ -207,7 +229,7 @@ class DepositSpecification(interfaces.FactoryObject):
         self._start_date = _date_to_datetime(start_date)
 
     @property
-    def maturity_date(self) -> date:
+    def maturity_date(self) -> datetime:
         """
         Getter for deposit's maturity date.
 
@@ -255,7 +277,7 @@ class DepositSpecification(interfaces.FactoryObject):
         self._notional = _check_positivity(notional)
 
     @property
-    def day_count_convention(self) -> str:
+    def day_count_convention(self) -> RollConvention:
         """
         Getter for FRA's day count convention.
 
@@ -265,7 +287,7 @@ class DepositSpecification(interfaces.FactoryObject):
         return self._day_count_convention
 
     @day_count_convention.setter
-    def day_count_convention(self, day_count_convention: _Union[DayCounterType, str]) -> str:
+    def day_count_convention(self, day_count_convention: _Union[DayCounterType, str]):
         self._day_count_convention = DayCounterType.to_string(day_count_convention)
 
     @property
@@ -279,7 +301,7 @@ class DepositSpecification(interfaces.FactoryObject):
         return self._business_day_convention
 
     @business_day_convention.setter
-    def business_day_convention(self, business_day_convention: _Union[DayCounterType, str]) -> str:
+    def business_day_convention(self, business_day_convention: _Union[RollConvention, str]):
         self._business_day_convention = DayCounterType.to_string(business_day_convention)
 
     # endregion
@@ -308,7 +330,7 @@ class DepositSpecification(interfaces.FactoryObject):
         result = [
             (self.start_date, 0.0)
         ]  # the first entry of this schedule is the accrual start which has a cashflow of zero and is just used for accrual calculation
-        result.append[(self.maturity_date, interest + self.notional)]
+        result.append((self.maturity_date, interest + self.notional))
 
         # schedule = Schedule(self.accrual_start, self.maturity_date, period, stub=self.stub).generate_dates(ends_only=True)
         # result = [(d, self.coupon*coupon_multiplier*self.notional) for d in schedule]
@@ -336,43 +358,25 @@ class DepositSpecification(interfaces.FactoryObject):
         """
         return self.__coupons
 
+    @property
+    def calendar(self):
+        """
+        Getter for the calendar used for business day adjustment.
 
-################################
-# Temporary helper function location until we implement with Rivapy's existing date time tools
-# Calculate day count fraction
-def day_count_fraction(start, end, convention):
-    delta = (end - start).days
-    if convention == "ACT/360":
-        return delta / 360
-    elif convention == "ACT/365":
-        return delta / 365
-    elif convention == "30/360":
-        # Simplified 30/360: assumes every month has 30 days
-        d1, m1, y1 = start.day, start.month, start.year
-        d2, m2, y2 = end.day, end.month, end.year
-        days = 360 * (y2 - y1) + 30 * (m2 - m1) + (d2 - d1)
-        return days / 360
-    else:
-        raise ValueError("Unsupported day count convention")
+        Returns:
+            The calendar used for business day adjustment.
+        """
+        return self._calendar
 
+    @calendar.setter
+    def calendar(self, calendar: _Union[_HolidayBase, str]):
+        """
+        Setter for the calendar used for business day adjustment.
 
-def is_business_day(date, holidays):
-    return date.weekday() < 5 and date not in holidays
-
-
-def adjust_date(date, convention, holidays):
-    if is_business_day(date, holidays):
-        return date
-    if convention == "following":
-        while not is_business_day(date, holidays):
-            date += dt.timedelta(days=1)
-    elif convention == "preceding":
-        while not is_business_day(date, holidays):
-            date -= dt.timedelta(days=1)
-    elif convention == "modified_following":
-        orig_month = date.month
-        while not is_business_day(date, holidays):
-            date += dt.timedelta(days=1)
-        if date.month != orig_month:
-            date = adjust_date(date - dt.timedelta(days=1), "preceding", holidays)
-    return date
+        Args:
+            calendar (_Union[_HolidayBase, str]): The calendar used for business day adjustment.
+        """
+        if isinstance(calendar, str) and calendar.upper() == "TARGET":
+            self._calendar = _ECB()
+        else:
+            self._calendar = _string_to_calendar(calendar)

@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-
+from typing import Optional as _Optional
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 from calendar import monthrange, isleap
 from typing import List as _List, Union as _Union, Callable
-from holidays import HolidayBase as _HolidayBase, ECB as _ECB
-from rivapy.tools.enums import RollConvention, DayCounterType
+from holidays import HolidayBase as _HolidayBase
+from holidays import EuropeanCentralBank as _ECB
+from rivapy.tools.enums import RollConvention, DayCounterType, RollRule
 from rivapy.tools._validators import _string_to_calendar
 import logging
 
@@ -299,7 +300,7 @@ class Period:
         """Creates a Period from a string
 
         Args:
-            period (str): The string defining the period. The string must be defined by the number of days/months/years followed by one of the letters 'Y'/'M'/'D', i.e. '6M' means 6 months.
+            period (str): The string defining the period. The string must be defined by the number of days/months/years followed by one of the letters 'Y'/'M'/'D', i.e. '6M' means 6 months, or 'O/N', or 'T/N'.
 
         Returns:
             Period: The resulting period
@@ -310,15 +311,20 @@ class Period:
                 >>> p = Period('6M')  # period of 6 months
                 >>> p = Period('1Y') #period of 1 year
         """
-        period_length = int(period[:-1])
-        period_type = period[1]
-        if period_type == "Y":
-            return Period(years=period_length)
-        elif period_type == "M":
-            return Period(months=period_length)
-        elif period_type == "D":
-            return Period(days=period_length)
-        raise Exception(period + " is not a valid period string. See documentation of tools.datetools.Period for deocumentation of valid strings.")
+        if period == "T/N" or period == "O/N":
+            return Period(days=1)
+        else:
+            period_length = int(period[:-1])
+            period_type = period[1]
+            if period_type == "Y":
+                return Period(years=period_length)
+            elif period_type == "M":
+                return Period(months=period_length)
+            elif period_type == "D":
+                return Period(days=period_length)
+            raise Exception(
+                period + " is not a valid period string. See documentation of tools.datetools.Period for deocumentation of valid strings."
+            )
 
     @property
     def years(self) -> int:
@@ -391,9 +397,12 @@ class Schedule:
         end_day: _Union[date, datetime],
         time_period: _Union[Period, str],
         backwards: bool = True,
-        stub: bool = False,
+        # stub_mode: str = "automatic", # could alternatively be "force" or "none" (i.e. force a stub period even if not necessary, or do not allow stub periods at all)
+        stub_type_is_Long: bool = True,
+        # stub_placement: str = "ending", # could alternatively be "beginning" (i.e. place stub period at the end, at the beginning)
         business_day_convention: _Union[RollConvention, str] = RollConvention.MODIFIED_FOLLOWING,
         calendar: _Union[_HolidayBase, str] = None,
+        roll_convention: _Union[RollRule, str] = RollRule.EOM,
     ):
         """
         A schedule is a list of dates, e.g. of coupon payments, fixings, etc., which is defined by its first (= start
@@ -408,8 +417,8 @@ class Schedule:
             time_period (_Union[Period, str]): Time distance between two consecutive dates.
             backwards (bool, optional): Defines direction for rolling out the schedule. True means the schedule will be
                                         rolled out (backwards) from end day to start day. Defaults to True.
-            stub (bool, optional): Defines if the first/last period is accepted (True), even though it is shorter than
-                                   the others, or if its remaining days are added to the neighbouring period (False).
+            stub_type_is_Long (bool, optional): Defines if a stub period is accepted (False) to be shorter than
+                                   the others, or if its remaining days are added to the neighbouring period (True).
                                    Defaults to True.
             business_day_convention (_Union[RollConvention, str], optional): Set of rules defining the adjustment of
                                                                              days to ensure each date being a business
@@ -421,6 +430,7 @@ class Schedule:
                                                           Saturdays and Sundays).
                                                           Defaults (through constructor) to holidays.ECB
                                                           (= Target2 calendar) between start_day and end_day.
+            roll_convention (_Union[RollRule, str], optional): Defines the roll convention for the schedule.
 
         Examples:
 
@@ -435,9 +445,10 @@ class Schedule:
         self.end_day = end_day
         self.time_period = time_period
         self.backwards = backwards
-        self.stub = stub
+        self.stub_type_is_Long = stub_type_is_Long
         self.business_day_convention = business_day_convention
         self.calendar = calendar
+        self.roll_convention = roll_convention
 
     @property
     def start_day(self):
@@ -497,19 +508,19 @@ class Schedule:
         self.__backwards = backwards
 
     @property
-    def stub(self):
+    def stub_type_is_Long(self):
         """
-        Getter for potential existence of short periods (stubs).
+        Getter for potential existence of shlong periods (stub_type_is_long).
 
         Returns:
             True, if a shorter period is allowed.
             False, if only a longer period is allowed.
         """
-        return self.__stub
+        return self.stub_type_is_Long
 
-    @stub.setter
-    def stub(self, stub: bool):
-        self.__stub = stub
+    @stub_type_is_Long.setter
+    def stub_type_is_Long(self, stub_type_is_Long: bool):
+        self.__stub_type_is_Long = stub_type_is_Long
 
     @property
     def business_day_convention(self):
@@ -542,8 +553,86 @@ class Schedule:
         else:
             self.__calendar = _string_to_calendar(calendar)
 
+    @property
+    def roll_convention(self):
+        """
+        Getter for schedule's roll convention.
+
+        Returns:
+            Roll convention of specified schedule.
+        """
+        return self.__roll_convention
+
+    @roll_convention.setter
+    def roll_convention(self, roll_convention: _Union[RollRule, str]):
+        """
+        Setter for schedule's roll convention.
+
+        Args:
+            roll_convention (Union[RollRule, str]): Roll convention of specified schedule.
+        """
+        self.__roll_convention = RollRule.to_string(roll_convention)
+
+    def _generate_eom_dates(from_, to_, term, direction, backwards) -> _List[date]:
+        dates = []
+        if _is_ambiguous_date(from_):
+            from_ = datetime(from_.year, from_.month, monthrange(from_.year, from_.month)[-1])
+        if _is_ambiguous_date(to_):
+            to_ = datetime(to_.year, to_.month, monthrange(to_.year, to_.month)[-1])
+        while ((not backwards) & (from_ <= to_)) | (backwards & (to_ <= from_)):
+            dates.append(from_)
+            from_ += direction * relativedelta(years=term.years, months=term.months, day=31)
+        return dates
+
+    def _generate_none_dates(from_, to_, term, direction, backwards) -> _List[date]:
+        dates = []
+        while ((not backwards) & (from_ <= to_)) | (backwards & (to_ <= from_)):
+            dates.append(from_)
+            from_ += direction * relativedelta(years=term.years, months=term.months, days=term.days)
+        return dates
+
+    def _generate_dom_dates(from_, to_, term, direction, backwards) -> _List[date]:
+        dates = []
+        date = from_
+        i = 0
+        days = from_.day
+        while ((not backwards) & (date <= to_)) | (backwards & (to_ <= date)):
+            dates.append(date)
+            i += 1
+            date = from_ + direction * relativedelta(years=term.years, months=term.months * i, day=days)
+        return dates
+
+    def _generate_imm_dates(from_, to_, term, direction, backwards) -> _List[date]:
+        from dateutil.rrule import WE
+
+        dates = []
+        while ((not backwards) & (from_ <= to_)) | (backwards & (to_ <= from_)):
+            dates.append(from_)
+            from_ += direction * relativedelta(years=term.years, months=term.months, day=1, weekday=WE(3))
+        return dates
+
+    def _generate_dates_by_roll_convention(roll_convention_, from_, to_, term, direction, backwards) -> _List[date]:
+        RollConventionMap = {
+            RollRule.EOM: Schedule._generate_eom_dates,
+            RollRule.NONE: Schedule._generate_none_dates,
+            RollRule.DOM: Schedule._generate_dom_dates,
+            RollRule.IMM: Schedule._generate_imm_dates,
+        }
+        if roll_convention_ not in RollConventionMap:
+            raise Exception(f"Unknown roll convention '{roll_convention_}'!")
+        return RollConventionMap[roll_convention_](from_, to_, term, direction, backwards)
+
+    # ToDo: clarify what is done here --> automatic stub, allow_stub control if long or short, always at the end when rolling forward, at the beginning when rolling backwards
+    # ToDo: add tests, check out deposits and FRAs
     @staticmethod
-    def _roll_out(from_: _Union[date, datetime], to_: _Union[date, datetime], term: Period, backwards: bool, allow_stub: bool) -> _List[date]:
+    def _roll_out(
+        from_: _Union[date, datetime],
+        to_: _Union[date, datetime],
+        term: Period,
+        backwards: bool = False,
+        long_stub: bool = True,
+        roll_convention_: _Union[RollRule, str] = "NONE",
+    ) -> _List[date]:
         """
         Rolls out dates from from_ to to_ in the specified direction applying the given term under consideration of the
         specification for allowing shorter periods.
@@ -553,17 +642,18 @@ class Schedule:
             to_ (_Union[date, datetime]): End of the roll out mechanism.
             term (Period): Difference between rolled out dates.
             backwards (bool): Direction of roll out mechanism: backwards if True, forwards if False.
-            allow_stub (bool): Defines if periods shorter than term are allowed.
+            long_stub (bool): Defines if periods longer than term are allowed.
 
         Returns:
             Date schedule not yet adjusted to any business day convention.
         """
+        if isinstance(roll_convention_, str):
+            roll_convention_ = RollRule[roll_convention_.upper()]
         # convert datetime to date (if necessary):
         from_ = _date_to_datetime(from_)
         to_ = _date_to_datetime(to_)
-
         # check input consistency:
-        if (~backwards) & (from_ < to_):
+        if (not backwards) & (from_ < to_):
             direction = +1
         elif backwards & (from_ > to_):
             direction = -1
@@ -577,17 +667,15 @@ class Schedule:
                 + str(backwards)
                 + "')!"
             )
-
         # generates a list of dates ...
-        dates = []
-        # ... for forward rolling case  or  backward rolling case ...
-        while ((~backwards) & (from_ <= to_)) | (backwards & (to_ <= from_)):
-            dates.append(from_)
-            from_ += direction * relativedelta(years=term.years, months=term.months, days=term.days)
-            # ... and compete list for fractional periods ...
-        if dates[-1] != to_:
-            # ... by adding stub or ...
-            if allow_stub:
+        dates = Schedule._generate_dates_by_roll_convention(roll_convention_, from_, to_, term, direction, backwards)
+        if roll_convention_ == RollRule.EOM and _is_ambiguous_date(from_):
+            from_ = datetime(from_.year, from_.month, monthrange(from_.year, from_.month)[-1])
+        if roll_convention_ == RollRule.EOM and _is_ambiguous_date(to_):
+            to_ = datetime(to_.year, to_.month, monthrange(to_.year, to_.month)[-1])
+        if dates[-1].date() != to_.date():
+            # ... by adding a short stub or ...
+            if not long_stub:
                 dates.append(to_)
             # ... by extending last period.
             else:
@@ -597,21 +685,21 @@ class Schedule:
     def generate_dates(self, ends_only: bool) -> _List[date]:
         """
         Generate list of schedule days according to the schedule specification, in particular with regards to business
-        day convention and calendar given.
+        day convention, roll_convention and calendar given.
 
         Args:
             ends_only (bool): Flag to indicate if period beginnings shall be included, e.g. for defining accrual
-                              periods: True, if only period ends shall be included, e.g. for defining payment dates.
+                                periods: True, if only period ends shall be included, e.g. for defining payment dates.
 
         Returns:
             List[date]: List of schedule dates (including start and end date) adjusted to rolling convention.
         """
         # roll out dates ignoring any business day issues
         if self.__backwards:
-            schedule_dates = Schedule._roll_out(self.__end_day, self.__start_day, self.__time_period, True, self.__stub)
+            schedule_dates = Schedule._roll_out(self.__end_day, self.__start_day, self.__time_period, True, self.__stub_type_is_Long)
             schedule_dates.reverse()
         else:
-            schedule_dates = Schedule._roll_out(self.__start_day, self.__end_day, self.__time_period, False, self.__stub)
+            schedule_dates = Schedule._roll_out(self.__start_day, self.__end_day, self.__time_period, False, self.__stub_type_is_Long)
 
         # adjust according to business day convention
         rolled_schedule_dates = [roll_day(schedule_dates[0], self.__calendar, self.__business_day_convention, schedule_dates[0])]
@@ -625,237 +713,6 @@ class Schedule:
 
         logger.debug("Schedule dates successfully calculated from '" + str(self.__start_day) + "' to '" + str(self.__end_day) + "'.")
         return rolled_schedule_dates
-
-
-# class PowerSchedule:
-#     def __init__(self,
-#                  start_day: _Union[date, datetime],
-#                  end_day: _Union[date, datetime],
-#                  time_period: _Union[Period, str],
-#                  backwards: bool = True,
-#                  business_day_convention: _Union[RollConvention, str] = RollConvention.MODIFIED_FOLLOWING,
-#                  calendar: _Union[_HolidayBase, str] = None):
-#         """
-
-#         Args:
-#             start_day (_Union[date, datetime]): Schedule's first day - beginning of the schedule.
-#             end_day (_Union[date, datetime]): Schedule's last day - end of the schedule.
-#             time_period (_Union[Period, str]): Time distance between two consecutive dates.
-#             backwards (bool, optional): Defines direction for rolling out the schedule. True means the schedule will be
-#                                         rolled out (backwards) from end day to start day. Defaults to True.
-#             stub (bool, optional): Defines if the first/last period is accepted (True), even though it is shorter than
-#                                    the others, or if it remaining days are added to the neighbouring period (False).
-#                                    Defaults to True.
-#             business_day_convention (_Union[RollConvention, str], optional): Set of rules defining the adjustment of
-#                                                                              days to ensure each date being a business
-#                                                                              day with respect to a given holiday
-#                                                                              calendar. Defaults to
-#                                                                              RollConvention.MODIFIED_FOLLOWING
-#             calendar (_Union[_HolidayBase, str], optional): Holiday calendar defining the bank holidays of a country or
-#                                                           province (but not all non-business days as for example
-#                                                           Saturdays and Sundays).
-#                                                           Defaults (through constructor) to holidays.ECB
-#                                                           (= Target2 calendar) between start_day and end_day.
-
-#         Examples:
-
-#             .. code-block:: python
-
-#                 >>> from datetime import date
-#                 >>> from rivapy.tools import schedule
-#                 >>> schedule = Schedule(date(2020, 8, 21), date(2021, 8, 21), Period(0, 3, 0), True, False, RollConvention.UNADJUSTED, holidays_de).generate_dates(False),
-#                        [date(2020, 8, 21), date(2020, 11, 21), date(2021, 2, 21), date(2021, 5, 21), date(2021, 8, 21)])
-#         """
-#         self.start_day = start_day
-#         self.end_day = end_day
-#         self.time_period = time_period
-#         self.backwards = backwards
-#         self.business_day_convention = business_day_convention
-#         self.calendar = calendar
-
-
-#     @property
-#     def start_day(self):
-#         """
-#         Getter for schedule's start date.
-
-#         Returns:
-#             Start date of specified schedule.
-#         """
-#         return self.__start_day
-
-#     @start_day.setter
-#     def start_day(self, start_day: _Union[date, datetime]):
-#         self.__start_day = _date_to_datetime(start_day)
-
-#     @property
-#     def end_day(self):
-#         """
-#         Getter for schedule's end date.
-
-#         Returns:
-#             End date of specified schedule.
-#         """
-#         return self.__end_day
-
-#     @end_day.setter
-#     def end_day(self, end_day: _Union[date, datetime]):
-#         self.__end_day = _date_to_datetime(end_day)
-
-#     @property
-#     def time_period(self):
-#         """
-#         Getter for schedule's time period.
-
-#         Returns:
-#             Time period of specified schedule.
-#         """
-#         return self.__time_period
-
-#     @time_period.setter
-#     def time_period(self, time_period: _Union[Period, str]):
-#         self.__time_period = _term_to_period(time_period)
-
-#     @property
-#     def backwards(self):
-#         """
-#         Getter for schedule's roll out direction.
-
-#         Returns:
-#             True, if rolled out from end day to start day.
-#             False, if rolled out from start day to end day.
-#         """
-#         return self.__backwards
-
-#     @backwards.setter
-#     def backwards(self, backwards: bool):
-#         self.__backwards = backwards
-
-#     @property
-#     def stub(self):
-#         """
-#         Getter for potential existence of short periods (stubs).
-
-#         Returns:
-#             True, if a shorter period is allowed.
-#             False, if only a longer period is allowed.
-#         """
-#         return self.__stub
-
-#     @stub.setter
-#     def stub(self, stub: bool):
-#         self.__stub = stub
-
-#     @property
-#     def business_day_convention(self):
-#         """
-#         Getter for schedule's business day convention.
-
-#         Returns:
-#             Business day convention of specified schedule.
-#         """
-#         return self.__business_day_convention
-
-#     @business_day_convention.setter
-#     def business_day_convention(self, business_day_convention: _Union[RollConvention, str]):
-#         self.__business_day_convention = RollConvention.to_string(business_day_convention)
-
-#     @property
-#     def calendar(self):
-#         """
-#         Getter for schedule's holiday calendar.
-
-#         Returns:
-#             Holiday calendar of specified schedule.
-#         """
-#         return self.__calendar
-
-#     @calendar.setter
-#     def calendar(self, calendar: _Union[_HolidayBase, str]):
-#         if calendar is None:
-#             self.__calendar = _ECB(years=range(self.__start_day.year, self.__end_day.year + 1))
-#         else:
-#             self.__calendar = _string_to_calendar(calendar)
-
-#     @staticmethod
-#     def _roll_out(from_: _Union[date, datetime], to_: _Union[date, datetime], term: Period, backwards: bool,
-#                   allow_stub: bool) -> _List[date]:
-#         """
-#         Rolls out dates from from_ to to_ in the specified direction applying the given term under consideration of the
-#         specification for allowing shorter periods.
-
-#         Args:
-#             from_ (_Union[date, datetime]): Beginning of the roll out mechanism.
-#             to_ (_Union[date, datetime]): End of the roll out mechanism.
-#             term (Period): Difference between rolled out dates.
-#             backwards (bool): Direction of roll out mechanism: backwards if True, forwards if False.
-#             allow_stub (bool): Defines if periods shorter than term are allowed.
-
-#         Returns:
-#             Date schedule not yet adjusted to any business day convention.
-#         """
-#         # convert datetime to date (if necessary):
-#         from_ = _date_to_datetime(from_)
-#         to_ = _date_to_datetime(to_)
-
-#         # check input consistency:
-#         if (~backwards) & (from_ < to_):
-#             direction = +1
-#         elif backwards & (from_ > to_):
-#             direction = -1
-#         else:
-#             raise Exception("From-date '" + str(from_) + "' and to-date '" + str(to_) +
-#                             "' are not consistent with roll direction (backwards = '" + str(backwards) + "')!")
-
-#         # generates a list of dates ...
-#         dates = []
-#         # ... for forward rolling case  or  backward rolling case ...
-#         while ((~backwards) & (from_ <= to_)) | (backwards & (to_ <= from_)):
-#             dates.append(from_)
-#             from_ += direction * relativedelta(years=term.years, months=term.months, days=term.days)
-#             # ... and compete list for fractional periods ...
-#         if dates[-1] != to_:
-#             # ... by adding stub or ...
-#             if allow_stub:
-#                 dates.append(to_)
-#             # ... by extending last period.
-#             else:
-#                 dates[-1] = to_
-#         return dates
-
-#     def generate_dates(self, ends_only: bool) -> _List[date]:
-#         """
-#         Generate list of schedule days according to the schedule specification, in particular with regards to business
-#         day convention and calendar given.
-
-#         Args:
-#             ends_only (bool): Flag to indicate if period beginnings shall be included, e.g. for defining accrual
-#                               periods: True, if only period ends shall be included, e.g. for defining payment dates.
-
-#         Returns:
-#             List[date]: List of schedule dates (including start and end date) adjusted to rolling convention.
-#         """
-#         # roll out dates ignoring any business day issues
-#         if self.__backwards:
-#             schedule_dates = Schedule._roll_out(self.__end_day, self.__start_day, self.__time_period,
-#                                                 True, self.__stub)
-#             schedule_dates.reverse()
-#         else:
-#             schedule_dates = Schedule._roll_out(self.__start_day, self.__end_day, self.__time_period,
-#                                                 False, self.__stub)
-
-#         # adjust according to business day convention
-#         rolled_schedule_dates = [roll_day(schedule_dates[0], self.__calendar, self.__business_day_convention,
-#                                           schedule_dates[0])]
-#         [rolled_schedule_dates.append(roll_day(schedule_dates[i], self.__calendar, self.__business_day_convention,
-#                                                rolled_schedule_dates[i - 1])) for i in range(1, len(schedule_dates))]
-
-#         if ends_only:
-#             rolled_schedule_dates.pop(0)
-
-#         logger.debug("Schedule dates successfully calculated from '"
-#                      + str(self.__start_day) + "' to '" + str(self.__end_day) + "'.")
-#         return rolled_schedule_dates
 
 
 def _date_to_datetime(date_time: _Union[datetime, date]) -> datetime:
@@ -936,11 +793,38 @@ def _term_to_period(term: _Union[Period, str]) -> Period:
         raise TypeError("The term '" + str(term) + "' must be provided as Period or string!")
 
 
+def _is_ambiguous_date(day: _Union[date, datetime]) -> bool:
+    """
+    Checks if a given day is an ambiguous date, i.e. 30th of January, March, May, July, August, October or December.
+
+    Args:
+        day (_Union[date, datetime]): Day to be checked.
+
+    Returns:
+        bool: True if day is ambiguous date, False otherwise.
+    """
+    return (day.day == 30) and (day.month in [1, 3, 5, 7, 8, 10, 12])
+
+
+def _is_IMM_date(day: _Union[date, datetime]) -> bool:
+    """
+    Checks if a given day is an IMM date, i.e. the third Wednesday of March, June, September or December.
+
+    Args:
+        day (_Union[date, datetime]): Day to be checked.
+
+    Returns:
+        bool: True if day is IMM date, False otherwise.
+    """
+    return (day.month in [3, 6, 9, 12]) and (day.weekday() == 2) and (day.day >= 15) and (day.day <= 21)
+
+
 def calc_end_day(
     start_day: _Union[date, datetime],
     term: str,
-    business_day_convention: _Union[RollConvention, str] = None,
-    calendar: _Union[_HolidayBase, str] = None,
+    business_day_convention: _Optional[_Union[RollConvention, str]] = None,
+    calendar: _Optional[_Union[_HolidayBase, str]] = None,
+    roll_convention: _Union[RollRule, str] = "NONE",
 ) -> date:
     """
     Derives the end date of a time period based on the start day the the term given as string, e.g. 1D, 3M, or 5Y.
@@ -954,6 +838,7 @@ def calc_end_day(
         calendar (_Union[_HolidayBase, str], optional): Holiday calender defining non-business days
                                                       (but not Saturdays and Sundays).
                                                       Defaults to None.
+        roll_convention (_Union[RollRule, str], optional): Convention for rolling dates, e.g. "EOM" for end of month.
 
     Returns:
         date: End date potentially adjusted according to the specified business day convention with respect to the given
@@ -961,13 +846,21 @@ def calc_end_day(
     """
     start_date = _date_to_datetime(start_day)
     period = _term_to_period(term)
-    end_date = start_date + relativedelta(years=period.years, months=period.months, days=period.days)
+    if roll_convention == "EOM" and _is_ambiguous_date(start_date):  # add ambiguous dates, i.e. 30 of Jan, Mar, May, Jul, Aug, Oct, Dec
+        end_date = start_date + relativedelta(years=period.years, months=period.months, day=31)
+    elif roll_convention is None or roll_convention == "DOM":
+        end_date = start_date + relativedelta(years=period.years, months=period.months, days=period.days)
+    elif roll_convention == "IMM" and _is_IMM_date(start_date):  # add IMM dates, i.e. 3rd Wednesday of Mar, Jun, Sep, Dec
+        end_date = start_date + relativedelta(years=period.years, months=period.months, day=1, weekday=WE(3))
+    else:
+        raise Exception("Unknown roll convention '" + str(roll_convention) + "'! Please use 'NONE', EOM', 'DOM', or 'IMM'; for 'IMM'.")
     if (business_day_convention is not None) & (calendar is not None):
         end_date = roll_day(end_date, calendar, business_day_convention, start_date)
 
     return end_date
 
 
+# ToDo: this function needs revision to ensure rolling forward again, the same end_day is reproduced
 def calc_start_day(
     end_day: _Union[date, datetime],
     term: str,
@@ -1332,3 +1225,234 @@ def roll_day(
         result = roll_func(day, calendar, start_day)
 
     return result
+
+
+# class PowerSchedule:
+#     def __init__(self,
+#                  start_day: _Union[date, datetime],
+#                  end_day: _Union[date, datetime],
+#                  time_period: _Union[Period, str],
+#                  backwards: bool = True,
+#                  business_day_convention: _Union[RollConvention, str] = RollConvention.MODIFIED_FOLLOWING,
+#                  calendar: _Union[_HolidayBase, str] = None):
+#         """
+
+#         Args:
+#             start_day (_Union[date, datetime]): Schedule's first day - beginning of the schedule.
+#             end_day (_Union[date, datetime]): Schedule's last day - end of the schedule.
+#             time_period (_Union[Period, str]): Time distance between two consecutive dates.
+#             backwards (bool, optional): Defines direction for rolling out the schedule. True means the schedule will be
+#                                         rolled out (backwards) from end day to start day. Defaults to True.
+#             stub (bool, optional): Defines if the first/last period is accepted (True), even though it is shorter than
+#                                    the others, or if it remaining days are added to the neighbouring period (False).
+#                                    Defaults to True.
+#             business_day_convention (_Union[RollConvention, str], optional): Set of rules defining the adjustment of
+#                                                                              days to ensure each date being a business
+#                                                                              day with respect to a given holiday
+#                                                                              calendar. Defaults to
+#                                                                              RollConvention.MODIFIED_FOLLOWING
+#             calendar (_Union[_HolidayBase, str], optional): Holiday calendar defining the bank holidays of a country or
+#                                                           province (but not all non-business days as for example
+#                                                           Saturdays and Sundays).
+#                                                           Defaults (through constructor) to holidays.ECB
+#                                                           (= Target2 calendar) between start_day and end_day.
+
+#         Examples:
+
+#             .. code-block:: python
+
+#                 >>> from datetime import date
+#                 >>> from rivapy.tools import schedule
+#                 >>> schedule = Schedule(date(2020, 8, 21), date(2021, 8, 21), Period(0, 3, 0), True, False, RollConvention.UNADJUSTED, holidays_de).generate_dates(False),
+#                        [date(2020, 8, 21), date(2020, 11, 21), date(2021, 2, 21), date(2021, 5, 21), date(2021, 8, 21)])
+#         """
+#         self.start_day = start_day
+#         self.end_day = end_day
+#         self.time_period = time_period
+#         self.backwards = backwards
+#         self.business_day_convention = business_day_convention
+#         self.calendar = calendar
+
+
+#     @property
+#     def start_day(self):
+#         """
+#         Getter for schedule's start date.
+
+#         Returns:
+#             Start date of specified schedule.
+#         """
+#         return self.__start_day
+
+#     @start_day.setter
+#     def start_day(self, start_day: _Union[date, datetime]):
+#         self.__start_day = _date_to_datetime(start_day)
+
+#     @property
+#     def end_day(self):
+#         """
+#         Getter for schedule's end date.
+
+#         Returns:
+#             End date of specified schedule.
+#         """
+#         return self.__end_day
+
+#     @end_day.setter
+#     def end_day(self, end_day: _Union[date, datetime]):
+#         self.__end_day = _date_to_datetime(end_day)
+
+#     @property
+#     def time_period(self):
+#         """
+#         Getter for schedule's time period.
+
+#         Returns:
+#             Time period of specified schedule.
+#         """
+#         return self.__time_period
+
+#     @time_period.setter
+#     def time_period(self, time_period: _Union[Period, str]):
+#         self.__time_period = _term_to_period(time_period)
+
+#     @property
+#     def backwards(self):
+#         """
+#         Getter for schedule's roll out direction.
+
+#         Returns:
+#             True, if rolled out from end day to start day.
+#             False, if rolled out from start day to end day.
+#         """
+#         return self.__backwards
+
+#     @backwards.setter
+#     def backwards(self, backwards: bool):
+#         self.__backwards = backwards
+
+#     @property
+#     def stub(self):
+#         """
+#         Getter for potential existence of short periods (stubs).
+
+#         Returns:
+#             True, if a shorter period is allowed.
+#             False, if only a longer period is allowed.
+#         """
+#         return self.__stub
+
+#     @stub.setter
+#     def stub(self, stub: bool):
+#         self.__stub = stub
+
+#     @property
+#     def business_day_convention(self):
+#         """
+#         Getter for schedule's business day convention.
+
+#         Returns:
+#             Business day convention of specified schedule.
+#         """
+#         return self.__business_day_convention
+
+#     @business_day_convention.setter
+#     def business_day_convention(self, business_day_convention: _Union[RollConvention, str]):
+#         self.__business_day_convention = RollConvention.to_string(business_day_convention)
+
+#     @property
+#     def calendar(self):
+#         """
+#         Getter for schedule's holiday calendar.
+
+#         Returns:
+#             Holiday calendar of specified schedule.
+#         """
+#         return self.__calendar
+
+#     @calendar.setter
+#     def calendar(self, calendar: _Union[_HolidayBase, str]):
+#         if calendar is None:
+#             self.__calendar = _ECB(years=range(self.__start_day.year, self.__end_day.year + 1))
+#         else:
+#             self.__calendar = _string_to_calendar(calendar)
+
+#     @staticmethod
+#     def _roll_out(from_: _Union[date, datetime], to_: _Union[date, datetime], term: Period, backwards: bool,
+#                   allow_stub: bool) -> _List[date]:
+#         """
+#         Rolls out dates from from_ to to_ in the specified direction applying the given term under consideration of the
+#         specification for allowing shorter periods.
+
+#         Args:
+#             from_ (_Union[date, datetime]): Beginning of the roll out mechanism.
+#             to_ (_Union[date, datetime]): End of the roll out mechanism.
+#             term (Period): Difference between rolled out dates.
+#             backwards (bool): Direction of roll out mechanism: backwards if True, forwards if False.
+#             allow_stub (bool): Defines if periods shorter than term are allowed.
+
+#         Returns:
+#             Date schedule not yet adjusted to any business day convention.
+#         """
+#         # convert datetime to date (if necessary):
+#         from_ = _date_to_datetime(from_)
+#         to_ = _date_to_datetime(to_)
+
+#         # check input consistency:
+#         if (~backwards) & (from_ < to_):
+#             direction = +1
+#         elif backwards & (from_ > to_):
+#             direction = -1
+#         else:
+#             raise Exception("From-date '" + str(from_) + "' and to-date '" + str(to_) +
+#                             "' are not consistent with roll direction (backwards = '" + str(backwards) + "')!")
+
+#         # generates a list of dates ...
+#         dates = []
+#         # ... for forward rolling case  or  backward rolling case ...
+#         while ((~backwards) & (from_ <= to_)) | (backwards & (to_ <= from_)):
+#             dates.append(from_)
+#             from_ += direction * relativedelta(years=term.years, months=term.months, days=term.days)
+#             # ... and compete list for fractional periods ...
+#         if dates[-1] != to_:
+#             # ... by adding stub or ...
+#             if allow_stub:
+#                 dates.append(to_)
+#             # ... by extending last period.
+#             else:
+#                 dates[-1] = to_
+#         return dates
+
+#     def generate_dates(self, ends_only: bool) -> _List[date]:
+#         """
+#         Generate list of schedule days according to the schedule specification, in particular with regards to business
+#         day convention and calendar given.
+
+#         Args:
+#             ends_only (bool): Flag to indicate if period beginnings shall be included, e.g. for defining accrual
+#                               periods: True, if only period ends shall be included, e.g. for defining payment dates.
+
+#         Returns:
+#             List[date]: List of schedule dates (including start and end date) adjusted to rolling convention.
+#         """
+#         # roll out dates ignoring any business day issues
+#         if self.__backwards:
+#             schedule_dates = Schedule._roll_out(self.__end_day, self.__start_day, self.__time_period,
+#                                                 True, self.__stub)
+#             schedule_dates.reverse()
+#         else:
+#             schedule_dates = Schedule._roll_out(self.__start_day, self.__end_day, self.__time_period,
+#                                                 False, self.__stub)
+
+#         # adjust according to business day convention
+#         rolled_schedule_dates = [roll_day(schedule_dates[0], self.__calendar, self.__business_day_convention,
+#                                           schedule_dates[0])]
+#         [rolled_schedule_dates.append(roll_day(schedule_dates[i], self.__calendar, self.__business_day_convention,
+#                                                rolled_schedule_dates[i - 1])) for i in range(1, len(schedule_dates))]
+
+#         if ends_only:
+#             rolled_schedule_dates.pop(0)
+
+#         logger.debug("Schedule dates successfully calculated from '"
+#                      + str(self.__start_day) + "' to '" + str(self.__end_day) + "'.")
+#         return rolled_schedule_dates
