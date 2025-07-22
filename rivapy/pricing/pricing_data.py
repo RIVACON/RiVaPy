@@ -30,8 +30,9 @@ from rivapy.pricing.pricing_request import (
 )
 
 from rivapy.pricing.factory import _factory
-#from rivapy.pricing.deposit_pricing import DepositPricer
-#from rivapy.pricing.fra_pricing import ForwardRateAgreementPricer
+
+# from rivapy.pricing.deposit_pricing import DepositPricer
+# from rivapy.pricing.fra_pricing import ForwardRateAgreementPricer
 
 # double declaration
 # class CDSPricingData:
@@ -91,7 +92,7 @@ class BasePricingData:
         Returns:
             PricingRequest: Configured pricing request.
         """
-        return self.pricing_request
+        return self.__pricing_request
 
     @pricing_request.setter
     def pricing_request(self, pricing_request: PricingRequest):
@@ -581,7 +582,7 @@ class DepositPricingData(BasePricingData):
     def __init__(
         self,
         deposit: DepositSpecification,
-        valuation_date: _Union[date, datetime],
+        val_date: _Union[date, datetime],
         pricing_request: DepositPricingRequest,
         pricer: str,
         discount_curve: DiscountCurve,
@@ -601,8 +602,8 @@ class DepositPricingData(BasePricingData):
         """
 
         super().__init__(pricer, pricing_request)
-        self.__spec = deposit  # spec
-        self.valuation_date = valuation_date  # valDate
+        self.spec = deposit  # spec
+        self.val_date = val_date  # valDate
         self.discount_curve = discount_curve  # discountCurve
         self.parameters = parameters  # param
 
@@ -614,9 +615,9 @@ class DepositPricingData(BasePricingData):
     def price(self):
         # obtain correct pricer
         pricer_obj = _factory()["DepositPricer"]
-        pricer = pricer_obj(self.valuation_date, self.__spec, self.discount_curve)# TODO ignore spread curve for now
-        #pricer = DepositPricer(self.valuation_date, self.__spec, self.discount_curve) 
-        
+        pricer = pricer_obj(self.val_date, self.spec, self.discount_curve)  # TODO ignore spread curve for now
+        # pricer = DepositPricer(self.valuation_date, self.__spec, self.discount_curve)
+
         # pass correct required pricer information and calculate
         val = pricer.price()
 
@@ -628,7 +629,7 @@ class ForwardRateAgreementPricingData(BasePricingData):
     def __init__(
         self,
         fra: ForwardRateAgreementSpecification,
-        valuation_date: _Union[date, datetime],
+        val_date: _Union[date, datetime],
         pricing_request: ForwardRateAgreementPricingRequest,
         pricer: str,
         discount_curve: DiscountCurve,
@@ -648,8 +649,8 @@ class ForwardRateAgreementPricingData(BasePricingData):
         """
         super().__init__(pricer, pricing_request)
 
-        self.__spec = fra
-        self.valuation_date = valuation_date  # valDate
+        self.spec = fra
+        self.val_date = val_date  # valDate
         self.discount_curve = discount_curve  # discountCurve
         self.forward_curve = forward_curve  # discountCurve
         self.parameters = parameters  # param
@@ -658,7 +659,7 @@ class ForwardRateAgreementPricingData(BasePricingData):
         # obtain correct pricer
         # pricer = _factory_entries[self.pricer]
         pricer_obj = _factory()["ForwardRateAgreementPricer"]
-        pricer = pricer_obj(self.valuation_date, self.__spec, self.discount_curve, self.forward_curve)
+        pricer = pricer_obj(self.val_date, self.spec, self.discount_curve, self.forward_curve)
 
         # pass correct required pricer information and calculate
         val = pricer.price()
@@ -666,9 +667,18 @@ class ForwardRateAgreementPricingData(BasePricingData):
         return val
 
 
-class InterestRateSwapPricingData_rivapy: #TODO!!!!
-    def __init__(self, val_date: datetime, spec, ccy, leg_pricing_data, pricing_request: Iterable[ResultType]):
-        """Constructor for 
+class InterestRateSwapPricingData_rivapy(BasePricingData):  # TODO!!!!
+
+    def __init__(
+        self,
+        spec: InterestRateSwapSpecification,
+        val_date: _Union[date, datetime],
+        pricing_request: InterestRateSwapPricingRequest,
+        pricer: str,
+        ccy,
+        leg_pricing_data,
+    ):
+        """Constructor for
 
         Args:
             val_date ([datetime]): Valuation date.
@@ -678,20 +688,77 @@ class InterestRateSwapPricingData_rivapy: #TODO!!!!
             pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.
         """
 
+        super().__init__(pricer, pricing_request)
+
         self.val_date = val_date
         self.spec = spec
         self.ccy = ccy
         self.leg_pricing_data = leg_pricing_data
-        self.pricing_request = pricing_request
 
+        # TODO right now leg_pricing_data is expected to have:
+        # discount_curve_pay_leg: DiscountCurve,
+        # discount_curve_receive_leg: DiscountCurve,
+        # fixing_curve_pay_leg: DiscountCurve,
+        # fixing_curve_receive_leg: DiscountCurve,
+        # fx_fwd_curve_pay_leg: DiscountCurve, # TODO FxForwardCurve ... do we need anotheer class
+        # fx_fwd_curve_receive_leg: DiscountCurve,
+        # pricing_param: Dict = {}, #
+        # fixing_map : FixingTable = None,
+        # fx_pay_leg : float = 1.0,
+        # fx_receive_leg : float = 1.0
+
+        # unpacking other_pricing_data ...
+        self.discount_curve_pay_leg = leg_pricing_data["discount_curve_pay_leg"]
+        self.discount_curve_receive_leg = leg_pricing_data["discount_curve_receive_leg"]
+        self.fixing_curve_pay_leg = leg_pricing_data["fixing_curve_pay_leg"]
+        self.fixing_curve_receive_leg = leg_pricing_data["fixing_curve_receive_leg"]
+        self.fx_fwd_curve_pay_leg = leg_pricing_data["fx_fwd_curve_pay_leg"]
+        self.fx_fwd_curve_receive_leg = leg_pricing_data["fx_fwd_curve_receive_leg"]
+        self.pricing_param = leg_pricing_data["pricing_param"]
+        self.fixing_map = leg_pricing_data["fixing_map"]
+        self.fx_pay_leg = leg_pricing_data["fx_pay_leg"]
+        self.fx_receive_leg = leg_pricing_data["fx_receive_leg"]
 
     def price(self):
-        return _pyvacon.finance.pricing.BasePricer.price(self._get_pyvacon_obj())
+        # Obtain correct pricer, right now it is hardcoded for simplicity # TODO
+        # pricer_obj = _factory()["InterestRateSwapPricer"] # not working for some reason?
+        from rivapy.pricing.interest_rate_swap_pricing import InterestRateSwapPricer
+
+        # pricer = pricer_obj(self.val_date, self.spec,
+        pricer = InterestRateSwapPricer(
+            self.val_date,
+            self.spec,
+            discount_curve_pay_leg=self.discount_curve_pay_leg,
+            discount_curve_receive_leg=self.discount_curve_receive_leg,
+            fixing_curve_pay_leg=self.fixing_curve_pay_leg,
+            fixing_curve_receive_leg=self.fixing_curve_receive_leg,
+            fx_fwd_curve_pay_leg=self.fx_fwd_curve_pay_leg,
+            fx_fwd_curve_receive_leg=self.fx_fwd_curve_receive_leg,
+            pricing_request=self.pricing_request,
+            pricing_param=self.pricing_param,
+            fixing_map=self.fixing_map,
+            fx_pay_leg=self.fx_pay_leg,
+            fx_receive_leg=self.fx_receive_leg,
+        )
+
+        # pass correct required pricer information and calculate
+        val = pricer.price()
+
+        return val
 
 
 class InterestRateSwapLegPricingData_rivapy:
-    def __init__(self, spec, discount_curve:DiscountCurve, forward_curve:DiscountCurve, fixing_map, desired_rate = None, fx_rate: float = 1.0, weight: float = None):
-        """Constructor for 
+    def __init__(
+        self,
+        spec,
+        discount_curve: DiscountCurve,
+        forward_curve: DiscountCurve,
+        fixing_map,
+        desired_rate=None,
+        fx_rate: float = 1.0,
+        weight: float = None,
+    ):
+        """Constructor for
 
         Args:
             val_date ([datetime]): Valuation date.
@@ -705,16 +772,28 @@ class InterestRateSwapLegPricingData_rivapy:
         self.forward_curve = forward_curve
         self.fixing_map = fixing_map
         self.spec = spec
-        if fx_rate is not None: #where to use?
+        if fx_rate is not None:  # where to use?
             self.fx_rate = fx_rate
-        if weight is not None: #where to use?
+        if weight is not None:  # where to use?
             self.weight = weight
         if desired_rate is not None:
             self.desired_rate = desired_rate
 
+
 class InterestRateSwapFloatLegPricingData_rivapy(InterestRateSwapLegPricingData_rivapy):
-    def __init__(self, spec, discount_curve, forward_curve, fixing_map, fixing_grace_period: int, spread: float=None, fx_rate: float = 1.0, weight: float=None, fixing_curve:DiscountCurve=None):
-        """Constructor for 
+    def __init__(
+        self,
+        spec,
+        discount_curve,
+        forward_curve,
+        fixing_map,
+        fixing_grace_period: int,
+        spread: float = None,
+        fx_rate: float = 1.0,
+        weight: float = None,
+        fixing_curve: DiscountCurve = None,
+    ):
+        """Constructor for
 
         Args:
             val_date ([datetime]): Valuation date.
@@ -724,8 +803,8 @@ class InterestRateSwapFloatLegPricingData_rivapy(InterestRateSwapLegPricingData_
             pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.
         """
 
-        #HERE the FX_RATE is ACTUALLY THE SPREAD
-        super().__init__(spec, discount_curve, forward_curve, fixing_map, fx_rate = fx_rate, weight= weight)
+        # HERE the FX_RATE is ACTUALLY THE SPREAD
+        super().__init__(spec, discount_curve, forward_curve, fixing_map, fx_rate=fx_rate, weight=weight)
 
         self.fixing_curve = fixing_curve
         self.fixing_grace_period = fixing_grace_period

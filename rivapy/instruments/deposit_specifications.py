@@ -201,7 +201,12 @@ class DepositSpecification(interfaces.FactoryObject):
 
     @property
     def securitization_level(self) -> str:
-        """The bond's securitization level as a string."""
+        """
+        Getter for instrument's securitisation level.
+
+        Returns:
+            str: Instrument's securitisation level.
+        """
         return self._securitization_level
 
     @securitization_level.setter
@@ -277,7 +282,7 @@ class DepositSpecification(interfaces.FactoryObject):
         self._notional = _check_positivity(notional)
 
     @property
-    def day_count_convention(self) -> RollConvention:
+    def day_count_convention(self) -> str:
         """
         Getter for FRA's day count convention.
 

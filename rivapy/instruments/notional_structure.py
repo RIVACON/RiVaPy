@@ -60,11 +60,19 @@ class NotionalStructure(interfaces.FactoryObject):
 
 
 class ConstNotionalStructure(NotionalStructure):
+    """Constant notional means that it does not change over the lifetime.
+    Meaning that there are no notional cashflows as well, inflow or outflow.
+
+    Args:
+        NotionalStructure (_type_): _description_
+    """
+
     def __init__(self, notional: float):
-        self._notional = notional
+        self._notional = [notional]
 
     def get_amount(self, period: int) -> float:
-        """since notional is constant, period is unused...
+        """since notional is constant, period is used, but expects it to be zero...
+        If somethign else is passed, there is an inconsistency in the usage of ConstNotionalStructure... RETHINK
 
         Args:
             period (int): _description_
@@ -72,7 +80,7 @@ class ConstNotionalStructure(NotionalStructure):
         Returns:
             float: _description_
         """
-        return self._notional
+        return self._notional[period]
 
     def get_size(self) -> int:
         """If the notional structure is constant, we default the 'size' as 1
@@ -80,7 +88,7 @@ class ConstNotionalStructure(NotionalStructure):
         Returns:
             int: _description_
         """
-        return 1
+        return len(self._notional)
 
     def _to_dict(self) -> Dict:
         return_dict = {

@@ -51,22 +51,12 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
     ):
         """_summary_ #TODO"""
         self.obj_id = obj_id
-        self._notional_structure = notional
+        self.notional_structure = notional
         self.start_dates = start_dates
         self.end_dates = end_dates
         self.pay_dates = pay_dates
         self.currency = Currency.to_string(currency)
         self.day_count_convention = day_count_convention
-
-    # region properties
-    # @property
-    # def notional(self) -> float:
-    #     """The swap leg's notional amount (face value)."""
-    #     return self._notional
-
-    # @notional.setter
-    # def notional(self, value: float):
-    #     self._notional = _check_positivity(value)
 
     @property
     def currency(self) -> str:
@@ -86,11 +76,9 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
         """
         return self._start_dates
 
-
     @start_dates.setter
     def start_dates(self, value: _List[datetime]):
         self._start_dates = value
-
 
     @property
     def end_dates(self) -> _List[datetime]:
@@ -100,7 +88,7 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
             _List[datetime]: _description_
         """
         return self._end_dates
-    
+
     @end_dates.setter
     def end_dates(self, value: _List[datetime]):
         self._end_dates = value
@@ -113,7 +101,7 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
             _List[datetime]: _description_
         """
         return self._pay_dates
-    
+
     @pay_dates.setter
     def pay_dates(self, value: _List[datetime]):
         self._pay_dates = value
@@ -125,7 +113,7 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
         Returns:
             NotionalStructure: class object detailing the notionals, start dates, ...
         """
-        return self.notional_structure
+        return self._notional_structure
 
     @notional_structure.setter
     def notional_structure(self, value: _Union[float, NotionalStructure]):
@@ -163,16 +151,17 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
 
 
 class IrFixedLegSpecification(IrSwapLegSpecification):
-    def __init__(self,
-                fixed_rate: float,
-                obj_id: str,
-                notional: _Union[float, NotionalStructure],
-                start_dates: _List[datetime],
-                end_dates: _List[datetime],
-                pay_dates: _List[datetime],
-                currency: _Union[Currency, str],
-                day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
-            ):
+    def __init__(
+        self,
+        fixed_rate: float,
+        obj_id: str,
+        notional: _Union[float, NotionalStructure],
+        start_dates: _List[datetime],
+        end_dates: _List[datetime],
+        pay_dates: _List[datetime],
+        currency: _Union[Currency, str],
+        day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
+    ):
         super().__init__(obj_id, notional, start_dates, end_dates, pay_dates, currency, day_count_convention)
         self.fixed_rate = _check_positivity(fixed_rate)
 
@@ -186,9 +175,8 @@ class IrFixedLegSpecification(IrSwapLegSpecification):
         return self._fixed_rate
 
     @fixed_rate.setter
-    def fixed_rate(self, value:float):
+    def fixed_rate(self, value: float):
         self._fixed_rate = value
-
 
     # @property
     # def reset_dates(self) -> _List[datetime]:
@@ -252,15 +240,15 @@ class IrFloatLegSpecification(IrSwapLegSpecification):
         return self._reset_dates
 
     @reset_dates.setter
-    def reset_dates(self,value):
+    def reset_dates(self, value):
         self._reset_dates = value
 
     @property
     def udl_id(self) -> str:
         return self._udl_id
-    
+
     @udl_id.setter
-    def udl_id(self,value):
+    def udl_id(self, value):
         self._udl_id = value
 
     @property
@@ -268,7 +256,7 @@ class IrFloatLegSpecification(IrSwapLegSpecification):
         return self._fixing_id
 
     @fixing_id.setter
-    def fixing_id(self,value):
+    def fixing_id(self, value):
         self._fixing_id = value
 
     @property
@@ -276,7 +264,7 @@ class IrFloatLegSpecification(IrSwapLegSpecification):
         return self._spread
 
     @spread.setter
-    def spread(self,value):
+    def spread(self, value):
         self._spread = value
 
     @property
@@ -286,17 +274,17 @@ class IrFloatLegSpecification(IrSwapLegSpecification):
     @property
     def rate_start_dates(self) -> _List[datetime]:
         return self._rate_start_dates
-    
+
     @rate_start_dates.setter
-    def rate_start_dates(self,value):
+    def rate_start_dates(self, value):
         self._rate_start_dates = value
 
     @property
     def rate_end_dates(self) -> _List[datetime]:
         return self._rate_end_dates
-    
+
     @rate_end_dates.setter
-    def rate_end_dates(self,value):
+    def rate_end_dates(self, value):
         self._rate_end_dates = value
 
     def get_underlyings(self) -> Dict[str, str]:
@@ -499,7 +487,6 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
     def currency(self, currency: str):
         self.__currency = Currency.to_string(currency)
 
-
     @property
     def notional_structure(self) -> NotionalStructure:
         """Return the notionals
@@ -521,14 +508,12 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
         else:
             self._notional_structure = value
 
-
     def get_pay_leg(self):
         return self.pay_leg
-    
+
     def get_receive_leg(self):
         return self.receive_leg
 
-
-    #TODO getters for PAY and RECEIVE legs
+    # TODO getters for PAY and RECEIVE legs
 
     # endregion
