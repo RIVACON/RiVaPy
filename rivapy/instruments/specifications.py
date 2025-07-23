@@ -1,4 +1,7 @@
-from datetime import datetime
+import abc
+from typing import List, Tuple
+from rivapy.tools.interfaces import FactoryObject
+import datetime as dt
 from rivapy.tools.enums import SecuritizationLevel, Currency
 
 # from rivapy.enums import Currency
@@ -79,7 +82,7 @@ class EuropeanVanillaSpecification:
         self,
         id: str,
         type: str,
-        expiry: datetime,
+        expiry: dt,
         strike: float,
         issuer: str = "",
         sec_lvl: str = SecuritizationLevel.COLLATERALIZED,
@@ -95,7 +98,7 @@ class EuropeanVanillaSpecification:
         Args:
             id (str): Identifier (name) of the european vanilla specification.
             type (str): Type of the european vanilla option ('PUT','CALL').
-            expiry (datetime): Expiration date.
+            expiry (dt): Expiration date.
             strike (float): Strike price.
             issuer (str, optional): Issuer Id. Must not be set if pricing data is manually defined. Defaults to ''.
             sec_lvl (str, optional): Securitization level. Can be selected from rivapy.enums.SecuritizationLevel. Defaults to SecuritizationLevel.COLLATERALIZED.
@@ -133,7 +136,7 @@ class AmericanVanillaSpecification:
         self,
         id: str,
         type: str,
-        expiry: datetime,
+        expiry: dt,
         strike: float,
         issuer: str = "",
         sec_lvl: str = SecuritizationLevel.COLLATERALIZED,
@@ -150,7 +153,7 @@ class AmericanVanillaSpecification:
         Args:
             id (str): Identifier (name) of the american vanilla specification.
             type (str): Type of the american vanilla option ('PUT','CALL').
-            expiry (datetime): Expiration date.
+            expiry (dt): Expiration date.
             strike (float): Strike price.
             issuer (str, optional): Issuer Id. Must not be set if pricing data is manually defined. Defaults to ''.
             sec_lvl (str, optional): Securitization level. Can be selected from rivapy.enums.SecuritizationLevel. Defaults to SecuritizationLevel.COLLATERALIZED.
@@ -195,3 +198,9 @@ class AmericanVanillaSpecification:
             )
 
         return self._pyvacon_obj
+
+
+class HasExpectedCashflows(abc.ABC):
+    @abc.abstractmethod
+    def expected_cashflows(self) -> List[Tuple[dt.datetime, float]]:
+        pass

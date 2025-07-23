@@ -68,7 +68,3 @@ class BaseDatedCurve(abc.ABC):
         pass
 
 
-class HasExpectedCashflows(abc.ABC):
-    @abc.abstractmethod
-    def expected_cashflows(self)->List[Tuple[dt.datetime, float]]:
-        pass

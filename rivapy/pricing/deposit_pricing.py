@@ -1,6 +1,7 @@
 from datetime import datetime, date
 from scipy.optimize import brentq
-from rivapy.tools.interfaces import BaseDatedCurve, HasExpectedCashflows
+from rivapy.tools.interfaces import BaseDatedCurve
+from rivapy.instruments.specifications import HasExpectedCashflows
 from rivapy.marketdata import DiscountCurveParametrized, ConstantRate, DiscountCurve
 from rivapy.pricing.pricing_request import PricingRequest
 from rivapy.pricing._logger import logger
@@ -68,8 +69,8 @@ class DepositPricer:
         # print(self._deposit_spec._rate)
         # print(type(dt))
         # print(type(self._deposit_spec.notional))
-        
-        value_d1 = self._deposit_spec.notional * (1 + self._deposit_spec.rate * dt) 
+
+        value_d1 = self._deposit_spec.notional * (1 + self._deposit_spec.rate * dt)
 
         # value_d1 = self._deposit_spec.notional  # as deposits are par-rate instrument?????
         df_val_d1 = self._discount_curve.rivapy_value(self._val_date, self._deposit_spec.maturity_date)

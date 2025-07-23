@@ -1,6 +1,7 @@
 from datetime import datetime, date
 from scipy.optimize import brentq
-from rivapy.tools.interfaces import BaseDatedCurve, HasExpectedCashflows
+from rivapy.tools.interfaces import BaseDatedCurve
+from rivapy.instruments.specifications import HasExpectedCashflows
 from rivapy.marketdata import DiscountCurveParametrized, ConstantRate, DiscountCurve
 from rivapy.pricing.pricing_request import PricingRequest
 from rivapy.pricing._logger import logger
