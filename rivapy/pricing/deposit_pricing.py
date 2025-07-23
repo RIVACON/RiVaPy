@@ -8,6 +8,8 @@ from rivapy.pricing._logger import logger
 from rivapy.instruments.deposit_specifications import DepositSpecification
 from typing import List as _List, Union as _Union, Tuple
 from rivapy.tools.datetools import DayCounter
+from rivapy.tools._validators import _check_start_at_or_before_end
+from rivapy.pricing.bond_pricing import SimpleCashflowPricer
 
 
 class DepositPricer:
@@ -17,7 +19,7 @@ class DepositPricer:
         val_date: _Union[date, datetime],
         deposit_spec: DepositSpecification,
         discount_curve: DiscountCurve,
-        spread_curve: _Union[DiscountCurve, float] = 1.0,
+        spread_curve: _Union[DiscountCurve, float] = 0.0,
     ):
         """_summary_
 
@@ -29,32 +31,37 @@ class DepositPricer:
         """
 
         self._val_date = val_date
-        self._deposit_spec = deposit_spec
+        self._spec = deposit_spec
         self._discount_curve = discount_curve
         self._spread_curve = spread_curve
+        self._validate_pricer_dates()
 
-    def impliedSimplyCompoundedRate(self):
-        """Returns the fair rate such that the specification gives the contract a zero value.
-        Assumption is that it is a simply compounded rate
+    def _validate_pricer_dates(self):
+        """Validates consistency of valuation date, curve reference date, and deposit fixing date"""
+        self._spec._fixing_date, self._val_date = _check_start_at_or_before_end(self._spec._fixing_date, self._val_date)
+        self._discount_curve.refdate, self._val_date = _check_start_at_or_before_end(self._discount_curve.refdate, self._val_date)
 
-        i.e. D(t) = 1 / ( 1+ rate(t) * t)
+        # def expected_cashflows(self) -> _List[Tuple[datetime, float]]:
+        #     """Returns the expected cashflows of the deposit specification
 
-        Returns:
-            float_: _description_
-        """
+        #     Returns:
+        #         _List[Tuple[datetime, float]]: _description_
+        #     """
+        #     start_date = self._deposit_spec.start_date
+        #     end_date = self._deposit_spec.maturity_date
+        #     notional = self._deposit_spec.notional
+        #     rate = self._deposit_spec.rate
 
-        df = self._discount_curve.rivapy_valueFWD(self._val_date, self._deposit_spec.start_date, self._deposit_spec.maturity_date)
+        # if isinstance(self._spread_curve, DiscountCurve):
+        #     spread_df = self._spread_curve.rivapy_valueFWD(self._val_date, start_date, end_date)
+        # else:
+        #     spread_df = self._spread_curve
 
-        if isinstance(self._spread_curve, DiscountCurve):
-            spread_df = self._discount_curve.rivapy_valueFWD(self._val_date, self._deposit_spec.start_date, self._deposit_spec.maturity_date)
-        else:
-            spread_df = self._spread_curve
+        # dcc = DayCounter(self._discount_curve.daycounter)
+        # dt = dcc.yf(start_date, end_date)
+        # value_d1 = notional * (1 + rate * dt)
 
-        # obtain time interval
-        dcc = DayCounter(self._discount_curve.daycounter)  # use the curves or the specification? TODO: they should be the same though...
-        dt = dcc.yf(self._deposit_spec.start_date, self._deposit_spec.maturity_date)
-
-        return (1.0 / (spread_df * df) - 1.0) / dt
+        # return [(end_date, value_d1)]
 
     def price(self):
         """Calculate the present value of the specified deposit given a discount curve and daycount convention
@@ -62,18 +69,35 @@ class DepositPricer:
         Returns:
            float: present value of a deposit based on simple compounding
         """
+        dc = self._discount_curve
+        val_date = self._val_date
+        spec = self._spec
 
-        dcc = DayCounter(self._discount_curve.daycounter)  # use the curves or the specification? TODO: they should be the same though...
-        dt = dcc.yf(self._deposit_spec.start_date, self._deposit_spec.maturity_date)
-        # print(type(self._deposit_spec.rate))
-        # print(self._deposit_spec._rate)
-        # print(type(dt))
-        # print(type(self._deposit_spec.notional))
+        return SimpleCashflowPricer.pv_cashflows(val_date, spec, dc)
 
-        value_d1 = self._deposit_spec.notional * (1 + self._deposit_spec.rate * dt)
+    # def impliedSimplyCompoundedRate(self):
+        # """Returns the fair rate such that the specification gives the contract a zero value.
+        # Assumption is that it is a simply compounded rate
 
-        # value_d1 = self._deposit_spec.notional  # as deposits are par-rate instrument?????
-        df_val_d1 = self._discount_curve.rivapy_value(self._val_date, self._deposit_spec.maturity_date)
-        PV = value_d1 * df_val_d1  # in the case that val_date is less that start date ... discount it from start datet to val date ...,
+        # i.e. D(t) = 1 / ( 1+ rate(t) * t)
 
-        return PV
+        # Returns:
+        #     float_: _description_
+        # """
+
+        # dc = self._discount_curve
+        # # self._discount_curve.rivapy_valueFWD(self._val_date, self._deposit_spec.start_date, self._deposit_spec.maturity_date)
+        # val_date = self._val_date
+        # start_date = self._spec.start_date
+        # maturity_date = self._spec.maturity_date
+
+        # if isinstance(dc, DiscountCurve):
+        #     spread_df = dc.rivapy_valueFWD(val_date, start_date, maturity_date)
+        # else:
+        #     raise ValueError("Discount curve must be of type DiscountCurve")
+
+        # # obtain time interval
+        # # dcc = DayCounter(self._deposit_spec._day_count_convention)  # use the curves or the specification? TODO: they should be the same though...
+        # # dt = dcc.yf(start_date, maturity_date)
+
+        # return spread_df  # (1.0 / (spread_df * df) - 1.0) / dt
