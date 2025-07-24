@@ -212,10 +212,16 @@ def error_fn(df_val: float):
 # here we need to better define the get_quote function, and which curves arer being passed to it...
 
 
-def get_quote(instrument_spec, other_params: dict = {}):  # use pricer for each instrument or equivalent functions...
+def get_quote(
+    instrument_spec: _Union[DepositSpecification, ForwardRateAgreementSpecification, InterestRateSwapSpecification], other_params: dict = {}
+):  # use pricer for each instrument or equivalent functions...
 
-    if instrument_spec
-
+    if instrument_spec.ins_type() == Instrument.Deposit:
+        pass
+    elif instrument_spec.ins_type() == Instrument.FRA:
+        pass
+    elif instrument_spec.ins_type() == Instrument.IRS:
+        pass
 
     pass
 

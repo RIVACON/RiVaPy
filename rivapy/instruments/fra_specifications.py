@@ -5,7 +5,7 @@ from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
 from holidays import HolidayBase as _HolidayBase, ECB as _ECB
 from rivapy.tools.datetools import Period, Schedule, _date_to_datetime, _datetime_to_date_list, _term_to_period
-from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating
+from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating, Instrument
 from rivapy.tools._validators import _check_positivity, _check_start_before_end, _string_to_calendar, _is_ascending_date_list
 import rivapy.tools.interfaces as interfaces
 from rivapy.tools.datetools import Period, Schedule, roll_day
@@ -119,8 +119,8 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         # give dates where applicable as optional, if not given, calculate based on spot lag, index spot lag, and forward period YMxZM (e.g. 1Mx4M)
         # e.g. for trade date D1 and spotLag, S1, and start_period = 1Mx4M
         # start_date = D1 + S1 + 1Month # this is the date it starts accruing interest
-        # but how must interest? the pre agreed FRA rate, fixed
-        # how is it settled? at settledate=start date, and using
+        # but how much interest? -> the pre agreed FRA rate, fixed
+        # how is it settled? -> at settledate=start date, and using
         # The floating rate index (e.g., LIBOR, SOFR, EURIBOR) used to determine the settlement amoun
         # This is determined at the fixing_date ( usually spot lag before, e.g. 2 days)
 
@@ -154,6 +154,19 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
     def _create_sample(
         n_samples: int, seed: int = None, ref_date=None, issuers: _List[str] = None, sec_levels: _List[str] = None, currencies: _List[str] = None
     ) -> _List[dict]:
+        """Create a random sample of multiple instruments of this type with varied specification parameters.
+
+        Args:
+            n_samples (int): The number of desired sample objects
+            seed (int, optional): Seed number to allow repeated result. Defaults to None.
+            ref_date (_type_, optional): Reference date . Defaults to None.
+            issuers (_List[str], optional): list of issuers. Defaults to None.
+            sec_levels (_List[str], optional): list of possible securitization levels. Defaults to None.
+            currencies (_List[str], optional): list of possible currencies used. Defaults to None.
+
+        Returns:
+            _List[dict]: where each entry is a dict representing with the information needed to specify an instrument.
+        """
         if seed is not None:
             np.random.seed(seed)
         if ref_date is None:
@@ -283,6 +296,11 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
 
     @property
     def rating(self) -> str:
+        """Getter for instrument's rating.
+
+        Returns:
+            str: instrument's rating
+        """
         return self._rating
 
     @rating.setter
@@ -553,5 +571,13 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
             float: _description_
         """
         return self._end_period
+
+    def ins_type(self):
+        """Return instrument type
+
+        Returns:
+            Instrument: Forward rate agreement
+        """
+        return Instrument.FRA
 
     # endregion

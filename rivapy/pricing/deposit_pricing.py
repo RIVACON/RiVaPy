@@ -24,10 +24,10 @@ class DepositPricer:
         """_summary_
 
         Args:
-            val_date (_Union[date, datetime]): _description_
-            deposit_spec (DepositSpecification): _description_
-            discount_curve (DiscountCurve): _description_
-            spread_curve (_Union[DiscountCurve, float]): _description_
+            val_date (_Union[date, datetime]): specific date for which the value of the financial instrument is calculated.
+            deposit_spec (DepositSpecification): Specification object with deposit specific parameters.
+            discount_curve (DiscountCurve): Discount curve used for discounting.
+            spread_curve (_Union[DiscountCurve, float]): Spread curve
         """
 
         self._val_date = val_date
@@ -76,28 +76,28 @@ class DepositPricer:
         return SimpleCashflowPricer.pv_cashflows(val_date, spec, dc)
 
     # def impliedSimplyCompoundedRate(self):
-        # """Returns the fair rate such that the specification gives the contract a zero value.
-        # Assumption is that it is a simply compounded rate
+    # """Returns the fair rate such that the specification gives the contract a zero value.
+    # Assumption is that it is a simply compounded rate
 
-        # i.e. D(t) = 1 / ( 1+ rate(t) * t)
+    # i.e. D(t) = 1 / ( 1+ rate(t) * t)
 
-        # Returns:
-        #     float_: _description_
-        # """
+    # Returns:
+    #     float_: _description_
+    # """
 
-        # dc = self._discount_curve
-        # # self._discount_curve.rivapy_valueFWD(self._val_date, self._deposit_spec.start_date, self._deposit_spec.maturity_date)
-        # val_date = self._val_date
-        # start_date = self._spec.start_date
-        # maturity_date = self._spec.maturity_date
+    # dc = self._discount_curve
+    # # self._discount_curve.rivapy_valueFWD(self._val_date, self._deposit_spec.start_date, self._deposit_spec.maturity_date)
+    # val_date = self._val_date
+    # start_date = self._spec.start_date
+    # maturity_date = self._spec.maturity_date
 
-        # if isinstance(dc, DiscountCurve):
-        #     spread_df = dc.rivapy_valueFWD(val_date, start_date, maturity_date)
-        # else:
-        #     raise ValueError("Discount curve must be of type DiscountCurve")
+    # if isinstance(dc, DiscountCurve):
+    #     spread_df = dc.rivapy_valueFWD(val_date, start_date, maturity_date)
+    # else:
+    #     raise ValueError("Discount curve must be of type DiscountCurve")
 
-        # # obtain time interval
-        # # dcc = DayCounter(self._deposit_spec._day_count_convention)  # use the curves or the specification? TODO: they should be the same though...
-        # # dt = dcc.yf(start_date, maturity_date)
+    # # obtain time interval
+    # # dcc = DayCounter(self._deposit_spec._day_count_convention)  # use the curves or the specification? TODO: they should be the same though...
+    # # dt = dcc.yf(start_date, maturity_date)
 
-        # return spread_df  # (1.0 / (spread_df * df) - 1.0) / dt
+    # return spread_df  # (1.0 / (spread_df * df) - 1.0) / dt
