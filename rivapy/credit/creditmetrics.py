@@ -108,7 +108,7 @@ class creditMetricsModel():
         """
         # credit spread implied by transmat
         PD_t = self.transition_matrix[:,-1] # default probability at t
-        credit_spread = -np.log(1-LGD*PD_t)/1
+        credit_spread = -np.log(1-LGD*PD_t)/self.t
         
         return credit_spread
     
@@ -124,10 +124,11 @@ class creditMetricsModel():
         # print(exposure)
         idx = positions["RatingID"]
         # print(idx)
-        LGD = 1-self.RR
+        LGD = 1-positions["RecoveryRate"]
+        print(LGD)
         credit_spread = self.get_credit_spreads(LGD)
         # print(credit_spread)
-        EV = np.multiply(exposure, np.exp(-(self.r+credit_spread[idx])*self.t))
+        EV = np.multiply(exposure, np.exp(-(self.r+credit_spread[idx])*self.t)) #TODO hier Bewertungsfunkiton aufrufen
 
         return EV
     
@@ -138,15 +139,15 @@ class creditMetricsModel():
             DataFrame: Dataframe with all possible present values.
         """
         positions = self.get_issuer_groups()
-        LGD = 1-self.RR
-        recover = self.RR
-        credit_spread = self.get_credit_spreads(LGD)
-        cp = np.tile(credit_spread.T,[positions["IssuerID"].nunique(),1])
-        exposure = np.matrix(positions["Exposure"]).T
-        state = np.multiply(exposure,np.exp(-(self.r+cp)*self.t))
-        state = np.append(state,np.multiply(exposure,recover),axis=1) #last column is default case
-        states = np.fliplr(state) # keep in same order as credit cutoff
-
+        LGD = 1-np.array(positions["RecoveryRate"])
+        PD_t = self.transition_matrix[:,-1] # default probability at t
+        credit_spread = -np.log(1-PD_t*LGD.T)
+        exposure = np.matrix(positions["Exposure"])
+        state = np.multiply(exposure, np.exp(-(self.r+credit_spread)*self.t)).T
+        state = np.append(state,np.multiply(exposure,np.matrix(positions["RecoveryRate"])).T,axis=1) #last column is default case
+        states = pd.DataFrame(np.fliplr(state), columns=["D","C","B","BB","BBB","A","AA","AAA"]) # keep in same order as credit cutoff
+        states["issuer"] = positions["IssuerName"].to_list()
+        states = states.groupby("issuer").sum()
         return states
     
     def get_issuer_groups(self):
