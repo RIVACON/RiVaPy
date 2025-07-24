@@ -22,9 +22,9 @@ class ForwardRateAgreementPricer:
         """_summary_
 
         Args:
-            val_date (_Union[date, datetime]): _description_
-            fra_spec (ForwardRateAgreementSpecification): _description_
-            discount_curve (DiscountCurve): _description_
+            val_date (_Union[date, datetime]): specific date for which the value of the financial instrument is calculated.
+            fra_spec (ForwardRateAgreementSpecification): Specification object with FRA specific parameters.
+            discount_curve (DiscountCurve): Discount curve used for discounting.
             forward_curve(): from underlying index...
 
         """
@@ -76,6 +76,17 @@ class ForwardRateAgreementPricer:
     def computeFairRate(
         val_date: _Union[datetime, date], forward_curve: DiscountCurve, rate_start_date: _Union[datetime, date], rate_end_date: _Union[datetime, date]
     ):
+        """Computes the fair rate such that the when used in the specification of the FRA gives a net value of zero.
+
+        Args:
+            val_date (_Union[datetime, date]): specific date for which the value of the financial instrument is calculated.
+            forward_curve (DiscountCurve): Forward curve used for projecting rates
+            rate_start_date (_Union[datetime, date]): start date for the forward period
+            rate_end_date (_Union[datetime, date]): end date for the forward period
+
+        Returns:
+            float: _description_
+        """
 
         dcc = DayCounter(forward_curve.daycounter)
         yf = dcc.yf(rate_start_date, rate_end_date)

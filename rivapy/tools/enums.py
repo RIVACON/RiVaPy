@@ -505,3 +505,32 @@ class Country(_MyEnum):
     GB = "GB"
     JP = "JP"
     CN = "CN"
+
+
+class IrLegType(_MyEnum):
+    """Enums object for the type of interest rate swap legs."""
+
+    FIXED = "FIXED"
+    FLOAT = "FLOAT"
+    OIS = "OIS"
+
+    @staticmethod
+    def from_string(s: str) -> str:
+        s = s.upper()
+        if s in (IrLegType.FIXED, IrLegType.FLOAT, IrLegType.OIS):
+            return s
+        raise ValueError(f"Unknown leg type '{s}'")
+
+    # @staticmethod
+    # def to_string(cls, value: str) -> str:
+    #     return value.upper()
+
+
+class Instrument(_MyEnum):
+    """Enums object for the type of instrument."""
+
+    IRS = "IRS"
+    TBS = "TBS"
+    Deposit = "DEPOSIT"
+    OIS = "OIS"
+    FRA = "FRA"

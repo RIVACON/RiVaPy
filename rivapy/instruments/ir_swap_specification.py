@@ -4,41 +4,43 @@ import numpy as np
 from datetime import datetime, date, timedelta
 from holidays import HolidayBase as _HolidayBase, ECB as _ECB
 from rivapy.tools.datetools import Period, Schedule, _date_to_datetime, _datetime_to_date_list, _term_to_period
-from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating
+from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating, Instrument
 from rivapy.tools._validators import _check_positivity, _check_start_before_end, _string_to_calendar, _is_ascending_date_list
 import rivapy.tools.interfaces as interfaces
 from rivapy.tools.datetools import Period, Schedule
 
 from rivapy.instruments.bond_specifications import BondBaseSpecification
 from rivapy.instruments.notional_structure import NotionalStructure, ConstNotionalStructure, VariableNotionalStructure, ResettingNotionalStructure
+from rivapy.tools.enums import IrLegType
 
 # Base each swap leg, off of the IRSwapBaseSpecification
 # This IRSwapBaseSpecification is in turn, based off of the BondBaseSpecification
 # Can think about basing the float/fixed leg off of the BondFlaoting/Fixed Note class...
 
 # WIP
-# TODO: only class names are there, update arguments to reflect IR Swap requirements
 
 
-# TODO: Move this to ENUMS???
-class IrLegType:
-    FIXED = "FIXED"
-    FLOAT = "FLOAT"
-    OIS = "OIS"
+# TODO: MoveED to tools.enums
+# class IrLegType:
+#     FIXED = "FIXED"
+#     FLOAT = "FLOAT"
+#     OIS = "OIS"
 
-    @staticmethod
-    def from_string(s: str) -> str:
-        s = s.upper()
-        if s in (IrLegType.FIXED, IrLegType.FLOAT, IrLegType.OIS):
-            return s
-        raise ValueError(f"Unknown leg type '{s}'")
+#     @staticmethod
+#     def from_string(s: str) -> str:
+#         s = s.upper()
+#         if s in (IrLegType.FIXED, IrLegType.FLOAT, IrLegType.OIS):
+#             return s
+#         raise ValueError(f"Unknown leg type '{s}'")
 
-    @staticmethod
-    def to_string(leg_type: str) -> str:
-        return leg_type.upper()
+#     @staticmethod
+#     def to_string(leg_type: str) -> str:
+#         return leg_type.upper()
 
 
 class IrSwapLegSpecification(interfaces.FactoryObject):
+    """Base interest rate swap leg specification used to define both fixed and floating legs."""
+
     def __init__(
         self,
         obj_id: str,
@@ -49,7 +51,17 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
         currency: _Union[Currency, str],
         day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
     ):
-        """_summary_ #TODO"""
+        """_summary_
+
+        Args:
+            obj_id (str): obj ID for the instrument.
+            notional (_Union[float, NotionalStructure]): If given a singular float, will convert to ConstNotinalStructure. Contains the notional information.
+            start_dates (_List[datetime]): start date of interest accrual period.
+            end_dates (_List[datetime]): end date of interest accrual period.
+            pay_dates (_List[datetime]): Dates when both legs of the swap exchange cash flows.
+            currency (_Union[Currency, str]): The currency of the swap
+            day_count_convention (_Union[DayCounterType, str], optional): The day count convention used. Defaults to DayCounterType.ThirtyU360.
+        """
         self.obj_id = obj_id
         self.notional_structure = notional
         self.start_dates = start_dates
@@ -151,6 +163,8 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
 
 
 class IrFixedLegSpecification(IrSwapLegSpecification):
+    """Specification for a fixed leg for an interest rate swap."""
+
     def __init__(
         self,
         fixed_rate: float,
@@ -162,6 +176,18 @@ class IrFixedLegSpecification(IrSwapLegSpecification):
         currency: _Union[Currency, str],
         day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
     ):
+        """_summary_
+
+        Args:
+            fixed_rate (float): The fixed interest rate defining this leg of the swap.
+            obj_id (str): obj ID for the instrument.
+            notional (_Union[float, NotionalStructure]): If given a singular float, will convert to ConstNotinalStructure. Contains the notional information.
+            start_dates (_List[datetime]): start date of interest accrual period.
+            end_dates (_List[datetime]): end date of interest accrual period.
+            pay_dates (_List[datetime]): Dates when both legs of the swap exchange cash flows.
+            currency (_Union[Currency, str]): The currency of the swap
+            day_count_convention (_Union[DayCounterType, str], optional): The day count convention used. Defaults to DayCounterType.ThirtyU360.
+        """
         super().__init__(obj_id, notional, start_dates, end_dates, pay_dates, currency, day_count_convention)
         self.fixed_rate = _check_positivity(fixed_rate)
 
@@ -221,6 +247,25 @@ class IrFloatLegSpecification(IrSwapLegSpecification):
         rate_day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
         spread: float = 0.0,
     ):
+        """_summary_
+
+        Args:
+            obj_id (str): obj ID for the instrument.
+            notional (_Union[float, NotionalStructure]): If given a singular float, will convert to ConstNotinalStructure. Contains the notional information.
+            reset_dates (_List[datetime]): Date on which the floating rate (e.g., SOFR, LIBOR) is determined
+            start_dates (_List[datetime]): Date the entire swap begins (effective date)
+            end_dates (_List[datetime]): Date the swap matures
+            rate_start_dates (_List[datetime]): start dates for the determination of the underlying rate
+            rate_end_dates (_List[datetime]): end dates for the determination of the underlying rate
+            pay_dates (_List[datetime]): Dates when both legs of the swap exchange cash flows.
+            currency (_Union[Currency, str]): The currency of the swap
+            udl_id (str): ID of the underlying rate
+            fixing_id (str): fixing id
+            day_count_convention (_Union[DayCounterType, str], optional): The day count convention used.. Defaults to DayCounterType.ThirtyU360.
+            rate_day_count_convention (_Union[DayCounterType, str], optional): The day count convention used for the underlying
+                                                . Defaults to DayCounterType.ThirtyU360.
+            spread (float, optional): _description_. Defaults to 0.0.
+        """
         super().__init__(obj_id, notional, start_dates, end_dates, pay_dates, currency, day_count_convention)
         self.reset_dates = reset_dates  # TODO: ADD setters to get rid of error notification?
         self.rate_start_dates = rate_start_dates
@@ -315,7 +360,23 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
         securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
         rating: _Union[Rating, str] = Rating.NONE,
     ):
-        """TODO"""
+        """Specification of the entire swap, encapsulating both the pay leg and the receive leg.
+
+        Args:
+            obj_id (str): _description_
+            notional (_Union[float, NotionalStructure]): _description_
+            issue_date (_Union[date, datetime]): _description_
+            maturity_date (_Union[date, datetime]): _description_
+            pay_leg (_Union[IrFixedLegSpecification, IrFloatLegSpecification]): _description_
+            receive_leg (_Union[IrFixedLegSpecification, IrFloatLegSpecification]): _description_
+            currency (_Union[Currency, str], optional): _description_. Defaults to "EUR".
+            calendar (_Union[_HolidayBase, str], optional): _description_. Defaults to None.
+            day_count_convention (_Union[DayCounterType, str], optional): _description_. Defaults to DayCounterType.ThirtyU360.
+            business_day_convention (_Union[RollConvention, str], optional): _description_. Defaults to RollConvention.FOLLOWING.
+            issuer (str, optional): _description_. Defaults to None.
+            securitization_level (_Union[SecuritizationLevel, str], optional): _description_. Defaults to SecuritizationLevel.NONE.
+            rating (_Union[Rating, str], optional): _description_. Defaults to Rating.NONE.
+        """
         self.obj_id = obj_id
         if issuer is not None:
             self.issuer = issuer
@@ -514,6 +575,11 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
     def get_receive_leg(self):
         return self.receive_leg
 
-    # TODO getters for PAY and RECEIVE legs
+    def ins_type(self):
+        """Return instrument type
 
+        Returns:
+            Instrument: Interest Rate Swap
+        """
+        return Instrument.IRS
     # endregion

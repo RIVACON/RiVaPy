@@ -28,8 +28,7 @@ from rivapy.instruments.notional_structure import *
 import numpy as np
 
 
-# #TODO MOVE TO ENUMS!!!
-from rivapy.instruments.ir_swap_specification import IrLegType
+from rivapy.tools.enums import IrLegType
 
 # If we follow pyvacon implementation
 # Makes uses of a cashFlowEntry class
@@ -61,13 +60,13 @@ class CashFlow:
         """overwritting default getter for dynamically growing one
 
         Args:
-            name (str): _description_
+            name (str): name of the the desired attribute
 
         Raises:
-            AttributeError: _description_
+            AttributeError: attribute name not included
 
         Returns:
-            Any: _description_
+            Any: value of the desired attribute
         """
         try:
             return self._attributes[name]
@@ -75,15 +74,15 @@ class CashFlow:
             raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
 
     def __setattr__(self, name: str, value: Any):
-        """overwriting default setter fr dynamically growing one
+        """overwriting default setter for dynamically growing one
         which also checks for expected type validation.
 
         Args:
-            name (str): _description_
-            value (Any): _description_
+            name (str): new name for desired attribute
+            value (Any): value to be stored in desired attribute
 
         Raises:
-            TypeError: _description_
+            TypeError: For known attributes defined in schema, raise error if type mismatch for value
         """
         if name in {"val", "_attributes"}:  # avoid infinite recursion
             super().__setattr__(name, value)  # use the the normal attribute storage from base class
@@ -132,13 +131,23 @@ class InterestRateSwapPricer:
         fx_pay_leg: float = 1.0,
         fx_receive_leg: float = 1.0,
     ):
-        """#TODO
+        """Initializes the Interest Rate Swap Pricer with all required curves, specifications, and parameters.
 
         Args:
-            val_date (_Union[date, datetime]): _description_
-            fra_spec (ForwardRateAgreementSpecification): _description_
-            discount_curve (DiscountCurve): _description_
-            forward_curve(): from underlying index...
+            val_date (date | datetime): The valuation date for pricing the swap. This is the anchor date for all time-dependent calculations.
+            spec (InterestRateSwapSpecification): The swap's structural details (legs, notionals, schedules, etc.).
+            discount_curve_pay_leg (DiscountCurve): Discount curve used to present value the pay leg.
+            discount_curve_receive_leg (DiscountCurve): Discount curve used to present value the receive leg.
+            fixing_curve_pay_leg (DiscountCurve): Curve used to forecast forward rates for the pay leg (typically for floating legs).
+            fixing_curve_receive_leg (DiscountCurve): Curve used to forecast forward rates for the receive leg.
+            fx_fwd_curve_pay_leg (DiscountCurve): FX forward curve to convert the pay leg currency to the pricing currency (if applicable).
+            fx_fwd_curve_receive_leg (DiscountCurve): FX forward curve to convert the receive leg currency to the pricing currency.
+            pricing_request (InterestRateSwapPricingRequest): Contains the pricing type, metrics requested (e.g., PV), and other flags. Not yet used properly
+            pricing_param (Dict, optional): Additional pricing parameters, such as day count conventions, compounding rules, etc.
+            fixing_map (FixingTable, optional): Historical fixings for floating legs that reference past periods.
+            fx_pay_leg (float, optional): FX rate multiplier to convert the pay leg currency to base. Default is 1.0 (i.e., same currency).
+            fx_receive_leg (float, optional): FX rate multiplier to convert the receive leg currency to base. Default is 1.0.
+
         """
 
         self._val_date = val_date

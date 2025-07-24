@@ -68,22 +68,30 @@ class ConstNotionalStructure(NotionalStructure):
     """
 
     def __init__(self, notional: float):
+        """Constructor for a notional structure with a constant notional.
+
+        Args:
+            notional (float): _description_
+        """
         self._notional = [notional]
 
     def get_amount(self, period: int) -> float:
-        """since notional is constant, period is used, but expects it to be zero...
-        If somethign else is passed, there is an inconsistency in the usage of ConstNotionalStructure... RETHINK
+        """Get the value of the notional.
+
+        Note: Kept list structure to stay consistent with other notional structures.
+        However, expectation is that of only one entry in this list.
 
         Args:
-            period (int): _description_
+            period (int): index rerferencing to a specific period of rolled out notional
 
         Returns:
-            float: _description_
+            float: notional value
         """
         return self._notional[period]
 
     def get_size(self) -> int:
-        """If the notional structure is constant, we default the 'size' as 1
+        """If the notional structure is constant, we expect the size to be 1.
+        Otherwise, return the amount of notional time stamps used.
 
         Returns:
             int: _description_
@@ -99,12 +107,12 @@ class ConstNotionalStructure(NotionalStructure):
 
 class VariableNotionalStructure(NotionalStructure):
     def __init__(self, notionals: list[float], pay_date_start: list[datetime], pay_date_end: list[datetime]):
-        """_summary_
+        """Constructor for a variable notional structure
 
         Args:
-            notionals (list[float]): _description_
-            pay_date_start (list[datetime]): _description_
-            pay_date_end (list[datetime]): _description_
+            notionals (list[float]): values for each period, referenced by index and matched to the pay_date_start/end
+            pay_date_start (list[datetime]): start date of the payment period
+            pay_date_end (list[datetime]): end date of the payment period
         """
         self._notional = notionals
         self._pay_date_start = pay_date_start
@@ -131,6 +139,8 @@ class VariableNotionalStructure(NotionalStructure):
         # TODO fill out more
         return_dict = {
             "notional": self._notional,
+            "pay_date_start": self._pay_date_start,
+            "pay_date_end": self._pay_date_end,
         }
         return return_dict
 
@@ -145,15 +155,15 @@ class ResettingNotionalStructure(NotionalStructure):
         pay_date_end: list[datetime],
         fixing_dates: list[datetime],
     ):
-        """_summary_
+        """Notional is recalculated/reset dynamically based on underlying referenced by fx_fixing_id at specific datets (fixing_dates)
 
         Args:
-            ref_currency (str): _description_
-            fx_fixing_id (str): _description_
-            notionals (list[float]): _description_
-            pay_date_start (list[datetime]): _description_
-            pay_date_end (list[datetime]): _description_
-            fixing_dates (list[datetime]): _description_
+            ref_currency (str): Currency of the reference
+            fx_fixing_id (str): Id of the fixing
+            notionals (list[float]): notional values
+            pay_date_start (list[datetime]): start of accrual period for that notional
+            pay_date_end (list[datetime]): end of accrual period for that notional
+            fixing_dates (list[datetime]): date at which notional is reset
         """
 
         self._ref_currency = ref_currency
@@ -190,28 +200,13 @@ class ResettingNotionalStructure(NotionalStructure):
         # TODO fill out more
         return_dict = {
             "notional": self._notional,
+            "pay_date_start": self._pay_date_start,
+            "pay_date_end": self._pay_date_end,
+            "ref_currency": self._ref_currency,
+            "fx_fixing_id": self._fx_fixing_id,
+            "fixing_date": self._fixing_date,
         }
         return return_dict
-
-
-# #TODO implment in the case we need to build a notional structure from a given database...
-# def build_notional_structure(
-#     notional_data: Dict[str, List[str]],
-#     var_notional_data: Optional[Dict[str, List[str]]],
-#     notional_id: int
-# ) -> Union[ConstNotionalStructure, VariableNotionalStructure, ResettingNotionalStructure]:
-
-#     """
-#     Factory function to build the appropriate NotionalStructure object.
-
-#     Parameters:
-#         notional_data: Dictionary-like table of notional metadata.
-#         var_notional_data: Dictionary-like table of variable/resetting notional values.
-#         notional_id: ID of the notional structure to build.
-
-#     Returns:
-#         An instance of ConstNotionalStructure, VariableNotionalStructure, or ResettingNotionalStructure.
-#     """
 
 
 if __name__ == "__main__":
