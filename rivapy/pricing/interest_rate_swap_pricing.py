@@ -1,3 +1,4 @@
+# 2025.07.24 Hans Nguyen
 from datetime import datetime, date
 from scipy.optimize import brentq
 from rivapy.tools.interfaces import BaseDatedCurve
@@ -36,6 +37,7 @@ from rivapy.tools.enums import IrLegType
 # Makes use of a cashFlowTable class? this wew dont use for now...
 
 
+#########################################################################
 class CashFlow:
     # goal is to define a dynamically growing class that is still able to use
     # type validation and dot-access e.g. class.variable
@@ -607,7 +609,82 @@ class InterestRateSwapPricer:
         # aggregated_price is already discount to present value inside the price_leg method
         return aggregated_price
 
+    # static method also then?
+    def compute_swap_rate(
+        ref_date: _Union[date, datetime],
+        discount_curve: DiscountCurve,
+        fixing_curve: DiscountCurve,
+        float_leg: IrFloatLegSpecification,
+        fixed_leg: IrFixedLegSpecification,
+        fixing_map: FixingTable = None,
+        fixing_grace_period: int = 0,
+    ):
+        # ref date
+        # discount curve
+        # fixing curve
+        # float leg spec
+        # fixed leg spec
+        # fixing map
+        # extra param: InterestRateSwapPricingParameter
+        # fixing grace period comes from the extra param
 
+        # float_PV = 1  # price leg refDate, discountCurve, fixingCurve, nullptr, floatLeg, fixingMap, fixingGracePeriod
+        # fixed_PV = 1
+        float_PV = InterestRateSwapPricer.price_leg(ref_date, discount_curve, fixing_curve, None, float_leg, fixing_map, fixing_grace_period)
+        fixed_PV = InterestRateSwapPricer.price_leg(ref_date, discount_curve, fixing_curve, None, fixed_leg, fixing_map, fixing_grace_period)
+        return float_PV / fixed_PV
+
+    # TODO
+    def compute_swap_spread(self):
+        # ref date
+        # discount curve pay leg
+        # forward curve pay leg
+        # fx forward curve pay leg
+        # discount curve rec leg
+        # forward curve rec leg
+        # fx forward curve rec leg
+        # pay leg spec
+        # rec leg spec
+        # fixing map
+        # extra param: InterestRateSwapPricingParameter
+        # fx pay
+        # fx rec
+        # fixing grace period comes from the extra param
+
+        # convert all prices into the currency of the swap
+        pv_pay = 0
+        pv_rec_s0 = 1
+        py_rec_s1 = 0
+        # pv_pay =  fxPay * price_leg(refDate, discountCurvePay, forwardCurvePay, fxForwardCurvePay, floatLegPay, fixingMap, fixingGracePeriod);
+        # pv_rec_s0 = fxRec * price_leg(refDate, discountCurveRec, forwardCurveRec, fxForwardCurveRec, floatLegRec, fixingMap, fixingGracePeriod, true, 0.);set_spread=True, desired_spread = 0.0 #for float it is spread
+        # py_rec_s1 = fxRec * price_leg(refDate, discountCurveRec, forwardCurveRec, fxForwardCurveRec, floatLegRec, fixingMap, fixingGracePeriod, true, 1.);set_spread=True, desired_spread = 1.0
+        # note that the current price leg doesnt take spreads as options for the moment, it is left as a # TODO for now...
+        return (pv_pay - pv_rec_s0) / (py_rec_s1 - pv_rec_s0)
+
+    # TODO
+    def compute_basis_spread(self):
+        # ref date
+        # discount curve
+        # receiveLegFixingCurve
+        # payLegFixingCurve
+        # receiveLeg spec #floatIRspec
+        # payLeg spec #floatIRspec
+        # fixed leg spec # fixedIRspec
+        # fixing grace period comes from the extra param
+
+        # noFxFowardCruve, set to null
+
+        receive_leg_PV = 1  # price_leg(refDate, discountCurve, receiveLegFixingCurve, nullptr, receiveLeg, fixingMap, fixingGracePeriod)
+        pay_leg_PV = 1  # price_leg(refDate, discountCurve, payLegFixingCurve,     nullptr, payLeg, fixingMap, fixingGracePeriod);
+        fixed_leg_PV01 = (
+            1  # price_leg(refDate, discountCurve, std::shared_ptr<const DiscountCurve>(), nullptr, fixedLeg, fixingMap, fixingGracePeriod, true, 1.);
+        )
+        # # for fixed, we are setting the rate to 1
+
+        return (receive_leg_PV - pay_leg_PV) / fixed_leg_PV01
+
+
+#########################################################################
 # FUNCTIONS
 def get_projected_notionals(
     val_date: _Union[date, datetime],

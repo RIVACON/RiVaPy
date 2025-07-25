@@ -575,6 +575,36 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
     def get_receive_leg(self):
         return self.receive_leg
 
+    def get_fixed_leg(self):
+        """get the fixed leg (only possible for fixed vs. floating swaps -> throws otherwise)"""
+
+        pay_leg_is_fixed = self.get_pay_leg().leg_type() == IrLegType.FIXED
+        receive_leg_is_fixed = self.get_receive_leg().leg_type() == IrLegType.FIXED
+
+        if pay_leg_is_fixed and not receive_leg_is_fixed:
+            leg = self.get_pay_leg()
+        elif receive_leg_is_fixed and not pay_leg_is_fixed:
+            leg = self.get_receive_leg()
+        else:
+            raise ValueError("Swap is not comprised of one fixed leg and one float/OIS leg!")
+
+        return leg
+
+    def get_float_leg(self):
+        """get the float leg (only possible for fixed vs. floating swaps -> throws otherwise)"""
+
+        pay_leg_is_float = self.get_pay_leg().leg_type() in (IrLegType.FLOAT or IrLegType.OIS)
+        receive_leg_is_float = self.get_receive_leg().leg_type() in (IrLegType.FLOAT or IrLegType.OIS)
+
+        if pay_leg_is_float and not receive_leg_is_float:
+            leg = self.get_pay_leg()
+        elif receive_leg_is_float and not pay_leg_is_float:
+            leg = self.get_receive_leg()
+        else:
+            raise ValueError("Swap is not comprised of one fixed leg and one float/OIS leg!")
+
+        return leg
+
     def ins_type(self):
         """Return instrument type
 
@@ -582,4 +612,5 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
             Instrument: Interest Rate Swap
         """
         return Instrument.IRS
+
     # endregion

@@ -534,3 +534,4 @@ class Instrument(_MyEnum):
     Deposit = "DEPOSIT"
     OIS = "OIS"
     FRA = "FRA"
+    FXF = "FXF"

@@ -17,7 +17,7 @@ class FixingTable:
     def __init__(self, id: str = None, fixings: Dict[str, Tuple[_List[datetime], _List[float]]] = None):
         # id: Optional[str] = None,
         # fixings: Optional[Dict[str, Tuple[List[datetime], List[float]]]] = None):
-        """Constructor for FixingTable.
+        """Constructor for FixingTable. Creates 'empty' instance if no parameters passed.
 
         Args:
             id (str): identifier for the table. Defaults to None.
