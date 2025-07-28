@@ -211,7 +211,7 @@ class RollConvention(_MyEnum):
 
 @_unique
 class RollRule(_MyEnum):
-    """Roll Rules are used for calculateing daten when building a scheduel and, therefore, rolling forward (or backward) dates by periods or frequencies"""
+    """Roll Rules are used for calculating daten when building a schedule and, therefore, rolling forward (or backward) dates by periods or frequencies"""
 
     NONE = "NONE"  # no roll rule applied,  day of a month drifts if adjustments are made acc. to bdc, i.e. the anchor date changes
     EOM = "EOM"  # rolls from month end to month end, ambiguous days are adjusted to the end of the month, i.e. Mar 30,

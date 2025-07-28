@@ -1,18 +1,19 @@
 import abc
-from typing import List, Tuple
+from typing import List, Tuple, TYPE_CHECKING
 from rivapy.tools.interfaces import FactoryObject
 import datetime as dt
+from dateutil.relativedelta import relativedelta
 
 # import rivapy.tools.interfaces as interfaces
 from rivapy.tools.enums import SecuritizationLevel, Currency, DayCounterType, RollConvention, RollRule
 from typing import List, Tuple, Optional as _Optional, Union as _Union
-from rivapy.tools.datetools import Period, _date_to_datetime, _term_to_period, _string_to_calendar, DayCounter, Schedule
+from rivapy.tools.datetools import Period, _date_to_datetime, _term_to_period, _string_to_calendar, DayCounter, Schedule, roll_day
 from holidays import HolidayBase as _HolidayBase
 from holidays import EuropeanCentralBank as _ECB
 
-# from rivapy.marketdata.curves import DiscountCurve
+# if TYPE_CHECKING:
+#from rivapy.marketdata.curves import DiscountCurve
 
-# from rivapy.enums import Currency
 from rivapy import _pyvacon_available
 
 if _pyvacon_available:
@@ -212,9 +213,11 @@ class HasExpectedCashflows(FactoryObject):
     def __init__(
         self,
         obj_id: str,
+        first_fixing_date: _Union[dt.date, dt.datetime],
         start_date: _Union[dt.date, dt.datetime],
+        end_date: _Union[dt.date, dt.datetime],
         maturity_date: _Union[dt.date, dt.datetime],
-        notional: float,
+        notional: float = 100.0,
         notional_exchange: bool = True,
         coupon: float = 0.0,
         frequency: _Optional[_Union[Period, str]] = None,
@@ -223,14 +226,19 @@ class HasExpectedCashflows(FactoryObject):
         roll_convention: _Union[RollRule, str] = RollRule.EOM,
         calendar: _Union[_HolidayBase, str] = _ECB(),
         coupon_type: str = "fix",
+        settlement_days: int = 0,
+        spot_lag: int = 2,
+        pays_in_arrears: bool = True,
         # fwd_curve: _Optional[DiscountCurve] = None,
     ):
         """Initializes the HasExpectedCashflows object.
 
         Args:
             obj_id (str): Unique identifier for the object.
+            first_fixing_date (_Union[date, datetime]): Date of the first fixing.
             start_date (_Union[date, datetime]): Start date of the first accrual period.
-            maturity_date (_Union[date, datetime]): End of the last accrual period.
+            end_date (_Union[date, datetime]): End of the last accrual period. Not necessarily a good business day.
+            maturity_date (_Union[date, datetime]): Adjusted end date of the last accrual period. Is a good business day.
             notional (float): Notional amount of the instrument.
             coupon (float): Fixed coupon rate .
             frequency (_Union[Period, str]): frequency of fixings.
@@ -238,9 +246,15 @@ class HasExpectedCashflows(FactoryObject):
             business_day_convention (_Union[RollConvention, str], optional): Business day convention. Defaults to RollConvention.MODIFIED_FOLLOWING.
             roll_convention (_Union[RollRule, str], optional): Roll convention. Defaults to RollRule.EOM.
             calendar (_Union[_HolidayBase, str], optional): Holiday calendar. Defaults to _ECB().
+            settlement_days (int, optional): Number of settlement days. Defaults to 0.
+            notional_exchange (bool, optional): Indicates if notional is exchanged at maturity. Defaults
+            pays_in_arrears (bool, optional): Indicates if the instrument pays in arrears. Defaults to True.
+            fwd_curve (_Optional[DiscountCurve], optional): Forward curve used for pricing. Defaults to None.
         """
         self._obj_id = obj_id
+        self._first_fixing_date = _date_to_datetime(first_fixing_date)
         self._start_date = _date_to_datetime(start_date)
+        self._end_date = _date_to_datetime(end_date)
         self._maturity_date = _date_to_datetime(maturity_date)
         self._notional = notional
         self._coupon = coupon
@@ -251,6 +265,9 @@ class HasExpectedCashflows(FactoryObject):
         self._calendar = calendar
         self._coupon_type = coupon_type
         self._notional_exchange = notional_exchange
+        self._settlement_days = settlement_days
+        self._spot_days = spot_lag
+        self._pays_in_arrears = pays_in_arrears
         # self._fwd_curve = fwd_curve
 
     @property
@@ -348,7 +365,7 @@ class HasExpectedCashflows(FactoryObject):
         self._notional = _check_positivity(notional)
 
     @property
-    def day_count_convention(self) -> RollConvention:
+    def day_count_convention(self) -> DayCounterType:
         """
         Getter for FRA's day count convention.
 
@@ -426,18 +443,113 @@ class HasExpectedCashflows(FactoryObject):
     def notional_exchange(self, notional_exchange: bool):
         self._notional_exchange = notional_exchange
 
+    @property
+    def settlement_days(self) -> int:
+        """
+        Getter for the number of settlement days.
+
+        Returns:
+            int: Number of settlement days.
+        """
+        return self._settlement_days
+
+    @settlement_days.setter
+    def settlement_days(self, settlement_days: int):
+        """
+        Setter for the number of settlement days.
+
+        Args:
+            settlement_days (int): Number of settlement days.
+        """
+        if not isinstance(settlement_days, int) or settlement_days < 0:
+            raise ValueError("Settlement days must be a non-negative integer.")
+        self._settlement_days = settlement_days
+
+    @property
+    def pays_in_arrears(self) -> bool:
+        """
+        Getter for the pays_in_arrears flag.
+
+        Returns:
+            bool: True if the instrument pays in arrears, False otherwise.
+        """
+        return self._pays_in_arrears
+
+    @pays_in_arrears.setter
+    def pays_in_arrears(self, pays_in_arrears: bool):
+        """
+        Setter for the pays_in_arrears flag.
+
+        Args:
+            pays_in_arrears (bool): True if the instrument pays in arrears, False otherwise.
+        """
+        if not isinstance(pays_in_arrears, bool):
+            raise ValueError("pays_in_arrears must be a boolean value.")
+        self._pays_in_arrears = pays_in_arrears
+
+    # @property
+    # def fwd_curve(self) -> _Optional[DiscountCurve]:
+    #     """
+    #     Getter for the forward curve used in pricing.
+
+    #     Returns:
+    #         _Optional[DiscountCurve]: The forward curve used in pricing, or None if not set.
+    #     """
+    #     return self._fwd_curve
+
+    # @fwd_curve.setter
+    # def fwd_curve(self, fwd_curve: _Optional[DiscountCurve]):
+    #     """
+    #     Setter for the forward curve used in pricing.
+
+    #     Args:
+    #         fwd_curve (_Optional[DiscountCurve]): The forward curve used in pricing, or None if not set.
+    #     """
+    #     if fwd_curve is not None and not isinstance(fwd_curve, DiscountCurve):
+    #         raise ValueError("fwd_curve must be of type DiscountCurve or None.")
+    #     self._fwd_curve = fwd_curve
+
+    def _adjust_to_payment_date(self, accrual_end_date: dt.datetime) -> dt.datetime:
+        """Adjusts the payment date by applying business day conventions and settlement days.
+
+        Args:
+            accrual_end_date: End date of the accrual period
+
+        Returns:
+            dt.datetime: Adjusted payment date that is guaranteed to be >= accrual_end_date
+        """
+        try:
+            # First business day adjustment
+            adjusted_date = roll_day(accrual_end_date, self._calendar, self._business_day_convention)
+
+            # Add settlement days
+            from dateutil.relativedelta import relativedelta
+
+            with_settlement = adjusted_date + relativedelta(days=self._settlement_days)
+
+            # Final business day adjustment
+            final_date = roll_day(with_settlement, self._calendar, self._business_day_convention)
+
+            # Ensure the payment date is not before the accrual end date
+            if final_date < accrual_end_date:
+                raise ValueError(f"Adjusted payment date {final_date} is before accrual end date {accrual_end_date}")
+
+            return final_date
+        except Exception as e:
+            raise ValueError(f"Failed to adjust payment date: {e}")
+
     def expected_cashflows(self) -> List[Tuple[dt.datetime, float]]:
         schedule = self.get_schedule()
         dates = schedule._roll_out(
             from_=self._start_date,
-            to_=self._maturity_date,
+            to_=self._end_date,
             term=_term_to_period(self._frequency),
         )
         dcc = DayCounter(self.day_count_convention)
         if self._coupon_type == "float":
-            cashflows = [(d1, self._notional * self._coupon * dcc.yf(d1, d2)) for d1, d2 in zip(dates[:-1], dates[1:])]
+            cashflows = [(self._adjust_to_payment_date(d1), self._notional * self._coupon * dcc.yf(d1, d2)) for d1, d2 in zip(dates[:-1], dates[1:])]
         else:
-            cashflows = [(d1, self._notional * self._coupon * dcc.yf(d1, d2)) for d1, d2 in zip(dates[:-1], dates[1:])]
+            cashflows = [(self._adjust_to_payment_date(d1), self._notional * self._coupon * dcc.yf(d1, d2)) for d1, d2 in zip(dates[:-1], dates[1:])]
         if self._notional_exchange:
             cashflows.append((self._maturity_date, self._notional))
         return cashflows
@@ -446,7 +558,7 @@ class HasExpectedCashflows(FactoryObject):
         """Returns the schedule of the cashflows."""
         return Schedule(
             start_day=self._start_date,
-            end_day=self._maturity_date,
+            end_day=self._end_date,
             time_period=self._frequency,
             backwards=True,
             stub_type_is_Long=True,

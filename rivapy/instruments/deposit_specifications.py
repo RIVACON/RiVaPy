@@ -1,3 +1,8 @@
+# ToDo:
+# - consider proper end date handling
+# - move date handling to hasexpectedcf
+# - correct _frequency, _dcc issues...
+
 from abc import abstractmethod as _abstractmethod
 from typing import List as _List, Union as _Union, Tuple, Optional as _Optional
 import numpy as np
@@ -5,6 +10,7 @@ from rivapy.instruments import HasExpectedCashflows
 from datetime import datetime, date, timedelta
 from holidays import HolidayBase as _HolidayBase
 from holidays import EuropeanCentralBank as _ECB
+from dateutil.relativedelta import relativedelta
 from rivapy.tools.datetools import Period, _date_to_datetime, _term_to_period, calc_end_day, calc_start_day, roll_day
 from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating, RollRule
 from rivapy.tools._validators import (
@@ -23,9 +29,10 @@ class DepositSpecification(HasExpectedCashflows):
     def __init__(
         self,
         obj_id: str,
-        fixing_date: _Union[date, datetime],
-        start_date: _Union[date, datetime],
-        maturity_date: _Union[date, datetime],
+        fixing_date: _Optional[_Union[date, datetime]] = None,
+        end_date: _Optional[_Union[date, datetime]] = None,
+        start_date: _Optional[_Union[date, datetime]] = None,
+        maturity_date: _Optional[_Union[date, datetime]] = None,
         currency: _Union[Currency, str] = "EUR",
         notional: float = 100.0,
         rate: float = 0.00,
@@ -33,12 +40,13 @@ class DepositSpecification(HasExpectedCashflows):
         day_count_convention: _Union[DayCounterType, str] = DayCounterType.ACT360,
         business_day_convention: _Union[RollConvention, str] = RollConvention.MODIFIED_FOLLOWING,
         roll_convention: _Union[RollRule, str] = RollRule.EOM,
-        spot_days: int = 2,
+        spot_lag: int = 2,
         calendar: _Union[_HolidayBase, str] = _ECB(),
         issuer: _Optional[str] = None,
         securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
         rating: _Union[Rating, str] = Rating.NONE,
         notional_exchange: bool = True,
+        settlement_days: int = 0,
     ):
         """
         Deposit specification. Defaults assume deposit corresponds to an interbank deposit.
@@ -48,7 +56,8 @@ class DepositSpecification(HasExpectedCashflows):
             obj_id (str): (Preferably) Unique label of the deposit.
             fixing_date (_Union[date, datetime]): Date on which the reference rate (e.g. EURIBOR) is set for floating rate deposits. Must lie at or before the start_date.
             start_date (_Union[date, datetime]): Date on when deposits begins for accrual or settlement.
-            maturity_date (_Union[date, datetime]): Date when deposit is repaid, defining the end of the interest period. Must lie after the start_date.
+            end_date (_Union[date, datetime]): Date on which the deposit ends for accrual or settlement. Must lie after the start_date.
+            maturity_date (_Union[date, datetime]): Date when deposit is matures formally, lies on a good business day. Must lie at or after the start_date.
             currency (str, optional): Currency as alphabetic, Defaults to 'EUR'.
             notional (float, optional): Deposit's notional/face value. Must be positive. Defaults to 100.0.
             rate (float): Deposit fixed interest rate.
@@ -61,23 +70,26 @@ class DepositSpecification(HasExpectedCashflows):
                                                                             calendar. Defaults to
                                                                             RollConvention.FOLLOWING
             roll_convention (Union[RollRule],str], optional): Roll convention to be applied when building a schedule. Defaults to RollRule.NONE.
-            spot_days (int, optional): Number of days after fixing date when the deposit is actually settled. Defaults to 2.
+            spot_lag (int, optional): Number of days after fixing date when the deposit is actually settled. Defaults to 2.
             calendar (Union[HolidayBase, str], optional): Holiday calendar to be used for business day adjustment. Defaults to ECB calendar.
             issuer (str, optional): Name/id of issuer. Defaults to None.
             securitization_level (_Union[SecuritizationLevel, str], optional): Securitization level. Defaults to None.
             rating (_Union[Rating, str]): Paper rating.
         """
 
-        if term == "O/N":
-            self._spot_days = 0
-        elif term == "T/N":
-            self._spot_days = 1
+        # check and adjust spot_days for O/N and T/N deposits
+        if term == "O/N" or (fixing_date is not None and start_date is not None and fixing_date == start_date):
+            spd = 0
+        elif term == "T/N" or (fixing_date is not None and start_date is not None and fixing_date + relativedelta(days=1) == start_date):
+            spd = 1
         else:
-            self._spot_days = spot_days
+            spd = spot_lag
+
+        # set fixing date,  start date, end date, and maturity date
         if fixing_date is not None:
-            self._fixing_date = fixing_date
+            fd = roll_day(fixing_date, calendar=calendar, business_day_convention=business_day_convention)
         elif start_date is not None:
-            self._fixing_date = calc_start_day(
+            fd = calc_start_day(
                 roll_day(start_date, calendar=calendar, business_day_convention=business_day_convention),
                 f"{self._spot_days}D",
                 business_day_convention=business_day_convention,
@@ -97,14 +109,20 @@ class DepositSpecification(HasExpectedCashflows):
             )
         else:
             raise ValueError("Either fixing_date or start_date must be provided.")
+        if end_date is not None:
+            ed = end_date
+        elif term is not None:
+            ed = calc_end_day(sd, term, business_day_convention=business_day_convention, calendar=calendar, roll_convention=roll_convention)
+        elif maturity_date is not None:
+            ed = maturity_date
+        else:
+            raise ValueError("Either end_date, term and start_date, or maturity_date must be provided.")
         if maturity_date is not None:
             md = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
         else:
-            md = calc_end_day(
-                self.start_date, term, business_day_convention=business_day_convention, calendar=calendar, roll_convention=roll_convention
-            )
+            md = roll_day(ed, calendar=calendar, business_day_convention=business_day_convention)
         if term is None:
-            t = f"{(md - sd).days}D"
+            t = f"{(ed - sd).days}D"
         else:
             t = term
         self._currency = currency
@@ -115,7 +133,10 @@ class DepositSpecification(HasExpectedCashflows):
         self._rating = Rating.to_string(rating)
         super().__init__(
             obj_id=obj_id,
+            first_fixing_date=fd,
+            spot_lag=spd,
             start_date=sd,
+            end_date=ed,
             maturity_date=md,
             notional=notional,
             coupon=rate,
@@ -125,6 +146,7 @@ class DepositSpecification(HasExpectedCashflows):
             roll_convention=roll_convention,
             calendar=calendar,
             notional_exchange=notional_exchange,
+            settlement_days=settlement_days,
         )
 
     @staticmethod
@@ -232,19 +254,3 @@ class DepositSpecification(HasExpectedCashflows):
             issuer(str): Issuer of the instrument.
         """
         self._issuer = issuer
-
-    @property
-    def fixing_date(self) -> datetime:
-        return self._fixing_date
-
-    @fixing_date.setter
-    def fixing_date(self, fixing_date: _Union[date, datetime]):
-        self._fixing_date = fixing_date
-
-    @property
-    def spot_days(self) -> int:
-        return self._spot_days
-
-    @spot_days.setter
-    def spot_days(self, spot_days: int):
-        self._spot_days = spot_days
