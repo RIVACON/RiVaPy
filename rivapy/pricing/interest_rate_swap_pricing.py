@@ -1,3 +1,4 @@
+# 2025.07.24 Hans Nguyen
 from datetime import datetime, date
 from scipy.optimize import brentq
 from rivapy.tools.interfaces import BaseDatedCurve
@@ -29,14 +30,14 @@ from rivapy.instruments.notional_structure import *
 import numpy as np
 
 
-# #TODO MOVE TO ENUMS!!!
-from rivapy.instruments.ir_swap_specification import IrLegType
+from rivapy.tools.enums import IrLegType
 
 # If we follow pyvacon implementation
 # Makes uses of a cashFlowEntry class
 # Makes use of a cashFlowTable class? this wew dont use for now...
 
 
+#########################################################################
 class CashFlow:
     # goal is to define a dynamically growing class that is still able to use
     # type validation and dot-access e.g. class.variable
@@ -62,13 +63,13 @@ class CashFlow:
         """overwritting default getter for dynamically growing one
 
         Args:
-            name (str): _description_
+            name (str): name of the the desired attribute
 
         Raises:
-            AttributeError: _description_
+            AttributeError: attribute name not included
 
         Returns:
-            Any: _description_
+            Any: value of the desired attribute
         """
         try:
             return self._attributes[name]
@@ -76,15 +77,15 @@ class CashFlow:
             raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
 
     def __setattr__(self, name: str, value: Any):
-        """overwriting default setter fr dynamically growing one
+        """overwriting default setter for dynamically growing one
         which also checks for expected type validation.
 
         Args:
-            name (str): _description_
-            value (Any): _description_
+            name (str): new name for desired attribute
+            value (Any): value to be stored in desired attribute
 
         Raises:
-            TypeError: _description_
+            TypeError: For known attributes defined in schema, raise error if type mismatch for value
         """
         if name in {"val", "_attributes"}:  # avoid infinite recursion
             super().__setattr__(name, value)  # use the the normal attribute storage from base class
@@ -133,13 +134,23 @@ class InterestRateSwapPricer:
         fx_pay_leg: float = 1.0,
         fx_receive_leg: float = 1.0,
     ):
-        """#TODO
+        """Initializes the Interest Rate Swap Pricer with all required curves, specifications, and parameters.
 
         Args:
-            val_date (_Union[date, datetime]): _description_
-            fra_spec (ForwardRateAgreementSpecification): _description_
-            discount_curve (DiscountCurve): _description_
-            forward_curve(): from underlying index...
+            val_date (date | datetime): The valuation date for pricing the swap. This is the anchor date for all time-dependent calculations.
+            spec (InterestRateSwapSpecification): The swap's structural details (legs, notionals, schedules, etc.).
+            discount_curve_pay_leg (DiscountCurve): Discount curve used to present value the pay leg.
+            discount_curve_receive_leg (DiscountCurve): Discount curve used to present value the receive leg.
+            fixing_curve_pay_leg (DiscountCurve): Curve used to forecast forward rates for the pay leg (typically for floating legs).
+            fixing_curve_receive_leg (DiscountCurve): Curve used to forecast forward rates for the receive leg.
+            fx_fwd_curve_pay_leg (DiscountCurve): FX forward curve to convert the pay leg currency to the pricing currency (if applicable).
+            fx_fwd_curve_receive_leg (DiscountCurve): FX forward curve to convert the receive leg currency to the pricing currency.
+            pricing_request (InterestRateSwapPricingRequest): Contains the pricing type, metrics requested (e.g., PV), and other flags. Not yet used properly
+            pricing_param (Dict, optional): Additional pricing parameters, such as day count conventions, compounding rules, etc.
+            fixing_map (FixingTable, optional): Historical fixings for floating legs that reference past periods.
+            fx_pay_leg (float, optional): FX rate multiplier to convert the pay leg currency to base. Default is 1.0 (i.e., same currency).
+            fx_receive_leg (float, optional): FX rate multiplier to convert the receive leg currency to base. Default is 1.0.
+
         """
 
         self._val_date = val_date
@@ -598,7 +609,82 @@ class InterestRateSwapPricer:
         # aggregated_price is already discount to present value inside the price_leg method
         return aggregated_price
 
+    # static method also then?
+    def compute_swap_rate(
+        ref_date: _Union[date, datetime],
+        discount_curve: DiscountCurve,
+        fixing_curve: DiscountCurve,
+        float_leg: IrFloatLegSpecification,
+        fixed_leg: IrFixedLegSpecification,
+        fixing_map: FixingTable = None,
+        fixing_grace_period: int = 0,
+    ):
+        # ref date
+        # discount curve
+        # fixing curve
+        # float leg spec
+        # fixed leg spec
+        # fixing map
+        # extra param: InterestRateSwapPricingParameter
+        # fixing grace period comes from the extra param
 
+        # float_PV = 1  # price leg refDate, discountCurve, fixingCurve, nullptr, floatLeg, fixingMap, fixingGracePeriod
+        # fixed_PV = 1
+        float_PV = InterestRateSwapPricer.price_leg(ref_date, discount_curve, fixing_curve, None, float_leg, fixing_map, fixing_grace_period)
+        fixed_PV = InterestRateSwapPricer.price_leg(ref_date, discount_curve, fixing_curve, None, fixed_leg, fixing_map, fixing_grace_period)
+        return float_PV / fixed_PV
+
+    # TODO
+    def compute_swap_spread(self):
+        # ref date
+        # discount curve pay leg
+        # forward curve pay leg
+        # fx forward curve pay leg
+        # discount curve rec leg
+        # forward curve rec leg
+        # fx forward curve rec leg
+        # pay leg spec
+        # rec leg spec
+        # fixing map
+        # extra param: InterestRateSwapPricingParameter
+        # fx pay
+        # fx rec
+        # fixing grace period comes from the extra param
+
+        # convert all prices into the currency of the swap
+        pv_pay = 0
+        pv_rec_s0 = 1
+        py_rec_s1 = 0
+        # pv_pay =  fxPay * price_leg(refDate, discountCurvePay, forwardCurvePay, fxForwardCurvePay, floatLegPay, fixingMap, fixingGracePeriod);
+        # pv_rec_s0 = fxRec * price_leg(refDate, discountCurveRec, forwardCurveRec, fxForwardCurveRec, floatLegRec, fixingMap, fixingGracePeriod, true, 0.);set_spread=True, desired_spread = 0.0 #for float it is spread
+        # py_rec_s1 = fxRec * price_leg(refDate, discountCurveRec, forwardCurveRec, fxForwardCurveRec, floatLegRec, fixingMap, fixingGracePeriod, true, 1.);set_spread=True, desired_spread = 1.0
+        # note that the current price leg doesnt take spreads as options for the moment, it is left as a # TODO for now...
+        return (pv_pay - pv_rec_s0) / (py_rec_s1 - pv_rec_s0)
+
+    # TODO
+    def compute_basis_spread(self):
+        # ref date
+        # discount curve
+        # receiveLegFixingCurve
+        # payLegFixingCurve
+        # receiveLeg spec #floatIRspec
+        # payLeg spec #floatIRspec
+        # fixed leg spec # fixedIRspec
+        # fixing grace period comes from the extra param
+
+        # noFxFowardCruve, set to null
+
+        receive_leg_PV = 1  # price_leg(refDate, discountCurve, receiveLegFixingCurve, nullptr, receiveLeg, fixingMap, fixingGracePeriod)
+        pay_leg_PV = 1  # price_leg(refDate, discountCurve, payLegFixingCurve,     nullptr, payLeg, fixingMap, fixingGracePeriod);
+        fixed_leg_PV01 = (
+            1  # price_leg(refDate, discountCurve, std::shared_ptr<const DiscountCurve>(), nullptr, fixedLeg, fixingMap, fixingGracePeriod, true, 1.);
+        )
+        # # for fixed, we are setting the rate to 1
+
+        return (receive_leg_PV - pay_leg_PV) / fixed_leg_PV01
+
+
+#########################################################################
 # FUNCTIONS
 def get_projected_notionals(
     val_date: _Union[date, datetime],

@@ -12,7 +12,7 @@ from holidays import HolidayBase as _HolidayBase
 from holidays import EuropeanCentralBank as _ECB
 from dateutil.relativedelta import relativedelta
 from rivapy.tools.datetools import Period, _date_to_datetime, _term_to_period, calc_end_day, calc_start_day, roll_day
-from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating, RollRule
+from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating, RollRule, Instrument
 from rivapy.tools._validators import (
     _check_positivity,
     _check_start_before_end,
@@ -254,3 +254,27 @@ class DepositSpecification(HasExpectedCashflows):
             issuer(str): Issuer of the instrument.
         """
         self._issuer = issuer
+
+    @property
+    def fixing_date(self) -> datetime:
+        return self._fixing_date
+
+    @fixing_date.setter
+    def fixing_date(self, fixing_date: _Union[date, datetime]):
+        self._fixing_date = fixing_date
+
+    @property
+    def spot_days(self) -> int:
+        return self._spot_days
+
+    @spot_days.setter
+    def spot_days(self, spot_days: int):
+        self._spot_days = spot_days
+
+    def ins_type(self):
+        """Return instrument type
+
+        Returns:
+            Instrument: Forward rate agreement
+        """
+        return Instrument.FRA

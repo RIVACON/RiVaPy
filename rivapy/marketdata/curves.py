@@ -80,6 +80,7 @@ class DiscountCurve:
             raise TypeError("Extrapolation is not of type enums.ExtrapolationType")
         self.extrapolation = extrapolation
         if not isinstance(daycounter, DayCounterType):
+            print(daycounter)
             raise TypeError("Daycounter is not of type enums.DaycounterType")
         self.daycounter = daycounter
         self.id = id
@@ -144,7 +145,7 @@ class DiscountCurve:
             )
         return self._pyvacon_obj
 
-    # experimental
+    # Change the name with value once full pyvacon dependencies are removed throughout rivapy
     def rivapy_value(self, refdate: Union[date, datetime], d: Union[date, datetime], payment_dates=None, annual_payment_frequency=None) -> float:
         """Return discount factor for a given date (without dependencies from pyvacon)
 
@@ -202,7 +203,7 @@ class DiscountCurve:
 
         return df
 
-    def rivapy_valueFWD(self, valdate: Union[date, datetime], d1: Union[date, datetime], d2: Union[date, datetime]) -> float:
+    def rivapy_valueFWD(self, val_date: Union[date, datetime], d1: Union[date, datetime], d2: Union[date, datetime]) -> float:
         """Return discount factor for a given date (without dependencies from pyvacon)
 
         Args:
@@ -230,13 +231,13 @@ class DiscountCurve:
         # }
 
         # check valid dates
-        if not isinstance(valdate, datetime):  # handling date object -> datetime
-            valdate = datetime(valdate, 0, 0, 0)
+        if not isinstance(val_date, datetime):  # handling date object -> datetime
+            val_date = datetime(val_date, 0, 0, 0)
         if not isinstance(d1, datetime):
             d1 = datetime(d1, 0, 0, 0)
         if not isinstance(d2, datetime):
-            d2 = datetime(d21, 0, 0, 0)
-        if valdate < self.refdate:
+            d2 = datetime(d2, 0, 0, 0)
+        if val_date < self.refdate:
             raise Exception("The given value date is before the curves reference date.")
 
         # get yearfrac, taking into account DCC
@@ -256,8 +257,8 @@ class DiscountCurve:
         # print(dcc.yf(refdate, d))
 
         # give FWD value if given refdate is greater than curves reference date
-        df1 = interp.interp(yf_list, df_list, dcc.yf(valdate, d1), self.extrapolation)
-        df2 = interp.interp(yf_list, df_list, dcc.yf(valdate, d2), self.extrapolation)
+        df1 = interp.interp(yf_list, df_list, dcc.yf(val_date, d1), self.extrapolation)
+        df2 = interp.interp(yf_list, df_list, dcc.yf(val_date, d2), self.extrapolation)
         df = df2 / df1
 
         return df
