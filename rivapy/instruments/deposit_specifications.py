@@ -44,23 +44,21 @@ class DepositSpecification(HasExpectedCashflows):
         calendar: _Union[_HolidayBase, str] = _ECB(),
         issuer: _Optional[str] = None,
         securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
-        rating: _Union[Rating, str] = Rating.NONE,
-        notional_exchange: bool = True,
         settlement_days: int = 0,
     ):
         """
-        Deposit specification. Defaults assume deposit corresponds to an interbank deposit.
-        Accrual start and end are adjusted according business day conventions, payment occurs on the maturity date (i.e. same date as end of accrual period), spot days are adjusted to 1 or 0 respectively if deposit is T/N or O/N.
+        Deposit specification.
+        Accrual start is adjusted according business day conventions, payment occurs on the maturity date (plus settlement days), spot days are adjusted to 1 or 0 respectively if deposit is T/N or O/N.
 
         Args:
             obj_id (str): (Preferably) Unique label of the deposit.
-            fixing_date (_Union[date, datetime]): Date on which the reference rate (e.g. EURIBOR) is set for floating rate deposits. Must lie at or before the start_date.
+            fixing_date (_Union[date, datetime]): Date on which the reference rate is set. Must lie at or before the start_date.
             start_date (_Union[date, datetime]): Date on when deposits begins for accrual or settlement.
             end_date (_Union[date, datetime]): Date on which the deposit ends for accrual or settlement. Must lie after the start_date.
             maturity_date (_Union[date, datetime]): Date when deposit is matures formally, lies on a good business day. Must lie at or after the start_date.
             currency (str, optional): Currency as alphabetic, Defaults to 'EUR'.
             notional (float, optional): Deposit's notional/face value. Must be positive. Defaults to 100.0.
-            rate (float): Deposit fixed interest rate.
+            rate (float): Deposit fixed rate.
             term (_Union[Period, str], optional): Deposit term. If provided, it is used to calculate the maturity date from the start date.
             day_count_convention (Union[DayCounter, str], optional): Day count convention for determining period
                                                                      length. Defaults to DayCounter.ThirtyU360.
@@ -97,6 +95,7 @@ class DepositSpecification(HasExpectedCashflows):
             )
         else:
             raise ValueError("Either fixing_date or start_date must be provided.")
+
         if start_date is not None:
             sd = roll_day(start_date, calendar=calendar, business_day_convention=business_day_convention)
         elif fixing_date is not None:
@@ -109,28 +108,26 @@ class DepositSpecification(HasExpectedCashflows):
             )
         else:
             raise ValueError("Either fixing_date or start_date must be provided.")
+
         if end_date is not None:
             ed = end_date
         elif term is not None:
-            ed = calc_end_day(sd, term, business_day_convention=business_day_convention, calendar=calendar, roll_convention=roll_convention)
+            ed = calc_end_day(sd, term, calendar=calendar, roll_convention=roll_convention)
         elif maturity_date is not None:
             ed = maturity_date
         else:
             raise ValueError("Either end_date, term and start_date, or maturity_date must be provided.")
+
         if maturity_date is not None:
             md = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
         else:
             md = roll_day(ed, calendar=calendar, business_day_convention=business_day_convention)
+
         if term is None:
             t = f"{(ed - sd).days}D"
         else:
             t = term
-        self._currency = currency
-        if issuer is not None:
-            self._issuer = issuer
-        if securitization_level is not None:
-            self._securitization_level = SecuritizationLevel.to_string(securitization_level)
-        self._rating = Rating.to_string(rating)
+
         super().__init__(
             obj_id=obj_id,
             first_fixing_date=fd,
@@ -139,14 +136,17 @@ class DepositSpecification(HasExpectedCashflows):
             end_date=ed,
             maturity_date=md,
             notional=notional,
+            currency=currency,
             coupon=rate,
             frequency=t,
             day_count_convention=day_count_convention,
             business_day_convention=business_day_convention,
             roll_convention=roll_convention,
             calendar=calendar,
-            notional_exchange=notional_exchange,
+            notional_exchange=True,
             settlement_days=settlement_days,
+            issuer=issuer,
+            securitization_level=securitization_level,
         )
 
     @staticmethod
@@ -202,51 +202,8 @@ class DepositSpecification(HasExpectedCashflows):
         }
         return result
 
-    # region properties
+        # region properties
 
-    @property
-    def currency(self) -> str:
-        """
-        Getter for deposit's currency.
-
-        Returns:
-            str: deposit's  currency code
-        """
-        return self._currency
-
-    @currency.setter
-    def currency(self, currency: str):
-        self._currency = Currency.to_string(currency)
-
-    @property
-    def rating(self) -> str:
-        return self._rating
-
-    @rating.setter
-    def rating(self, rating: _Union[Rating, str]):
-        self._rating = Rating.to_string(rating)
-
-    @property
-    def securitization_level(self) -> str:
-        """The bond's securitization level as a string."""
-        return self._securitization_level
-
-    @securitization_level.setter
-    def securitization_level(self, value: _Union[SecuritizationLevel, str]):
-        self._securitization_level = SecuritizationLevel.to_string(value)
-
-    @property
-    def issuer(self) -> str:
-        """
-        Getter for instrument's issuer.
-
-        Returns:
-            str: Instrument's issuer.
-        """
-        return self._issuer
-
-    @issuer.setter
-    def issuer(self, issuer: str):
         """
         Setter for instrument's issuer.
 
@@ -255,26 +212,10 @@ class DepositSpecification(HasExpectedCashflows):
         """
         self._issuer = issuer
 
-    @property
-    def fixing_date(self) -> datetime:
-        return self._fixing_date
-
-    @fixing_date.setter
-    def fixing_date(self, fixing_date: _Union[date, datetime]):
-        self._fixing_date = fixing_date
-
-    @property
-    def spot_days(self) -> int:
-        return self._spot_days
-
-    @spot_days.setter
-    def spot_days(self, spot_days: int):
-        self._spot_days = spot_days
-
     def ins_type(self):
         """Return instrument type
 
         Returns:
             Instrument: Forward rate agreement
         """
-        return Instrument.FRA
+        return Instrument.Deposit

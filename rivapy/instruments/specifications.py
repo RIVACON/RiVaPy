@@ -12,7 +12,7 @@ from holidays import HolidayBase as _HolidayBase
 from holidays import EuropeanCentralBank as _ECB
 
 # if TYPE_CHECKING:
-#from rivapy.marketdata.curves import DiscountCurve
+# from rivapy.marketdata.curves import DiscountCurve
 
 from rivapy import _pyvacon_available
 
@@ -217,10 +217,11 @@ class HasExpectedCashflows(FactoryObject):
         start_date: _Union[dt.date, dt.datetime],
         end_date: _Union[dt.date, dt.datetime],
         maturity_date: _Union[dt.date, dt.datetime],
+        frequency: _Union[Period, str],
         notional: float = 100.0,
+        currency: _Union[Currency, str] = Currency.EUR,
         notional_exchange: bool = True,
         coupon: float = 0.0,
-        frequency: _Optional[_Union[Period, str]] = None,
         day_count_convention: _Union[DayCounterType, str] = DayCounterType.ACT360,
         business_day_convention: _Union[RollConvention, str] = RollConvention.MODIFIED_FOLLOWING,
         roll_convention: _Union[RollRule, str] = RollRule.EOM,
@@ -229,7 +230,10 @@ class HasExpectedCashflows(FactoryObject):
         settlement_days: int = 0,
         spot_lag: int = 2,
         pays_in_arrears: bool = True,
-        # fwd_curve: _Optional[DiscountCurve] = None,
+        issuer: _Optional[str] = None,
+        securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
+        backwards=True,
+        stub_type_is_Long=True,
     ):
         """Initializes the HasExpectedCashflows object.
 
@@ -268,6 +272,13 @@ class HasExpectedCashflows(FactoryObject):
         self._settlement_days = settlement_days
         self._spot_days = spot_lag
         self._pays_in_arrears = pays_in_arrears
+        self._currency = Currency.to_string(currency)
+        if issuer is not None:
+            self._issuer = issuer
+        if securitization_level is not None:
+            self._securitization_level = SecuritizationLevel.to_string(securitization_level)
+        self._backwards = backwards
+        self._stub_type_is_Long = stub_type_is_Long
         # self._fwd_curve = fwd_curve
 
     @property
@@ -487,6 +498,20 @@ class HasExpectedCashflows(FactoryObject):
             raise ValueError("pays_in_arrears must be a boolean value.")
         self._pays_in_arrears = pays_in_arrears
 
+    @property
+    def currency(self) -> str:
+        """
+        Getter for deposit's currency.
+
+        Returns:
+            str: deposit's  currency code
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency: str):
+        self._currency = Currency.to_string(currency)
+
     # @property
     # def fwd_curve(self) -> _Optional[DiscountCurve]:
     #     """
@@ -508,6 +533,37 @@ class HasExpectedCashflows(FactoryObject):
     #     if fwd_curve is not None and not isinstance(fwd_curve, DiscountCurve):
     #         raise ValueError("fwd_curve must be of type DiscountCurve or None.")
     #     self._fwd_curve = fwd_curve
+
+    @property
+    def securitization_level(self) -> str:
+        """The bond's securitization level as a string."""
+        return self._securitization_level
+
+    @securitization_level.setter
+    def securitization_level(self, value: _Union[SecuritizationLevel, str]):
+        self._securitization_level = SecuritizationLevel.to_string(value)
+
+    @property
+    def issuer(self) -> str:
+        """
+        Getter for instrument's issuer.
+
+        Returns:
+            str: Instrument's issuer.
+        """
+        return self._issuer
+
+    @issuer.setter
+    def issuer(self, issuer: str):
+        """
+        Setter for instrument's issuer.
+
+        Args:
+            issuer (str): Instrument's issuer.
+        """
+        if not isinstance(issuer, str):
+            raise ValueError("Issuer must be a string.")
+        self._issuer = issuer
 
     def _adjust_to_payment_date(self, accrual_end_date: dt.datetime) -> dt.datetime:
         """Adjusts the payment date by applying business day conventions and settlement days.
@@ -555,13 +611,13 @@ class HasExpectedCashflows(FactoryObject):
         return cashflows
 
     def get_schedule(self) -> Schedule:
-        """Returns the schedule of the cashflows."""
+        """Returns the schedule of the accrual periods of the instrument."""
         return Schedule(
             start_day=self._start_date,
             end_day=self._end_date,
             time_period=self._frequency,
-            backwards=True,
-            stub_type_is_Long=True,
+            backwards=self._backwards,
+            stub_type_is_Long=self._stub_type_is_Long,
             business_day_convention=self._business_day_convention,
             roll_convention=self._roll_convention,
             calendar=self._calendar,
