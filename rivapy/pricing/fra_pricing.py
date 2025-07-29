@@ -74,7 +74,7 @@ class ForwardRateAgreementPricer:
     # }
 
     @staticmethod
-    def computeFairRate(
+    def compute_fair_rate(
         val_date: _Union[datetime, date], forward_curve: DiscountCurve, rate_start_date: _Union[datetime, date], rate_end_date: _Union[datetime, date]
     ):
         """Computes the fair rate such that the when used in the specification of the FRA gives a net value of zero.
