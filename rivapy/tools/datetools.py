@@ -404,6 +404,7 @@ class Schedule:
         business_day_convention: _Union[RollConvention, str] = RollConvention.MODIFIED_FOLLOWING,
         calendar: _Optional[_Union[_HolidayBase, str]] = None,
         roll_convention: _Union[RollRule, str] = RollRule.EOM,
+        settle_days: int = 0,
     ):
         """
         A schedule is a list of dates, e.g. of coupon payments, fixings, etc., which is defined by its first (= start
@@ -432,6 +433,7 @@ class Schedule:
                                                           Defaults (through constructor) to holidays.ECB
                                                           (= Target2 calendar) between start_day and end_day.
             roll_convention (_Union[RollRule, str], optional): Defines the roll convention for the schedule.
+            settle_days (int, optional): Number of days for settlement. Defaults to 0.
 
         Examples:
 
@@ -450,6 +452,7 @@ class Schedule:
         self.business_day_convention = business_day_convention
         self.calendar = calendar
         self.roll_convention = roll_convention
+        self.settle_days = settle_days
 
     @property
     def start_day(self):
@@ -700,10 +703,14 @@ class Schedule:
         """
         # roll out dates ignoring any business day issues
         if self.__backwards:
-            schedule_dates = Schedule._roll_out(self.__end_day, self.__start_day, self.__time_period, True, self.__stub_type_is_Long)
+            schedule_dates = Schedule._roll_out(
+                self.__end_day, self.__start_day, self.__time_period, True, self.__stub_type_is_Long, self.__roll_convention
+            )
             schedule_dates.reverse()
         else:
-            schedule_dates = Schedule._roll_out(self.__start_day, self.__end_day, self.__time_period, False, self.__stub_type_is_Long)
+            schedule_dates = Schedule._roll_out(
+                self.__start_day, self.__end_day, self.__time_period, False, self.__stub_type_is_Long, self.__roll_convention
+            )
 
         # adjust according to business day convention
         rolled_schedule_dates = [roll_day(schedule_dates[0], self.__calendar, self.__business_day_convention, schedule_dates[0])]
@@ -712,10 +719,22 @@ class Schedule:
             for i in range(1, len(schedule_dates))
         ]
 
+        # adjust for settlement days if any
+        if self.settle_days > 0:
+            rolled_schedule_dates = [
+                roll_day(d + relativedelta(days=self.settle_days), self.__calendar, self.__business_day_convention) for d in rolled_schedule_dates
+            ]
+
         if ends_only:
             rolled_schedule_dates.pop(0)
 
-        logger.debug("Schedule dates successfully calculated from '" + str(self.__start_day) + "' to '" + str(self.__end_day) + "'.")
+        logger.debug(
+            "Schedule dates successfully calculated from '"
+            + str(self.__start_day)
+            + "' to '"
+            + str(self.__end_day)
+            + "' adjusted by business day convention and settlement days."
+        )
         return rolled_schedule_dates
 
 

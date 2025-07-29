@@ -10,6 +10,13 @@ from typing import List, Tuple, Optional as _Optional, Union as _Union
 from rivapy.tools.datetools import Period, _date_to_datetime, _term_to_period, _string_to_calendar, DayCounter, Schedule, roll_day
 from holidays import HolidayBase as _HolidayBase
 from holidays import EuropeanCentralBank as _ECB
+from rivapy.tools._validators import (
+    _check_positivity,
+    _check_start_before_end,
+    _check_start_at_or_before_end,
+    _string_to_calendar,
+    _is_ascending_date_list,
+)
 
 # if TYPE_CHECKING:
 # from rivapy.marketdata.curves import DiscountCurve
@@ -279,6 +286,7 @@ class HasExpectedCashflows(FactoryObject):
             self._securitization_level = SecuritizationLevel.to_string(securitization_level)
         self._backwards = backwards
         self._stub_type_is_Long = stub_type_is_Long
+        self._validate()
         # self._fwd_curve = fwd_curve
 
     @property
@@ -564,6 +572,18 @@ class HasExpectedCashflows(FactoryObject):
         if not isinstance(issuer, str):
             raise ValueError("Issuer must be a string.")
         self._issuer = issuer
+
+    def _validate(self):
+        """Validates the parameters of the instrument."""
+        _check_positivity(self._notional)
+        _check_start_at_or_before_end(self._first_fixing_date, self._start_date)
+        _check_start_before_end(self._start_date, self._end_date)
+        _check_start_at_or_before_end(self._end_date, self._maturity_date)
+        _check_positivity(self._settlement_days)
+        if not isinstance(self._frequency, (Period, str)):
+            raise ValueError("Frequency must be a Period object or string.")
+        if not isinstance(self._calendar, (_HolidayBase, str)):
+            raise ValueError("Calendar must be a HolidayBase or string.")
 
     def _adjust_to_payment_date(self, accrual_end_date: dt.datetime) -> dt.datetime:
         """Adjusts the payment date by applying business day conventions and settlement days.
