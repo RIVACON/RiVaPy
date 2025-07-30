@@ -241,6 +241,7 @@ class HasExpectedCashflows(FactoryObject):
         securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
         backwards=True,
         stub_type_is_Long=True,
+        last_fixing: _Optional[float] = None,
     ):
         """Initializes the HasExpectedCashflows object.
 
@@ -287,7 +288,7 @@ class HasExpectedCashflows(FactoryObject):
         self._backwards = backwards
         self._stub_type_is_Long = stub_type_is_Long
         self._validate()
-        # self._fwd_curve = fwd_curve
+        self._last_fixing = last_fixing
 
     @property
     def coupon(self) -> float:
@@ -348,6 +349,28 @@ class HasExpectedCashflows(FactoryObject):
             maturity_date (Union[datetime, date]): deposit's maturity date.
         """
         self._maturity_date = _date_to_datetime(maturity_date)
+
+    @property
+    def end_date(self) -> dt.datetime:
+        """
+        Getter for deposit's end date.
+
+        Returns:
+            date: deposit's end date.
+        """
+        return self._end_date
+
+    @end_date.setter
+    def end_date(self, end_date: _Union[dt.datetime, dt.date]):
+        """
+        Setter for deposit's end date.
+
+        Args:
+            end_date (Union[datetime, date]): deposit's end date.
+        """
+        if not isinstance(end_date, (dt.datetime, dt.date)):
+            raise TypeError("end_date must be a datetime or date object.")
+        self._end_date = _date_to_datetime(end_date)
 
     @property
     def frequency(self) -> Period:
@@ -520,28 +543,6 @@ class HasExpectedCashflows(FactoryObject):
     def currency(self, currency: str):
         self._currency = Currency.to_string(currency)
 
-    # @property
-    # def fwd_curve(self) -> _Optional[DiscountCurve]:
-    #     """
-    #     Getter for the forward curve used in pricing.
-
-    #     Returns:
-    #         _Optional[DiscountCurve]: The forward curve used in pricing, or None if not set.
-    #     """
-    #     return self._fwd_curve
-
-    # @fwd_curve.setter
-    # def fwd_curve(self, fwd_curve: _Optional[DiscountCurve]):
-    #     """
-    #     Setter for the forward curve used in pricing.
-
-    #     Args:
-    #         fwd_curve (_Optional[DiscountCurve]): The forward curve used in pricing, or None if not set.
-    #     """
-    #     if fwd_curve is not None and not isinstance(fwd_curve, DiscountCurve):
-    #         raise ValueError("fwd_curve must be of type DiscountCurve or None.")
-    #     self._fwd_curve = fwd_curve
-
     @property
     def securitization_level(self) -> str:
         """The bond's securitization level as a string."""
@@ -573,6 +574,136 @@ class HasExpectedCashflows(FactoryObject):
             raise ValueError("Issuer must be a string.")
         self._issuer = issuer
 
+    @property
+    def first_fixing_date(self) -> dt.datetime:
+        """
+        Getter for the first fixing date of the instrument.
+
+        Returns:
+            dt.datetime: The first fixing date.
+        """
+        return self._first_fixing_date
+
+    @first_fixing_date.setter
+    def first_fixing_date(self, first_fixing_date: _Union[dt.datetime, dt.date]):
+        """
+        Setter for the first fixing date of the instrument.
+
+        Args:
+            first_fixing_date (_Union[dt.datetime, dt.date]): The first fixing date.
+        """
+        self._first_fixing_date = _date_to_datetime(first_fixing_date)
+
+    @property
+    def obj_id(self) -> str:
+        """
+        Getter for the unique identifier of the object.
+
+        Returns:
+            str: Unique identifier of the object.
+        """
+        return self._obj_id
+
+    @obj_id.setter
+    def obj_id(self, obj_id: str):
+        """
+        Setter for the unique identifier of the object.
+
+        Args:
+            obj_id (str): Unique identifier of the object.
+        """
+        if not isinstance(obj_id, str):
+            raise ValueError("Object ID must be a string.")
+        self._obj_id = obj_id
+
+    @property
+    def backwards(self) -> bool:
+        """
+        Getter for the backwards flag.
+
+        Returns:
+            bool: True if the schedule is generated backwards, False otherwise.
+        """
+        return self._backwards
+
+    @backwards.setter
+    def backwards(self, backwards: bool):
+        """
+        Setter for the backwards flag.
+
+        Args:
+            backwards (bool): True if the schedule is generated backwards, False otherwise.
+        """
+        if not isinstance(backwards, bool):
+            raise ValueError("Backwards must be a boolean value.")
+        self._backwards = backwards
+
+    @property
+    def stub_type_is_Long(self) -> bool:
+        """
+        Getter for the stub type flag.
+
+        Returns:
+            bool: True if the stub type is long, False otherwise.
+        """
+        return self._stub_type_is_Long
+
+    @stub_type_is_Long.setter
+    def stub_type_is_Long(self, stub_type_is_Long: bool):
+        """
+        Setter for the stub type flag.
+
+        Args:
+            stub_type_is_Long (bool): True if the stub type is long, False otherwise.
+        """
+        if not isinstance(stub_type_is_Long, bool):
+            raise ValueError("Stub type must be a boolean value.")
+        self._stub_type_is_Long = stub_type_is_Long
+
+    @property
+    def spot_days(self) -> int:
+        """
+        Getter for the number of spot days.
+
+        Returns:
+            int: Number of spot days.
+        """
+        return self._spot_days
+
+    @spot_days.setter
+    def spot_days(self, spot_days: int):
+        """
+        Setter for the number of spot days.
+
+        Args:
+            spot_days (int): Number of spot days.
+        """
+        if not isinstance(spot_days, int) or spot_days < 0:
+            raise ValueError("Spot days must be a non-negative integer.")
+        self._spot_days = spot_days
+
+    @property
+    def last_fixing(self) -> _Optional[float]:
+        """
+        Getter for the last fixing value.
+
+        Returns:
+            _Optional[float]: The last fixing value, or None if not set.
+        """
+        return self._last_fixing
+
+    @last_fixing.setter
+    def last_fixing(self, last_fixing: _Optional[float]):
+        """
+        Setter for the last fixing value.
+
+        Args:
+            last_fixing (_Optional[float]): The last fixing value, or None if not set.
+        """
+        if last_fixing is not None and not isinstance(last_fixing, (float, int)):
+            raise ValueError("Last fixing must be a float or None.")
+        self._last_fixing = float(last_fixing) if last_fixing is not None else None
+
     def _validate(self):
         """Validates the parameters of the instrument."""
         _check_positivity(self._notional)
@@ -585,50 +716,50 @@ class HasExpectedCashflows(FactoryObject):
         if not isinstance(self._calendar, (_HolidayBase, str)):
             raise ValueError("Calendar must be a HolidayBase or string.")
 
-    def _adjust_to_payment_date(self, accrual_end_date: dt.datetime) -> dt.datetime:
-        """Adjusts the payment date by applying business day conventions and settlement days.
+    # def _adjust_to_payment_date(self, accrual_end_date: dt.datetime) -> dt.datetime:
+    #     """Adjusts the payment date by applying business day conventions and settlement days.
 
-        Args:
-            accrual_end_date: End date of the accrual period
+    #     Args:
+    #         accrual_end_date: End date of the accrual period
 
-        Returns:
-            dt.datetime: Adjusted payment date that is guaranteed to be >= accrual_end_date
-        """
-        try:
-            # First business day adjustment
-            adjusted_date = roll_day(accrual_end_date, self._calendar, self._business_day_convention)
+    #     Returns:
+    #         dt.datetime: Adjusted payment date that is guaranteed to be >= accrual_end_date
+    #     """
+    #     try:
+    #         # First business day adjustment
+    #         adjusted_date = roll_day(accrual_end_date, self._calendar, self._business_day_convention)
 
-            # Add settlement days
-            from dateutil.relativedelta import relativedelta
+    #         # Add settlement days
+    #         from dateutil.relativedelta import relativedelta
 
-            with_settlement = adjusted_date + relativedelta(days=self._settlement_days)
+    #         with_settlement = adjusted_date + relativedelta(days=self._settlement_days)
 
-            # Final business day adjustment
-            final_date = roll_day(with_settlement, self._calendar, self._business_day_convention)
+    #         # Final business day adjustment
+    #         final_date = roll_day(with_settlement, self._calendar, self._business_day_convention)
 
-            # Ensure the payment date is not before the accrual end date
-            if final_date < accrual_end_date:
-                raise ValueError(f"Adjusted payment date {final_date} is before accrual end date {accrual_end_date}")
+    #         # Ensure the payment date is not before the accrual end date
+    #         if final_date < accrual_end_date:
+    #             raise ValueError(f"Adjusted payment date {final_date} is before accrual end date {accrual_end_date}")
 
-            return final_date
-        except Exception as e:
-            raise ValueError(f"Failed to adjust payment date: {e}")
+    #         return final_date
+    #     except Exception as e:
+    #         raise ValueError(f"Failed to adjust payment date: {e}")
 
-    def expected_cashflows(self) -> List[Tuple[dt.datetime, float]]:
-        schedule = self.get_schedule()
-        dates = schedule._roll_out(
-            from_=self._start_date,
-            to_=self._end_date,
-            term=_term_to_period(self._frequency),
-        )
-        dcc = DayCounter(self.day_count_convention)
-        if self._coupon_type == "float":
-            cashflows = [(self._adjust_to_payment_date(d1), self._notional * self._coupon * dcc.yf(d1, d2)) for d1, d2 in zip(dates[:-1], dates[1:])]
-        else:
-            cashflows = [(self._adjust_to_payment_date(d1), self._notional * self._coupon * dcc.yf(d1, d2)) for d1, d2 in zip(dates[:-1], dates[1:])]
-        if self._notional_exchange:
-            cashflows.append((self._maturity_date, self._notional))
-        return cashflows
+    # def expected_cashflows(self) -> List[Tuple[dt.datetime, float]]:
+    #     schedule = self.get_schedule()
+    #     dates = schedule._roll_out(
+    #         from_=self._start_date,
+    #         to_=self._end_date,
+    #         term=_term_to_period(self._frequency),
+    #     )
+    #     dcc = DayCounter(self.day_count_convention)
+    #     if self._coupon_type == "float":
+    #         cashflows = [(self._adjust_to_payment_date(d1), self._notional * self._coupon * dcc.yf(d1, d2)) for d1, d2 in zip(dates[:-1], dates[1:])]
+    #     else:
+    #         cashflows = [(self._adjust_to_payment_date(d1), self._notional * self._coupon * dcc.yf(d1, d2)) for d1, d2 in zip(dates[:-1], dates[1:])]
+    #     if self._notional_exchange:
+    #         cashflows.append((self._maturity_date, self._notional))
+    #     return cashflows
 
     def get_schedule(self) -> Schedule:
         """Returns the schedule of the accrual periods of the instrument."""

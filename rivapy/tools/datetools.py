@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 from typing import Callable, Dict, Any, Optional as _Optional
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
@@ -405,6 +406,7 @@ class Schedule:
         calendar: _Optional[_Union[_HolidayBase, str]] = None,
         roll_convention: _Union[RollRule, str] = RollRule.EOM,
         settle_days: int = 0,
+        ref_date: _Optional[_Union[date, datetime]] = None,
     ):
         """
         A schedule is a list of dates, e.g. of coupon payments, fixings, etc., which is defined by its first (= start
@@ -434,6 +436,7 @@ class Schedule:
                                                           (= Target2 calendar) between start_day and end_day.
             roll_convention (_Union[RollRule, str], optional): Defines the roll convention for the schedule.
             settle_days (int, optional): Number of days for settlement. Defaults to 0.
+            ref_date (_Optional[_Union[date, datetime]]): Reference date for the schedule. If provided, the schedule will be shortened and include the dates that are after the reference date plus the immediate date before it.
 
         Examples:
 
@@ -453,6 +456,7 @@ class Schedule:
         self.calendar = calendar
         self.roll_convention = roll_convention
         self.settle_days = settle_days
+        self.ref_date = ref_date
 
     @property
     def start_day(self):
@@ -575,7 +579,9 @@ class Schedule:
         Args:
             roll_convention (Union[RollRule, str]): Roll convention of specified schedule.
         """
-        self.__roll_convention = RollRule.to_string(roll_convention)
+        if isinstance(roll_convention, str):
+            roll_convention = RollRule[roll_convention.upper()]
+        self.__roll_convention = roll_convention.value
 
     @staticmethod
     def _generate_eom_dates(from_, to_, term, direction, backwards) -> _List[date]:
@@ -619,6 +625,12 @@ class Schedule:
 
     @staticmethod
     def _generate_dates_by_roll_convention(roll_convention_, from_, to_, term, direction, backwards) -> _List[date]:
+        # Ensure roll_convention_ is an enum instance
+        if isinstance(roll_convention_, str):
+            roll_convention_ = RollRule[roll_convention_.upper()]
+        elif not isinstance(roll_convention_, RollRule):
+            raise Exception(f"Invalid roll convention type: {type(roll_convention_)}")
+
         RollConventionMap = {
             RollRule.EOM: Schedule._generate_eom_dates,
             RollRule.NONE: Schedule._generate_none_dates,
@@ -626,7 +638,7 @@ class Schedule:
             RollRule.IMM: Schedule._generate_imm_dates,
         }
         if roll_convention_ not in RollConventionMap:
-            raise Exception(f"Unknown roll convention '{roll_convention_}'!")
+            raise Exception(f"Unknown roll convention '{roll_convention_}'! Must be one of {list(RollConventionMap.keys())}")
         return RollConventionMap[roll_convention_](from_, to_, term, direction, backwards)
 
     # ToDo: clarify what is done here --> automatic stub, allow_stub control if long or short, always at the end when rolling forward, at the beginning when rolling backwards
@@ -639,6 +651,7 @@ class Schedule:
         backwards: bool = False,
         long_stub: bool = True,
         roll_convention_: _Union[RollRule, str] = "NONE",
+        ref_date: _Optional[_Union[date, datetime]] = None,
     ) -> _List[date]:
         """
         Rolls out dates from from_ to to_ in the specified direction applying the given term under consideration of the
@@ -687,6 +700,11 @@ class Schedule:
             # ... by extending last period.
             else:
                 dates[-1] = to_
+
+        if ref_date is not None:
+            dates = [
+                d for d in dates if d >= calc_start_day(ref_date, term, roll_convention=roll_convention_)
+            ]  # Keep only dates after the reference date plus the last date before the reference date.
         return dates
 
     def generate_dates(self, ends_only: bool) -> _List[date]:
@@ -713,17 +731,11 @@ class Schedule:
             )
 
         # adjust according to business day convention
-        rolled_schedule_dates = [roll_day(schedule_dates[0], self.__calendar, self.__business_day_convention, schedule_dates[0])]
-        [
-            rolled_schedule_dates.append(roll_day(schedule_dates[i], self.__calendar, self.__business_day_convention, rolled_schedule_dates[i - 1]))
-            for i in range(1, len(schedule_dates))
-        ]
-
-        # adjust for settlement days if any
-        if self.settle_days > 0:
-            rolled_schedule_dates = [
-                roll_day(d + relativedelta(days=self.settle_days), self.__calendar, self.__business_day_convention) for d in rolled_schedule_dates
-            ]
+        rolled_schedule_dates = [roll_day(schedule_dates[0], self.__calendar, self.__business_day_convention, schedule_dates[0], self.settle_days)]
+        for i in range(1, len(schedule_dates)):
+            rolled_schedule_dates.append(
+                roll_day(schedule_dates[i], self.__calendar, self.__business_day_convention, rolled_schedule_dates[i - 1], self.settle_days)
+            )
 
         if ends_only:
             rolled_schedule_dates.pop(0)
@@ -846,9 +858,9 @@ def _is_IMM_date(day: _Union[date, datetime]) -> bool:
 def calc_end_day(
     start_day: _Union[date, datetime],
     term: str,
-    business_day_convention: _Union[RollConvention, str] = "Unadjusted",
+    business_day_convention: _Union[RollConvention, str] = RollConvention.UNADJUSTED,
     calendar: _Union[_HolidayBase, str] = _ECB,
-    roll_convention: _Union[RollRule, str] = "NONE",
+    roll_convention: _Union[RollRule, str] = RollRule.NONE,
 ) -> date:
     """
     Derives the end date of a time period based on the start day the the term given as string, e.g. 1D, 3M, or 5Y.
@@ -870,14 +882,19 @@ def calc_end_day(
     """
     start_date = _date_to_datetime(start_day)
     period = _term_to_period(term)
-    if roll_convention == "EOM" and _is_ambiguous_date(start_date):  # add ambiguous dates, i.e. 30 of Jan, Mar, May, Jul, Aug, Oct, Dec
+    # Convert string roll_convention to enum if needed
+    roll_conv = RollRule.to_string(roll_convention) if roll_convention is not None else "NONE"
+
+    if roll_conv == RollRule.EOM.value and _is_ambiguous_date(start_date):  # add ambiguous dates, i.e. 30 of Jan, Mar, May, Jul, Aug, Oct, Dec
         end_date = start_date + relativedelta(years=period.years, months=period.months, day=31)
-    elif roll_convention is None or roll_convention == "DOM":
+    elif roll_conv == RollRule.NONE.value or roll_conv == RollRule.DOM.value:
         end_date = start_date + relativedelta(years=period.years, months=period.months, days=period.days)
-    elif roll_convention == "IMM" and _is_IMM_date(start_date):  # add IMM dates, i.e. 3rd Wednesday of Mar, Jun, Sep, Dec
+    elif roll_conv == RollRule.IMM.value and _is_IMM_date(start_date):  # add IMM dates, i.e. 3rd Wednesday of Mar, Jun, Sep, Dec
         end_date = start_date + relativedelta(years=period.years, months=period.months, day=1, weekday=WE(3))
     else:
-        raise Exception("Unknown roll convention '" + str(roll_convention) + "'! Please use 'NONE', EOM', 'DOM', or 'IMM'; for 'IMM'.")
+        raise Exception(
+            "Unknown roll convention '" + str(roll_convention) + "'! Please use RollRule.NONE, RollRule.EOM, RollRule.DOM, or RollRule.IMM."
+        )
     if (business_day_convention is not None) & (calendar is not None):
         end_date = roll_day(end_date, calendar, business_day_convention, start_date)
 
@@ -886,7 +903,7 @@ def calc_end_day(
 
 def calc_start_day(
     end_day: _Union[date, datetime],
-    term: str,
+    term: _Union[Period, str],
     business_day_convention: _Union[RollConvention, str] = "Unadjusted",
     calendar: _Union[_HolidayBase, str] = _ECB,
     roll_convention: _Union[RollRule, str] = "NONE",
@@ -925,7 +942,7 @@ def calc_start_day(
         # Adjust start_date by one day if not matching
         # If candidate_end < end_date, move start_date back; else, move forward
         delta = (_date_to_datetime(candidate_end) - end_date).days
-        start_date -= timedelta(days=delta if delta != 0 else 1)
+        start_date -= relativedelta(days=delta if delta != 0 else 1)
     raise ValueError("Could not find a start date such that calc_end_day(start_date, ...) == end_day after {} iterations.".format(max_iter))
 
     return start_date
@@ -1225,6 +1242,7 @@ def roll_day(
     calendar: _Union[_HolidayBase, str],
     business_day_convention: _Union[RollConvention, str],
     start_day: _Optional[_Union[date, datetime]] = None,
+    settle_days: int = 0,
 ) -> date:
     """
     Adjusts a given day according to the specified business day convention with respect to a given calendar or if the
@@ -1266,8 +1284,14 @@ def roll_day(
     import inspect
 
     params = inspect.signature(roll_func).parameters
-    if "start_day" in params:
+    if "start_day" in params and settle_days == 0:
         return roll_func(day, calendar, start_day)
+    elif "start_day" in params and settle_days > 0:
+        with_settlement = roll_func(day, calendar, start_day) + relativedelta(days=settle_days)
+        return roll_func(with_settlement, calendar, start_day)
+    elif "start_day" not in params and settle_days > 0:
+        with_settlement = roll_func(day, calendar) + relativedelta(days=settle_days)
+        return roll_func(with_settlement, calendar)
     else:
         return roll_func(day, calendar)
 
