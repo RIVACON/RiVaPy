@@ -207,14 +207,6 @@ class DepositSpecification(HasExpectedCashflows):
 
         # region properties
 
-        """
-        Setter for instrument's issuer.
-
-        Args:
-            issuer(str): Issuer of the instrument.
-        """
-        self._issuer = issuer
-
     def ins_type(self):
         """Return instrument type
 
@@ -222,3 +214,7 @@ class DepositSpecification(HasExpectedCashflows):
             Instrument: Forward rate agreement
         """
         return Instrument.Deposit
+
+    # temp placeholder
+    def get_end_date(self):
+        return self._end_date

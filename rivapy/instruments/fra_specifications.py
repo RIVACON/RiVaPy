@@ -580,4 +580,8 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         """
         return Instrument.FRA
 
+    # temp placeholder
+    def get_end_date(self):
+        return self.maturity_date
+
     # endregion

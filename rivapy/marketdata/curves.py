@@ -246,6 +246,12 @@ class DiscountCurve:
         yf_list = [dcc.yf(self.refdate, x) for x in self.get_dates()]  # list(dcc.yf(self.refdate, self.get_dates()))
         df_list = [x for x in self.get_df()]
 
+        # DEBUG TODO REMOVE
+        # print("7777777777777777777777777777777777777777777777")
+        # print("Debugging rivapy_valueFWD: x (yearfrac), then y (df) lists")
+        # print(yf_list)
+        # print(df_list)
+
         # interpolate/extrapolate given a chosen method
         interp = Interpolator(self.interpolation, self.extrapolation)
 
@@ -277,7 +283,7 @@ class DiscountCurve:
         for i in range(1, len(dates)):
             while dates_new[-1] + timedelta(days=days) < dates[i]:
                 dates_new.append(dates_new[-1] + timedelta(days=days))
-        dates_new.append(dates[-1])
+            dates_new.append(dates[i])
         # TODO: consider how best to deal with pyvacon version vs rivapy version
         # if self._pyvacon_obj is None:
         #    values = [self.rivapy_value(self.refdate, d) for d in dates_new]

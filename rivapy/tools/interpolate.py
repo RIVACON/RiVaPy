@@ -74,6 +74,7 @@ class Interpolator:
 
         mapping = {
             InterpolationType.LINEAR.value: Interpolator.linear,
+            InterpolationType.LINEAR_LOG.value: Interpolator.linear_log,
             InterpolationType.CONSTANT.value: Interpolator.constant,
         }
 
@@ -95,7 +96,9 @@ class Interpolator:
         Returns:
             float: interpolated value
         """
-
+        # print("interpolation values")
+        # print(x_list)  # DEBUG TEST TODO REMOVE
+        # print(y_list)
         if not x_list or not y_list or len(x_list) != len(y_list):
             raise ValueError("x_list and y_list must be non-empty and of the same length.")
 
@@ -132,6 +135,25 @@ class Interpolator:
         """PLACEHOLDER #TODO implement"""
 
         return -9999.999
+
+    @staticmethod
+    def linear_log(x_list: list, y_list: list, x: float, extrapolation: str) -> float:
+        # x_val = np.array(x_list)
+        y_val = np.array(y_list)
+
+        if np.any(y_val <= 0):
+            raise ValueError("All y-values must be positive for log-linear interpolation.")
+
+        log_y_val = np.log(y_val).tolist()
+
+        # handle the extrapolation properly TODO
+        if extrapolation == "LINEAR_LOG":
+            extr = "LINEAR"
+        else:
+            extr = extrapolation
+        log_y_interp = Interpolator.linear(x_list, log_y_val, x, extr)
+        y_interp = np.exp(log_y_interp)
+        return y_interp
 
 
 # if __name__ == "__main__":

@@ -100,7 +100,7 @@ class _MyIntEnum(_Enum):
 class InterpolationType(_MyEnum):
     CONSTANT = "CONSTANT"
     LINEAR = "LINEAR"
-    LINEAR_LOG = "LINEARLOG"
+    LINEAR_LOG = "LINEAR_LOG"
     CONSTRAINED_SPLINE = "CONSTRAINED_SPLINE"
     HAGAN = "HAGAN"
     HAGAN_DF = "HAGAN_DF"
@@ -111,7 +111,7 @@ class ExtrapolationType(_MyEnum):
     NONE = "NONE"
     CONSTANT = "CONSTANT"
     LINEAR = "LINEAR"
-    LINEAR_LOG = "LINEARLOG"
+    LINEAR_LOG = "LINEAR_LOG"
 
 
 @_unique

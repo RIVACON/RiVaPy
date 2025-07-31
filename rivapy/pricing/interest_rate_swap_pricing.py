@@ -31,6 +31,7 @@ import numpy as np
 
 
 from rivapy.tools.enums import IrLegType
+from rivapy.tools._validators import print_member_values
 
 # If we follow pyvacon implementation
 # Makes uses of a cashFlowEntry class
@@ -184,10 +185,11 @@ class InterestRateSwapPricer:
         val_date: _Union[date, datetime],
         fixed_leg_spec: IrFixedLegSpecification,
         discount_curve: DiscountCurve,
-        forward_curve: DiscountCurve,
+        # forward_curve: DiscountCurve,
+        fx_forward_curve: DiscountCurve,
         fixing_map: FixingTable,
         set_rate: bool = False,
-        desired_rate: float = None,
+        desired_rate: float = 1.0,
     ) -> _List[CashFlow]:
         # fxForwardCurve
         # fixingMap? -means?
@@ -203,7 +205,7 @@ class InterestRateSwapPricer:
         # overwrite fixed interest if desired
         fixed_rate = fixed_leg_spec.fixed_rate
         if set_rate:
-            fixed_rate = desired_rate
+            fixed_rate = desired_rate  # if desired_rate = 1.0, this is to calculate the annuity, for the calculation of fair swap rate.
 
         # init output storage object
         entries = []
@@ -216,13 +218,15 @@ class InterestRateSwapPricer:
         # leg_spec.get_projected_notionals(val_date, leg_data.fx_forward_curve, fixing_table)
 
         leg_notional_structure = fixed_leg_spec.get_NotionalStructure()
+        # define number of cashflows
+        num_of_start_dates = len(fixed_leg_spec.start_dates)
 
         notionals = get_projected_notionals(
             val_date=val_date,
             notional_structure=leg_notional_structure,
             start_period=0,
-            end_period=leg_notional_structure.get_size(),
-            fx_forward_curve=forward_curve,
+            end_period=num_of_start_dates,
+            fx_forward_curve=fx_forward_curve,
             fixing_map=fixing_map,
         )  # output is a lsit of floats
 
@@ -266,9 +270,9 @@ class InterestRateSwapPricer:
             entry.interest_cashflow = True
             entries.append(entry)
 
-            # TEMPORARY TEST - inthe case of constant notional structure, but i want a final notional cashflow like a bond
-            if i == len(notionals) - 1:  # this checks for the last entry
-                notional_end_date = entry.end_date
+            # # TEMPORARY TEST - inthe case of constant notional structure, but i want a final notional cashflow like a bond
+            # if i == len(notionals) - 1:  # this checks for the last entry
+            #     notional_end_date = entry.end_date
 
             if notional_end_date:
                 # add an intional notional INFLOW or not
@@ -295,7 +299,7 @@ class InterestRateSwapPricer:
         forward_curve: DiscountCurve,
         fx_forward_curve: DiscountCurve,
         fixing_map: FixingTable,
-        fixing_grace_period: int,
+        fixing_grace_period: float,
         set_spread: bool = False,
         spread: float = None,
     ) -> _List[CashFlow]:
@@ -324,7 +328,7 @@ class InterestRateSwapPricer:
         # swap day count convention
         dcc = DayCounter(discount_curve.daycounter)
         # rate day count convention # note that the specification also has dcc but withoout the curve...
-        rate_dcc = DayCounter(fx_forward_curve.daycounter)
+        rate_dcc = DayCounter(float_leg_spec.rate_day_count_convention)
 
         # overwrite spread if desired
         leg_spread = float_leg_spec.spread
@@ -344,12 +348,15 @@ class InterestRateSwapPricer:
         # notionals = float_leg_spec.notional * np.ones(len(float_leg_spec.pay_dates))
 
         leg_notional_structure = float_leg_spec.get_NotionalStructure()
+        # define the number of cashflows
+        num_of_start_dates = len(float_leg_spec.start_dates)
+
         notionals = get_projected_notionals(
             val_date=val_date,
             notional_structure=leg_notional_structure,
             start_period=0,
-            end_period=leg_notional_structure.get_size(),
-            fx_forward_curve=forward_curve,
+            end_period=num_of_start_dates,
+            fx_forward_curve=fx_forward_curve,
             fixing_map=fixing_map,
         )  # output is a list of floats
 
@@ -380,8 +387,10 @@ class InterestRateSwapPricer:
             entry.notional = notionals[i]
             entry.interest_yf = dcc.yf(entry.start_date, entry.end_date)
             rate_yf = rate_dcc.yf(float_leg_spec.rate_start_dates[i], float_leg_spec.rate_end_dates[i])
-
+            # DEBUG TODO REMOVE
+            print(f"notional {i}:{notionals[i]} for {entry.end_date}")
             if val_date <= float_leg_spec.reset_dates[i]:
+                print("swap calculating fwd_rate for floating leg")  # DEBUG TODO REMOVE
                 fwd_rate = forward_curve.rivapy_valueFWD(val_date, float_leg_spec.rate_start_dates[i], float_leg_spec.rate_end_dates[i])
                 entry.rate = leg_spread + (1.0 / fwd_rate - 1.0) / rate_yf
 
@@ -424,9 +433,9 @@ class InterestRateSwapPricer:
             entry.interest_cashflow = True
             entries.append(entry)
 
-            # TEMPORARY TEST - inthe case of constant notional structure, but i want a final notional cashflow like a bond
-            if i == len(notionals) - 1:  # this checks for the last entry
-                notional_end_date = entry.end_date
+            # # TEMPORARY TEST - inthe case of constant notional structure, but i want a final notional cashflow like a bond
+            # if i == len(notionals) - 1:  # this checks for the last entry
+            #     notional_end_date = entry.end_date
 
             if notional_end_date:
                 # add an intional notional INFLOW or not
@@ -518,10 +527,11 @@ class InterestRateSwapPricer:
         val_date,
         discount_curve: DiscountCurve,
         forward_curve: DiscountCurve,
-        fixing_curve: DiscountCurve,
+        fxForward_curve: DiscountCurve,
         spec: _Union[IrFixedLegSpecification, IrFloatLegSpecification],
         fixing_map: FixingTable = None,
         fixing_grace_period: float = 0,
+        pricing_params: dict = {"set_rate": False, "desired_rate": 1.0},
     ):
         """Pricing a single Leg using Pricing Data architecture
 
@@ -540,13 +550,17 @@ class InterestRateSwapPricer:
         leg_spec = spec  # what kind of leg?
 
         if leg_spec.leg_type == IrLegType.FIXED:
+            print("generating cashflow table for FIXED leg")
+            set_rate = pricing_params["set_rate"]  # if we want to set the rate
+            desired_rate = pricing_params["desired_rate"]
             cashflow_table = InterestRateSwapPricer._populate_cashflows_fix(
-                val_date, leg_spec, discount_curve, forward_curve, fixing_map
-            )  # TODO assume no setting of optional rates for now)
+                val_date, leg_spec, discount_curve, forward_curve, fixing_map, set_rate, desired_rate
+            )  # TODO rethink framework of passing set_rate and desired rate
         elif leg_spec.leg_type == IrLegType.FLOAT:
+            print("generating cashflow table for FLOAT leg")
             cashflow_table = InterestRateSwapPricer._populate_cashflows_float(
-                val_date, leg_spec, discount_curve, forward_curve, fixing_curve, fixing_map, fixing_grace_period
-            )  # TODO assume no setting of optional SPREAD for now)
+                val_date, leg_spec, discount_curve, forward_curve, fxForward_curve, fixing_map, fixing_grace_period
+            )  # TODO implement spread
 
         # elif leg_spec.leg_type ==  IrLegType.OIS:
         #    populateCashFlowTableOIS
@@ -554,8 +568,11 @@ class InterestRateSwapPricer:
             raise ValueError(f"Unknown leg type {leg_spec.type}")
 
         PV = 0
+        print("----------------------------------------------------------")
+        print("DEBUG: price leg pv values")  # DEBUG TODO REMOVE
         for entry in cashflow_table:
-
+            # print_member_values(entry)
+            print(entry.present_value)
             PV += entry.present_value
 
         return PV
@@ -590,8 +607,8 @@ class InterestRateSwapPricer:
         aggregated_price = InterestRateSwapPricer.price_leg(
             self._val_date,
             discount_curve=self._discount_curve_receive_leg,
-            forward_curve=self._fx_fwd_curve_receive_leg,
-            fixing_curve=self._fixing_curve_receive_leg,
+            forward_curve=self._fixing_curve_receive_leg,
+            fxForward_curve=self._fx_fwd_curve_receive_leg,
             spec=self._receive_leg,
             fixing_map=self._fixing_map,
             fixing_grace_period=fixing_grace_period,
@@ -599,8 +616,8 @@ class InterestRateSwapPricer:
         aggregated_price -= InterestRateSwapPricer.price_leg(
             self._val_date,
             discount_curve=self._discount_curve_pay_leg,
-            forward_curve=self._fx_fwd_curve_pay_leg,
-            fixing_curve=self._fixing_curve_pay_leg,
+            forward_curve=self._fixing_curve_receive_leg,
+            fxForward_curve=self._fx_fwd_curve_receive_leg,
             spec=self._pay_leg,
             fixing_map=self._fixing_map,
             fixing_grace_period=fixing_grace_period,
@@ -610,6 +627,7 @@ class InterestRateSwapPricer:
         return aggregated_price
 
     # static method also then?
+    @staticmethod
     def compute_swap_rate(
         ref_date: _Union[date, datetime],
         discount_curve: DiscountCurve,
@@ -617,8 +635,26 @@ class InterestRateSwapPricer:
         float_leg: IrFloatLegSpecification,
         fixed_leg: IrFixedLegSpecification,
         fixing_map: FixingTable = None,
-        fixing_grace_period: int = 0,
+        pricing_params: dict = {"fixing_grace_period": 0.0},
     ):
+        """To calculate the fair swap rate, i.e. the fixed rate(r*) such that
+                PV_fixed(r*) = PV_float
+            where
+                PV_fixed(r*) = r* * Annuity
+            where
+                Annuity = sum(notional_i * DF_i * YF_i*)
+        Args:
+            ref_date (_Union[date, datetime]): _description_
+            discount_curve (DiscountCurve): _description_
+            fixing_curve (DiscountCurve): _description_
+            float_leg (IrFloatLegSpecification): _description_
+            fixed_leg (IrFixedLegSpecification): _description_
+            fixing_map (FixingTable, optional): _description_. Defaults to None.
+            fixing_grace_period (int, optional): _description_. Defaults to 0.
+
+        Returns:
+            _type_: _description_
+        """
         # ref date
         # discount curve
         # fixing curve
@@ -627,12 +663,15 @@ class InterestRateSwapPricer:
         # fixing map
         # extra param: InterestRateSwapPricingParameter
         # fixing grace period comes from the extra param
+        fixing_grace_period = pricing_params["fixing_grace_period"]
 
         # float_PV = 1  # price leg refDate, discountCurve, fixingCurve, nullptr, floatLeg, fixingMap, fixingGracePeriod
         # fixed_PV = 1
-        float_PV = InterestRateSwapPricer.price_leg(ref_date, discount_curve, fixing_curve, None, float_leg, fixing_map, fixing_grace_period)
-        fixed_PV = InterestRateSwapPricer.price_leg(ref_date, discount_curve, fixing_curve, None, fixed_leg, fixing_map, fixing_grace_period)
-        return float_PV / fixed_PV
+        float_leg_PV = InterestRateSwapPricer.price_leg(ref_date, discount_curve, fixing_curve, None, float_leg, fixing_map, fixing_grace_period)
+        fixed_leg_annuity = InterestRateSwapPricer.price_leg(
+            ref_date, discount_curve, fixing_curve, None, fixed_leg, fixing_map, fixing_grace_period, pricing_params
+        )
+        return float_leg_PV / fixed_leg_annuity
 
     # TODO
     def compute_swap_spread(self):
@@ -676,9 +715,9 @@ class InterestRateSwapPricer:
 
         receive_leg_PV = 1  # price_leg(refDate, discountCurve, receiveLegFixingCurve, nullptr, receiveLeg, fixingMap, fixingGracePeriod)
         pay_leg_PV = 1  # price_leg(refDate, discountCurve, payLegFixingCurve,     nullptr, payLeg, fixingMap, fixingGracePeriod);
-        fixed_leg_PV01 = (
-            1  # price_leg(refDate, discountCurve, std::shared_ptr<const DiscountCurve>(), nullptr, fixedLeg, fixingMap, fixingGracePeriod, true, 1.);
-        )
+        fixed_leg_PV01 = 1
+        # price_leg(refDate, discountCurve, std::shared_ptr<const DiscountCurve>(), nullptr, fixedLeg, fixingMap, fixingGracePeriod, true, 1.);
+
         # # for fixed, we are setting the rate to 1
 
         return (receive_leg_PV - pay_leg_PV) / fixed_leg_PV01
@@ -717,6 +756,11 @@ def get_projected_notionals(
             fixing_date = notional_structure.get_fixing_date(i)
             fx = fx_forward_curve.rivapy_value(val_date, fixing_date)
             result.append(notional_structure.get_amount(i) * fx)
+    elif isinstance(notional_structure, ConstNotionalStructure):
+        for i in range(start_period, end_period):
+            # print(i)
+            # print(notional_structure.get_amount(i))
+            result.append(notional_structure.get_amount(0))
     else:
         for i in range(start_period, end_period):
             # print(i)
