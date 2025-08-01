@@ -1,5 +1,5 @@
 # 2025.07.18 HN
-# refactor of notional structurer from pyvacon
+# refactor of notional structure from pyvacon
 # main objective is that for swaps at least, notionals are not always constant
 
 import abc

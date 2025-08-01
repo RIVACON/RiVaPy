@@ -50,7 +50,7 @@ class ForwardRateAgreementPricer:
 
         #        roll convention??
         time_delta = dcc.yf(self._fra_spec.start_date, self._fra_spec.end_date)  # as yearfrac
-        fwd_rate = ForwardRateAgreementPricer.computeFairRate(
+        fwd_rate = ForwardRateAgreementPricer.compute_fair_rate(
             self._val_date, self._forward_curve, self._fra_spec._rate_start_date, self._fra_spec._rate_end_date
         )  # 1.00  # self._fra_spec. # need forward curve
         fra_rate = self._fra_spec._rate

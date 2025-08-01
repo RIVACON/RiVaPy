@@ -204,7 +204,7 @@ class DiscountCurve:
         return df
 
     def rivapy_valueFWD(self, val_date: Union[date, datetime], d1: Union[date, datetime], d2: Union[date, datetime]) -> float:
-        """Return discount factor for a given date (without dependencies from pyvacon)
+        """Return forward discount factor for a given date (without dependencies from pyvacon)
 
         Args:
             refdate (Union[date, datetime]): The reference date. If the reference date is in the future
