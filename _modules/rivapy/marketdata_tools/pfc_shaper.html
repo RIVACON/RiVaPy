@@ -242,15 +242,16 @@
 
 <span class="sd">    .. math::</span>
 
-<span class="sd">        S(t) = S_0 + \sum^{23}_{i=1}\\beta^h_i\cdot\mathbb{I}_{h(t)=i} + \\beta^d\cdot\mathbb{I}_{d(t)=1}  + \\beta^H\cdot\mathbb{I}_{H(t)=1} + \sum^{12}_{i=2}\\beta^m_i\cdot\mathbb{I}_{m(t)=i}</span>
+<span class="sd">        S(t) = S_0 + \\sum^{23}_{i=1}\\beta^h_i\\cdot\\mathbb{I}_{h(t)=i} + \\beta^d\\cdot\\mathbb{I}_{d(t)=1}  + \\beta^H\\cdot\\mathbb{I}_{H(t)=1} + \\sum^{12}_{i=2}\\beta^m_i\\cdot\\mathbb{I}_{m(t)=i}</span>
 
-<span class="sd">    where:\n</span>
-<span class="sd">    :math:`S_0`: Spot price level\n</span>
-<span class="sd">    :math:`\mathbb{I}_x = \\begin{cases} 1, &amp; \\text{if the } x \\text{ expression renders true} \\\\ 0, &amp; \\text{if the } x \\text{ expression renders false} \\end{cases}` \n</span>
-<span class="sd">    :math:`h(t)`: Hour of t\n</span>
-<span class="sd">    :math:`d(t) = \\begin{cases} 1, &amp; \\text{if t is a weekday} \\\\ 0, &amp; \\text{if t is a day on a weekend} \\end{cases}` \n</span>
-<span class="sd">    :math:`H(t) = \\begin{cases} 1, &amp; \\text{if t public holidy} \\\\ 0, &amp; \\text{if t is not a public holiday} \\end{cases}` \n</span>
-<span class="sd">    :math:`m(t)`: Month of t\n</span>
+<span class="sd">    Where:</span>
+
+<span class="sd">    - :math:`S_0`: Spot price level</span>
+<span class="sd">    - :math:`\\mathbb{I}_x = \\begin{cases} 1, &amp; \\text{if the } x \\text{ expression renders true} \\\\ 0, &amp; \\text{if the } x \\text{ expression renders false} \\end{cases}`</span>
+<span class="sd">    - :math:`h(t)`: Hour of t</span>
+<span class="sd">    - :math:`d(t) = \\begin{cases} 1, &amp; \\text{if t is a weekday} \\\\ 0, &amp; \\text{if t is a day on a weekend} \\end{cases}`</span>
+<span class="sd">    - :math:`H(t) = \\begin{cases} 1, &amp; \\text{if t public holidy} \\\\ 0, &amp; \\text{if t is not a public holiday} \\end{cases}`</span>
+<span class="sd">    - :math:`m(t)`: Month of t</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        spot_prices (pd.DataFrame): Data used to calibrate the shaping model.</span>

@@ -222,6 +222,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            pd.DataFrame: Transition matrix without linearly dependent row vectors.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">transition_matrix</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">transition_matrix</span>
+
         <span class="n">potential_redundant_contracts</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">np_transition_matrix</span> <span class="o">=</span> <span class="n">transition_matrix</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">transition_matrix</span><span class="p">)):</span>
@@ -271,6 +274,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            pd.DataFrame: Full rank transition matrix</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">transition_matrix</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">transition_matrix</span>
+
         <span class="n">m</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">transition_matrix</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">target_rank</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
         <span class="n">transition_matrix</span> <span class="o">=</span> <span class="n">transition_matrix</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -346,21 +352,22 @@
 <div class="viewcode-block" id="PFCShifter.shift">
 <a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShifter.shift">[docs]</a>
     <span class="k">def</span> <span class="nf">shift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transition_matrix</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This method is the final step in the shifting algorithm. The transition matrix is inversed and multiplied with the forward price vector to obtain a non overlapping forward price vector.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;This method is the final step in the shifting algorithm. The transition matrix is inversed and multiplied with the forward price vector to obtain a non overlapping forward price vector.</span>
 
 <span class="sd">        .. math::</span>
 
-<span class="sd">            f^{no} = T^{-1}\cdot f</span>
+<span class="sd">            f^{no} = T^{-1}\\cdot f</span>
 
-<span class="sd">        where:\n</span>
-<span class="sd">        :math:`f^{no}` is the Non-overlapping forward price vector\n</span>
-<span class="sd">        :math:`T` is the Transition matrix\n</span>
-<span class="sd">        :math:`f` is the Forward price vector\n</span>
+<span class="sd">        Where:</span>
+
+<span class="sd">        - :math:`f^{no}` is the Non-overlapping forward price vector</span>
+<span class="sd">        - :math:`T` is the Transition matrix</span>
+<span class="sd">        - :math:`f` is the Forward price vector</span>
 
 <span class="sd">        Afterwards the PFC :math:`S(t)` is obtained from the shape :math:`s(t)` by the follwoing formular:</span>
 
 <span class="sd">        .. math::</span>
-<span class="sd">            S(t) = s(t)\cdot \\frac{\sum_{u=T_s}^{T_e} f^{no}(u)}{\sum_{u=T_s}^{T_e} s(u)}</span>
+<span class="sd">            S(t) = s(t)\\cdot \\frac{\\sum_{u=T_s}^{T_e} f^{no}(u)}{\\sum_{u=T_s}^{T_e} s(u)}</span>
 
 <span class="sd">        with :math:`T_s` and :math:`T_e` being the start and end dates of the individual delivery periods.</span>
 
