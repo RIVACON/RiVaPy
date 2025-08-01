@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rivapy"
+version = "1.0.0"
+description = "RIVACON's Risk and Valuation Library"
+readme = "README.md"
+authors = [{name="RIVACON", email="info@rivacon.com"}]
+requires-python = ">=3.12"
+license-files = ["LICEN[CS]E*"]
+
+dependencies = [
+  "numpy",
+  "pandas",
+  "scikit-learn",
+  "scipy",
+  "openpyxl",
+  "python-dateutil",
+  "holidays",
+  "matplotlib",
+]
+
+
+[tool.setuptools.packages.find]
+include = ["rivapy*"]
+exclude = ["tests*"]
+
+[project.urls]
+Homepage = "https://github.com/RIVACON/RiVaPy"
+Issues = "https://github.com/RIVACON/RiVaPy/issues"
