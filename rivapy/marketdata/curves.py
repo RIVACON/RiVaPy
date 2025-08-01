@@ -18,7 +18,7 @@ except ImportError:
     has_tf = False
 
 from rivapy.tools.enums import DayCounterType, InterpolationType, ExtrapolationType
-from rivapy.tools.enums import EnergyTimeGridStructure as ets
+from rivapy.tools.enums import EnergyTimeGridStructure as etgs
 from rivapy.tools.datetools import DayCounter
 from rivapy.marketdata.factory import create as _create
 from rivapy.marketdata_tools.pfc_shaper import PFCShaper
@@ -877,7 +877,7 @@ class EnergyPriceForwardCurve:
     def __get_offpeak_contracts(
         self, base_contracts: List[EnergyFutureSpecifications], peak_contracts: List[EnergyFutureSpecifications]
     ) -> List[EnergyFutureSpecifications]:
-        """In cases where base and peak contracts are part of the ``self._future_contracts``, offpeak contracts need to be decuted from these two in order to shift the shape properly.
+        """In cases where base and peak contracts are part of the ``self._future_contracts``, offpeak contracts need to be deducted from these two in order to shift the shape properly.
 
         Args:
             base_contracts (List[EnergyFutureSpecifications]): List of base contracts
@@ -916,7 +916,7 @@ class EnergyPriceForwardCurve:
         self.__validate_contracts_frequency()
 
         base_contracts, peak_contracts = [
-            [fc for fc in self._future_contracts if fc.schedule.__class__._name == schedule_type] for schedule_type in (ets.BASE, ets.PEAK)
+            [fc for fc in self._future_contracts if fc.schedule.__class__._name == schedule_type] for schedule_type in (etgs.BASE, etgs.PEAK)
         ]
 
         # if base and peak contracts both exist, offpeak contracts are computed
@@ -936,7 +936,7 @@ class EnergyPriceForwardCurve:
             self._pfc = shifted_pfc.sort_index(ascending=True)
 
         else:
-            # if either base of peak exists, the shift can be directly performed
+            # if either base of peak exists, shifting can be directly performed
             pfc_shifter = PFCShifter(shape=self._pfc_shape, contracts=self._future_contracts)
             self._pfc = pfc_shifter.compute()
 
