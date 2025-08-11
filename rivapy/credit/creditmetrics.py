@@ -194,106 +194,81 @@ class creditMetricsModel:
         return df_positions_grouped
 
     def mc_calculation(self):
-        """Monte-Carlo simulation of portfolio based on positions, issuer, correlation and transition matrix.
-         In every simulation step the return of an issuer will be simulated:
-         - Therefore the return of the Benchmark (Y) will be simulated and multiplied with the issuer-specific correlation. This random number is consistent for
-         every position during one simulation step.
-         - Aftewards the return of a specific issuer will be simulated and multiplied with the idiosyncratic risk factor (1-p)
-         This results in the simulated return for every position in every simulation step
-          𝑟𝑘=𝜌𝑌+√(1−𝜌^2 ) 𝑍𝑘
+        """
+        Monte-Carlo simulation of portfolio based on positions, issuer, correlation and transition matrix.
+
+        For each simulation step, the return of each issuer is simulated:
+        - The return of the benchmark (Y) is simulated and multiplied with the issuer-specific correlation. This random number is consistent for every issuer during one simulation step.
+        - Afterwards, the idiosyncratic return of each issuer is simulated and multiplied with the idiosyncratic risk factor sqrt(1-p^2).
+        - This results in the simulated return for every issuer in every simulation step:
+        r_k = rho * Y + sqrt(1 - rho^2) * Z_k
+
+        For each issuer, the new rating is determined and the loss is calculated as the difference between the new value and the expected value.
 
         Returns:
-            Array2d: Occurring losses during simulation for every position.
+            tuple:
+                Loss (np.ndarray): Array of shape (n_simulation, n_issuer) with losses for each scenario and issuer.
+                issuer_ids (np.ndarray): Array of issuer IDs, order matches Loss columns.
+                issuer_names (list): List of issuer names, order matches Loss columns.
         """
-        # c = get_cholesky_distribution(rho, n_issuer)
-        # cut = get_cut_ratings(transition_matrix, position_data)
-        # positions = self.mergePositionsIssuer()
         positions = self.get_issuer_groups()
         correlation = self.get_correlation()
         cutOffs = self.get_cutoffs_rating()
         states = self.get_states()
         EV = self.get_expected_value()
-        issuer = EV.index.to_list()
-        # n_positions = positions["InstrumentID"].nunique()
-        issuer_ids = positions["IssuerID"].unique()
-        Loss = np.zeros((self.n_simulation, n_issuer))
+        issuer_info = positions[["IssuerName", "IssuerID", "Rating", "RatingID"]].drop_duplicates()
+        issuer_ids = issuer_info["IssuerID"].to_numpy()
+        issuer_names = issuer_info["IssuerName"].to_list()
+        Loss = np.zeros((self.n_simulation, len(issuer_ids)))
         np.random.seed(self.seed)
 
-        for i in range(0, self.n_simulation):
+        for i in range(self.n_simulation):
             YY = norm.ppf(np.random.rand())
-            # rr=c*YY.T
-            # rr = YY*self.rho
-            for k in issuer_ids:
-                # n_positions_issuer = positions['InstrumentID'][positions['IssuerID']==issuer.loc[k,"IssuerID"]].nunique()
-                # positions_issuer = positions[positions['IssuerID']==issuer.loc[k,"IssuerID"]]
-                # positions_issuer.reset_index(inplace = True, drop = True)
-                issuer_name = self.issuer_data[k].name
-                rho = correlation[positions.loc[k, "IssuerName"]]
+            for idx, k in enumerate(issuer_ids):
+                issuer = issuer_names[idx]
+                rho = correlation[issuer]
                 rr = YY * rho
                 YY_ido = norm.ppf(np.random.rand())
-                # corr_idio=np.sqrt((1-(c*c)))
                 rr_idio = np.sqrt(1 - (rho**2)) * YY_ido
-                # print(rr_idio)
                 rr_all = rr + rr_idio
-                # print(rr)
-                # for j in range (0,n_positions_issuer):
-                # rho = correlation[positions.loc[j,'IssuerName']]
-                # rr = YY*rho
-                # YY_ido = norm.ppf(np.random.rand())
-                # #corr_idio=np.sqrt((1-(c*c)))
-                # rr_idio=np.sqrt(1-(rho**2))*YY_ido
-                # print(j)
-                # print(n_positions_issuer)
-                # print(positions_issuer)
-                # rr_all=rr+rr_idio
-                # print(rr_all)
-                rating = np.array(rr_all < np.matrix(cutOffs[:, positions.loc[k, "RatingID"]]).T)
-                # print(rating)
+                rating_id = issuer_info.loc[issuer_info["IssuerID"] == k, "RatingID"].iloc[0]
+                cutoffs_vec = np.matrix(cutOffs[:, rating_id]).T
+                rating = np.array(rr_all < cutoffs_vec)
                 rate_idx = len(rating) - np.sum(rating, 0)
-                # print(rate_idx)
-                col_idx = rate_idx
-                V_t = states[k, col_idx]  # retrieve the corresponding state value of the exposure
-                Loss_t = V_t - EV.item(k)
-                # print(Loss_t)
-                Loss[i, k] = Loss_t
-                # print(j)
-                # print(k)
-                # print(Loss)
+                col_idx = rate_idx[0].astype(int)
+                V_t = states.loc[issuer][col_idx]
+                Loss_t = V_t - EV.loc[issuer][0]
+                Loss[i, idx] = Loss_t
 
-        # Portfolio_MC_Loss = np.sum(Loss,1)
-        return Loss
+        return Loss, issuer_ids, issuer_names
 
-    def get_Loss_distribution(self):
+    def get_loss_distribution(self, mc_scenario_values: np.array):
         """Computes loss distribution for portfolio after monte-carlo-simulation.
 
         Returns:
             Array: Portfolio loss distribution.
         """
-        Loss = self.mc_calculation()
-        Portfolio_MC_Loss = np.sum(Loss, 1)
+        loss_distribution = np.sum(mc_scenario_values, 1)
 
-        return Portfolio_MC_Loss
+        return loss_distribution
 
-    def get_portfolio_VaR(self):
+    def get_portfolio_VaR(self, loss_distribution: np.array):
         """Computes Credit Value at Risk for specific portfolio and confidence level.
 
         Returns:
             Float: Portfolio Value at Risk of specific confidence level.
         """
-        loss_Distribution = self.get_Loss_distribution()
-        Port_Var = -1 * np.percentile(loss_Distribution, self.confidencelevel)
+        Port_Var = -1 * np.percentile(loss_distribution, self.confidencelevel)
 
         return Port_Var
 
-    def get_portfolio_ES(self):
+    def get_portfolio_ES(self, loss_distribution: np.array):
         """Computes expected shortfall for specific portfolio and confidence level.
 
         Returns:
             Float: Expected shorfall of porfolio.
         """
-        loss_Distribution = self.get_Loss_distribution()
-        portVar = self.get_portfolio_VaR()
 
-        expectedShortfall = -1 * np.mean(loss_Distribution[loss_Distribution < -1 * portVar])
+        expectedShortfall = -1 * np.mean(loss_distribution[loss_distribution < np.percentile(loss_distribution, self.confidencelevel)])
 
         return expectedShortfall
