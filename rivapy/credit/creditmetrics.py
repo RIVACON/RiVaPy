@@ -236,8 +236,8 @@ class creditMetricsModel:
                 rating = np.array(rr_all < cutoffs_vec)
                 rate_idx = len(rating) - np.sum(rating, 0)
                 col_idx = rate_idx[0].astype(int)
-                V_t = states.loc[issuer][col_idx]
-                Loss_t = V_t - EV.loc[issuer][0]
+                V_t = states.loc[issuer].iloc[col_idx]
+                Loss_t = V_t - EV.loc[issuer].iloc[0]
                 Loss[i, idx] = Loss_t
 
         return Loss, issuer_ids, issuer_names
