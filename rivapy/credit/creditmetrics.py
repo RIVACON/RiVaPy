@@ -9,23 +9,25 @@ from scipy.linalg import sqrtm
 from random import seed
 from random import random
 import plotly.express as px
-
+from typing import List, Union as _Union
+from rivapy.instruments.components import Issuer
+from rivapy.tools.enums import Rating
 from numpy.linalg import cholesky
 
-class creditMetricsModel():
-    def __init__(self, 
-                # rho : float, 
-                # n_issuer : int, 
-                n_simulation : int , 
-                transition_matrix : np.matrix, 
-                position_data : pd.DataFrame,
-                issuer_data : pd.DataFrame,
-                stock_data: pd.DataFrame, 
-                r : float, 
-                t : float, 
-                RR : float,
-                confidencelevel : int,
-                seed : int = None):
+
+class creditMetricsModel:
+    def __init__(
+        self,
+        n_simulation: int,
+        transition_matrix: np.matrix,
+        position_data: pd.DataFrame,
+        issuer_data: List[Issuer],
+        stock_data: pd.DataFrame,
+        r: float,
+        t: float,
+        confidencelevel: int,
+        seed: int = None,
+    ):
         """_summary_
 
         Args:
@@ -36,13 +38,10 @@ class creditMetricsModel():
             stock_data (pd.DataFrame): Dataframe with stock data. Stock data needs to include close values of the different issuers as well as a reference time series (e.g. Dax)
             r (float): Risk-free rate. Needed to comupute expected value of positions as well as different states during transition process.
             t (float): Dipositon horizon for calculation of credit risk.
-            RR (float): Fix recovery rate for CVaR calculation
             confidencelevel (int): Used confidence level in VaR-Calculation. Format Int.
             seed (int, optional): Seed for random number generator. Defaults to None.
         """
 
-        # self.rho = rho
-        # self.n_issuer = n_issuer
         self.n_simulation = n_simulation
         self.transition_matrix = transition_matrix
         self.position_data = position_data
@@ -50,53 +49,92 @@ class creditMetricsModel():
         self.stock_data = stock_data
         self.r = r
         self.t = t
-        self.RR = RR
         self.confidencelevel = confidencelevel
         self.seed = seed
-        self.n_issuer = issuer_data["IssuerID"].nunique()
 
     def mergePositionsIssuer(self):
-        """Merges position dataframe with issuer dataframe to obtain rating-data for each position
-
+        """
+        Merges position dataframe with issuer dataframe to obtain rating-data for each position.
+        Maps all +/- Rating variants to the same RatingID.
         Returns:
             DataFrame: Returns adjusted position dataframe.
         """
-        rating_map = pd.DataFrame({'Rating': ["AAA", "AA", "A", "BBB", "BB", "B", "CCC", "D"], 'RatingID': [0, 1, 2, 3, 4, 5, 6, 7]})
-        issuer_adj = self.issuer_data.merge(rating_map, on = "Rating", how = "left")
-        positions_adj = self.position_data.merge(issuer_adj[["IssuerID","Rating","RatingID"]], on = "IssuerID", how = "left")
+        # Mapping aller Rating-Varianten (inkl. +/-) auf RatingID
+        rating_map = pd.DataFrame(
+            {
+                "Rating": [
+                    "AAA",
+                    "AA+",
+                    "AA",
+                    "AA-",
+                    "A+",
+                    "A",
+                    "A-",
+                    "BBB+",
+                    "BBB",
+                    "BBB-",
+                    "BB+",
+                    "BB",
+                    "BB-",
+                    "B+",
+                    "B",
+                    "B-",
+                    "CCC+",
+                    "CCC",
+                    "CCC-",
+                    "D",
+                ],
+                "RatingID": [0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7],
+            }
+        )
+
+        # issuer_data ist jetzt eine Liste von Issuer-Objekten
+        issuer_df = pd.DataFrame(
+            [
+                {
+                    "IssuerID": issuer.obj_id,
+                    "IssuerName": issuer.name,
+                    "Rating": str(issuer.rating),  # ggf. .value oder .name je nach Enum-Implementierung
+                }
+                for issuer in self.issuer_data
+            ]
+        )
+
+        # Mapping anwenden
+        issuer_adj = issuer_df.merge(rating_map, on="Rating", how="left")
+        positions_adj = self.position_data.merge(issuer_adj[["IssuerID", "IssuerName", "Rating", "RatingID"]], on="IssuerID", how="left")
 
         return positions_adj
-    
-    def get_correlation (self):
+
+    def get_correlation(self):
         """Calculates correlation pairs for issuer with a specific reference time series.
 
         Returns:
             DataFrame: Dataframe with correlation coefficient for each issuer.
         """
 
-        mergedData = self.stock_data.drop(['Date'], axis=1)
+        mergedData = self.stock_data.drop(["Date"], axis=1)
         returns = mergedData.pct_change()
 
         correlation_mat = returns.corr()
-        corr_pairs = correlation_mat.unstack()['Dax']
+        corr_pairs = correlation_mat.unstack()["Dax"]
         return corr_pairs
 
-    
     def get_cutoffs_rating(self):
-        """Computes cutoffs for each initial rating based on input transition matrix. 
+        """Computes cutoffs for each initial rating based on input transition matrix.
         The inverse function of the standard normal distribution is used to get specific thresholds.
 
         Returns:
             DataFrame: Dataframe with arrays including thresholds for each initial rating.
         """
-        Z=np.cumsum(np.flipud(self.transition_matrix.T),0)
-        Z[Z>=(1-1/1e12)] = 1-1/1e12;
-        Z[Z<=(0+1/1e12)] = 0+1/1e12;
+        Z = np.cumsum(np.flipud(self.transition_matrix.T), 0)
+        Z[Z >= (1 - 1 / 1e12)] = 1 - 1 / 1e12
+        Z[Z <= (0 + 1 / 1e12)] = 0 + 1 / 1e12
 
-        CutOffs=norm.ppf(Z,0,1) # compute cut offes by inverting normal distribution
+        CutOffs = norm.ppf(Z, 0, 1)  # compute cut offes by inverting normal distribution
         return CutOffs
 
-    def get_credit_spreads(self, LGD):
+    def get_credit_spreads(self, LGD, idx):
         """Computes credit spreads for every rating based on the following formula
         -np.log(1-LGD*PD_t)/1
 
@@ -107,58 +145,56 @@ class creditMetricsModel():
             DataFrame: Dataframe with Credit spreads for each initial rating.
         """
         # credit spread implied by transmat
-        PD_t = self.transition_matrix[:,-1] # default probability at t
-        credit_spread = -np.log(1-LGD*PD_t)/self.t
-        
+        PD_t = self.transition_matrix[:, -1]
+        PD_vec = PD_t[idx]
+        LGD_np = LGD.to_numpy().reshape(-1, 1)
+        credit_spread = -np.log(1 - np.multiply(LGD_np, PD_vec)) / self.t
         return credit_spread
-    
-    def get_expected_value (self):
+
+    def get_expected_value(self):
         """Calculates expected value of every position based on exposure and credit spread for initial rating class.
 
         Returns:
             DataFrame: Dataframe including expected values.
         """
-        # positions = self.mergePositionsIssuer()
         positions = self.get_issuer_groups()
         exposure = np.matrix(positions["Exposure"]).T
-        # print(exposure)
         idx = positions["RatingID"]
-        # print(idx)
-        LGD = 1-positions["RecoveryRate"]
-        print(LGD)
-        credit_spread = self.get_credit_spreads(LGD)
-        # print(credit_spread)
-        EV = np.multiply(exposure, np.exp(-(self.r+credit_spread[idx])*self.t)) #TODO hier Bewertungsfunkiton aufrufen
-
+        LGD = 1 - positions["RecoveryRate"]
+        credit_spread = self.get_credit_spreads(LGD, idx)
+        EV = np.multiply(exposure, np.exp(-(self.r + credit_spread) * self.t))
+        EV = pd.DataFrame(EV, columns=["EV"])  # keep in same order as credit cutoff
+        EV["issuer"] = positions["IssuerName"].to_list()
+        EV = EV.groupby("issuer").sum()  # group by issuer to sum up expected values
         return EV
-    
-    def get_states (self):
+
+    def get_states(self):
         """Calculates matrix of present values for every position and every possible future rating.
 
         Returns:
             DataFrame: Dataframe with all possible present values.
         """
         positions = self.get_issuer_groups()
-        LGD = 1-np.array(positions["RecoveryRate"])
-        PD_t = self.transition_matrix[:,-1] # default probability at t
-        credit_spread = -np.log(1-PD_t*LGD.T)
+        LGD = 1 - np.array(positions["RecoveryRate"])
+        PD_t = self.transition_matrix[:, -1]  # default probability at t
+        credit_spread = -np.log(1 - PD_t * LGD.T)
         exposure = np.matrix(positions["Exposure"])
-        state = np.multiply(exposure, np.exp(-(self.r+credit_spread)*self.t)).T
-        state = np.append(state,np.multiply(exposure,np.matrix(positions["RecoveryRate"])).T,axis=1) #last column is default case
-        states = pd.DataFrame(np.fliplr(state), columns=["D","C","B","BB","BBB","A","AA","AAA"]) # keep in same order as credit cutoff
+        state = np.multiply(exposure, np.exp(-(self.r + credit_spread) * self.t)).T
+        state = np.append(state, np.multiply(exposure, np.matrix(positions["RecoveryRate"])).T, axis=1)  # last column is default case
+        states = pd.DataFrame(np.fliplr(state), columns=["D", "C", "B", "BB", "BBB", "A", "AA", "AAA"])  # keep in same order as credit cutoff
         states["issuer"] = positions["IssuerName"].to_list()
         states = states.groupby("issuer").sum()
         return states
-    
+
     def get_issuer_groups(self):
         df_positions_grouped = self.mergePositionsIssuer()
-        df_positions_grouped = df_positions_grouped[['IssuerID', 'IssuerName', 'RecoveryRate', 'Rating', 'RatingID','Exposure']]
-        df_positions_grouped = df_positions_grouped.groupby(['IssuerID', 'IssuerName', 'RecoveryRate', 'Rating', 'RatingID'], as_index=False).sum()
+        df_positions_grouped = df_positions_grouped[["IssuerID", "IssuerName", "RecoveryRate", "Rating", "RatingID", "Exposure"]]
+        df_positions_grouped = df_positions_grouped.groupby(["IssuerID", "IssuerName", "RecoveryRate", "Rating", "RatingID"], as_index=False).sum()
 
         return df_positions_grouped
-    
+
     def mc_calculation(self):
-        """Monte-Carlo simulation of portfolio based on positions, issuer, correlation and transition matrix. 
+        """Monte-Carlo simulation of portfolio based on positions, issuer, correlation and transition matrix.
          In every simulation step the return of an issuer will be simulated:
          - Therefore the return of the Benchmark (Y) will be simulated and multiplied with the issuer-specific correlation. This random number is consistent for
          every position during one simulation step.
@@ -173,67 +209,68 @@ class creditMetricsModel():
         # cut = get_cut_ratings(transition_matrix, position_data)
         # positions = self.mergePositionsIssuer()
         positions = self.get_issuer_groups()
-        issuer = self.issuer_data
         correlation = self.get_correlation()
         cutOffs = self.get_cutoffs_rating()
-        states = self.get_states ()
-        EV = self.get_expected_value ()
+        states = self.get_states()
+        EV = self.get_expected_value()
+        issuer = EV.index.to_list()
         # n_positions = positions["InstrumentID"].nunique()
-        n_issuer = positions["IssuerID"].nunique()
-        Loss = np.zeros((self.n_simulation,n_issuer))
+        issuer_ids = positions["IssuerID"].unique()
+        Loss = np.zeros((self.n_simulation, n_issuer))
         np.random.seed(self.seed)
 
-        for i in range(0,self.n_simulation):
+        for i in range(0, self.n_simulation):
             YY = norm.ppf(np.random.rand())
             # rr=c*YY.T
             # rr = YY*self.rho
-            for k in range (0, n_issuer):
+            for k in issuer_ids:
                 # n_positions_issuer = positions['InstrumentID'][positions['IssuerID']==issuer.loc[k,"IssuerID"]].nunique()
                 # positions_issuer = positions[positions['IssuerID']==issuer.loc[k,"IssuerID"]]
                 # positions_issuer.reset_index(inplace = True, drop = True)
-                rho = correlation[positions.loc[k,'IssuerName']]
-                rr = YY*rho
+                issuer_name = self.issuer_data[k].name
+                rho = correlation[positions.loc[k, "IssuerName"]]
+                rr = YY * rho
                 YY_ido = norm.ppf(np.random.rand())
-                #corr_idio=np.sqrt((1-(c*c)))
-                rr_idio=np.sqrt(1-(rho**2))*YY_ido
+                # corr_idio=np.sqrt((1-(c*c)))
+                rr_idio = np.sqrt(1 - (rho**2)) * YY_ido
                 # print(rr_idio)
-                rr_all=rr+rr_idio
+                rr_all = rr + rr_idio
                 # print(rr)
                 # for j in range (0,n_positions_issuer):
-                    # rho = correlation[positions.loc[j,'IssuerName']]
-                    # rr = YY*rho
-                    # YY_ido = norm.ppf(np.random.rand())
-                    # #corr_idio=np.sqrt((1-(c*c)))
-                    # rr_idio=np.sqrt(1-(rho**2))*YY_ido
-                    # print(j)
-                    # print(n_positions_issuer)
-                    # print(positions_issuer)
-                    # rr_all=rr+rr_idio
-                    # print(rr_all)
-                rating = np.array(rr_all<np.matrix(cutOffs[:,positions.loc[k,"RatingID"]]).T)
+                # rho = correlation[positions.loc[j,'IssuerName']]
+                # rr = YY*rho
+                # YY_ido = norm.ppf(np.random.rand())
+                # #corr_idio=np.sqrt((1-(c*c)))
+                # rr_idio=np.sqrt(1-(rho**2))*YY_ido
+                # print(j)
+                # print(n_positions_issuer)
+                # print(positions_issuer)
+                # rr_all=rr+rr_idio
+                # print(rr_all)
+                rating = np.array(rr_all < np.matrix(cutOffs[:, positions.loc[k, "RatingID"]]).T)
                 # print(rating)
-                rate_idx = len(rating) - np.sum(rating,0)
+                rate_idx = len(rating) - np.sum(rating, 0)
                 # print(rate_idx)
                 col_idx = rate_idx
-                V_t = states[k,col_idx] # retrieve the corresponding state value of the exposure
-                Loss_t = V_t-EV.item(k)
+                V_t = states[k, col_idx]  # retrieve the corresponding state value of the exposure
+                Loss_t = V_t - EV.item(k)
                 # print(Loss_t)
-                Loss[i,k] = Loss_t
-                    # print(j)
-                    # print(k)
-                    # print(Loss)
+                Loss[i, k] = Loss_t
+                # print(j)
+                # print(k)
+                # print(Loss)
 
         # Portfolio_MC_Loss = np.sum(Loss,1)
-        return Loss 
+        return Loss
 
-    def get_Loss_distribution (self):
+    def get_Loss_distribution(self):
         """Computes loss distribution for portfolio after monte-carlo-simulation.
 
         Returns:
             Array: Portfolio loss distribution.
         """
         Loss = self.mc_calculation()
-        Portfolio_MC_Loss = np.sum(Loss,1)
+        Portfolio_MC_Loss = np.sum(Loss, 1)
 
         return Portfolio_MC_Loss
 
@@ -244,7 +281,7 @@ class creditMetricsModel():
             Float: Portfolio Value at Risk of specific confidence level.
         """
         loss_Distribution = self.get_Loss_distribution()
-        Port_Var = -1*np.percentile(loss_Distribution,self.confidencelevel)
+        Port_Var = -1 * np.percentile(loss_Distribution, self.confidencelevel)
 
         return Port_Var
 
@@ -257,8 +294,6 @@ class creditMetricsModel():
         loss_Distribution = self.get_Loss_distribution()
         portVar = self.get_portfolio_VaR()
 
-        expectedShortfall = -1*np.mean(loss_Distribution[loss_Distribution<-1*portVar])
+        expectedShortfall = -1 * np.mean(loss_Distribution[loss_Distribution < -1 * portVar])
 
         return expectedShortfall
-
-
