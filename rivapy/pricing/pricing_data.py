@@ -658,6 +658,7 @@ class ForwardRateAgreementPricingData(BasePricingData):
     def price(self):
         # obtain correct pricer
         # pricer = _factory_entries[self.pricer]
+        print(_factory().keys())
         pricer_obj = _factory()["ForwardRateAgreementPricer"]
         pricer = pricer_obj(self.val_date, self.spec, self.discount_curve, self.forward_curve)
 
@@ -721,11 +722,12 @@ class InterestRateSwapPricingData_rivapy(BasePricingData):  # TODO!!!!
 
     def price(self):
         # Obtain correct pricer, right now it is hardcoded for simplicity # TODO
-        # pricer_obj = _factory()["InterestRateSwapPricer"] # not working for some reason?
-        from rivapy.pricing.interest_rate_swap_pricing import InterestRateSwapPricer
+        pricer_obj = _factory()["InterestRateSwapPricer"]  # not working for some reason?
+        # from rivapy.pricing.interest_rate_swap_pricing import InterestRateSwapPricer
 
-        # pricer = pricer_obj(self.val_date, self.spec,
-        pricer = InterestRateSwapPricer(
+        print(self.discount_curve_pay_leg)
+        # pricer = InterestRateSwapPricer(
+        pricer = pricer_obj(
             self.val_date,
             self.spec,
             discount_curve_pay_leg=self.discount_curve_pay_leg,

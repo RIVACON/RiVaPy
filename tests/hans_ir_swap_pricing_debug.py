@@ -158,3 +158,26 @@ if __name__ == "__main__":
     pr = ir_swap_pricing_data.price()
     print(f"runtime: {dt.datetime.now() - tic}")
     print(f"Price: {pr}")
+
+    print("------------------------------------------")
+    print("Debugging: each leg present value")
+
+    fixed_PV = InterestRateSwapPricer.price_leg(
+        refdate, dc, dc, None, fixed_leg, None, 0  # discount  # forward/fixing  # fx_fwd  # leg_spec  # fixing table  # fixing grace peropd
+    )
+    float_PV = InterestRateSwapPricer.price_leg(
+        refdate, dc, dc, None, float_leg, None, 0  # discount  # forward/fixing  # fx_fwd  # leg_spec  # fixing table  # fixing grace peropd
+    )
+
+    print(f"float leg pv: {float_PV}")
+    print(f"fixed leg pv: {fixed_PV}")
+    print(f"fair swap rate: flot/fix: {float_PV/fixed_PV}")
+
+    print("------------------------------------------")
+    print("Debugging: each leg cashflow matrix")
+
+    print("generating cashflow table for FIXED leg")
+    cashflow_table_fix = InterestRateSwapPricer._populate_cashflows_fix(refdate, fixed_leg, dc, dc, None)
+
+    print("generating cashflow table for FLOAT leg")
+    cashflow_table_float = InterestRateSwapPricer._populate_cashflows_float(refdate, float_leg, dc, dc, None, None, 0)

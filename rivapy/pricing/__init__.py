@@ -9,7 +9,8 @@ from rivapy import _pyvacon_available
 # 	from rivapy.pricing.pricing_data import CDSPricingData
 # 	from rivapy.pricing.pricing_data import Black76PricingData, ResultType, AmericanPdePricingData
 
-from rivapy.tools.factory import _factory
+# from rivapy.tools.factory import _factory
+from rivapy.pricing.factory import _factory
 from rivapy.pricing.deposit_pricing import DepositPricer
 from rivapy.pricing.fra_pricing import ForwardRateAgreementPricer
 from rivapy.pricing.interest_rate_swap_pricing import InterestRateSwapPricer

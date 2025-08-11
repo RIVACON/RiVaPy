@@ -1,4 +1,3 @@
-
 from datetime import datetime
 from rivapy.marketdata import DiscountCurve
 from rivapy.pricing.pricing_request import PricingRequest
@@ -6,6 +5,7 @@ from rivapy.pricing._logger import logger
 from rivapy.instruments.deposit_specifications import DepositSpecification
 from rivapy.tools.datetools import DayCounter
 from rivapy.pricing.bond_pricing import SimpleCashflowPricer
+
 
 class DepositPricer(SimpleCashflowPricer):
 
@@ -51,18 +51,18 @@ class DepositPricer(SimpleCashflowPricer):
         """Calculates the fair simply compounded rate for a deposit contract such that the contract has zero value.
         The function assumes a simply compounded rate, i.e., D(t) = 1 / (1 + rate(t) * dt), and computes the implied rate
         using the provided discount curve and deposit specification.
-        
+
         Parameters:
             val_date (datetime): The valuation date for the calculation.
             specification (DepositSpecification): The deposit contract specification, including start date, maturity date, and day count convention.
             discount_curve (DiscountCurve): The discount curve used to obtain discount factors, should match the issuer specific discount curve.
-            
+
         Returns:
             float: The implied simply compounded rate that makes the contract value zero.
-            
+
         Raises:
             ValueError: If the provided discount_curve is not of type DiscountCurve.
-  
+
         """
 
         start_date = specification.start_date
@@ -74,8 +74,13 @@ class DepositPricer(SimpleCashflowPricer):
         else:
             raise ValueError("Discount curve must be of type DiscountCurve")
 
-        dcc = DayCounter(daycountconvention) 
+        dcc = DayCounter(daycountconvention)
         dt = dcc.yf(start_date, maturity_date)
+        # # DEBUG TODO REMOVE
+        # print("Depopsit Pricing, start, mat, yf")
+        # print(start_date)
+        # print(maturity_date)
+        # print(dt)
         simple_rate = ((1 / cont_df) - 1) / dt
 
         return simple_rate

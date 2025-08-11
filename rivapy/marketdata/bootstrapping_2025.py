@@ -25,7 +25,7 @@ from scipy.optimize import brentq
 
 
 # import quote calculators
-from rivapy.pricing.deposit_pricing import DepositPricer  # ?SUBJECT TO CHANGE based on architecture
+from rivapy.pricing.deposit_pricing import DepositPricer  # TODO SUBJECT TO CHANGE based on architecture
 from rivapy.pricing.fra_pricing import ForwardRateAgreementPricer
 from rivapy.pricing.interest_rate_swap_pricing import InterestRateSwapPricer
 
@@ -42,12 +42,13 @@ def bootstrap_curve(
     day_count_convention: _Union[DayCounterType, str],
     instruments: _List,
     quotes: _List,
-    discount_curve: DiscountCurve = None,
-    basis_curve: DiscountCurve = None,
+    curves: dict = {},
+    # discount_curve: DiscountCurve = None,
+    # basis_curve: DiscountCurve = None,
     interpolation_type: InterpolationType = InterpolationType.LINEAR,
-    extrapolation_type: ExtrapolationType = ExtrapolationType.NONE,
-    tolerance: float = 0.0,
-    max_iterations: int = 100000,
+    extrapolation_type: ExtrapolationType = ExtrapolationType.LINEAR,
+    tolerance: float = 1.0e-8,
+    max_iterations: int = 10000,
 ) -> DiscountCurve:
     """
 
@@ -57,29 +58,21 @@ def bootstrap_curve(
         day_count_convention (_Union[DayCounterType, str]): daycounter for the new curve
         instruments (_List): instrument specifications that are used in the calibration (deposits, FRAs, and swaps allowed atm)
         quotes (_List): the rate quotes for the instruments (deposit rates, FRAs and swap rates)
-        discount_curve (DiscountCurve, optional): discount curve used for the instruments (if empty, the bootstrapped curve is used for discounting). Defaults to None.
-        basis_curve (DiscountCurve, optional): flow curve used for the instruments like IR basis swap (if empty, but needed --> raise Exception). Defaults to None.
+        curves (dict): curves to be used during bootstrapping such as discount curve and forward curve if given. Defaults to Empty
+        interpolation_type (InterpolationType): interpolation method to be used by the final curve. defaults to LINEAR
+        extrapolation_type (ExtrapolationType): extrapolation method to be used by the final curve. defaults to LINEAR
+        tolerance (float): tolerance value used in refinement of the zero rates
+        max_iterations (int): the maximim number of iterations (after that the bootstrapper fails)
+
 
     Returns:
-        DiscountCurve: _description_
+        DiscountCurve: bootstrapped discount curve
     """
-
-    # other factors needed in general taken from pyvacon implementation
-    # //! @param refDate the reference date for the new curve  - have
-    # //! @param objId the object id for the new Curve -have
-    # //! @param instruments the instruments used for botstrapping -have
-    # //! @param quotes the quotes, in the same order as the instruments -have
-    # //! @param curves the curves required for valuing the bootstrap instruments (besides the curve to be bootstrapped)
-    # //! @param dcType daycounter for the new curve -have
-    # //! @param interType the interpolation type for the new curve - NEEDS TO BE SPECIFIED
-    # //! @param extraType the extrapolation type for the new curve - NEEDS TO BE SPECIFIED
-    # //! @param baseCurveName if non-empty, the curve will be constructed as a shifted curve over the specified - For FUTURE implementations
-    # //! base curve
-    # //! @param tolerance the required tolerance in the zero rates - EXPLAIN
-    # //! @param maxIterations the maximim number of iterations (after that the bootstrapper fails) - EXPLAAIN
 
     # Sanity checks:
     assert len(instruments) == len(quotes), "Number of quotes does not equal number of instruments."
+    # TODO implement more input qualit checks:
+    # curves given of correct type that match instrument type - or will this be done in the "market container" class?
 
     #############################################################
     # initialize: # alternatively..
@@ -99,18 +92,45 @@ def bootstrap_curve(
         instruments_by_date[end_date] = (quotes[i], inst)
 
     #############################################################
-    # base curve creatiion????
+    # base curve creatiion check #TODO think about improving how to handle input curves if given for multicurve bootstrapping
+    # given instrument types, check for required curves
+    ins_types = []
+    flag_irs_bootstrapped_as_fwd = False
+    for inst in instruments:
+        ins_type = inst.ins_type()
+        if ins_type not in ins_types:
+            ins_types.append(ins_type)
+
+    if "discount_curve" not in curves:
+        curves["discount_curve"] = DiscountCurve(
+            "dummy_id_discount", ref_date, yc_dates, dfs, interpolation_type, extrapolation_type, day_count_convention
+        )
+
+    if Instrument.IRS in ins_types:
+        # check if curves has a fixing curve
+        if "fixing_curve" in curves:
+            if not isinstance(curves["fixing_curve"], DiscountCurve):
+                raise Exception("Fixing curve is not of type DiscountCurve")
+        else:
+            print("IRS swap present but no fixing curve provided, will use bootstrapped curve in place")
+            flag_irs_bootstrapped_as_fwd = True
+            curves["fixing_curve"] = curves["discount_curve"]
 
     #############################################################
-    # # start with loglinear interpolation to obtain good initial values for all dates
+    # # start with loglinear interpolation to obtain good initial values for all dates #TODO make logliner interpolator
     # this means i have to pass into the rror function the interpolation types desired which is different
     # from the inter and extra type we want for the final discount curve
     # bootstrap loop over ordered expiry dates which is also sorted here
 
+    lower = 1.0e-5  # DEBUG TODO REMOVE if not implement bracket search
+    upper = 5.0
+
     for end_date in sorted(instruments_by_date):
-        quote, inst = instruments_by_date[end_date]  # use the quote to compare with brentq
-        yc_dates.append(end_date)  # next datet
+        quote, inst = instruments_by_date[end_date]  # use the market quote to compare with brentq
+        yc_dates.append(end_date)  # next date
         dfs.append(dfs[-1])  # append a dummy value for the next date
+
+        # arguments to be passed to the error function for the brentq root solver
         ARGS = (
             -1,  # since we will look at the latest addition to our discount curve.
             dfs,
@@ -119,26 +139,31 @@ def bootstrap_curve(
             ref_date,
             quote,
             curves,
-            interpolation_type,  # TODO TO BE IMPLEMENTED , default to LINEAR for testing purposes until implemented
-            extrapolation_type,
+            InterpolationType.LINEAR_LOG,
+            ExtrapolationType.LINEAR_LOG,
             day_count_convention,
-        )  # needed to run get_quote inside of error_fn , everythign other than the input guess of discount factor
+            flag_irs_bootstrapped_as_fwd,
+        )
+
         try:
-            # solution = brentq(error_fn, 0.00001, 5.0, xtol=1e-5)  # TODO define this error_fn, read on brentq usage
-            solution = brentq(error_fn, 0.00001, 5.0, ARGS, xtol=1e-5)  # TODO define this error_fn, read on brentq usage
+
+            solution = brentq(error_fn, lower, upper, ARGS, xtol=1e-6)
             dfs[-1] = solution
+
+            if flag_irs_bootstrapped_as_fwd == True:  # meaning the passed forward curve needs to be updating alongside the discount curve
+                curves["discount_curve"] = DiscountCurve(
+                    "bootstrappedYC", ref_date, yc_dates, dfs, interpolation_type, extrapolation_type, day_count_convention
+                )
+                curves["fixing_curve"] = curves["discount_curve"]
+
         except Exception as e:
             raise Exception(f"Initial bootstrap failed at {end_date}: {str(e)}")
 
     # In principle, this will have produced a curve.
 
-    # start with next end date
-    # solve for discount factor so that MODEL (bootstrapped) quote matches MARKET (input) quote (use brentq root finding)
-    # check for error size between model and market
-
     #############################################################
     # Iterative refinement with real interpolator
-    # this is to improve the values???
+    # this is to improve the values for the whole curve
     # check for convergence: max change in zero rate estimate must be below tolerance.
     # max_diff = float("inf")
     max_diff = 0.0
@@ -147,28 +172,31 @@ def bootstrap_curve(
 
         total_evals = 0  # ??number of attempts?
 
-        for i, end_date in enumerate(sorted(instruments_by_date), start=1):  # iterate through all end dates?
-            quote, inst = instruments_by_date[end_date]  # use the quote to compare with brentq, must pass into error function somehow
+        for i, end_date in enumerate(sorted(instruments_by_date), start=1):  # iterate through all end dates
+            quote, inst = instruments_by_date[end_date]  # use the quote to compare with brentq
 
             ARGS = (
                 i,
-                dfs,
-                yc_dates,  # by now this is the full list of dates
+                dfs,  # At this stage, these are all the solved for discount factors
+                yc_dates,  # At this stage, this is the full list of dates of the discount curve
                 inst,
                 ref_date,
                 quote,
                 curves,
-                interpolation_type,  # TODO TO BE IMPLEMENTED , default to LINEAR for testing purposes until implemented
+                interpolation_type,
                 extrapolation_type,
                 day_count_convention,
+                flag_irs_bootstrapped_as_fwd,
             )
 
             try:
-                # used to determine the tolerance for brentq??? weighted ? normalized by yearfrac? to within 10% ontop of the original tolerance?
+                # used to determine the tolerance for brentq - scaled by discount factor and maturity and a heuristic 10% ontop to keep from over fitting
                 tol_brent = dfs[i] * tolerance * dcc.yf(ref_date, end_date) * 0.1
-                # dfs[i] = brentq(error_fn, 0.00001, 5.0, xtol=tol_brent)
+                # print("------------------------refinement tolerance:")
+                # print(f"{i} DF:{dfs[i]} * {tolerance} * {dcc.yf(ref_date, end_date)} * 0.1 = {tol_brent}")
                 dfs[i] = brentq(error_fn, 0.00001, 5.0, ARGS, xtol=tol_brent)
                 total_evals += 1
+
             except Exception as e:
                 raise Exception(f"Refinement failed at {end_date}: {str(e)}")
 
@@ -178,21 +206,23 @@ def bootstrap_curve(
             # calculate derivative dq/dr using finite differences
             # (q=quote, r=zero rate)
             quote, inst = instruments_by_date[end_date]
-            # yc = DiscountCurve(dfs, yc_dates, interpolation_type, extrapolation_type)
             yc = DiscountCurve("dummy_id", ref_date, yc_dates, dfs, interpolation_type, extrapolation_type, day_count_convention)
-            q_model = inst.get_quote(
-                ref_date, curves + [yc]
-            )  # here we need to better define the get_quote function, and which curves arer being passed to it...
+            curves["discount_curve"] = yc
+            if flag_irs_bootstrapped_as_fwd == True:  # meaning the passed forward curve needs to be updating alongside the discount curve
+                curves["fixing_curve"] = curves["discount_curve"]
+
+            q_model = get_quote(ref_date, inst, curves)  # this curves dict needs to have the updated YC
+
             epsilon = 1e-6
             dfs_perturbed = dfs.copy()
-            dfs_perturbed[i] += epsilon  # pertrub only at position = i
-            # yc_perturbed = DiscountCurve(dfs_perturbed, yc_dates, interpolation_type, extrapolation_type)
+            dfs_perturbed[i] += epsilon  # perturb only at position = i
             yc_perturbed = DiscountCurve(
                 "dummy_id_perturbed", ref_date, yc_dates, dfs_perturbed, interpolation_type, extrapolation_type, day_count_convention
             )
-            q_model_eps = inst.get_quote(
-                ref_date, curves + [yc_perturbed]
-            )  # here we need to better define the get_quote function, and which curves arer being passed to it...
+            curves["discount_curve"] = yc_perturbed
+            if flag_irs_bootstrapped_as_fwd == True:  # meaning the passed forward curve needs to be updating alongside the discount curve
+                curves["fixing_curve"] = curves["discount_curve"]
+            q_model_eps = get_quote(ref_date, inst, curves)
 
             dq = (q_model_eps - q_model) / epsilon
             dr = abs((quote - q_model) / (dq * dcc.yf(ref_date, end_date) * dfs[i]))
@@ -203,7 +233,7 @@ def bootstrap_curve(
     if max_diff > tolerance:
         raise Exception("Bootstrapping did not converge within tolerance.")
 
-    # adding 150Y pillar to avoid expicit extrapolation???
+    # TODO adding 150Y pillar to avoid explicit extrapolation???
 
     # create final discount curve
     curve = DiscountCurve(
@@ -211,34 +241,12 @@ def bootstrap_curve(
         refdate=ref_date,
         dates=yc_dates,  # populate with correct dates
         df=dfs,  # populated with corresponding discount factors
-        interpolation=InterpolationType.LINEAR,
-        extrapolation=ExtrapolationType.NONE,
+        interpolation=interpolation_type,
+        extrapolation=extrapolation_type,
         daycounter=day_count_convention,
     )
 
     return curve
-
-
-# get_end_date (instrument specification) # maturity? or accrual period end date?
-# return end date
-
-# get_quote(ref_date, instrumentSpec, yield_curve, discount_curve, basis_curve)
-# if basisSwap
-# if discoutncurve given:
-#    computeBasisSpread from the pricer
-# else:
-#    computeBasisSpread with different inputs, using yield curve in place of discount curve
-# else if IR swap
-# if discoutncurve given:
-#    computeSwapRate from the pricer
-# else:
-#    computeSwapRate with different inputs, using yield curve in place of discount curve
-
-
-# ellseif deposit
-# return DepositPricer::impliedSimplyCompoundedRate(refDate, yc, spread, depo);
-
-# Hence return an INTEREST RATE as final results...i.e. a quote
 
 
 # Compute Error - This method computes the diff between market quote and candidate
@@ -250,76 +258,135 @@ def error_fn(
     instrument_spec: _Union[DepositSpecification, ForwardRateAgreementSpecification, InterestRateSwapSpecification],
     ref_date: _Union[date, datetime],
     ref_quote: float,
-    curves: _List,  # or should it be dictionary?
+    curves: dict,  # or should it be dictionary?
     interpolation_type: InterpolationType,
     extrapolation_type: ExtrapolationType,
     day_count_convention: DayCounterType = DayCounterType.ACT360,
+    flag_irs_bootstrapped_as_fwd: bool = False,
 ):
-    """_summary_
+    """Error function used for the bootstrapper using a brentq solver.
+    Returns the differnce between an input target value and calculated
+    model value.
+
+    Given a list of corresponding dates and discount factors, create a disount curve object
+    and update the curve dictionary necessary.
+
+    Pass relevant instrument information in order to calculate the fair rate given the current
+    curve data.
+
+    #TODO think about how to better implement in the case where forward curve is the same as discount curve
 
     Args:
-        df_val (float): _description_
-        dfs (_List): _description_
-        yc_dates (_List): _description_
-        interpolation_type (InterpolationType): _description_
-        extrapolation_type (ExtrapolationType): _description_
-        ref_date (_Union[date, datetime]):
-        ref_quote (float): _description_
-        curves (_List): _description_
+        df_val (float): discount factor value used as guess for next value of the bootstrapped discount curve
+        index (int): list index of where to insert df_val. usually -1 is passed to ensure it is the last entry
+        dfs (_List): list of predetermined discount factors
+        yc_dates (_List): corresponding datetime objects
+        instrument_spec (): instrument specific data
+        ref_date (_Union[date, datetime]): reference date
+        ref_quote (float): target quote to compare to
+        curves (dict): dictionary of relevant curve data
+        interpolation_type (InterpolationType): the interpolation method to be used by the curves
+        extrapolation_type (ExtrapolationType): the extrapolation method to be used by the curves
+        day_count_convention: day coutn convention to be used for the dummy curve built
+        flag_irs_bootstrapped_as_fwd (bool): Flag to trigger if fixing curve is the same as discount curve
+
 
     Returns:
-        _type_: _description_
+        float: difference between target quote and calculated quote
     """
     df_tmp = dfs.copy()
     df_tmp[index] = df_val
     # here reference date is used as placeholder
     yc = DiscountCurve("bootstrappedYC", ref_date, yc_dates, df_tmp, interpolation_type, extrapolation_type, day_count_convention)
-    return get_quote(ref_date, instrument_spec, curves + [yc]) - ref_quote
+    curves_copy = curves.copy()
+    curves_copy["discount_curve"] = yc
+    if flag_irs_bootstrapped_as_fwd:
+        curves_copy["fixing_curve"] = yc
+
+    # DEBUG statement
+    # print("----------------")
+    # print("Error function trial curve")
+    # print(yc.get_df())
+    return get_quote(ref_date, instrument_spec, curves_copy) - ref_quote
 
 
-# here we need to better define the get_quote function, and which curves arer being passed to it...
+def find_bracket(error_fn, initial_guess, *args):
+    """Optional function to help find an applicable upper and lower bound
+    for the brentq solver to ensure a sign change across the given error function
+    applied over the boundary limits
+
+    Args:
+        error_fn (function): Error function
+        initial_guess (float: initial guess of the correct result from which to find the boundary limits
+    Raises:
+        RuntimeError: _description_
+
+    Returns:
+       floats: lower and upper bound
+    """
+    lower = initial_guess * 0.5
+    upper = initial_guess * 1.5
+    f_lower = error_fn(lower, *args)
+    f_upper = error_fn(upper, *args)
+
+    count = 0
+    while f_lower * f_upper > 0 and count < 50:
+        lower *= 0.5
+        upper *= 1.5
+        f_lower = error_fn(lower, *args)
+        f_upper = error_fn(upper, *args)
+        count += 1
+
+    if f_lower * f_upper > 0:
+        raise RuntimeError(f"Could not find a sign change around initial guess {initial_guess}")
+    return lower, upper
 
 
 def get_quote(
     ref_date: _Union[date, datetime],
     instrument_spec: _Union[DepositSpecification, ForwardRateAgreementSpecification, InterestRateSwapSpecification],
-    curve_dict: dict = {},
-):  # use pricer for each instrument or equivalent functions...
+    curve_dict: dict,
+):
+    """Get the instrument specific fair quote calculation result to be used in the bootstrapper.
+
+    Args:
+        ref_date (_Union[date, datetime]): _description_
+        instrument_spec (_Union[DepositSpecification, ForwardRateAgreementSpecification, InterestRateSwapSpecification]): _description_
+        curve_dict (dict): Dictionary containing the market data curves needed for discounting or fwd rates.
+
+    Returns:
+        float: calculated fair rate
+    """
 
     quote = 0.0
     if instrument_spec.ins_type() == Instrument.Deposit:
 
         # old
-        discount_curve = curve_dict["bootstrapped_dc"]
+        discount_curve = curve_dict["discount_curve"]
         # spread_curve=curve_dict["spread_curve"]
-        start = instrument_spec.start_date
-        end = instrument_spec.maturity_date
-        DepositPricer.impliedSimplyCompoundedRate(ref_date, start, end, discount_curve)  # assume no spread curve
+        quote = DepositPricer.implied_simply_compounded_rate(ref_date, instrument_spec, discount_curve)  # TODO assumes no spread curve for now
 
     elif instrument_spec.ins_type() == Instrument.FRA:
 
-        curve_used = curve_dict["bootstrapped_dc"]
-        rate_start = instrument_spec.start_date
-        rate_end = instrument_spec.end_date
-
-        ForwardRateAgreementPricer.computeFairRate(val_date=ref_date, forward_curve=curve_used, rate_start_date=rate_start, rate_end_date=rate_end)
+        curve_used = curve_dict["discount_curve"]
+        quote = ForwardRateAgreementPricer.compute_fair_rate(ref_date, instrument_spec, forward_curve=curve_used)
 
     elif instrument_spec.ins_type() == Instrument.IRS:
 
-        yc_discount = curve_dict["bootstrapped_dc"]  # TODO decide how to pass which curves
-        yc_forward = curve_dict["market_forward_curve"]
-        # according to pyvayon example, the fixing table is assumed to defaulted to empty to allow the code to run...
+        yc_discount = curve_dict["discount_curve"]  # TODO decide how to pass which curves
+        yc_forward = curve_dict["fixing_curve"]
+        # according to pyvayon example, the fixing table is assumed to default to empty to allow the code to run...
         fixing_table = FixingTable()
 
         float_leg = instrument_spec.get_float_leg()
         fixed_leg = instrument_spec.get_fixed_leg()
         fixing_grace_period = 0  # TODO take in as parameter? in pyvacon example, the extra swap parameters are assumed to be empty, only the curves were passed as arguments...
 
-        quote = InterestRateSwapPricer.compute_swap_rate(ref_date, yc_discount, yc_forward, float_leg, fixed_leg, fixing_table, fixing_grace_period)
-        # InterestRateSwapPricer::computeSwapRate(
-        # 		refDate, ycDiscount, ycForward, swapSpec->getFloatLeg(), swapSpec->getFixedLeg(),
-        # 		std::make_shared<const FixingTable>(),
-        # 		std::make_shared<const InterestRateSwapPricingParameter>()
+        # parameters specific to ir swap bootstrapping, in regards to the fixed leg for calculating the fair swap rate
+        # needed to pass these settings onto the InterestRateSwapPricer.price_leg
+        pricing_params = {"fixing_grace_period": fixing_grace_period, "set_rate": True, "desired_rate": 1.0}
+
+        quote = InterestRateSwapPricer.compute_swap_rate(ref_date, yc_discount, yc_forward, float_leg, fixed_leg, fixing_table, pricing_params)
 
     elif instrument_spec.ins_type() == Instrument.OIS:
         pass
@@ -333,6 +400,8 @@ def get_quote(
     elif instrument_spec.ins_type() == Instrument.FXF:  # fx forward
         pass
 
+    # # DEBUG TODO REMOVE
+    # print(f"Calculated quote for {instrument_spec.ins_type()} is {quote}")
     return quote
 
 

@@ -71,6 +71,9 @@ class DepositSpecification(HasExpectedCashflows):
             rating (_Union[Rating, str]): Paper rating.
         """
 
+        # Store original input of fixing date
+        self.fixing_date = fixing_date
+
         # check and adjust spot_days for O/N and T/N deposits
         if term == "O/N" or (fixing_date is not None and start_date is not None and fixing_date == start_date):
             spd = 0
@@ -237,6 +240,8 @@ class DepositSpecification(HasExpectedCashflows):
         }
         return result
 
+        # region properties
+
     def ins_type(self):
         """Return instrument type
 
@@ -244,3 +249,7 @@ class DepositSpecification(HasExpectedCashflows):
             Instrument: Forward rate agreement
         """
         return Instrument.Deposit
+
+    # temp placeholder
+    def get_end_date(self):
+        return self._end_date

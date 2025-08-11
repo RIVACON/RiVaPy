@@ -50,7 +50,7 @@ class ForwardRateAgreementPricer:
 
         #        roll convention??
         time_delta = dcc.yf(self._fra_spec.start_date, self._fra_spec.end_date)  # as yearfrac
-        fwd_rate = ForwardRateAgreementPricer.computeFairRate(
+        fwd_rate = ForwardRateAgreementPricer.compute_fair_rate(
             self._val_date, self._forward_curve, self._fra_spec._rate_start_date, self._fra_spec._rate_end_date
         )  # 1.00  # self._fra_spec. # need forward curve
         fra_rate = self._fra_spec._rate
@@ -74,8 +74,10 @@ class ForwardRateAgreementPricer:
     # }
 
     @staticmethod
-    def computeFairRate(
-        val_date: _Union[datetime, date], forward_curve: DiscountCurve, rate_start_date: _Union[datetime, date], rate_end_date: _Union[datetime, date]
+    def compute_fair_rate(
+        val_date: _Union[datetime, date],
+        specification: ForwardRateAgreementSpecification,
+        forward_curve: DiscountCurve,
     ):
         """Computes the fair rate such that the when used in the specification of the FRA gives a net value of zero.
         A discount curve is given, from which the Forward Rate is determined between the two dates.
@@ -92,6 +94,9 @@ class ForwardRateAgreementPricer:
         Returns:
             float: _description_
         """
+
+        rate_start_date: specification.rate_start_date
+        rate_end_date: specification.rate_end_date
 
         dcc = DayCounter(forward_curve.daycounter)
         yf = dcc.yf(rate_start_date, rate_end_date)
