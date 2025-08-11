@@ -404,7 +404,7 @@ class Schedule:
         # stub_placement: str = "ending", # could alternatively be "beginning" (i.e. place stub period at the end, at the beginning)
         business_day_convention: _Union[RollConvention, str] = RollConvention.MODIFIED_FOLLOWING,
         calendar: _Optional[_Union[_HolidayBase, str]] = None,
-        roll_convention: _Union[RollRule, str] = RollRule.EOM,
+        roll_convention: _Union[RollRule, str] = RollRule.NONE,
         settle_days: int = 0,
         ref_date: _Optional[_Union[date, datetime]] = None,
     ):
@@ -693,7 +693,7 @@ class Schedule:
             from_ = datetime(from_.year, from_.month, monthrange(from_.year, from_.month)[-1])
         if roll_convention_ == RollRule.EOM and _is_ambiguous_date(to_):
             to_ = datetime(to_.year, to_.month, monthrange(to_.year, to_.month)[-1])
-        if dates[-1] != to_.date():
+        if _date_to_datetime(dates[-1]) != to_:
             # ... by adding a short stub or ...
             if not long_stub:
                 dates.append(to_)
