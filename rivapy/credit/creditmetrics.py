@@ -220,6 +220,7 @@ class creditMetricsModel:
         issuer_ids = issuer_info["IssuerID"].to_numpy()
         issuer_names = issuer_info["IssuerName"].to_list()
         Loss = np.zeros((self.n_simulation, len(issuer_ids)))
+        rr_scenarios = np.zeros((self.n_simulation, len(issuer_ids)))
         np.random.seed(self.seed)
 
         for i in range(self.n_simulation):
@@ -239,8 +240,9 @@ class creditMetricsModel:
                 V_t = states.loc[issuer].iloc[col_idx]
                 Loss_t = V_t - EV.loc[issuer].iloc[0]
                 Loss[i, idx] = Loss_t
+                rr_scenarios[i, idx] = rr_all
 
-        return Loss, issuer_ids, issuer_names
+        return Loss, rr_scenarios, issuer_ids, issuer_names
 
     def get_loss_distribution(self, mc_scenario_values: np.array):
         """Computes loss distribution for portfolio after monte-carlo-simulation.
