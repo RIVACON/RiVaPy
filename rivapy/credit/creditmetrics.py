@@ -1,18 +1,9 @@
 from __future__ import division
-from turtle import position
 import pandas as pd
 import numpy as np
 from scipy.stats import norm
-import sys
-import math
-from scipy.linalg import sqrtm
-from random import seed
-from random import random
-import plotly.express as px
-from typing import List, Union as _Union
+from typing import List, Optional as _Optional
 from rivapy.instruments.components import Issuer
-from rivapy.tools.enums import Rating
-from numpy.linalg import cholesky
 
 
 class creditMetricsModel:
@@ -26,17 +17,20 @@ class creditMetricsModel:
         r: float,
         t: float,
         confidencelevel: int,
-        seed: int = None,
+        seed: _Optional[int] = None,
     ):
         """_summary_
 
         Args:
-            n_simulation (int): Number of simulation, which should be carried out
-            transition_matrix (np.matrix): Transition matrix (format np.matrix). S&P 8x8 matrix is integrated.
+            n_simulation (int): Number of simulation
+            transition_matrix (np.matrix): Transition matrix (format np.matrix).
+                S&P 8x8 matrix is integrated.
             position_data (pd.DataFrame): Dataframe with position data. Specific format is needed.
             issuer_data (pd.DataFrame): Dataframe with issuer data. Specific format is needed.
-            stock_data (pd.DataFrame): Dataframe with stock data. Stock data needs to include close values of the different issuers as well as a reference time series (e.g. Dax)
-            r (float): Risk-free rate. Needed to comupute expected value of positions as well as different states during transition process.
+            stock_data (pd.DataFrame): Dataframe with stock data. Stock data needs to include close
+                values of the different issuers as well as a reference time series (e.g. Dax)
+            r (float): Risk-free rate. Needed to comupute expected value of positions as well as
+                different states during transition process.
             t (float): Dipositon horizon for calculation of credit risk.
             confidencelevel (int): Used confidence level in VaR-Calculation. Format Int.
             seed (int, optional): Seed for random number generator. Defaults to None.
@@ -94,7 +88,7 @@ class creditMetricsModel:
                 {
                     "IssuerID": issuer.obj_id,
                     "IssuerName": issuer.name,
-                    "Rating": str(issuer.rating),  # ggf. .value oder .name je nach Enum-Implementierung
+                    "Rating": str(issuer.rating),
                 }
                 for issuer in self.issuer_data
             ]
@@ -198,12 +192,15 @@ class creditMetricsModel:
         Monte-Carlo simulation of portfolio based on positions, issuer, correlation and transition matrix.
 
         For each simulation step, the return of each issuer is simulated:
-        - The return of the benchmark (Y) is simulated and multiplied with the issuer-specific correlation. This random number is consistent for every issuer during one simulation step.
-        - Afterwards, the idiosyncratic return of each issuer is simulated and multiplied with the idiosyncratic risk factor sqrt(1-p^2).
+        - The return of the benchmark (Y) is simulated and multiplied with the issuer-specific correlation.
+          This random number is consistent for every issuer during one simulation step.
+        - Afterwards, the idiosyncratic return of each issuer is simulated and multiplied with the idiosyncratic
+          risk factor sqrt(1-p^2).
         - This results in the simulated return for every issuer in every simulation step:
-        r_k = rho * Y + sqrt(1 - rho^2) * Z_k
+          r_k = rho * Y + sqrt(1 - rho^2) * Z_k
 
-        For each issuer, the new rating is determined and the loss is calculated as the difference between the new value and the expected value.
+        For each issuer, the new rating is determined and the loss is calculated as the difference between the
+        new value and the expected value.
 
         Returns:
             tuple:
@@ -244,7 +241,7 @@ class creditMetricsModel:
 
         return Loss, rr_scenarios, issuer_ids, issuer_names
 
-    def get_loss_distribution(self, mc_scenario_values: np.array):
+    def get_loss_distribution(self, mc_scenario_values: np.ndarray):
         """Computes loss distribution for portfolio after monte-carlo-simulation.
 
         Returns:
@@ -254,7 +251,7 @@ class creditMetricsModel:
 
         return loss_distribution
 
-    def get_portfolio_VaR(self, loss_distribution: np.array):
+    def get_portfolio_VaR(self, loss_distribution: np.ndarray):
         """Computes Credit Value at Risk for specific portfolio and confidence level.
 
         Returns:
@@ -264,7 +261,7 @@ class creditMetricsModel:
 
         return Port_Var
 
-    def get_portfolio_ES(self, loss_distribution: np.array):
+    def get_portfolio_ES(self, loss_distribution: np.ndarray):
         """Computes expected shortfall for specific portfolio and confidence level.
 
         Returns:
