@@ -132,7 +132,7 @@ class SimpleSchedule(interfaces.FactoryObject):
         result = []
         for i in range(n_samples):
             start = ref_date + dt.timedelta(days=np.random.randint(0, 100))
-            end = start + +dt.timedelta(days=np.random.randint(5, 365))
+            end = start + dt.timedelta(days=np.random.randint(5, 365))
             result.append(SimpleSchedule(start=start, end=end))
         return result
 
