@@ -76,11 +76,6 @@ class DepositPricer(SimpleCashflowPricer):
 
         dcc = DayCounter(daycountconvention)
         dt = dcc.yf(start_date, maturity_date)
-        # # DEBUG TODO REMOVE
-        # print("Depopsit Pricing, start, mat, yf")
-        # print(start_date)
-        # print(maturity_date)
-        # print(dt)
         simple_rate = ((1 / cont_df) - 1) / dt
 
         return simple_rate

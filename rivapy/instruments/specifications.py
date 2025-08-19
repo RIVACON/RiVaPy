@@ -15,6 +15,7 @@ from rivapy.tools._validators import (
     _check_start_before_end,
     _check_start_at_or_before_end,
     _string_to_calendar,
+    _check_non_negativity,
     _is_ascending_date_list,
 )
 
@@ -710,7 +711,8 @@ class HasExpectedCashflows(FactoryObject):
         _check_start_at_or_before_end(self._first_fixing_date, self._start_date)
         _check_start_before_end(self._start_date, self._end_date)
         _check_start_at_or_before_end(self._end_date, self._maturity_date)
-        _check_positivity(self._settlement_days)
+        _check_non_negativity(self._settlement_days)
+        _check_non_negativity(self._spot_days)
         if not isinstance(self._frequency, (Period, str)):
             raise ValueError("Frequency must be a Period object or string.")
         if not isinstance(self._calendar, (_HolidayBase, str)):

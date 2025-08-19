@@ -11,7 +11,7 @@ from datetime import datetime, date, timedelta
 from holidays import HolidayBase as _HolidayBase
 from holidays import EuropeanCentralBank as _ECB
 from dateutil.relativedelta import relativedelta
-from rivapy.tools.datetools import Period, _date_to_datetime, _term_to_period, calc_end_day, calc_start_day, roll_day
+from rivapy.tools.datetools import Period, _date_to_datetime, _term_to_period, calc_end_day, calc_start_day, roll_day, next_or_previous_business_day
 from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating, RollRule, Instrument
 
 import rivapy.tools.interfaces as interfaces
@@ -38,7 +38,7 @@ class DepositSpecification(HasExpectedCashflows):
         calendar: _Union[_HolidayBase, str] = _ECB(),
         issuer: _Optional[str] = None,
         securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
-        settlement_days: int = 2,
+        settlement_days: int = 0,
         adjust_start_date: bool = True,
         adjust_end_date: bool = False,
     ):
@@ -48,27 +48,24 @@ class DepositSpecification(HasExpectedCashflows):
 
         Args:
             obj_id (str): (Preferably) Unique label of the deposit.
-            fixing_date (_Union[date, datetime]): Date on which the reference rate is set. Must lie at or before the start_date.
-            start_date (_Union[date, datetime]): Date on when deposits begins for accrual or settlement. Is rolled to business day according to the business_day_convention. Must lie at or before the fixing_date.
-            end_date (_Union[date, datetime]): Date on which the deposit ends for accrual or settlement. May be a holiday according to applicable calendar. Must lie after the start_date.
-            maturity_date (_Union[date, datetime]): Date when deposit is matures formally, lies on a good business day. Must lie at or after the start_date.
+            fixing_date (_Union[date, datetime]): Date on which the reference rate is set. Must be a business day and must lie at or before the start_date. is rolled to business day according to business_day_convention if not provided as business day.
+            start_date (_Union[date, datetime]): Date on when deposits begins for accrual or settlement. Is rolled to business day according to the business_day_convention if adjust_start_date is True. Must lie at or after the fixing_date.
+            end_date (_Union[date, datetime]): Date on which the deposit ends for accrual or settlement. May be a holiday according to applicable calendar. Must lie after the start_date and will be rolled according to business day convention if adjust_end_date is True.
+            maturity_date (_Union[date, datetime]): Date when deposit matures formally, lies on a good business day. Must lie at or after the end_date.
             currency (str, optional): Currency as alphabetic, Defaults to 'EUR'.
             notional (float, optional): Deposit's notional/face value. Must be positive. Defaults to 100.0.
             rate (float): Deposit fixed rate.
-            term (_Union[Period, str], optional): Deposit term. If provided, it is used to calculate the maturity date from the start date.
-            day_count_convention (Union[DayCounter, str], optional): Day count convention for determining period
-                                                                     length. Defaults to DayCounter.ThirtyU360.
-            business_day_convention (Union[RollConvention, str], optional): Set of rules defining the adjustment of
-                                                                            days to ensure each date being a business
-                                                                            day with respect to a given holiday
-                                                                            calendar. Defaults to
-                                                                            RollConvention.FOLLOWING
+            term (_Union[Period, str], optional): Deposit term. If provided and not end date is given, it is used to calculate the end date from the start date.
+            day_count_convention (Union[DayCounter, str], optional): Day count convention for determining period length. Defaults to DayCounter.ThirtyU360.
+            business_day_convention (Union[RollConvention, str], optional): Set of rules defining the adjustment of  days to ensure each date being a business day with respect to a given holiday calendar. Defaults to RollConvention.FOLLOWING
             roll_convention (Union[RollRule],str], optional): Roll convention to be applied when building a schedule. Defaults to RollRule.NONE.
-            spot_lag (int, optional): Number of days after fixing date when the deposit is actually settled. Defaults to 2.
+            spot_lag (int, optional): Number of days after fixing date when the deposit is actually settled. Defaults to 2 and is set to 0, if start_date == fixing_date or O/N deposit, and is set to 1 for T/N deposit or start_date = fixing_date+1.
             calendar (Union[HolidayBase, str], optional): Holiday calendar to be used for business day adjustment. Defaults to ECB calendar.
             issuer (str, optional): Name/id of issuer. Defaults to None.
             securitization_level (_Union[SecuritizationLevel, str], optional): Securitization level. Defaults to None.
-            rating (_Union[Rating, str]): Paper rating.
+            settlement_days (int, optional): Number of days after end date when the deposit is actually settled. Defaults to 2.
+            adjust_start_date (bool, optional): Whether to adjust the start date to the next business day if it falls on a holiday. Defaults to True.
+            adjust_end_date (bool, optional): Whether to adjust the end date to the next business day if it falls on a holiday. Defaults to False.
         """
 
         # Store original input of fixing date
@@ -92,11 +89,12 @@ class DepositSpecification(HasExpectedCashflows):
             else:
                 fd = fixing_date
         elif start_date is not None:
-            fd = calc_start_day(
-                roll_day(start_date, calendar=calendar, business_day_convention=business_day_convention),
-                f"{self._spot_days}D",
-                business_day_convention=business_day_convention,
-                calendar=calendar,
+            fd = next_or_previous_business_day(
+                calc_start_day(
+                    roll_day(start_date, calendar=calendar, business_day_convention=business_day_convention),f"{spd}D",
+                    business_day_convention=business_day_convention,calendar=calendar
+                )
+                ,calendar = calendar, following_first=False
             )
             print("Set fixing_date, " + str(start_date) + " to start_date adjusted backwards by spot_days and business_day_convention:" + str(fd))
         else:
@@ -111,7 +109,7 @@ class DepositSpecification(HasExpectedCashflows):
         elif fixing_date is not None and adjust_start_date:
             sd = calc_end_day(
                 fixing_date,
-                f"{self._spot_days}D",
+                f"{spd}D",
                 business_day_convention=business_day_convention,
                 calendar=calendar,
                 roll_convention=roll_convention,
@@ -132,15 +130,10 @@ class DepositSpecification(HasExpectedCashflows):
             print("Set end_date, " + str(end_date) + ", to next business day acc. to business_day_convention:" + str(ed))
         elif term is not None and not adjust_end_date:
             ed = calc_end_day(sd, term, calendar=calendar, roll_convention=roll_convention)
-            print(
-                "set end_date to start_date, "
-                + str(sd)
-                + ", adjusted by term and roll_convention, not adjusted by business_day_convention: "
-                + str(ed)
-            )
+            print("set end_date to start_date " + "adjusted by term and roll_convention, not adjusted by business_day_convention: " + str(ed))
         elif term is not None:
             ed = calc_end_day(sd, term, calendar=calendar, roll_convention=roll_convention, business_day_convention=business_day_convention)
-            print("set end_date to start_date, " + str(sd) + ", adjusted by term and roll_convention and business_day_convention: " + str(ed))
+            print("set end_date to start_date adjusted by term, roll_convention, and business_day_convention: " + str(ed))
         elif maturity_date is not None:
             if not is_business_day(maturity_date, calendar=calendar) and adjust_end_date:
                 ed = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)

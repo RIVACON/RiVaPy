@@ -51,7 +51,17 @@ class SimpleCashflowPricer:
                 for d1, d2 in zip(dates[:-1], dates[1:])
             ]
         if specification._notional_exchange:
-            cashflows.append((specification._maturity_date, specification._notional))
+            cashflows.append(
+                (
+                    roll_day(
+                        specification._maturity_date,
+                        specification._calendar,
+                        specification._business_day_convention,
+                        settle_days=specification._settlement_days,
+                    ),
+                    specification._notional,
+                )
+            )
         return cashflows
 
     @staticmethod

@@ -46,21 +46,20 @@ def _check_positivity(value: float) -> float:
         raise Exception(str(value) + " must be positive!")
 
 
-# def check_non_negativity(value: float
-#                          ) -> float:
-#     """
-#     Checks if value is non-negative.
-#
-#     Args:
-#         value (float): value to be checked for non-negativity.
-#
-#     Returns:
-#         float: non-negative value
-#     """
-#     if value < 0.0:
-#         raise Exception(str(value) + ' must not be negative!')
-#     else:
-#         return value
+def _check_non_negativity(value: float) -> float:
+    """
+    Checks if value is non-negative.
+
+    Args:
+        value (float): value to be checked for non-negativity.
+
+    Returns:
+        float: non-negative value
+    """
+    if value < 0.0:
+        raise Exception(str(value) + ' must not be negative!')
+    else:
+        return value
 
 
 def _check_relation(less: float, more: float) -> _Tuple[float, float]:
