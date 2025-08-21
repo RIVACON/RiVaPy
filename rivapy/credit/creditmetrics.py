@@ -6,7 +6,7 @@ from typing import List, Optional as _Optional
 from rivapy.instruments.components import Issuer
 
 
-class creditMetricsModel:
+class CreditMetricsModel:
     def __init__(
         self,
         n_simulation: int,
@@ -16,7 +16,7 @@ class creditMetricsModel:
         stock_data: pd.DataFrame,
         r: float,
         t: float,
-        confidencelevel: int,
+        confidencelevel: float,
         seed: _Optional[int] = None,
     ):
         """_summary_
@@ -32,7 +32,7 @@ class creditMetricsModel:
             r (float): Risk-free rate. Needed to comupute expected value of positions as well as
                 different states during transition process.
             t (float): Dipositon horizon for calculation of credit risk.
-            confidencelevel (int): Used confidence level in VaR-Calculation. Format Int.
+            confidencelevel (float): Used confidence level in VaR-Calculation. Format Float.
             seed (int, optional): Seed for random number generator. Defaults to None.
         """
 
@@ -257,7 +257,7 @@ class creditMetricsModel:
         Returns:
             Float: Portfolio Value at Risk of specific confidence level.
         """
-        Port_Var = -1 * np.percentile(loss_distribution, self.confidencelevel)
+        Port_Var = -1 * np.percentile(loss_distribution, 100 - self.confidencelevel)
 
         return Port_Var
 
@@ -268,6 +268,6 @@ class creditMetricsModel:
             Float: Expected shorfall of porfolio.
         """
 
-        expectedShortfall = -1 * np.mean(loss_distribution[loss_distribution < np.percentile(loss_distribution, self.confidencelevel)])
+        expectedShortfall = -1 * np.mean(loss_distribution[loss_distribution < np.percentile(loss_distribution, 100 - self.confidencelevel)])
 
         return expectedShortfall

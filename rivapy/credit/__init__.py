@@ -1,3 +1,3 @@
 from rivapy.credit.credit import *
 
-from rivapy.credit.creditmetrics import creditMetricsModel
+from rivapy.credit.creditmetrics import CreditMetricsModel
