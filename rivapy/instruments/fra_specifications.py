@@ -5,7 +5,16 @@ from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
 from holidays import HolidayBase as _HolidayBase, ECB as _ECB
 from rivapy.tools.datetools import Period, Schedule, _date_to_datetime, _datetime_to_date_list, _term_to_period
-from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating, Instrument
+from rivapy.tools.enums import (
+    DayCounterType,
+    RollConvention,
+    SecuritizationLevel,
+    Currency,
+    Rating,
+    Instrument,
+    InterestRateIndex,
+    get_index_by_alias,
+)
 from rivapy.tools._validators import _check_positivity, _check_start_before_end, _string_to_calendar, _is_ascending_date_list
 import rivapy.tools.interfaces as interfaces
 from rivapy.tools.datetools import Period, Schedule, roll_day
@@ -35,7 +44,9 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         # trade_settle: int= 0,
         spot_lag: int = None,
         start_period: int = None,
+        # _Optional[_Union[Period, str]] = None,
         end_period: int = None,
+        index_alias: str = None,
         issuer: str = None,
         securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
         rating: _Union[Rating, str] = Rating.NONE,
@@ -76,6 +87,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
             spot_lag (int): time difference between issue/trade date and spot_date given in days.
             start_period (int): forward start period given in months e.g. 1 from 1Mx4M
             end_period (int): forward end period given in months e.g. 4 from 1Mx4M
+            index_alias (str): ID of the underlying Index rate used for the floating rate for fixing.
             issuer (str, optional): Name/id of issuer. Defaults to None.
             securitization_level (_Union[SecuritizationLevel, str], optional): Securitization level. Defaults to None.
             rating (_Union[Rating, str]): Paper rating.
@@ -110,6 +122,10 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
             self._start_period = start_period
         if end_period is not None:
             self._end_period = end_period
+        if index_alias is not None:
+            self._index_alias = index_alias
+            self._index = get_index_by_alias(index_alias)
+            self._indexdata = self._index.value
         if issuer is not None:
             self._issuer = issuer
         if securitization_level is not None:
@@ -243,6 +259,18 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         }
         return result
 
+    def get_schedule(self) -> Schedule:
+        """Returns the schedule of the accrual periods of the instrument."""
+        return Schedule(
+            start_day=self._start_date,
+            end_day=self._end_date,
+            time_period=self._frequency,
+            backwards=True,
+            stub_type_is_Long=True,
+            business_day_convention=self.business_day_convention,
+            roll_convention=None,
+            calendar=self._calendar,
+        )
         # region properties
 
     @property
@@ -543,6 +571,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
 
     @rate_business_day_convention.setter
     def rate_business_day_convention(self, business_day_convention: _Union[DayCounterType, str]) -> str:
+        """Setter for FRA's underlying rate's business_day_convention."""
         self._rate_business_day_convention = DayCounterType.to_string(business_day_convention)
 
     @property
@@ -571,6 +600,19 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
             float: _description_
         """
         return self._end_period
+
+    @property
+    def index(self) -> str:
+        """Getter for the underlying Index rate used for the floating rate for fixing.
+
+        Returns:
+            str: _description_
+        """
+        return self._index
+
+    @index.setter
+    def index(self, index: str):
+        self._index = index
 
     def ins_type(self):
         """Return instrument type

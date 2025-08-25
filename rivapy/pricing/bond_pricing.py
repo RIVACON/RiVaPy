@@ -65,10 +65,17 @@ class SimpleCashflowPricer:
         return cashflows
 
     @staticmethod
-    def pv_cashflows(val_date: datetime, specification: HasExpectedCashflows, discount_curve: DiscountCurve) -> float:
+    def pv_cashflows(
+        val_date: datetime,
+        specification: HasExpectedCashflows,
+        discount_curve: DiscountCurve,
+        cashflows: _Union[List[Tuple[datetime, float]], None] = None,
+    ) -> float:
         # logger.info('Start computing pv cashflows for bond ' + specification.obj_id)
 
-        cashflows = SimpleCashflowPricer.expected_cashflows(specification, val_date=val_date)  # get only cashflows
+        if cashflows is None:
+            cashflows = SimpleCashflowPricer.expected_cashflows(specification, val_date=val_date)  # get only cashflows
+
         pv_cashflows = 0.0
         for c in cashflows:
             if c[0] >= val_date:

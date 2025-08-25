@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from enum import Enum as _Enum, unique as _unique
+from dataclasses import dataclass
+from typing import List
 from rivapy import _pyvacon_available
 
 """
@@ -535,3 +537,55 @@ class Instrument(_MyEnum):
     OIS = "OIS"
     FRA = "FRA"
     FXF = "FXF"
+
+
+@dataclass(frozen=True)
+class IndexMetadata:
+    name: str
+    currency: str
+    tenor: str
+    spot_lag: int
+    business_day_convention: str
+    roll_convention: str
+    calendar: str
+    aliases: List[str]
+
+
+class InterestRateIndex(_MyEnum):
+    EUR3M = IndexMetadata(
+        name="EURIBOR 3M",
+        currency="EUR",
+        tenor="3M",
+        spot_lag=2,
+        business_day_convention="ModifiedFollowing",
+        roll_convention="EOM",
+        calendar="TARGET",
+        aliases=["EUR3M", " EUR 3M", "EURIBOR 3M"],
+    )
+    EUR6M = IndexMetadata(
+        name="EURIBOR 6M",
+        currency="EUR",
+        tenor="6M",
+        spot_lag=2,
+        business_day_convention="ModifiedFollowing",
+        roll_convention="EOM,
+        calendar="TARGET",
+        aliases=["EUR6M", "EUR 6M", "EURIBOR 6M"],
+    )
+    ESTR = IndexMetadata(
+        name="€STR",
+        currency="EUR",
+        tenor="O/N",
+        spot_lag=0,
+        business_day_convention="Following",
+        roll_convention="None",
+        calendar="TARGET",
+        aliases=["EURSTR", "EUR STR", "€STR"],
+    )
+
+def get_index_by_alias(alias: str) -> InterestRateIndex:
+    alias = alias.strip().upper()
+    for index in InterestRateIndex:
+        if alias in [a.upper() for a in index.value["aliases"]]:
+            return index
+    raise ValueError(f"Unknown index alias: {alias}")
