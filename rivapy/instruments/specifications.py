@@ -235,7 +235,7 @@ class HasExpectedCashflows(FactoryObject):
         roll_convention: _Union[RollRule, str] = RollRule.EOM,
         calendar: _Union[_HolidayBase, str] = _ECB(),
         coupon_type: str = "fix",
-        settlement_days: int = 0,
+        payment_days: int = 0,
         spot_lag: int = 2,
         pays_in_arrears: bool = True,
         issuer: _Optional[str] = None,
@@ -259,7 +259,7 @@ class HasExpectedCashflows(FactoryObject):
             business_day_convention (_Union[RollConvention, str], optional): Business day convention. Defaults to RollConvention.MODIFIED_FOLLOWING.
             roll_convention (_Union[RollRule, str], optional): Roll convention. Defaults to RollRule.EOM.
             calendar (_Union[_HolidayBase, str], optional): Holiday calendar. Defaults to _ECB().
-            settlement_days (int, optional): Number of settlement days. Defaults to 0.
+            payment_days (int, optional): Number of payment days that pass between accrual end or maturity to payment. Defaults to 0.
             notional_exchange (bool, optional): Indicates if notional is exchanged at maturity. Defaults
             pays_in_arrears (bool, optional): Indicates if the instrument pays in arrears. Defaults to True.
             fwd_curve (_Optional[DiscountCurve], optional): Forward curve used for pricing. Defaults to None.
@@ -278,7 +278,7 @@ class HasExpectedCashflows(FactoryObject):
         self._calendar = calendar
         self._coupon_type = coupon_type
         self._notional_exchange = notional_exchange
-        self._settlement_days = settlement_days
+        self._payment_days = payment_days
         self._spot_days = spot_lag
         self._pays_in_arrears = pays_in_arrears
         self._currency = Currency.to_string(currency)
@@ -487,26 +487,26 @@ class HasExpectedCashflows(FactoryObject):
         self._notional_exchange = notional_exchange
 
     @property
-    def settlement_days(self) -> int:
+    def payment_days(self) -> int:
         """
         Getter for the number of settlement days.
 
         Returns:
             int: Number of settlement days.
         """
-        return self._settlement_days
+        return self._payment_days
 
-    @settlement_days.setter
-    def settlement_days(self, settlement_days: int):
+    @payment_days.setter
+    def payment_days(self, payment_days: int):
         """
         Setter for the number of settlement days.
 
         Args:
-            settlement_days (int): Number of settlement days.
+            payment_days (int): Number of settlement days.
         """
-        if not isinstance(settlement_days, int) or settlement_days < 0:
+        if not isinstance(payment_days, int) or payment_days < 0:
             raise ValueError("Settlement days must be a non-negative integer.")
-        self._settlement_days = settlement_days
+        self._payment_days = payment_days
 
     @property
     def pays_in_arrears(self) -> bool:
@@ -710,8 +710,8 @@ class HasExpectedCashflows(FactoryObject):
         _check_positivity(self._notional)
         _check_start_at_or_before_end(self._first_fixing_date, self._start_date)
         _check_start_before_end(self._start_date, self._end_date)
-        _check_start_at_or_before_end(self._end_date, self._maturity_date)
-        _check_non_negativity(self._settlement_days)
+        # _check_start_at_or_before_end(self._end_date, self._maturity_date)
+        _check_non_negativity(self._payment_days)
         _check_non_negativity(self._spot_days)
         if not isinstance(self._frequency, (Period, str)):
             raise ValueError("Frequency must be a Period object or string.")
@@ -734,7 +734,7 @@ class HasExpectedCashflows(FactoryObject):
     #         # Add settlement days
     #         from dateutil.relativedelta import relativedelta
 
-    #         with_settlement = adjusted_date + relativedelta(days=self._settlement_days)
+    #         with_settlement = adjusted_date + relativedelta(days=self._payment_days)
 
     #         # Final business day adjustment
     #         final_date = roll_day(with_settlement, self._calendar, self._business_day_convention)

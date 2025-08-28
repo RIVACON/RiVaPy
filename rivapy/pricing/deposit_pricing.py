@@ -1,53 +1,93 @@
-from datetime import datetime
+from datetime import datetime, date
 from rivapy.marketdata import DiscountCurve
 from rivapy.pricing.pricing_request import PricingRequest
 from rivapy.pricing._logger import logger
 from rivapy.instruments.deposit_specifications import DepositSpecification
 from rivapy.tools.datetools import DayCounter
 from rivapy.pricing.bond_pricing import SimpleCashflowPricer
+from typing import Tuple, Union as _Union, List as _List
 
 
 class DepositPricer(SimpleCashflowPricer):
 
-    # def __init__(
-    #     self,
-    #     val_date: _Union[date, datetime],
-    #     deposit_spec: DepositSpecification,
-    #     discount_curve: DiscountCurve,
-    #     spread_curve: _Union[DiscountCurve, float] = 0.0,
-    # ):
-    #     """_summary_
+    def __init__(
+        self,
+        val_date: _Union[date, datetime],
+        deposit_spec: DepositSpecification,
+        discount_curve: DiscountCurve,
+        spread_curve: DiscountCurve = None,
+    ):
+        """_summary_
 
-    #     Args:
-    #         val_date (_Union[date, datetime]): specific date for which the value of the financial instrument is calculated.
-    #         deposit_spec (DepositSpecification): Specification object with deposit specific parameters.
-    #         discount_curve (DiscountCurve): Discount curve used for discounting.
-    #         spread_curve (_Union[DiscountCurve, float]): Spread curve
-    #     """
+        Args:
+            val_date (_Union[date, datetime]): specific date for which the value of the financial instrument is calculated.
+            deposit_spec (DepositSpecification): Specification object with deposit specific parameters.
+            discount_curve (DiscountCurve): Discount curve used for discounting.
+            spread_curve (_Union[DiscountCurve, float]): Spread curve
+        """
 
-    #     self._val_date = val_date
-    #     self._spec = deposit_spec
-    #     self._discount_curve = discount_curve
-    #     self._spread_curve = spread_curve
-    #     self._validate_pricer_dates()
+        self._val_date = val_date
+        self._spec = deposit_spec
+        self._discount_curve = discount_curve
+        self._spread_curve = spread_curve
+        self._validate_pricer_dates()
 
-    # def _validate_pricer_dates(self):
-    #     """Validates consistency of valuation date, curve reference date, and deposit fixing date"""
-    #     self._discount_curve.refdate, self._spec._fixing_date = _check_start_at_or_before_end(self._discount_curve.refdate, self._spec._fixing_date)
-    #     self._discount_curve.refdate, self._val_date = _check_start_at_or_before_end(self._discount_curve.refdate, self._val_date)
+    def _validate_pricer_dates(self):
+        """Validates consistency of valuation date, curve reference date, and deposit fixing date"""
+        self._discount_curve.refdate, self._spec._fixing_date = _check_start_at_or_before_end(self._discount_curve.refdate, self._spec._fixing_date)
+        self._discount_curve.refdate, self._val_date = _check_start_at_or_before_end(self._discount_curve.refdate, self._val_date)
+
+    def expected_cashflows(self) -> _List[Tuple[datetime, float]]:
+        """Get the expected cashflows of the deposit.
+
+        Returns:
+            List[Tuple[datetime, float]]: The expected cashflows of the deposit.
+        """
+        return SimpleCashflowPricer.expected_cashflows(self._spec, self._val_date)
 
     @staticmethod
-    def price(val_date: datetime, specification: DepositSpecification, discount_curve: DiscountCurve) -> float:
+    def get_expected_cashflows(val_date: datetime, specification: DepositSpecification) -> _List[Tuple[datetime, float]]:
+        """Get the expected cashflows of the deposit.
+
+        Args:
+            val_date (datetime): The valuation date.
+            specification (DepositSpecification): The deposit specification.
+            discount_curve (DiscountCurve): The discount curve.
+
+        Returns:
+            List[Tuple[datetime, float]]: The expected cashflows of the deposit.
+        """
+        return SimpleCashflowPricer.expected_cashflows(specification, val_date)
+
+    def price(self) -> float:
+        """Get the price of the deposit.
+
+        Returns:
+            float: The price of the deposit.
+        """
+        return self.get_price(self._val_date, self._spec, self._discount_curve)
+
+    @staticmethod
+    def get_price(val_date: datetime, specification: DepositSpecification, discount_curve: DiscountCurve) -> float:
         """Calculate the present value of the specified deposit given a discount curve and daycount convention
 
         Returns:
            float: present value of a deposit based on simple compounding
         """
 
-        return SimpleCashflowPricer.pv_cashflows(val_date, specification, discount_curve)
+        return SimpleCashflowPricer.get_pv_cashflows(val_date, specification, discount_curve)
+
+    def implied_simply_compounded_rate(self) -> float:
+        """Get the implied simply compounded rate of the deposit.
+
+
+        Returns:
+            float: The implied simply compounded rate of the deposit.
+        """
+        return DepositPricer.get_implied_simply_compounded_rate(self._val_date, self._spec, self._discount_curve)
 
     @staticmethod
-    def implied_simply_compounded_rate(val_date: datetime, specification: DepositSpecification, discount_curve: DiscountCurve) -> float:
+    def get_implied_simply_compounded_rate(val_date: datetime, specification: DepositSpecification, discount_curve: DiscountCurve) -> float:
         """Calculates the fair simply compounded rate for a deposit contract such that the contract has zero value.
         The function assumes a simply compounded rate, i.e., D(t) = 1 / (1 + rate(t) * dt), and computes the implied rate
         using the provided discount curve and deposit specification.
