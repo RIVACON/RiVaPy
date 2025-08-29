@@ -11,6 +11,7 @@ from rivapy.instruments.fra_specifications import ForwardRateAgreementSpecificat
 from rivapy.instruments.ir_swap_specification import (
     IrFixedLegSpecification,
     IrFloatLegSpecification,
+    IrOISLegSpecification,
     InterestRateSwapSpecification,
     IrSwapLegSpecification,
 )
@@ -271,7 +272,7 @@ class InterestRateSwapPricer:
             notional_end_date = leg_notional_structure.get_pay_date_end(i)
 
             if notional_start_date:  # i.e. not None or empty
-                # add an intional notional OUTFLOW or not
+                # add an initial notional OUTFLOW or not
                 notional_entry = CashFlow()
                 notional_entry.pay_date = notional_start_date
 
@@ -364,6 +365,191 @@ class InterestRateSwapPricer:
         return entries
 
     @staticmethod
+    def _populate_cashflows_ois(
+        val_date: _Union[date, datetime],
+        ois_leg_spec: IrOISLegSpecification,
+        discount_curve: DiscountCurve,
+        forward_curve: DiscountCurve,
+        fx_forward_curve: DiscountCurve,
+        fixing_map: FixingTable,
+        fixing_grace_period: float,
+        set_spread: bool = False,
+        spread: float = None,
+    ) -> _List[CashFlow]:
+        """Generate a list of CashFlow objects, each with the cashflow amount for the given accrual period
+        and additional information added to describe the cashflow. To be used for OIS leg specifications.
+
+        Args:
+            val_date (_Union[date, datetime]): valuation date
+            float_leg_spec (IrFloatLegSpecification): specification of the floating leg of the IR Swap
+            discount_curve (DiscountCurve): The discount curve used for discounting to calculated the present value
+            forward_curve (DiscountCurve): forward curve used to determine the forward rate to calculate the interest
+            fx_forward_curve (DiscountCurve): fxCurve used for currency conversion for applicable swap (not yet implemented)
+            fixing_map (FixingTable): Fixing map of historial values (not yet implemented)
+            fixing_grace_period (float):
+            setSpread (bool, optional): Flag to manually set a spread value. Defaults to False.
+            spread (float, optional): Desired spread value. Defaults to None.
+
+        Raises:
+            ValueError: No underlying index ID found in fixing table
+
+        Returns:
+            _List[CashFlow]: list of CashFlow objects.
+        """
+        entries = []  # output container to be returned
+        udl = ois_leg_spec.udl_id  # get the ID of the underlying
+
+        # Parameters to consider
+        # const std::vector<std::vector<boost::posix_time::ptime>>& dailyRateStartDates = oisLeg->getDailyRateStartDates();
+        # const std::vector<std::vector<boost::posix_time::ptime>>& dailyRateEndDates = oisLeg->getDailyRateEndDates();
+        # const std::vector<std::vector<boost::posix_time::ptime>>& dailyResetDates = oisLeg->getDailyResetDates();
+        # const std::vector<boost::posix_time::ptime>& startDates = oisLeg->getStartDates();
+        # const std::vector<boost::posix_time::ptime>& endDates = oisLeg->getEndDates();
+        # const std::vector<boost::posix_time::ptime>& payDates = oisLeg->getPayDates();
+        # std::shared_ptr<const NotionalStructure> notionalStructure = leg->getNotionalStructure();
+        # std::vector<double> notionals(leg->getStartDates().size());
+
+        # swap day count convention
+        dcc = DayCounter(discount_curve.daycounter)
+        # rate day count convention # note that the specification also has dcc but without the curve...
+        rate_dcc = DayCounter(ois_leg_spec.rate_day_count_convention)
+
+        # overwrite spread if desired
+        leg_spread = ois_leg_spec.spread
+        if set_spread:
+            leg_spread = spread
+
+        # obtain the notionals and create a list of notionals to be used for each cashflow
+        leg_notional_structure = ois_leg_spec.get_NotionalStructure()
+        # define the number of cashflows
+        num_of_start_dates = len(ois_leg_spec.start_dates)
+
+        notionals = get_projected_notionals(
+            val_date=val_date,
+            notional_structure=leg_notional_structure,
+            start_period=0,
+            end_period=num_of_start_dates,
+            fx_forward_curve=fx_forward_curve,
+            fixing_map=fixing_map,
+        )  # output is a list of floats
+
+        # obtained from ois_leg_spec # expect 2D structure
+        daily_rate_start_dates = ois_leg_spec.rate_start_dates
+        # [[0],[1]] # i:start datet fo accrual period j:rate start days within the accrual period # e.g i:accrual over 3M, j:reset daily
+        daily_rate_end_dates = ois_leg_spec.rate_end_dates
+        daily_rate_reset_dates = ois_leg_spec.rate_reset_dates
+
+        # for each notional, but essentially each accrual period
+        for i in range(len(notionals)):
+
+            notional_start_date = leg_notional_structure.get_pay_date_start(i)
+            notional_end_date = leg_notional_structure.get_pay_date_end(i)
+
+            if notional_start_date:  # i.e. not None or empty
+                # add an initial notional OUTFLOW or not
+                notional_entry = CashFlow()
+                notional_entry.pay_date = notional_start_date
+
+                if val_date <= notional_entry.pay_date:  # TODO recheck this business logic
+                    notional_entry.discount_factor = discount_curve.rivapy_value(val_date, notional_entry.pay_date)
+                else:
+                    notional_entry.discount_factor = 0.0
+
+                notional_entry.pay_amount = -1 * notionals[i]
+                notional_entry.present_value = notional_entry.pay_amount * notional_entry.discount_factor
+                notional_entry.notional_cashflow = True
+                entries.append(notional_entry)
+
+            entry = CashFlow()
+            entry.start_date = ois_leg_spec.start_dates[i]
+            entry.end_date = ois_leg_spec.end_dates[i]
+            entry.pay_date = ois_leg_spec.pay_dates[i]
+            entry.notional = notionals[i]
+            entry.interest_yf = dcc.yf(entry.start_date, entry.end_date)
+
+            # loop over each resetting datet, i.e. daily to calculate the daily compounded interest to use to calculae coupon for this time period/entry
+            accDf = 1.0  # accrual discount factor
+
+            for j in range(len(daily_rate_start_dates[i])):
+
+                rate_yf = rate_dcc.yf(daily_rate_start_dates[i][j], daily_rate_end_dates[i][j])  # should be a day
+
+                if daily_rate_reset_dates[i][j] >= val_date:  # rate not yet fixed
+                    daily_fwd = forward_curve.rivapy_valueFWD(val_date, daily_rate_start_dates[i][j], daily_rate_end_dates[i][j])
+                    daily_rate = leg_spread + (1.0 / daily_fwd - 1.0) / rate_yf
+
+                else:  # rate already fixed
+
+                    fixing = fixing_map.get_fixing(udl, daily_rate_reset_dates[i][j])
+
+                    if np.isnan(fixing):  # math.isnan
+                        if (val_date - daily_rate_reset_dates[i][j]) > fixing_grace_period:
+                            raise RuntimeError(f"Fixing for udl {udl}, date {daily_rate_reset_dates[i][j]} not provided")
+                        else:
+                            if entry.pay_date >= val_date:
+                                # fix value of payment i in future based on current discount curve and a period between valDate and valDate+length of original period (workaround if fixing is not available)
+                                time_delta = entry.end_date - entry.start_date  # do we need? we assume daily...
+                                fixing = (
+                                    1.0 / forward_curve.rivapy_valueFWD(val_date, daily_rate_start_dates[i][j], daily_rate_end_dates[i][j]) - 1.0
+                                ) / rate_yf
+
+                    daily_rate = leg_spread + fixing
+
+                accDf *= 1.0 + daily_rate * rate_yf  # compounded daily, hence the multiplication
+            # accDf now calulated
+
+            rate_yf = rate_dcc.yf(daily_rate_start_dates[i][0], daily_rate_end_dates[i][-1])  # total accrual period Yf
+            entry.rate = (accDf - 1.0) / rate_yf  # the -1 gives then just the interest portion of the compounded daily
+
+            if val_date <= entry.pay_date:
+                entry.discount_factor = discount_curve.rivapy_value(val_date, entry.pay_date)
+            else:
+                entry.discount_factor = 0.0
+
+            # given rate, notional, and yf, calc interest
+            entry.interest_amount = entry.notional * entry.rate * entry.interest_yf
+            entry.pay_amount = entry.interest_amount
+
+            # # scale by forward rate???? #TODO
+            # if val_date <= entry.end_date:
+            #     entry.pay_amount = entry.interest_amount / forward_curve.rivapy_valueFWD(val_date, entry.end_date, entry.pay_date)
+            # else:
+            #     if entry.pay_date >= val_date:
+            #         entry.pay_amount = entry.interest_amount / forward_curve.rivapy_valueFWD(val_date, val_date, entry.pay_date)
+            #     else:
+            #         entry.pay_amount = 0.0
+
+            # given total cashflow amount - discount it
+            # #DEBUG TODO
+            # print(f"forward rate: {entry.rate}")
+            # print(f"delta_t: {entry.interest_yf}")
+            # print(f"discount_factor: {entry.discount_factor}")
+            entry.present_value = entry.pay_amount * entry.discount_factor
+            entry.interest_cashflow = True
+            entries.append(entry)
+
+            # # TEMPORARY TEST - inthe case of constant notional structure, but i want a final notional cashflow like a bond
+            # if i == len(notionals) - 1:  # this checks for the last entry
+            #     notional_end_date = entry.end_date
+
+            if notional_end_date:
+                # add an intional notional INFLOW or not
+                notional_entry = CashFlow()
+                notional_entry.pay_date = notional_end_date
+
+                if val_date <= notional_entry.pay_date:  # TODO recheck this business logic
+                    notional_entry.discount_factor = discount_curve.rivapy_value(val_date, notional_entry.pay_date)
+                else:
+                    notional_entry.discount_factor = 0.0
+
+                notional_entry.pay_amount = notionals[i]  # positive
+                notional_entry.present_value = notional_entry.pay_amount * notional_entry.discount_factor
+                notional_entry.notional_cashflow = True
+                entries.append(notional_entry)
+
+        return entries
+
+    @staticmethod
     def price_leg_pricing_data(val_date, pricing_data: InterestRateSwapLegPricingData_rivapy, param):
         """Pricing a single Leg using Pricing Data architecture (not yet fully integrated, to be done once architecture clarified)
 
@@ -419,7 +605,7 @@ class InterestRateSwapPricer:
                 raise ValueError("pricing data is not of type 'InterestRateSwapFloatLegPricingData_rivapy' ")  # TODO UPDATE
 
         # elif leg_spec.leg_type ==  IrLegType.OIS:
-        #    populateCashFlowTableOIS
+        #    InterestRateSwapPricer._populate_cashflows_ois
         else:
             raise ValueError(f"Unknown leg type {leg_spec.type}")
 
@@ -477,8 +663,11 @@ class InterestRateSwapPricer:
                 val_date, leg_spec, discount_curve, forward_curve, fxForward_curve, fixing_map, fixing_grace_period
             )  # TODO implement spread
 
-        # elif leg_spec.leg_type ==  IrLegType.OIS:
-        #    populateCashFlowTableOIS
+        elif leg_spec.leg_type == IrLegType.OIS:
+            cashflow_table = InterestRateSwapPricer._populate_cashflows_ois(
+                val_date, leg_spec, discount_curve, forward_curve, fxForward_curve, fixing_map, fixing_grace_period
+            )
+            # TODO implement spread
         else:
             raise ValueError(f"Unknown leg type {leg_spec.type}")
 

@@ -568,7 +568,7 @@ class InterestRateIndex(_MyEnum):
         tenor="6M",
         spot_lag=2,
         business_day_convention="ModifiedFollowing",
-        roll_convention="EOM,
+        roll_convention="EOM",
         calendar="TARGET",
         aliases=["EUR6M", "EUR 6M", "EURIBOR 6M"],
     )
@@ -582,6 +582,7 @@ class InterestRateIndex(_MyEnum):
         calendar="TARGET",
         aliases=["EURSTR", "EUR STR", "€STR"],
     )
+
 
 def get_index_by_alias(alias: str) -> InterestRateIndex:
     alias = alias.strip().upper()

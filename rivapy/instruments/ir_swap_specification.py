@@ -246,7 +246,7 @@ class IrFloatLegSpecification(IrSwapLegSpecification):
         day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
         rate_day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
         spread: float = 0.0,
-    ):
+    ):  # TODO do we need to implemente BCC, roll convention here as well or is that handled elsewhere??
         """_summary_
 
         Args:
@@ -275,6 +275,8 @@ class IrFloatLegSpecification(IrSwapLegSpecification):
         self.fixing_id = fixing_id
         self.rate_day_count_convention = DayCounterType.to_string(rate_day_count_convention)
 
+    # TODO to_dict method
+
     # region properties
     @property
     def leg_type(self) -> str:
@@ -287,6 +289,132 @@ class IrFloatLegSpecification(IrSwapLegSpecification):
     @reset_dates.setter
     def reset_dates(self, value):
         self._reset_dates = value
+
+    @property
+    def udl_id(self) -> str:
+        return self._udl_id
+
+    @udl_id.setter
+    def udl_id(self, value):
+        self._udl_id = value
+
+    @property
+    def fixing_id(self) -> str:
+        return self._fixing_id
+
+    @fixing_id.setter
+    def fixing_id(self, value):
+        self._fixing_id = value
+
+    @property
+    def spread(self) -> float:
+        return self._spread
+
+    @spread.setter
+    def spread(self, value):
+        self._spread = value
+
+    @property
+    def rate_day_count(self) -> str:
+        return self.rate_day_count
+
+    @property
+    def rate_start_dates(self) -> _List[datetime]:
+        return self._rate_start_dates
+
+    @rate_start_dates.setter
+    def rate_start_dates(self, value):
+        self._rate_start_dates = value
+
+    @property
+    def rate_end_dates(self) -> _List[datetime]:
+        return self._rate_end_dates
+
+    @rate_end_dates.setter
+    def rate_end_dates(self, value):
+        self._rate_end_dates = value
+
+    def get_underlyings(self) -> Dict[str, str]:
+        return {self.udl_id: self.fixing_id}
+
+    # endregion
+
+    def get_NotionalStructure(self):
+
+        return self.notional_structure
+
+
+class IrOISLegSpecification(IrSwapLegSpecification):
+    def __init__(
+        self,
+        obj_id: str,
+        notional: _Union[float, NotionalStructure],
+        rate_reset_dates: _List[datetime],
+        start_dates: _List[datetime],
+        end_dates: _List[datetime],
+        rate_start_dates: _List[datetime],  # are these needed here? or are they obtained from the underlying
+        rate_end_dates: _List[datetime],
+        pay_dates: _List[datetime],
+        currency: _Union[Currency, str],
+        udl_id: str,
+        fixing_id: str,
+        day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
+        rate_day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
+        spread: float = 0.0,
+    ):
+
+        # fixingLag?
+        # payLag?
+        # freq?
+        # rate currency vs notional currency?
+        # leg holidays, and rate holidays - again to be dealt with in the scheduler?
+        # #TODO do we need to implemente BCC, roll convention here as well or is that handled elsewhere??
+        # FYI scheduler needs, start date, end date, freq, roll convention, holiday...
+        # for the reset dates, will need fixing lag
+        # for the pay dates generation, will need payLag
+
+        """_summary_
+
+        Args:
+            obj_id (str): obj ID for the instrument.
+            notional (_Union[float, NotionalStructure]): If given a singular float, will convert to ConstNotinalStructure. Contains the notional information.
+            reset_dates (_List[datetime]): Date on which the floating rate (e.g., SOFR, LIBOR) is determined
+            start_dates (_List[datetime]): Date the entire swap begins (effective date)
+            end_dates (_List[datetime]): Date the swap matures
+            rate_start_dates (_List[datetime]): start dates for the determination of the underlying rate
+            rate_end_dates (_List[datetime]): end dates for the determination of the underlying rate
+            pay_dates (_List[datetime]): Dates when both legs of the swap exchange cash flows.
+            currency (_Union[Currency, str]): The currency of the swap
+            udl_id (str): ID of the underlying rate
+            fixing_id (str): fixing id
+            day_count_convention (_Union[DayCounterType, str], optional): The day count convention used.. Defaults to DayCounterType.ThirtyU360.
+            rate_day_count_convention (_Union[DayCounterType, str], optional): The day count convention used for the underlying
+                                                . Defaults to DayCounterType.ThirtyU360.
+            spread (float, optional): _description_. Defaults to 0.0.
+        """
+        super().__init__(obj_id, notional, start_dates, end_dates, pay_dates, currency, day_count_convention)
+        self.rate_reset_dates = rate_reset_dates  # TODO: ADD setters to get rid of error notification?
+        self.rate_start_dates = rate_start_dates
+        self.rate_end_dates = rate_end_dates
+        self._spread = spread
+        self.udl_id = udl_id
+        self.fixing_id = fixing_id
+        self.rate_day_count_convention = DayCounterType.to_string(rate_day_count_convention)
+
+    # TODO to_dict method
+
+    # region properties
+    @property
+    def leg_type(self) -> str:
+        return IrLegType.OIS
+
+    @property
+    def reset_dates(self) -> _List[datetime]:
+        return self._rate_reset_dates
+
+    @reset_dates.setter
+    def rate_reset_dates(self, value):
+        self._rate_reset_dates = value
 
     @property
     def udl_id(self) -> str:

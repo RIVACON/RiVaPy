@@ -710,7 +710,7 @@ class HasExpectedCashflows(FactoryObject):
         _check_positivity(self._notional)
         _check_start_at_or_before_end(self._first_fixing_date, self._start_date)
         _check_start_before_end(self._start_date, self._end_date)
-        _check_start_at_or_before_end(self._end_date, self._maturity_date)
+        _check_start_at_or_before_end(self._end_date, self._maturity_date)  # TODO special case modified following BCC
         _check_non_negativity(self._settlement_days)
         _check_non_negativity(self._spot_days)
         if not isinstance(self._frequency, (Period, str)):
