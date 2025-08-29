@@ -41,7 +41,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         calendar: _Union[_HolidayBase, str] = None,
         currency: _Union[Currency, str] = "EUR",
         # ex_settle: int =0,
-        # trade_settle: int= 0,
+        payment_days: int = 0,
         spot_lag: int = None,
         start_period: int = None,
         # _Optional[_Union[Period, str]] = None,
@@ -84,6 +84,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
                                                           Defaults (through constructor) to holidays.ECB
                                                           (= Target2 calendar) between start_day and end_day.
             currency (str, optional): Currency as alphabetic, Defaults to 'EUR'.
+            payment_days (int): Number of days for payment after the start date. Defaults to 0.
             spot_lag (int): time difference between issue/trade date and spot_date given in days.
             start_period (int): forward start period given in months e.g. 1 from 1Mx4M
             end_period (int): forward end period given in months e.g. 4 from 1Mx4M
@@ -131,6 +132,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         if securitization_level is not None:
             self._securitization_level = securitization_level
         self._rating = Rating.to_string(rating)
+        self._payment_days = payment_days
 
         # give dates where applicable as optional, if not given, calculate based on spot lag, index spot lag, and forward period YMxZM (e.g. 1Mx4M)
         # e.g. for trade date D1 and spotLag, S1, and start_period = 1Mx4M
@@ -250,6 +252,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
             "rate_business_day_convention": self.rate_business_day_convention,
             "calendar": self.calendar,
             "currency": self.currency,
+            "payment_days": self.payment_days,
             "spot_lag": self.spot_lag,
             "start_period": self.start_period,
             "end_period": self.end_period,
@@ -621,6 +624,19 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
             Instrument: Forward rate agreement
         """
         return Instrument.FRA
+
+    @property
+    def payment_days(self) -> int:
+        """Getter for the number of settlement days.
+
+        Returns:
+            int: Number of settlement days.
+        """
+        return self._payment_days
+
+    @payment_days.setter
+    def payment_days(self, payment_days: int):
+        self._payment_days = payment_days
 
     # temp placeholder
     def get_end_date(self):

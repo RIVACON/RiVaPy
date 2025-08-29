@@ -45,40 +45,52 @@ class ForwardRateAgreementPricer:
     # -- add: expected cashflows
     # -- add: @static method price and ensure that non-static method can be called
     @staticmethod
-    def expected_FRA_cashflows(
+    def get_expected_cashflows(
         specification: ForwardRateAgreementSpecification,
         val_date: _Union[datetime.date, datetime],
-        curve: DiscountCurve,
-        fwdcurve: _Union[DiscountCurve, None] = None,
+        fwdcurve: DiscountCurve,
     ) -> _List[Tuple[datetime, float]]:
         """Calculate expected cashflows for the FRA specification based on the valuation date and discount curve.
 
         Args:
             specification (ForwardRateAgreementSpecification): The FRA specification.
             val_date (_Union[datetime.date, datetime]): The data as of which the cashflows are calculated.
-            curve (DiscountCurve): The discount curve.
             fwdcurve (_Union[DiscountCurve, None]): The forward curve.
 
         Returns:
             List[Tuple[datetime, float]]: List of tuples containing payment dates and amounts.
         """
 
-        if fwdcurve is None:
-            fwdcurve = curve
-
-        dcc = DayCounter(specification.day_count_convention)
         cashflows = []
-        payment_date = roll_day(
-            specification._start_date, specification._calendar, specification._business_day_convention, settle_days=specification._settlement_days
-        )
-        fwdrate = fwdcurve.rivapy_valueFWD(val_date, specification._rate_start_date, specification._rate_end_date)
-        dscrate = curve.rivapy_valueFWD(val_date, specification._start_date, specification._end_date)
-        dt = dcc.yf(specification._start_date, specification._end_date, specification._end_date)
+        # using curve daycount convention to get fwd-rate data
+        dcc_rate = DayCounter(fwdcurve.daycounter)
+        fwdrateDF = fwdcurve.rivapy_valueFWD(val_date, specification._rate_start_date, specification._rate_end_date)
+        dt_rate = dcc_rate.yf(specification._rate_start_date, specification._rate_end_date)
+        fwdrate = (1.0 / fwdrateDF - 1) / dt_rate
+        print(f"Day count fraction (yf): {dt_rate}, Forward rate: {fwdrate}")
+
+        # using instrument daycount convention to calculate delta t for cf amount calculation and discouting
+        dcc = DayCounter(specification.day_count_convention)
+        dt = dcc.yf(specification._start_date, specification._end_date)
         amount = specification._notional * (fwdrate - specification._rate) * dt
-        cf = amount / (1 + dscrate * dt)
+        print(f"dt: {dt}, Specification_Rate: {specification._rate}, Amount: {amount}")
+        cf = amount / (1 + fwdrate * dt)
+        print(f"Cashflow: {cf}")
+
+        payment_date = roll_day(
+            specification._start_date, specification._calendar, specification._business_day_convention, settle_days=specification._payment_days
+        )
         cashflows.append((payment_date, cf))
 
         return cashflows
+
+    def expected_cashflows(self):
+        """Calculate expected cashflows for the FRA specification.
+
+        Returns:
+            List[Tuple[datetime, float]]: List of tuples containing payment dates and amounts.
+        """
+        return ForwardRateAgreementPricer.get_expected_cashflows(self._fra_spec, self._val_date, self._forward_curve)
 
     @staticmethod
     def get_price(
@@ -98,8 +110,8 @@ class ForwardRateAgreementPricer:
         Returns:
             float: The present value of the FRA.
         """
-        expected_cashflows = ForwardRateAgreementPricer.expected_FRA_cashflows(specification, val_date, discount_curve, forward_curve)
-        price = SimpleCashflowPricer(val_date, specification, discount_curve, expected_cashflows)
+        expected_cashflows = ForwardRateAgreementPricer.get_expected_cashflows(specification, val_date, forward_curve)
+        price = SimpleCashflowPricer.get_pv_cashflows(val_date, specification, discount_curve, expected_cashflows)
         return price
 
     def price(self):
@@ -108,21 +120,7 @@ class ForwardRateAgreementPricer:
         Returns:
            float: present value of a deposit based on simple compounding
         """
-        # dcc = DayCounter(self._fra_spec.day_count_convention)
-
-        # #        roll convention??
-        # time_delta = dcc.yf(self._fra_spec.start_date, self._fra_spec.end_date)  # as yearfrac
-        # fwd_rate = ForwardRateAgreementPricer.compute_fair_rate(
-        #     self._val_date, self._forward_curve, self._fra_spec._rate_start_date, self._fra_spec._rate_end_date
-        # )  # 1.00  # self._fra_spec. # need forward curve
-        # fra_rate = self._fra_spec._rate
-        # pay_off = self._fra_spec.notional * time_delta * (fwd_rate - fra_rate)
-        # pay_off_discounted_to_start_date = pay_off / (1 + fwd_rate * time_delta)
-        # df_val_date = self._discount_curve.rivapy_value(
-        #     self._val_date, self._fra_spec.start_date
-        # )  # discounted from payment datet, usually start-date to val_date
-        # PV = pay_off_discounted_to_start_date * df_val_date
-        price = get_price(self._val_date, self._fra_spec, self._discount_curve, self._forward_curve)
+        price = ForwardRateAgreementPricer.get_price(self._val_date, self._fra_spec, self._discount_curve, self._forward_curve)
 
         return price
 
@@ -158,8 +156,8 @@ class ForwardRateAgreementPricer:
             float: _description_
         """
 
-        rate_start_date: specification.rate_start_date
-        rate_end_date: specification.rate_end_date
+        rate_start_date = specification._rate_start_date
+        rate_end_date = specification._rate_end_date
 
         dcc = DayCounter(forward_curve.daycounter)
         yf = dcc.yf(rate_start_date, rate_end_date)

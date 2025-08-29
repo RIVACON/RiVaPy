@@ -38,7 +38,7 @@ class DepositSpecification(HasExpectedCashflows):
         calendar: _Union[_HolidayBase, str] = _ECB(),
         issuer: _Optional[str] = None,
         securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
-        settlement_days: int = 0,
+        payment_days: int = 0,
         adjust_start_date: bool = True,
         adjust_end_date: bool = False,
     ):
@@ -63,7 +63,7 @@ class DepositSpecification(HasExpectedCashflows):
             calendar (Union[HolidayBase, str], optional): Holiday calendar to be used for business day adjustment. Defaults to ECB calendar.
             issuer (str, optional): Name/id of issuer. Defaults to None.
             securitization_level (_Union[SecuritizationLevel, str], optional): Securitization level. Defaults to None.
-            settlement_days (int, optional): Number of days after end date when the deposit is actually settled. Defaults to 2.
+            payment_days (int, optional): Number of days after maturity date when the cashflow is actually paid. Defaults to 2.
             adjust_start_date (bool, optional): Whether to adjust the start date to the next business day if it falls on a holiday. Defaults to True.
             adjust_end_date (bool, optional): Whether to adjust the end date to the next business day if it falls on a holiday. Defaults to False.
         """
@@ -91,11 +91,15 @@ class DepositSpecification(HasExpectedCashflows):
         elif start_date is not None:
             fd = next_or_previous_business_day(
                 calc_start_day(
-                    roll_day(start_date, calendar=calendar, business_day_convention=business_day_convention),f"{spd}D",
-                    business_day_convention=business_day_convention,calendar=calendar
-                )
-                ,calendar = calendar, following_first=False
+                    roll_day(start_date, calendar=calendar, business_day_convention=business_day_convention),
+                    f"{spd}D",
+                    business_day_convention=business_day_convention,
+                    calendar=calendar,
+                ),
+                calendar=calendar,
+                following_first=False,
             )
+            fixing_date = fd
             print("Set fixing_date, " + str(start_date) + " to start_date adjusted backwards by spot_days and business_day_convention:" + str(fd))
         else:
             raise ValueError("Either fixing_date or start_date must be provided.")
@@ -174,7 +178,7 @@ class DepositSpecification(HasExpectedCashflows):
             roll_convention=roll_convention,
             calendar=calendar,
             notional_exchange=True,
-            settlement_days=settlement_days,
+            payment_days=payment_days,
             issuer=issuer,
             securitization_level=securitization_level,
         )
@@ -229,7 +233,7 @@ class DepositSpecification(HasExpectedCashflows):
             "issuer": self.issuer,
             "securitization_level": self.securitization_level,
             "securitization_level_str": SecuritizationLevel.to_string(self.securitization_level),
-            "settlement_days": self.settlement_days,
+            "payment_days": self.payment_days,
         }
         return result
 

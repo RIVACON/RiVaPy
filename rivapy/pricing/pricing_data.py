@@ -656,16 +656,25 @@ class ForwardRateAgreementPricingData(BasePricingData):
         self.parameters = parameters  # param
 
     def price(self):
-        # obtain correct pricer
-        # pricer = _factory_entries[self.pricer]
-        print(_factory().keys())
-        pricer_obj = _factory()["ForwardRateAgreementPricer"]
-        pricer = pricer_obj(self.val_date, self.spec, self.discount_curve, self.forward_curve)
+        """Calculate the price of the forward rate agreement.
 
-        # pass correct required pricer information and calculate
-        val = pricer.price()
+        Raises:
+            ValueError: _description_
+            RuntimeError: _description_
 
-        return val
+        Returns:
+            _type_: _description_
+        """
+        try:
+            factory = _factory()
+            if "ForwardRateAgreementPricer" not in factory:
+                raise ValueError("ForwardRateAgreementPricer not found in factory")
+
+            pricer_obj = factory["ForwardRateAgreementPricer"]
+            pricer = pricer_obj(self.val_date, self.spec, self.discount_curve, self.forward_curve)
+            return pricer.price()
+        except Exception as e:
+            raise RuntimeError(f"Error pricing forward rate agreement: {str(e)}")
 
 
 class InterestRateSwapPricingData_rivapy(BasePricingData):  # TODO!!!!

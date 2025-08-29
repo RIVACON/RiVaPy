@@ -552,6 +552,16 @@ class IndexMetadata:
 
 
 class InterestRateIndex(_MyEnum):
+    EUR1M = IndexMetadata(
+        name="EURIBOR 1M",
+        currency="EUR",
+        tenor="1M",
+        spot_lag=2,
+        business_day_convention="ModifiedFollowing",
+        roll_convention="EOM",
+        calendar="TARGET",
+        aliases=["EUR1M", " EUR 1M", "EURIBOR 1M"],
+    )    
     EUR3M = IndexMetadata(
         name="EURIBOR 3M",
         currency="EUR",
