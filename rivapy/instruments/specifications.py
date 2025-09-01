@@ -489,23 +489,23 @@ class HasExpectedCashflows(FactoryObject):
     @property
     def payment_days(self) -> int:
         """
-        Getter for the number of settlement days.
+        Getter for the number of payment days.
 
         Returns:
-            int: Number of settlement days.
+            int: Number of payment days.
         """
         return self._payment_days
 
     @payment_days.setter
     def payment_days(self, payment_days: int):
         """
-        Setter for the number of settlement days.
+        Setter for the number of payment days.
 
         Args:
-            payment_days (int): Number of settlement days.
+            payment_days (int): Number of payment days.
         """
         if not isinstance(payment_days, int) or payment_days < 0:
-            raise ValueError("Settlement days must be a non-negative integer.")
+            raise ValueError("payment days must be a non-negative integer.")
         self._payment_days = payment_days
 
     @property
@@ -710,7 +710,7 @@ class HasExpectedCashflows(FactoryObject):
         _check_positivity(self._notional)
         _check_start_at_or_before_end(self._first_fixing_date, self._start_date)
         _check_start_before_end(self._start_date, self._end_date)
-        # _check_start_at_or_before_end(self._end_date, self._maturity_date)
+        # _check_start_at_or_before_end(self._end_date, self._maturity_date) # TODO special case modified following BCC
         _check_non_negativity(self._payment_days)
         _check_non_negativity(self._spot_days)
         if not isinstance(self._frequency, (Period, str)):
@@ -719,7 +719,7 @@ class HasExpectedCashflows(FactoryObject):
             raise ValueError("Calendar must be a HolidayBase or string.")
 
     # def _adjust_to_payment_date(self, accrual_end_date: dt.datetime) -> dt.datetime:
-    #     """Adjusts the payment date by applying business day conventions and settlement days.
+    #     """Adjusts the payment date by applying business day conventions and payment days.
 
     #     Args:
     #         accrual_end_date: End date of the accrual period
@@ -731,13 +731,13 @@ class HasExpectedCashflows(FactoryObject):
     #         # First business day adjustment
     #         adjusted_date = roll_day(accrual_end_date, self._calendar, self._business_day_convention)
 
-    #         # Add settlement days
+    #         # Add payment days
     #         from dateutil.relativedelta import relativedelta
 
-    #         with_settlement = adjusted_date + relativedelta(days=self._payment_days)
+    #         with_payment = adjusted_date + relativedelta(days=self._payment_days)
 
     #         # Final business day adjustment
-    #         final_date = roll_day(with_settlement, self._calendar, self._business_day_convention)
+    #         final_date = roll_day(with_payment, self._calendar, self._business_day_convention)
 
     #         # Ensure the payment date is not before the accrual end date
     #         if final_date < accrual_end_date:

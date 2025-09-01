@@ -364,7 +364,7 @@ def get_quote(
         # old
         discount_curve = curve_dict["discount_curve"]
         # spread_curve=curve_dict["spread_curve"]
-        quote = DepositPricer.implied_simply_compounded_rate(ref_date, instrument_spec, discount_curve)  # TODO assumes no spread curve for now
+        quote = DepositPricer.get_implied_simply_compounded_rate(ref_date, instrument_spec, discount_curve)  # TODO assumes no spread curve for now
 
     elif instrument_spec.ins_type() == Instrument.FRA:
 

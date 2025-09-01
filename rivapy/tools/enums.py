@@ -593,6 +593,7 @@ class InterestRateIndex(_MyEnum):
         aliases=["EURSTR", "EUR STR", "€STR"],
     )
 
+
 def get_index_by_alias(alias: str) -> InterestRateIndex:
     alias = alias.strip().upper()
     for index in InterestRateIndex:

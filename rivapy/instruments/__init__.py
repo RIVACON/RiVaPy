@@ -20,6 +20,7 @@ from rivapy.instruments.ir_swap_specification import (
     IrSwapLegSpecification,
     IrFixedLegSpecification,
     IrFloatLegSpecification,
+    IrOISLegSpecification,
     InterestRateSwapSpecification,
 )
 
@@ -41,5 +42,6 @@ _add_to_factory(ForwardRateAgreementSpecification)
 _add_to_factory(IrSwapLegSpecification)
 _add_to_factory(IrFixedLegSpecification)
 _add_to_factory(IrFloatLegSpecification)
+_add_to_factory(IrOISLegSpecification)
 _add_to_factory(InterestRateSwapSpecification)
 _add_to_factory(CashFlow)
