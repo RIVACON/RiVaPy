@@ -206,7 +206,7 @@ def bootstrap_curve(
     day_count_convention: _Union[DayCounterType, str],
     instruments: _List,
     quotes: _List,
-    curves: dict = {},
+    curves: dict = None,
     # discount_curve: DiscountCurve = None,
     # basis_curve: DiscountCurve = None,
     interpolation_type: InterpolationType = InterpolationType.LINEAR,
@@ -237,6 +237,13 @@ def bootstrap_curve(
     assert len(instruments) == len(quotes), "Number of quotes does not equal number of instruments."
     # TODO implement more input qualit checks:
     # curves given of correct type that match instrument type - or will this be done in the "market container" class?
+    # TODO for multicurve bootstrapping, if deposits are involved, they are not to be used.
+
+    if curves == None:
+        curves = {}
+        print("* curves dictionary is empty, will bootstrap single discount curve")
+    else:
+        print("* curves dictionary provided, will bootstrap forward curve if IRS involved")
 
     #############################################################
     # initialize: # alternatively..

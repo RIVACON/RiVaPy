@@ -348,7 +348,7 @@ quotes_3M = [-0.003204, -0.002615]
 
 euribor3MCurve = bootstrap_curve(
     ref_date,
-    "bootstrapped_ois_DC",
+    "euribor3MCurve",
     DayCounterType.Act365Fixed,
     instruments_3M,
     quotes_3M,
