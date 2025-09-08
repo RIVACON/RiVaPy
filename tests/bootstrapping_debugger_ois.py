@@ -458,7 +458,7 @@ values = [boot_curve_ois.rivapy_value(boot_curve_ois.refdate, d) for d in dates_
 print(values)
 
 plt.plot(dates_final, df_final, marker="^", label="bootstrapped")
-plt.plot(dates_new, values, label="interpolated")
+plt.plot(dates_new, values, label="bootstrapped - interpolated")
 
 plt.xlabel("year")
 plt.ylabel("DF")
