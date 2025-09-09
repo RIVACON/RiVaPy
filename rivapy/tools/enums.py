@@ -533,7 +533,7 @@ class Instrument(_MyEnum):
 
     IRS = "IRS"
     TBS = "TBS"
-    Deposit = "DEPOSIT"
+    DEPOSIT = "DEPOSIT"
     OIS = "OIS"
     FRA = "FRA"
     FXF = "FXF"
@@ -561,7 +561,7 @@ class InterestRateIndex(_MyEnum):
         roll_convention="EOM",
         calendar="TARGET",
         aliases=["EUR1M", " EUR 1M", "EURIBOR 1M"],
-    )    
+    )
     EUR3M = IndexMetadata(
         name="EURIBOR 3M",
         currency="EUR",

@@ -72,7 +72,7 @@ class InstrumentSpecFromTable:
             instrument = self.get_irs_spec()
         elif self.instr.upper() == Instrument.TBS:
             instrument = self.get_tbs_spec()
-        elif self.instr.upper() == Instrument.Deposit:
+        elif self.instr.upper() == Instrument.DEPOSIT:
             instrument = self.get_deposit_spec()
         elif self.instr.upper() == Instrument.FRA:
             instrument = self.get_fra_spec()
@@ -237,13 +237,12 @@ def bootstrap_curve(
     assert len(instruments) == len(quotes), "Number of quotes does not equal number of instruments."
     # TODO implement more input qualit checks:
     # curves given of correct type that match instrument type - or will this be done in the "market container" class?
-    # TODO for multicurve bootstrapping, if deposits are involved, they are not to be used.
 
     if curves == None:
         curves = {}
         print("* curves dictionary is empty, will bootstrap single discount curve")
     else:
-        print("* curves dictionary provided, will bootstrap forward curve if IRS involved")
+        print("* curves dictionary provided, will bootstrap forward curve")
 
     #############################################################
     # initialize: # alternatively..
@@ -281,13 +280,16 @@ def bootstrap_curve(
     else:  # TODO #This means the discount curve was given. We thereforer want to output a FORWARD  curve, e.g. 3M, 6M,...
         flag_multi_curve = True
 
+    # cannot multicurve bootstrap with deposits involved
+
+    if Instrument.Deposit in ins_types and flag_multi_curve == True:
+        raise Exception("Deposits cannot be used in multicurve bootstrapping")
+
     if Instrument.IRS in ins_types:
         # check if curves has a fixing curve
         if "fixing_curve" in curves:
             if not isinstance(curves["fixing_curve"], DiscountCurve):
                 raise Exception("Fixing curve is not of type DiscountCurve")
-        # need to add something here for multicurve? e.g. discoutn curve provided ...the created curve is to be the forward curve, ie fixing curve
-        # TODO
 
         else:
             print("IRS swap present but no fixing curve provided, will use bootstrapped curve in place")
@@ -579,7 +581,7 @@ def get_quote(
     """
 
     quote = 0.0
-    if instrument_spec.ins_type() == Instrument.Deposit:
+    if instrument_spec.ins_type() == Instrument.DEPOSIT:
 
         # old
         discount_curve = curve_dict["discount_curve"]
