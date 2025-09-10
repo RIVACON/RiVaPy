@@ -17,7 +17,7 @@ from rivapy.tools.enums import (
 )
 from rivapy.tools._validators import _check_positivity, _check_start_before_end, _string_to_calendar, _is_ascending_date_list
 import rivapy.tools.interfaces as interfaces
-from rivapy.tools.datetools import Period, Schedule, roll_day
+from rivapy.tools.datetools import Period, Schedule, roll_day, calc_start_day
 
 
 class ForwardRateAgreementSpecification(interfaces.FactoryObject):
@@ -25,8 +25,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
     def __init__(
         self,
         obj_id: str,
-        issue_date: _Union[date, datetime],
-        maturity_date: _Union[date, datetime],
+        trade_date: _Union[date, datetime],
         notional: float,
         rate: float,
         start_date: _Union[date, datetime],
@@ -34,6 +33,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         udlID: str,
         rate_start_date: _Union[date, datetime],
         rate_end_date: _Union[date, datetime],
+        maturity_date: _Union[date, datetime] = None,
         day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
         business_day_convention: _Union[RollConvention, str] = RollConvention.FOLLOWING,
         rate_day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
@@ -42,7 +42,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         currency: _Union[Currency, str] = "EUR",
         # ex_settle: int =0,
         payment_days: int = 0,
-        spot_lag: int = None,
+        spot_lag: int = 2,
         start_period: int = None,
         # _Optional[_Union[Period, str]] = None,
         end_period: int = None,
@@ -55,8 +55,8 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
 
         Args:
             obj_id (str): (Preferably) Unique label of the FRA
-            issue_date (_Union[date, datetime]): FRA Trade date.
-            maturity_date (_Union[date, datetime]): FRA's maturity/expiry date. Must lie after the issue_date.
+            trade_date (_Union[date, datetime]): FRA Trade date.
+            maturity_date (_Union[date, datetime]): FRA's maturity/expiry date. Must lie after the trade_date.
             notional (float, optional): Fra's notional/face value. Must be positive.
             rate (float): Agreed upon forward rate, a.k.a. FRA rate.
             start_date (_Union[date, datetime]): start date of the interest rate (FRA_rate) reference period from which interest is accrued.
@@ -85,7 +85,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
                                                           (= Target2 calendar) between start_day and end_day.
             currency (str, optional): Currency as alphabetic, Defaults to 'EUR'.
             payment_days (int): Number of days for payment after the start date. Defaults to 0.
-            spot_lag (int): time difference between issue/trade date and spot_date given in days.
+            spot_lag (int): time difference between fixing date and start dategiven in days.
             start_period (int): forward start period given in months e.g. 1 from 1Mx4M
             end_period (int): forward end period given in months e.g. 4 from 1Mx4M
             index_alias (str): ID of the underlying Index rate used for the floating rate for fixing.
@@ -95,30 +95,32 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         """
         # positional arguments
         self.obj_id = obj_id
-        self._issue_date = issue_date
-        self._maturity_date = maturity_date
+        self._trade_date = trade_date
         self._notional = notional
         self._rate = rate
         self._start_date = start_date
         self._end_date = end_date
+        if maturity_date is None:
+            self._maturity_date = self._end_date
+        else:
+            self._maturity_date = maturity_date
         self._udlID = udlID
         self._rate_start_date = rate_start_date
         self._rate_end_date = rate_end_date
-
         # optional arguments
         self._day_count_convention = day_count_convention  # TODO: correct syntax with setter?? HN
         self._business_day_convention = RollConvention.to_string(business_day_convention)
         self._rate_day_count_convention = rate_day_count_convention
         self._rate_business_day_convention = RollConvention.to_string(rate_business_day_convention)
         if calendar is None:
-            self._calendar = _ECB(years=range(issue_date.year, maturity_date.year + 1))
+            self._calendar = _ECB(years=range(trade_date.year, end_date.year + 1))
         else:
             self._calendar = _string_to_calendar(calendar)
         self._currency = currency
         # self.ex_settle = ex_settle
         # self.trade_settle = trade_settle
-        if spot_lag is not None:
-            self._spot_lag = spot_lag
+        self._fixing_date = calc_start_day(self._start_date, f"{spot_lag}D", self._business_day_convention, self._calendar)
+        self._spot_lag = spot_lag
         if start_period is not None:
             self._start_period = start_period
         if end_period is not None:
@@ -144,9 +146,9 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
 
         # if trade date, spotlag, startperiod,endperiod give, then recalcualte start_datet etc...
         # TODO: get clarification on roll_day function
-        if issue_date and spot_lag and start_period and end_period:
+        if trade_date and spot_lag and start_period and end_period:
             spot_date = roll_day(
-                day=issue_date + timedelta(days=spot_lag),  # need holiday
+                day=trade_date + timedelta(days=spot_lag),  # need holiday
                 calendar=self.calendar,
                 business_day_convention=self.rate_business_day_convention,
                 start_day=None,
@@ -200,14 +202,14 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
             sec_levels = list(SecuritizationLevel)
         for _ in range(n_samples):
             days = int(15.0 * 365.0 * np.random.beta(2.0, 2.0)) + 1
-            issue_date = ref_date + timedelta(days=np.random.randint(low=-365, high=0))
+            trade_date = ref_date + timedelta(days=np.random.randint(low=-365, high=0))
             maturity_date = ref_date + timedelta(days=days)
             start_date = ref_date + relativedelta(months=np.random.randint(low=1, high=3))
             end_date = start_date + relativedelta(months=np.random.choice([3, 6]))
             # spot_lag=2, fixing pre_lag =2
             result.append(
                 {
-                    "issue_date": issue_date,
+                    "trade_date": trade_date,
                     "maturity_date": maturity_date,
                     "notional": np.random.choice([100.0, 1000.0, 10_000.0, 100_0000.0]),
                     "rate": np.random.choice([0.01, 0.02, 0.03, 0.04, 0.05]),
@@ -220,7 +222,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
                     # "business_day_convention": self.business_day_convention,
                     # "rate_day_count_convention": self.rate_day_count_convention,
                     # "rate_business_day_convention": self.rate_business_day_convention,
-                    "calendar": _ECB(years=range(issue_date.year, maturity_date.year + 1)),
+                    "calendar": _ECB(years=range(trade_date.year, maturity_date.year + 1)),
                     "currency": np.random.choice(currencies),
                     # "spot_lag": self.spot_lag, # not needed if start dates given
                     # "start_period": self.start_period,
@@ -232,12 +234,12 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         return result
 
     def _validate_derived_issued_instrument(self):
-        self.__issue_date, self.__maturity_date = _check_start_before_end(self.__issue_date, self.__maturity_date)
+        self.__trade_date, self.__maturity_date = _check_start_before_end(self.__trade_date, self.__maturity_date)
 
     def _to_dict(self) -> dict:
         result = {
             "obj_id": self.obj_id,
-            "issue_date": self.issue_date,
+            "trade_date": self.trade_date,
             "maturity_date": self.maturity_date,
             "notional": self.notional,
             "rate": self.rate,
@@ -373,24 +375,24 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         self._rate = rate
 
     @property
-    def issue_date(self) -> date:
+    def trade_date(self) -> date:
         """
         Getter for FRA's issue date.
 
         Returns:
             date: FRA's issue date.
         """
-        return self._issue_date
+        return self._trade_date
 
-    @issue_date.setter
-    def issue_date(self, issue_date: _Union[datetime, date]):
+    @trade_date.setter
+    def trade_date(self, trade_date: _Union[datetime, date]):
         """
         Setter for FRA's issue date.
 
         Args:
             issue (Union[datetime, date]): FRA's issue date.
         """
-        self._issue_date = _date_to_datetime(issue_date)
+        self._trade_date = _date_to_datetime(trade_date)
 
     @property
     def start_date(self) -> date:
