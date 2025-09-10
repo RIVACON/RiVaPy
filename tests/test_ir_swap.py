@@ -123,6 +123,12 @@ class TestIrFloatLegSpecification(unittest.TestCase):
 
 
 class TestInterestRateSwapSpecification(unittest.TestCase):
+    """Full swap with both leg tests
+
+    Args:
+        unittest (_type_): _description_
+    """
+
     def setUp(self):
         self.start_dates = [datetime(2024, 1, 1)]
         self.end_dates = [datetime(2025, 1, 1)]
