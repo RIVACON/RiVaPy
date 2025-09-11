@@ -1,4 +1,4 @@
-# ToDo:
+# TODO:
 # - consider proper end date handling
 # - move date handling to hasexpectedcf
 # - correct _frequency, _dcc issues...
@@ -55,7 +55,7 @@ class DepositSpecification(HasExpectedCashflows):
             currency (str, optional): Currency as alphabetic, Defaults to 'EUR'.
             notional (float, optional): Deposit's notional/face value. Must be positive. Defaults to 100.0.
             rate (float): Deposit fixed rate.
-            term (_Union[Period, str], optional): Deposit term. If provided and not end date is given, it is used to calculate the end date from the start date.
+            term (_Union[Period, str], optional): Deposit term. If provided and no end date is given, it is used to calculate the end date from the start date.
             day_count_convention (Union[DayCounter, str], optional): Day count convention for determining period length. Defaults to DayCounter.ThirtyU360.
             business_day_convention (Union[RollConvention, str], optional): Set of rules defining the adjustment of  days to ensure each date being a business day with respect to a given holiday calendar. Defaults to RollConvention.FOLLOWING
             roll_convention (Union[RollRule],str], optional): Roll convention to be applied when building a schedule. Defaults to RollRule.NONE.
@@ -67,6 +67,7 @@ class DepositSpecification(HasExpectedCashflows):
             adjust_start_date (bool, optional): Whether to adjust the start date to the next business day if it falls on a holiday. Defaults to True.
             adjust_end_date (bool, optional): Whether to adjust the end date to the next business day if it falls on a holiday. Defaults to False.
         """
+        self.rate = rate
 
         # Store original input of fixing date
         self.fixing_date = fixing_date
@@ -75,9 +76,15 @@ class DepositSpecification(HasExpectedCashflows):
         if term == "O/N" or (fixing_date is not None and start_date is not None and fixing_date == start_date):
             spd = 0
             print("Setting spot_lag to 0: O/N deposit or fixing_date equal to start_date.")
+            if term == None:
+                term = "O/N"
+                print("Term not given but fixxing == start -> setting term to O/N")
         elif term == "T/N" or (fixing_date is not None and start_date is not None and fixing_date + relativedelta(days=1) == start_date):
             spd = 1
             print("Setting spot_lag to 1: T/N deposit or fixing_date + 1 day equal to start_date.")
+            if term == None:
+                term = "T/N"
+                print("Term not given but fixxing == start -> setting term to T/N")
         else:
             spd = spot_lag
 
@@ -245,7 +252,7 @@ class DepositSpecification(HasExpectedCashflows):
         Returns:
             Instrument: Forward rate agreement
         """
-        return Instrument.Deposit
+        return Instrument.DEPOSIT
 
     # temp placeholder
     def get_end_date(self):

@@ -750,7 +750,7 @@ if __name__ == "__main__":
     #     day_count_convention: _Union[DayCounterType, str],
     #     instruments: _List,
     #     quotes: _List,
-    #     curves: dict = {},
+    #     curves: dict = None,
     #     # discount_curve: DiscountCurve = None,
     #     # basis_curve: DiscountCurve = None,
     #     interpolation_type: InterpolationType = InterpolationType.LINEAR,

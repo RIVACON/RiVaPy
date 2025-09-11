@@ -48,7 +48,7 @@ class InterestRateSwapPricer:
         fx_fwd_curve_pay_leg: DiscountCurve,  # TODO FxForwardCurve ... do we need anotheer class
         fx_fwd_curve_receive_leg: DiscountCurve,
         pricing_request: InterestRateSwapPricingRequest,
-        pricing_param: Dict = {},
+        pricing_param: Dict = None,  # mutable argument should be defaulted to none
         fixing_map: FixingTable = None,
         fx_pay_leg: float = 1.0,
         fx_receive_leg: float = 1.0,
@@ -87,6 +87,8 @@ class InterestRateSwapPricer:
         self._fx_fwd_curve_receive_leg = fx_fwd_curve_receive_leg  # const std::shared_ptr<const FxForwardCurve>& fxForwardCurveReceiveLeg,
 
         self._pricing_request = pricing_request  # const PricingRequest& pricingRequest,
+        if pricing_param is None:
+            pricing_param = {}
         self._pricing_param = pricing_param  # std::shared_ptr<const InterestRateSwapPricingParameter> pricingParam,
         self._fixing_map = fixing_map  # std::shared_ptr<const FixingTable> fixingMap,
 

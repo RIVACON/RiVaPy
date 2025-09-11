@@ -587,7 +587,7 @@ class DepositPricingData(BasePricingData):
         pricer: str,
         discount_curve: DiscountCurve,
         # fixing_curve: DiscountCurve,
-        parameters: dict,
+        parameters: dict = None,
         # past_fixing: float = None
     ):
         """Constructor for DepositPricingData
@@ -605,6 +605,8 @@ class DepositPricingData(BasePricingData):
         self.spec = deposit  # spec
         self.val_date = val_date  # valDate
         self.discount_curve = discount_curve  # discountCurve
+        if parameters == None:
+            parameters = {}
         self.parameters = parameters  # param
 
         # in the case for floating rate deposits?
@@ -634,7 +636,7 @@ class ForwardRateAgreementPricingData(BasePricingData):
         pricer: str,
         discount_curve: DiscountCurve,
         forward_curve: DiscountCurve,
-        parameters: dict,
+        parameters: dict = None,
     ):
         """Constructor for ForwardrateAgreementPricingData
 
@@ -653,6 +655,8 @@ class ForwardRateAgreementPricingData(BasePricingData):
         self.val_date = val_date  # valDate
         self.discount_curve = discount_curve  # discountCurve
         self.forward_curve = forward_curve  # discountCurve
+        if parameters == None:
+            parameters = {}
         self.parameters = parameters  # param
 
     def price(self):
