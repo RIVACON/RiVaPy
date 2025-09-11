@@ -282,7 +282,7 @@ def bootstrap_curve(
 
     # cannot multicurve bootstrap with deposits involved
 
-    if Instrument.Deposit in ins_types and flag_multi_curve == True:
+    if Instrument.DEPOSIT in ins_types and flag_multi_curve == True:
         raise Exception("Deposits cannot be used in multicurve bootstrapping")
 
     if Instrument.IRS in ins_types:

@@ -20,24 +20,6 @@ from rivapy.tools.enums import IrLegType
 # WIP
 
 
-# TODO: MoveED to tools.enums
-# class IrLegType:
-#     FIXED = "FIXED"
-#     FLOAT = "FLOAT"
-#     OIS = "OIS"
-
-#     @staticmethod
-#     def from_string(s: str) -> str:
-#         s = s.upper()
-#         if s in (IrLegType.FIXED, IrLegType.FLOAT, IrLegType.OIS):
-#             return s
-#         raise ValueError(f"Unknown leg type '{s}'")
-
-#     @staticmethod
-#     def to_string(leg_type: str) -> str:
-#         return leg_type.upper()
-
-
 class IrSwapLegSpecification(interfaces.FactoryObject):
     """Base interest rate swap leg specification used to define both fixed and floating legs."""
 

@@ -50,16 +50,16 @@ class TestDepositSpecification(unittest.TestCase):
         start = dt.datetime(2024, 1, 4)  # start after fixing [spot lag(=2) behavior]
         # Use a 6 month term (Period-like string supported by class)
 
-        # TODO
-        # dep = DepositSpecification(
-        #     obj_id="dep_6m",
-        #     fixing_date=fixing,
-        #     start_date=start,
-        #     term="6M",
-        #     rate=0.05,
-        #     notional=1000.0,
-        #     day_count_convention=DayCounterType.ACT360,  # default but explicit here
-        # )
+        ##TODO
+        dep = DepositSpecification(
+            obj_id="dep_6m",
+            fixing_date=fixing,
+            start_date=start,
+            term="6M",
+            rate=0.05,
+            notional=1000.0,
+            day_count_convention=DayCounterType.ACT360,  # default but explicit here
+        )
 
         # TODO
         # 2025.09.09 HN currentls throws error due to cal_end_day
