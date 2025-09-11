@@ -887,10 +887,10 @@ def calc_end_day(
 
     if roll_conv == RollRule.EOM.value and _is_ambiguous_date(start_date):  # add ambiguous dates, i.e. 30 of Jan, Mar, May, Jul, Aug, Oct, Dec
         end_date = start_date + relativedelta(years=period.years, months=period.months, day=31)
-    elif roll_conv == RollRule.EOM.value or roll_conv == RollRule.NONE.value or roll_conv == RollRule.DOM.value:
-        end_date = start_date + relativedelta(years=period.years, months=period.months, days=period.days)
     elif roll_conv == RollRule.IMM.value and _is_IMM_date(start_date):  # add IMM dates, i.e. 3rd Wednesday of Mar, Jun, Sep, Dec
         end_date = start_date + relativedelta(years=period.years, months=period.months, day=1, weekday=WE(3))
+    elif roll_conv == RollRule.EOM.value or roll_conv == RollRule.IMM.value or roll_conv == RollRule.NONE.value or roll_conv == RollRule.DOM.value:
+        end_date = start_date + relativedelta(years=period.years, months=period.months, days=period.days)
     else:
         raise Exception(
             "Unknown roll convention '" + str(roll_convention) + "'! Please use RollRule.NONE, RollRule.EOM, RollRule.DOM, or RollRule.IMM."
