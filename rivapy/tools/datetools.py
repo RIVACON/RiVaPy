@@ -839,7 +839,7 @@ def _is_ambiguous_date(day: _Union[date, datetime]) -> bool:
     Returns:
         bool: True if day is ambiguous date, False otherwise.
     """
-    return (day.day == 30) and (day.month in [1, 3, 5, 7, 8, 10, 12])
+    return ((day.day == 30) and (day.month in [1, 3, 5, 7, 8, 10, 12])) or ((day.day == 28 or day.day == 29) and day.month == 2)
 
 
 def _is_IMM_date(day: _Union[date, datetime]) -> bool:
@@ -887,7 +887,7 @@ def calc_end_day(
 
     if roll_conv == RollRule.EOM.value and _is_ambiguous_date(start_date):  # add ambiguous dates, i.e. 30 of Jan, Mar, May, Jul, Aug, Oct, Dec
         end_date = start_date + relativedelta(years=period.years, months=period.months, day=31)
-    elif roll_conv == RollRule.NONE.value or roll_conv == RollRule.DOM.value:
+    elif roll_conv == RollRule.EOM.value or roll_conv == RollRule.NONE.value or roll_conv == RollRule.DOM.value:
         end_date = start_date + relativedelta(years=period.years, months=period.months, days=period.days)
     elif roll_conv == RollRule.IMM.value and _is_IMM_date(start_date):  # add IMM dates, i.e. 3rd Wednesday of Mar, Jun, Sep, Dec
         end_date = start_date + relativedelta(years=period.years, months=period.months, day=1, weekday=WE(3))
