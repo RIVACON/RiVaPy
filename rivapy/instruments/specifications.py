@@ -284,6 +284,8 @@ class HasExpectedCashflows(FactoryObject):
         self._currency = Currency.to_string(currency)
         if issuer is not None:
             self._issuer = issuer
+        else:
+            self._issuer = ""
         if securitization_level is not None:
             self._securitization_level = SecuritizationLevel.to_string(securitization_level)
         self._backwards = backwards

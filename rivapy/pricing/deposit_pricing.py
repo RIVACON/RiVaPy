@@ -106,16 +106,19 @@ class DepositPricer(SimpleCashflowPricer):
         """
 
         start_date = specification.start_date
-        maturity_date = specification.maturity_date
+        # maturity_date = specification.maturity_date # date of legal end of the deposit and when payment needs to be made
+        end_date = (
+            specification.end_date
+        )  # period over which interest is calculated # this is the period we need to use as it is the actual accrual period, regardless of when payment is due
         daycountconvention = specification.day_count_convention
 
         if isinstance(discount_curve, DiscountCurve):
-            cont_df = discount_curve.rivapy_valueFWD(val_date, start_date, maturity_date)
+            cont_df = discount_curve.rivapy_valueFWD(val_date, start_date, end_date)
         else:
             raise ValueError("Discount curve must be of type DiscountCurve")
 
         dcc = DayCounter(daycountconvention)
-        dt = dcc.yf(start_date, maturity_date)
+        dt = dcc.yf(start_date, end_date)
         simple_rate = ((1 / cont_df) - 1) / dt
 
         return simple_rate

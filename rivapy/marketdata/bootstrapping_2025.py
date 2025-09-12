@@ -211,7 +211,7 @@ def bootstrap_curve(
     # basis_curve: DiscountCurve = None,
     interpolation_type: InterpolationType = InterpolationType.LINEAR,
     extrapolation_type: ExtrapolationType = ExtrapolationType.LINEAR,
-    tolerance: float = 1.0e-8,
+    tolerance: float = 1.0e-6,
     max_iterations: int = 10000,
 ) -> DiscountCurve:
     """
@@ -525,11 +525,15 @@ def error_fn(
         if flag_irs_bootstrapped_as_fwd:  # if it is an irs instrument that needs the forward curve as well
             curves_copy["fixing_curve"] = yc
 
+    calc_quote = get_quote(ref_date, instrument_spec, curves_copy)
+
     # DEBUG statement
     # print("----------------")
     # print("Error function trial curve")
     # print(yc.get_df())
-    return get_quote(ref_date, instrument_spec, curves_copy) - ref_quote
+    # print("----------------")
+    # print(f"using {df_val} -> calc_quote: {calc_quote} - ref_quote: {ref_quote} = {calc_quote - ref_quote}")
+    return calc_quote - ref_quote
 
 
 def find_bracket(error_fn, initial_guess, *args):

@@ -72,7 +72,8 @@ class DiscountCurve:
         if isinstance(refdate, datetime):
             self.refdate = refdate
         else:
-            self.refdate = datetime(refdate, 0, 0, 0)
+            # self.refdate = datetime(refdate, 0, 0, 0) # old version syntax??
+            self.refdate = datetime(refdate.year, refdate.month, refdate.day)
         if not isinstance(interpolation, InterpolationType):
             raise TypeError("Interpolation is not of type enums.InterpolationType")
         self.interpolation = interpolation

@@ -1,5 +1,6 @@
 # 2025.09.09 Bootstrapping without pyvacon
 import unittest
+import math
 from datetime import date, datetime, timedelta
 
 from rivapy.marketdata.bootstrapping_2025 import (
@@ -20,15 +21,36 @@ from rivapy.tools.enums import DayCounterType, InterpolationType, ExtrapolationT
 
 
 # Minimal instrument specification classes for testing
-class DummyDepositSpec:
-    def __init__(self, end_date):
-        self._end_date = end_date
+class DummyDepositSpec(DepositSpecification):
+    def __init__(self, end_date=None, start_date=None, ref_date=None):
+        """Setting up base deposit specification for tests.
+        For now, as O/N deposit with 1 day accrual.
+        """
+        ##########################################
+        # setting up depoist
+        # calculation date
+        if ref_date is None:
+            ref_date = datetime(2019, 8, 31)
 
-    def get_end_date(self):
-        return self._end_date
+        # start date of the accrual period with spot lag equal to 2 days
+        if start_date is None:
+            start_date = ref_date + timedelta(days=2)
 
-    def ins_type(self):
-        return Instrument.DEPOSIT
+        # end date of the accrual period is 1 day after startdate
+        if end_date is None:
+            end_date = start_date + timedelta(days=1)
+
+        super().__init__(
+            obj_id="dummy_deposit",
+            issuer="dummy_issuer",
+            currency="EUR",
+            fixing_date=ref_date,
+            start_date=start_date,
+            maturity_date=end_date,
+            notional=100.0,
+            rate=0.01,
+            day_count_convention="Act360",
+        )
 
 
 class DummyFRASpec:
@@ -68,20 +90,20 @@ class TestBootstrapCurve(unittest.TestCase):
                 ref_date=date(2024, 1, 1),
                 curve_id="curve1",
                 day_count_convention=DayCounterType.ThirtyU360,
-                instruments=[DummyDepositSpec(date(2025, 1, 1))],
+                instruments=[DummyDepositSpec(end_date=datetime(2025, 1, 1))],
                 quotes=[],
             )
 
     def test_duplicate_end_dates(self):
         """Test that duplicate end dates in instruments raises an error.
-        This is a design choice for the momment to keep bootstrapping logic simple.
+        This is a design choice for the moment to keep bootstrapping logic simple.
         """
 
         inst1 = DummyDepositSpec(date(2025, 1, 1))
         inst2 = DummyDepositSpec(date(2025, 1, 1))
         with self.assertRaises(Exception) as cm:
             bootstrap_curve(
-                ref_date=date(2024, 1, 1),
+                ref_date=datetime(2024, 1, 1),
                 curve_id="curve1",
                 day_count_convention=DayCounterType.ThirtyU360,
                 instruments=[inst1, inst2],
@@ -93,152 +115,165 @@ class TestBootstrapCurve(unittest.TestCase):
         """Test if bootstrap_curve runs without error and returns a DiscountCurve
         Does not check for correctness of the curve.
         """
-        inst = DummyDepositSpec(date(2025, 1, 1))
+        # here this end_date is being saved into the maturity date..., and the end date is calculated internally in deposit spec
+        # inst = DummyDepositSpec(ref_date=datetime(2024, 1, 1), start_date=datetime(2024, 1, 1), end_date=datetime(2025, 1, 1))
+        # here we input an end date that would coincide with the maturity date by desgien
+        inst = DummyDepositSpec(ref_date=datetime(2024, 1, 1), start_date=datetime(2024, 1, 1), end_date=datetime(2024, 1, 3))
         result = bootstrap_curve(
-            ref_date=date(2024, 1, 1),
+            ref_date=datetime(2024, 1, 1),
             curve_id="curve1",
             day_count_convention=DayCounterType.ThirtyU360,
             instruments=[inst],
             quotes=[0.01],
         )
+
         self.assertIsInstance(result, DiscountCurve)
-        self.assertEqual(result.dates[0], date(2024, 1, 1))
-        self.assertEqual(result.dates[1], date(2025, 1, 1))
+        self.assertEqual(result.get_dates()[0], datetime(2024, 1, 1))
+        self.assertEqual(result.get_dates()[1], datetime(2024, 1, 3))
 
 
-# class TestErrorFn(unittest.TestCase):
-#     """Tests on the error function used for the brentq solver used for iteratively solving for discount factors
-#     regardless of instrument type.
+class TestErrorFn(unittest.TestCase):
+    """Tests on the error function used for the brentq solver used for iteratively solving for discount factors
+    regardless of instrument type.
 
-#     Args:
-#         unittest (_type_): _description_
-#     """
+    Args:
+        unittest (_type_): _description_
+    """
 
-#     def test_error_fn_returns_float(self):
-#         """Test function output type check"""
-#         inst = DummyDepositSpec(date(2025, 1, 1))
-#         dfs = [1.0, 0.99]
-#         yc_dates = [date(2024, 1, 1), date(2025, 1, 1)]
-#         curves = {
-#             "discount_curve": DiscountCurve(
-#                 "test", date(2024, 1, 1), yc_dates, dfs, InterpolationType.LINEAR, ExtrapolationType.LINEAR, DayCounterType.ThirtyU360
-#             )
-#         }
-#         result = error_fn(
-#             df_val=0.98,
-#             index=1,
-#             dfs=dfs.copy(),
-#             yc_dates=yc_dates,
-#             instrument_spec=inst,
-#             ref_date=date(2024, 1, 1),
-#             ref_quote=0.01,
-#             curves=curves,
-#             interpolation_type=InterpolationType.LINEAR,
-#             extrapolation_type=ExtrapolationType.LINEAR,
-#         )
-#         self.assertIsInstance(result, float)
-
-
-# class TestFindBracket(unittest.TestCase):
-#     """Test for the helper function used in initial testing for bretnq solver.
-#     Helper function was made for the case that inital guesses
-#     were far off from potential root values to find better initial brackets.
-
-#     Args:
-#         unittest (_type_): _description_
-#     """
-
-#     def test_find_bracket_success(self):
-#         def fake_error_fn(x, *args):
-#             return x - 1
-
-#         lower, upper = find_bracket(fake_error_fn, 2)
-#         self.assertLess(lower, 1)
-#         self.assertGreater(upper, 1)
-
-#     def test_find_bracket_failure(self):
-#         def fake_error_fn(x, *args):
-#             return 1
-
-#         with self.assertRaises(RuntimeError):
-#             find_bracket(fake_error_fn, 2)
+    def test_error_fn_returns_float(self):
+        """Test function output type check"""
+        inst = DummyDepositSpec(datetime(2024, 1, 3))
+        dfs = [1.0, 0.99]
+        yc_dates = [datetime(2024, 1, 1), datetime(2024, 1, 3)]
+        curves = {
+            "discount_curve": DiscountCurve(
+                "test", datetime(2024, 1, 1), yc_dates, dfs, InterpolationType.LINEAR, ExtrapolationType.LINEAR, DayCounterType.ThirtyU360
+            )
+        }
+        result = error_fn(
+            df_val=0.98,
+            index=1,
+            dfs=dfs.copy(),
+            yc_dates=yc_dates,
+            instrument_spec=inst,
+            ref_date=datetime(2024, 1, 1),
+            ref_quote=0.01,
+            curves=curves,
+            interpolation_type=InterpolationType.LINEAR,
+            extrapolation_type=ExtrapolationType.LINEAR,
+        )
+        self.assertIsInstance(result, float)
 
 
-# class TestGetQuote(unittest.TestCase):
-#     """Testing get_quote for different instrument types
+class TestFindBracket(unittest.TestCase):
+    """Test for the helper function used in initial testing for bretnq solver.
+    Helper function was made for the case that inital guesses
+    were far off from potential root values to find better initial brackets.
 
-#     Args:
-#         unittest (_type_): _description_
-#     """
+    Args:
+        unittest (_type_): _description_
+    """
 
-#     def test_get_quote_deposit(self):
-#         inst = DummyDepositSpec(date(2025, 1, 1))
-#         curve = DiscountCurve(
-#             "test",
-#             date(2024, 1, 1),
-#             [date(2024, 1, 1), date(2025, 1, 1)],
-#             [1.0, 0.99],
-#             InterpolationType.LINEAR,
-#             ExtrapolationType.LINEAR,
-#             DayCounterType.ThirtyU360,
-#         )
-#         result = get_quote(
-#             ref_date=date(2024, 1, 1),
-#             instrument_spec=inst,
-#             curve_dict={"discount_curve": curve},
-#         )
-#         self.assertEqual(result, 0.01)  # TODO input expected calculated value, 0.01 is dummy
+    def test_find_bracket_success(self):
+        """Caveat is that the inital guess should not produce a boundary value that is also the intended root."""
 
-#     def test_get_quote_fra(self):
-#         inst = DummyFRASpec(date(2025, 1, 1))
-#         curve = DiscountCurve(
-#             "test",
-#             date(2024, 1, 1),
-#             [date(2024, 1, 1), date(2025, 1, 1)],
-#             [1.0, 0.99],
-#             InterpolationType.LINEAR,
-#             ExtrapolationType.LINEAR,
-#             DayCounterType.ThirtyU360,
-#         )
-#         result = get_quote(
-#             ref_date=date(2024, 1, 1),
-#             instrument_spec=inst,
-#             curve_dict={"discount_curve": curve},
-#         )
-#         self.assertEqual(result, 0.02)  # TODO input expected calculated value, 0.02 is dummy
+        def fake_error_fn(x, *args):
+            return x - 1
 
-#     def test_get_quote_irs(self):
-#         inst = DummyIRSSpec(date(2025, 1, 1))
-#         curve = DiscountCurve(
-#             "test",
-#             date(2024, 1, 1),
-#             [date(2024, 1, 1), date(2025, 1, 1)],
-#             [1.0, 0.99],
-#             InterpolationType.LINEAR,
-#             ExtrapolationType.LINEAR,
-#             DayCounterType.ThirtyU360,
-#         )
-#         result = get_quote(
-#             ref_date=date(2024, 1, 1),
-#             instrument_spec=inst,
-#             curve_dict={"discount_curve": curve, "fixing_curve": curve},
-#         )
-#         self.assertEqual(result, 0.03)  # TODO input expected calculated value, 0.03 is dummy
+        lower, upper = find_bracket(fake_error_fn, 1.5)
+        self.assertLess(lower, 1)
+        self.assertGreater(upper, 1)
+
+    def test_find_bracket_failure(self):
+        def fake_error_fn(x, *args):
+            return 1
+
+        with self.assertRaises(RuntimeError):
+            find_bracket(fake_error_fn, 2)
 
 
-# class TestBootstrapCurveIntegration(unittest.TestCase):
-#     """Test for various combination of instruments supplied to the bootstrapper
+class TestGetQuote(unittest.TestCase):
+    """Testing get_quote for different instrument types
 
-#     Args:
-#         unittest (_type_): _description_
-#     """
+    Args:
+        unittest (_type_): _description_
+    """
 
-#     def setUp(self):
-#         self.ref_date = date(2024, 1, 1)
-#         self.curve_id = "EUR_DISC"
-#         self.day_count = DayCounterType.ThirtyU360
-#         self.interp = InterpolationType.LINEAR
-#         self.extrap = ExtrapolationType.LINEAR
+    def test_get_quote_deposit(self):
+        refdate = datetime(2024, 1, 1)
+        inst = DummyDepositSpec(ref_date=refdate, start_date=refdate, end_date=datetime(2024, 1, 3))
+        days_to_maturity = [1, 180, 365, 720, 3 * 365, 4 * 365, 10 * 365]
+        dates = [refdate + timedelta(days=d) for d in days_to_maturity]
+        flat_rate = 0.025
+        df = [math.exp(-d / 365.0 * flat_rate) for d in days_to_maturity]
+        curve = DiscountCurve(
+            id="dummy discount curve",
+            refdate=refdate,
+            dates=dates,
+            df=df,
+            interpolation=InterpolationType.LINEAR,
+            extrapolation=ExtrapolationType.LINEAR,
+        )
+        result = get_quote(
+            ref_date=refdate,
+            instrument_spec=inst,
+            curve_dict={"discount_curve": curve},
+        )
+        # self.assertEqual(result, 0.01)  # TODO input expected calculated value, 0.01 is dummy
+        self.assertAlmostEqual(result, 0.024508664452316253, delta=1e-8)
+
+    def test_get_quote_fra(self):  # TODO -> verify correctness of the FRA specificaiton first... changes were made
+        pass
+        # inst = DummyFRASpec(date(2025, 1, 1))
+        # curve = DiscountCurve(
+        #     "test",
+        #     date(2024, 1, 1),
+        #     [date(2024, 1, 1), date(2025, 1, 1)],
+        #     [1.0, 0.99],
+        #     InterpolationType.LINEAR,
+        #     ExtrapolationType.LINEAR,
+        #     DayCounterType.ThirtyU360,
+        # )
+        # result = get_quote(
+        #     ref_date=date(2024, 1, 1),
+        #     instrument_spec=inst,
+        #     curve_dict={"discount_curve": curve},
+        # )
+        # self.assertEqual(result, 0.02)  # TODO input expected calculated value, 0.02 is dummy
+
+    def test_get_quote_irs(self):
+        inst = DummyIRSSpec(date(2025, 1, 1))
+        curve = DiscountCurve(
+            "test",
+            date(2024, 1, 1),
+            [date(2024, 1, 1), date(2025, 1, 1)],
+            [1.0, 0.99],
+            InterpolationType.LINEAR,
+            ExtrapolationType.LINEAR,
+            DayCounterType.ThirtyU360,
+        )
+        result = get_quote(
+            ref_date=date(2024, 1, 1),
+            instrument_spec=inst,
+            curve_dict={"discount_curve": curve, "fixing_curve": curve},
+        )
+        self.assertEqual(result, 0.03)  # TODO input expected calculated value, 0.03 is dummy
+
+
+class TestBootstrapCurveIntegration(unittest.TestCase):
+    """Test for various combination of instruments supplied to the bootstrapper
+
+    Args:
+        unittest (_type_): _description_
+    """
+
+    def setUp(self):
+        self.ref_date = date(2024, 1, 1)
+        self.curve_id = "EUR_DISC"
+        self.day_count = DayCounterType.ThirtyU360
+        self.interp = InterpolationType.LINEAR
+        self.extrap = ExtrapolationType.LINEAR
+
 
 #     def test_deposit_bootstrap(self):
 #         # Minimal deposit: 6M, 2% rate

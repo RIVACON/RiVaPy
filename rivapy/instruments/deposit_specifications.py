@@ -78,13 +78,13 @@ class DepositSpecification(HasExpectedCashflows):
             print("Setting spot_lag to 0: O/N deposit or fixing_date equal to start_date.")
             if term == None:
                 term = "O/N"
-                print("Term not given but fixxing == start -> setting term to O/N")
+                print("Term not given but fixing == start -> setting term to O/N")
         elif term == "T/N" or (fixing_date is not None and start_date is not None and fixing_date + relativedelta(days=1) == start_date):
             spd = 1
             print("Setting spot_lag to 1: T/N deposit or fixing_date + 1 day equal to start_date.")
             if term == None:
                 term = "T/N"
-                print("Term not given but fixxing == start -> setting term to T/N")
+                print("Term not given but fixing == start -> setting term to T/N")
         else:
             spd = spot_lag
 
@@ -163,8 +163,18 @@ class DepositSpecification(HasExpectedCashflows):
             md = roll_day(ed, calendar=calendar, business_day_convention=business_day_convention)
             print("Set maturity_date to end_date, " + str(ed) + ", adjusted by business_day_convention:" + str(md))
 
-        if term is None:
-            t = f"{(ed - sd).days}D"
+        if (
+            term is None
+        ):  # since we can somtimes get a mix of datetime and date, (which should be discussed...) we normalize to date here to find the difference in days
+            if isinstance(ed, datetime):
+                ed_date = ed.date()
+            else:
+                ed_date = ed
+            if isinstance(sd, datetime):
+                sd_date = sd.date()
+            else:
+                sd_date = sd
+            t = f"{(ed_date - sd_date).days}D"
             print("Set term to the difference between end_date and start_date in days.")
         else:
             t = term

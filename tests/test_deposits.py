@@ -48,8 +48,8 @@ class TestDepositSpecification(unittest.TestCase):
         """
         fixing = dt.datetime(2024, 1, 2)
         start = dt.datetime(2024, 1, 4)  # start after fixing [spot lag(=2) behavior]
-        # Use a 6 month term (Period-like string supported by class)
-
+        # Use a 6 month term (Period-like string supported by Period class)
+        # Implies end_date and maturity_date 2024-07-04 that must be calculated inside the DepositSpecification class
         ##TODO
         dep = DepositSpecification(
             obj_id="dep_6m",
@@ -61,14 +61,8 @@ class TestDepositSpecification(unittest.TestCase):
             day_count_convention=DayCounterType.ACT360,  # default but explicit here
         )
 
-        # TODO
-        # 2025.09.09 HN currentls throws error due to cal_end_day
-        # if roll_conv == RollRule.EOM.value and _is_ambiguous_date(start_date):  in line 888 in datetools.py
-        #
-        # there is no check for is roll_conv is EOM and date is NOT ambiguous. will trigger exception and no end date is set
-        # what is then the desired output? start date in question used was 2025.01.04 -> not ambiguous
-        # should be 2025.07.04 as end date?
-
+        # TODO: implement deposit.cashflows property similar to bonds or workaround here
+        # The following is commented out because deposits.cashflows is not yet implemented
         # # The deposit should produce a single cashflow at maturity with interest + notional.
         # cfs = dep.cashflows # this is assuming same construction as bonds, hoowever, deposits.cashflows is not yet inplemented #TODO
         # # Expect one cashflow
