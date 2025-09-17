@@ -232,12 +232,12 @@ class DiscountCurve:
         # }
 
         # check valid dates
-        if not isinstance(val_date, datetime):  # handling date object -> datetime
-            val_date = datetime(val_date, 0, 0, 0)
-        if not isinstance(d1, datetime):
-            d1 = datetime(d1, 0, 0, 0)
-        if not isinstance(d2, datetime):
-            d2 = datetime(d2, 0, 0, 0)
+        if isinstance(val_date, date):  # handling date object -> datetime
+            val_date = datetime.combine(val_date, datetime.min.time())
+        if isinstance(d1, date):
+            d1 = datetime.combine(d1, datetime.min.time())
+        if isinstance(d2, date):
+            d2 = datetime.combine(d2, datetime.min.time())
         if val_date < self.refdate:
             raise Exception("The given value date is before the curves reference date.")
 
