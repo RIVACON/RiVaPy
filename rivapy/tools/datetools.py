@@ -7,7 +7,9 @@ from dateutil.rrule import WE
 from calendar import monthrange, isleap
 from typing import List as _List, Union as _Union, Callable
 from holidays import HolidayBase as _HolidayBase
-from holidays import EuropeanCentralBank as _ECB
+
+# from holidays import DE
+from holidays.financial.european_central_bank import ECB as _ECB
 from rivapy.tools.enums import RollConvention, DayCounterType, RollRule
 from rivapy.tools._validators import _string_to_calendar
 import logging
@@ -618,9 +620,19 @@ class Schedule:
     @staticmethod
     def _generate_imm_dates(from_, to_, term, direction, backwards) -> _List[date]:
         dates = []
-        while ((not backwards) & (from_ <= to_)) | (backwards & (to_ <= from_)):
-            dates.append(from_)
-            from_ += direction * relativedelta(years=term.years, months=term.months, day=1, weekday=WE(3))
+        from_new = from_
+        # shift to next IMM if necessary, i.e. from_ may not be part of the generated dates
+        if not _is_IMM_date(from_):
+            from_new = _date_to_datetime(next_IMM_date(from_))
+        if backwards:
+            from_new = _date_to_datetime(next_IMM_date(from_ - relativedelta(months=3)))
+        # adjust term if not a multiple of 3 months
+        term_new = term
+        if term.months % 3 != 0:
+            term_new = next_IMM_period(term)
+        while ((not backwards) & (from_new <= to_)) | (backwards & (to_ <= from_new)):
+            dates.append(from_new)
+            from_new += direction * relativedelta(years=term_new.years, months=term_new.months, day=1, weekday=WE(3))
         return dates
 
     @staticmethod
@@ -689,6 +701,10 @@ class Schedule:
             )
         # generates a list of dates ...
         dates = Schedule._generate_dates_by_roll_convention(roll_convention_, from_, to_, term, direction, backwards)
+        # return empty list if no dates were generated
+        if dates == []:
+            print("No dates were generated!")
+            return dates
         if roll_convention_ == RollRule.EOM and _is_ambiguous_date(from_):
             from_ = datetime(from_.year, from_.month, monthrange(from_.year, from_.month)[-1])
         if roll_convention_ == RollRule.EOM and _is_ambiguous_date(to_):
@@ -855,11 +871,73 @@ def _is_IMM_date(day: _Union[date, datetime]) -> bool:
     return (day.month in [3, 6, 9, 12]) and (day.weekday() == 2) and (day.day >= 15) and (day.day <= 21)
 
 
+def next_IMM_date(from_date: _Union[date, datetime]) -> date:
+    """
+    Calculates the next IMM date (3rd Wednesday of March, June, September, December) on or after the given date.
+
+    Args:
+        from_date (_Union[date, datetime]): The date from which to find the next IMM date.
+
+    Returns:
+        date: The next IMM date on or after the given date.
+    """
+    from_date_dt = _date_to_datetime(from_date + relativedelta(days=1))
+    year = from_date_dt.year
+    month = from_date_dt.month
+
+    # Determine the next IMM month
+    if month <= 3:
+        imm_month = 3
+    elif month <= 6:
+        imm_month = 6
+    elif month <= 9:
+        imm_month = 9
+    else:
+        imm_month = 12
+
+    # Calculate the third Wednesday of the IMM month
+    first_day_of_imm_month = datetime(year, imm_month, 1)
+    first_wednesday = first_day_of_imm_month + relativedelta(weekday=WE(1))
+    third_wednesday = first_wednesday + relativedelta(weeks=2)
+
+    # If the calculated IMM date is before the from_date, move to the next IMM date
+    if third_wednesday < from_date_dt:
+        if imm_month == 12:
+            imm_month = 3
+            year += 1
+        else:
+            imm_month += 3
+
+    first_day_of_imm_month = datetime(year, imm_month, 1)
+    first_wednesday = first_day_of_imm_month + relativedelta(weekday=WE(1))
+    third_wednesday = first_wednesday + relativedelta(weeks=2)
+    print("Next IMM date from " + str(from_date) + " to next IMM date " + str(third_wednesday))
+    return third_wednesday.date()
+
+
+def next_IMM_period(period: Period) -> Period:
+    """
+    Adjusts the given period to the next multiple of 3 months, as IMM dates occur every 3 months.
+
+    Args:
+        period (Period): The original period.
+
+    Returns:
+        Period: The adjusted period.
+    """
+
+    months = period.months + (period.years * 12)
+    if period.days > 0:
+        months += 1  # If there are extra days, round up to the next month
+    months = ((months + 2) // 3) * 3  # Round up to next multiple of 3
+    return Period(0, months, 0)
+
+
 def calc_end_day(
     start_day: _Union[date, datetime],
     term: str,
     business_day_convention: _Union[RollConvention, str] = RollConvention.UNADJUSTED,
-    calendar: _Union[_HolidayBase, str] = _ECB,
+    calendar: _Union[_HolidayBase, str] = _ECB(),
     roll_convention: _Union[RollRule, str] = RollRule.NONE,
 ) -> date:
     """
@@ -887,8 +965,12 @@ def calc_end_day(
 
     if roll_conv == RollRule.EOM.value and _is_ambiguous_date(start_date):  # add ambiguous dates, i.e. 30 of Jan, Mar, May, Jul, Aug, Oct, Dec
         end_date = start_date + relativedelta(years=period.years, months=period.months, day=31)
-    elif roll_conv == RollRule.IMM.value and _is_IMM_date(start_date):  # add IMM dates, i.e. 3rd Wednesday of Mar, Jun, Sep, Dec
-        end_date = start_date + relativedelta(years=period.years, months=period.months, day=1, weekday=WE(3))
+    elif roll_conv == RollRule.IMM.value:  # add IMM dates, i.e. 3rd Wednesday of Mar, Jun, Sep, Dec
+        period_new = next_IMM_period(period)
+        if _is_IMM_date(start_date):
+            end_date = start_date + relativedelta(years=period_new.years, months=period_new.months, day=1, weekday=WE(3))
+        else:
+            end_date = next_IMM_date(start_date) + relativedelta(years=period_new.years, months=period_new.months, day=1, weekday=WE(3))
     elif roll_conv == RollRule.EOM.value or roll_conv == RollRule.IMM.value or roll_conv == RollRule.NONE.value or roll_conv == RollRule.DOM.value:
         end_date = start_date + relativedelta(years=period.years, months=period.months, days=period.days)
     else:
@@ -905,13 +987,16 @@ def calc_start_day(
     end_day: _Union[date, datetime],
     term: _Union[Period, str],
     business_day_convention: _Union[RollConvention, str] = "Unadjusted",
-    calendar: _Union[_HolidayBase, str] = _ECB,
+    calendar: _Union[_HolidayBase, str] = _ECB(),
     roll_convention: _Union[RollRule, str] = "NONE",
     max_iter: int = 10,
 ) -> date:
     """
-    Derives the start date of a time period based on the end day and the term given as string, e.g. 1D, 3M, or 5Y.
+    Derives the start date of a time period based on the end day, term, business day convention, calendar, and roll_convention.
+    The start date may be a business day or not, depending on the business day convention provided.
     The function ensures that applying calc_end_day to the resulting start date with the same parameters returns the original end_day.
+    Depending on the combination of the input parameters, a start date may not exist. In such cases, the function returns None and logs a warning.
+    For other combinations, the start may not be unique. In such cases, the function returns the latest business day for which the end date is matched.
 
     Args:
         end_day (_Union[date, datetime]): End of the time period with length term.
@@ -927,7 +1012,14 @@ def calc_start_day(
     """
     end_date = _date_to_datetime(end_day)
     period = _term_to_period(term)
-    start_date = end_date - relativedelta(years=period.years, months=period.months, days=period.days)
+    if not (business_day_convention == "Unadjusted" or business_day_convention == RollConvention.UNADJUSTED) and not is_business_day(
+        end_date, calendar
+    ):
+        logger.warning(
+            f"Cannot not find a start date such that calc_end_day(start_date, ...) == end_day given combination of business day convention, calendar, and end_day."
+        )
+        return None
+    start_date = next_or_previous_business_day(end_date - relativedelta(years=period.years, months=period.months, days=period.days), calendar, False)
     # Try to find the correct start_date such that calc_end_day(start_date, ...) == end_day
     for i in range(max_iter):
         candidate_end = calc_end_day(
@@ -938,14 +1030,18 @@ def calc_start_day(
             roll_convention=roll_convention,
         )
         if candidate_end == end_date:
+            if not is_business_day(start_date, calendar):
+                logger.warning(
+                    f"Found start date {start_date} such that calc_end_day(start_date, ...) == end_day, but start date is not a business day in the given calendar."
+                )
             return start_date
         # Adjust start_date by one day if not matching
         # If candidate_end < end_date, move start_date back; else, move forward
         delta = (_date_to_datetime(candidate_end) - end_date).days
         start_date -= relativedelta(days=delta if delta != 0 else 1)
-    raise ValueError("Could not find a start date such that calc_end_day(start_date, ...) == end_day after {} iterations.".format(max_iter))
-
-    return start_date
+    # If not found, handle error internally
+    logger.warning(f"Could not find a start date such that calc_end_day(start_date, ...) == end_day after {max_iter} iterations.")
+    return None
 
 
 def last_day_of_month(day: _Union[date, datetime]) -> date:
@@ -971,7 +1067,7 @@ def is_last_day_of_month(day: _Union[date, datetime]) -> bool:
     Returns:
         bool: True, if day is last day of the month, False otherwise.
     """
-    return _date_to_datetime(day) == last_day_of_month(day)
+    return _date_to_datetime(day) == _date_to_datetime(last_day_of_month(day))
 
 
 def is_business_day(day: _Union[date, datetime], calendar: _Union[_HolidayBase, str]) -> bool:
@@ -1017,7 +1113,7 @@ def is_last_business_day_of_month(day: _Union[date, datetime], calendar: _Union[
     Returns:
         bool: True if day is last business day of the corresponding month, False otherwise.
     """
-    return _date_to_datetime(day) == last_business_day_of_month(day, calendar)
+    return _date_to_datetime(day) == _date_to_datetime(last_business_day_of_month(day, calendar))
 
 
 def nearest_business_day(day: _Union[date, datetime], calendar: _Union[_HolidayBase, str], following_first: bool = True) -> date:
