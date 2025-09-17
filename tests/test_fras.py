@@ -20,14 +20,14 @@ from rivapy.tools.enums import (
 class TestForwardRateAgreementSpecification(unittest.TestCase):
     def setUp(self):
         """Common setup for tests"""
-        self.issue_date = dt.date(2024, 1, 1)
+        self.trade_date = dt.date(2024, 1, 1)
         self.maturity_date = dt.date(2024, 12, 31)
         self.start_date = dt.date(2024, 3, 1)
         self.end_date = dt.date(2024, 9, 1)
 
         self.fra = ForwardRateAgreementSpecification(
             obj_id="fra_001",
-            issue_date=self.issue_date,
+            trade_date=self.trade_date,
             maturity_date=self.maturity_date,
             notional=1_000_000,
             rate=0.02,
@@ -48,7 +48,7 @@ class TestForwardRateAgreementSpecification(unittest.TestCase):
         self.assertEqual(self.fra.obj_id, "fra_001")
         self.assertEqual(self.fra.notional, 1_000_000)
         self.assertEqual(self.fra.rate, 0.02)
-        self.assertEqual(self.fra.issue_date, self.issue_date)
+        self.assertEqual(self.fra.trade_date, self.trade_date)
         self.assertEqual(self.fra.maturity_date, self.maturity_date)
         self.assertEqual(self.fra.start_date, self.start_date)
         self.assertEqual(self.fra.end_date, self.end_date)
@@ -92,8 +92,8 @@ class TestForwardRateAgreementSpecification(unittest.TestCase):
         self.assertEqual(self.fra.get_end_date(), self.maturity_date)
 
     def test_create_sample_reproducibility(self):
-        samples1 = ForwardRateAgreementSpecification._create_sample(3, seed=42, ref_date=self.issue_date)
-        samples2 = ForwardRateAgreementSpecification._create_sample(3, seed=42, ref_date=self.issue_date)
+        samples1 = ForwardRateAgreementSpecification._create_sample(3, seed=42, ref_date=self.trade_date)
+        samples2 = ForwardRateAgreementSpecification._create_sample(3, seed=42, ref_date=self.trade_date)
 
         self.assertEqual(len(samples1), 3)
         self.assertEqual(len(samples2), 3)
@@ -102,9 +102,9 @@ class TestForwardRateAgreementSpecification(unittest.TestCase):
         self.assertEqual(samples1[0]["currency"], samples2[0]["currency"])
 
     def test_create_sample_structure(self):
-        samples = ForwardRateAgreementSpecification._create_sample(2, seed=1, ref_date=self.issue_date)
+        samples = ForwardRateAgreementSpecification._create_sample(2, seed=1, ref_date=self.trade_date)
         self.assertIsInstance(samples, list)
-        self.assertIn("issue_date", samples[0])
+        self.assertIn("trade_date", samples[0])
         self.assertIn("maturity_date", samples[0])
         self.assertIn("currency", samples[0])
 
