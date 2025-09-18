@@ -86,7 +86,7 @@ if __name__ == "__main__":
         pay_leg=fixed_leg,
         receive_leg=float_leg,
         currency="EUR",
-        day_count_convention="EUR",
+        day_count_convention="Act360",
         issuer="DBK",
         securitization_level="COLLATERALIZED",
     )
