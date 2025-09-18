@@ -1,6 +1,7 @@
 # 2025.07.24 Hans Nguyen
 from datetime import datetime, date
 from typing import List as _List, Union as _Union, Tuple, Dict, Any
+import numpy as np
 
 
 #########################################################################
@@ -80,3 +81,29 @@ class CashFlow:
             _type_: _description_
         """
         return super().__dir__() + list(self._attributes.keys())
+
+    @staticmethod
+    def _create_sample(n_samples: int, seed: int = None):
+        """Creates a sample of random ``CashFlow`` objects.
+
+        Returns:
+            List[CashFlow]: List of sampled ``CashFlow`` objects
+        """
+        result = []
+        if seed is not None:
+            np.random.seed(seed)
+
+        for i in range(n_samples):
+            cashflow_val = np.random.choice(np.arange(1000, 10000, 100), 1)[0]
+            result.append(
+                {
+                    "val": cashflow_val,
+                }
+            )
+
+    def _to_dict(self) -> dict:
+        result = {
+            "val": self.val,
+            "attributes": self._attributes,
+        }
+        return result
