@@ -43,7 +43,7 @@ def _check_positivity(value: float) -> float:
     if value > 0.0:
         return value
     else:
-        raise Exception(str(value) + " must be positive!")
+        raise ValueError(str(value) + " must be positive!")
 
 
 def _check_non_negativity(value: float) -> float:
@@ -57,7 +57,7 @@ def _check_non_negativity(value: float) -> float:
         float: non-negative value
     """
     if value < 0.0:
-        raise Exception(str(value) + ' must not be negative!')
+        raise ValueError(str(value) + " must not be negative!")
     else:
         return value
 
@@ -189,6 +189,7 @@ def _check_start_at_or_before_end(start: _Union[date, datetime], end: _Union[dat
     else:
         raise Exception("'" + str(start) + "' must be earlier than '" + str(end) + "'!")
 
+
 def check_start_before_end(start: _Union[date, datetime], end: _Union[date, datetime]) -> _Tuple[date, date]:
     """
     Converts the two input dates from datetime to date format it necessary and checks if the first date is earlier
@@ -207,6 +208,7 @@ def check_start_before_end(start: _Union[date, datetime], end: _Union[date, date
         return start_date, end_date
     else:
         raise Exception("'" + str(start) + "' must be earlier than '" + str(end) + "'!")
+
 
 def _is_ascending_date_list(start_date: date, dates: _List[date], end_date: date, exclude_start: bool = True, exclude_end: bool = False) -> bool:
     """
@@ -276,10 +278,11 @@ def _check_pandas_index_for_datetime(dataframe: pd.DataFrame):
     else:
         raise TypeError(f"The argument is not of type pd.DataFrame!")
 
+
 def print_member_values(obj):
     print(f"Inspecting instance of {type(obj).__name__}:\n")
     for attr in dir(obj):
-        if attr.startswith('_'):
+        if attr.startswith("_"):
             continue  # Skip private and built-in attributes
         value = getattr(obj, attr)
         if not callable(value):
