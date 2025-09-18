@@ -25,6 +25,13 @@ class FactoryTestsMeta(type):
         return fn
 
 
+# TODO currently, the EnergyFtureSpecifications and GreenPPASpecification
+# _create_sample() functions return List[Instrument_spec]
+# However, from the updated Bonds Specification, upon which, deposits, fras, IR Swaps
+# are based, these specifications return a List[Dict[instrument parameters]]
+# and several instances of the specification are not actually initlized.
+# this leads to the current error in the unit tests
+# TODO: discuss desgin choice with Hans and update accordingly 2025.09.18
 class InstrumentTests(unittest.TestCase, metaclass=FactoryTestsMeta):
     pass
 
