@@ -26,22 +26,22 @@ class SimpleCashflowPricer:
 
     @staticmethod
     def get_expected_cashflows(
-        specification: HasExpectedCashflows, val_date: _Union[datetime.date, datetime], curve: _Union[DiscountCurve, None] = None
+        specification: HasExpectedCashflows, val_date: _Union[datetime.date, datetime, None] = None, curve: _Union[DiscountCurve, None] = None
     ) -> List[Tuple[datetime, float]]:
         schedule = specification.get_schedule()
         dates = schedule._roll_out(
             from_=specification._start_date,
             to_=specification._end_date,
-            term=_term_to_period(specification._frequency),
+            term=_term_to_period(specification._tenor),
             ref_date=val_date,  # restrict schedule to the current and future periods
         )
         dcc = DayCounter(specification.day_count_convention)
         if specification._coupon_type == "float":
+            if val_date is None:
+                raise ValueError("val_date must be provided for floating rate cashflow calculation.")
             cashflows = []
             for d1, d2 in zip(dates[:-1], dates[1:]):
-                payment_date = roll_day(
-                    d2, specification._calendar, specification._business_day_convention, settle_days == specification._payment_days
-                )
+                payment_date = roll_day(d2, specification._calendar, specification._business_day_convention, settle_days=specification._payment_days)
                 # For the first period, check if we have a fixing rate or if d1 is before curve date
                 if len(cashflows) == 0 and (specification.last_fixing is not None or (curve is not None and d1 >= curve.refdate)):
                     rate = specification.last_fixing if specification.last_fixing is not None else curve.rivapy_valueFWD(val_date, d1, d2)

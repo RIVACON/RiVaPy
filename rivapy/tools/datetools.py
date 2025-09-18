@@ -17,7 +17,7 @@ import logging
 
 # TODO: Switch to locally configured logger.
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 
 class DayCounter:
@@ -1040,7 +1040,7 @@ def calc_start_day(
         delta = (_date_to_datetime(candidate_end) - end_date).days
         start_date -= relativedelta(days=delta if delta != 0 else 1)
     # If not found, handle error internally
-    logger.warning(f"Could not find a start date such that calc_end_day(start_date, ...) == end_day after {max_iter} iterations.")
+    logger.error(f"Could not find a start date such that calc_end_day(start_date, ...) == end_day after {max_iter} iterations.")
     return None
 
 
