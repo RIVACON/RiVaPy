@@ -121,11 +121,12 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         # self.trade_settle = trade_settle
         self._fixing_date = calc_start_day(self._start_date, f"{spot_lag}D", self._business_day_convention, self._calendar)
         self._spot_lag = spot_lag
-        if start_period is not None:
-            self.start_period = start_period
 
-        if end_period is not None:
-            self.end_period = end_period
+        # if start_period is not None:
+        self.start_period = start_period
+
+        # if end_period is not None:
+        self.end_period = end_period
 
         if index_alias is not None:
             self._index_alias = index_alias
@@ -616,6 +617,15 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
             float: _description_
         """
         return self._end_period
+
+    @end_period.setter
+    def end_period(self, end_period) -> int:
+        """setter for the end period, given in Months
+
+        Returns:
+            float: _description_
+        """
+        self._end_period = end_period
 
     @property
     def index(self) -> str:
