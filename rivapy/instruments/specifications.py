@@ -218,6 +218,7 @@ class AmericanVanillaSpecification:
 
 
 class HasExpectedCashflows(FactoryObject):
+
     def __init__(
         self,
         obj_id: str,
@@ -225,7 +226,7 @@ class HasExpectedCashflows(FactoryObject):
         start_date: _Union[dt.date, dt.datetime],
         end_date: _Union[dt.date, dt.datetime],
         maturity_date: _Union[dt.date, dt.datetime],
-        frequency: _Union[Period, str],
+        tenor: _Union[Period, str],
         notional: float = 100.0,
         currency: _Union[Currency, str] = Currency.EUR,
         notional_exchange: bool = True,
@@ -254,7 +255,7 @@ class HasExpectedCashflows(FactoryObject):
             maturity_date (_Union[date, datetime]): Adjusted end date of the last accrual period. Is a good business day.
             notional (float): Notional amount of the instrument.
             coupon (float): Fixed coupon rate .
-            frequency (_Union[Period, str]): frequency of fixings.
+            tenor (_Union[Period, str]): tenor of the instrument.
             day_count_convention (_Union[DayCounterType, str], optional): Day count convention. Defaults to DayCounterType.ACT360.
             business_day_convention (_Union[RollConvention, str], optional): Business day convention. Defaults to RollConvention.MODIFIED_FOLLOWING.
             roll_convention (_Union[RollRule, str], optional): Roll convention. Defaults to RollRule.EOM.
@@ -271,7 +272,7 @@ class HasExpectedCashflows(FactoryObject):
         self._maturity_date = _date_to_datetime(maturity_date)
         self._notional = notional
         self._coupon = coupon
-        self._frequency = frequency
+        self._tenor = tenor
         self._day_count_convention = day_count_convention
         self._business_day_convention = business_day_convention
         self._roll_convention = roll_convention
@@ -376,24 +377,24 @@ class HasExpectedCashflows(FactoryObject):
         self._end_date = _date_to_datetime(end_date)
 
     @property
-    def frequency(self) -> Period:
+    def tenor(self) -> Period:
         """
-        Getter for instrument's fixing frequency.
+        Getter for instrument's fixing tenor.
 
         Returns:
-            Period: instrument's fixing frequency.
+            Period: instrument's fixing tenor.
         """
-        return self._frequency
+        return self._tenor
 
-    @frequency.setter
-    def frequency(self, frequency: _Union[Period, str]):
+    @tenor.setter
+    def tenor(self, tenor: _Union[Period, str]):
         """
-        Setter for instrument's frequency.
+        Setter for instrument's tenor.
 
         Args:
-            frequency (Union[Period, str]): instrument's fixing frequency.
+            tenor (Union[Period, str]): instrument's fixing tenor.
         """
-        self._frequency = _term_to_period(frequency)
+        self._tenor = _term_to_period(tenor)
 
     @property
     def notional(self) -> float:
@@ -715,8 +716,8 @@ class HasExpectedCashflows(FactoryObject):
         # _check_start_at_or_before_end(self._end_date, self._maturity_date) # TODO special case modified following BCC
         _check_non_negativity(self._payment_days)
         _check_non_negativity(self._spot_days)
-        if not isinstance(self._frequency, (Period, str)):
-            raise ValueError("Frequency must be a Period object or string.")
+        if not isinstance(self._tenor, (Period, str)):
+            raise ValueError("tenor must be a Period object or string.")
         if not isinstance(self._calendar, (_HolidayBase, str)):
             raise ValueError("Calendar must be a HolidayBase or string.")
 
@@ -754,7 +755,7 @@ class HasExpectedCashflows(FactoryObject):
     #     dates = schedule._roll_out(
     #         from_=self._start_date,
     #         to_=self._end_date,
-    #         term=_term_to_period(self._frequency),
+    #         term=_term_to_period(self._tenor),
     #     )
     #     dcc = DayCounter(self.day_count_convention)
     #     if self._coupon_type == "float":
@@ -770,7 +771,7 @@ class HasExpectedCashflows(FactoryObject):
         return Schedule(
             start_day=self._start_date,
             end_day=self._end_date,
-            time_period=self._frequency,
+            time_period=self._tenor,
             backwards=self._backwards,
             stub_type_is_Long=self._stub_type_is_Long,
             business_day_convention=self._business_day_convention,

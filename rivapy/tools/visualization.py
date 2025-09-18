@@ -257,7 +257,7 @@ def plot_deposit(spec: DepositSpecification, val_date) -> plt.Figure:
     if spec.end_date != spec.maturity_date:
         periods.append(("Mon Accrual Period", spec.end_date, spec.maturity_date))
     if spec.maturity_date != payment_date:
-        periods.append(("Final Settlement Period \n(aka Payment Lag)", spec.maturity_date, payment_date))
+        periods.append(("Payment Lag)", spec.maturity_date, payment_date))
     from rivapy.pricing.bond_pricing import SimpleCashflowPricer
 
     cashflows = SimpleCashflowPricer.get_expected_cashflows(spec, val_date)
@@ -282,11 +282,9 @@ def plot_fra(spec: ForwardRateAgreementSpecification, val_date, fwd_curve) -> pl
     }
     periods = []
     if spec._trade_date != spec._start_date:
-        periods.append(("Start Period", spec._trade_date, spec._start_date))
+        periods.append(("Lead Period \n(aka Start Period)", spec._trade_date, spec._start_date))
         periods.append(("Contract Period", spec._start_date, spec._end_date))
         periods.append(("End Period", spec._trade_date, spec._end_date))
-    if spec._fixing_date != spec._start_date:
-        periods.append(("Lead Period", spec._fixing_date, spec._start_date))
     if spec._start_date != payment_date:
         periods.append(("Payment Lag", spec._start_date, payment_date))
     from rivapy.pricing import ForwardRateAgreementPricer

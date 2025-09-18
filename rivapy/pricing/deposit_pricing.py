@@ -46,7 +46,9 @@ class DepositPricer(SimpleCashflowPricer):
         return SimpleCashflowPricer.expected_cashflows(self._spec, self._val_date)
 
     @staticmethod
-    def get_expected_cashflows(val_date: datetime, specification: DepositSpecification) -> _List[Tuple[datetime, float]]:
+    def get_expected_cashflows(
+        specification: DepositSpecification, val_date: _Union[datetime.date, datetime, None] = None
+    ) -> _List[Tuple[datetime, float]]:
         """Get the expected cashflows of the deposit.
 
         Args:
@@ -57,7 +59,10 @@ class DepositPricer(SimpleCashflowPricer):
         Returns:
             List[Tuple[datetime, float]]: The expected cashflows of the deposit.
         """
-        return SimpleCashflowPricer.expected_cashflows(specification, val_date)
+        if val_date is None:
+            return SimpleCashflowPricer.get_expected_cashflows(specification)
+        else:
+            return SimpleCashflowPricer.get_expected_cashflows(specification, val_date)
 
     def price(self) -> float:
         """Get the price of the deposit.
@@ -120,5 +125,5 @@ class DepositPricer(SimpleCashflowPricer):
         dcc = DayCounter(daycountconvention)
         dt = dcc.yf(start_date, end_date)
         simple_rate = ((1 / cont_df) - 1) / dt
-
+        print((f"dcc: {dcc}, start_date: {start_date}, end_date: {end_date}, dt: {dt}, cont_df: {cont_df}, simple_rate: {simple_rate}"))
         return simple_rate
