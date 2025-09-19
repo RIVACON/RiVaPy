@@ -41,9 +41,6 @@ class ForwardRateAgreementPricer:
         else:
             self._forward_curve = forward_curve
 
-    # ToDo:
-    # -- add: expected cashflows
-    # -- add: @static method price and ensure that non-static method can be called
     @staticmethod
     def get_expected_cashflows(
         specification: ForwardRateAgreementSpecification,
@@ -124,16 +121,6 @@ class ForwardRateAgreementPricer:
 
         return price
 
-    # {
-    # 	double fwdRate = ForwardRateAgreementPricer::computeFairRate(valDate, spec, forwardCurve);
-    # 	double yf = spec->getDc()->yf(spec->getStartDate(), spec->getEndDate());
-    # 	double pv = (fwdRate - spec->getRate()) / (1. + yf * fwdRate) * spec->getNotional() * yf *
-    # 		discountCurve->value(valDate, spec->getStartDate());
-    # 	if (!spec->isBuyer()) #TODO determine if is buyer or seller in specification
-    # 		pv = -pv;
-    # 	return pv;
-    # }
-
     @staticmethod
     def compute_fair_rate(
         val_date: _Union[datetime, date],
@@ -166,8 +153,3 @@ class ForwardRateAgreementPricer:
         fair_rate = (1.0 / fwd_df - 1) / yf
 
         return fair_rate
-
-
-# fair rate:
-# 	double yf = spec->getDc()->yf(spec->getRateStartDate(), spec->getRateEndDate());
-# 			return  (1.0 / forwardCurve->valueFwd(refDate, spec->getRateStartDate(), spec->getRateEndDate()) - 1.) / yf;
