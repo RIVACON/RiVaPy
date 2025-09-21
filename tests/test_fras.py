@@ -1,14 +1,20 @@
 # hnguyen, 2024-09-08
 # unit tests for Forward rate agreement specification class
+import math
 from holidays import ECB  # ??
 
 import unittest
 import datetime as dt
+from matplotlib import dates
 import numpy as np
 from rivapy.instruments.fra_specifications import ForwardRateAgreementSpecification
-from rivapy.tools.datetools import DayCounter
+from rivapy.marketdata.curves import DiscountCurve
+from rivapy.pricing.fra_pricing import ForwardRateAgreementPricer
+from rivapy.pricing.bond_pricing import SimpleCashflowPricer
+from rivapy.tools.datetools import DayCounter, roll_day
 from rivapy.tools.enums import (
     DayCounterType,
+    InterpolationType,
     RollConvention,
     SecuritizationLevel,
     Currency,
@@ -18,6 +24,35 @@ from rivapy.tools.enums import (
 
 
 class TestForwardRateAgreementSpecification(unittest.TestCase):
+
+    # Set up FRA
+    ccy = "EUR"
+    fra_rate = 0.04
+    ref_date = dt.datetime(2023, 1, 28)
+    start_date = dt.datetime(2023, 7, 28)
+    end_date = dt.datetime(2023, 10, 28)
+
+    mat_date = ref_date + dt.timedelta(days=365)
+
+    fra = ForwardRateAgreementSpecification(
+        obj_id="dummy_id",
+        trade_date=ref_date,
+        notional=1000.0,
+        rate=fra_rate,
+        start_date=start_date,
+        end_date=end_date,
+        udlID="dummy_underlying_index",
+        rate_start_date=start_date,
+        rate_end_date=end_date,
+        day_count_convention="Act360",
+        rate_day_count_convention="Act360",
+        currency=ccy,
+        spot_lag=1,
+        payment_days=1,
+        issuer="dummy_issuer",
+        securitization_level="NONE",
+    )
+
     def setUp(self):
         """Common setup for tests"""
         self.trade_date = dt.date(2024, 1, 1)
@@ -111,6 +146,48 @@ class TestForwardRateAgreementSpecification(unittest.TestCase):
 
 #######################################################
 # Tests for Pricing
+def test_fra_cf_implied_rate(self):
+    # setting up necessary curves
+    # discount curve
+    object_id = "TEST_DC"
+    dsc_rate = 0.01
+    days_to_maturity = [1, 180, 365, 720, 3 * 365, 4 * 365, 10 * 365]
+    dates = [self.ref_date + dt.timedelta(days=d) for d in days_to_maturity]
+    df = [math.exp(-d / 365.0 * dsc_rate) for d in days_to_maturity]
+    dc = DiscountCurve(id=object_id, refdate=self.ref_date, dates=dates, df=df, interpolation=InterpolationType.LINEAR)
+
+    # Fixing curve
+    object_id = "TEST_fwd"
+    fwd_rate = 0.05
+    fwd_df = [math.exp(-d / 365.0 * fwd_rate) for d in days_to_maturity]
+    fwd_dc = DiscountCurve(id=object_id, refdate=self.ref_date, dates=dates, df=fwd_df, interpolation=InterpolationType.LINEAR)
+
+    fra_pricer = ForwardRateAgreementPricer(self.ref_date, self.fra, dc, fwd_dc)
+
+    # Manually calculate expected cashflows 'manually' for comparison
+    dcc_rate = DayCounter(fwd_dc.daycounter)
+    fwdrateDF = fwd_dc.rivapy_valueFWD(self.ref_date, self.fra._rate_start_date, self.fra._rate_end_date)
+    dt_rate = dcc_rate.yf(self.fra._rate_start_date, self.fra._rate_end_date)
+    fwdrate = (1.0 / fwdrateDF - 1) / dt_rate
+
+    # using instrument daycount convention to calculate delta t for cf amount calculation and discounting
+    dcc = DayCounter(self.fra.day_count_convention)
+    dt = dcc.yf(self.fra._start_date, self.fra._end_date)
+    amount = self.fra._notional * (fwdrate - self.fra._rate) * dt
+    cf = amount / (1 + fwdrate * dt)
+
+    fair_rate = (1.0 / fwdrateDF - 1) / dt_rate
+
+    self.assertEqual(fra_pricer._fra_spec, self.fra)
+    self.assertEqual(fra_pricer._val_date, self.ref_date)
+    self.assertEqual(fra_pricer._discount_curve, dc)
+    self.assertEqual(fra_pricer._forward_curve, fwd_dc)
+
+    self.assertEqual(
+        fra_pricer.get_expected_cashflows(),
+        [(roll_day(self.fra._start_date, self.fra._calendar, self.fra._business_day_convention, settle_days=self.fra._payment_days), cf)],
+    )
+    self.assertEqual(fra_pricer.compute_fair_rate(self.ref_date, self.fra, fwd_dc), fair_rate)
 
 
 if __name__ == "__main__":
