@@ -3,7 +3,7 @@ import datetime as dt
 from dateutil.relativedelta import relativedelta
 import pandas as pd
 import matplotlib.pyplot as plt
-from rivapy.marketdata.bootstrapping_2025 import bootstrap_curve, get_quote
+from rivapy.marketdata.bootstrapping import bootstrap_curve, get_quote
 from rivapy.instruments.deposit_specifications import DepositSpecification
 from rivapy.instruments.fra_specifications import ForwardRateAgreementSpecification
 from rivapy.instruments.ir_swap_specification import (
@@ -12,7 +12,7 @@ from rivapy.instruments.ir_swap_specification import (
     IrFloatLegSpecification,
     IrOISLegSpecification,
 )
-from rivapy.instruments.notional_structure import ConstNotionalStructure
+from rivapy.instruments.components import ConstNotionalStructure
 from rivapy.tools.enums import DayCounterType, InterpolationType, ExtrapolationType
 
 import matplotlib.pyplot as plt

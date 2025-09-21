@@ -25,9 +25,9 @@ from rivapy.pricing.pricing_data import (
 from rivapy.pricing.pricing_request import InterestRateSwapPricingRequest
 from typing import List as _List, Union as _Union, Tuple, Dict, Any
 from rivapy.tools.datetools import DayCounter
-from rivapy.instruments.cashflow import CashFlow
+from rivapy.instruments.components import CashFlow
 from rivapy.marketdata.fixing_table import FixingTable
-from rivapy.instruments.notional_structure import *
+from rivapy.instruments.components import *
 import numpy as np
 
 
@@ -327,7 +327,7 @@ class InterestRateSwapPricer:
             # given rate, notional, and yf, calc interest
             entry.interest_amount = entry.notional * entry.rate * entry.interest_yf
 
-            # scale by forward rate???? #TODO
+            # scale by forward rate #TODO # required for FX swap...
             if val_date <= entry.end_date:
                 entry.pay_amount = entry.interest_amount / forward_curve.rivapy_valueFWD(val_date, entry.end_date, entry.pay_date)
             else:

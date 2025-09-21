@@ -1,6 +1,6 @@
 from rivapy.pricing.interest_rate_swap_pricing import InterestRateSwapPricer
 from rivapy.instruments.ir_swap_specification import InterestRateSwapSpecification, IrFixedLegSpecification, IrFloatLegSpecification
-from rivapy.instruments.notional_structure import NotionalStructure, ConstNotionalStructure, VariableNotionalStructure, ResettingNotionalStructure
+from rivapy.instruments.components import NotionalStructure, ConstNotionalStructure, VariableNotionalStructure, ResettingNotionalStructure
 from rivapy.pricing.pricing_data import (
     InterestRateSwapFloatLegPricingData_rivapy,
     InterestRateSwapLegPricingData_rivapy,
