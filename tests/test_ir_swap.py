@@ -738,8 +738,54 @@ class TestIRSwapSpecificationPricing(unittest.TestCase):
         self.assertEqual(result, 50.0)
         mock_populate_ois.assert_called_once()
 
-    def compute_swap_rate(self):
-        pass
+    @unittest.mock.patch("rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.price_leg")
+    def test_compute_swap_rate(self, mock_price_leg):
+        """
+        Test fair swap rate calculation:
+        swap_rate = PV_float / Annuity_fixed
+
+        The function essentially calls price_leg on a fixed and floating leg, where for the
+        fixed leg, the desired rate is set = 1 in order to calculate the Annuity instead
+        as used for the computation of a fair swap rate st. PV_Fixed = PV_float
+
+        """
+
+        # Arrange: control PVs from mocked price_leg
+        mock_price_leg.side_effect = [200.0, 800.0]  # float PV, fixed annuity
+
+        ref_date = datetime(2024, 1, 1)
+        discount_curve = unittest.mock.Mock()
+        fixing_curve = unittest.mock.Mock()
+        float_leg = unittest.mock.Mock()
+        fixed_leg = unittest.mock.Mock()
+        fixing_map = unittest.mock.Mock()
+
+        # Act
+        swap_rate = InterestRateSwapPricer.compute_swap_rate(
+            ref_date=ref_date,
+            discount_curve=discount_curve,
+            fixing_curve=fixing_curve,
+            float_leg=float_leg,
+            fixed_leg=fixed_leg,
+            fixing_map=fixing_map,
+            pricing_params={
+                "fixing_grace_period": 0.0
+            },  # then ensures that desired_rate = 1 in price_leg for fixed since it will go with default value
+        )
+
+        # Assert
+        expected_rate = 200.0 / 800.0  # 0.25
+        self.assertAlmostEqual(swap_rate, expected_rate)
+
+        # Verify calls
+        self.assertEqual(mock_price_leg.call_count, 2)
+        # First call -> float leg
+        args_float = mock_price_leg.call_args_list[0][0]
+        # Second call -> fixed leg
+        args_fixed = mock_price_leg.call_args_list[1][0]
+
+        self.assertIs(args_float[2], fixing_curve)  # forward curve used for float leg
+        self.assertIs(args_fixed[2], fixing_curve)  # forward curve also passed for fixed leg annuity
 
 
 class TestGetProjectedNotionals(unittest.TestCase):
