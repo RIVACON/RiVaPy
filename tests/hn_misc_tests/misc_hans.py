@@ -12,7 +12,7 @@ from rivapy.pricing.fra_pricing import ForwardRateAgreementPricer
 from rivapy.pricing.interest_rate_swap_pricing import InterestRateSwapPricer
 
 from rivapy.marketdata.curves import DiscountCurve
-from rivapy.instruments.notional_structure import ConstNotionalStructure
+from rivapy.instruments.components import ConstNotionalStructure
 
 from rivapy.tools.datetools import _term_to_period, DayCounter, roll_day
 from rivapy.tools.enums import DayCounterType, InterpolationType, ExtrapolationType, Instrument

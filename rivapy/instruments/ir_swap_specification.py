@@ -10,7 +10,7 @@ import rivapy.tools.interfaces as interfaces
 from rivapy.tools.datetools import Period, Schedule
 
 from rivapy.instruments.bond_specifications import BondBaseSpecification
-from rivapy.instruments.notional_structure import NotionalStructure, ConstNotionalStructure, VariableNotionalStructure, ResettingNotionalStructure
+from rivapy.instruments.components import NotionalStructure, ConstNotionalStructure, VariableNotionalStructure, ResettingNotionalStructure
 from rivapy.tools.enums import IrLegType
 
 # Base each swap leg, off of the IRSwapBaseSpecification

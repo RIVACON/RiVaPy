@@ -12,7 +12,7 @@ from rivapy.instruments.ppa_specification import PPASpecification, GreenPPASpeci
 #     FloatingRateNoteSpecification,
 #     FixedToFloatingRateNoteSpecification,
 # )
-from rivapy.instruments.cashflow import CashFlow
+from rivapy.instruments.components import CashFlow
 from rivapy.instruments.energy_futures_specifications import EnergyFutureSpecifications
 from rivapy.instruments.deposit_specifications import DepositSpecification
 from rivapy.instruments.fra_specifications import ForwardRateAgreementSpecification

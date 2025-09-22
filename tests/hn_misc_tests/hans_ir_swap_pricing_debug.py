@@ -1,6 +1,6 @@
 from rivapy.pricing.interest_rate_swap_pricing import InterestRateSwapPricer
 from rivapy.instruments.ir_swap_specification import InterestRateSwapSpecification, IrFixedLegSpecification, IrFloatLegSpecification
-from rivapy.instruments.notional_structure import NotionalStructure, ConstNotionalStructure, VariableNotionalStructure, ResettingNotionalStructure
+from rivapy.instruments.components import NotionalStructure, ConstNotionalStructure, VariableNotionalStructure, ResettingNotionalStructure
 from rivapy.pricing.pricing_data import (
     InterestRateSwapFloatLegPricingData_rivapy,
     InterestRateSwapLegPricingData_rivapy,
@@ -86,7 +86,7 @@ if __name__ == "__main__":
         pay_leg=fixed_leg,
         receive_leg=float_leg,
         currency="EUR",
-        day_count_convention="EUR",
+        day_count_convention="Act360",
         issuer="DBK",
         securitization_level="COLLATERALIZED",
     )

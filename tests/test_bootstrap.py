@@ -5,7 +5,7 @@ from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
 
-from rivapy.marketdata.bootstrapping_2025 import (
+from rivapy.marketdata.bootstrapping import (
     bootstrap_curve,
     error_fn,
     find_bracket,
@@ -21,7 +21,7 @@ from rivapy.instruments.ir_swap_specification import (
     IrOISLegSpecification,
 )
 from rivapy.tools.enums import DayCounterType, InterpolationType, ExtrapolationType, Instrument
-from rivapy.instruments.notional_structure import ConstNotionalStructure
+from rivapy.instruments.components import ConstNotionalStructure
 from rivapy.tools.datetools import DayCounter
 
 
