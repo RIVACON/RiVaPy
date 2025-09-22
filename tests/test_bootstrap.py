@@ -1,6 +1,7 @@
 # 2025.09.09 Bootstrapping without pyvacon
 import unittest
 import math
+import pandas as pd
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
@@ -23,6 +24,12 @@ from rivapy.instruments.ir_swap_specification import (
 from rivapy.tools.enums import DayCounterType, InterpolationType, ExtrapolationType, Instrument
 from rivapy.instruments.components import ConstNotionalStructure
 from rivapy.tools.datetools import DayCounter
+
+
+# for specification from file tests
+import rivapy.instruments.specification_from_csv as sfc
+from holidays import HolidayBase as _HolidayBase
+from holidays import EuropeanCentralBank as _ECB
 
 
 # Helper functions
@@ -1352,6 +1359,198 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
                 extrapolation_type=self.extrap,
             )
         self.assertIn("Deposits cannot be used in multicurve bootstrapping", str(cm.exception))
+
+
+class TestAutomaticInstrumentCreation(unittest.TestCase):
+    """_summary_
+
+    Args:
+        unittest (_type_): _description_
+    """
+
+    def setUp(self):
+        """_summary_"""
+        # set directory and file name for Input Quotes
+        dirName = "./notebooks/marketdata"  # "./"
+        fileName = "/inputQuotes.csv"  # "/inputQuotes.csv"
+
+        df = pd.read_csv(dirName + fileName, sep=";", decimal=",")
+        column_names = list(df.columns)
+
+        self.quotes_df = df
+        self.column_names = column_names
+
+    def create_deposits_from_df(self):
+        """ """
+        df = self.quotes_df.copy()
+        df_deposits = df[df["Instrument"] == "DEPOSIT"]
+
+        example_dep = df_deposits.iloc[0]
+        input_data = example_dep.copy()
+
+        # these inputs must be given by user
+        refDate = datetime(2019, 3, 1)
+        holidays = _ECB()
+
+        # the following is read for every instrument type
+        instr = input_data["Instrument"]
+        fixDayCount = input_data["DayCountFixed"]
+        floatDayCount = input_data["DayCountFloat"]
+        basisDayCount = input_data["DayCountBasis"]
+        maturity = input_data["Maturity"]
+        tenor = input_data["UnderlyingTenor"]
+        underlyingPayFreq = input_data["UnderlyingPaymentFrequency"]
+        basisTenor = input_data["BasisTenor"]
+        basisPayFreq = input_data["BasisPaymentFrequency"]
+        fixPayFreq = input_data["PaymentFrequencyFixed"]
+        rollConvFloat = input_data["RollConventionFloat"]
+        rollConvFix = input_data["RollConventionFixed"]
+        rollConvBasis = input_data["RollConventionBasis"]
+        spotLag = input_data["SpotLag"]
+        parRate = input_data["Quote"]
+        currency = input_data["Currency"]
+        label = instr + "_" + maturity
+
+        ##################
+        # # get spot date # form Thomas
+        # spot_date = get_end_date(self.refDate, self.spotLag)
+        # # end date of the accrual period
+        # end_date = get_end_date(spot_date, self.maturity)
+
+        # # start date of FRA is endDate - tenor
+        # start_date = get_start_date(end_date, self.tenor)
+        # self.label, "dummy_issuer", "NONE", self.currency, self.refDate, start_date, end_date, 100, self.parRate, self.floatDayCount)
+
+        #######################
+        # the fixing date is equivanlent to
+        # so from the file, we know the TERM for sure, the MATURITY for sure, and we give the REFERENCE DATE
+
+        # our deposit spepcificaiton can be created using the FIXING_DATE = ,refdate, spotlag, and MATURITY to calculate the term, start, end_date
+
+        dep_spec = DepositSpecification(
+            obj_id=label,
+            fixing_date=refDate,
+            # end_date: _Optional[_Union[date, datetime]] = None,
+            # start_date: _Optional[_Union[date, datetime]] = None,
+            # maturity_date: _Optional[_Union[date, datetime]] = None,
+            currency=currency,
+            # notional: float = 100.0, # we let notional default to 100
+            rate=parRate,
+            term=maturity,
+            day_count_convention=floatDayCount,
+            business_day_convention=rollConvFloat,
+            # roll_convention: _Union[RollRule, str] = RollRule.EOM, # leave as default
+            spot_lag=spotLag,
+            calendar=holidays,
+            issuer="dummy_issuer",
+            securitization_level="NONE",
+            # payment_days: int = 0,
+            # adjust_start_date: bool = True,
+            # adjust_end_date: bool = False,
+        )
+
+        self.assertIsInstance(dep_spec, DepositSpecification)
+
+    def create_IRSfrom_df(self):
+        """ """
+        df = self.quotes_df.copy()
+        df_deposits = df[df["Instrument"] == "IRS"]
+
+        example_dep = df_deposits.iloc[0]
+        input_data = example_dep.copy()
+
+        # these inputs must be given by user
+        refDate = datetime(2019, 3, 1)
+        holidays = _ECB()
+
+        # the following is read for every instrument type
+        instr = input_data["Instrument"]
+        fixDayCount = input_data["DayCountFixed"]
+        floatDayCount = input_data["DayCountFloat"]
+        basisDayCount = input_data["DayCountBasis"]
+        maturity = input_data["Maturity"]
+        tenor = input_data["UnderlyingTenor"]
+        underlyingPayFreq = input_data["UnderlyingPaymentFrequency"]
+        basisTenor = input_data["BasisTenor"]
+        basisPayFreq = input_data["BasisPaymentFrequency"]
+        fixPayFreq = input_data["PaymentFrequencyFixed"]
+        rollConvFloat = input_data["RollConventionFloat"]
+        rollConvFix = input_data["RollConventionFixed"]
+        rollConvBasis = input_data["RollConventionBasis"]
+        spotLag = input_data["SpotLag"]
+        parRate = input_data["Quote"]
+        currency = input_data["Currency"]
+        label = instr + "_" + maturity
+
+        # NEED TO CHECK OUTPUT OF SCHEDULER
+
+        # get swap leg schedule
+        flt_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_lag)
+        flt_start_dates = flt_schedule[:-1]
+        flt_end_dates = flt_schedule[1:]
+        flt_pay_dates = flt_end_dates
+        flt_reset_schedule = get_schedule(self.refDate, self.maturity, reset_freq, roll_conv, self.holidays, spot_lag)
+        flt_reset_dates = flt_reset_schedule[:-1]
+
+        fix_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_lag)
+        fix_start_dates = fix_schedule[:-1]
+        fix_end_dates = fix_schedule[1:]
+        fix_pay_dates = fix_end_dates
+
+        # start_dates3 = [ref_date + relativedelta(months=3*i) for i in range(4*3)]
+        # reset_dates3 = start_dates3
+        # end_dates3 = [x + relativedelta(months=3) for x in start_dates3]
+        # pay_dates3 = end_dates3
+        ns = ConstNotionalStructure(100.0)
+        spread = 0.00
+
+        # # definition of the floating leg
+        float_leg = IrFloatLegSpecification(
+            obj_id=label + "_float_leg",
+            notional=ns,
+            reset_dates=reset_dates3,
+            start_dates=start_dates3,
+            end_dates=end_dates3,
+            rate_start_dates=start_dates3,
+            rate_end_dates=end_dates3,
+            pay_dates=pay_dates3,
+            currency=currency,
+            udl_id="test_udl_id",
+            fixing_id="test_fixing_id",
+            day_count_convention=rollConvFloat,
+            spread=spread,
+        )
+
+        # # definition of the fixed leg
+        fixed_leg = IrFixedLegSpecification(
+            fixed_rate=parRate,
+            obj_id=label + "_fixed_leg3",
+            notional=100.0,
+            start_dates=start_dates3,
+            end_dates=end_dates3,
+            pay_dates=pay_dates3,
+            currency="currency",
+            day_count_convention=rollConvFix,
+        )
+
+        # get expiry of swap (cannot be before last paydate of legs)
+        # spot_date = get_end_date(self.refDate, self.spotLag)
+        # expiry = get_end_date(spot_date, self.maturity)
+        # # definition of the IR swap
+        ir_swap = InterestRateSwapSpecification(
+            obj_id=label,
+            notional=ns,
+            issue_date=ref_date,
+            maturity_date=pay_dates3[-1],
+            pay_leg=fixed_leg,
+            receive_leg=float_leg,
+            currency="currency",
+            day_count_convention=rollConvFloat,
+            issuer="dummy_issuer",
+            securitization_level="COLLATERALIZED",
+        )
+
+        self.assertIsInstance(ir_swap, InterestRateSwapSpecification)
 
 
 if __name__ == "__main__":
