@@ -171,7 +171,7 @@ class IrFixedLegSpecification(IrSwapLegSpecification):
             day_count_convention (_Union[DayCounterType, str], optional): The day count convention used. Defaults to DayCounterType.ThirtyU360.
         """
         super().__init__(obj_id, notional, start_dates, end_dates, pay_dates, currency, day_count_convention)
-        self.fixed_rate = _check_positivity(fixed_rate)
+        self.fixed_rate = fixed_rate  # _check_positivity(fixed_rate) # TODO is there a need for it to be always positive?
 
     # region properties
     @property
@@ -451,6 +451,52 @@ class IrOISLegSpecification(IrSwapLegSpecification):
 
         return self.notional_structure
 
+    @staticmethod
+    def ois_scheduler_2D(start_dates: _List[datetime], end_dates: _List[datetime]):
+        """The OIS makeshift scheduler to account for expected 2D array structure of
+            >>> rivapy.instruments.interest_rate_swap_pricer.populate_cashflows_ois
+            #TODO look how Schedule() class would handle this
+        Args:
+            start_dates (_List[datetime]): _description_
+            end_dates (_List[datetime]): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        # CONSIDER USING A SCHEDULER FUNCTION ONCE IT IS FINISHED
+        daily_rate_start_dates = []  # 2D list: coupon i -> list of daily starts
+        daily_rate_end_dates = []  # 2D list: coupon i -> list of daily ends
+        daily_rate_reset_dates = []  # 2D list: coupon i -> list of reset dates
+        pay_dates = []  # 1D list: one pay date per coupon
+
+        for i in range(len(start_dates)):
+
+            # for this test we keep it simple and ignore conventions e.g. business day or so. i.e just take every day
+            num_days = (end_dates[i] - start_dates[i]).days
+            daily_schedule = [start_dates[i] + timedelta(days=j) for j in range(num_days)]
+
+            # Build start/end date pairs for accrual periods
+            starts = daily_schedule[:-1]  # all except last
+            ends = daily_schedule[1:]  # all except first
+
+            daily_rate_start_dates.append(starts)
+            daily_rate_end_dates.append(ends)
+
+            # 4. Compute reset dates (fixing lag applied to each start)
+            # resets = [add_business_days(start, fixingLag, rateHolidays)
+            #           for start in starts]
+            # assume simple case reset date is the same as start date
+            resets = starts  # reset dates are equal to start dates if spot lag is 0.
+            daily_rate_reset_dates.append(resets)
+
+            # Compute payment date for the coupon
+            # pay_date = add_business_days(end_dates[i], payLag, holidays)
+            # assume simple case, pay date is end date
+            pay_date = end_dates[i]
+            pay_dates.append(pay_date)
+
+        return [daily_rate_start_dates, daily_rate_end_dates, daily_rate_reset_dates, pay_dates]
+
 
 class InterestRateSwapSpecification(interfaces.FactoryObject):
 
@@ -460,8 +506,8 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
         notional: _Union[float, NotionalStructure],
         issue_date: _Union[date, datetime],
         maturity_date: _Union[date, datetime],
-        pay_leg: _Union[IrFixedLegSpecification, IrFloatLegSpecification],
-        receive_leg: _Union[IrFixedLegSpecification, IrFloatLegSpecification],
+        pay_leg: _Union[IrFixedLegSpecification, IrFloatLegSpecification, IrOISLegSpecification],
+        receive_leg: _Union[IrFixedLegSpecification, IrFloatLegSpecification, IrOISLegSpecification],
         currency: _Union[Currency, str] = "EUR",
         calendar: _Union[_HolidayBase, str] = None,
         day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,

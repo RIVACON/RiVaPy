@@ -248,6 +248,9 @@ def bootstrap_curve(
     # initialize: # alternatively..
     yc_dates = [ref_date]
     dfs = [1.0]
+    if isinstance(day_count_convention, str):  # normalizes type
+        day_count_convention = DayCounterType(day_count_convention)
+
     dcc = DayCounter(day_count_convention)
 
     #############################################################

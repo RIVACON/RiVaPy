@@ -4,7 +4,7 @@ import numpy as np
 from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
 from holidays import HolidayBase as _HolidayBase, ECB as _ECB
-from rivapy.tools.datetools import Period, Schedule, _date_to_datetime, _datetime_to_date_list, _term_to_period
+from rivapy.tools.datetools import Period, Schedule, _date_to_datetime, _datetime_to_date_list, _term_to_period, roll_day, calc_start_day
 from rivapy.tools.enums import (
     DayCounterType,
     RollConvention,
@@ -17,7 +17,6 @@ from rivapy.tools.enums import (
 )
 from rivapy.tools._validators import _check_positivity, _check_start_before_end, _string_to_calendar, _is_ascending_date_list
 import rivapy.tools.interfaces as interfaces
-from rivapy.tools.datetools import Period, Schedule, roll_day, calc_start_day
 
 
 class ForwardRateAgreementSpecification(interfaces.FactoryObject):
@@ -164,7 +163,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
                 start_day=None,
             )  # spot_date + start_period #need roll convention: ddc, bdc, holiday, date
             self._end_date = roll_day(
-                day=self.start_date + relativedelta(months=start_period),  # need holiday
+                day=self.start_date + relativedelta(months=end_period - start_period),  # need holiday
                 calendar=self.calendar,
                 business_day_convention=self.rate_business_day_convention,
                 start_day=None,

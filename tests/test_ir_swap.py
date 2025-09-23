@@ -277,43 +277,6 @@ class TestIRSwapSpecificationPricing(unittest.TestCase):
         unittest (_type_): _description_
     """
 
-    @staticmethod
-    def temp_ois_scheduler(start_dates: list, end_dates: list):
-
-        # CONSIDER USING A SCHEDULER FUNCTION ONCE IT IS FINISHED
-        daily_rate_start_dates = []  # 2D list: coupon i -> list of daily starts
-        daily_rate_end_dates = []  # 2D list: coupon i -> list of daily ends
-        daily_rate_reset_dates = []  # 2D list: coupon i -> list of reset dates
-        pay_dates = []  # 1D list: one pay date per coupon
-
-        for i in range(len(start_dates)):
-
-            # for this test we keep it simple and ignore conventions e.g. business day or so. i.e just take every day
-            num_days = (end_dates[i] - start_dates[i]).days
-            daily_schedule = [start_dates[i] + timedelta(days=j) for j in range(num_days)]
-
-            # Build start/end date pairs for accrual periods
-            starts = daily_schedule[:-1]  # all except last
-            ends = daily_schedule[1:]  # all except first
-
-            daily_rate_start_dates.append(starts)
-            daily_rate_end_dates.append(ends)
-
-            # 4. Compute reset dates (fixing lag applied to each start)
-            # resets = [add_business_days(start, fixingLag, rateHolidays)
-            #           for start in starts]
-            # assume simple case reset date is the same as start date
-            resets = starts  # reset dates are equal to start dates if spot lag is 0.
-            daily_rate_reset_dates.append(resets)
-
-            # Compute payment date for the coupon
-            # pay_date = add_business_days(end_dates[i], payLag, holidays)
-            # assume simple case, pay date is end date
-            pay_date = end_dates[i]
-            pay_dates.append(pay_date)
-
-        return [daily_rate_start_dates, daily_rate_end_dates, daily_rate_reset_dates, pay_dates]
-
     def setUp(self):
         """Setup of default values used throughout pricing"""
         # by hand calculations to compare to
@@ -386,7 +349,7 @@ class TestIRSwapSpecificationPricing(unittest.TestCase):
 
         # in my other example, was an OIS with 6M tenor, and 6M maturity. with only 1 "interval"
         # here we will have more if using these startdates and enddates
-        res = TestIRSwapSpecificationPricing.temp_ois_scheduler(startdates, enddates)
+        res = TestIRSwapSpecificationPricing.IrOISLegSpecification.ois_scheduler_2D(startdates, enddates)
         daily_rate_start_dates = res[0]  # 2D list: coupon i -> list of daily starts
         daily_rate_end_dates = res[1]  # 2D list: coupon i -> list of daily ends
         daily_rate_reset_dates = res[2]  # 2D list: coupon i -> list of reset dates

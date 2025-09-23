@@ -23,7 +23,7 @@ from rivapy.instruments.ir_swap_specification import (
 )
 from rivapy.tools.enums import DayCounterType, InterpolationType, ExtrapolationType, Instrument
 from rivapy.instruments.components import ConstNotionalStructure
-from rivapy.tools.datetools import DayCounter
+from rivapy.tools.datetools import DayCounter, Period, Schedule, calc_end_day, calc_start_day
 
 
 # for specification from file tests
@@ -33,41 +33,16 @@ from holidays import EuropeanCentralBank as _ECB
 
 
 # Helper functions
-def temp_ois_scheduler(start_dates: list, end_dates: list):
 
-    # CONSIDER USING A SCHEDULER FUNCTION ONCE IT IS FINISHED
-    daily_rate_start_dates = []  # 2D list: coupon i -> list of daily starts
-    daily_rate_end_dates = []  # 2D list: coupon i -> list of daily ends
-    daily_rate_reset_dates = []  # 2D list: coupon i -> list of reset dates
-    pay_dates = []  # 1D list: one pay date per coupon
 
-    for i in range(len(start_dates)):
-
-        # for this test we keep it simple and ignore conventions e.g. business day or so. i.e just take every day
-        num_days = (end_dates[i] - start_dates[i]).days
-        daily_schedule = [start_dates[i] + timedelta(days=j) for j in range(num_days)]
-
-        # Build start/end date pairs for accrual periods
-        starts = daily_schedule[:-1]  # all except last
-        ends = daily_schedule[1:]  # all except first
-
-        daily_rate_start_dates.append(starts)
-        daily_rate_end_dates.append(ends)
-
-        # 4. Compute reset dates (fixing lag applied to each start)
-        # resets = [add_business_days(start, fixingLag, rateHolidays)
-        #           for start in starts]
-        # assume simple case reset date is the same as start date
-        resets = starts  # reset dates are equal to start dates if spot lag is 0.
-        daily_rate_reset_dates.append(resets)
-
-        # Compute payment date for the coupon
-        # pay_date = add_business_days(end_dates[i], payLag, holidays)
-        # assume simple case, pay date is end date
-        pay_date = end_dates[i]
-        pay_dates.append(pay_date)
-
-    return [daily_rate_start_dates, daily_rate_end_dates, daily_rate_reset_dates, pay_dates]
+def deep_equal(obj1, obj2):
+    if type(obj1) != type(obj2):
+        return False
+    if hasattr(obj1, "__dict__") and hasattr(obj2, "__dict__"):
+        return all(deep_equal(v, obj2.__dict__[k]) for k, v in obj1.__dict__.items())
+    if isinstance(obj1, (list, tuple)):
+        return all(deep_equal(x, y) for x, y in zip(obj1, obj2))
+    return obj1 == obj2
 
 
 # Minimal instrument specification classes for testing
@@ -946,7 +921,7 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
         spread = 0.00
 
         # the difference here is that rate_date arrays are excpected to be 2 dimensional, i.e. keep track of the daily resetting per accrual period
-        res = temp_ois_scheduler(start_dates, end_dates)
+        res = IrOISLegSpecification.ois_scheduler_2D(start_dates, end_dates)
 
         daily_rate_start_dates = res[0]  # 2D list: coupon i -> list of daily starts
         daily_rate_end_dates = res[1]  # 2D list: coupon i -> list of daily ends
@@ -1006,7 +981,7 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
         end_dates = [x + relativedelta(months=3) for x in start_dates]
         ns = ConstNotionalStructure(100.0)
         spread = 0.00
-        res = temp_ois_scheduler(start_dates, end_dates)
+        res = IrOISLegSpecification.ois_scheduler_2D(start_dates, end_dates)
 
         daily_rate_start_dates = res[0]  # 2D list: coupon i -> list of daily starts
         daily_rate_end_dates = res[1]  # 2D list: coupon i -> list of daily ends
@@ -1063,7 +1038,7 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
         end_dates = [x + relativedelta(months=6) for x in start_dates]
         ns = ConstNotionalStructure(100.0)
         spread = 0.00
-        res = temp_ois_scheduler(start_dates, end_dates)
+        res = IrOISLegSpecification.ois_scheduler_2D(start_dates, end_dates)
 
         daily_rate_start_dates = res[0]  # 2D list: coupon i -> list of daily starts
         daily_rate_end_dates = res[1]  # 2D list: coupon i -> list of daily ends
@@ -1119,7 +1094,7 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
         end_dates = [x + relativedelta(months=9) for x in start_dates]
         ns = ConstNotionalStructure(100.0)
         spread = 0.00
-        res = temp_ois_scheduler(start_dates, end_dates)
+        res = IrOISLegSpecification.ois_scheduler_2D(start_dates, end_dates)
 
         daily_rate_start_dates = res[0]  # 2D list: coupon i -> list of daily starts
         daily_rate_end_dates = res[1]  # 2D list: coupon i -> list of daily ends
@@ -1372,7 +1347,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         """_summary_"""
         # set directory and file name for Input Quotes
         dirName = "./notebooks/marketdata"  # "./"
-        fileName = "/inputQuotes.csv"  # "/inputQuotes.csv"
+        fileName = "/inputQuotes_includeFRAs.csv"  # "/inputQuotes.csv"
 
         df = pd.read_csv(dirName + fileName, sep=";", decimal=",")
         column_names = list(df.columns)
@@ -1380,7 +1355,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         self.quotes_df = df
         self.column_names = column_names
 
-    def create_deposits_from_df(self):
+    def test_create_deposits_from_df(self):
         """ """
         df = self.quotes_df.copy()
         df_deposits = df[df["Instrument"] == "DEPOSIT"]
@@ -1406,8 +1381,8 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         rollConvFloat = input_data["RollConventionFloat"]
         rollConvFix = input_data["RollConventionFixed"]
         rollConvBasis = input_data["RollConventionBasis"]
-        spotLag = input_data["SpotLag"]
-        parRate = input_data["Quote"]
+        spotLag = input_data["SpotLag"]  # expect form "1D", i.e 1 day
+        parRate = float(input_data["Quote"])
         currency = input_data["Currency"]
         label = instr + "_" + maturity
 
@@ -1430,9 +1405,6 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         dep_spec = DepositSpecification(
             obj_id=label,
             fixing_date=refDate,
-            # end_date: _Optional[_Union[date, datetime]] = None,
-            # start_date: _Optional[_Union[date, datetime]] = None,
-            # maturity_date: _Optional[_Union[date, datetime]] = None,
             currency=currency,
             # notional: float = 100.0, # we let notional default to 100
             rate=parRate,
@@ -1440,24 +1412,25 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
             day_count_convention=floatDayCount,
             business_day_convention=rollConvFloat,
             # roll_convention: _Union[RollRule, str] = RollRule.EOM, # leave as default
-            spot_lag=spotLag,
+            spot_lag=int(spotLag[:-1]),  # make assumption it is always given in DAYS convert -> int
             calendar=holidays,
             issuer="dummy_issuer",
             securitization_level="NONE",
-            # payment_days: int = 0,
-            # adjust_start_date: bool = True,
-            # adjust_end_date: bool = False,
         )
 
-        self.assertIsInstance(dep_spec, DepositSpecification)
+        dep_spec2 = sfc.make_deposit_spec(input_data, refDate, holidays)
 
-    def create_IRSfrom_df(self):
+        self.assertIsInstance(dep_spec, DepositSpecification)
+        self.assertIsInstance(dep_spec2, DepositSpecification)
+        self.assertEqual(dep_spec.__dict__, dep_spec2.__dict__)
+
+    def test_create_IRS_from_df(self):
         """ """
         df = self.quotes_df.copy()
-        df_deposits = df[df["Instrument"] == "IRS"]
+        df_irs = df[df["Instrument"] == "IRS"]
 
-        example_dep = df_deposits.iloc[0]
-        input_data = example_dep.copy()
+        example_irs = df_irs.iloc[0]
+        input_data = example_irs.copy()
 
         # these inputs must be given by user
         refDate = datetime(2019, 3, 1)
@@ -1469,6 +1442,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         floatDayCount = input_data["DayCountFloat"]
         basisDayCount = input_data["DayCountBasis"]
         maturity = input_data["Maturity"]
+        underlyingIndex = input_data["UnderlyingIndex"]
         tenor = input_data["UnderlyingTenor"]
         underlyingPayFreq = input_data["UnderlyingPaymentFrequency"]
         basisTenor = input_data["BasisTenor"]
@@ -1478,24 +1452,65 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         rollConvFix = input_data["RollConventionFixed"]
         rollConvBasis = input_data["RollConventionBasis"]
         spotLag = input_data["SpotLag"]
-        parRate = input_data["Quote"]
+        parRate = float(input_data["Quote"])
         currency = input_data["Currency"]
         label = instr + "_" + maturity
 
         # NEED TO CHECK OUTPUT OF SCHEDULER
+        # def __init__(
+        #     self,
+        #     start_day: _Union[date, datetime],
+        #     end_day: _Union[date, datetime],
+        #     time_period: _Union[Period, str],
+        #     backwards: bool = True,
+        #     # stub_mode: str = "automatic", # could alternatively be "force" or "none" (i.e. force a stub period even if not necessary, or do not allow stub periods at all)
+        #     stub_type_is_Long: bool = True,
+        #     # stub_placement: str = "ending", # could alternatively be "beginning" (i.e. place stub period at the end, at the beginning)
+        #     business_day_convention: _Union[RollConvention, str] = RollConvention.MODIFIED_FOLLOWING,
+        #     calendar: _Optional[_Union[_HolidayBase, str]] = None,
+        #     roll_convention: _Union[RollRule, str] = RollRule.NONE,
+        #     settle_days: int = 0,
+        #     ref_date: _Optional[_Union[date, datetime]] = None,
+        # ):
+        # get swap leg schedule # assume same for both fix and float legs?
+        # we use the helper function with spotlag in place of maturity to effctively shift the date
+        spot_date = calc_end_day(start_day=refDate, term=spotLag, business_day_convention=rollConvFix, calendar=holidays)
+        expiry = calc_end_day(spot_date, maturity, rollConvFix, holidays)
 
-        # get swap leg schedule
-        flt_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_lag)
-        flt_start_dates = flt_schedule[:-1]
-        flt_end_dates = flt_schedule[1:]
-        flt_pay_dates = flt_end_dates
-        flt_reset_schedule = get_schedule(self.refDate, self.maturity, reset_freq, roll_conv, self.holidays, spot_lag)
-        flt_reset_dates = flt_reset_schedule[:-1]
+        # start_day = calc_start_day(ref)
+        # end_day = calc_end_day()
+        # generate_dates
+        fix_schedule = Schedule(
+            start_day=spot_date, end_day=expiry, time_period=fixPayFreq, business_day_convention=rollConvFix, calendar=holidays, ref_date=refDate
+        ).generate_dates(False)
 
-        fix_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_lag)
+        # fix_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_lag)
         fix_start_dates = fix_schedule[:-1]
         fix_end_dates = fix_schedule[1:]
         fix_pay_dates = fix_end_dates
+
+        flt_schedule = Schedule(
+            start_day=spot_date,
+            end_day=expiry,
+            time_period=underlyingPayFreq,
+            business_day_convention=rollConvFloat,
+            calendar=holidays,
+            ref_date=refDate,
+        ).generate_dates(False)
+
+        # flt_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_lag)
+        flt_start_dates = flt_schedule[:-1]
+        flt_end_dates = flt_schedule[1:]
+        flt_pay_dates = flt_end_dates
+
+        flt_reset_schedule = Schedule(
+            start_day=spot_date, end_day=expiry, time_period=tenor, business_day_convention=rollConvFloat, calendar=holidays, ref_date=refDate
+        ).generate_dates(False)
+
+        # flt_reset_schedule = get_schedule(self.refDate, self.maturity, reset_freq, roll_conv, self.holidays, spot_lag)
+        flt_reset_dates = flt_reset_schedule[:-1]
+
+        print(flt_reset_dates)
 
         # start_dates3 = [ref_date + relativedelta(months=3*i) for i in range(4*3)]
         # reset_dates3 = start_dates3
@@ -1508,14 +1523,14 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         float_leg = IrFloatLegSpecification(
             obj_id=label + "_float_leg",
             notional=ns,
-            reset_dates=reset_dates3,
-            start_dates=start_dates3,
-            end_dates=end_dates3,
-            rate_start_dates=start_dates3,
-            rate_end_dates=end_dates3,
-            pay_dates=pay_dates3,
+            reset_dates=flt_reset_dates,
+            start_dates=flt_start_dates,
+            end_dates=flt_end_dates,
+            rate_start_dates=flt_start_dates,
+            rate_end_dates=flt_end_dates,
+            pay_dates=flt_pay_dates,
             currency=currency,
-            udl_id="test_udl_id",
+            udl_id=underlyingIndex,
             fixing_id="test_fixing_id",
             day_count_convention=rollConvFloat,
             spread=spread,
@@ -1526,10 +1541,10 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
             fixed_rate=parRate,
             obj_id=label + "_fixed_leg3",
             notional=100.0,
-            start_dates=start_dates3,
-            end_dates=end_dates3,
-            pay_dates=pay_dates3,
-            currency="currency",
+            start_dates=fix_start_dates,
+            end_dates=fix_end_dates,
+            pay_dates=fix_pay_dates,
+            currency=currency,
             day_count_convention=rollConvFix,
         )
 
@@ -1540,17 +1555,291 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         ir_swap = InterestRateSwapSpecification(
             obj_id=label,
             notional=ns,
-            issue_date=ref_date,
-            maturity_date=pay_dates3[-1],
+            issue_date=refDate,
+            maturity_date=expiry,
             pay_leg=fixed_leg,
             receive_leg=float_leg,
-            currency="currency",
+            currency=currency,
             day_count_convention=rollConvFloat,
             issuer="dummy_issuer",
             securitization_level="COLLATERALIZED",
         )
 
+        ir_swap2 = sfc.make_irswap_spec(input_data, refDate, holidays)
+        self.maxDiff = None
         self.assertIsInstance(ir_swap, InterestRateSwapSpecification)
+        self.assertIsInstance(ir_swap2, InterestRateSwapSpecification)
+        self.assertTrue(deep_equal(ir_swap, ir_swap2))
+
+    def test_create_OIS_from_df(self):
+        """ """
+        df = self.quotes_df.copy()
+        df_ois = df[df["Instrument"] == "OIS"]
+
+        example_ois = df_ois.iloc[0]
+        input_data = example_ois.copy()
+
+        # these inputs must be given by user
+        refDate = datetime(2019, 3, 1)
+        holidays = _ECB()
+
+        # the following is read for every instrument type
+        instr = input_data["Instrument"]
+        fixDayCount = input_data["DayCountFixed"]
+        floatDayCount = input_data["DayCountFloat"]
+        basisDayCount = input_data["DayCountBasis"]
+        maturity = input_data["Maturity"]
+        underlyingIndex = input_data["UnderlyingIndex"]
+        tenor = input_data["UnderlyingTenor"]
+        underlyingPayFreq = input_data["UnderlyingPaymentFrequency"]
+        basisTenor = input_data["BasisTenor"]
+        basisPayFreq = input_data["BasisPaymentFrequency"]
+        fixPayFreq = input_data["PaymentFrequencyFixed"]
+        rollConvFloat = input_data["RollConventionFloat"]
+        rollConvFix = input_data["RollConventionFixed"]
+        rollConvBasis = input_data["RollConventionBasis"]
+        spotLag = input_data["SpotLag"]
+        parRate = float(input_data["Quote"])
+        currency = input_data["Currency"]
+        label = instr + "_" + maturity
+
+        # get swap leg schedule # assume same for both fix and float legs?
+        # we use the helper function with spotlag in place of maturity to effctively shift the date
+        spot_date = calc_end_day(start_day=refDate, term=spotLag, business_day_convention=rollConvFix, calendar=holidays)
+        expiry = calc_end_day(spot_date, maturity, rollConvFix, holidays)
+
+        # start_day = calc_start_day(ref)
+        # end_day = calc_end_day()
+        # generate_dates
+        fix_schedule = Schedule(
+            start_day=spot_date, end_day=expiry, time_period=fixPayFreq, business_day_convention=rollConvFix, calendar=holidays, ref_date=refDate
+        ).generate_dates(False)
+
+        # fix_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_lag)
+        fix_start_dates = fix_schedule[:-1]
+        fix_end_dates = fix_schedule[1:]
+        fix_pay_dates = fix_end_dates
+
+        flt_schedule = Schedule(
+            start_day=spot_date,
+            end_day=expiry,
+            time_period=underlyingPayFreq,
+            business_day_convention=rollConvFloat,
+            calendar=holidays,
+            ref_date=refDate,
+        ).generate_dates(False)
+
+        flt_start_dates = flt_schedule[:-1]
+        flt_end_dates = flt_schedule[1:]
+        flt_pay_dates = flt_end_dates
+
+        flt_reset_schedule = Schedule(
+            start_day=spot_date, end_day=expiry, time_period=tenor, business_day_convention=rollConvFloat, calendar=holidays, ref_date=refDate
+        ).generate_dates(False)
+
+        flt_reset_dates = flt_reset_schedule[:-1]
+
+        res = IrOISLegSpecification.ois_scheduler_2D(flt_start_dates, flt_end_dates)
+
+        daily_rate_start_dates = res[0]  # 2D list: coupon i -> list of daily starts
+        daily_rate_end_dates = res[1]  # 2D list: coupon i -> list of daily ends
+        daily_rate_reset_dates = res[2]  # 2D list: coupon i -> list of reset dates
+        daily_rate_pay_dates = res[3]
+
+        # print(flt_reset_dates)
+        # print(daily_rate_reset_dates)
+
+        ns = ConstNotionalStructure(100.0)
+        spread = 0.00
+
+        # # definition of the floating leg
+
+        ois_leg = IrOISLegSpecification(
+            obj_id=label + "_float_leg",
+            notional=ns,
+            rate_reset_dates=daily_rate_reset_dates,
+            start_dates=flt_start_dates,
+            end_dates=flt_end_dates,
+            rate_start_dates=daily_rate_start_dates,
+            rate_end_dates=daily_rate_end_dates,
+            pay_dates=daily_rate_pay_dates,
+            currency=currency,
+            udl_id=underlyingIndex,
+            fixing_id="test_fixing_id",
+            day_count_convention=floatDayCount,
+            rate_day_count_convention=floatDayCount,
+            spread=spread,
+        )
+
+        # # definition of the fixed leg
+        fixed_leg = IrFixedLegSpecification(
+            fixed_rate=parRate,
+            obj_id=label + "_fixed_leg3",
+            notional=100.0,
+            start_dates=fix_start_dates,
+            end_dates=fix_end_dates,
+            pay_dates=fix_pay_dates,
+            currency=currency,
+            day_count_convention=rollConvFix,
+        )
+
+        # # definition of the IR swap
+        oi_swap = InterestRateSwapSpecification(
+            obj_id=label,
+            notional=ns,
+            issue_date=refDate,
+            maturity_date=expiry,
+            pay_leg=fixed_leg,
+            receive_leg=ois_leg,
+            currency=currency,
+            day_count_convention=rollConvFloat,
+            issuer="dummy_issuer",
+            securitization_level="COLLATERALIZED",
+        )
+
+        oi_swap2 = sfc.make_ois_spec(input_data, refDate, holidays)
+        self.maxDiff = None
+        self.assertIsInstance(oi_swap, InterestRateSwapSpecification)
+        self.assertIsInstance(oi_swap2, InterestRateSwapSpecification)
+        self.assertTrue(deep_equal(oi_swap, oi_swap2))
+
+    def test_create_FRA_from_df(self):
+        """Assuming a 3Mx6M Forward rate agreement instrument"""
+        df = self.quotes_df.copy()
+        df_fra = df[df["Instrument"] == "FRA"]
+
+        example_fra = df_fra.iloc[0]
+        input_data = example_fra.copy()
+        self.assertEqual(input_data["Maturity"], "3Mx6M")
+        self.assertEqual(input_data["SpotLag"], "2D")
+        # these inputs must be given by user
+        refDate = datetime(2019, 4, 1)
+        holidays = _ECB()
+        # spot_lag = 2
+        start_date = datetime(2019, 4 + 3, 3)
+        end_date = datetime(2019, 4 + 3 + 3, 3)
+        label = input_data["Instrument"] + "_" + input_data["Maturity"]
+
+        fra_spec = ForwardRateAgreementSpecification(
+            obj_id=label,
+            trade_date=refDate,
+            notional=100,
+            rate=float(input_data["Quote"]),
+            start_date=start_date,
+            end_date=end_date,
+            udlID=input_data["UnderlyingIndex"],
+            rate_start_date=start_date,
+            rate_end_date=end_date,
+            # maturity_date=,
+            day_count_convention=input_data["DayCountFixed"],
+            business_day_convention=input_data["RollConventionFixed"],
+            rate_day_count_convention=input_data["DayCountFloat"],
+            rate_business_day_convention=input_data["RollConventionFloat"],
+            calendar=holidays,
+            currency=input_data["Currency"],
+            # payment_days: int = 0,
+            spot_lag=int(input_data["SpotLag"][:-1]),
+            # start_period: int = None,
+            # end_period: int = None,
+            # index_alias: str = None,
+            # issuer: str = None,
+        )
+
+        fra_spec2 = sfc.make_fra_spec(input_data, refDate, holidays)
+        self.assertIsInstance(fra_spec, ForwardRateAgreementSpecification)
+        self.assertIsInstance(fra_spec2, ForwardRateAgreementSpecification)
+        self.assertEqual(fra_spec.start_date, fra_spec2.start_date)
+        self.assertEqual(fra_spec.end_date, fra_spec2.end_date)
+        # self.assertEqual(fra_spec.__dict__, fra_spec2.__dict__)
+
+    def test_bootstrap_deposits_from_df(self):
+        """Test of the bootstrap function using deposit specifications
+        parsed from a datafram of expected format
+
+        Assumption is that the deposits are already ordered by maturity...
+
+        """
+        # these inputs must be given by user
+        refDate = datetime(2019, 3, 1)
+        holidays = _ECB()
+
+        df = self.quotes_df.copy()
+        df_ins = df[df["Instrument"] == "DEPOSIT"]
+
+        ins_spec = sfc.load_specifications_from_pd(df_ins, refDate, holidays)
+        ins_quotes = df_ins["Quote"].tolist()
+
+        print("--------------DEBUG PARSING")
+        print(ins_quotes[0])
+        print(df_ins["DayCountFixed"][0])
+        print(df_ins)
+        print("--------------Starting bootstrapper")
+        curve = bootstrap_curve(
+            ref_date=refDate,
+            curve_id="dc_deposits",
+            day_count_convention=df_ins["DayCountFixed"][0],  # taken the first entry and assume is valid for all other deposits
+            instruments=ins_spec,
+            quotes=ins_quotes,
+            interpolation_type=InterpolationType.LINEAR,
+            extrapolation_type=ExtrapolationType.LINEAR,
+        )
+        # print(curve.get_dates())
+        self.assertIsInstance(curve, DiscountCurve)
+        self.assertEqual(curve.get_dates()[0], refDate)
+
+        # the discount curve needs to be able to get the same market quote for the instrument
+        for i in range(len(ins_spec)):
+            model_quote = get_quote(refDate, ins_spec[i], {"discount_curve": curve})
+            self.assertAlmostEqual(model_quote, ins_quotes[i], delta=1e-6)
+            # per_diff = (model_quote - deposit_quotes[i]) / deposit_quotes[i] * 100
+            # print(f"model: {model_quote} market: {deposit_quotes[i]} perdiff: {per_diff}")
+
+        # self.assertEqual(1, 1)
+
+    def test_bootstrap_ois_from_df(self):
+        """Test of the bootstrap function using deposit specifications
+        parsed from a datafram of expected format
+
+        Assumption is that the deposits are already ordered by maturity...
+
+        """
+
+        # these inputs must be given by user
+        refDate = datetime(2019, 3, 1)
+        holidays = _ECB()
+
+        df = self.quotes_df.copy()
+        df_ins = df[df["Instrument"] == "OIS"]
+
+        ins_spec = sfc.load_specifications_from_pd(df_ins, refDate, holidays)
+        ins_quotes = df_ins["Quote"].tolist()
+
+        print("--------------DEBUG PARSING")
+        print(ins_quotes[0])
+        print(df_ins["DayCountFixed"][0])
+        print(df_ins)
+        print("--------------Starting bootstrapper")
+        curve = bootstrap_curve(
+            ref_date=refDate,
+            curve_id="dc_deposits",
+            day_count_convention=df_ins["DayCountFixed"][0],  # taken the first entry and assume is valid for all other deposits
+            instruments=ins_spec,
+            quotes=ins_quotes,
+            interpolation_type=InterpolationType.LINEAR,
+            extrapolation_type=ExtrapolationType.LINEAR,
+        )
+        # print(curve.get_dates())
+        self.assertIsInstance(curve, DiscountCurve)
+        self.assertEqual(curve.get_dates()[0], refDate)
+
+        # the discount curve needs to be able to get the same market quote for the instrument
+        for i in range(len(ins_spec)):
+            model_quote = get_quote(refDate, ins_spec[i], {"discount_curve": curve})
+            self.assertAlmostEqual(model_quote, ins_quotes[i], delta=1e-6)
+            # per_diff = (model_quote - deposit_quotes[i]) / deposit_quotes[i] * 100
+            # print(f"model: {model_quote} market: {deposit_quotes[i]} perdiff: {per_diff}")
+
+        # self.assertEqual(1, 1)
 
 
 if __name__ == "__main__":
