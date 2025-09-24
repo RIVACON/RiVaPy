@@ -349,7 +349,7 @@ class TestIRSwapSpecificationPricing(unittest.TestCase):
 
         # in my other example, was an OIS with 6M tenor, and 6M maturity. with only 1 "interval"
         # here we will have more if using these startdates and enddates
-        res = TestIRSwapSpecificationPricing.IrOISLegSpecification.ois_scheduler_2D(startdates, enddates)
+        res = IrOISLegSpecification.ois_scheduler_2D(startdates, enddates)
         daily_rate_start_dates = res[0]  # 2D list: coupon i -> list of daily starts
         daily_rate_end_dates = res[1]  # 2D list: coupon i -> list of daily ends
         daily_rate_reset_dates = res[2]  # 2D list: coupon i -> list of reset dates

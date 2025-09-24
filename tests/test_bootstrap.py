@@ -1816,13 +1816,13 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
 
         print("--------------DEBUG PARSING")
         print(ins_quotes[0])
-        print(df_ins["DayCountFixed"][0])
+        print(df_ins["DayCountFixed"].tolist()[0])
         print(df_ins)
         print("--------------Starting bootstrapper")
         curve = bootstrap_curve(
             ref_date=refDate,
             curve_id="dc_deposits",
-            day_count_convention=df_ins["DayCountFixed"][0],  # taken the first entry and assume is valid for all other deposits
+            day_count_convention=df_ins["DayCountFixed"].tolist()[0],  # taken the first entry and assume is valid for all other deposits
             instruments=ins_spec,
             quotes=ins_quotes,
             interpolation_type=InterpolationType.LINEAR,
