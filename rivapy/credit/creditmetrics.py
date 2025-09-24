@@ -28,7 +28,7 @@ class CreditMetricsModel:
             position_data (pd.DataFrame): Dataframe with position data. Specific format is needed.
             issuer_data (pd.DataFrame): Dataframe with issuer data. Specific format is needed.
             stock_data (pd.DataFrame): Dataframe with stock data. Stock data needs to include close
-                values of the different issuers as well as a reference time series (e.g. Dax)
+                values of the different issuers as well as a reference time series (e.g. DAX)
             r (float): Risk-free rate. Needed to comupute expected value of positions as well as
                 different states during transition process.
             t (float): Dipositon horizon for calculation of credit risk.
@@ -45,6 +45,8 @@ class CreditMetricsModel:
         self.t = t
         self.confidencelevel = confidencelevel
         self.seed = seed
+
+        self.list_of_indices = ["DAX", "SP"]
 
     def mergePositionsIssuer(self):
         """
@@ -111,7 +113,7 @@ class CreditMetricsModel:
         returns = mergedData.pct_change()
 
         correlation_mat = returns.corr()
-        corr_pairs = correlation_mat.unstack()["Dax"]
+        corr_pairs = pd.DataFrame([correlation_mat.unstack()["DAX"], correlation_mat.unstack()["SP"]], index=['DAX', 'SP']) #Korrelation zu DAX und SP passt zum Land
         return corr_pairs
 
     def get_cutoffs_rating(self):
@@ -218,14 +220,25 @@ class CreditMetricsModel:
         issuer_names = issuer_info["IssuerName"].to_list()
         Loss = np.zeros((self.n_simulation, len(issuer_ids)))
         rr_scenarios = np.zeros((self.n_simulation, len(issuer_ids)))
-        np.random.seed(self.seed)
+        #np.random.seed(self.seed)
 
+        # Main Monte-Carlo Loop
         for i in range(self.n_simulation):
-            YY = norm.ppf(np.random.rand())
+
+            # Schleife über Indizes
+            YY = {}
+            for index in self.list_of_indices:
+                YY[index] = norm.ppf(np.random.rand())
+
+            # Schleife über Emittenten
             for idx, k in enumerate(issuer_ids):
                 issuer = issuer_names[idx]
-                rho = correlation[issuer]
-                rr = YY * rho
+                index_of_issuer = next((idx for idx in self.list_of_indices if idx in correlation.index), None)
+                if index_of_issuer is None:
+                    raise ValueError(f"No matching index found for issuer {issuer} in correlation indices: {self.list_of_indices}")
+                print((index_of_issuer))
+                rho = correlation[index_of_issuer][issuer]#TODO ist das richtig so?
+                rr = YY[index_of_issuer] * rho
                 YY_ido = norm.ppf(np.random.rand())
                 rr_idio = np.sqrt(1 - (rho**2)) * YY_ido
                 rr_all = rr + rr_idio
