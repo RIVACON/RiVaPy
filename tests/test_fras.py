@@ -166,7 +166,7 @@ def test_fra_cf_implied_rate(self):
 
     # Manually calculate expected cashflows 'manually' for comparison
     dcc_rate = DayCounter(fwd_dc.daycounter)
-    fwdrateDF = fwd_dc.rivapy_valueFWD(self.ref_date, self.fra._rate_start_date, self.fra._rate_end_date)
+    fwdrateDF = fwd_dc.value_fwd(self.ref_date, self.fra._rate_start_date, self.fra._rate_end_date)
     dt_rate = dcc_rate.yf(self.fra._rate_start_date, self.fra._rate_end_date)
     fwdrate = (1.0 / fwdrateDF - 1) / dt_rate
 

@@ -209,7 +209,7 @@ if __name__ == "__main__":
         dates_new.append(dates_final[i])
 
     print(dates_new)
-    values = [estr.rivapy_value(estr.refdate, d) for d in dates_new]
+    values = [estr.value(estr.refdate, d) for d in dates_new]
     print(values)
 
     plt.plot(dates_final, df_final, marker="^", label="bootstrapped")
@@ -611,7 +611,7 @@ if __name__ == "__main__":
         dates_new.append(dates_final[i])
 
     print(dates_new)
-    values = [boot_curve_ois.rivapy_value(boot_curve_ois.refdate, d) for d in dates_new]
+    values = [boot_curve_ois.value(boot_curve_ois.refdate, d) for d in dates_new]
     print(values)
 
     plt.plot(dates_final, df_final, marker="^", label="bootstrapped")

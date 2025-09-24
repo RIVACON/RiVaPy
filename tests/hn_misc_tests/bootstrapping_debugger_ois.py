@@ -417,7 +417,7 @@ for i in range(1, len(dates_final)):
     dates_new.append(dates_final[i])
 
 print(dates_new)
-values = [boot_curve_ois.rivapy_value(boot_curve_ois.refdate, d) for d in dates_new]
+values = [boot_curve_ois.value(boot_curve_ois.refdate, d) for d in dates_new]
 print(values)
 
 plt.plot(dates_final, df_final, marker="^", label="bootstrapped")
@@ -707,7 +707,7 @@ for i in range(1, len(dates_final)):
     dates_new.append(dates_final[i])
 
 print(dates_new)
-values = [euribor3MCurve.rivapy_value(euribor3MCurve.refdate, d) for d in dates_new]
+values = [euribor3MCurve.value(euribor3MCurve.refdate, d) for d in dates_new]
 print(values)
 
 plt.plot(dates_final, df_final, marker="^", label="bootstrapped")

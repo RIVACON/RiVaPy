@@ -159,7 +159,7 @@ class InterestRateSwapPricer:
                 notional_entry.pay_date = notional_start_date
 
                 if val_date <= notional_entry.pay_date:  # TODO recheck this business logic
-                    notional_entry.discount_factor = discount_curve.rivapy_value(val_date, notional_entry.pay_date)
+                    notional_entry.discount_factor = discount_curve.value(val_date, notional_entry.pay_date)
                 else:
                     notional_entry.discount_factor = 0.0
 
@@ -176,7 +176,7 @@ class InterestRateSwapPricer:
             entry.rate = fixed_rate
             entry.interest_yf = dcc.yf(entry.start_date, entry.end_date)  # gives back SINGLE yearfraction
             if val_date < entry.pay_date:
-                entry.discount_factor = discount_curve.rivapy_value(val_date, entry.pay_date)
+                entry.discount_factor = discount_curve.value(val_date, entry.pay_date)
             else:
                 entry.discount_factor = 0.0
             entry.interest_amount = entry.notional * entry.rate * entry.interest_yf
@@ -198,7 +198,7 @@ class InterestRateSwapPricer:
                 notional_entry.pay_date = notional_end_date
 
                 if val_date <= notional_entry.pay_date:  # TODO recheck this business logic
-                    notional_entry.discount_factor = discount_curve.rivapy_value(val_date, notional_entry.pay_date)
+                    notional_entry.discount_factor = discount_curve.value(val_date, notional_entry.pay_date)
                 else:
                     notional_entry.discount_factor = 0.0
 
@@ -279,7 +279,7 @@ class InterestRateSwapPricer:
                 notional_entry.pay_date = notional_start_date
 
                 if val_date <= notional_entry.pay_date:  # TODO recheck this business logic
-                    notional_entry.discount_factor = discount_curve.rivapy_value(val_date, notional_entry.pay_date)
+                    notional_entry.discount_factor = discount_curve.value(val_date, notional_entry.pay_date)
                 else:
                     notional_entry.discount_factor = 0.0
 
@@ -299,7 +299,7 @@ class InterestRateSwapPricer:
             # print(f"notional {i}:{notionals[i]} for {entry.end_date}")
             if val_date <= float_leg_spec.reset_dates[i]:
                 # print("swap calculating fwd_rate for floating leg")  # DEBUG TODO REMOVE
-                fwd_rate = forward_curve.rivapy_valueFWD(val_date, float_leg_spec.rate_start_dates[i], float_leg_spec.rate_end_dates[i])
+                fwd_rate = forward_curve.value_fwd(val_date, float_leg_spec.rate_start_dates[i], float_leg_spec.rate_end_dates[i])
                 entry.rate = leg_spread + (1.0 / fwd_rate - 1.0) / rate_yf
 
             else:
@@ -315,12 +315,12 @@ class InterestRateSwapPricer:
                         # taken from pyvacon
                         if entry.pay_date >= val_date:  # TODO understand the logic
                             time_delta = entry.end_date - entry.start_date
-                            fixing = (1.0 / forward_curve.rivapy_valueFWD(val_date, val_date, val_date + time_delta) - 1) / entry.interest_yf
+                            fixing = (1.0 / forward_curve.value_fwd(val_date, val_date, val_date + time_delta) - 1) / entry.interest_yf
 
                 entry.rate = fixing + spread
 
             if val_date <= entry.pay_date:
-                entry.discount_factor = discount_curve.rivapy_value(val_date, entry.pay_date)
+                entry.discount_factor = discount_curve.value(val_date, entry.pay_date)
             else:
                 entry.discount_factor = 0.0
 
@@ -329,10 +329,10 @@ class InterestRateSwapPricer:
 
             # scale by forward rate #TODO # required for FX swap...
             if val_date <= entry.end_date:
-                entry.pay_amount = entry.interest_amount / forward_curve.rivapy_valueFWD(val_date, entry.end_date, entry.pay_date)
+                entry.pay_amount = entry.interest_amount / forward_curve.value_fwd(val_date, entry.end_date, entry.pay_date)
             else:
                 if entry.pay_date >= val_date:
-                    entry.pay_amount = entry.interest_amount / forward_curve.rivapy_valueFWD(val_date, val_date, entry.pay_date)
+                    entry.pay_amount = entry.interest_amount / forward_curve.value_fwd(val_date, val_date, entry.pay_date)
                 else:
                     entry.pay_amount = 0.0
 
@@ -355,7 +355,7 @@ class InterestRateSwapPricer:
                 notional_entry.pay_date = notional_end_date
 
                 if val_date <= notional_entry.pay_date:  # TODO recheck this business logic
-                    notional_entry.discount_factor = discount_curve.rivapy_value(val_date, notional_entry.pay_date)
+                    notional_entry.discount_factor = discount_curve.value(val_date, notional_entry.pay_date)
                 else:
                     notional_entry.discount_factor = 0.0
 
@@ -453,7 +453,7 @@ class InterestRateSwapPricer:
                 notional_entry.pay_date = notional_start_date
 
                 if val_date <= notional_entry.pay_date:  # TODO recheck this business logic
-                    notional_entry.discount_factor = discount_curve.rivapy_value(val_date, notional_entry.pay_date)
+                    notional_entry.discount_factor = discount_curve.value(val_date, notional_entry.pay_date)
                 else:
                     notional_entry.discount_factor = 0.0
 
@@ -477,7 +477,7 @@ class InterestRateSwapPricer:
                 rate_yf = rate_dcc.yf(daily_rate_start_dates[i][j], daily_rate_end_dates[i][j])  # should be a day
 
                 if daily_rate_reset_dates[i][j] >= val_date:  # rate not yet fixed
-                    daily_fwd = forward_curve.rivapy_valueFWD(val_date, daily_rate_start_dates[i][j], daily_rate_end_dates[i][j])
+                    daily_fwd = forward_curve.value_fwd(val_date, daily_rate_start_dates[i][j], daily_rate_end_dates[i][j])
                     daily_rate = leg_spread + (1.0 / daily_fwd - 1.0) / rate_yf
 
                 else:  # rate already fixed
@@ -492,7 +492,7 @@ class InterestRateSwapPricer:
                                 # fix value of payment i in future based on current discount curve and a period between valDate and valDate+length of original period (workaround if fixing is not available)
                                 time_delta = entry.end_date - entry.start_date  # do we need? we assume daily...
                                 fixing = (
-                                    1.0 / forward_curve.rivapy_valueFWD(val_date, daily_rate_start_dates[i][j], daily_rate_end_dates[i][j]) - 1.0
+                                    1.0 / forward_curve.value_fwd(val_date, daily_rate_start_dates[i][j], daily_rate_end_dates[i][j]) - 1.0
                                 ) / rate_yf
 
                     daily_rate = leg_spread + fixing
@@ -504,7 +504,7 @@ class InterestRateSwapPricer:
             entry.rate = (accDf - 1.0) / rate_yf  # the -1 gives then just the interest portion of the compounded daily
 
             if val_date <= entry.pay_date:
-                entry.discount_factor = discount_curve.rivapy_value(val_date, entry.pay_date)
+                entry.discount_factor = discount_curve.value(val_date, entry.pay_date)
             else:
                 entry.discount_factor = 0.0
 
@@ -514,10 +514,10 @@ class InterestRateSwapPricer:
 
             # # scale by forward rate???? #TODO
             # if val_date <= entry.end_date:
-            #     entry.pay_amount = entry.interest_amount / forward_curve.rivapy_valueFWD(val_date, entry.end_date, entry.pay_date)
+            #     entry.pay_amount = entry.interest_amount / forward_curve.value_fwd(val_date, entry.end_date, entry.pay_date)
             # else:
             #     if entry.pay_date >= val_date:
-            #         entry.pay_amount = entry.interest_amount / forward_curve.rivapy_valueFWD(val_date, val_date, entry.pay_date)
+            #         entry.pay_amount = entry.interest_amount / forward_curve.value_fwd(val_date, val_date, entry.pay_date)
             #     else:
             #         entry.pay_amount = 0.0
 
@@ -540,7 +540,7 @@ class InterestRateSwapPricer:
                 notional_entry.pay_date = notional_end_date
 
                 if val_date <= notional_entry.pay_date:  # TODO recheck this business logic
-                    notional_entry.discount_factor = discount_curve.rivapy_value(val_date, notional_entry.pay_date)
+                    notional_entry.discount_factor = discount_curve.value(val_date, notional_entry.pay_date)
                 else:
                     notional_entry.discount_factor = 0.0
 
@@ -851,7 +851,7 @@ def get_projected_notionals(
 
         for i in range(start_period, end_period):
             fixing_date = notional_structure.get_fixing_date(i)
-            fx = fx_forward_curve.rivapy_value(val_date, fixing_date)
+            fx = fx_forward_curve.value(val_date, fixing_date)
             result.append(notional_structure.get_amount(i) * fx)
     elif isinstance(notional_structure, ConstNotionalStructure):
         for i in range(start_period, end_period):

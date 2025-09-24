@@ -94,7 +94,7 @@ class TestDepositSpecification(TestCase):
         dc = DiscountCurve(
             id=object_id, refdate=start, dates=dates, df=df, interpolation=InterpolationType.LINEAR, extrapolation=ExtrapolationType.LINEAR
         )
-        cont_df = dc.rivapy_valueFWD(val_date=start, d1=dep.start_date, d2=dep._end_date)
+        cont_df = dc.value_fwd(val_date=start, d1=dep.start_date, d2=dep._end_date)
         self.assertAlmostEqual(
             DepositPricer.get_implied_simply_compounded_rate(val_date=start, specification=dep, discount_curve=dc),
             1 / dcc.yf(dep.start_date, dep._end_date) * (1 / cont_df - 1),

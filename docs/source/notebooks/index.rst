@@ -6,6 +6,7 @@ Market Data
 .. nbgallery::
    marketdata/discount_curves.ipynb
 
+
 Models
 ------
 .. nbgallery::
@@ -26,3 +27,9 @@ Financial Instruments
 ------------------------
 .. nbgallery::
    instruments/repurchase_agreement.ipynb
+   instruments/deposits_fras.ipynb
+
+Tools
+----------------
+.. nbgallery::
+   tools/daycounter_rollconventions_schedules.ipynb

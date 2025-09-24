@@ -461,7 +461,7 @@ class FixedRateBond(BondBaseSpecification):
         pv_cashflows = 0.0
         for c in self._cashflows:
             if c[0] > value_date:
-                rate = discount_curve.rivapy_value(refdate=ref_date, d=value_date)
+                rate = discount_curve.value(refdate=ref_date, d=value_date)
                 yf = self._accrual_day_counter.yf(d1=value_date, d2=c[0])
                 df = 1 / ((1 + rate + self._spread) ** yf)
                 pv_cashflows += df * c[1]
@@ -650,7 +650,7 @@ class FloatingRateBond(BondBaseSpecification):
                     f"Coupon payment {payment_date_dt} is not the first coupon payment after fixing and happens before the start date of the coupon reference curve {_date_to_datetime(self._coupon_ref_curve.get_dates()[0])}"
                 )
             else:
-                coupon_rate = self._coupon_ref_curve.rivapy_value(refdate=_curve_ref_date, d=payment_date_dt)
+                coupon_rate = self._coupon_ref_curve.value(refdate=_curve_ref_date, d=payment_date_dt)
 
             year_fraction_for_coupon = self._accrual_day_counter.yf(
                 period_start_dt, payment_date_dt, coupon_schedule=self.__schedule_dates, coupon_frequency=coupon_freq  # coupon_frequency_int

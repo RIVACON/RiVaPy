@@ -61,7 +61,7 @@ class ForwardRateAgreementPricer:
         cashflows = []
         # using curve daycount convention to get fwd-rate data
         dcc_rate = DayCounter(fwdcurve.daycounter)
-        fwdrateDF = fwdcurve.rivapy_valueFWD(val_date, specification._rate_start_date, specification._rate_end_date)
+        fwdrateDF = fwdcurve.value_fwd(val_date, specification._rate_start_date, specification._rate_end_date)
         dt_rate = dcc_rate.yf(specification._rate_start_date, specification._rate_end_date)
         fwdrate = (1.0 / fwdrateDF - 1) / dt_rate
         print(f"Day count fraction (yf): {dt_rate}, Forward rate: {fwdrate}")
@@ -148,7 +148,7 @@ class ForwardRateAgreementPricer:
 
         dcc = DayCounter(forward_curve.daycounter)
         yf = dcc.yf(rate_start_date, rate_end_date)
-        fwd_df = forward_curve.rivapy_valueFWD(val_date, rate_start_date, rate_end_date)  # REF DATE is =
+        fwd_df = forward_curve.value_fwd(val_date, rate_start_date, rate_end_date)  # REF DATE is =
 
         fair_rate = (1.0 / fwd_df - 1) / yf
 

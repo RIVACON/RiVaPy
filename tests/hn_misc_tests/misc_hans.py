@@ -120,7 +120,7 @@ print(DepositPricer.get_price(refdate, fair_deposit_spec, dc))
 # Check fair rate
 # discount factor from curve
 
-df_curve = dc.rivapy_valueFWD(refdate, fair_deposit_spec.start_date, fair_deposit_spec.maturity_date)
+df_curve = dc.value_fwd(refdate, fair_deposit_spec.start_date, fair_deposit_spec.maturity_date)
 # discount factor implied by fair rate (simple compounding, Act/360)
 dcc = DayCounter(fair_deposit_spec.day_count_convention)
 delta_t = dcc.yf(fair_deposit_spec.start_date, fair_deposit_spec.maturity_date)
