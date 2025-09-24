@@ -564,7 +564,8 @@ class BondPricingRequest(PricingRequest):
         calc_yield_to_maturity: bool = False,
         calc_convexity: bool = False,
         calc_macaulay_duration: bool = False,
-    ):  # TODO: clarify why no z-spread
+        calc_z_spread: bool = False,
+    ):
         """
         Configuration of set of information to be calculated together with the bond's dirty price. In restricts the
         general PricingRequest to the sub-set relevant for the pricing of bonds.
@@ -579,6 +580,7 @@ class BondPricingRequest(PricingRequest):
             calc_yield_to_maturity=calc_yield_to_maturity,
             calc_convexity=calc_convexity,
             calc_macaulay_duration=calc_macaulay_duration,
+            calc_z_spread=calc_z_spread,
         )
 
 

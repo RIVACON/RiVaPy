@@ -487,7 +487,7 @@ class TestIRSwapSpecificationPricing(unittest.TestCase):
         # Mock discount curve
         discount_curve = unittest.mock.Mock()
         discount_curve.daycounter = "Act360"
-        discount_curve.rivapy_value.return_value = 0.95  # talk the discount factor to be 0.95 for control
+        discount_curve.value.return_value = 0.95  # talk the discount factor to be 0.95 for control
 
         print("DEBUG: DayCounter mock:", mock_daycounter)
         print("DEBUG: DayCounter instance:", mock_daycounter.return_value)
@@ -558,12 +558,12 @@ class TestIRSwapSpecificationPricing(unittest.TestCase):
         # Mock discount curve
         discount_curve = unittest.mock.Mock()
         discount_curve.daycounter = "Act360"
-        discount_curve.rivapy_value.return_value = 0.95
+        discount_curve.value.return_value = 0.95
 
         # Mock forward curve
         forward_curve = unittest.mock.Mock()
         fwd_factor = 1.0 / (1.0 + fwd_floating_rate)
-        forward_curve.rivapy_valueFWD.return_value = fwd_factor  # given fwd_floating_rate = (1/fwd_factor -1 )/yf
+        forward_curve.value_fwd.return_value = fwd_factor  # given fwd_floating_rate = (1/fwd_factor -1 )/yf
         # Mock fx curve (not used)
         fx_forward_curve = unittest.mock.Mock()
 
@@ -621,8 +621,8 @@ class TestIRSwapSpecificationPricing(unittest.TestCase):
         # Check mocks called
         mock_get_notionals.assert_called_once()
         mock_daycounter.return_value.yf.assert_called()
-        forward_curve.rivapy_valueFWD.assert_called()
-        discount_curve.rivapy_value.assert_called()
+        forward_curve.value_fwd.assert_called()
+        discount_curve.value.assert_called()
 
     def populate_cashflow_ois(self):
         pass
@@ -816,11 +816,11 @@ class TestGetProjectedNotionals(unittest.TestCase):
         )
         # Mock FX forward curve: return 2.0 regardless of input
         fx_curve = unittest.mock.Mock()
-        fx_curve.rivapy_value.return_value = 2.0
+        fx_curve.value.return_value = 2.0
 
         result = get_projected_notionals(self.val_date, ns, 0, 3, fx_curve)
         self.assertEqual(result, [200.0, 400.0, 600.0])
-        fx_curve.rivapy_value.assert_called()  # ensure it was used
+        fx_curve.value.assert_called()  # ensure it was used
 
     def test_resetting_notional_structure_without_fx_raises(self):
         fixing_dates = [

@@ -373,7 +373,7 @@ for i in range(1, len(dates_final)):
     dates_new.append(dates_final[i])
 
 print(dates_new)
-values = [euribor3MCurve.rivapy_value(euribor3MCurve.refdate, d) for d in dates_new]
+values = [euribor3MCurve.value(euribor3MCurve.refdate, d) for d in dates_new]
 print(values)
 
 plt.plot(dates_final, df_final, marker="^", label="bootstrapped")

@@ -118,7 +118,7 @@ class DepositPricer(SimpleCashflowPricer):
         daycountconvention = specification.day_count_convention
 
         if isinstance(discount_curve, DiscountCurve):
-            cont_df = discount_curve.rivapy_valueFWD(val_date, start_date, end_date)
+            cont_df = discount_curve.value_fwd(val_date, start_date, end_date)
         else:
             raise ValueError("Discount curve must be of type DiscountCurve")
 

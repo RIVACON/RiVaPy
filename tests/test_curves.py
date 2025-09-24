@@ -17,11 +17,11 @@ class TestDiscountCurve(unittest.TestCase):
     # get_df
     # value
     # get_pyvacon_obj
-    # rivapy_value -  cares about daycount convention refdates, target date, interpolation type, extrapolation type..
+    # value -  cares about daycount convention refdates, target date, interpolation type, extrapolation type..
     #  at the moment, it is assumed the target date is correctly calculated  before input with correct business day logic/roll convention
     #  there is at the moment a potential issue with the roll convention and the given reference date, for now assume it is correct #TODO
-    # plot - calls the value or rivapy_value in order to plot.
-    # TODO: consider how to wrape both value and rivapy_value depending on if the interpolationType is a pyvacon or Rivapy construction respectively
+    # plot - calls the value or value in order to plot.
+    # TODO: consider how to wrape both value and value depending on if the interpolationType is a pyvacon or Rivapy construction respectively
 
     def setUp(self):
         """Test data, simple linear case. Extend to more robust if requested."""
@@ -77,7 +77,7 @@ class TestDiscountCurve(unittest.TestCase):
         expected = tuple()  # TODO
         pass
 
-    def test_rivapy_value(self):
+    def test_value(self):
         """_summary_"""
 
         # DDC, interpolation, extrapolation
@@ -92,18 +92,18 @@ class TestDiscountCurve(unittest.TestCase):
             DayCounterType.Act365Fixed,
         )
 
-        df1 = dc_linear.rivapy_value(self.refdate, self.refdate + dt.timedelta(days=90))
-        df2 = dc_linear.rivapy_value(self.refdate, self.refdate + dt.timedelta(days=180))
-        fwd_df = dc_linear.rivapy_value(self.refdate + dt.timedelta(days=90), self.refdate + dt.timedelta(days=180))
+        df1 = dc_linear.value(self.refdate, self.refdate + dt.timedelta(days=90))
+        df2 = dc_linear.value(self.refdate, self.refdate + dt.timedelta(days=180))
+        fwd_df = dc_linear.value(self.refdate + dt.timedelta(days=90), self.refdate + dt.timedelta(days=180))
 
         self.assertAlmostEqual(df1, 0.9926568878362608, delta=1e-5)
         self.assertAlmostEqual(df2, 0.9853143806626516, delta=1e-5)
         self.assertAlmostEqual(fwd_df, df2 / df1, delta=1e-5)
 
         # extrapolation
-        df1 = dc_linear.rivapy_value(self.refdate, self.refdate + dt.timedelta(days=10 * 365 + 10))
-        df2 = dc_linear.rivapy_value(self.refdate, self.refdate + dt.timedelta(days=10 * 365 + 60))
-        fwd_df = dc_linear.rivapy_value(self.refdate + dt.timedelta(days=10 * 365 + 10), self.refdate + dt.timedelta(days=10 * 365 + 60))
+        df1 = dc_linear.value(self.refdate, self.refdate + dt.timedelta(days=10 * 365 + 10))
+        df2 = dc_linear.value(self.refdate, self.refdate + dt.timedelta(days=10 * 365 + 60))
+        fwd_df = dc_linear.value(self.refdate + dt.timedelta(days=10 * 365 + 10), self.refdate + dt.timedelta(days=10 * 365 + 60))
 
         self.assertAlmostEqual(df1, 0.7401510872751634, delta=1e-5)  # cf with pyvacon results
         self.assertAlmostEqual(df2, 0.7368154202423907, delta=1e-5)
@@ -121,18 +121,18 @@ class TestDiscountCurve(unittest.TestCase):
         )
 
         # interpolation
-        df1 = dc_linear.rivapy_value(self.refdate, self.refdate + dt.timedelta(days=90))
-        df2 = dc_linear.rivapy_value(self.refdate, self.refdate + dt.timedelta(days=180))
-        fwd_df = dc_linear.rivapy_value(self.refdate + dt.timedelta(days=90), self.refdate + dt.timedelta(days=180))
+        df1 = dc_linear.value(self.refdate, self.refdate + dt.timedelta(days=90))
+        df2 = dc_linear.value(self.refdate, self.refdate + dt.timedelta(days=180))
+        fwd_df = dc_linear.value(self.refdate + dt.timedelta(days=90), self.refdate + dt.timedelta(days=180))
 
         self.assertAlmostEqual(df1, 0.9926568878362608, delta=1e-5)  # cf with pyvacon results
         self.assertAlmostEqual(df2, 0.9853143806626516, delta=1e-5)
         self.assertAlmostEqual(fwd_df, df2 / df1, delta=1e-5)
 
         # extrapolation
-        df1 = dc_linear.rivapy_value(self.refdate, self.refdate + dt.timedelta(days=10 * 365 + 10))
-        df2 = dc_linear.rivapy_value(self.refdate, self.refdate + dt.timedelta(days=10 * 365 + 60))
-        fwd_df = dc_linear.rivapy_value(self.refdate + dt.timedelta(days=10 * 365 + 10), self.refdate + dt.timedelta(days=10 * 365 + 60))
+        df1 = dc_linear.value(self.refdate, self.refdate + dt.timedelta(days=10 * 365 + 10))
+        df2 = dc_linear.value(self.refdate, self.refdate + dt.timedelta(days=10 * 365 + 60))
+        fwd_df = dc_linear.value(self.refdate + dt.timedelta(days=10 * 365 + 10), self.refdate + dt.timedelta(days=10 * 365 + 60))
 
         self.assertAlmostEqual(df1, 0.7408182206817179, delta=1e-5)  # cf with pyvacon results
         self.assertAlmostEqual(df2, 0.7408182206817179, delta=1e-5)
@@ -150,9 +150,9 @@ class TestDiscountCurve(unittest.TestCase):
         )
 
         # interpolation
-        df1 = dc_linear.rivapy_value(self.refdate, self.refdate + dt.timedelta(days=90))
-        df2 = dc_linear.rivapy_value(self.refdate, self.refdate + dt.timedelta(days=180))
-        fwd_df = dc_linear.rivapy_value(self.refdate + dt.timedelta(days=90), self.refdate + dt.timedelta(days=180))
+        df1 = dc_linear.value(self.refdate, self.refdate + dt.timedelta(days=90))
+        df2 = dc_linear.value(self.refdate, self.refdate + dt.timedelta(days=180))
+        fwd_df = dc_linear.value(self.refdate + dt.timedelta(days=90), self.refdate + dt.timedelta(days=180))
 
         self.assertAlmostEqual(df1, 0.9926568878362608, delta=1e-5)  # cf with pyvacon results
         self.assertAlmostEqual(df2, 0.9853143806626516, delta=1e-5)
@@ -160,11 +160,11 @@ class TestDiscountCurve(unittest.TestCase):
 
         # extrapolation
         with self.assertRaises(ValueError):
-            df1 = dc_linear.rivapy_value(self.refdate, self.refdate + dt.timedelta(days=10 * 365 + 10))
+            df1 = dc_linear.value(self.refdate, self.refdate + dt.timedelta(days=10 * 365 + 10))
         with self.assertRaises(ValueError):
-            df2 = dc_linear.rivapy_value(self.refdate, self.refdate + dt.timedelta(days=10 * 365 + 60))
+            df2 = dc_linear.value(self.refdate, self.refdate + dt.timedelta(days=10 * 365 + 60))
         with self.assertRaises(ValueError):
-            fwd_df = dc_linear.rivapy_value(self.refdate + dt.timedelta(days=10 * 365 + 10), self.refdate + dt.timedelta(days=10 * 365 + 60))
+            fwd_df = dc_linear.value(self.refdate + dt.timedelta(days=10 * 365 + 10), self.refdate + dt.timedelta(days=10 * 365 + 60))
 
         # TODO:
         # Tests with other DCC
@@ -181,12 +181,12 @@ class TestDiscountCurve(unittest.TestCase):
 
         # TODO: TEST LIST of given dates
 
-    def test_rivapy_value_HAGAN(self):
+    def test_value_HAGAN(self):
         """_summary_"""
 
         pass
 
-    def test_plot_rivapy_value(self):
+    def test_plot_value(self):
         """_summary_"""
 
         pass
