@@ -37,8 +37,8 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
         self,
         obj_id: str,
         fixing_date: _Optional[_Union[date, datetime]] = None,
-        end_date: _Optional[_Union[date, datetime]] = None,
         start_date: _Optional[_Union[date, datetime]] = None,
+        end_date: _Optional[_Union[date, datetime]] = None,
         maturity_date: _Optional[_Union[date, datetime]] = None,
         currency: _Union[Currency, str] = "EUR",
         notional: float = 100.0,
@@ -142,6 +142,7 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
 
         # checking and setting start date
         if start_date is not None:
+            issue_date = start_date
             if not is_business_day(start_date, calendar=calendar) and adjust_start_date:
                 sd = roll_day(start_date, calendar=calendar, business_day_convention=business_day_convention)
                 logger.info(
@@ -157,12 +158,14 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
                 calendar=calendar,
                 roll_convention=roll_convention,
             )
+            issue_date = sd
             logger.info("Set start_date, " + str(sd) + ", to fixing_date adjusted by spot_days and business_day_convention:" + str(sd))
         elif fixing_date is not None:
             sd = fd + timedelta(days=spd)
             logger.info(
                 "Set start_date to fixing_date, " + str(fd) + ", adjusted by spot_days without business day adjustment (i.e. unadjusted): " + str(sd)
             )
+            issue_date = sd
         else:
             raise ValueError("Either fixing_date or start_date must be provided.")
         # checking and setting end date
@@ -216,6 +219,7 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
             obj_id=obj_id,
             first_fixing_date=fd,
             spot_lag=spd,
+            issue_date=issue_date,
             start_date=sd,
             end_date=ed,
             maturity_date=md,
