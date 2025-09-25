@@ -56,6 +56,6 @@ Maturity;Instrument;Currency;Quote;UnderlyingIndex;UnderlyingTenor;UnderlyingPay
 30Y;IRS;EUR;0,0142175;EURIBOR;3M;3M;;;;1Y;Act360;Act360;;ModifiedFollowing;ModifiedFollowing;;2D
 40Y;IRS;EUR;0,014415;EURIBOR;3M;3M;;;;1Y;Act360;Act360;;ModifiedFollowing;ModifiedFollowing;;2D
 50Y;IRS;EUR;0,01408;EURIBOR;3M;3M;;;;1Y;Act360;Act360;;ModifiedFollowing;ModifiedFollowing;;2D
-3Mx6M;FRA;EUR;-0,003729;EURIBOR;3M;3M;;;;3M;Act360;Act360;;ModifiedFollowing;ModifiedFollowing;;2D
-6Mx9M;FRA;EUR;-0,003727672;EURIBOR;3M;3M;;;;3M;Act360;Act360;;ModifiedFollowing;ModifiedFollowing;;2D
-9Mx12M;FRA;EUR;-0,003723786;EURIBOR;3M;3M;;;;3M;Act360;Act360;;ModifiedFollowing;ModifiedFollowing;;2D
+3Mx6M;FRA;EUR;-0,003729;OTHER;3M;3M;;;;3M;Act360;Act360;;ModifiedFollowing;ModifiedFollowing;;2D
+6Mx9M;FRA;EUR;-0,003727672;OTHER;3M;3M;;;;3M;Act360;Act360;;ModifiedFollowing;ModifiedFollowing;;2D
+9Mx12M;FRA;EUR;-0,003723786;OTHER;3M;3M;;;;3M;Act360;Act360;;ModifiedFollowing;ModifiedFollowing;;2D

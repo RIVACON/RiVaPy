@@ -53,7 +53,7 @@ def make_specification_from_row(row: pd.DataFrame, ref_date: datetime, calendar:
         return make_ois_spec(row, ref_date, calendar)
     elif inst_type == "FRA":
         return make_fra_spec(row, ref_date, calendar)
-    elif inst_type == "SWAP":
+    elif inst_type == "IRS":
         return make_irswap_spec(row, ref_date, calendar)
     else:
         raise ValueError(f"Unsupported instrument type {inst_type}")

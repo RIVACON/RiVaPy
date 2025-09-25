@@ -4,7 +4,7 @@ import math
 import pandas as pd
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
-
+import numpy as np
 
 from rivapy.marketdata.bootstrapping import (
     bootstrap_curve,
@@ -1796,20 +1796,19 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
 
         # self.assertEqual(1, 1)
 
-    def test_bootstrap_ois_from_df(self):
+    def test_bootstrap_FRAs_from_df(self):
         """Test of the bootstrap function using deposit specifications
         parsed from a datafram of expected format
 
         Assumption is that the deposits are already ordered by maturity...
 
         """
-
         # these inputs must be given by user
         refDate = datetime(2019, 3, 1)
         holidays = _ECB()
 
         df = self.quotes_df.copy()
-        df_ins = df[df["Instrument"] == "OIS"]
+        df_ins = df[df["Instrument"] == "FRA"]
 
         ins_spec = sfc.load_specifications_from_pd(df_ins, refDate, holidays)
         ins_quotes = df_ins["Quote"].tolist()
@@ -1840,6 +1839,134 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
             # print(f"model: {model_quote} market: {deposit_quotes[i]} perdiff: {per_diff}")
 
         # self.assertEqual(1, 1)
+
+    def test_bootstrap_ois_from_df(self):
+        """Test of the bootstrap function using deposit specifications
+        parsed from a datafram of expected format
+
+        Assumption is that the deposits are already ordered by maturity...
+
+        """
+
+        # these inputs must be given by user
+        refDate = datetime(2019, 3, 1)
+        holidays = _ECB()
+
+        df = self.quotes_df.copy()
+        df_ins = df[df["Instrument"] == "OIS"]
+
+        min_i = 0
+        max_i = 18  # 19-25 problematic?
+        min_i2 = 26
+        max_i2 = -1
+        ins_spec = sfc.load_specifications_from_pd(df_ins.iloc[np.r_[min_i:max_i, min_i2:max_i2]], refDate, holidays)
+        # ins_quotes = df_ins["Quote"].tolist()[min_i:max_i]
+        ins_quotes = df_ins["Quote"].tolist()[min_i:max_i] + df_ins["Quote"].tolist()[min_i2:max_i2]
+
+        print("--------------DEBUG PARSING")
+        print(ins_quotes[0])
+        print(df_ins["DayCountFixed"].tolist()[0])
+        print(df_ins.iloc[min_i:max_i].copy())
+        print("--------------Starting bootstrapper")
+        curve = bootstrap_curve(
+            ref_date=refDate,
+            curve_id="OIS_estr",
+            day_count_convention=df_ins["DayCountFixed"].tolist()[0],  # taken the first entry and assume is valid for all other deposits
+            instruments=ins_spec,
+            quotes=ins_quotes,
+            interpolation_type=InterpolationType.LINEAR,
+            extrapolation_type=ExtrapolationType.LINEAR,
+        )
+        # print(curve.get_dates())
+        self.assertIsInstance(curve, DiscountCurve)
+        self.assertEqual(curve.get_dates()[0], refDate)
+
+        # the discount curve needs to be able to get the same market quote for the instrument
+        for i in range(len(ins_spec)):
+            model_quote = get_quote(refDate, ins_spec[i], {"discount_curve": curve, "fixing_curve": curve})
+            self.assertAlmostEqual(model_quote, ins_quotes[i], delta=1e-6)
+            # per_diff = (model_quote - deposit_quotes[i]) / deposit_quotes[i] * 100
+            # print(f"model: {model_quote} market: {deposit_quotes[i]} perdiff: {per_diff}")
+
+        # self.assertEqual(1, 1)
+
+    def test_multicurve_bootstrap_ois_3M(self):
+        """Test of the bootstrap function using deposit specifications
+        parsed from a datafram of expected format
+
+        Assumption is that the deposits are already ordered by maturity...
+
+        """
+
+        # these inputs must be given by user
+        refDate = datetime(2019, 3, 1)
+        holidays = _ECB()
+
+        ###############################
+        # PREPARE discount curve
+        df = self.quotes_df.copy()
+        df_ins = df[df["Instrument"] == "OIS"]
+
+        min_i = 0
+        max_i = 17  # up to 3 years ...
+
+        ins_spec = sfc.load_specifications_from_pd(df_ins.iloc[min_i:max_i], refDate, holidays)
+        ins_quotes = df_ins["Quote"].tolist()[min_i:max_i]
+
+        print("--------------DEBUG PARSING")
+        print(ins_quotes[0])
+        print(df_ins["DayCountFixed"].tolist()[0])
+        print(df_ins.iloc[min_i:max_i].copy())
+        print("--------------Starting bootstrapper")
+        curve_ois = bootstrap_curve(
+            ref_date=refDate,
+            curve_id="OIS_estr",
+            day_count_convention=df_ins["DayCountFixed"].tolist()[0],  # taken the first entry and assume is valid for all other deposits
+            instruments=ins_spec,
+            quotes=ins_quotes,
+            interpolation_type=InterpolationType.LINEAR,
+            extrapolation_type=ExtrapolationType.LINEAR,
+        )
+        # print(curve.get_dates())
+        self.assertIsInstance(curve_ois, DiscountCurve)
+        self.assertEqual(curve_ois.get_dates()[0], refDate)
+
+        # the discount curve needs to be able to get the same market quote for the instrument
+        for i in range(len(ins_spec)):
+            model_quote = get_quote(refDate, ins_spec[i], {"discount_curve": curve_ois, "fixing_curve": curve_ois})
+            self.assertAlmostEqual(model_quote, ins_quotes[i], delta=1e-6)
+            # per_diff = (model_quote - deposit_quotes[i]) / deposit_quotes[i] * 100
+            # print(f"model: {model_quote} market: {deposit_quotes[i]} perdiff: {per_diff}")
+
+        # self.assertEqual(1, 1)
+
+        ##################################################
+        # select for 3M instruments!
+        min_i = 0
+        max_i = -1
+
+        # df_ins_3M = df[(df["UnderlyingIndex"] == "EURIBOR") & (df["UnderlyingTenor"] == "3M")]
+        df_ins_3M = df[(df["UnderlyingIndex"] == "EURIBOR") & (df["UnderlyingTenor"] == "3M") & (df["Instrument"] == "IRS")]
+        ins_spec_3M = sfc.load_specifications_from_pd(df_ins_3M.iloc[min_i:max_i], refDate, holidays)
+        ins_quotes_3M = df_ins_3M["Quote"].tolist()[min_i:max_i]
+
+        # bootstrap forward curve
+        euribor3MCurve = bootstrap_curve(
+            refDate,
+            "euribor3M_DC",
+            DayCounterType.Act365Fixed,
+            ins_spec_3M,
+            ins_quotes_3M,
+            curves={"discount_curve": curve_ois},
+            interpolation_type=InterpolationType.LINEAR_LOG,
+            extrapolation_type=ExtrapolationType.LINEAR_LOG,
+        )
+
+        for i in range(len(ins_spec_3M)):
+            model_quote = get_quote(refDate, ins_spec_3M[i], {"discount_curve": curve_ois, "fixing_curve": euribor3MCurve})
+            self.assertAlmostEqual(model_quote, ins_quotes_3M[i], delta=1e-6)
+            # per_diff = (model_quote - deposit_quotes[i]) / deposit_quotes[i] * 100
+            # print(f"model: {model_quote} market: {deposit_quotes[i]} perdiff: {per_diff}")
 
 
 if __name__ == "__main__":
