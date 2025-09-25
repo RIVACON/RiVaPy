@@ -540,7 +540,7 @@ class Instrument(_MyEnum):
 
 
 @dataclass(frozen=True)
-class IndexMetadata:
+class IRIndexMetadata:
     name: str
     currency: str
     tenor: str
@@ -552,7 +552,7 @@ class IndexMetadata:
 
 
 class InterestRateIndex(_MyEnum):
-    EUR1M = IndexMetadata(
+    EUR1M = IRIndexMetadata(
         name="EURIBOR 1M",
         currency="EUR",
         tenor="1M",
@@ -562,7 +562,7 @@ class InterestRateIndex(_MyEnum):
         calendar="TARGET",
         aliases=["EUR1M", " EUR 1M", "EURIBOR 1M"],
     )
-    EUR3M = IndexMetadata(
+    EUR3M = IRIndexMetadata(
         name="EURIBOR 3M",
         currency="EUR",
         tenor="3M",
@@ -572,7 +572,7 @@ class InterestRateIndex(_MyEnum):
         calendar="TARGET",
         aliases=["EUR3M", " EUR 3M", "EURIBOR 3M"],
     )
-    EUR6M = IndexMetadata(
+    EUR6M = IRIndexMetadata(
         name="EURIBOR 6M",
         currency="EUR",
         tenor="6M",
@@ -582,7 +582,7 @@ class InterestRateIndex(_MyEnum):
         calendar="TARGET",
         aliases=["EUR6M", "EUR 6M", "EURIBOR 6M"],
     )
-    ESTR = IndexMetadata(
+    ESTR = IRIndexMetadata(
         name="€STR",
         currency="EUR",
         tenor="O/N",
@@ -590,7 +590,7 @@ class InterestRateIndex(_MyEnum):
         business_day_convention="Following",
         roll_convention="None",
         calendar="TARGET",
-        aliases=["EURSTR", "EUR STR", "€STR"],
+        aliases=["EURSTR", "EUR STR", "€STR", "EUR1D", "EUR O/N"],
     )
 
 

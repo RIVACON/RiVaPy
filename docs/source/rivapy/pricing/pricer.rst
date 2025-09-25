@@ -3,7 +3,7 @@ Pricer
 
 Bonds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. autoclass:: rivapy.pricing.bond_pricing.SimpleCashflowPricer
+.. autoclass:: rivapy.pricing.bond_pricing.DeterministicCashflowPricer
    :members:
    :undoc-members:
    :show-inheritance:

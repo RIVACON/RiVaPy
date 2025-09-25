@@ -7,22 +7,31 @@ from abc import abstractmethod as _abstractmethod
 from typing import List as _List, Union as _Union, Tuple, Optional as _Optional
 import numpy as np
 import logging
-from rivapy.instruments import HasExpectedCashflows
+from rivapy.instruments.bond_specifications import DeterministicCashflowBondSpecification
 from datetime import datetime, date, timedelta
 from holidays import HolidayBase as _HolidayBase
 from holidays import EuropeanCentralBank as _ECB
 from dateutil.relativedelta import relativedelta
-from rivapy.tools.datetools import Period, _date_to_datetime, _term_to_period, calc_end_day, calc_start_day, roll_day, next_or_previous_business_day
+from rivapy.instruments.components import Issuer
+from rivapy.tools.datetools import (
+    Period,
+    _date_to_datetime,
+    _term_to_period,
+    calc_end_day,
+    calc_start_day,
+    roll_day,
+    next_or_previous_business_day,
+    is_business_day,
+)
 from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating, RollRule, Instrument
 
 import rivapy.tools.interfaces as interfaces
-from rivapy.tools.datetools import Period, is_business_day
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-class DepositSpecification(HasExpectedCashflows):
+class DepositSpecification(DeterministicCashflowBondSpecification):
 
     def __init__(
         self,
@@ -40,7 +49,7 @@ class DepositSpecification(HasExpectedCashflows):
         roll_convention: _Union[RollRule, str] = RollRule.EOM,
         spot_lag: int = 2,
         calendar: _Union[_HolidayBase, str] = _ECB(),
-        issuer: _Optional[str] = None,
+        issuer: _Optional[_Union[Issuer, str]] = None,
         securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
         payment_days: int = 0,
         adjust_start_date: bool = True,
@@ -213,7 +222,7 @@ class DepositSpecification(HasExpectedCashflows):
             notional=notional,
             currency=currency,
             coupon=rate,
-            tenor=t,
+            frequency=t,
             day_count_convention=day_count_convention,
             business_day_convention=business_day_convention,
             roll_convention=roll_convention,

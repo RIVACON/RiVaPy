@@ -1,9 +1,9 @@
 from datetime import datetime, date
 from scipy.optimize import brentq
 from rivapy.tools.interfaces import BaseDatedCurve
-from rivapy.instruments.specifications import HasExpectedCashflows
+from rivapy.instruments.bond_specifications import DeterministicCashflowBondSpecification
 from rivapy.marketdata import DiscountCurveParametrized, ConstantRate, DiscountCurve
-from rivapy.pricing.bond_pricing import SimpleCashflowPricer
+from rivapy.pricing.bond_pricing import DeterministicCashflowPricer
 from rivapy.pricing.pricing_request import PricingRequest
 from rivapy.pricing._logger import logger
 from rivapy.instruments.deposit_specifications import DepositSpecification
@@ -108,7 +108,7 @@ class ForwardRateAgreementPricer:
             float: The present value of the FRA.
         """
         expected_cashflows = ForwardRateAgreementPricer.get_expected_cashflows(specification, val_date, forward_curve)
-        price = SimpleCashflowPricer.get_pv_cashflows(val_date, specification, discount_curve, expected_cashflows)
+        price = DeterministicCashflowPricer.get_pv_cashflows(val_date, specification, discount_curve, expected_cashflows)
         return price
 
     def price(self):

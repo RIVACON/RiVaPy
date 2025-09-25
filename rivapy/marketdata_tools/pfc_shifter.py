@@ -4,7 +4,9 @@ import numpy as np
 import datetime as dt
 import rivapy.tools.interfaces as interfaces
 import rivapy.tools._validators as validators
-from rivapy.instruments import EnergyFutureSpecifications
+from rivapy.instruments.energy_futures_specifications import EnergyFutureSpecifications
+
+# from rivapy.instruments import EnergyFutureSpecifications
 from typing import Dict, Set, List, Any
 from collections import defaultdict
 

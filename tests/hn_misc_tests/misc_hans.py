@@ -17,7 +17,7 @@ from rivapy.instruments.components import ConstNotionalStructure
 from rivapy.tools.datetools import _term_to_period, DayCounter, roll_day
 from rivapy.tools.enums import DayCounterType, InterpolationType, ExtrapolationType, Instrument
 from datetime import date, timedelta, datetime
-from rivapy.pricing.bond_pricing import SimpleCashflowPricer
+from rivapy.pricing.bond_pricing import DeterministicCashflowPricer
 import math
 
 
@@ -93,7 +93,7 @@ df = [math.exp(-d / 365.0 * flat_rate) for d in days_to_maturity]
 dc = DiscountCurve(id=object_id, refdate=refdate, dates=dates, df=df, interpolation=InterpolationType.LINEAR, extrapolation=ExtrapolationType.LINEAR)
 
 # price deposit
-print(f"Expected Cashflows: {SimpleCashflowPricer.get_expected_cashflows(test_deposit,refdate)}")
+print(f"Expected Cashflows: {DeterministicCashflowPricer.get_expected_cashflows(test_deposit,refdate)}")
 print(f"Price Deposit: {DepositPricer.get_price(refdate, test_deposit, dc)}")
 
 # Determine fair rate

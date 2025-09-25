@@ -1,7 +1,7 @@
 from rivapy.instruments.factory import _factory
 from rivapy.instruments.specifications import *
 from rivapy.instruments.components import Issuer
-from rivapy.instruments.specifications import HasExpectedCashflows
+from rivapy.instruments.bond_specifications import DeterministicCashflowBondSpecification
 from rivapy.instruments.cds_specification import CDSSpecification
 from rivapy.instruments.ppa_specification import PPASpecification, GreenPPASpecification
 
