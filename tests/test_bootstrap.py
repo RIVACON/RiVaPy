@@ -1858,15 +1858,23 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         min_i = 0
         max_i = 18  # 19-25 problematic?
         min_i2 = 26
-        max_i2 = -1
+        max_i2 = len(df_ins) 
         ins_spec = sfc.load_specifications_from_pd(df_ins.iloc[np.r_[min_i:max_i, min_i2:max_i2]], refDate, holidays)
         # ins_quotes = df_ins["Quote"].tolist()[min_i:max_i]
         ins_quotes = df_ins["Quote"].tolist()[min_i:max_i] + df_ins["Quote"].tolist()[min_i2:max_i2]
 
-        print("--------------DEBUG PARSING")
-        print(ins_quotes[0])
-        print(df_ins["DayCountFixed"].tolist()[0])
-        print(df_ins.iloc[min_i:max_i].copy())
+        # print("--------------DEBUG PARSING")
+        # print(ins_quotes[0])
+        # print(df_ins["DayCountFixed"].tolist()[0])
+        # print(df_ins.iloc[min_i:max_i].copy())
+        # print(len(ins_spec), len(ins_quotes))
+        # print(len(df_ins["Quote"].tolist()))
+        # print(len(df_ins.iloc[np.r_[min_i:max_i, min_i2:max_i2]]))
+        # for i in range(len(ins_quotes)):
+        #     print(i, ins_quotes[i])
+
+
+
         print("--------------Starting bootstrapper")
         curve = bootstrap_curve(
             ref_date=refDate,
