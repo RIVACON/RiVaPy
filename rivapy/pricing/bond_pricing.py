@@ -4,6 +4,7 @@ from scipy.optimize import brentq
 from rivapy.tools.enums import InterestRateIndex
 from rivapy.tools.interfaces import BaseDatedCurve
 from rivapy.instruments.bond_specifications import DeterministicCashflowBondSpecification
+from rivapy.marketdata.curves import DiscountCurveComposition
 from rivapy.marketdata import DiscountCurveParametrized, ConstantRate
 from rivapy.pricing.pricing_request import PricingRequest
 from rivapy.pricing._logger import logger
@@ -173,7 +174,7 @@ class DeterministicCashflowPricer:
             accrual_fraction = dcc.yf(last_coupon_date, trade_date) / dcc.yf(last_coupon_date, next_coupon_date)
             # Calculate the accrued interest
             if specification._coupon_type == "float":
-                rate = DeterministicCashflowPricer.get_float_rate(spec, trade_date, d1, d2)
+                rate = DeterministicCashflowPricer.get_float_rate(specification, trade_date, last_coupon_date, next_coupon_date)
             else:
                 rate = specification._coupon
             accrued_interest = specification._notional * rate * accrual_fraction * dcc.yf(last_coupon_date, next_coupon_date)

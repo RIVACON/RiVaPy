@@ -112,6 +112,16 @@ class FixingTable:
 
         return dates[:], values[:]
 
+    def _to_dict(self):
+        # Serializes the fixings dictionary: keys are underlying IDs,
+        # values are tuples of (list of dates, list of floats)
+        result = {}
+        for udl_id, (dates, values) in self.fixings.items():
+            # Convert all dates to ISO strings
+            dates_serialized = [d.isoformat() if hasattr(d, "isoformat") else str(d) for d in dates]
+            result[udl_id] = {"dates": dates_serialized, "values": values}
+        return {"id": self.id, "fixings": result}
+
 
 # Functions
 

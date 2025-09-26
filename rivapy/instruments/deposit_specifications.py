@@ -13,6 +13,7 @@ from holidays import HolidayBase as _HolidayBase
 from holidays import EuropeanCentralBank as _ECB
 from dateutil.relativedelta import relativedelta
 from rivapy.instruments.components import Issuer
+
 from rivapy.tools.datetools import (
     Period,
     _date_to_datetime,
@@ -22,6 +23,7 @@ from rivapy.tools.datetools import (
     roll_day,
     next_or_previous_business_day,
     is_business_day,
+    serialize_date,
 )
 from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating, RollRule, Instrument
 
@@ -48,7 +50,7 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
         day_count_convention: _Union[DayCounterType, str] = DayCounterType.ACT360,
         business_day_convention: _Union[RollConvention, str] = RollConvention.MODIFIED_FOLLOWING,
         roll_convention: _Union[RollRule, str] = RollRule.EOM,
-        spot_lag: int = 2,
+        spot_days: int = 2,
         calendar: _Union[_HolidayBase, str] = _ECB(),
         issuer: _Optional[_Union[Issuer, str]] = None,
         securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
@@ -73,7 +75,7 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
             day_count_convention (Union[DayCounter, str], optional): Day count convention for determining period length. Defaults to DayCounter.ThirtyU360.
             business_day_convention (Union[RollConvention, str], optional): Set of rules defining the adjustment of  days to ensure each date being a business day with respect to a given holiday calendar. Defaults to RollConvention.FOLLOWING
             roll_convention (Union[RollRule],str], optional): Roll convention to be applied when building a schedule. Defaults to RollRule.NONE.
-            spot_lag (int, optional): Number of days after fixing date when the deposit is actually settled. Defaults to 2 and is set to 0, if start_date == fixing_date or O/N deposit, and is set to 1 for T/N deposit or start_date = fixing_date+1.
+            spot_days (int, optional): Number of days after fixing date when the deposit is actually settled. Defaults to 2 and is set to 0, if start_date == fixing_date or O/N deposit, and is set to 1 for T/N deposit or start_date = fixing_date+1.
             calendar (Union[HolidayBase, str], optional): Holiday calendar to be used for business day adjustment. Defaults to ECB calendar.
             issuer (str, optional): Name/id of issuer. Defaults to None.
             securitization_level (_Union[SecuritizationLevel, str], optional): Securitization level. Defaults to None.
@@ -93,7 +95,7 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
                 logger.error(f"term given as {term} and not as 'O/N' but fixing_date == start_date -> inconsistent data")
             elif term == "O/N" and (fixing_date is not None and start_date is not None and fixing_date != start_date):
                 logger.error(f"term given as {term} but fixing_date != start_date -> inconsistent data")
-            logger.info("Setting spot_lag to 0: O/N deposit or fixing_date equal to start_date.")
+            logger.info("Setting spot_days to 0: O/N deposit or fixing_date equal to start_date.")
         elif term == "T/N" or (fixing_date is not None and start_date is not None and fixing_date + relativedelta(days=1) == start_date):
             spd = 1
             if (
@@ -106,9 +108,9 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
                 logger.error(f"term given as {term} and not as 'T/N' but fixing_date + 1 day == start_date -> inconsistent data")
             elif term == "T/N" and (fixing_date is not None and start_date is not None and fixing_date + relativedelta(days=1) != start_date):
                 logger.error(f"term given as {term} but fixing_date + 1 day != start_date -> inconsistent data")
-            logger.info("Setting spot_lag to 1: T/N deposit or fixing_date + 1 day equal to start_date.")
+            logger.info("Setting spot_days to 1: T/N deposit or fixing_date + 1 day equal to start_date.")
         else:
-            spd = spot_lag
+            spd = spot_days
 
         # set fixing date,  start date, end date, and maturity date
         # checking and setting fixing date
@@ -218,7 +220,7 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
         super().__init__(
             obj_id=obj_id,
             first_fixing_date=fd,
-            spot_lag=spd,
+            spot_days=spd,
             issue_date=issue_date,
             start_date=sd,
             end_date=ed,
@@ -240,7 +242,7 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
     @staticmethod
     def _create_sample(
         n_samples: int, seed: int = None, ref_date=None, issuers: _List[str] = None, sec_levels: _List[str] = None, currencies: _List[str] = None
-    ) -> _List[dict]:
+    ) -> _List["DepositSpecification"]:
         if seed is not None:
             np.random.seed(seed)
         if ref_date is None:
@@ -258,25 +260,25 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
             days = int(15.0 * 365.0 * np.random.beta(2.0, 2.0)) + 1
             start_date = ref_date + timedelta(days=np.random.randint(low=-365, high=0))
             result.append(
-                {
-                    "fixing_date": start_date + timedelta(days=np.random.randint(low=-2, high=0)),
-                    "start_date": start_date,
-                    "maturity_date": ref_date + timedelta(days=days),
-                    "currency": np.random.choice(currencies),
-                    "notional": np.random.choice([100.0, 1000.0, 10_000.0, 100_0000.0]),
-                    "rate": np.random.choice([0.01, 0.02, 0.03, 0.04, 0.05]),
-                    "issuer": np.random.choice(issuers),
-                    "securitization_level": np.random.choice(sec_levels),
-                }
+                DepositSpecification(
+                    obj_id=f"Deposit_{_}",
+                    start_date=start_date,
+                    maturity_date=ref_date + timedelta(days=days),
+                    currency=np.random.choice(currencies),
+                    notional=np.random.choice([100.0, 1000.0, 10_000.0, 100_0000.0]),
+                    rate=np.random.choice([0.01, 0.02, 0.03, 0.04, 0.05]),
+                    issuer=np.random.choice(issuers),
+                    securitization_level=np.random.choice(sec_levels),
+                )
             )
         return result
 
     def _to_dict(self) -> dict:
         result = {
             "obj_id": self.obj_id,
-            "fixing_date": self.fixing_date,
-            "start_date": self.start_date,
-            "maturity_date": self.maturity_date,
+            "fixing_date": serialize_date(self.fixing_date),
+            "start_date": serialize_date(self.start_date),
+            "maturity_date": serialize_date(self.maturity_date),
             "currency": self.currency,
             "notional": self.notional,
             "rate": self.rate,
@@ -286,7 +288,6 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
             "business_day_convention": self.business_day_convention,
             "issuer": self.issuer,
             "securitization_level": self._securitization_level,
-            "securitization_level_str": SecuritizationLevel.to_string(self._securitization_level),
             "payment_days": self._payment_days,
         }
         return result

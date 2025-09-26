@@ -5,7 +5,16 @@ from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
 from holidays import HolidayBase as _HolidayBase, ECB as _ECB
 from rivapy.instruments.components import Issuer
-from rivapy.tools.datetools import Period, Schedule, _date_to_datetime, _datetime_to_date_list, _term_to_period, roll_day, calc_start_day
+from rivapy.tools.datetools import (
+    Period,
+    Schedule,
+    _date_to_datetime,
+    _datetime_to_date_list,
+    _term_to_period,
+    roll_day,
+    calc_start_day,
+    serialize_date,
+)
 from rivapy.tools.enums import (
     DayCounterType,
     RollConvention,
@@ -176,7 +185,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
     @staticmethod
     def _create_sample(
         n_samples: int, seed: int = None, ref_date=None, issuers: _List[str] = None, sec_levels: _List[str] = None, currencies: _List[str] = None
-    ) -> _List[dict]:
+    ) -> _List["ForwardRateAgreementSpecification"]:
         """Create a random sample of multiple instruments of this type with varied specification parameters.
 
         Args:
@@ -188,7 +197,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
             currencies (_List[str], optional): list of possible currencies used. Defaults to None.
 
         Returns:
-            _List[dict]: where each entry is a dict representing with the information needed to specify an instrument.
+            _List[ForwardRateAgreementSpecification]: where each entry is a dict representing with the information needed to specify an instrument.
         """
         if seed is not None:
             np.random.seed(seed)
@@ -211,28 +220,29 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
             end_date = start_date + relativedelta(months=np.random.choice([3, 6]))
             # spot_lag=2, fixing pre_lag =2
             result.append(
-                {
-                    "trade_date": trade_date,
-                    "maturity_date": maturity_date,
-                    "notional": np.random.choice([100.0, 1000.0, 10_000.0, 100_0000.0]),
-                    "rate": np.random.choice([0.01, 0.02, 0.03, 0.04, 0.05]),
-                    "start_date": start_date,
-                    "end_date": end_date,
-                    "udlID": "dummy_underlying_index",  #
-                    "rate_start_date": start_date - timedelta(days=2),  # does not account for roll convention ...
-                    "rate_end_date": end_date - timedelta(days=2),
+                ForwardRateAgreementSpecification(
+                    obj_id=f"Deposit_{_}",
+                    trade_date=trade_date,
+                    maturity_date=maturity_date,
+                    notional=np.random.choice([100.0, 1000.0, 10_000.0, 100_0000.0]),
+                    rate=np.random.choice([0.01, 0.02, 0.03, 0.04, 0.05]),
+                    start_date=start_date,
+                    end_date=end_date,
+                    udlID="dummy_underlying_index",
+                    rate_start_date=start_date - timedelta(days=2),
+                    rate_end_date=end_date - timedelta(days=2),
                     # "day_count_convention": self.day_count_convention, #TODO
                     # "business_day_convention": self.business_day_convention,
                     # "rate_day_count_convention": self.rate_day_count_convention,
                     # "rate_business_day_convention": self.rate_business_day_convention,
-                    "calendar": _ECB(years=range(trade_date.year, maturity_date.year + 1)),
-                    "currency": np.random.choice(currencies),
+                    calendar=_ECB(years=range(trade_date.year, maturity_date.year + 1)),
+                    currency=np.random.choice(currencies),
                     # "spot_lag": self.spot_lag, # not needed if start dates given
                     # "start_period": self.start_period,
                     # "end_period": self.end_period,
-                    "issuer": np.random.choice(issuers),
-                    "securitization_level": np.random.choice(sec_levels),
-                }
+                    issuer=np.random.choice(issuers),
+                    securitization_level=np.random.choice(sec_levels),
+                )
             )
         return result
 
@@ -240,22 +250,23 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         self.__trade_date, self.__maturity_date = _check_start_before_end(self.__trade_date, self.__maturity_date)
 
     def _to_dict(self) -> dict:
+
         result = {
             "obj_id": self.obj_id,
-            "trade_date": self.trade_date,
-            "maturity_date": self.maturity_date,
+            "trade_date": serialize_date(self.trade_date),
+            "maturity_date": serialize_date(self.maturity_date),
             "notional": self.notional,
             "rate": self.rate,
-            "start_date": self.start_date,
-            "end_date": self.end_date,
+            "start_date": serialize_date(self.start_date),
+            "end_date": serialize_date(self.end_date),
             "udlID": self.udlID,
-            "rate_start_date": self.rate_start_date,
-            "rate_end_date": self.rate_end_date,
+            "rate_start_date": serialize_date(self.rate_start_date),
+            "rate_end_date": serialize_date(self.rate_end_date),
             "day_count_convention": self.day_count_convention,
             "business_day_convention": self.business_day_convention,
             "rate_day_count_convention": self.rate_day_count_convention,
             "rate_business_day_convention": self.rate_business_day_convention,
-            "calendar": self.calendar,
+            "calendar": getattr(self.calendar, "name", self.calendar.__class__.__name__),
             "currency": self.currency,
             "payment_days": self.payment_days,
             "spot_lag": self.spot_lag,

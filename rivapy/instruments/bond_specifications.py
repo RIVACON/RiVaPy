@@ -9,7 +9,7 @@ import rivapy.tools.interfaces as interfaces
 from scipy.optimize import brentq
 from collections import defaultdict
 from typing import Optional, Dict, Tuple, List as _List, Union as _Union, Optional as _Optional
-
+from dateutil.relativedelta import relativedelta
 from rivapy.tools.enums import Currency, Rating, SecuritizationLevel, RollConvention, InterestRateIndex
 from rivapy.tools.datetools import _date_to_datetime, Schedule, Period, DayCounterType, DayCounter
 from rivapy.tools._validators import (
@@ -21,9 +21,18 @@ from rivapy.tools._validators import (
     _is_ascending_date_list,
 )
 from datetime import datetime, date, timedelta
-from rivapy.tools.datetools import _term_to_period, calc_end_day, calc_start_day, roll_day, next_or_previous_business_day, is_business_day, RollRule
+from rivapy.tools.datetools import (
+    _term_to_period,
+    calc_end_day,
+    calc_start_day,
+    roll_day,
+    next_or_previous_business_day,
+    is_business_day,
+    RollRule,
+    serialize_date,
+)
 from holidays import HolidayBase as _HolidayBase
-from holidays import EuropeanCentralBank as _ECB
+from holidays import ECB as _ECB
 
 # placeholder
 from rivapy.marketdata.curves import DiscountCurve
@@ -109,8 +118,8 @@ class BondBaseSpecification(interfaces.FactoryObject):
             "obj_id": self.obj_id,
             "issuer": self.issuer,
             "securitization_level": self.securitization_level,
-            "issue_date": self.issue_date,
-            "maturity_date": self.maturity_date,
+            "issue_date": serialize_date(self.issue_date),
+            "maturity_date": serialize_date(self.maturity_date),
             "currency": self.currency,
             "notional": self.notional,
             "rating": self.rating,
@@ -238,12 +247,12 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         self,
         obj_id: str,
         issue_date: _Union[date, datetime],
-        first_fixing_date: _Union[date, datetime],
         start_date: _Union[date, datetime],
         end_date: _Union[date, datetime],
         maturity_date: _Union[date, datetime],
-        frequency: _Union[Period, str],
         notional: float = 100.0,
+        frequency: _Optional[_Union[Period, str]] = None,
+        first_fixing_date: _Optional[_Union[date, datetime]] = None,
         issue_price: _Optional[float] = None,
         index: _Union[InterestRateIndex, str] = None,
         currency: _Union[Currency, str] = Currency.EUR,
@@ -256,7 +265,7 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         calendar: _Union[_HolidayBase, str] = _ECB(),
         coupon_type: str = "fix",
         payment_days: int = 0,
-        spot_lag: int = 2,
+        spot_days: int = 2,
         pays_in_arrears: bool = True,
         issuer: _Optional[_Union[Issuer, str]] = None,
         rating: _Union[Rating, str] = Rating.NONE,
@@ -300,7 +309,10 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
             securitization_level,
             Rating.to_string(rating),
         )
-        self._first_fixing_date = _date_to_datetime(first_fixing_date)
+        if first_fixing_date is not None:
+            self._first_fixing_date = _date_to_datetime(first_fixing_date)
+        else:
+            self._first_fixing_date = _date_to_datetime(start_date)
         self._start_date = _date_to_datetime(start_date)
         self._end_date = _date_to_datetime(end_date)
         if issue_price is not None:
@@ -312,6 +324,8 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         self._frequency = frequency
         if index is not None:
             self._index = InterestRateIndex.to_string(index)
+        else:
+            self._index = None
         self._day_count_convention = day_count_convention
         self._business_day_convention = business_day_convention
         self._roll_convention = roll_convention
@@ -319,7 +333,7 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         self._coupon_type = coupon_type
         self._notional_exchange = notional_exchange
         self._payment_days = payment_days
-        self._spot_days = spot_lag
+        self._spot_days = spot_days
         self._pays_in_arrears = pays_in_arrears
         self._backwards = backwards
         self._stub_type_is_Long = stub_type_is_Long
@@ -679,8 +693,8 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         # _check_start_at_or_before_end(self._end_date, self._maturity_date) # TODO special case modified following BCC
         _check_non_negativity(self._payment_days)
         _check_non_negativity(self._spot_days)
-        if not isinstance(self._frequency, (Period, str)):
-            raise ValueError("Frequency must be a Period object or string.")
+        # if not isinstance(self._frequency, (Period, str)):
+        #     raise ValueError("Frequency must be a Period object or string.")
         if not isinstance(self._calendar, (_HolidayBase, str)):
             raise ValueError("Calendar must be a HolidayBase or string.")
 
@@ -711,7 +725,7 @@ class PlainVanillaCouponBondSpecification(DeterministicCashflowBondSpecification
         currency: _Union[Currency, str],
         issue_date: _Union[date, datetime],
         maturity_date: _Union[date, datetime],
-        coupon_rate: float,
+        coupon: float,
         frequency: _Union[Period, str],
         business_day_convention: RollConvention = RollConvention.MODIFIED_FOLLOWING,
         issuer: Optional[_Union[Issuer, str]] = None,
@@ -723,26 +737,26 @@ class PlainVanillaCouponBondSpecification(DeterministicCashflowBondSpecification
         adjust_start_date: bool = True,
         adjust_end_date: bool = False,
     ):
-        if not is_business_day(issue_date) and adjust_start_date:
+        if not is_business_day(issue_date, calendar) and adjust_start_date:
             start_date = roll_day(issue_date, calendar=calendar, business_day_convention=business_day_convention)
         else:
             start_date = issue_date
-        if not is_business_day(maturity_date) and adjust_end_date:
+        if not is_business_day(maturity_date, calendar) and adjust_end_date:
             end_date = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
         else:
             end_date = maturity_date
-        if not is_business_day(maturity_date):
+        if not is_business_day(maturity_date, calendar):
             maturity_date = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
         super().__init__(
             obj_id=obj_id,
-            spot_lag=spot_days,
+            spot_days=spot_days,
             issue_date=issue_date,
             start_date=start_date,
             end_date=end_date,
             maturity_date=maturity_date,
             notional=notional,
             currency=currency,
-            coupon=coupon_rate,
+            coupon=coupon,
             coupon_type="fix",
             frequency=frequency,
             day_count_convention=day_count_convention,
@@ -753,6 +767,8 @@ class PlainVanillaCouponBondSpecification(DeterministicCashflowBondSpecification
             securitization_level=securitization_level,
             calendar=calendar,
         )
+        self._adjust_start_date = adjust_start_date
+        self._adjust_end_date = adjust_end_date
 
     @property
     def adjust_start_date(self) -> bool:
@@ -761,7 +777,7 @@ class PlainVanillaCouponBondSpecification(DeterministicCashflowBondSpecification
     @adjust_start_date.setter
     def adjust_start_date(self, value: bool):
         self._adjust_start_date = value
-        if not is_business_day(self._issuedate) and self._adjust_start_date:
+        if not is_business_day(self._issue_date, self._calendar) and self._adjust_start_date:
             self._start_date = roll_day(self._issuedate, calendar=self._calendar, business_day_convention=self._business_day_convention)
 
     @property
@@ -771,7 +787,7 @@ class PlainVanillaCouponBondSpecification(DeterministicCashflowBondSpecification
     @adjust_end_date.setter
     def adjust_end_date(self, value: bool):
         self._adjust_end_date = value
-        if not is_business_day(self._maturity_date) and self._adjust_end_date:
+        if not is_business_day(self._maturity_date, self._calendar) and self._adjust_end_date:
             self._end_date = roll_day(self._maturity_date, calendar=self._calendar, business_day_convention=self._business_day_convention)
 
     @staticmethod
@@ -787,42 +803,43 @@ class PlainVanillaCouponBondSpecification(DeterministicCashflowBondSpecification
         securitization_level = SecuritizationLevel.SUBORDINATED
         daycounter = DayCounterType.ACT_ACT
         for i in range(n_samples):
-            coupon_rate = np.random.choice([0.0, 0.01, 0.03, 0.05])
+            coupon = np.random.choice([0.0, 0.01, 0.03, 0.05])
             period = np.random.choice(["1Y", "6M", "3M"])
             result.append(
-                {
-                    "obj_id": f"ID_{i}",
-                    "notional": notional,
-                    "frequency": period,
-                    "currency": currency,
-                    "issue_date": issue_date,
-                    "maturity_date": maturity_date,
-                    "coupon_rate": coupon_rate,
-                    "securitization_level": securitization_level,
-                    "accrual_day_counter_type": daycounter,
-                }
+                PlainVanillaCouponBondSpecification(
+                    obj_id=f"ID_{i}",
+                    notional=notional,
+                    frequency=period,
+                    currency=currency,
+                    issue_date=issue_date,
+                    maturity_date=maturity_date,
+                    coupon=coupon,
+                    securitization_level=securitization_level,
+                    day_count_convention=daycounter,
+                )
             )
+        return result
 
     def _to_dict(self) -> Dict:
         dict = {
             "obj_id": self.obj_id,
             "issuer": self._issuer,
             "securitization_level": self._securitization_level,
-            "issue_date": self._issuedate,
-            "maturity_date": self._maturity_date,
+            "issue_date": serialize_date(self._issue_date),
+            "maturity_date": serialize_date(self._maturity_date),
             "currency": self._currency,
             "notional": self._notional,
             "rating": self._rating,
             "frequency": self._frequency,
             "day_count_convention": self._day_count_convention,
             "business_day_convention": self._business_day_convention,
-            "coupon_rate": self._coupon,
-            "spot_lag": self._spot_days,
-            "calendar": self._calendar,
+            "coupon": self._coupon,
+            "spot_days": self._spot_days,
+            "calendar": getattr(self._calendar, "name", self._calendar.__class__.__name__),
             "adjust_start_date": self._adjust_start_date,
             "adjust_end_date": self._adjust_end_date,
         }
-        return _dict
+        return dict
 
 
 class ZeroBondSpecification(DeterministicCashflowBondSpecification):
@@ -841,7 +858,7 @@ class ZeroBondSpecification(DeterministicCashflowBondSpecification):
         securitization_level: Optional[_Union[SecuritizationLevel, str]] = SecuritizationLevel.NONE,
         rating: Optional[_Union[Rating, str]] = Rating.NONE,
     ):
-        if not is_business_day(maturity_date):
+        if not is_business_day(maturity_date, calendar):
             maturity_date = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
         super().__init__(
             obj_id=obj_id,
@@ -872,35 +889,35 @@ class ZeroBondSpecification(DeterministicCashflowBondSpecification):
         securitization_level = SecuritizationLevel.SUBORDINATED
         for i in range(n_samples):
             issue_price = np.random.choice([90.0, 95.0, 99.0])
-            period = np.random.choice(["1Y", "6M", "3M"])
+            m = np.random.choice([0, 12, 6, 3])
             result.append(
-                {
-                    "obj_id": f"ID_{i}",
-                    "notional": notional,
-                    "issue_price": issue_price,
-                    "frequency": period,
-                    "currency": currency,
-                    "issue_date": issue_date,
-                    "maturity_date": maturity_date,
-                    "securitization_level": securitization_level,
-                }
+                ZeroBondSpecification(
+                    obj_id=f"ID_{i}",
+                    notional=notional,
+                    issue_price=issue_price,
+                    currency=currency,
+                    issue_date=issue_date,
+                    maturity_date=maturity_date + relativedelta(months=m),
+                    securitization_level=securitization_level,
+                )
             )
+        return result
 
     def _to_dict(self) -> Dict:
         dict = {
             "obj_id": self.obj_id,
             "issuer": self._issuer,
             "securitization_level": self._securitization_level,
-            "issue_date": self._issuedate,
-            "maturity_date": self._maturity_date,
+            "issue_date": serialize_date(self._issue_date),
+            "maturity_date": serialize_date(self._maturity_date),
             "currency": self._currency,
             "notional": self._notional,
             "issue_price": self._issue_price,
             "rating": self._rating,
             "business_day_convention": self._business_day_convention,
-            "calendar": self._calendar,
+            "calendar": getattr(self._calendar, "name", self._calendar.__class__.__name__),
         }
-        return _dict
+        return dict
 
 
 class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
@@ -926,16 +943,16 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
         adjust_start_date: bool = True,
         adjust_end_date: bool = False,
     ):
-        if not is_business_day(issue_date) and adjust_start_date:
+        if not is_business_day(issue_date, calendar) and adjust_start_date:
             start_date = roll_day(issue_date, calendar=calendar, business_day_convention=business_day_convention)
         else:
             start_date = issue_date
         first_fixing_date = calc_start_day(start_date, f"{spot_days}D", business_day_convention=business_day_convention, calendar=calendar)
-        if not is_business_day(maturity_date) and adjust_end_date:
+        if not is_business_day(maturity_date, calendar) and adjust_end_date:
             end_date = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
         else:
             end_date = maturity_date
-        if not is_business_day(maturity_date):
+        if not is_business_day(maturity_date, calendar):
             maturity_date = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
         if index is None and frequency is None:
             raise ValueError("Either index or frequency must be provided for a floating rate bond.")
@@ -948,7 +965,7 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
         super().__init__(
             obj_id=obj_id,
             fixings=fixings,
-            spot_lag=spot_days,
+            spot_days=spot_days,
             issue_date=issue_date,
             start_date=start_date,
             end_date=end_date,
@@ -967,6 +984,8 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
             rating=rating,
             securitization_level=securitization_level,
         )
+        self._adjust_start_date = adjust_start_date
+        self._adjust_end_date = adjust_end_date
 
     @property
     def adjust_start_date(self) -> bool:
@@ -975,7 +994,7 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
     @adjust_start_date.setter
     def adjust_start_date(self, value: bool):
         self._adjust_start_date = value
-        if not is_business_day(self._issuedate) and self._adjust_start_date:
+        if not is_business_day(self._issue_date, self._calendar) and self._adjust_start_date:
             self._start_date = roll_day(self._issuedate, calendar=self._calendar, business_day_convention=self._business_day_convention)
 
     @property
@@ -985,7 +1004,7 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
     @adjust_end_date.setter
     def adjust_end_date(self, value: bool):
         self._adjust_end_date = value
-        if not is_business_day(self._maturity_date) and self._adjust_end_date:
+        if not is_business_day(self._maturity_date, self._calendar) and self._adjust_end_date:
             self._end_date = roll_day(self._maturity_date, calendar=self._calendar, business_day_convention=self._business_day_convention)
 
     @staticmethod
@@ -1005,43 +1024,43 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
             margin = np.random.choice([0.0, 1, 3, 5])
             period = np.random.choice(["1Y", "6M", "3M"])
             result.append(
-                {
-                    "obj_id": f"ID_{i}",
-                    "notional": notional,
-                    "frequency": period,
-                    "currency": currency,
-                    "issue_date": issue_date,
-                    "maturity_date": maturity_date,
-                    "margin": margin,
-                    "securitization_level": securitization_level,
-                    "accrual_day_counter_type": daycounter,
-                    "fixings": fixings,
-                }
+                FloatingRateBondSpecification(
+                    obj_id=f"ID_{i}",
+                    notional=notional,
+                    frequency=period,
+                    currency=currency,
+                    issue_date=issue_date,
+                    maturity_date=maturity_date,
+                    margin=margin,
+                    securitization_level=securitization_level,
+                    day_count_convention=daycounter,
+                    fixings=fixings,
+                )
             )
+        return result
 
     def _to_dict(self) -> Dict:
         dict = {
             "obj_id": self.obj_id,
             "issuer": self._issuer,
             "securitization_level": self._securitization_level,
-            "issue_date": self.start_date,
-            "maturity_date": self._maturity_date,
+            "issue_date": serialize_date(self._issue_date),
+            "maturity_date": serialize_date(self._maturity_date),
             "currency": self._currency,
             "notional": self._notional,
             "rating": self._rating,
             "frequency": self._frequency,
-            "accrual_day_counter_type": self._day_count_convention,
+            "day_count_convention": self._day_count_convention,
             "business_day_convention": self._business_day_convention,
-            "coupon_rate": self._coupon,
-            "fixings": self._fixings,
+            "fixings": self._fixings._to_dict() if isinstance(self._fixings, FixingTable) else self._fixings,
             "index": self._index,
             "margin": self._margin,
-            "spot_lag": self._spot_days,
-            "calendar": self._calendar,
+            "spot_days": self._spot_days,
+            "calendar": getattr(self._calendar, "name", self._calendar.__class__.__name__),
             "adjust_start_date": self._adjust_start_date,
             "adjust_end_date": self._adjust_end_date,
         }
-        return _dict
+        return dict
 
 
 # class ZeroCouponBondSpecification(BondBaseSpecification):
@@ -1755,7 +1774,7 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 #         issuer: Optional[str] = None,
 #         securitization_level: Optional[Union[SecuritizationLevel, str]] = SecuritizationLevel.NONE,
 #         rating: Optional[Union[Rating, str]] = Rating.NONE,
-#         accrual_day_counter_type: DayCounterType = DayCounterType.ActActICMA,
+#         day_count_convention: DayCounterType = DayCounterType.ActActICMA,
 #     ):
 #         """
 #         Initializes the base bond specification.
@@ -1767,12 +1786,12 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 #             currency (Union[Currency, str]): The currency of the bond.
 #             issue_date (Union[date, datetime]): The date the bond was issued.
 #             maturity_date (Union[date, datetime]): Maturity date of the bond.
-#             coupon_rate (float): The annual coupon rate (e.g., 0.05 for 5%).
+#             coupon (float): The annual coupon rate (e.g., 0.05 for 5%).
 #             spread (float): Credit spread.
 #             issuer (Optional[str], optional): The issuer of the bond. Defaults to None.
 #             securitization_level (Optional[Union[SecuritizationLevel, str]], optional): The securitization level. Defaults to SecuritizationLevel.NONE.
 #             rating (Optional[Union[Rating, str]], optional): The credit rating of the bond. Defaults to Rating.NONE.
-#             accrual_day_counter_type (DayCounterType, optional): The day count convention for accrual calculations. Defaults to DayCounterType.ActActICMA.
+#             day_count_convention (DayCounterType, optional): The day count convention for accrual calculations. Defaults to DayCounterType.ActActICMA.
 #         """
 
 #         self.obj_id = obj_id
@@ -1795,12 +1814,12 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 #         if spread < 0:
 #             raise ValueError("Spread must be non-negative.")
 
-#         self._accrual_day_counter = DayCounter(accrual_day_counter_type)
-#         self._accrual_day_counter_type = accrual_day_counter_type
+#         self._accrual_day_counter = DayCounter(day_count_convention)
+#         self._day_count_convention = day_count_convention
 
 #         self._coupon_freq = self._schedule.time_period
 
-#         if self._accrual_day_counter_type == DayCounterType.ActActICMA:
+#         if self._day_count_convention == DayCounterType.ActActICMA:
 #             _check = False
 #             for cp_freq_str in ["1Y", "6M", "3M"]:
 #                 if self._coupon_freq == Period.from_string(cp_freq_str):
@@ -1821,7 +1840,7 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 #             "currency": self._currency,
 #             "notional": self._notional,
 #             "rating": self._rating,
-#             "accrual_day_counter_type": self._accrual_day_counter_type,
+#             "day_count_convention": self._day_count_convention,
 #         }
 #         return return_dict
 
@@ -1903,12 +1922,12 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 #         self._rating = Rating.to_string(value)
 
 #     @property
-#     def accrual_day_counter_type(self) -> str:
-#         return self._accrual_day_counter_type
+#     def day_count_convention(self) -> str:
+#         return self._day_count_convention
 
-#     @accrual_day_counter_type.setter
-#     def accrual_day_counter_type(self, value: Union[DayCounterType, str]):
-#         self._accrual_day_counter_type = DayCounterType.to_string(value)
+#     @day_count_convention.setter
+#     def day_count_convention(self, value: Union[DayCounterType, str]):
+#         self._day_count_convention = DayCounterType.to_string(value)
 
 #     def _get_coupon_frequency(self):
 #         if self._coupon_freq.years > 0:
@@ -1985,12 +2004,12 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 #         currency: Union[Currency, str],
 #         issue_date: Union[date, datetime],
 #         maturity_date: Union[date, datetime],
-#         coupon_rate: float,
+#         coupon: float,
 #         spread: float = 0.0,
 #         issuer: Optional[str] = None,
 #         securitization_level: Optional[Union[SecuritizationLevel, str]] = SecuritizationLevel.NONE,
 #         rating: Optional[Union[Rating, str]] = Rating.NONE,
-#         accrual_day_counter_type: DayCounterType = DayCounterType.ActActICMA,
+#         day_count_convention: DayCounterType = DayCounterType.ActActICMA,
 #     ):
 #         """
 #         Initializes a fixed-rate bond.
@@ -2002,12 +2021,12 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 #             currency (Union[Currency, str]): The currency of the bond.
 #             issue_date (Union[date, datetime]): The date the bond was issued.
 #             maturity_date (Union[date, datetime]): Maturity date of the bond.
-#             coupon_rate (float): The annual coupon rate (e.g., 0.05 for 5%).
+#             coupon (float): The annual coupon rate (e.g., 0.05 for 5%).
 #             spread (float): Credit spread.
 #             issuer (Optional[str], optional): The issuer of the bond. Defaults to None.
 #             securitization_level (Optional[Union[SecuritizationLevel, str]], optional): The securitization level. Defaults to SecuritizationLevel.NONE.
 #             rating (Optional[Union[Rating, str]], optional): The credit rating of the bond. Defaults to Rating.NONE.
-#             accrual_day_counter_type (DayCounterType, optional): The day count convention for accrual calculations. Defaults to DayCounterType.ActActICMA.
+#             day_count_convention (DayCounterType, optional): The day count convention for accrual calculations. Defaults to DayCounterType.ActActICMA.
 #         """
 #         super().__init__(
 #             obj_id,
@@ -2020,27 +2039,27 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 #             issuer,
 #             securitization_level,
 #             rating,
-#             accrual_day_counter_type,
+#             day_count_convention,
 #         )
-#         if coupon_rate < 0:
+#         if coupon < 0:
 #             raise ValueError("Coupon rate must be non-negative.")
 
-#         self._coupon_rate = coupon_rate
+#         self._coupon = coupon
 #         self.__schedule_dates = self._schedule.generate_dates(ends_only=False)
 #         self._cashflows = self.expected_cashflows()
 
 #     @property
-#     def coupon_rate(self) -> float:
+#     def coupon(self) -> float:
 #         """The bond's annual coupon rate"""
-#         return self._coupon_rate
+#         return self._coupon
 
-#     @coupon_rate.setter
-#     def coupon_rate(self, value: float):
-#         self._coupon_rate = _check_positivity(value)
+#     @coupon.setter
+#     def coupon(self, value: float):
+#         self._coupon = _check_positivity(value)
 
 #     def _to_dict(self) -> Dict:
 #         _dict = super()._to_dict()
-#         _dict["coupon_rate"] = self._coupon_rate
+#         _dict["coupon"] = self._coupon
 #         return _dict
 
 #     @staticmethod
@@ -2056,7 +2075,7 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 #         securitization_level = SecuritizationLevel.SUBORDINATED
 #         daycounter = DayCounterType.ACT_ACT
 #         for i in range(n_samples):
-#             coupon_rate = np.random.choice([0.0, 0.01, 0.03, 0.05])
+#             coupon = np.random.choice([0.0, 0.01, 0.03, 0.05])
 #             period = np.random.choice(["1Y", "6M", "3M"])
 #             schedule = Schedule(
 #                 start_day=issue_date, end_day=maturity_date, time_period=Period.from_string(period), business_day_convention=RollConvention.UNADJUSTED
@@ -2068,9 +2087,9 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 #                     "notional": notional,
 #                     "currency": currency,
 #                     "issue_date": issue_date,
-#                     "coupon_rate": coupon_rate,
+#                     "coupon": coupon,
 #                     "securitization_level": securitization_level,
-#                     "accrual_day_counter_type": daycounter,
+#                     "day_count_convention": daycounter,
 #                 }
 #             )
 
@@ -2102,7 +2121,7 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 #                 period_start_dt, payment_date_dt, coupon_schedule=self.__schedule_dates, coupon_frequency=coupon_freq  # coupon_frequency_int
 #             )
 
-#             coupon_amount = self._notional * self._coupon_rate * year_fraction_for_coupon
+#             coupon_amount = self._notional * self._coupon * year_fraction_for_coupon
 #             if coupon_amount > 0.0:
 #                 cashflows.append((payment_date_dt, coupon_amount))
 
@@ -2135,7 +2154,7 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 #         val_date_dt = _date_to_datetime(valuation_date)
 
 #         # For zero-coupon bonds, accrued interest is always zero. This also prevents division by zero errors.
-#         if self._coupon_rate == 0.0:
+#         if self._coupon == 0.0:
 #             return 0.0
 
 #         # No accrued interest if valuation is outside the bond's life
@@ -2166,7 +2185,7 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 
 #         # Calculate accrued interest year fraction for the period [current_accrual_start, val_date_dt]
 #         accrued_year_fraction = self._accrual_day_counter.yf(current_accrual_start, val_date_dt, self.__schedule_dates, coupon_frequency)
-#         return self._notional * self._coupon_rate * accrued_year_fraction
+#         return self._notional * self._coupon * accrued_year_fraction
 
 #     def compute_clean_price(self, value_date: datetime, discount_curve: DiscountCurve) -> float:
 #         """
@@ -2264,14 +2283,14 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 #         issue_date: Union[date, datetime],
 #         maturity_date: Union[date, datetime],
 #         coupon_ref_curve: DiscountCurve,
-#         coupon_rate_spread: float,
+#         coupon_spread: float,
 #         fixing_date: Union[date, datetime],
-#         fixing_coupon_rate: float,
+#         fixing_coupon: float,
 #         spread: float = 0.0,
 #         issuer: Optional[str] = None,
 #         securitization_level: Optional[Union[SecuritizationLevel, str]] = SecuritizationLevel.NONE,
 #         rating: Optional[Union[Rating, str]] = Rating.NONE,
-#         accrual_day_counter_type: DayCounterType = DayCounterType.ActActICMA,
+#         day_count_convention: DayCounterType = DayCounterType.ActActICMA,
 #     ):
 #         super().__init__(
 #             obj_id,
@@ -2284,17 +2303,17 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 #             issuer,
 #             securitization_level,
 #             rating,
-#             accrual_day_counter_type,
+#             day_count_convention,
 #         )
 #         self._coupon_ref_curve = coupon_ref_curve
-#         self._coupon_rate_spread = coupon_rate_spread
+#         self._coupon_spread = coupon_spread
 #         self._fixing_date = _date_to_datetime(fixing_date)
-#         self._fixing_coupon_rate = fixing_coupon_rate
+#         self._fixing_coupon = fixing_coupon
 
 #         _check_start_before_end(self._fixing_date, self._maturity_date)
 #         self.__schedule_dates = self._schedule.generate_dates(ends_only=False)
 
-#         self._coupon_rates: List[Tuple[datetime, datetime, float]] = []
+#         self._coupons: List[Tuple[datetime, datetime, float]] = []
 
 #         self._cashflows = self.expected_cashflows()
 
@@ -2303,20 +2322,20 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 #         return self._cashflows
 
 #     @property
-#     def coupon_rates(self) -> List[Tuple[datetime, datetime, float]]:
-#         return self._coupon_rates
+#     def coupons(self) -> List[Tuple[datetime, datetime, float]]:
+#         return self._coupons
 
 #     @property
 #     def coupon_ref_curve(self) -> DiscountCurve:
 #         return self._coupon_ref_curve
 
 #     @property
-#     def coupon_rate_spread(self) -> float:
-#         return self._coupon_rate_spread
+#     def coupon_spread(self) -> float:
+#         return self._coupon_spread
 
-#     @coupon_rate_spread.setter
-#     def coupon_rate_spread(self, value: float):
-#         self._coupon_rate_spread = _check_positivity(value=value)
+#     @coupon_spread.setter
+#     def coupon_spread(self, value: float):
+#         self._coupon_spread = _check_positivity(value=value)
 
 #     @property
 #     def fixing_date(self) -> datetime:
@@ -2327,15 +2346,15 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 #         self._fixing_date = _date_to_datetime(value)
 
 #     @property
-#     def fixing_coupon_rate(self) -> float:
-#         return self._fixing_coupon_rate
+#     def fixing_coupon(self) -> float:
+#         return self._fixing_coupon
 
-#     @fixing_coupon_rate.setter
-#     def fixing_coupon_rate(self, value: float):
-#         self._fixing_coupon_rate = _check_positivity(value=value)
+#     @fixing_coupon.setter
+#     def fixing_coupon(self, value: float):
+#         self._fixing_coupon = _check_positivity(value=value)
 
 #     def _to_dict(self):
-#         _dict = {"coupon_rate_spread": self._coupon_rate_spread, "fixing_date": self._fixing_date, "fixing_coupon_rate": self._fixing_coupon_rate}
+#         _dict = {"coupon_spread": self._coupon_spread, "fixing_date": self._fixing_date, "fixing_coupon": self._fixing_coupon}
 #         return {**super()._to_dict(), **_dict}
 
 #     def expected_cashflows(self) -> List[Tuple[datetime, float]]:
@@ -2362,7 +2381,7 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 
 #             if (not _fixed_coupon) and (self._fixing_date <= payment_date_dt):
 #                 # first coupon payment after the fixing date has a fixed coupon rate
-#                 coupon_rate = self._fixing_coupon_rate
+#                 coupon = self._fixing_coupon
 #                 _fixed_coupon = True
 
 #             elif (
@@ -2375,18 +2394,18 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 #                     f"Coupon payment {payment_date_dt} is not the first coupon payment after fixing and happens before the start date of the coupon reference curve {_date_to_datetime(self._coupon_ref_curve.get_dates()[0])}"
 #                 )
 #             else:
-#                 coupon_rate = self._coupon_ref_curve.value(refdate=_curve_ref_date, d=payment_date_dt)
+#                 coupon = self._coupon_ref_curve.value(refdate=_curve_ref_date, d=payment_date_dt)
 
 #             year_fraction_for_coupon = self._accrual_day_counter.yf(
 #                 period_start_dt, payment_date_dt, coupon_schedule=self.__schedule_dates, coupon_frequency=coupon_freq  # coupon_frequency_int
 #             )
 
-#             print(f"Coupon rate: {coupon_rate}")
-#             coupon = self._notional * coupon_rate * year_fraction_for_coupon
+#             print(f"Coupon rate: {coupon}")
+#             coupon = self._notional * coupon * year_fraction_for_coupon
 #             if coupon > 0.0:
 #                 cashflows.append((payment_date_dt, coupon))
 
-#             self._coupon_rates.append((period_start_dt, payment_date_dt, coupon_rate))
+#             self._coupons.append((period_start_dt, payment_date_dt, coupon))
 
 #         # Add notional at maturity date (which is the last date in the schedule)
 #         maturity_payment_date = _date_to_datetime(self._maturity_date)
@@ -2415,15 +2434,15 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 #         """
 #         val_date_dt = _date_to_datetime(valuation_date)
 
-#         if (val_date_dt < self._coupon_rates[0][0]) or (val_date_dt > self._coupon_rates[-1][1]):
-#             raise ValueError(f" Valuation date {val_date_dt} is out of bonds {self._coupon_rates[0][0]} / {self._coupon_rates[-1][1]}")
+#         if (val_date_dt < self._coupons[0][0]) or (val_date_dt > self._coupons[-1][1]):
+#             raise ValueError(f" Valuation date {val_date_dt} is out of bonds {self._coupons[0][0]} / {self._coupons[-1][1]}")
 
 #         coupon_frequency = self._get_coupon_frequency()
 
-#         for dt_start, dt_end, coupon_rate in self._coupon_rates:
+#         for dt_start, dt_end, coupon in self._coupons:
 #             if dt_start <= val_date_dt < dt_end:
 #                 accrued_year_fraction = self._accrual_day_counter.yf(dt_start, val_date_dt, self.__schedule_dates, coupon_frequency)
-#                 return self._notional * coupon_rate * accrued_year_fraction
+#                 return self._notional * coupon * accrued_year_fraction
 
 #     def compute_clean_price(self, discount_curve):
 #         return super().compute_clean_price(discount_curve)

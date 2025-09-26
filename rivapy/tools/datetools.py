@@ -1392,6 +1392,12 @@ def roll_day(
         return roll_func(day, calendar)
 
 
+def serialize_date(val):
+    if isinstance(val, (datetime, date)):
+        return val.isoformat()
+    return val
+
+
 # class PowerSchedule:
 #     def __init__(self,
 #                  start_day: _Union[date, datetime],
