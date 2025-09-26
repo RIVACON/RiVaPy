@@ -51,7 +51,7 @@ class DeterministicCashflowPricer:
     def get_expected_cashflows(
         spec: DeterministicCashflowBondSpecification,
         val_date: _Union[datetime.date, datetime, None] = None,
-        curve: _Union[DiscountCurve, None] = None,
+        fwd_curve: _Union[DiscountCurve, None] = None,
     ) -> List[Tuple[datetime, float]]:
         """
         Calculate the expected cashflows for a deterministic cashflow instrument.
@@ -73,9 +73,9 @@ class DeterministicCashflowPricer:
             for d1, d2 in zip(dates[:-1], dates[1:]):
                 payment_date = roll_day(d2, spec._calendar, spec._business_day_convention, settle_days=spec._payment_days)
                 if spec._coupon_type == "float":
-                    if val_date is None or curve is None:
-                        raise ValueError("val_date and curve must be provided for floating rate cashflow calculation.")
-                    rate = DeterministicCashflowPricer.get_float_rate(spec, val_date, d1, d2, curve)
+                    if val_date is None or fwd_curve is None:
+                        raise ValueError("val_date and fwd_curve must be provided for floating rate cashflow calculation.")
+                    rate = DeterministicCashflowPricer.get_float_rate(spec, val_date, d1, d2, fwd_curve)
                 else:
                     rate = spec._coupon
                 amount = spec._notional * rate * dcc.yf(d1, d2)
@@ -112,12 +112,12 @@ class DeterministicCashflowPricer:
             float: The floating rate for the given period, including margin.
         """
         if specification._index is not None:  # For the first period, check if we have a fixing rate or if d1 is before curve date
-            spot_lag = InterestRateIndex(specification._index).value.spot_lag
+            spot_days = InterestRateIndex(specification._index).value.spot_days
         else:
-            spot_lag = specification._spot_lag
+            spot_days = specification._spot_days
         fixing_date = calc_start_day(
             d1,
-            f"{spot_lag}D",
+            f"{spot_days}D",
             business_day_convention=specification._business_day_convention,
             calendar=specification._calendar,
         )

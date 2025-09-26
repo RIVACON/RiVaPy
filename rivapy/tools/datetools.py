@@ -815,7 +815,10 @@ def _string_to_period(term: str) -> Period:
         return Period(days=1)
     else:
         unit = term[-1]
-        measure = int(term[:-1])
+        try:
+            measure = int(term[:-1])
+        except ValueError:
+            measure = 0
         if unit.upper() == "D":
             period = Period(0, 0, measure)
         elif unit.upper() == "M":

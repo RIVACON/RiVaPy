@@ -75,7 +75,7 @@ def make_deposit_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_H
         day_count_convention=row["DayCountFloat"],
         business_day_convention=row["RollConventionFloat"],
         # roll_convention: _Union[RollRule, str] = RollRule.EOM, # leave as default
-        spot_lag=int(row["SpotLag"][:-1]),  # make assumption it is always given in DAYS convert -> int
+        spot_days=int(row["SpotLag"][:-1]),  # make assumption it is always given in DAYS convert -> int
         calendar=calendar,
         issuer="dummy_issuer",
         securitization_level="NONE",
@@ -133,7 +133,7 @@ def make_fra_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Holid
         calendar=calendar,
         currency=row["Currency"],
         # payment_days: int = 0,
-        spot_lag=int(row["SpotLag"][:-1]),
+        spot_days=int(row["SpotLag"][:-1]),
         # start_period: int = None,
         # end_period: int = None,
         # index_alias: str = None,

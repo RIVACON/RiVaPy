@@ -51,7 +51,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         currency: _Union[Currency, str] = "EUR",
         # ex_settle: int =0,
         payment_days: int = 0,
-        spot_lag: int = 2,
+        spot_days: int = 2,
         start_period: int = None,
         # _Optional[_Union[Period, str]] = None,
         end_period: int = None,
@@ -94,7 +94,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
                                                           (= Target2 calendar) between start_day and end_day.
             currency (str, optional): Currency as alphabetic, Defaults to 'EUR'.
             payment_days (int): Number of days for payment after the start date. Defaults to 0.
-            spot_lag (int): time difference between fixing date and start dategiven in days.
+            spot_days (int): time difference between fixing date and start dategiven in days.
             start_period (int): forward start period given in months e.g. 1 from 1Mx4M
             end_period (int): forward end period given in months e.g. 4 from 1Mx4M
             index_alias (str): ID of the underlying Index rate used for the floating rate for fixing.
@@ -128,8 +128,8 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         self._currency = currency
         # self.ex_settle = ex_settle
         # self.trade_settle = trade_settle
-        self._fixing_date = calc_start_day(self._start_date, f"{spot_lag}D", self._business_day_convention, self._calendar)
-        self._spot_lag = spot_lag
+        self._fixing_date = calc_start_day(self._start_date, f"{spot_days}D", self._business_day_convention, self._calendar)
+        self._spot_days = spot_days
 
         # if start_period is not None:
         self.start_period = start_period
@@ -158,9 +158,9 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
 
         # if trade date, spotlag, startperiod,endperiod give, then recalcualte start_datet etc...
         # TODO: get clarification on roll_day function
-        if trade_date and spot_lag and start_period and end_period:
+        if trade_date and spot_days and start_period and end_period:
             spot_date = roll_day(
-                day=trade_date + timedelta(days=spot_lag),  # need holiday
+                day=trade_date + timedelta(days=spot_days),  # need holiday
                 calendar=self.calendar,
                 business_day_convention=self.rate_business_day_convention,
                 start_day=None,
@@ -218,7 +218,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
             maturity_date = ref_date + timedelta(days=days)
             start_date = ref_date + relativedelta(months=np.random.randint(low=1, high=3))
             end_date = start_date + relativedelta(months=np.random.choice([3, 6]))
-            # spot_lag=2, fixing pre_lag =2
+            # spot_days=2, fixing pre_lag =2
             result.append(
                 ForwardRateAgreementSpecification(
                     obj_id=f"Deposit_{_}",
@@ -237,7 +237,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
                     # "rate_business_day_convention": self.rate_business_day_convention,
                     calendar=_ECB(years=range(trade_date.year, maturity_date.year + 1)),
                     currency=np.random.choice(currencies),
-                    # "spot_lag": self.spot_lag, # not needed if start dates given
+                    # "spot_days": self.spot_days, # not needed if start dates given
                     # "start_period": self.start_period,
                     # "end_period": self.end_period,
                     issuer=np.random.choice(issuers),
@@ -269,7 +269,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
             "calendar": getattr(self.calendar, "name", self.calendar.__class__.__name__),
             "currency": self.currency,
             "payment_days": self.payment_days,
-            "spot_lag": self.spot_lag,
+            "spot_days": self.spot_days,
             "start_period": self.start_period,
             "end_period": self.end_period,
             "issuer": self.issuer,
@@ -594,13 +594,13 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         self._rate_business_day_convention = DayCounterType.to_string(business_day_convention)
 
     @property
-    def spot_lag(self) -> int:
+    def spot_days(self) -> int:
         """Getter for the spot lag given in days
 
         Returns:
             float: _description_
         """
-        return self._spot_lag
+        return self._spot_days
 
     @property
     def start_period(self) -> int:

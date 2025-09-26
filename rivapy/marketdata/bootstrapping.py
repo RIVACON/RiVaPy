@@ -162,10 +162,10 @@ from rivapy.pricing.interest_rate_swap_pricing import InterestRateSwapPricer
 
 #         return fra
 
-#     def get_float_leg(self, pay_freq, reset_freq, roll_conv, spot_lag="0D"):  # TODO
+#     def get_float_leg(self, pay_freq, reset_freq, roll_conv, spot_days="0D"):  # TODO
 
 #         # get swap leg schedule
-#         flt_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_lag)
+#         flt_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_days)
 
 #         # get start dates
 #         flt_start_dates = flt_schedule[:-1]
@@ -175,7 +175,7 @@ from rivapy.pricing.interest_rate_swap_pricing import InterestRateSwapPricer
 #         flt_pay_dates = flt_end_dates
 
 #         # get reset dates
-#         flt_reset_schedule = get_schedule(self.refDate, self.maturity, reset_freq, roll_conv, self.holidays, spot_lag)
+#         flt_reset_schedule = get_schedule(self.refDate, self.maturity, reset_freq, roll_conv, self.holidays, spot_days)
 #         flt_reset_dates = flt_reset_schedule[:-1]
 
 #         flt_notionals = [1.0 for _ in range(len(flt_start_dates))]
@@ -184,9 +184,9 @@ from rivapy.pricing.interest_rate_swap_pricing import InterestRateSwapPricer
 #         )
 #         return floatleg
 
-#     def get_fix_leg(self, pay_freq, roll_conv, spot_lag="0D"):  # TODO
+#     def get_fix_leg(self, pay_freq, roll_conv, spot_days="0D"):  # TODO
 #         # get fix leg schedule
-#         fix_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_lag)
+#         fix_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_days)
 #         fix_start_dates = fix_schedule[:-1]
 #         fix_end_dates = fix_schedule[1:]
 #         fix_pay_dates = fix_end_dates

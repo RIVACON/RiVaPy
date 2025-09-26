@@ -311,10 +311,10 @@ class InstrumentSpec:
 
         return fra
 
-    def get_float_leg(self, pay_freq, reset_freq, roll_conv, spot_lag="0D"):
+    def get_float_leg(self, pay_freq, reset_freq, roll_conv, spot_days="0D"):
 
         # get swap leg schedule
-        flt_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_lag)
+        flt_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_days)
 
         # get start dates
         flt_start_dates = flt_schedule[:-1]
@@ -324,7 +324,7 @@ class InstrumentSpec:
         flt_pay_dates = flt_end_dates
 
         # get reset dates
-        flt_reset_schedule = get_schedule(self.refDate, self.maturity, reset_freq, roll_conv, self.holidays, spot_lag)
+        flt_reset_schedule = get_schedule(self.refDate, self.maturity, reset_freq, roll_conv, self.holidays, spot_days)
         flt_reset_dates = flt_reset_schedule[:-1]
 
         flt_notionals = [1.0 for _ in range(len(flt_start_dates))]
@@ -333,9 +333,9 @@ class InstrumentSpec:
         )
         return floatleg
 
-    def get_fix_leg(self, pay_freq, roll_conv, spot_lag="0D"):
+    def get_fix_leg(self, pay_freq, roll_conv, spot_days="0D"):
         # get fix leg schedule
-        fix_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_lag)
+        fix_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_days)
         fix_start_dates = fix_schedule[:-1]
         fix_end_dates = fix_schedule[1:]
         fix_pay_dates = fix_end_dates
@@ -354,12 +354,12 @@ class Instrument:
     FRA = "FRA"
 
 
-def get_schedule(ref_date, term, tenor, roll_conv, holidays, spot_lag="0D", stub_period=False):
+def get_schedule(ref_date, term, tenor, roll_conv, holidays, spot_days="0D", stub_period=False):
     """
     Generates a schedule starting with refDate + spotLag
     """
     # calc schedule start & end dates
-    start = get_end_date(ref_date, spot_lag)
+    start = get_end_date(ref_date, spot_days)
     end = get_end_date(start, term)
 
     # calc schedule period

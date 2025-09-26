@@ -267,7 +267,7 @@ class TestGetQuote(unittest.TestCase):
             day_count_convention="Act360",
             rate_day_count_convention="Act360",
             currency="EUR",
-            spot_lag=1,
+            spot_days=1,
             payment_days=1,
             issuer="dummy_issuer",
             securitization_level="NONE",
@@ -444,7 +444,7 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
             day_count_convention=self.day_count,
             rate_day_count_convention=self.day_count,
             currency="EUR",
-            spot_lag=1,
+            spot_days=1,
             payment_days=1,
             issuer="dummy_issuer",
             securitization_level="NONE",
@@ -592,7 +592,7 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
             day_count_convention=self.day_count,
             rate_day_count_convention=self.day_count,
             currency="EUR",
-            spot_lag=1,
+            spot_days=1,
             payment_days=1,
             issuer="dummy_issuer",
             securitization_level="NONE",
@@ -1412,7 +1412,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
             day_count_convention=floatDayCount,
             business_day_convention=rollConvFloat,
             # roll_convention: _Union[RollRule, str] = RollRule.EOM, # leave as default
-            spot_lag=int(spotLag[:-1]),  # make assumption it is always given in DAYS convert -> int
+            spot_days=int(spotLag[:-1]),  # make assumption it is always given in DAYS convert -> int
             calendar=holidays,
             issuer="dummy_issuer",
             securitization_level="NONE",
@@ -1484,7 +1484,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
             start_day=spot_date, end_day=expiry, time_period=fixPayFreq, business_day_convention=rollConvFix, calendar=holidays, ref_date=refDate
         ).generate_dates(False)
 
-        # fix_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_lag)
+        # fix_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_days)
         fix_start_dates = fix_schedule[:-1]
         fix_end_dates = fix_schedule[1:]
         fix_pay_dates = fix_end_dates
@@ -1498,7 +1498,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
             ref_date=refDate,
         ).generate_dates(False)
 
-        # flt_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_lag)
+        # flt_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_days)
         flt_start_dates = flt_schedule[:-1]
         flt_end_dates = flt_schedule[1:]
         flt_pay_dates = flt_end_dates
@@ -1507,7 +1507,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
             start_day=spot_date, end_day=expiry, time_period=tenor, business_day_convention=rollConvFloat, calendar=holidays, ref_date=refDate
         ).generate_dates(False)
 
-        # flt_reset_schedule = get_schedule(self.refDate, self.maturity, reset_freq, roll_conv, self.holidays, spot_lag)
+        # flt_reset_schedule = get_schedule(self.refDate, self.maturity, reset_freq, roll_conv, self.holidays, spot_days)
         flt_reset_dates = flt_reset_schedule[:-1]
 
         print(flt_reset_dates)
@@ -1615,7 +1615,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
             start_day=spot_date, end_day=expiry, time_period=fixPayFreq, business_day_convention=rollConvFix, calendar=holidays, ref_date=refDate
         ).generate_dates(False)
 
-        # fix_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_lag)
+        # fix_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_days)
         fix_start_dates = fix_schedule[:-1]
         fix_end_dates = fix_schedule[1:]
         fix_pay_dates = fix_end_dates
@@ -1715,7 +1715,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         # these inputs must be given by user
         refDate = datetime(2019, 4, 1)
         holidays = _ECB()
-        # spot_lag = 2
+        # spot_days = 2
         start_date = datetime(2019, 4 + 3, 3)
         end_date = datetime(2019, 4 + 3 + 3, 3)
         label = input_data["Instrument"] + "_" + input_data["Maturity"]
@@ -1738,7 +1738,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
             calendar=holidays,
             currency=input_data["Currency"],
             # payment_days: int = 0,
-            spot_lag=int(input_data["SpotLag"][:-1]),
+            spot_days=int(input_data["SpotLag"][:-1]),
             # start_period: int = None,
             # end_period: int = None,
             # index_alias: str = None,
@@ -1858,7 +1858,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         min_i = 0
         max_i = 18  # 19-25 problematic?
         min_i2 = 26
-        max_i2 = len(df_ins) 
+        max_i2 = len(df_ins)
         ins_spec = sfc.load_specifications_from_pd(df_ins.iloc[np.r_[min_i:max_i, min_i2:max_i2]], refDate, holidays)
         # ins_quotes = df_ins["Quote"].tolist()[min_i:max_i]
         ins_quotes = df_ins["Quote"].tolist()[min_i:max_i] + df_ins["Quote"].tolist()[min_i2:max_i2]
@@ -1872,8 +1872,6 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         # print(len(df_ins.iloc[np.r_[min_i:max_i, min_i2:max_i2]]))
         # for i in range(len(ins_quotes)):
         #     print(i, ins_quotes[i])
-
-
 
         print("--------------Starting bootstrapper")
         curve = bootstrap_curve(

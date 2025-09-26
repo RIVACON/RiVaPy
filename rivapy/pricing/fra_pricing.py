@@ -108,7 +108,8 @@ class ForwardRateAgreementPricer:
             float: The present value of the FRA.
         """
         expected_cashflows = ForwardRateAgreementPricer.get_expected_cashflows(specification, val_date, forward_curve)
-        price = DeterministicCashflowPricer.get_pv_cashflows(val_date, specification, discount_curve, expected_cashflows)
+        price = discount_curve.value(val_date, expected_cashflows[0][0]) * expected_cashflows[0][1]
+        # DeterministicCashflowPricer.get_pv_cashflows(val_date, specification, discount_curve, expected_cashflows)
         return price
 
     def price(self):
