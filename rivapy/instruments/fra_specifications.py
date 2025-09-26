@@ -1,9 +1,10 @@
 from abc import abstractmethod as _abstractmethod
-from typing import List as _List, Union as _Union, Tuple
+from typing import List as _List, Union as _Union, Tuple, Optional as _Optional
 import numpy as np
 from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
 from holidays import HolidayBase as _HolidayBase, ECB as _ECB
+from rivapy.instruments.components import Issuer
 from rivapy.tools.datetools import Period, Schedule, _date_to_datetime, _datetime_to_date_list, _term_to_period, roll_day, calc_start_day
 from rivapy.tools.enums import (
     DayCounterType,
@@ -46,7 +47,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         # _Optional[_Union[Period, str]] = None,
         end_period: int = None,
         index_alias: str = None,
-        issuer: str = None,
+        issuer: _Optional[_Union[Issuer, str]] = None,
         securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
         rating: _Union[Rating, str] = Rating.NONE,
     ):

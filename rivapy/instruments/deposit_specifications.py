@@ -7,29 +7,39 @@ from abc import abstractmethod as _abstractmethod
 from typing import List as _List, Union as _Union, Tuple, Optional as _Optional
 import numpy as np
 import logging
-from rivapy.instruments import HasExpectedCashflows
+from rivapy.instruments.bond_specifications import DeterministicCashflowBondSpecification
 from datetime import datetime, date, timedelta
 from holidays import HolidayBase as _HolidayBase
 from holidays import EuropeanCentralBank as _ECB
 from dateutil.relativedelta import relativedelta
-from rivapy.tools.datetools import Period, _date_to_datetime, _term_to_period, calc_end_day, calc_start_day, roll_day, next_or_previous_business_day
+from rivapy.instruments.components import Issuer
+from rivapy.tools.datetools import (
+    Period,
+    _date_to_datetime,
+    _term_to_period,
+    calc_end_day,
+    calc_start_day,
+    roll_day,
+    next_or_previous_business_day,
+    is_business_day,
+)
 from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating, RollRule, Instrument
 
 import rivapy.tools.interfaces as interfaces
-from rivapy.tools.datetools import Period, is_business_day
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-class DepositSpecification(HasExpectedCashflows):
+class DepositSpecification(DeterministicCashflowBondSpecification):
 
     def __init__(
         self,
         obj_id: str,
+        issue_date: _Optional[_Union[date, datetime]] = None,
         fixing_date: _Optional[_Union[date, datetime]] = None,
-        end_date: _Optional[_Union[date, datetime]] = None,
         start_date: _Optional[_Union[date, datetime]] = None,
+        end_date: _Optional[_Union[date, datetime]] = None,
         maturity_date: _Optional[_Union[date, datetime]] = None,
         currency: _Union[Currency, str] = "EUR",
         notional: float = 100.0,
@@ -40,7 +50,7 @@ class DepositSpecification(HasExpectedCashflows):
         roll_convention: _Union[RollRule, str] = RollRule.EOM,
         spot_lag: int = 2,
         calendar: _Union[_HolidayBase, str] = _ECB(),
-        issuer: _Optional[str] = None,
+        issuer: _Optional[_Union[Issuer, str]] = None,
         securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
         payment_days: int = 0,
         adjust_start_date: bool = True,
@@ -156,6 +166,8 @@ class DepositSpecification(HasExpectedCashflows):
             )
         else:
             raise ValueError("Either fixing_date or start_date must be provided.")
+        if issue_date is None:
+            issue_date = sd
         # checking and setting end date
         if end_date is not None and (not adjust_end_date or is_business_day(end_date, calendar=calendar)):
             ed = end_date
@@ -207,13 +219,14 @@ class DepositSpecification(HasExpectedCashflows):
             obj_id=obj_id,
             first_fixing_date=fd,
             spot_lag=spd,
+            issue_date=issue_date,
             start_date=sd,
             end_date=ed,
             maturity_date=md,
             notional=notional,
             currency=currency,
             coupon=rate,
-            tenor=t,
+            frequency=t,
             day_count_convention=day_count_convention,
             business_day_convention=business_day_convention,
             roll_convention=roll_convention,
@@ -272,9 +285,9 @@ class DepositSpecification(HasExpectedCashflows):
             "spot_days": self._spot_days,
             "business_day_convention": self.business_day_convention,
             "issuer": self.issuer,
-            "securitization_level": self.securitization_level,
-            "securitization_level_str": SecuritizationLevel.to_string(self.securitization_level),
-            "payment_days": self.payment_days,
+            "securitization_level": self._securitization_level,
+            "securitization_level_str": SecuritizationLevel.to_string(self._securitization_level),
+            "payment_days": self._payment_days,
         }
         return result
 

@@ -10,7 +10,7 @@ import numpy as np
 from rivapy.instruments.fra_specifications import ForwardRateAgreementSpecification
 from rivapy.marketdata.curves import DiscountCurve
 from rivapy.pricing.fra_pricing import ForwardRateAgreementPricer
-from rivapy.pricing.bond_pricing import SimpleCashflowPricer
+from rivapy.pricing.bond_pricing import DeterministicCashflowPricer
 from rivapy.tools.datetools import DayCounter, roll_day
 from rivapy.tools.enums import (
     DayCounterType,

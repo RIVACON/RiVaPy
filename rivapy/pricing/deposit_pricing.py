@@ -4,11 +4,11 @@ from rivapy.pricing.pricing_request import PricingRequest
 from rivapy.pricing._logger import logger
 from rivapy.instruments.deposit_specifications import DepositSpecification
 from rivapy.tools.datetools import DayCounter
-from rivapy.pricing.bond_pricing import SimpleCashflowPricer
+from rivapy.pricing.bond_pricing import DeterministicCashflowPricer
 from typing import Tuple, Union as _Union, List as _List
 
 
-class DepositPricer(SimpleCashflowPricer):
+class DepositPricer(DeterministicCashflowPricer):
 
     def __init__(
         self,
@@ -43,7 +43,7 @@ class DepositPricer(SimpleCashflowPricer):
         Returns:
             List[Tuple[datetime, float]]: The expected cashflows of the deposit.
         """
-        return SimpleCashflowPricer.expected_cashflows(self._spec, self._val_date)
+        return DeterministicCashflowPricer.expected_cashflows(self._spec, self._val_date)
 
     @staticmethod
     def get_expected_cashflows(
@@ -60,9 +60,9 @@ class DepositPricer(SimpleCashflowPricer):
             List[Tuple[datetime, float]]: The expected cashflows of the deposit.
         """
         if val_date is None:
-            return SimpleCashflowPricer.get_expected_cashflows(specification)
+            return DeterministicCashflowPricer.get_expected_cashflows(specification)
         else:
-            return SimpleCashflowPricer.get_expected_cashflows(specification, val_date)
+            return DeterministicCashflowPricer.get_expected_cashflows(specification, val_date)
 
     def price(self) -> float:
         """Get the price of the deposit.
@@ -80,7 +80,7 @@ class DepositPricer(SimpleCashflowPricer):
            float: present value of a deposit based on simple compounding
         """
 
-        return SimpleCashflowPricer.get_pv_cashflows(val_date, specification, discount_curve)
+        return DeterministicCashflowPricer.get_pv_cashflows(val_date, specification, discount_curve)
 
     def implied_simply_compounded_rate(self) -> float:
         """Get the implied simply compounded rate of the deposit.

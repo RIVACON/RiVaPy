@@ -133,7 +133,7 @@ def _add_period_brace(ax, x1, x2, label, y_levels, timeline_y, y_base=-0.2, y_st
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.dates import date2num, DateFormatter
-from rivapy.pricing.bond_pricing import SimpleCashflowPricer
+from rivapy.pricing.bond_pricing import DeterministicCashflowPricer
 from rivapy.instruments import DepositSpecification, ForwardRateAgreementSpecification
 from rivapy.tools.datetools import Period, _date_to_datetime, _term_to_period, _string_to_calendar, DayCounter, Schedule, roll_day
 
@@ -258,9 +258,9 @@ def plot_deposit(spec: DepositSpecification, val_date) -> plt.Figure:
         periods.append(("Mon Accrual Period", spec.end_date, spec.maturity_date))
     if spec.maturity_date != payment_date:
         periods.append(("Payment Lag)", spec.maturity_date, payment_date))
-    from rivapy.pricing.bond_pricing import SimpleCashflowPricer
+    from rivapy.pricing.bond_pricing import DeterministicCashflowPricer
 
-    cashflows = SimpleCashflowPricer.get_expected_cashflows(spec, val_date)
+    cashflows = DeterministicCashflowPricer.get_expected_cashflows(spec, val_date)
     return plot_timeline_and_cf(relevant_dates, periods, cashflows)
 
 

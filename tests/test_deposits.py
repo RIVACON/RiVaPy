@@ -73,7 +73,7 @@ class TestDepositSpecification(TestCase):
         dep = DepositSpecification(obj_id="dep_6m", start_date=start, term="6M", rate=0.05, notional=1000.0, day_count_convention="30E360")
         self.assertEqual(
             DepositPricer.get_expected_cashflows(specification=dep),
-            [(dt.datetime(2024, 7, 2), 25.0), (dt.datetime(2024, 1, 2), -1000.0), (dt.datetime(2024, 7, 2), 1000.0)],
+            [(dt.datetime(2024, 1, 2), -1000.0), (dt.datetime(2024, 7, 2), 25.0), (dt.datetime(2024, 7, 2), 1000.0)],
         )
 
     def test_get_implied_simply_compounded_rate(self):
