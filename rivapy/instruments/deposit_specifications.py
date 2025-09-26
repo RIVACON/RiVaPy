@@ -36,6 +36,7 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
     def __init__(
         self,
         obj_id: str,
+        issue_date: _Optional[_Union[date, datetime]] = None,
         fixing_date: _Optional[_Union[date, datetime]] = None,
         start_date: _Optional[_Union[date, datetime]] = None,
         end_date: _Optional[_Union[date, datetime]] = None,
@@ -142,7 +143,6 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
 
         # checking and setting start date
         if start_date is not None:
-            issue_date = start_date
             if not is_business_day(start_date, calendar=calendar) and adjust_start_date:
                 sd = roll_day(start_date, calendar=calendar, business_day_convention=business_day_convention)
                 logger.info(
@@ -158,16 +158,16 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
                 calendar=calendar,
                 roll_convention=roll_convention,
             )
-            issue_date = sd
             logger.info("Set start_date, " + str(sd) + ", to fixing_date adjusted by spot_days and business_day_convention:" + str(sd))
         elif fixing_date is not None:
             sd = fd + timedelta(days=spd)
             logger.info(
                 "Set start_date to fixing_date, " + str(fd) + ", adjusted by spot_days without business day adjustment (i.e. unadjusted): " + str(sd)
             )
-            issue_date = sd
         else:
             raise ValueError("Either fixing_date or start_date must be provided.")
+        if issue_date is None:
+            issue_date = sd
         # checking and setting end date
         if end_date is not None and (not adjust_end_date or is_business_day(end_date, calendar=calendar)):
             ed = end_date
@@ -285,9 +285,9 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
             "spot_days": self._spot_days,
             "business_day_convention": self.business_day_convention,
             "issuer": self.issuer,
-            "securitization_level": self.securitization_level,
-            "securitization_level_str": SecuritizationLevel.to_string(self.securitization_level),
-            "payment_days": self.payment_days,
+            "securitization_level": self._securitization_level,
+            "securitization_level_str": SecuritizationLevel.to_string(self._securitization_level),
+            "payment_days": self._payment_days,
         }
         return result
 

@@ -56,14 +56,16 @@ class BondBaseSpecification(interfaces.FactoryObject):
         """
         self.obj_id = obj_id
         if issuer is not None:
-            self.issuer = issuer
+            self._issuer = issuer
+        else:
+            self._issuer = "Unknown"
         if securitization_level is not None:
-            self.securitization_level = securitization_level
-        self.issue_date = issue_date
-        self.maturity_date = maturity_date
-        self.currency = currency
-        self.notional = notional
-        self.rating = Rating.to_string(rating)
+            self._securitization_level = securitization_level
+        self._issue_date = issue_date
+        self._maturity_date = maturity_date
+        self._currency = currency
+        self._notional = notional
+        self._rating = Rating.to_string(rating)
         # validate dates
         self._validate_derived_issued_instrument()
 
@@ -100,7 +102,7 @@ class BondBaseSpecification(interfaces.FactoryObject):
         return result
 
     def _validate_derived_issued_instrument(self):
-        self.__issue_date, self.__maturity_date = _check_start_before_end(self.__issue_date, self.__maturity_date)
+        self._issue_date, self._maturity_date = _check_start_before_end(self._issue_date, self._maturity_date)
 
     def _to_dict(self) -> dict:
         result = {
@@ -125,7 +127,7 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Returns:
             str: Instrument's issuer.
         """
-        return self.__issuer
+        return self._issuer
 
     @issuer.setter
     def issuer(self, issuer: str):
@@ -135,15 +137,15 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Args:
             issuer(str): Issuer of the instrument.
         """
-        self.__issuer = issuer
+        self._issuer = issuer
 
     @property
     def rating(self) -> str:
-        return self.__rating
+        return self._rating
 
     @rating.setter
     def rating(self, rating: _Union[Rating, str]) -> str:
-        self.__rating = Rating.to_string(rating)
+        self._rating = Rating.to_string(rating)
 
     @property
     def securitization_level(self) -> str:
@@ -153,11 +155,11 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Returns:
             str: Instrument's securitisation level.
         """
-        return self.__securitization_level
+        return self._securitization_level
 
     @securitization_level.setter
     def securitization_level(self, securitisation_level: _Union[SecuritizationLevel, str]):
-        self.__securitization_level = SecuritizationLevel.to_string(securitisation_level)
+        self._securitization_level = SecuritizationLevel.to_string(securitisation_level)
 
     @property
     def issue_date(self) -> date:
@@ -167,7 +169,7 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Returns:
             date: Bond's issue date.
         """
-        return self.__issue_date
+        return self._issue_date
 
     @issue_date.setter
     def issue_date(self, issue_date: _Union[datetime, date]):
@@ -177,7 +179,7 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Args:
             issue_date (Union[datetime, date]): Bond's issue date.
         """
-        self.__issue_date = _date_to_datetime(issue_date)
+        self._issue_date = _date_to_datetime(issue_date)
 
     @property
     def maturity_date(self) -> date:
@@ -187,7 +189,7 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Returns:
             date: Bond's maturity date.
         """
-        return self.__maturity_date
+        return self._maturity_date
 
     @maturity_date.setter
     def maturity_date(self, maturity_date: _Union[datetime, date]):
@@ -197,7 +199,7 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Args:
             maturity_date (Union[datetime, date]): Bond's maturity date.
         """
-        self.__maturity_date = _date_to_datetime(maturity_date)
+        self._maturity_date = _date_to_datetime(maturity_date)
 
     @property
     def currency(self) -> str:
@@ -207,11 +209,11 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Returns:
             str: Bond's ISO 4217 currency code
         """
-        return self.__currency
+        return self._currency
 
     @currency.setter
     def currency(self, currency: str):
-        self.__currency = Currency.to_string(currency)
+        self._currency = Currency.to_string(currency)
 
     @property
     def notional(self) -> float:
@@ -221,11 +223,11 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Returns:
             float: Bond's face value.
         """
-        return self.__notional
+        return self._notional
 
     @notional.setter
     def notional(self, notional):
-        self.__notional = _check_positivity(notional)
+        self._notional = _check_positivity(notional)
 
     # endregion
 
