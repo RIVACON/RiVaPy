@@ -212,7 +212,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
             currencies = list(Currency)
         if sec_levels is None:
             sec_levels = list(SecuritizationLevel)
-        for _ in range(n_samples):
+        for i in range(n_samples):
             days = int(15.0 * 365.0 * np.random.beta(2.0, 2.0)) + 1
             trade_date = ref_date + timedelta(days=np.random.randint(low=-365, high=0))
             maturity_date = ref_date + timedelta(days=days)
@@ -221,7 +221,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
             # spot_days=2, fixing pre_lag =2
             result.append(
                 ForwardRateAgreementSpecification(
-                    obj_id=f"Deposit_{_}",
+                    obj_id=f"Deposit_{i}",
                     trade_date=trade_date,
                     maturity_date=maturity_date,
                     notional=np.random.choice([100.0, 1000.0, 10_000.0, 100_0000.0]),

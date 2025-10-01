@@ -564,6 +564,15 @@ class ConstantRate(interfaces.FactoryObject):
             result.append(ConstantRate(rate=np.random.uniform(-0.005, 0.1)))
         return result
 
+    def value(self, refdate: Union[date, datetime], d: Union[date, datetime]) -> float:
+        if not isinstance(refdate, datetime):
+            refdate = datetime(refdate, 0, 0, 0)
+        if not isinstance(d, datetime):
+            d = datetime(d, 0, 0, 0)
+        r = self.rate
+        yf = DayCounter(DayCounterType.Act365Fixed).yf(refdate, d)
+        return np.exp(-r * yf)
+
     def __call__(self, t: float, refdate: Union[date, datetime] = None, d: Union[date, datetime] = None):
         return self.rate
 

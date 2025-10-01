@@ -1,9 +1,10 @@
 from abc import abstractmethod as _abstractmethod
+from locale import currency
 from typing import List as _List, Union as _Union, Tuple, Dict
 import numpy as np
 from datetime import datetime, date, timedelta
 from holidays import HolidayBase as _HolidayBase, ECB as _ECB
-from rivapy.tools.datetools import Period, Schedule, _date_to_datetime, _datetime_to_date_list, _term_to_period
+from rivapy.tools.datetools import Period, Schedule, _date_to_datetime, _datetime_to_date_list, _term_to_period, serialize_date
 from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating, Instrument
 from rivapy.tools._validators import _check_positivity, _check_start_before_end, _string_to_calendar, _is_ascending_date_list
 import rivapy.tools.interfaces as interfaces
@@ -557,7 +558,7 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
     @staticmethod  # TODO
     def _create_sample(
         n_samples: int, seed: int = None, ref_date=None, issuers: _List[str] = None, sec_levels: _List[str] = None, currencies: _List[str] = None
-    ) -> _List[dict]:
+    ) -> _List["InterestRateSwapSpecification"]:
         if seed is not None:
             np.random.seed(seed)
         if ref_date is None:
@@ -571,18 +572,19 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
             currencies = list(Currency)
         if sec_levels is None:
             sec_levels = list(SecuritizationLevel)
-        for _ in range(n_samples):
+        for i in range(n_samples):
             days = int(15.0 * 365.0 * np.random.beta(2.0, 2.0)) + 1
             issue_date = ref_date + timedelta(days=np.random.randint(low=-365, high=0))
             result.append(
-                {
-                    "issue_date": issue_date,
-                    "maturity_date": ref_date + timedelta(days=days),
-                    "currency": np.random.choice(currencies),
-                    "notional": np.random.choice([100.0, 1000.0, 10_000.0, 100_0000.0]),
-                    "issuer": np.random.choice(issuers),
-                    "securitization_level": np.random.choice(sec_levels),
-                }
+                InterestRateSwapSpecification(
+                    obj_id=f"IRS_{i}",
+                    issue_date=issue_date,
+                    maturity_date=ref_date + timedelta(days=days),
+                    currency=np.random.choice(currencies),
+                    notional=np.random.choice([100.0, 1000.0, 10_000.0, 100_0000.0]),
+                    issuer=np.random.choice(issuers),
+                    securitization_level=np.random.choice(sec_levels),
+                )
             )
         return result
 
@@ -594,14 +596,14 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
             "obj_id": self.obj_id,
             "issuer": self.issuer,
             "securitization_level": self.securitization_level,
-            "issue_date": self.issue_date,
-            "maturity_date": self.maturity_date,
+            "issue_date": serialize_date(self.issue_date),
+            "maturity_date": serialize_date(self.maturity_date),
             "currency": self.currency,
             "notional": self.notional_structure,
             "rating": self.rating,
             "receive_leg": self.receive_leg,
             "pay_leg": self.pay_leg,
-            "calendar": self.calendar,
+            "calendar": getattr(self.calendar, "name", self.calendar.__class__.__name__),
             "day_count_convention": self.day_count_convention,
             "business_day_convention": self.business_day_convention,
         }

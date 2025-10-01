@@ -256,12 +256,12 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
             currencies = list(Currency)
         if sec_levels is None:
             sec_levels = list(SecuritizationLevel)
-        for _ in range(n_samples):
+        for i in range(n_samples):
             days = int(15.0 * 365.0 * np.random.beta(2.0, 2.0)) + 1
             start_date = ref_date + timedelta(days=np.random.randint(low=-365, high=0))
             result.append(
                 DepositSpecification(
-                    obj_id=f"Deposit_{_}",
+                    obj_id=f"Deposit_{i}",
                     start_date=start_date,
                     maturity_date=ref_date + timedelta(days=days),
                     currency=np.random.choice(currencies),

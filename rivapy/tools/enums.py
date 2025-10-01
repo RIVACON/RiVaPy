@@ -544,7 +544,7 @@ class IRIndexMetadata:
     name: str
     currency: str
     tenor: str
-    spot_lag: int
+    spot_days: int
     business_day_convention: str
     roll_convention: str
     calendar: str
@@ -556,7 +556,7 @@ class InterestRateIndex(_MyEnum):
         name="EURIBOR 1M",
         currency="EUR",
         tenor="1M",
-        spot_lag=2,
+        spot_days=2,
         business_day_convention="ModifiedFollowing",
         roll_convention="EOM",
         calendar="TARGET",
@@ -566,17 +566,17 @@ class InterestRateIndex(_MyEnum):
         name="EURIBOR 3M",
         currency="EUR",
         tenor="3M",
-        spot_lag=2,
+        spot_days=2,
         business_day_convention="ModifiedFollowing",
         roll_convention="EOM",
         calendar="TARGET",
-        aliases=["EUR3M", " EUR 3M", "EURIBOR 3M"],
+        aliases=["EUR3M", " EUR 3M", "EURIBOR 3M", "EURIBOR_3M"],
     )
     EUR6M = IRIndexMetadata(
         name="EURIBOR 6M",
         currency="EUR",
         tenor="6M",
-        spot_lag=2,
+        spot_days=2,
         business_day_convention="ModifiedFollowing",
         roll_convention="EOM",
         calendar="TARGET",
@@ -586,7 +586,7 @@ class InterestRateIndex(_MyEnum):
         name="€STR",
         currency="EUR",
         tenor="O/N",
-        spot_lag=0,
+        spot_days=0,
         business_day_convention="Following",
         roll_convention="None",
         calendar="TARGET",
@@ -597,6 +597,8 @@ class InterestRateIndex(_MyEnum):
 def get_index_by_alias(alias: str) -> InterestRateIndex:
     alias = alias.strip().upper()
     for index in InterestRateIndex:
-        if alias in [a.upper() for a in index.value["aliases"]]:
+        value = index.value
+        aliases = [a.upper() for a in value.aliases]
+        if alias in aliases or alias == index.name.upper():
             return index
     raise ValueError(f"Unknown index alias: {alias}")

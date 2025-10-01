@@ -1,13 +1,13 @@
 from datetime import datetime, date
-from typing import List, Tuple, Union as _Union
+from typing import List, Tuple, Union as _Union, Optional as _Optional
 from scipy.optimize import brentq
-from rivapy.tools.enums import InterestRateIndex
+from rivapy.tools.enums import DayCounterType, InterestRateIndex
 from rivapy.tools.interfaces import BaseDatedCurve
 from rivapy.instruments.bond_specifications import DeterministicCashflowBondSpecification
 from rivapy.marketdata.curves import DiscountCurveComposition
 from rivapy.marketdata import DiscountCurveParametrized, ConstantRate
 from rivapy.pricing.pricing_request import PricingRequest
-from rivapy.pricing._logger import logger
+from rivapy.instruments._logger import logger
 from rivapy.marketdata.curves import DiscountCurve
 from rivapy.tools.datetools import Period, _date_to_datetime, _term_to_period, _string_to_calendar, DayCounter, Schedule, roll_day, calc_start_day
 from typing import Tuple, Union as _Union, List as _List
@@ -68,7 +68,13 @@ class DeterministicCashflowPricer:
         if spec._coupon_type != "zero":
             schedule = spec.get_schedule()
             # schedule for accrual periods rolled out
-            dates = schedule._roll_out(from_=spec._start_date, to_=spec._end_date, term=_term_to_period(spec._frequency))
+            dates = schedule._roll_out(
+                from_=spec._start_date if not spec._backwards else spec._end_date,
+                to_=spec._end_date if not spec._backwards else spec._start_date,
+                term=_term_to_period(spec._frequency),
+                long_stub=spec._stub_type_is_Long,
+                backwards=spec._backwards,
+            )
             dcc = DayCounter(spec.day_count_convention)
             for d1, d2 in zip(dates[:-1], dates[1:]):
                 payment_date = roll_day(d2, spec._calendar, spec._business_day_convention, settle_days=spec._payment_days)
@@ -78,7 +84,14 @@ class DeterministicCashflowPricer:
                     rate = DeterministicCashflowPricer.get_float_rate(spec, val_date, d1, d2, fwd_curve)
                 else:
                     rate = spec._coupon
-                amount = spec._notional * rate * dcc.yf(d1, d2)
+                nr = 0
+                if spec.day_count_convention == DayCounterType.ActActICMA.value:
+                    nr = spec.get_nr_annual_payments()
+                    if nr == 0:
+                        raise ValueError("Number of annual payments is zero. Please check the frequency setting in the bond specification.")
+                dcv = dcc.yf(d1, d2, dates, nr)
+
+                amount = spec._notional * rate * dcv
                 cashflows.append((payment_date, amount))
         if spec._notional_exchange:
             # add notional exchange at start and end date
@@ -267,13 +280,15 @@ class DeterministicCashflowPricer:
     # TODO: add accrued interest
     @staticmethod
     def get_compute_yield(
-        target_dirty_price: float, val_date: datetime, specification: DeterministicCashflowBondSpecification, discount_curve: DiscountCurve
+        target_dirty_price: float,
+        val_date: datetime,
+        specification: DeterministicCashflowBondSpecification,
     ) -> float:
         logger.info("Start computing bond z-spread for bond " + specification.obj_id + ", dirty price: " + str(target_dirty_price))
 
         def target_function(r: float) -> float:
-            dc = DiscountCurveParametrized(discount_curve, 1.0, ConstantRate(r))
-            price = DeterministicCashflowPricer.pv_cashflows(val_date, specification, dc)
+            dc = ConstantRate(r)
+            price = DeterministicCashflowPricer.get_pv_cashflows(val_date, specification, dc)
             logger.debug("Target function called with r: " + str(r) + ", price: " + str(price) + ", target_dirty_price: " + str(target_dirty_price))
             return price - target_dirty_price
 
@@ -282,10 +297,12 @@ class DeterministicCashflowPricer:
         return result
 
     @staticmethod
-    def get_z_spread(target_dirty_price: float, val_date: datetime, specification: DeterministicCashflowBondSpecification) -> float:
+    def get_z_spread(
+        target_dirty_price: float, val_date: datetime, specification: DeterministicCashflowBondSpecification, discount_curve: DiscountCurve
+    ) -> float:
         # logger.info('Start computing bond yield for bond ' + specification.obj_id + ', dirty price: ' + str(target_dirty_price))
         def target_function(r: float) -> float:
-            dc = DiscountCurveComposition()
+            dc = DiscountCurveComposition(discount_curve, ConstantRate(r))
             price = DeterministicCashflowPricer.pv_cashflows(val_date, specification, dc)
             logger.debug("Target function called with r: " + str(r) + ", price: " + str(price) + ", target_dirty_price: " + str(target_dirty_price))
             return price - target_dirty_price

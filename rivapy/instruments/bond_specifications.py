@@ -1,17 +1,20 @@
 import abc
 import calendar
 from turtle import fd
+from flask import logging
 import numpy as np
-
+from rivapy.instruments._logger import logger
 from rivapy.instruments.components import Issuer
 from rivapy.marketdata.fixing_table import FixingTable
 import rivapy.tools.interfaces as interfaces
 from scipy.optimize import brentq
+
 from collections import defaultdict
 from typing import Optional, Dict, Tuple, List as _List, Union as _Union, Optional as _Optional
 from dateutil.relativedelta import relativedelta
-from rivapy.tools.enums import Currency, Rating, SecuritizationLevel, RollConvention, InterestRateIndex
-from rivapy.tools.datetools import _date_to_datetime, Schedule, Period, DayCounterType, DayCounter
+from rivapy.tools.enums import Currency, Rating, SecuritizationLevel, RollConvention, InterestRateIndex, get_index_by_alias
+from rivapy.tools.datetools import _date_to_datetime, Schedule, Period, DayCounterType, DayCounter, _string_to_period
+from rivapy.instruments.components import NotionalStructure, ConstNotionalStructure, VariableNotionalStructure, ResettingNotionalStructure
 from rivapy.tools._validators import (
     _check_positivity,
     _check_start_before_end,
@@ -46,7 +49,7 @@ class BondBaseSpecification(interfaces.FactoryObject):
         issue_date: _Union[date, datetime],
         maturity_date: _Union[date, datetime],
         currency: _Union[Currency, str] = "EUR",
-        notional: float = 100.0,
+        notional: _Union[NotionalStructure, float] = 100.0,
         issuer: str = None,
         securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
         rating: _Union[Rating, str] = Rating.NONE,
@@ -164,7 +167,7 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Returns:
             str: Instrument's securitisation level.
         """
-        return self._securitization_level
+        return self._securitization_level.value
 
     @securitization_level.setter
     def securitization_level(self, securitisation_level: _Union[SecuritizationLevel, str]):
@@ -250,18 +253,19 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         start_date: _Union[date, datetime],
         end_date: _Union[date, datetime],
         maturity_date: _Union[date, datetime],
-        notional: float = 100.0,
+        notional: _Union[NotionalStructure, float] = 100.0,
         frequency: _Optional[_Union[Period, str]] = None,
         first_fixing_date: _Optional[_Union[date, datetime]] = None,
         issue_price: _Optional[float] = None,
-        index: _Union[InterestRateIndex, str] = None,
+        index_alias: _Union[InterestRateIndex, str] = None,
+        index: _Optional[InterestRateIndex] = None,
         currency: _Union[Currency, str] = Currency.EUR,
         notional_exchange: bool = True,
         coupon: float = 0.0,
         margin: float = 0.0,
         day_count_convention: _Union[DayCounterType, str] = DayCounterType.ACT360,
         business_day_convention: _Union[RollConvention, str] = RollConvention.MODIFIED_FOLLOWING,
-        roll_convention: _Union[RollRule, str] = RollRule.EOM,
+        roll_convention: _Union[RollRule, str] = RollRule.NONE,
         calendar: _Union[_HolidayBase, str] = _ECB(),
         coupon_type: str = "fix",
         payment_days: int = 0,
@@ -322,8 +326,9 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         self._coupon = coupon
         self._margin = margin
         self._frequency = frequency
+        self._index_alias = index_alias
         if index is not None:
-            self._index = InterestRateIndex.to_string(index)
+            self._index = index
         else:
             self._index = None
         self._day_count_convention = day_count_convention
@@ -433,18 +438,18 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         self._issue_price = _check_non_negativity(issue_price)
 
     @property
-    def day_count_convention(self) -> DayCounterType:
+    def day_count_convention(self) -> str:
         """
-        Getter for FRA's day count convention.
+        Getter for instruments's day count convention.
 
         Returns:
-            str: FRA's day count convention.
+            str: instruments's day count convention.
         """
         return self._day_count_convention
 
     @day_count_convention.setter
-    def day_count_convention(self, day_count_convention: _Union[DayCounterType, str]):
-        self._day_count_convention = DayCounterType.to_string(day_count_convention)
+    def day_count_convention(self, dcc: _Union[DayCounterType, str]):
+        self._day_count_convention = DayCounterType.to_string(dcc)
 
     @property
     def business_day_convention(self) -> str:
@@ -703,7 +708,7 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         return Schedule(
             start_day=self._start_date,
             end_day=self._end_date,
-            time_period=self._frequency,
+            time_period=_string_to_period(self._frequency),
             backwards=self._backwards,
             stub_type_is_Long=self._stub_type_is_Long,
             business_day_convention=self._business_day_convention,
@@ -711,12 +716,26 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
             calendar=self._calendar,
         )
 
+    def get_nr_annual_payments(self) -> float:
+        """Returns the number of annual payments of the instrument."""
+        if self._frequency is None:
+            logger.warning("Frequency is not set. Returning 0.")
+            return 0.0
+        freq = _string_to_period(self._frequency)
+        if freq.years > 0 or freq.months > 0 or freq.days > 0:
+            nr = 12.0 / (freq.years * 12 + freq.months + freq.days * 12 / 365.0)
+        else:
+            raise ValueError("Frequency must be positive.")
+        if nr.is_integer() is False:
+            logger.warning("Number of annual payments is not a whole number but a decimal.")
+        return nr
+
     @abc.abstractmethod
     def _to_dict(self) -> dict:
         pass
 
 
-class PlainVanillaCouponBondSpecification(DeterministicCashflowBondSpecification):
+class FixedRateBondSpecification(DeterministicCashflowBondSpecification):
 
     def __init__(
         self,
@@ -731,9 +750,10 @@ class PlainVanillaCouponBondSpecification(DeterministicCashflowBondSpecification
         issuer: Optional[_Union[Issuer, str]] = None,
         securitization_level: Optional[_Union[SecuritizationLevel, str]] = SecuritizationLevel.NONE,
         rating: Optional[_Union[Rating, str]] = Rating.NONE,
-        day_count_convention: DayCounterType = DayCounterType.ActActICMA,
+        day_count_convention: _Union[DayCounterType, str] = "ActActICMA",
         spot_days: int = 2,
         calendar: Optional[_Union[_HolidayBase, str]] = _ECB(),
+        stub_type_is_Long: bool = True,
         adjust_start_date: bool = True,
         adjust_end_date: bool = False,
     ):
@@ -762,6 +782,7 @@ class PlainVanillaCouponBondSpecification(DeterministicCashflowBondSpecification
             day_count_convention=day_count_convention,
             business_day_convention=business_day_convention,
             payment_days=0,
+            stub_type_is_Long=stub_type_is_Long,
             issuer=issuer,
             rating=rating,
             securitization_level=securitization_level,
@@ -806,7 +827,7 @@ class PlainVanillaCouponBondSpecification(DeterministicCashflowBondSpecification
             coupon = np.random.choice([0.0, 0.01, 0.03, 0.05])
             period = np.random.choice(["1Y", "6M", "3M"])
             result.append(
-                PlainVanillaCouponBondSpecification(
+                FixedRateBondSpecification(
                     obj_id=f"ID_{i}",
                     notional=notional,
                     frequency=period,
@@ -848,10 +869,10 @@ class ZeroBondSpecification(DeterministicCashflowBondSpecification):
         self,
         obj_id: str,
         notional: float,
-        issue_price: float,
         currency: _Union[Currency, str],
         issue_date: _Union[date, datetime],
         maturity_date: _Union[date, datetime],
+        issue_price: float = 100.0,
         calendar: Optional[_Union[_HolidayBase, str]] = _ECB(),
         business_day_convention: RollConvention = RollConvention.MODIFIED_FOLLOWING,
         issuer: Optional[_Union[Issuer, str]] = None,
@@ -925,13 +946,14 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
     def __init__(
         self,
         obj_id: str,
-        notional: float,
+        notional: _Union[NotionalStructure, float],
         currency: _Union[Currency, str],
         issue_date: _Union[date, datetime],
         maturity_date: _Union[date, datetime],
         margin: float,
         frequency: Optional[_Union[Period, str]] = None,
-        index: Optional[_Union[InterestRateIndex, str]] = None,
+        index_alias: Optional[str] = None,
+        index: Optional[InterestRateIndex] = None,
         business_day_convention: RollConvention = RollConvention.MODIFIED_FOLLOWING,
         issuer: Optional[_Union[Issuer, str]] = None,
         securitization_level: Optional[_Union[SecuritizationLevel, str]] = SecuritizationLevel.NONE,
@@ -940,6 +962,7 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
         fixings: Optional[FixingTable] = None,
         spot_days: int = 2,
         calendar: Optional[_Union[_HolidayBase, str]] = _ECB(),
+        stub_type_is_Long: bool = True,
         adjust_start_date: bool = True,
         adjust_end_date: bool = False,
     ):
@@ -954,14 +977,14 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
             end_date = maturity_date
         if not is_business_day(maturity_date, calendar):
             maturity_date = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
-        if index is None and frequency is None:
+        if index_alias is None and frequency is None:
             raise ValueError("Either index or frequency must be provided for a floating rate bond.")
-        elif index is not None and frequency is None:
-            if not isinstance(index, InterestRateIndex):
-                ind = InterestRateIndex(index)
-            else:
-                ind = index
-            frequency = ind.value.tenor
+        elif index_alias is not None:
+            self._index_alias = index_alias
+            index = get_index_by_alias(index_alias)
+            frequency = index.value.tenor
+        else:
+            frequency = frequency
         super().__init__(
             obj_id=obj_id,
             fixings=fixings,
@@ -975,11 +998,13 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
             margin=margin,
             coupon_type="float",
             frequency=frequency,
+            index_alias=index_alias,
             index=index,
             day_count_convention=day_count_convention,
             business_day_convention=business_day_convention,
             notional_exchange=True,
             payment_days=0,
+            stub_type_is_Long=stub_type_is_Long,
             issuer=issuer,
             rating=rating,
             securitization_level=securitization_level,
@@ -1053,6 +1078,7 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
             "day_count_convention": self._day_count_convention,
             "business_day_convention": self._business_day_convention,
             "fixings": self._fixings._to_dict() if isinstance(self._fixings, FixingTable) else self._fixings,
+            "index_alias": self._index_alias,
             "index": self._index,
             "margin": self._margin,
             "spot_days": self._spot_days,

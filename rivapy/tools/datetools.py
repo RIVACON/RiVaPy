@@ -12,12 +12,10 @@ from holidays import HolidayBase as _HolidayBase
 from holidays.financial.european_central_bank import ECB as _ECB
 from rivapy.tools.enums import RollConvention, DayCounterType, RollRule
 from rivapy.tools._validators import _string_to_calendar
-import logging
 
 
 # TODO: Switch to locally configured logger.
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+from rivapy.tools._logger import logger
 
 
 class DayCounter:
@@ -31,7 +29,7 @@ class DayCounter:
         d1: _Union[date, datetime],
         d2: _Union[_Union[date, datetime], _List[_Union[date, datetime]]],
         coupon_schedule: _List[_Union[date, datetime]] = None,  # Added optional argument
-        coupon_frequency: int = None,  # Added optional argument
+        coupon_frequency: float = None,  # Added optional argument
     ) -> _Union[float, _List[float]]:
 
         if self._dc == DayCounterType.ActActICMA.value:
@@ -81,6 +79,8 @@ class DayCounter:
         Returns:
             float: year fraction
         """
+        if coupon_frequency == 0:
+            raise ValueError("Coupon frequency must be greater than 0.")
         d1_dt = _date_to_datetime(d1)
         d2_dt = _date_to_datetime(d2)
         coupon_schedule_dt = [_date_to_datetime(cs_date) for cs_date in coupon_schedule]
@@ -659,7 +659,7 @@ class Schedule:
     def _roll_out(
         from_: _Union[date, datetime],
         to_: _Union[date, datetime],
-        term: Period,
+        term: _Union[Period, str],
         backwards: bool = False,
         long_stub: bool = True,
         roll_convention_: _Union[RollRule, str] = "NONE",
@@ -677,8 +677,10 @@ class Schedule:
             long_stub (bool): Defines if periods longer than term are allowed.
 
         Returns:
-            Date schedule not yet adjusted to any business day convention.
+            Date schedule not adjusted to business days.
         """
+        if isinstance(term, str):
+            term = _term_to_period(term)
         if isinstance(roll_convention_, str):
             roll_convention_ = RollRule[roll_convention_.upper()]
         # convert datetime to date (if necessary):
@@ -703,7 +705,7 @@ class Schedule:
         dates = Schedule._generate_dates_by_roll_convention(roll_convention_, from_, to_, term, direction, backwards)
         # return empty list if no dates were generated
         if dates == []:
-            print("No dates were generated!")
+            logger.info("No dates were generated!")
             return dates
         if roll_convention_ == RollRule.EOM and _is_ambiguous_date(from_):
             from_ = datetime(from_.year, from_.month, monthrange(from_.year, from_.month)[-1])
@@ -721,6 +723,8 @@ class Schedule:
             dates = [
                 d for d in dates if d >= calc_start_day(ref_date, term, roll_convention=roll_convention_)
             ]  # Keep only dates after the reference date plus the last date before the reference date.
+        if backwards:
+            dates.reverse()
         return dates
 
     def generate_dates(self, ends_only: bool) -> _List[date]:
@@ -740,7 +744,7 @@ class Schedule:
             schedule_dates = Schedule._roll_out(
                 self.__end_day, self.__start_day, self.__time_period, True, self.__stub_type_is_Long, self.__roll_convention
             )
-            schedule_dates.reverse()
+            # schedule_dates.reverse()
         else:
             schedule_dates = Schedule._roll_out(
                 self.__start_day, self.__end_day, self.__time_period, False, self.__stub_type_is_Long, self.__roll_convention
@@ -752,7 +756,6 @@ class Schedule:
             rolled_schedule_dates.append(
                 roll_day(schedule_dates[i], self.__calendar, self.__business_day_convention, rolled_schedule_dates[i - 1], self.settle_days)
             )
-
         if ends_only:
             rolled_schedule_dates.pop(0)
 
@@ -914,7 +917,7 @@ def next_IMM_date(from_date: _Union[date, datetime]) -> date:
     first_day_of_imm_month = datetime(year, imm_month, 1)
     first_wednesday = first_day_of_imm_month + relativedelta(weekday=WE(1))
     third_wednesday = first_wednesday + relativedelta(weeks=2)
-    print("Next IMM date from " + str(from_date) + " to next IMM date " + str(third_wednesday))
+    logger.warning("Next IMM date from " + str(from_date) + " to next IMM date " + str(third_wednesday))
     return third_wednesday.date()
 
 

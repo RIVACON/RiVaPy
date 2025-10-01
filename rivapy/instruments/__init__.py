@@ -7,8 +7,8 @@ from rivapy.instruments.ppa_specification import PPASpecification, GreenPPASpeci
 
 from rivapy.instruments.bond_specifications import (
     ZeroBondSpecification,
-    # FixedRateBondSpecification,
-    PlainVanillaCouponBondSpecification,
+    FixedRateBondSpecification,
+    # PlainVanillaCouponBondSpecification,
     FloatingRateBondSpecification,
     # FixedToFloatingRateNoteSpecification,
 )
@@ -34,8 +34,8 @@ _add_to_factory(Issuer)
 _add_to_factory(PPASpecification)
 _add_to_factory(GreenPPASpecification)
 _add_to_factory(ZeroBondSpecification)
-# _add_to_factory(FixedRateBondSpecification)
-_add_to_factory(PlainVanillaCouponBondSpecification)
+_add_to_factory(FixedRateBondSpecification)
+# _add_to_factory(PlainVanillaCouponBondSpecification)
 _add_to_factory(FloatingRateBondSpecification)
 _add_to_factory(EnergyFutureSpecifications)
 _add_to_factory(DepositSpecification)
