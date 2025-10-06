@@ -806,11 +806,11 @@ class BatteryStorage:
         self._tolerance = tolerance
 
         if precompile is True:
-            self.__precompile(precompuile_timefraction=precompile_timefraction)
+            self.__precompile(precompile_timefraction=precompile_timefraction)
 
         self.__optimized: bool = False
 
-    def __precompile(self, precompuile_timefraction: float):
+    def __precompile(self, precompile_timefraction: float):
         def state_check(state: Optional[Union[float, int]], value: float):
             if state is None:
                 return None
@@ -823,8 +823,8 @@ class BatteryStorage:
         actions = self._actions
         max_charges = self._max_charges
         max_capacity = self._max_capacity
-        bid_prices = self._bid_prices[: max(int(round(len(self._bid_prices) * precompuile_timefraction)), 2)]
-        ask_prices = self._ask_prices[: max(int(round(len(self._ask_prices) * precompuile_timefraction)), 2)]
+        bid_prices = self._bid_prices[: max(int(round(len(self._bid_prices) * precompile_timefraction)), 2)]
+        ask_prices = self._ask_prices[: max(int(round(len(self._ask_prices) * precompile_timefraction)), 2)]
 
         base_dispatch = np.zeros(len(ask_prices - 1), dtype=np.float32)
 
