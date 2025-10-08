@@ -12,7 +12,7 @@ class CreditMetricsModel:
         n_simulation: int,
         transition_matrix: np.matrix,
         position_data: pd.DataFrame,
-        issuer_data: List[Issuer],
+        issuer_data: dict[Issuer],
         stock_data: pd.DataFrame,
         r: float,
         t: float,
@@ -57,17 +57,15 @@ class CreditMetricsModel:
         excel_file = "Datenmodell_Krediportfoliomodell_test.xlsx"
         positions = pd.read_excel(folder_excel + excel_file, "Positions")
         issuer = pd.read_excel(folder_excel + excel_file, "Issuer")
-        issuer_list = []
+        issuer_dict = {}
         for _, row in issuer.iterrows():
-            issuer_list.append(
-                Issuer(
-                    obj_id=row['IssuerID'],
-                    name=row['IssuerName'],
-                    rating=row['Rating'],
-                    country=row['Land'],
-                    sector=row['Branche'],
-                    esg_rating=row['ESG_Rating'] if 'ESG_Rating' in row else "AAA",
-                )
+            issuer_dict[row['IssuerID']] = Issuer(
+            obj_id=row['IssuerID'],
+            name=row['IssuerName'],
+            rating=row['Rating'],
+            country=row['Land'],
+            sector=row['Branche'],
+            esg_rating=row['ESG_Rating'] if 'ESG_Rating' in row else "AAA",
             )
 
     def mergePositionsIssuer(self):
@@ -256,13 +254,12 @@ class CreditMetricsModel:
 
             # Schleife über Emittenten
             for idx in issuer_ids:
-                print(idx)
-                land = issuer.loc[issuer['IssuerID'] == idx, 'Land'].values[0]
-
-                index_of_issuer = mapping_countries_on_indeces[land]
-                print(index_of_issuer)
-                print(correlation)
-                print(correlation.loc['DAX','3'])
+                land = self.issuer_data[str(idx)].country
+                
+                index_of_issuer = self.mapping_countries_on_indeces[land]
+                # print(index_of_issuer)
+                # print(correlation)
+                # print(correlation.loc['DAX','3'])
                 rho = correlation.loc[index_of_issuer,str(idx)]
                 rr = YY[index_of_issuer] * rho
                 YY_ido = norm.ppf(np.random.rand())
