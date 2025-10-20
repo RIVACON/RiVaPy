@@ -1,0 +1,87 @@
+2025-10-20 11:55:41,800 - rivapy.instruments.deposit_specifications - INFO - Setting spot_days to 0: O/N deposit or fixing_date equal to start_date.
+2025-10-20 11:55:41,809 - rivapy.instruments.deposit_specifications - WARNING - Set fixing_date, 2024-01-01 00:00:00, to a good business day acc. to business_day_convention and calendar:2024-01-02 00:00:00
+2025-10-20 11:55:41,809 - rivapy.instruments.deposit_specifications - INFO - Start_date, 2024-01-01 00:00:00 no business day, moved to next business day acc. to business_day_convention:2024-01-02 00:00:00
+2025-10-20 11:55:41,809 - rivapy.instruments.deposit_specifications - INFO - Set maturity_date to end_date, 2024-04-03 00:00:00, adjusted by business_day_convention:2024-04-03 00:00:00
+2025-10-20 11:55:41,809 - rivapy.instruments.deposit_specifications - INFO - Set term to the difference between end_date and start_date in days.
+2025-10-20 11:55:41,809 - rivapy.instruments.deposit_specifications - INFO - Setting spot_days to 0: O/N deposit or fixing_date equal to start_date.
+2025-10-20 11:55:41,809 - rivapy.instruments.deposit_specifications - WARNING - Set fixing_date, 2024-01-01 00:00:00, to a good business day acc. to business_day_convention and calendar:2024-01-02 00:00:00
+2025-10-20 11:55:41,809 - rivapy.instruments.deposit_specifications - INFO - Set start_date, 2024-01-02 00:00:00, to fixing_date adjusted by spot_days and business_day_convention:2024-01-02 00:00:00
+2025-10-20 11:55:41,809 - rivapy.instruments.deposit_specifications - INFO - Set end_date to start_date adjusted by term and roll_convention, not adjusted by business_day_convention: 2024-01-03 00:00:00
+2025-10-20 11:55:41,809 - rivapy.instruments.deposit_specifications - INFO - Set maturity_date to end_date, 2024-01-03 00:00:00, adjusted by business_day_convention:2024-01-03 00:00:00
+2025-10-20 11:55:41,815 - rivapy.instruments.deposit_specifications - ERROR - term given as T/N and not as 'O/N' but fixing_date == start_date -> inconsistent data
+2025-10-20 11:55:41,817 - rivapy.instruments.deposit_specifications - INFO - Setting spot_days to 0: O/N deposit or fixing_date equal to start_date.
+2025-10-20 11:55:41,817 - rivapy.instruments.deposit_specifications - WARNING - Set fixing_date, 2024-01-01 00:00:00, to a good business day acc. to business_day_convention and calendar:2024-01-02 00:00:00
+2025-10-20 11:55:41,817 - rivapy.instruments.deposit_specifications - INFO - Start_date, 2024-01-01 00:00:00 no business day, moved to next business day acc. to business_day_convention:2024-01-02 00:00:00
+2025-10-20 11:55:41,817 - rivapy.instruments.deposit_specifications - INFO - Set end_date to start_date adjusted by term and roll_convention, not adjusted by business_day_convention: 2024-01-03 00:00:00
+2025-10-20 11:55:41,817 - rivapy.instruments.deposit_specifications - INFO - Set maturity_date to end_date, 2024-01-03 00:00:00, adjusted by business_day_convention:2024-01-03 00:00:00
+2025-10-20 11:55:41,817 - rivapy.instruments.deposit_specifications - ERROR - term given as O/N but fixing_date != start_date -> inconsistent data
+2025-10-20 11:55:41,817 - rivapy.instruments.deposit_specifications - INFO - Setting spot_days to 0: O/N deposit or fixing_date equal to start_date.
+2025-10-20 11:55:41,817 - rivapy.instruments.deposit_specifications - WARNING - Set fixing_date, 2024-01-01 00:00:00, to a good business day acc. to business_day_convention and calendar:2024-01-02 00:00:00
+2025-10-20 11:55:41,817 - rivapy.instruments.deposit_specifications - INFO - Set end_date to start_date adjusted by term and roll_convention, not adjusted by business_day_convention: 2024-01-04 00:00:00
+2025-10-20 11:55:41,817 - rivapy.instruments.deposit_specifications - INFO - Set maturity_date to end_date, 2024-01-04 00:00:00, adjusted by business_day_convention:2024-01-04 00:00:00
+2025-10-20 11:55:41,817 - rivapy.instruments.deposit_specifications - INFO - Setting spot_days to 1: T/N deposit or fixing_date + 1 day equal to start_date.
+2025-10-20 11:55:41,817 - rivapy.instruments.deposit_specifications - WARNING - Set fixing_date, 2024-01-01 00:00:00, to a good business day acc. to business_day_convention and calendar:2024-01-02 00:00:00
+2025-10-20 11:55:41,817 - rivapy.instruments.deposit_specifications - INFO - Set maturity_date to end_date, 2024-04-03 00:00:00, adjusted by business_day_convention:2024-04-03 00:00:00
+2025-10-20 11:55:41,817 - rivapy.instruments.deposit_specifications - INFO - Set term to the difference between end_date and start_date in days.
+2025-10-20 11:55:41,825 - rivapy.instruments.deposit_specifications - INFO - Setting spot_days to 1: T/N deposit or fixing_date + 1 day equal to start_date.
+2025-10-20 11:55:41,825 - rivapy.instruments.deposit_specifications - WARNING - Set fixing_date, 2024-01-01 00:00:00, to a good business day acc. to business_day_convention and calendar:2024-01-02 00:00:00
+2025-10-20 11:55:41,825 - rivapy.instruments.deposit_specifications - INFO - Set start_date, 2024-01-02 00:00:00, to fixing_date adjusted by spot_days and business_day_convention:2024-01-02 00:00:00
+2025-10-20 11:55:41,825 - rivapy.instruments.deposit_specifications - INFO - Set end_date to start_date adjusted by term and roll_convention, not adjusted by business_day_convention: 2024-01-03 00:00:00
+2025-10-20 11:55:41,825 - rivapy.instruments.deposit_specifications - INFO - Set maturity_date to end_date, 2024-01-03 00:00:00, adjusted by business_day_convention:2024-01-03 00:00:00
+2025-10-20 11:55:41,825 - rivapy.tools - WARNING - Found start date 2023-12-31 00:00:00 such that calc_end_day(start_date, ...) == end_day, but start date is not a business day in the given calendar.
+2025-10-20 11:55:41,825 - rivapy.instruments.deposit_specifications - INFO - Set fixing_date, 2024-01-02 00:00:00 to start_date adjusted backwards by spot_days, business_day_convention, and calendar:2023-12-29 00:00:00
+2025-10-20 11:55:41,832 - rivapy.instruments.deposit_specifications - INFO - Set end_date to start_date adjusted by term and roll_convention, not adjusted by business_day_convention: 2024-04-02 00:00:00
+2025-10-20 11:55:41,832 - rivapy.instruments.deposit_specifications - INFO - Set maturity_date to end_date, 2024-04-02 00:00:00, adjusted by business_day_convention:2024-04-02 00:00:00
+2025-10-20 11:56:13,528 - rivapy.instruments.deposit_specifications - INFO - Set fixing_date, 2019-09-02 00:00:00 to start_date adjusted backwards by spot_days, business_day_convention, and calendar:2019-08-30 00:00:00
+2025-10-20 11:56:13,528 - rivapy.instruments.deposit_specifications - INFO - Set maturity_date to end_date, 2019-09-03 00:00:00, adjusted by business_day_convention:2019-09-03 00:00:00
+2025-10-20 11:56:13,528 - rivapy.instruments.deposit_specifications - INFO - Set term to the difference between end_date and start_date in days.
+2025-10-20 11:56:13,530 - rivapy.market_data - INFO - Starting bootstrapper.
+2025-10-20 11:56:13,531 - rivapy.market_data - DEBUG - Input sanity checks
+2025-10-20 11:56:13,563 - rivapy.instruments.deposit_specifications - INFO - Set fixing_date, 2023-01-28 00:00:00 to start_date adjusted backwards by spot_days, business_day_convention, and calendar:2023-01-27 00:00:00
+2025-10-20 11:56:13,565 - rivapy.instruments.deposit_specifications - INFO - Start_date, 2023-01-28 00:00:00 no business day, moved to next business day acc. to business_day_convention:2023-01-30 00:00:00
+2025-10-20 11:56:13,566 - rivapy.instruments.deposit_specifications - INFO - Set maturity_date to end_date, 2023-07-28 00:00:00, adjusted by business_day_convention:2023-07-28 00:00:00
+2025-10-20 11:56:13,567 - rivapy.instruments.deposit_specifications - INFO - Set term to the difference between end_date and start_date in days.
+2025-10-20 11:56:13,568 - rivapy.market_data - INFO - Starting bootstrapper.
+2025-10-20 11:56:13,568 - rivapy.market_data - DEBUG - Input sanity checks
+2025-10-20 11:56:13,643 - rivapy.instruments.deposit_specifications - INFO - Set fixing_date, 2023-01-28 00:00:00 to start_date adjusted backwards by spot_days, business_day_convention, and calendar:2023-01-27 00:00:00
+2025-10-20 11:56:13,645 - rivapy.instruments.deposit_specifications - INFO - Start_date, 2023-01-28 00:00:00 no business day, moved to next business day acc. to business_day_convention:2023-01-30 00:00:00
+2025-10-20 11:56:13,645 - rivapy.instruments.deposit_specifications - INFO - Set maturity_date to end_date, 2023-07-28 00:00:00, adjusted by business_day_convention:2023-07-28 00:00:00
+2025-10-20 11:56:13,646 - rivapy.instruments.deposit_specifications - INFO - Set term to the difference between end_date and start_date in days.
+2025-10-20 11:56:13,646 - rivapy.market_data - INFO - Starting bootstrapper.
+2025-10-20 11:56:13,646 - rivapy.market_data - DEBUG - Input sanity checks
+2025-10-20 11:56:13,673 - rivapy.instruments.deposit_specifications - INFO - Set fixing_date, 2019-08-31 00:00:00 to start_date adjusted backwards by spot_days, business_day_convention, and calendar:2019-08-28 00:00:00
+2025-10-20 11:56:13,674 - rivapy.instruments.deposit_specifications - INFO - Start_date, 2019-08-31 00:00:00 no business day, moved to next business day acc. to business_day_convention:2019-08-30 00:00:00
+2025-10-20 11:56:13,676 - rivapy.instruments.deposit_specifications - INFO - Set maturity_date to end_date, 2020-02-29 00:00:00, adjusted by business_day_convention:2020-02-28 00:00:00
+2025-10-20 11:56:13,676 - rivapy.instruments.deposit_specifications - INFO - Set term to the difference between end_date and start_date in days.
+2025-10-20 11:56:13,677 - rivapy.market_data - INFO - Starting bootstrapper.
+2025-10-20 11:56:13,677 - rivapy.market_data - DEBUG - Input sanity checks
+2025-10-20 11:56:13,730 - rivapy.instruments.deposit_specifications - WARNING - Set fixing_date, 2019-08-31 00:00:00, to a good business day acc. to business_day_convention and calendar:2019-08-30 00:00:00
+2025-10-20 11:56:13,730 - rivapy.instruments.deposit_specifications - INFO - Set term to the difference between end_date and start_date in days.
+2025-10-20 11:56:13,732 - rivapy.instruments.deposit_specifications - WARNING - Set fixing_date, 2019-08-31 00:00:00, to a good business day acc. to business_day_convention and calendar:2019-08-30 00:00:00
+2025-10-20 11:56:13,732 - rivapy.instruments.deposit_specifications - INFO - Set term to the difference between end_date and start_date in days.
+2025-10-20 11:56:13,734 - rivapy.instruments.deposit_specifications - WARNING - Set fixing_date, 2019-08-31 00:00:00, to a good business day acc. to business_day_convention and calendar:2019-08-30 00:00:00
+2025-10-20 11:56:13,734 - rivapy.instruments.deposit_specifications - INFO - Set term to the difference between end_date and start_date in days.
+2025-10-20 11:56:13,735 - rivapy.instruments.deposit_specifications - WARNING - Set fixing_date, 2019-08-31 00:00:00, to a good business day acc. to business_day_convention and calendar:2019-08-30 00:00:00
+2025-10-20 11:56:13,738 - rivapy.instruments.deposit_specifications - INFO - Set term to the difference between end_date and start_date in days.
+2025-10-20 11:56:13,741 - rivapy.instruments.deposit_specifications - WARNING - Set fixing_date, 2019-08-31 00:00:00, to a good business day acc. to business_day_convention and calendar:2019-08-30 00:00:00
+2025-10-20 11:56:13,743 - rivapy.instruments.deposit_specifications - INFO - Set maturity_date, 2019-12-01 00:00:00, to next business day acc. to business_day_convention:2019-12-02 00:00:00
+2025-10-20 11:56:13,744 - rivapy.instruments.deposit_specifications - INFO - Set term to the difference between end_date and start_date in days.
+2025-10-20 11:56:13,746 - rivapy.instruments.deposit_specifications - WARNING - Set fixing_date, 2019-08-31 00:00:00, to a good business day acc. to business_day_convention and calendar:2019-08-30 00:00:00
+2025-10-20 11:56:13,747 - rivapy.instruments.deposit_specifications - INFO - Set maturity_date, 2020-03-01 00:00:00, to next business day acc. to business_day_convention:2020-03-02 00:00:00
+2025-10-20 11:56:13,748 - rivapy.instruments.deposit_specifications - INFO - Set term to the difference between end_date and start_date in days.
+2025-10-20 11:56:13,749 - rivapy.instruments.deposit_specifications - WARNING - Set fixing_date, 2019-08-31 00:00:00, to a good business day acc. to business_day_convention and calendar:2019-08-30 00:00:00
+2025-10-20 11:56:13,749 - rivapy.instruments.deposit_specifications - INFO - Set term to the difference between end_date and start_date in days.
+2025-10-20 11:56:13,761 - rivapy.market_data - INFO - Starting bootstrapper.
+2025-10-20 11:56:13,762 - rivapy.market_data - DEBUG - Input sanity checks
+2025-10-20 11:56:14,953 - rivapy.instruments.deposit_specifications - INFO - Set fixing_date, 2019-08-31 00:00:00 to start_date adjusted backwards by spot_days, business_day_convention, and calendar:2019-08-28 00:00:00
+2025-10-20 11:56:14,954 - rivapy.instruments.deposit_specifications - INFO - Start_date, 2019-08-31 00:00:00 no business day, moved to next business day acc. to business_day_convention:2019-08-30 00:00:00
+2025-10-20 11:56:14,957 - rivapy.instruments.deposit_specifications - INFO - Set maturity_date to end_date, 2020-02-29 00:00:00, adjusted by business_day_convention:2020-02-28 00:00:00
+2025-10-20 11:56:14,957 - rivapy.instruments.deposit_specifications - INFO - Set term to the difference between end_date and start_date in days.
+2025-10-20 11:56:14,957 - rivapy.market_data - INFO - Starting bootstrapper.
+2025-10-20 11:56:14,957 - rivapy.market_data - DEBUG - Input sanity checks
+2025-10-20 11:56:14,970 - rivapy.market_data - INFO - Starting bootstrapper.
+2025-10-20 11:56:14,971 - rivapy.market_data - DEBUG - Input sanity checks
+2025-10-20 11:56:14,981 - rivapy.market_data - INFO - Starting bootstrapper.
+2025-10-20 11:56:14,983 - rivapy.market_data - DEBUG - Input sanity checks
+2025-10-20 11:56:18,450 - rivapy.market_data - INFO - Starting bootstrapper.
+2025-10-20 11:56:18,450 - rivapy.market_data - DEBUG - Input sanity checks

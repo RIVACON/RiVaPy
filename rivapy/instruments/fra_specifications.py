@@ -1,3 +1,4 @@
+from rivapy.instruments._logger import logger
 from abc import abstractmethod as _abstractmethod
 from typing import List as _List, Union as _Union, Tuple, Optional as _Optional
 import numpy as np

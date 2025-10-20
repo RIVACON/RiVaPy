@@ -1,6 +1,10 @@
 # 2025.07.23 Hans Nguyen
 # Boostrapping in rivapy indepedent of pyvacon
 
+
+from rivapy.marketdata._logger import logger
+
+
 ##########
 # Modules
 from datetime import datetime, date
@@ -232,8 +236,10 @@ def bootstrap_curve(
     Returns:
         DiscountCurve: bootstrapped discount curve
     """
+    logger.info("Starting bootstrapper.")
 
     # Sanity checks:
+    logger.debug("Input sanity checks")
     assert len(instruments) == len(quotes), "Number of quotes does not equal number of instruments."
     # TODO implement more input qualit checks:
     # curves given of correct type that match instrument type - or will this be done in the "market container" class?

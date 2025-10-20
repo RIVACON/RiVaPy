@@ -4,6 +4,8 @@ from typing import List as _List, Union as _Union, Tuple, Dict
 import numpy as np
 from datetime import datetime, date, timedelta
 from holidays import HolidayBase as _HolidayBase, ECB as _ECB
+from rivapy.instruments._logger import logger
+
 from rivapy.tools.datetools import Period, Schedule, _date_to_datetime, _datetime_to_date_list, _term_to_period, serialize_date
 from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating, Instrument
 from rivapy.tools._validators import _check_positivity, _check_start_before_end, _string_to_calendar, _is_ascending_date_list

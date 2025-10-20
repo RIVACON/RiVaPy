@@ -1,5 +1,13 @@
 # 2025.09.09 Bootstrapping without pyvacon
 import unittest
+
+
+from setup_logging import setup_logging_for_tests
+
+# Configure logging once per test module
+setup_logging_for_tests("tests\rivapy_test.log")
+
+
 import math
 import pandas as pd
 from datetime import date, datetime, timedelta
@@ -1973,6 +1981,30 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
             self.assertAlmostEqual(model_quote, ins_quotes_3M[i], delta=1e-6)
             # per_diff = (model_quote - deposit_quotes[i]) / deposit_quotes[i] * 100
             # print(f"model: {model_quote} market: {deposit_quotes[i]} perdiff: {per_diff}")
+
+
+class TestReferenceDateDependance(unittest.TestCase):
+    """Noticed that depending on the stated reference date, which is needed to calculate
+    the start dates of the instruments, the bootstrapped curve can differ slightly.
+    This test checks that bootstrapping with different reference dates, but otherwise
+    identical input data, gives similar curves.
+
+    The finer points is because the start dates, and the adjustments to the date can affect
+    the actual day count fractions, and thus the cash flows, and thus the curve. Especially after applying
+    conventions like modified following.
+    """
+
+    def setUp(self):
+        """_summary_"""
+        # set directory and file name for Input Quotes
+        dirName = "./notebooks/marketdata"  # "./"
+        fileName = "/inputQuotes_includeFRAs.csv"  # "/inputQuotes.csv"
+
+        df = pd.read_csv(dirName + fileName, sep=";", decimal=",")
+        column_names = list(df.columns)
+
+        self.quotes_df = df
+        self.column_names = column_names
 
 
 if __name__ == "__main__":

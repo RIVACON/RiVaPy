@@ -109,7 +109,7 @@ class InterestRateSwapPricer:
         desired_rate: float = 1.0,
     ) -> _List[CashFlow]:
         """Generate a list of CashFlow objects, each with the cashflow amount for the given accrual period
-        and additional information added to descrive the cashflow. For the fixed leg of a swap.
+        and additional information added to describe the cashflow. For the fixed leg of a swap.
 
         Args:
             val_date (_Union[date, datetime]): valuation date
