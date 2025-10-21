@@ -28,7 +28,7 @@ class CreditMetricsModel:
             position_data (pd.DataFrame): Dataframe with position data. Specific format is needed.
             issuer_data (pd.DataFrame): Dataframe with issuer data. Specific format is needed.
             stock_data (pd.DataFrame): Dataframe with stock data. Stock data needs to include close
-                values of the different issuers as well as a reference time series (e.g. Dax)
+                values of the different issuers as well as a reference time series (e.g. DAX)
             r (float): Risk-free rate. Needed to comupute expected value of positions as well as
                 different states during transition process.
             t (float): Dipositon horizon for calculation of credit risk.
@@ -45,6 +45,12 @@ class CreditMetricsModel:
         self.t = t
         self.confidencelevel = confidencelevel
         self.seed = seed
+
+        self.list_of_indices = ["DAX", "SP"]  # Diese Redundanz ist suboptimal, aber für den Anfang ok
+        self.mapping_countries_on_indices = {
+            "DE": "DAX",
+            "US": "SP",
+        }
 
     def merge_positions_issuer(self):
         """
@@ -111,7 +117,9 @@ class CreditMetricsModel:
         returns = mergedData.pct_change()
 
         correlation_mat = returns.corr()
-        corr_pairs = correlation_mat.unstack()["Dax"]
+        corr_pairs = pd.DataFrame(
+            [correlation_mat.unstack()["DAX"], correlation_mat.unstack()["SP"]], index=["DAX", "SP"]
+        )  # Korrelation zu DAX und SP passt zum Land
         return corr_pairs
 
     def get_cutoffs_rating(self):
@@ -158,7 +166,7 @@ class CreditMetricsModel:
         credit_spread = self.get_credit_spreads(LGD, idx)
         EV = np.multiply(exposure, np.exp(-(self.r + credit_spread) * self.t))
         EV = pd.DataFrame(EV, columns=["EV"])  # keep in same order as credit cutoff
-        EV["issuer"] = positions["IssuerName"].to_list()
+        EV["issuer"] = positions["IssuerID"].to_list()
         EV = EV.groupby("issuer").sum()  # group by issuer to sum up expected values
         return EV
 
@@ -176,7 +184,7 @@ class CreditMetricsModel:
         state = np.multiply(exposure, np.exp(-(self.r + credit_spread) * self.t)).T
         state = np.append(state, np.multiply(exposure, np.matrix(positions["RecoveryRate"])).T, axis=1)  # last column is default case
         states = pd.DataFrame(np.fliplr(state), columns=["D", "C", "B", "BB", "BBB", "A", "AA", "AAA"])  # keep in same order as credit cutoff
-        states["issuer"] = positions["IssuerName"].to_list()
+        states["issuer"] = positions["IssuerID"].to_list()
         states = states.groupby("issuer").sum()
         return states
 
@@ -216,30 +224,46 @@ class CreditMetricsModel:
         issuer_info = positions[["IssuerName", "IssuerID", "Rating", "RatingID"]].drop_duplicates()
         issuer_ids = issuer_info["IssuerID"].to_numpy()
         issuer_names = issuer_info["IssuerName"].to_list()
-        Loss = np.zeros((self.n_simulation, len(issuer_ids)))
-        rr_scenarios = np.zeros((self.n_simulation, len(issuer_ids)))
-        np.random.seed(self.seed)
+        Loss = pd.DataFrame(np.zeros((self.n_simulation, len(issuer_ids))), columns=issuer_ids, index=range(self.n_simulation))
+        rr_scenarios = pd.DataFrame(np.zeros((self.n_simulation, len(issuer_ids))), columns=issuer_ids, index=range(self.n_simulation))
+        # np.random.seed(self.seed)
 
+        # Main Monte-Carlo Loop
         for i in range(self.n_simulation):
-            YY = norm.ppf(np.random.rand())
-            for idx, k in enumerate(issuer_ids):
-                issuer = issuer_names[idx]
-                rho = correlation[issuer]
-                rr = YY * rho
+
+            # Schleife über Indizes
+            YY = {}
+            for index in self.list_of_indices:
+                YY[index] = norm.ppf(np.random.rand())
+
+            print(YY)
+
+            # Schleife über Emittenten
+            for idx in issuer_ids:
+                print(idx)
+                land = issuer.loc[issuer["IssuerID"] == idx, "Land"].values[0]
+
+                index_of_issuer = self.mapping_countries_on_indices[land]
+                print(index_of_issuer)
+                print(correlation)
+                print(correlation.loc["DAX", "3"])
+                rho = correlation.loc[index_of_issuer, str(idx)]
+                rr = YY[index_of_issuer] * rho
                 YY_ido = norm.ppf(np.random.rand())
                 rr_idio = np.sqrt(1 - (rho**2)) * YY_ido
                 rr_all = rr + rr_idio
-                rating_id = issuer_info.loc[issuer_info["IssuerID"] == k, "RatingID"].iloc[0]
+                rating_id = issuer_info.loc[issuer_info["IssuerID"] == idx, "RatingID"].iloc[0]
                 cutoffs_vec = np.matrix(cutOffs[:, rating_id]).T
                 rating = np.array(rr_all < cutoffs_vec)
                 rate_idx = len(rating) - np.sum(rating, 0)
                 col_idx = rate_idx[0].astype(int)
-                V_t = states.loc[issuer].iloc[col_idx]
-                Loss_t = V_t - EV.loc[issuer].iloc[0]
-                Loss[i, idx] = Loss_t
-                rr_scenarios[i, idx] = rr_all
+                V_t = states.loc[idx].iloc[col_idx]
+                Loss_t = V_t - EV.loc[idx].iloc[0]
+                print(Loss)
+                Loss.loc[i, idx] = Loss_t
+                rr_scenarios.loc[i, idx] = rr_all
 
-        return Loss, rr_scenarios, issuer_ids, issuer_names
+        Loss, rr_scenarios, issuer_ids, issuer_names
 
     def get_loss_distribution(self, mc_scenario_values: np.ndarray):
         """Computes loss distribution for portfolio after monte-carlo-simulation.
