@@ -52,8 +52,8 @@ class TestCreditMetricsModel(unittest.TestCase):
             seed=self.seed,
         )
 
-    def test_mergePositionsIssuer(self):
-        merged = self.model.mergePositionsIssuer()
+    def test_merge_positions_issuer(self):
+        merged = self.model.merge_positions_issuer()
         self.assertIn("IssuerName", merged.columns)
         self.assertIn("RatingID", merged.columns)
         self.assertEqual(len(merged), 2)

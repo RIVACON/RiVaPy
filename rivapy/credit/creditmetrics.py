@@ -46,7 +46,7 @@ class CreditMetricsModel:
         self.confidencelevel = confidencelevel
         self.seed = seed
 
-    def mergePositionsIssuer(self):
+    def merge_positions_issuer(self):
         """
         Merges position dataframe with issuer dataframe to obtain rating-data for each position.
         Maps all +/- Rating variants to the same RatingID.
@@ -181,7 +181,7 @@ class CreditMetricsModel:
         return states
 
     def get_issuer_groups(self):
-        df_positions_grouped = self.mergePositionsIssuer()
+        df_positions_grouped = self.merge_positions_issuer()
         df_positions_grouped = df_positions_grouped[["IssuerID", "IssuerName", "RecoveryRate", "Rating", "RatingID", "Exposure"]]
         df_positions_grouped = df_positions_grouped.groupby(["IssuerID", "IssuerName", "RecoveryRate", "Rating", "RatingID"], as_index=False).sum()
 
