@@ -582,6 +582,16 @@ class InterestRateIndex(_MyEnum):
         calendar="TARGET",
         aliases=["EUR6M", "EUR 6M", "EURIBOR 6M"],
     )
+    EUR12M = IRIndexMetadata(
+        name="EURIBOR 12M",
+        currency="EUR",
+        tenor="12M",
+        spot_days=2,
+        business_day_convention="ModifiedFollowing",
+        roll_convention="EOM",
+        calendar="TARGET",
+        aliases=["EUR12M", "EUR 12M", "EURIBOR 12M", "EUR1Y", "EUR_1Y", "EURIBOR_1Y"],
+    )
     ESTR = IRIndexMetadata(
         name="€STR",
         currency="EUR",
@@ -600,5 +610,7 @@ def get_index_by_alias(alias: str) -> InterestRateIndex:
         value = index.value
         aliases = [a.upper() for a in value.aliases]
         if alias in aliases or alias == index.name.upper():
+            print("erfolgreich")
+            str = index.value.name
             return index
     raise ValueError(f"Unknown index alias: {alias}")

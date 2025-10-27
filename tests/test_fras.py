@@ -143,51 +143,51 @@ class TestForwardRateAgreementSpecification(unittest.TestCase):
     #     self.assertIn("maturity_date", samples[0])
     #     self.assertIn("currency", samples[0])
 
+    #######################################################
+    # Tests for Pricing
+    def test_fra_cf_implied_rate(self):
+        # setting up necessary curves
+        # discount curve
+        object_id = "TEST_DC"
+        dsc_rate = 0.01
+        days_to_maturity = [1, 180, 365, 720, 3 * 365, 4 * 365, 10 * 365]
+        dates = [self.ref_date + dt.timedelta(days=d) for d in days_to_maturity]
+        df = [math.exp(-d / 365.0 * dsc_rate) for d in days_to_maturity]
+        dc = DiscountCurve(id=object_id, refdate=self.ref_date, dates=dates, df=df, interpolation=InterpolationType.LINEAR)
 
-#######################################################
-# Tests for Pricing
-def test_fra_cf_implied_rate(self):
-    # setting up necessary curves
-    # discount curve
-    object_id = "TEST_DC"
-    dsc_rate = 0.01
-    days_to_maturity = [1, 180, 365, 720, 3 * 365, 4 * 365, 10 * 365]
-    dates = [self.ref_date + dt.timedelta(days=d) for d in days_to_maturity]
-    df = [math.exp(-d / 365.0 * dsc_rate) for d in days_to_maturity]
-    dc = DiscountCurve(id=object_id, refdate=self.ref_date, dates=dates, df=df, interpolation=InterpolationType.LINEAR)
+        # Fixing curve
+        object_id = "TEST_fwd"
+        fwd_rate = 0.05
+        fwd_df = [math.exp(-d / 365.0 * fwd_rate) for d in days_to_maturity]
+        fwd_dc = DiscountCurve(id=object_id, refdate=self.ref_date, dates=dates, df=fwd_df, interpolation=InterpolationType.LINEAR)
 
-    # Fixing curve
-    object_id = "TEST_fwd"
-    fwd_rate = 0.05
-    fwd_df = [math.exp(-d / 365.0 * fwd_rate) for d in days_to_maturity]
-    fwd_dc = DiscountCurve(id=object_id, refdate=self.ref_date, dates=dates, df=fwd_df, interpolation=InterpolationType.LINEAR)
+        fra_pricer = ForwardRateAgreementPricer(self.ref_date, self.fra, dc, fwd_dc)
 
-    fra_pricer = ForwardRateAgreementPricer(self.ref_date, self.fra, dc, fwd_dc)
+        # Manually calculate expected cashflows 'manually' for comparison
+        dcc_rate = DayCounter(fwd_dc.daycounter)
+        fwdrateDF = fwd_dc.value_fwd(self.ref_date, self.fra._rate_start_date, self.fra._rate_end_date)
+        dt_rate = dcc_rate.yf(self.fra._rate_start_date, self.fra._rate_end_date)
+        fwdrate = (1.0 / fwdrateDF - 1) / dt_rate
 
-    # Manually calculate expected cashflows 'manually' for comparison
-    dcc_rate = DayCounter(fwd_dc.daycounter)
-    fwdrateDF = fwd_dc.value_fwd(self.ref_date, self.fra._rate_start_date, self.fra._rate_end_date)
-    dt_rate = dcc_rate.yf(self.fra._rate_start_date, self.fra._rate_end_date)
-    fwdrate = (1.0 / fwdrateDF - 1) / dt_rate
+        # using instrument daycount convention to calculate delta t for cf amount calculation and discounting
+        dcc = DayCounter(self.fra.day_count_convention)
+        # avoid shadowing the datetime module alias `dt` imported at module level
+        # (assignment to `dt` would make `dt` local in this function and cause
+        #  UnboundLocalError when `dt.timedelta` is used earlier)
+        year_frac = dcc.yf(self.fra._start_date, self.fra._end_date)
+        amount = self.fra._notional * (fwdrate - self.fra._rate) * year_frac
+        cf = amount / (1 + fwdrate * year_frac)
+        fair_rate = (1.0 / fwdrateDF - 1) / dt_rate
+        self.assertEqual(fra_pricer._fra_spec, self.fra)
+        self.assertEqual(fra_pricer._val_date, self.ref_date)
+        self.assertEqual(fra_pricer._discount_curve, dc)
+        self.assertEqual(fra_pricer._forward_curve, fwd_dc)
 
-    # using instrument daycount convention to calculate delta t for cf amount calculation and discounting
-    dcc = DayCounter(self.fra.day_count_convention)
-    dt = dcc.yf(self.fra._start_date, self.fra._end_date)
-    amount = self.fra._notional * (fwdrate - self.fra._rate) * dt
-    cf = amount / (1 + fwdrate * dt)
-
-    fair_rate = (1.0 / fwdrateDF - 1) / dt_rate
-
-    self.assertEqual(fra_pricer._fra_spec, self.fra)
-    self.assertEqual(fra_pricer._val_date, self.ref_date)
-    self.assertEqual(fra_pricer._discount_curve, dc)
-    self.assertEqual(fra_pricer._forward_curve, fwd_dc)
-
-    self.assertEqual(
-        fra_pricer.get_expected_cashflows(),
-        [(roll_day(self.fra._start_date, self.fra._calendar, self.fra._business_day_convention, settle_days=self.fra._payment_days), cf)],
-    )
-    self.assertEqual(fra_pricer.compute_fair_rate(self.ref_date, self.fra, fwd_dc), fair_rate)
+        self.assertEqual(
+            fra_pricer.get_expected_cashflows(self.fra, self.ref_date, fwd_dc),
+            [(roll_day(self.fra._start_date, self.fra._calendar, self.fra._business_day_convention, settle_days=self.fra._payment_days), cf)],
+        )
+        self.assertEqual(fra_pricer.compute_fair_rate(self.ref_date, self.fra, fwd_dc), fair_rate)
 
 
 if __name__ == "__main__":

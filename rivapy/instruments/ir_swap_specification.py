@@ -11,7 +11,7 @@ import rivapy.tools.interfaces as interfaces
 from rivapy.tools.datetools import Period, Schedule
 
 from rivapy.instruments.bond_specifications import BondBaseSpecification
-from rivapy.instruments.components import NotionalStructure, ConstNotionalStructure, VariableNotionalStructure, ResettingNotionalStructure
+from rivapy.instruments.components import NotionalStructure, ConstNotionalStructure, VariableNotionalStructure  # , ResettingNotionalStructure
 from rivapy.tools.enums import IrLegType
 
 # Base each swap leg, off of the IRSwapBaseSpecification
@@ -117,8 +117,8 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
         Args:
             value (_Union[float, NotionalStructure]): _description_
         """
-        if isinstance(value, float):
-            self._notional_structure = ConstNotionalStructure(value)
+        if isinstance(value, (int, float)):
+            self._notional_structure = ConstNotionalStructure(float(value))
         else:
             self._notional_structure = value
 
@@ -722,8 +722,8 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
         Args:
             value (_Union[float, NotionalStructure]): _description_
         """
-        if isinstance(value, float):
-            self._notional_structure = ConstNotionalStructure(value)
+        if isinstance(value, (int, float)):
+            self._notional_structure = ConstNotionalStructure(float(value))
         else:
             self._notional_structure = value
 

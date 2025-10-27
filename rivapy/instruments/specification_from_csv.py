@@ -136,7 +136,7 @@ def make_fra_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Holid
         spot_days=int(row["SpotLag"][:-1]),
         # start_period: int = None,
         # end_period: int = None,
-        # index_alias: str = None,
+        # ir_index: str = None,
         # issuer: str = None,
     )
 

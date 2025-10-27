@@ -3,10 +3,11 @@ from typing import Union as _Union, List, Tuple, Dict, Any, Optional
 import numpy as np
 from datetime import datetime, date
 import rivapy.tools.interfaces as interfaces
-from rivapy.tools.datetools import _date_to_datetime
+from rivapy.tools.datetools import _date_to_datetime, Period
 from rivapy.tools._validators import _check_positivity, _check_relation, _is_chronological
 from rivapy.tools.enums import DayCounterType, Rating, Sector, Country, ESGRating
 import abc
+from rivapy.instruments._logger import logger
 
 
 class Coupon:
@@ -372,7 +373,7 @@ class NotionalStructure(interfaces.FactoryObject):
         pass
 
     @abc.abstractmethod
-    def get_amount(self, period: int) -> float:
+    def get_amount(self, period: int = None) -> float:
         """here, period is the INDEX that maps to the notional amount"""
         pass
 
@@ -405,6 +406,12 @@ class NotionalStructure(interfaces.FactoryObject):
         """
         return None
 
+    def get_amount_per_date(self, date: date) -> float:
+        pass
+
+    def get_amortization_schedule(self) -> List[Tuple[date, float]]:
+        pass
+
     @abc.abstractmethod
     def get_size(self) -> int:
         pass
@@ -430,8 +437,44 @@ class ConstNotionalStructure(NotionalStructure):
             notional (float): _description_
         """
         self._notional = [notional]
+        self._start_date = None
+        self._end_date = None
 
-    def get_amount(self, period: int) -> float:
+    # region properties
+
+    @property
+    def notional(self) -> float:
+        return self._notional
+
+    @notional.setter
+    def notional(self, notional: float):
+        self._notional[0] = notional
+
+    @property
+    def start_date(self) -> list[datetime]:
+        if self._start_date is None:
+            return None
+        return self._start_date
+
+    @start_date.setter
+    def start_date(self, start_date: list[datetime]):
+        self._start_date = start_date
+
+    @property
+    def end_date(self) -> list[datetime]:
+        if self._end_date is None:
+            return None
+        else:
+            return self._end_date
+
+    @end_date.setter
+    def end_date(self, end_date: list[datetime]):
+        self._end_date = end_date
+
+    # endregion
+
+    # region class methods
+    def get_amount(self, period: int = None) -> float:
         """Get the value of the notional.
 
         Note: Kept list structure to stay consistent with other notional structures.
@@ -443,7 +486,12 @@ class ConstNotionalStructure(NotionalStructure):
         Returns:
             float: notional value
         """
-        return self._notional[period]
+        if period is not None and period > 1:
+            logger.warning("ConstNotionalStructure only has one period with constant notional.")
+        return self._notional[0]
+
+    def get_amount_per_date(self, date):
+        return self._notional[0]
 
     def get_size(self) -> int:
         """If the notional structure is constant, we expect the size to be 1.
@@ -454,11 +502,173 @@ class ConstNotionalStructure(NotionalStructure):
         """
         return len(self._notional)
 
+    def get_amortizations_by_index(self) -> List[Tuple[int, float]]:
+        return [(1, self._notional[0])]
+
+    def get_amortization_schedule(self) -> Optional[List[Tuple[date, float]]]:
+        """Return amortization schedule as list of (date, amount) or None if end dates are missing.
+
+        Returns:
+            Optional[List[Tuple[date, float]]]: amortization schedule or None when end dates are not set
+        """
+        if getattr(self, "_end_date", None) is None:
+            # use plural message to be consistent with other notional structures
+            logger.error("End dates of notional structure are not set.")
+            return []
+        else:
+            return [(self._end_date, self._notional[0])]
+
     def _to_dict(self) -> Dict:
         return_dict = {
             "notional": self._notional,
         }
         return return_dict
+
+    # endregion
+
+
+class LinearNotionalStructure(NotionalStructure):
+    def __init__(self, start_notional: float, end_notional: float = 0.0, n_steps: int = 1):
+        """Constructor for a linear notional structure
+
+        Args:
+            start_notional (float): notional at the beginning of the structure
+            end_notional (float): notional at the end of the structure, set to start_notional if not provided
+            n_steps (int): number of steps to linearly interpolate between start and end notional, results in n_steps amortizations
+        """
+        if n_steps < 1:
+            raise ValueError("n_steps must be at least 1")
+        self._notional = list(np.linspace(start_notional, end_notional, n_steps))
+        self._start_notional = start_notional
+        self._end_notional = end_notional
+        self._n_steps = n_steps
+        self._start_date = None
+        self._end_date = None
+        self._dates = None
+
+    # region properties
+
+    @property
+    def n_steps(self) -> int:
+        return self._n_steps
+
+    @n_steps.setter
+    def n_steps(self, n_steps: int):
+        self._n_steps = n_steps
+        self._notional = list(np.linspace(self._start_notional, self._end_notional, n_steps))
+        # print(self._notional)
+
+    @property
+    def start_date(self) -> list[datetime]:
+        return self._start_date
+
+    @start_date.setter
+    def start_date(self, start_date: list[datetime]):
+        self._start_date = start_date
+
+    @property
+    def end_date(self) -> list[datetime]:
+        return self._end_date
+
+    @end_date.setter
+    def end_date(self, end_date: list[datetime]):
+        self._end_date = end_date
+
+    @property
+    def notional(self) -> list[float]:
+        return self._notional
+
+    @notional.setter
+    def notional(self, notional: list[float]):
+        self._notional = notional
+        self._start_notional = notional[0]
+        self._end_notional = notional[-1]
+
+    @property
+    def start_notional(self) -> float:
+        return self._start_notional
+
+    @start_notional.setter
+    def start_notional(self, start_notional: float):
+        self._start_notional = start_notional
+        self._notional = list(np.linspace(self._start_notional, self._end_notional, self._n_steps))
+
+    @property
+    def end_notional(self) -> float:
+        return self._end_notional
+
+    @end_notional.setter
+    def end_notional(self, end_notional: float):
+        self._end_notional = end_notional
+        self._notional = list(np.linspace(self._start_notional, self._end_notional, self._n_steps))
+
+    # endregion
+
+    # region class methods
+
+    def get_amount(self, period: int = None) -> float:
+        if period is None:
+            return self._notional[0]
+        return self._notional[period]
+
+    def get_amount_per_date(self, date):
+        if self._end_date is None or self._start_date is None:
+            raise Exception("Start or end dates of notional structure are not set.")
+        if date > self._end_date[-1]:
+            raise Exception("Date is after end date of notional structure")
+        earlier_dates = [d for d in self._start_date if d <= date]
+        if not earlier_dates:
+            raise Exception("Date is before start date of notional structure")
+        # Find the last one and return its index
+        return self._notional[self._start_date.index(earlier_dates[-1])]
+
+    def get_size(self) -> int:
+        """Returns the number of notionals
+
+        Returns:
+            int: _description_
+        """
+        return len(self._notional)
+
+    def get_amortizations_by_index(self) -> List[Tuple[int, float]]:
+        """Returns a list of tuples (index, notional) representing the amortizations by index."""
+        amortizations = []
+        n = len(self._notional)
+        if n <= 1:
+            return [(1, self._start_notional - self._end_notional)]
+        # compute the per-step change between consecutive notionals
+        per_step_change = float(self._notional[0] - self._notional[1])
+        # The tests expect an entry for each step index (1..n) repeating the per-step change
+        for i in range(1, n):
+            amortizations.append((i, per_step_change))
+        return amortizations
+
+    def get_amortization_schedule(self) -> List[Tuple[date, float]]:
+        """Returns a list of tuples (date, notional) representing the amortization schedule."""
+        schedule = []
+        if self._end_date is None:
+            logger.error("End dates of notional structure are not set.")
+        else:
+            laenge = len(self._notional)
+            # print(laenge)
+            if len(self._notional) == 1:
+                return [(self._end_date[0], self._start_notional - self._end_notional)]
+            else:
+                for i in range(1, len(self._notional)):
+                    change = self._notional[i - 1] - self._notional[i]
+                    n1 = self._notional[i - 1]
+                    n2 = self._notional[i]
+                    schedule.append((self._end_date[i - 1], change))
+        return schedule
+
+    def _to_dict(self) -> Dict:
+        # TODO fill out more
+        return_dict = {
+            "notional": self._notional,
+        }
+        return return_dict
+
+    # endregion
 
 
 class VariableNotionalStructure(NotionalStructure):
@@ -474,7 +684,9 @@ class VariableNotionalStructure(NotionalStructure):
         self._pay_date_start = pay_date_start
         self._pay_date_end = pay_date_end
 
-    def get_amount(self, period: int) -> float:
+    def get_amount(self, period: int = None) -> float:
+        if period is None:
+            return self._notional[0]
         return self._notional[period]
 
     def get_pay_date_start(self, period: int) -> datetime:
@@ -563,3 +775,178 @@ class ResettingNotionalStructure(NotionalStructure):
             "fixing_date": self._fixing_date,
         }
         return return_dict
+
+
+class AmortizationScheme(interfaces.FactoryObject):
+    """
+    Abstract base class for amortization schemes.
+    - none --> constant --> ConstNotionalStructure
+    - linear --> linear amortization --> LinearNotionalStructure
+    - variable --> variable amortization --> VariableNotionalStructure
+        - requires list of percentages and periods/dates(!?)
+        - requires consistency of dates to instrument dates at least regarding start and end date of the instrument
+        - requires implementation of abstract methods
+    - methods: get_amortization_periods, get_amortization_percentages_per_period, get_total_amortization_percentage, _to_dict, etc.
+    - subclasses implement specific schemes
+    """
+
+    @abc.abstractmethod
+    def __init__(self):
+        pass
+        pass
+
+    @abc.abstractmethod
+    def get_total_amortization(self) -> float:
+        pass
+
+    @abc.abstractmethod
+    def _to_dict(self) -> Dict:
+        pass
+
+    @classmethod
+    def _from_string(cls, data: Optional[str] = None) -> "AmortizationScheme":
+        """Create an AmortizationScheme object from a string representation.
+
+        Args:
+            data (str): String representation of the AmortizationScheme.
+
+        Returns:
+            AmortizationScheme: The created AmortizationScheme object.
+        """
+        if data == "linear":
+            return LinearAmortizationScheme()  # default to  single step
+        elif data == "constant" or data is None:
+            return ZeroAmortizationScheme()
+        else:
+            raise ValueError(f"Unknown AmortizationScheme type: {data}")
+
+
+class LinearAmortizationScheme(AmortizationScheme):
+    def __init__(self, total_amortization: float = 100.0, n_steps: int = 1):
+        """Constructor for a linear amortization scheme
+
+        Args:
+            n_steps (int): number of steps to linearly amortize the notional
+            total_amortization (float): total amortization percentage (default is 100.0)
+        """
+        if n_steps < 1:
+            raise ValueError("n_steps must be at least 1")
+        else:
+            self._n_steps = n_steps
+        if total_amortization < 0.0 or total_amortization > 100.0:
+            raise ValueError("total_amortization must be between 0.0 and 100.0")
+        else:
+            self._total_amortization = total_amortization
+
+    @property
+    def n_steps(self) -> int:
+        return self._n_steps
+
+    @n_steps.setter
+    def n_steps(self, n_steps: int):
+        if n_steps < 1:
+            raise ValueError("n_steps must be at least 1")
+        else:
+            self._n_steps = n_steps
+
+    @property
+    def total_amortization(self) -> float:
+        return self._total_amortization
+
+    @total_amortization.setter
+    def total_amortization(self, total_amortization: float):
+        if total_amortization < 0.0 or total_amortization > 100.0:
+            raise ValueError("total_amortization must be between 0.0 and 100.0")
+        else:
+            self._total_amortization = total_amortization
+
+    def get_total_amortization(self) -> float:
+        return self._total_amortization
+
+    def _to_dict(self) -> Dict:
+        # TODO fill out more
+        return_dict = {
+            "n_steps": self._n_steps,
+            "total_amortization": self._total_amortization,
+        }
+        return return_dict
+
+
+class ZeroAmortizationScheme(AmortizationScheme):
+    def __init__(self):
+        """Constructor for a constant amortization scheme (no amortization)"""
+        self._total_amortization = 0.0
+
+    # @property
+    # def total_amortization(self) -> float:
+    #     return self._total_percentage
+
+    # @total_amortization.setter
+    # def total_amortization(self, total_percentage: float):
+    #     if total_percentage < 0.0 or total_percentage > 100.0:
+    #         raise ValueError("total_percentage must be between 0.0 and 100.0")
+    #     else:
+    #         self._total_percentage = total_percentage
+
+    def _to_dict(self) -> Dict:
+        return_dict = {
+            "total_amortization": self._total_percentage,
+        }
+        return return_dict
+
+    def get_total_amortization(self) -> float:
+        return 0.0
+
+
+class VariableAmortizationScheme(AmortizationScheme):
+    def __init__(self, amortization_amounts: List[float], terms: List[Period] = []):
+        """Constructor for a variable amortization scheme
+
+        Args:
+            amortization_amounts (List[float]): amounts of amortizations, given as percentages (0-100)
+            terms (List[Period], optional): periods at which's end amortizations occur.
+        """
+        if len(amortization_amounts) != len(terms) and not len(terms) == 0:
+            raise ValueError("Length of amortization_amounts must equal length of terms")
+        if sum(amortization_amounts) > 100.0 or sum(amortization_amounts) < 0.0:
+            raise ValueError("Sum of amortization amounts cannot exceed 100.0 or be negative.")
+        else:
+            self._amortization_amounts = amortization_amounts
+            self._terms = terms
+
+    def _to_dict(self) -> Dict:
+        # TODO fill out more
+        return_dict = {
+            "amortization_amounts": self._amortization_amounts,
+            "terms": self._terms,
+        }
+        return return_dict
+
+    def get_nr_of_amortization_steps(self) -> int:
+        return len(self._amortization_amounts)
+
+    def get_total_amortization(self) -> float:
+        return sum(self._amortization_amounts)
+
+
+def components_main():
+    notional = LinearNotionalStructure(1000000, 0, 1)
+    # print("Initial notional amounts:", notional._start_notional, "to", notional._end_notional)
+    # print("Notional amounts over time:", notional._notional)
+    # print("Notional size:", notional.get_size())
+    # print("Amortization schedule:", notional.get_amortizations_by_index())
+    # print("Amortization schedule:", notional.get_amortization_schedule())
+
+    # notional_const = ConstNotionalStructure(500000)
+    # print("Constant notional amount:", notional_const._notional[0])
+    # print("Notional over time:", notional_const._notional)
+    # print("Notional size:", notional_const.get_size())
+    # print("Amortization schedule:", notional_const.get_amortizations_by_index())
+    # print("Amortization schedule:", notional_const.get_amortization_schedule())
+
+    # amort_1 = LinearAmortizationScheme(0.85, 4)
+    # print("Linear amortization total percentage:", amort_1.get_total_amortization())
+
+
+if __name__ == "__main__":
+    components_main()

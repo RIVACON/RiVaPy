@@ -1,6 +1,7 @@
 from unittest import main, TestCase
 
 import holidays
+from matplotlib.dates import relativedelta
 from rivapy.tools.datetools import calc_end_day, is_business_day, roll_day, Period, Schedule, DayCounter
 from rivapy.tools.enums import RollConvention, DayCounterType, RollRule
 import calendar
@@ -25,16 +26,143 @@ from holidays import DE, ECB
 
 class DayCounterTests(TestCase):
 
-    def test_ACT365(self):
+    def test_yf(self):
         d1 = datetime(2023, 1, 1)
         d2 = datetime(2024, 1, 1)
         self.assertAlmostEqual(DayCounter.yf_Act365Fixed(d1, d2), 1.0, delta=1e-5)
         dc = DayCounter(DayCounterType.Act365Fixed)
         self.assertAlmostEqual(DayCounter.yf_Act365Fixed(d1, d2), dc.yf(d1, d2), delta=1e-5)
 
+        d1 = datetime(2024, 12, 1)
+        d2 = datetime(2025, 2, 1)
+        self.assertAlmostEqual(DayCounter.yf_ActAct(d1, d2), 0.16963096040122763, delta=1e-5)
+        d1 = date(2024, 1, 1)
+        d2 = date(2025, 1, 1)
+        self.assertAlmostEqual(DayCounter.yf_Act360(d1, d2), 1.0166666666666666, delta=1e-5)
+        self.assertAlmostEqual(DayCounter.yf_Act365Fixed(d1, d2), 1.0027397260273974, delta=1e-5)
+        coupon_schedule = [date(2024, 5, 1), date(2024, 11, 1)]
+        self.assertEqual(DayCounter.yf_ActActICMA(date(2024, 5, 1), date(2024, 5, 31), coupon_schedule, coupon_frequency=2), 30 / 368)
 
-class Unit_Tests(TestCase):
+        self.assertAlmostEqual(DayCounter.yf_30360ISDA(date(2025, 1, 1), date(2025, 2, 1)), 0.08333333333333333, delta=1e-5)
+        self.assertAlmostEqual(DayCounter.yf_30360ISDA(date(2024, 12, 31), date(2025, 1, 31)), 0.08333333333333333, delta=1e-5)
+        self.assertAlmostEqual(DayCounter.yf_30360ISDA(date(2025, 4, 29), date(2025, 5, 30)), 0.08611111111111111, delta=1e-5)
+        self.assertAlmostEqual(DayCounter.yf_30360ISDA(date(2025, 4, 30), date(2025, 5, 31)), 0.08333333333333333, delta=1e-5)
 
+        self.assertAlmostEqual(DayCounter.yf_30E360(date(2024, 12, 31), date(2025, 1, 31)), 0.08333333333333333, delta=1e-5)
+        self.assertAlmostEqual(DayCounter.yf_30E360(date(2024, 12, 31), date(2025, 1, 30)), 0.08333333333333333, delta=1e-5)
+        self.assertAlmostEqual(DayCounter.yf_30E360(date(2024, 12, 30), date(2025, 1, 31)), 0.08333333333333333, delta=1e-5)
+        self.assertAlmostEqual(DayCounter.yf_30E360(date(2024, 12, 30), date(2025, 1, 30)), 0.08333333333333333, delta=1e-5)
+
+        self.assertAlmostEqual(DayCounter.yf_30U360(date(2024, 2, 29), date(2025, 2, 28)), 1.0, delta=1e-5)
+        self.assertAlmostEqual(DayCounter.yf_30U360(date(2024, 2, 28), date(2025, 2, 28)), 1.0, delta=1e-5)
+        self.assertAlmostEqual(DayCounter.yf_30U360(date(2023, 2, 28), date(2024, 2, 28)), 0.9944444444444445, delta=1e-5)
+
+
+class PeriodTests(TestCase):
+
+    def test_period(self):
+        p = Period(1975, 8, 22)
+        self.assertEqual(p.years, 1975)
+        self.assertEqual(p.months, 8)
+        self.assertEqual(p.days, 22)
+        self.assertTrue(p == Period(1975, 8, 22))
+        p = Period.from_string("T/N")
+        self.assertEqual(p.years, 0)
+        self.assertEqual(p.months, 0)
+        self.assertEqual(p.days, 1)
+        p = Period.from_string("O/N")
+        self.assertEqual(p.years, 0)
+        self.assertEqual(p.months, 0)
+        self.assertEqual(p.days, 1)
+        p = Period.from_string("5D")
+        self.assertEqual(p.years, 0)
+        self.assertEqual(p.months, 0)
+        self.assertEqual(p.days, 5)
+        P = Period.from_string("3M")
+        self.assertEqual(P.years, 0)
+        self.assertEqual(P.months, 3)
+        self.assertEqual(P.days, 0)
+        p = Period.from_string("2Y")
+        self.assertEqual(p.years, 2)
+        self.assertEqual(p.months, 0)
+        self.assertEqual(p.days, 0)
+        with self.assertRaises(Exception):
+            Period.from_string("1W")
+
+
+class OGandOwnTests(TestCase):
+    # These tests are shall reproduce the results given in [Chapter 4](https://usermanual.wiki/Document/interestrateinstrumentsandmarketconventionsguide.1425400940/view)
+    # of Interest Rate Instruments and Market Conventions Guide by OpenGamma
+    holidays_target2 = holidays.ECB(years=[2011, 2012])
+    holidays_de = holidays.DE(years=1997)
+
+    # OpenGamma Tests
+    def test_rolls(self):
+        start_date = date(2011, 8, 18)
+        end_date = start_date + relativedelta(months=1)
+        self.assertEqual(roll_day(end_date, self.holidays_target2, RollConvention.FOLLOWING), datetime(2011, 9, 19))
+        self.assertEqual(roll_day(end_date, self.holidays_target2, RollConvention.PRECEDING), datetime(2011, 9, 16))
+        start_date = date(2011, 6, 30)
+        end_date = start_date + relativedelta(months=1)
+        self.assertEqual(roll_day(end_date, self.holidays_target2, RollConvention.MODIFIED_FOLLOWING), datetime(2011, 7, 29))
+        self.assertEqual(roll_day(end_date, self.holidays_target2, RollConvention.FOLLOWING), datetime(2011, 8, 1))
+        self.assertEqual(roll_day(end_date, self.holidays_target2, RollConvention.MODIFIED_FOLLOWING), datetime(2011, 7, 29))
+        start_date = date(2011, 9, 15)
+        end_date = start_date + relativedelta(months=1)
+        self.assertEqual(roll_day(end_date, self.holidays_target2, RollConvention.MODIFIED_FOLLOWING_BIMONTHLY), datetime(2011, 10, 14))
+        self.assertEqual(roll_day(end_date, self.holidays_target2, RollConvention.FOLLOWING), datetime(2011, 10, 17))
+        start_date = date(2011, 2, 28)
+        end_date = start_date + relativedelta(months=1)
+        self.assertEqual(roll_day(end_date, self.holidays_target2, RollConvention.MODIFIED_FOLLOWING_EOM, start_date), datetime(2011, 3, 31))
+        start_date = date(2011, 4, 29)
+        end_date = start_date + relativedelta(months=1)
+        self.assertEqual(roll_day(end_date, self.holidays_target2, RollConvention.MODIFIED_FOLLOWING_EOM, start_date), datetime(2011, 5, 31))
+        start_date = date(2012, 2, 28)
+        end_date = start_date + relativedelta(months=1)
+        self.assertEqual(roll_day(end_date, self.holidays_target2, RollConvention.MODIFIED_FOLLOWING_EOM, start_date), datetime(2012, 3, 28))
+
+    # Own Tests
+
+    @staticmethod
+    def weekday(n):
+        name = {1: "Monday", 2: "Tuesday", 3: "Wednesday", 4: "Thursday", 5: "Friday", 6: "Saturday", 7: "Sunday"}
+        return name.get(n, "weekday(" + str(n) + ") is an invalid day of the week!")
+
+    def test_holidays(self):
+        for holiday_date, holiday_name in sorted(self.holidays_de.items()):
+            # self.assertTrue(
+            #     self.weekday(holiday_date.isoweekday()) in [6, 7]
+            #     or holiday_name
+            #     in [
+            #         "Neujahr",
+            #         "Karfreitag",
+            #         "Ostermontag",
+            #         "Erster Mai",
+            #         "Christi Himmelfahrt",
+            #         "Pfingstmontag",
+            #         "Tag der Deutschen Einheit",
+            #         "Erster Weihnachtstag",
+            #         "Zweiter Weihnachtstag",
+            #     ],
+            #     f"Unexpected holiday {holiday_name} on {holiday_date} ({self.weekday(holiday_date.isoweekday())})",
+            # )
+            self.assertTrue(
+                holiday_date
+                in [
+                    date(1997, 1, 1),
+                    date(1997, 3, 28),
+                    date(1997, 3, 31),
+                    date(1997, 5, 1),
+                    date(1997, 5, 8),
+                    date(1997, 5, 19),
+                    date(1997, 10, 3),
+                    date(1997, 12, 25),
+                    date(1997, 12, 26),
+                ]
+            )
+
+
+class RollingSchedulingTests(TestCase):
     def test_roll_day(self):
         holidays_de = DE()
 

@@ -3,13 +3,23 @@ from typing import List, Tuple, Union as _Union, Optional as _Optional
 from scipy.optimize import brentq
 from rivapy.tools.enums import DayCounterType, InterestRateIndex
 from rivapy.tools.interfaces import BaseDatedCurve
-from rivapy.instruments.bond_specifications import DeterministicCashflowBondSpecification
+from rivapy.instruments.bond_specifications import DeterministicCashflowBondSpecification, FloatingRateBondSpecification
 from rivapy.marketdata.curves import DiscountCurveComposition
 from rivapy.marketdata import DiscountCurveParametrized, ConstantRate
 from rivapy.pricing.pricing_request import PricingRequest
 from rivapy.instruments._logger import logger
 from rivapy.marketdata.curves import DiscountCurve
-from rivapy.tools.datetools import Period, _date_to_datetime, _term_to_period, _string_to_calendar, DayCounter, Schedule, roll_day, calc_start_day
+from rivapy.tools.datetools import (
+    Period,
+    _date_to_datetime,
+    _term_to_period,
+    _string_to_calendar,
+    DayCounter,
+    Schedule,
+    roll_day,
+    calc_start_day,
+    _period_to_string,
+)
 from typing import Tuple, Union as _Union, List as _List
 
 
@@ -38,6 +48,27 @@ class DeterministicCashflowPricer:
         self._spec = spec
         self._discount_curve = discount_curve
         self._fwd_curve = fwd_curve
+        self._cashflows = None
+
+    @property
+    def cashflows(self) -> _List[Tuple[datetime, float]]:
+        """Get the cashflows of the instrument.
+
+        Returns:
+            Cashflow: The cashflows of the instrument.
+        """
+        if self._cashflows is None:
+            self._cashflows = DeterministicCashflowPricer.get_expected_cashflows(self._spec, self._val_date, self._fwd_curve)
+        return self._cashflows
+
+    @cashflows.setter
+    def cashflows(self, value: _List[Tuple[datetime, float]]):
+        """Set the cashflows of the instrument.
+
+        Returns:
+            Cashflow: The cashflows of the instrument.
+        """
+        self._cashflows = value
 
     def expected_cashflows(self) -> _List[Tuple[datetime, float]]:
         """Get the expected cashflows of the instrument.
@@ -45,7 +76,7 @@ class DeterministicCashflowPricer:
         Returns:
             List[Tuple[datetime, float]]: The expected cashflows of the instrument.
         """
-        return DeterministicCashflowPricer.get_expected_cashflows(self, self._val_date, self._fwd_curve)
+        return DeterministicCashflowPricer.get_expected_cashflows(self._spec, self._val_date, self._fwd_curve)
 
     @staticmethod
     def get_expected_cashflows(
@@ -66,40 +97,51 @@ class DeterministicCashflowPricer:
         """
         cashflows = []
         if spec._coupon_type != "zero":
-            schedule = spec.get_schedule()
-            # schedule for accrual periods rolled out
-            dates = schedule._roll_out(
-                from_=spec._start_date if not spec._backwards else spec._end_date,
-                to_=spec._end_date if not spec._backwards else spec._start_date,
-                term=_term_to_period(spec._frequency),
-                long_stub=spec._stub_type_is_Long,
-                backwards=spec._backwards,
-            )
+            # schedule = spec.get_schedule()
+            # # schedule for accrual periods rolled out
+            # dates = schedule._roll_out(
+            #     from_=spec._start_date if not spec._backwards else spec._end_date,
+            #     to_=spec._end_date if not spec._backwards else spec._start_date,
+            #     term=_term_to_period(spec._frequency),
+            #     long_stub=spec.stub_type_is_Long,
+            #     backwards=spec.backwards,
+            # )
+            dates = spec.dates
+            # print(spec._notional.get_amortization_schedule())
             dcc = DayCounter(spec.day_count_convention)
             for d1, d2 in zip(dates[:-1], dates[1:]):
-                payment_date = roll_day(d2, spec._calendar, spec._business_day_convention, settle_days=spec._payment_days)
-                if spec._coupon_type == "float":
+                payment_date = roll_day(d2, spec.calendar, spec.business_day_convention, settle_days=spec.payment_days)
+                if spec.coupon_type == "float":
                     if val_date is None or fwd_curve is None:
                         raise ValueError("val_date and fwd_curve must be provided for floating rate cashflow calculation.")
                     rate = DeterministicCashflowPricer.get_float_rate(spec, val_date, d1, d2, fwd_curve)
                 else:
-                    rate = spec._coupon
-                nr = 0
-                if spec.day_count_convention == DayCounterType.ActActICMA.value:
+                    rate = spec.coupon
+                # normalize day count convention to canonical string before comparison
+                if DayCounterType.to_string(spec.day_count_convention) == DayCounterType.ActActICMA.value:
                     nr = spec.get_nr_annual_payments()
                     if nr == 0:
                         raise ValueError("Number of annual payments is zero. Please check the frequency setting in the bond specification.")
-                dcv = dcc.yf(d1, d2, dates, nr)
-
-                amount = spec._notional * rate * dcv
+                    dcv = dcc.yf(d1, d2, dates, nr)
+                else:
+                    dcv = dcc.yf(d1, d2)
+                amount = spec._notional.get_amount_per_date(d1) * rate * dcv
                 cashflows.append((payment_date, amount))
+        # add notional amortizations to cashflow list
+        cashflows.extend(spec._notional.get_amortization_schedule())
+        # add notional exchanges at start and end date if applicable (and only remaining notionals after amortizations)
         if spec._notional_exchange:
             # add notional exchange at start and end date
-            not_init = spec._issue_price if spec._issue_price is not None else spec._notional
+            not_init = spec._issue_price if spec._issue_price is not None else spec._notional.get_amount(0)
             cashflows.append((spec._start_date, not_init * (-1)))
-            cashflows.append(
-                (roll_day(spec._maturity_date, spec._calendar, spec._business_day_convention, settle_days=spec._payment_days), spec._notional)
-            )
+            rem_amount = spec._notional.get_amount(0) - spec._amortization_scheme.get_total_amortization()
+            if rem_amount > 0:
+                cashflows.append(
+                    (
+                        roll_day(spec._maturity_date, spec._calendar, spec._business_day_convention, settle_days=spec._payment_days),
+                        rem_amount,
+                    )
+                )
         cashflows = sorted(cashflows)
         return cashflows
 
@@ -124,8 +166,8 @@ class DeterministicCashflowPricer:
         Returns:
             float: The floating rate for the given period, including margin.
         """
-        if specification._index is not None:  # For the first period, check if we have a fixing rate or if d1 is before curve date
-            spot_days = InterestRateIndex(specification._index).value.spot_days
+        if specification._ir_index is not None:  # For the first period, check if we have a fixing rate or if d1 is before curve date
+            spot_days = InterestRateIndex(specification._ir_index).value.spot_days
         else:
             spot_days = specification._spot_days
         fixing_date = calc_start_day(
@@ -136,13 +178,19 @@ class DeterministicCashflowPricer:
         )
         if fixing_date <= curve.refdate:
             try:
-                rate = specification._fixings.get_fixing(specification._index, fixing_date)
+                print(specification._ir_index)
+                fix_name = (
+                    InterestRateIndex(specification._ir_index).value.name
+                    if specification._ir_index is not None and isinstance(InterestRateIndex(specification._ir_index), InterestRateIndex)
+                    else _period_to_string(specification._frequency)
+                )
+                rate = specification._fixings.get_fixing(fix_name, fixing_date)
             except Exception as e:
                 logger.warning(f"No fixing found for {specification._index} on {fixing_date}. Using 0.0 as fixed rate. Error: {e}")
                 rate = 0.0
         else:
             # For other periods use forward rate from curve
-            rate = curve.value_fwd(val_date, d1, d2) if curve is not None else 0.0
+            rate = curve.value_fwd_rate(val_date, d1, d2) if curve is not None else 0.0
         rate += specification._margin / 10000.0  # add margin
         return rate
 
@@ -150,6 +198,7 @@ class DeterministicCashflowPricer:
     def get_accrued_interest(
         specification: DeterministicCashflowBondSpecification,
         trade_date: _Union[date, datetime, None] = None,
+        fwd_curve: _Union[DiscountCurve, None] = None,
     ) -> float:
         """
         Get the accrued interest for a given instrument specification.
@@ -166,9 +215,10 @@ class DeterministicCashflowPricer:
         if specification._coupon_type == "zero":
             return 0.0
         else:
-            schedule = specification.get_schedule()
-            # schedule for payment periods rolled out
-            dates = schedule._roll_out(from_=specification._start_date, to_=specification._end_date, term=_term_to_period(specification._frequency))
+            # schedule = specification.get_schedule()
+            # # schedule for payment periods rolled out
+            # dates = schedule._roll_out(from_=specification._start_date, to_=specification._end_date, term=_term_to_period(specification._frequency))
+            dates = specification.dates
             dates = sorted(dates)
             # find the last coupon date before or on trade_date
             last_coupon_date = None
@@ -184,16 +234,21 @@ class DeterministicCashflowPricer:
 
             dcc = DayCounter(specification.day_count_convention)
             # Calculate the fraction of the coupon period that has accrued
-            accrual_fraction = dcc.yf(last_coupon_date, trade_date) / dcc.yf(last_coupon_date, next_coupon_date)
+            if isinstance(specification, FloatingRateBondSpecification):
+                accrual_fraction = dcc.yf(last_coupon_date, trade_date, specification.dates, specification.get_nr_annual_payments()) / dcc.yf(
+                    last_coupon_date, next_coupon_date, specification.dates, specification.get_nr_annual_payments()
+                )
+                yf = dcc.yf(last_coupon_date, next_coupon_date, specification.dates, specification.get_nr_annual_payments())
+            else:
+                accrual_fraction = dcc.yf(last_coupon_date, trade_date) / dcc.yf(last_coupon_date, next_coupon_date)
+                yf = dcc.yf(last_coupon_date, next_coupon_date)
             # Calculate the accrued interest
             if specification._coupon_type == "float":
-                rate = DeterministicCashflowPricer.get_float_rate(specification, trade_date, last_coupon_date, next_coupon_date)
+                rate = DeterministicCashflowPricer.get_float_rate(specification, trade_date, last_coupon_date, next_coupon_date, fwd_curve)
             else:
                 rate = specification._coupon
-            accrued_interest = specification._notional * rate * accrual_fraction * dcc.yf(last_coupon_date, next_coupon_date)
+            accrued_interest = specification._notional.get_amount_per_date(trade_date) * rate * accrual_fraction * yf
             return accrued_interest
-
-        return accrued_interest
 
     def pv_cashflows(self) -> float:
         """Get the present value of the cashflows.
@@ -275,7 +330,7 @@ class DeterministicCashflowPricer:
         Returns:
             float: The computed yield.
         """
-        return DeterministicCashflowPricer.get_compute_yield(target_dirty_price, self._val_date, self._spec)
+        return DeterministicCashflowPricer.get_compute_yield(target_dirty_price, self._val_date, self._spec, cashflows=self.cashflows)
 
     # TODO: add accrued interest
     @staticmethod
@@ -283,12 +338,16 @@ class DeterministicCashflowPricer:
         target_dirty_price: float,
         val_date: datetime,
         specification: DeterministicCashflowBondSpecification,
+        cashflows: _Union[List[Tuple[datetime, float]], None] = None,
+        fwd_curve: _Union[DiscountCurve, None] = None,
     ) -> float:
         logger.info("Start computing bond z-spread for bond " + specification.obj_id + ", dirty price: " + str(target_dirty_price))
+        if cashflows is None:
+            cashflows = DeterministicCashflowPricer.get_expected_cashflows(specification, val_date, fwd_curve=fwd_curve)
 
         def target_function(r: float) -> float:
             dc = ConstantRate(r)
-            price = DeterministicCashflowPricer.get_pv_cashflows(val_date, specification, dc)
+            price = DeterministicCashflowPricer.get_pv_cashflows(val_date, specification, dc, cashflows=cashflows)
             logger.debug("Target function called with r: " + str(r) + ", price: " + str(price) + ", target_dirty_price: " + str(target_dirty_price))
             return price - target_dirty_price
 
@@ -298,17 +357,27 @@ class DeterministicCashflowPricer:
 
     @staticmethod
     def get_z_spread(
-        target_dirty_price: float, val_date: datetime, specification: DeterministicCashflowBondSpecification, discount_curve: DiscountCurve
+        target_dirty_price: float,
+        val_date: datetime,
+        specification: DeterministicCashflowBondSpecification,
+        discount_curve: DiscountCurve,
+        cashflows: _Union[List[Tuple[datetime, float]], None] = None,
+        fwd_curve: _Union[DiscountCurve, None] = None,
     ) -> float:
-        # logger.info('Start computing bond yield for bond ' + specification.obj_id + ', dirty price: ' + str(target_dirty_price))
+        logger.info("Start computing z-spread for bond " + specification.obj_id + ", dirty price: " + str(target_dirty_price))
+        if cashflows is None and fwd_curve is not None:
+            cashflows = DeterministicCashflowPricer.get_expected_cashflows(specification, val_date, fwd_curve=fwd_curve)
+        else:
+            logger.error("To compute z-spread with floating rate bonds, cashflows, or fwd_curve must be provided to calculate cashflows.")
+
         def target_function(r: float) -> float:
-            dc = DiscountCurveComposition(discount_curve, ConstantRate(r))
-            price = DeterministicCashflowPricer.pv_cashflows(val_date, specification, dc)
+            dc = DiscountCurveComposition(discount_curve, 1.0, r)
+            price = DeterministicCashflowPricer.get_pv_cashflows(val_date, specification, dc, cashflows=cashflows)
             logger.debug("Target function called with r: " + str(r) + ", price: " + str(price) + ", target_dirty_price: " + str(target_dirty_price))
             return price - target_dirty_price
 
         result = brentq(target_function, -0.2, 1.5, full_output=False)
-        # logger.info('Finished computing bond yield')
+        logger.info("Finished computing z-spread.")
         return result
 
     def z_spread(self, target_dirty_price: float) -> float:
@@ -319,4 +388,36 @@ class DeterministicCashflowPricer:
         Returns:
             float: The computed z-spread.
         """
-        return DeterministicCashflowPricer.get_z_spread(target_dirty_price, self._val_date, self._spec, self._discount_curve)
+        return DeterministicCashflowPricer.get_z_spread(target_dirty_price, self._val_date, self._spec, self._discount_curve, self._cashflows)
+
+    ############################# PRICER ONLY METHODS BELOW #####################################
+
+    def macaulay_duration(self) -> float:
+        logger.info("Start computing macaulay duration for bond " + self._spec.obj_id)
+        cashflows = self.expected_cashflows()
+        pv_cashflows = DeterministicCashflowPricer.get_pv_cashflows(
+            self._val_date, self._spec, self._discount_curve, self._fwd_curve, cashflows=cashflows
+        )
+        # print(pv_cashflows)
+        macaulay_duration = 0.0
+        dcc = DayCounter(self._spec.day_count_convention)  # , self._spec._get_coupon_frequency if self._spec._coupon_type != "zero" else None)
+        for c in cashflows:
+            if c[0] > self._val_date:
+                df = self._discount_curve.value(self._val_date, c[0])
+                t = dcc.yf(self._val_date, c[0], self._spec.dates, self._spec.nr_annual_payments)
+                macaulay_duration += t * df * c[1]
+        if pv_cashflows > 0:
+            macaulay_duration /= pv_cashflows
+        logger.info("Finished computing macaulay duration for bond " + self._spec.obj_id + ", macaulay_duration: " + str(macaulay_duration))
+        return macaulay_duration
+
+    def modified_duration(
+        self,
+        target_dirty_price: float = 100.0,
+    ) -> float:
+        logger.info("Start computing modified duration for bond " + self._spec.obj_id)
+        macaulay_duration = self.macaulay_duration()
+        yld = self.compute_yield(target_dirty_price)
+        modified_duration = macaulay_duration / (1 + yld)
+        logger.info("Finished computing modified duration for bond " + self._spec.obj_id + ", modified_duration: " + str(modified_duration))
+        return modified_duration
