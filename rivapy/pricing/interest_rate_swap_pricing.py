@@ -670,6 +670,8 @@ class InterestRateSwapPricer:
                 val_date, leg_spec, discount_curve, forward_curve, fxForward_curve, fixing_map, fixing_grace_period
             )
             # TODO implement spread
+            # WE NEED TO INSERT EXIT CLAUSE HERE so that if OIS, we analytically calculate the present value of the OIS leg instead of looping over cashflows
+
         else:
             raise ValueError(f"Unknown leg type {leg_spec.type}")
 
@@ -749,6 +751,10 @@ class InterestRateSwapPricer:
                 PV_fixed(r*) = r* * Annuity
             where
                 Annuity = sum(notional_i * DF_i * YF_i*)
+
+        Fast path for OIS floating leg: use analytical OIS formula
+        so we do not simulate daily compounding each time inside the solver.
+
         Args:
             ref_date (_Union[date, datetime]): reference date
             discount_curve (DiscountCurve): discoutn curve to determine present value
@@ -764,10 +770,41 @@ class InterestRateSwapPricer:
 
         fixing_grace_period = pricing_params["fixing_grace_period"]
 
+        # -----------------------------
+        # Fast analytical OIS path:
+        # - If the floating leg is OIS, compute the fixed rate (par swap rate)
+        #   analytically using discount factors on the fixed leg payment dates:
+        #       R = (1 - P(T_N)) / sum_i alpha_i * P(T_i)
+        # - This is equivalent to pricing the compounded overnight floating leg.
+        # -----------------------------
+        try:
+            if hasattr(float_leg, "leg_type") and float_leg.leg_type == IrLegType.OIS:
+                return InterestRateSwapPricer.compute_swap_rate_ois_analytical(
+                            ref_date, discount_curve, fixing_curve, float_leg, fixed_leg
+                        )
+            #if getattr(float_leg, "leg_type", None) == IrLegType.OIS:
+            #    # For OIS float leg we assume standard OIS setup and no adjustments are needed.
+            #    # We compute the par rate for the fixed leg against the discount factors.
+            #    return InterestRateSwapPricer._compute_ois_analytical_rate(ref_date, discount_curve, fixed_leg)
+        except Exception:
+            # If anything unexpected (missing attributes) happens, fall back to generic route
+            logger.debug("Fast OIS path failed/fell through; using generic pricing path.")
+
+
+
+        # if fixed_leg.obj_id == "OIS_2M_fixed_leg3": # DEBUG TEST 2025
+        #    logger.debug("OIS_2M_fixed_leg3 detected")
+
+        # -----------------------------
+        # generic path:
         float_leg_PV = InterestRateSwapPricer.price_leg(ref_date, discount_curve, fixing_curve, None, float_leg, fixing_map, fixing_grace_period)
         fixed_leg_annuity = InterestRateSwapPricer.price_leg(
             ref_date, discount_curve, fixing_curve, None, fixed_leg, fixing_map, fixing_grace_period, pricing_params
         )
+
+        if fixed_leg_annuity == 0:
+            logger.error("Fixed leg annuity is zero, cannot compute swap rate!")
+
         return float_leg_PV / fixed_leg_annuity
 
     # TODO
@@ -820,6 +857,115 @@ class InterestRateSwapPricer:
         return (receive_leg_PV - pay_leg_PV) / fixed_leg_PV01
 
 
+    @staticmethod
+    def compute_swap_rate_ois_analytical(
+        ref_date: datetime,
+        discount_curve: DiscountCurve,
+        forward_curve: DiscountCurve,
+        float_leg: IrOISLegSpecification,
+        fixed_leg: IrFixedLegSpecification,
+        ) -> float:
+
+        """
+        Analytical OIS fair rate computation without daily compounding loops.
+        VERSION 2: handle date structure?
+        """
+
+
+        dcc = DayCounter(discount_curve.daycounter)
+        num_periods = len(float_leg.start_dates)
+
+        # get notionals using the same logic as your existing daily compounding path
+        leg_notional_structure = float_leg.get_NotionalStructure()
+        notionals = get_projected_notionals(
+            val_date=ref_date,
+            notional_structure=leg_notional_structure,
+            start_period=0,
+            end_period=num_periods,
+            fx_forward_curve=forward_curve,
+            fixing_map=FixingTable(),
+        )
+
+        start_dates = float_leg.start_dates
+        end_dates = float_leg.end_dates
+        pay_dates = float_leg.pay_dates
+
+        pv_float = 0.0
+        annuity = 0.0
+
+        # use analytical compounding shortcut:
+        # for each coupon period, the compounded OIS rate ≈ (DF_start / DF_end - 1) / YF
+        for i in range(num_periods):
+            yf = dcc.yf(start_dates[i], end_dates[i])
+            df_start = discount_curve.value(ref_date, start_dates[i])
+            df_end = discount_curve.value(ref_date, end_dates[i])
+
+            # period return implied by discount factors
+            # period_rate = (df_start / df_end - 1.0) / yf # for DEBUG
+
+            # PV of floating leg cashflow = notional * (DF_start - DF_end)
+            pv_float += notionals[i] * (df_start - df_end)
+
+            # annuity = sum of DF_end * yf * notional (denominator in swap rate)
+            annuity += notionals[i] * yf * df_end
+
+        if annuity == 0:
+            raise ValueError("Zero annuity in OIS analytical pricing")
+
+        # fair fixed rate = PV_float / Annuity
+        return pv_float / annuity
+
+
+    @staticmethod
+    def _compute_ois_analytical_rate(
+        ref_date: _Union[date, datetime],
+        discount_curve: DiscountCurve,
+        fixed_leg: IrFixedLegSpecification,
+    ) -> float:
+        """
+        Analytical OIS par-rate (assumes floating leg is overnight-compounded).
+        Formula:
+            R = (1 - P(T_N)) / sum_i alpha_i * P(T_i)
+        where:
+        - P(T_i) are discount factors for fixed leg pay dates
+        - alpha_i are accrual year fractions for each fixed coupon period
+        Returns par fixed rate that equates PV_fixed = PV_float (analytical).
+        """
+        # Extract fixed leg dates and day count convention
+        pay_dates = fixed_leg.pay_dates
+        start_dates = fixed_leg.start_dates
+
+        if not pay_dates or not start_dates:
+            raise ValueError("Fixed leg must have start_dates and pay_dates for analytical OIS computation.")
+
+        # Day counter to compute year fractions for the fixed leg accruals
+        dcc = DayCounter(discount_curve.daycounter)
+
+        # Get discount factors at fixed leg pay dates (use discount_curve.value)
+        # Note: discount_curve.value(ref_date, date) is assumed to return DF(ref_date -> date)
+        dfs = [discount_curve.value(ref_date, d) for d in pay_dates]
+
+        # Year fractions (alpha_i) for the fixed leg accruals
+        year_fracs = [dcc.yf(start_dates[i], pay_dates[i]) for i in range(len(pay_dates))]
+
+        # Numerator and denominator
+        P_TN = dfs[-1]
+        numerator = 1.0 - P_TN
+        denominator = 0.0
+        for i in range(len(pay_dates)):
+            # if year_frac is 0 (weird), skip or raise - but better to add small guard
+            alpha = year_fracs[i]
+            if alpha <= 0:
+                # If alpha == 0, contribution to annuity is 0; keep consistent behaviour
+                continue
+            denominator += dfs[i] * alpha
+
+        if denominator == 0:
+            raise ZeroDivisionError("Fixed leg annuity denominator is zero in OIS analytical rate computation.")
+
+        return numerator / denominator
+
+
 #########################################################################
 # FUNCTIONS
 def get_projected_notionals(
@@ -867,6 +1013,10 @@ def get_projected_notionals(
     return result
 
 
+
+
+
+
 # getPricingData
 
 
@@ -877,6 +1027,12 @@ def get_projected_notionals(
 
 
 # computeBasisSpread
+
+
+
+
+
+
 if __name__ == "__main__":
     pass
     # InterestRateSwapPricer

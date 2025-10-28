@@ -2,11 +2,13 @@
 import unittest
 
 
-from setup_logging import setup_logging_for_tests
+from tests.setup_logging import setup_logging_for_tests
 
 # Configure logging once per test module
-setup_logging_for_tests("tests\rivapy_test.log")
+setup_logging_for_tests("tests/rivapy_test.log")
+import logging
 
+logger = logging.getLogger("rivapy.tests.test_bootstrap")
 
 import math
 import pandas as pd
@@ -41,7 +43,15 @@ from holidays import EuropeanCentralBank as _ECB
 
 
 # Helper functions
-
+def tolerance_from_quote(q:float)->float:
+    """
+    Determine an appropriate delta for assertAlmostEqual
+    based on the number of decimals in the quote.
+    """
+    s = format(q, "f").rstrip("0").rstrip(".")
+    decimals = len(s.split(".")[1]) if "." in s else 0
+    delta = 0.5 * 10 ** (-decimals)
+    return delta
 
 def deep_equal(obj1, obj2):
     if type(obj1) != type(obj2):
@@ -402,6 +412,7 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
 
     def test_deposit_bootstrap(self):
         # Minimal deposit: 6M, 2% rate
+        logger.debug("Creating 1 deposit instrument")
         start_date = self.ref_date + timedelta(days=2)  # spot lag of 2 days
         end_date = start_date + timedelta(days=1)  # 1 day after startdate
         deposit = DepositSpecification(
@@ -413,6 +424,7 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
             day_count_convention=self.day_count,
             rate=0.01,  # rate different from "market quote" to ensure that rate here is NOT used in deposit bootstrapping
         )
+        logger.debug("Running single curve bootstrapping")
         curve = bootstrap_curve(
             ref_date=self.ref_date,
             curve_id=self.curve_id,
@@ -423,6 +435,7 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
             extrapolation_type=self.extrap,
         )
         # print(curve.get_dates())
+        logger.debug("Checking assertions")
         self.assertIsInstance(curve, DiscountCurve)
         self.assertEqual(curve.get_dates()[0], self.ref_date)
         self.assertEqual(curve.get_dates()[1], end_date)
@@ -430,6 +443,7 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
         # the discount curve needs to be able to get the same market quote for the instrument
         model_quote = get_quote(self.ref_date, deposit, {"discount_curve": curve})
         self.assertAlmostEqual(model_quote, 0.025, delta=1e-8)  # not good enough, what is going on? not enough data points?
+        logger.debug("TestBootstrapCurveInstruments.test_deposit_bootstrap completed")
 
     def test_fra_bootstrap(self):
         # Minimal FRA: 6Mx3M, 2.5% rate
@@ -1615,12 +1629,17 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         # we use the helper function with spotlag in place of maturity to effctively shift the date
         spot_date = calc_end_day(start_day=refDate, term=spotLag, business_day_convention=rollConvFix, calendar=holidays)
         expiry = calc_end_day(spot_date, maturity, rollConvFix, holidays)
+        expiry_unadjusted = calc_end_day(start_day=spot_date, term=maturity, calendar=holidays)
 
         # start_day = calc_start_day(ref)
         # end_day = calc_end_day()
         # generate_dates
         fix_schedule = Schedule(
-            start_day=spot_date, end_day=expiry, time_period=fixPayFreq, business_day_convention=rollConvFix, calendar=holidays, ref_date=refDate
+            start_day=spot_date, end_day=expiry_unadjusted,#expiry,
+              time_period=fixPayFreq, 
+              business_day_convention=rollConvFix, 
+              calendar=holidays, 
+              ref_date=refDate
         ).generate_dates(False)
 
         # fix_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_days)
@@ -1630,7 +1649,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
 
         flt_schedule = Schedule(
             start_day=spot_date,
-            end_day=expiry,
+            end_day=expiry_unadjusted,#expiry,
             time_period=underlyingPayFreq,
             business_day_convention=rollConvFloat,
             calendar=holidays,
@@ -1849,19 +1868,22 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         # self.assertEqual(1, 1)
 
     def test_bootstrap_ois_from_df(self):
-        """Test of the bootstrap function using deposit specifications
+        """Test of the bootstrap function using ois specifications
         parsed from a datafram of expected format
 
-        Assumption is that the deposits are already ordered by maturity...
+        Assumption is that the ois are already ordered by maturity...
 
         """
-
+        logger.debug(f"--------------------------------------------------------")
+        logger.debug("test_bootstrap_ois_from_df start")
         # these inputs must be given by user
         refDate = datetime(2019, 3, 1)
         holidays = _ECB()
 
         df = self.quotes_df.copy()
         df_ins = df[df["Instrument"] == "OIS"]
+
+        logger.debug("CSV loaded")
 
         min_i = 0
         max_i = 18  # 19-25 problematic?
@@ -1870,6 +1892,8 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         ins_spec = sfc.load_specifications_from_pd(df_ins.iloc[np.r_[min_i:max_i, min_i2:max_i2]], refDate, holidays)
         # ins_quotes = df_ins["Quote"].tolist()[min_i:max_i]
         ins_quotes = df_ins["Quote"].tolist()[min_i:max_i] + df_ins["Quote"].tolist()[min_i2:max_i2]
+
+        logger.debug("instrument specifications created")
 
         # print("--------------DEBUG PARSING")
         # print(ins_quotes[0])
@@ -1882,19 +1906,20 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         #     print(i, ins_quotes[i])
 
         print("--------------Starting bootstrapper")
+        logger.debug(f"starting bootstrapper of {len(ins_quotes)} instruments")
         curve = bootstrap_curve(
             ref_date=refDate,
             curve_id="OIS_estr",
             day_count_convention=df_ins["DayCountFixed"].tolist()[0],  # taken the first entry and assume is valid for all other deposits
             instruments=ins_spec,
             quotes=ins_quotes,
-            interpolation_type=InterpolationType.LINEAR,
-            extrapolation_type=ExtrapolationType.LINEAR,
+            interpolation_type=InterpolationType.LINEAR_LOG,
+            extrapolation_type=ExtrapolationType.LINEAR_LOG,
         )
         # print(curve.get_dates())
         self.assertIsInstance(curve, DiscountCurve)
         self.assertEqual(curve.get_dates()[0], refDate)
-
+        logger.debug("bootstrapped curve dates matched")
         # the discount curve needs to be able to get the same market quote for the instrument
         for i in range(len(ins_spec)):
             model_quote = get_quote(refDate, ins_spec[i], {"discount_curve": curve, "fixing_curve": curve})
@@ -1902,13 +1927,12 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
             # per_diff = (model_quote - deposit_quotes[i]) / deposit_quotes[i] * 100
             # print(f"model: {model_quote} market: {deposit_quotes[i]} perdiff: {per_diff}")
 
+        logger.debug(f"asserted market quote matched -done")
+        logger.debug(f"--------------------------------------------------------")
         # self.assertEqual(1, 1)
 
     def test_multicurve_bootstrap_ois_3M(self):
-        """Test of the bootstrap function using deposit specifications
-        parsed from a datafram of expected format
-
-        Assumption is that the deposits are already ordered by maturity...
+        """Test of the bootstrap function for multicurve generation...
 
         """
 
@@ -1998,13 +2022,159 @@ class TestReferenceDateDependance(unittest.TestCase):
         """_summary_"""
         # set directory and file name for Input Quotes
         dirName = "./notebooks/marketdata"  # "./"
-        fileName = "/inputQuotes_includeFRAs.csv"  # "/inputQuotes.csv"
+        fileName = "/multi_dates.csv"  # "/inputQuotes.csv"
 
         df = pd.read_csv(dirName + fileName, sep=";", decimal=",")
         column_names = list(df.columns)
 
         self.quotes_df = df
         self.column_names = column_names
+
+    def test_date1(self):
+        """Using 2025 09 24 as a control date, to ensure the proper bootstrapping from frontmark data."""
+
+        logger.debug(f"--------------------------------------------------------")
+        logger.debug("test_date dependency 1 start")
+        # these inputs must be given by user
+        mon = "09"
+        day = "24"
+        year = "2025"
+        date_str = f"{day}.{mon}.{year}"
+        refDate = datetime(int(year), int(mon), int(day))
+        holidays = _ECB()
+
+        df = self.quotes_df.copy()
+
+        A = df[df["Date"] == date_str]
+
+        # df_ins = df[df["Instrument"] == "OIS"]
+        # dc_df_temp = df[(df["Date"] == selected_date) & (df["Currency"] == selected_currency)  & (df["UnderlyingIndex"] == "ESTR") & (df["Instrument"] == "OIS") ]
+        df_ins = df[(df["Date"] == date_str) & (df["Currency"] == "EUR") & (df["UnderlyingIndex"] == "EONIA") & (df["Instrument"] == "OIS")]
+
+        logger.debug("CSV loaded")
+
+        min_i = 0
+        max_i = 18  # 19-25 problematic?
+        min_i2 = 26
+        max_i2 = len(df_ins)
+        # ins_spec = sfc.load_specifications_from_pd(df_ins.iloc[np.r_[min_i:max_i, min_i2:max_i2]], refDate, holidays)
+        # ins_quotes = df_ins["Quote"].tolist()[min_i:max_i]
+        # ins_quotes = df_ins["Quote"].tolist()[min_i:max_i] + df_ins["Quote"].tolist()[min_i2:max_i2]
+
+        ins_spec = sfc.load_specifications_from_pd(df_ins, refDate, holidays)
+        ins_quotes = df_ins["Quote"].tolist()
+        logger.debug("instrument specifications created")
+
+        # print("--------------DEBUG PARSING")
+        # print(ins_quotes[0])
+        # print(df_ins["DayCountFixed"].tolist()[0])
+        # print(df_ins.iloc[min_i:max_i].copy())
+        # print(len(ins_spec), len(ins_quotes))
+        # print(len(df_ins["Quote"].tolist()))
+        # print(len(df_ins.iloc[np.r_[min_i:max_i, min_i2:max_i2]]))
+        # for i in range(len(ins_quotes)):
+        #     print(i, ins_quotes[i])
+
+        print("--------------Starting bootstrapper")
+        logger.debug(f"starting bootstrapper of {len(ins_quotes)} instruments")
+        curve = bootstrap_curve(
+            ref_date=refDate,
+            curve_id="OIS_estr",
+            day_count_convention=df_ins["DayCountFixed"].tolist()[0],  # taken the first entry and assume is valid for all other deposits
+            instruments=ins_spec,
+            quotes=ins_quotes,
+            interpolation_type=InterpolationType.LINEAR_LOG,
+            extrapolation_type=ExtrapolationType.LINEAR_LOG,
+        )
+        # print(curve.get_dates())
+        self.assertIsInstance(curve, DiscountCurve)
+        self.assertEqual(curve.get_dates()[0], refDate)
+        logger.debug("bootstrapped curve dates matched")
+        # the discount curve needs to be able to get the same market quote for the instrument
+        for i in range(len(ins_spec)):
+            model_quote = get_quote(refDate, ins_spec[i], {"discount_curve": curve, "fixing_curve": curve})
+            self.assertAlmostEqual(model_quote, ins_quotes[i], delta=1e-5)  # since the quotes are only to 5 decimals
+            # per_diff = (model_quote - deposit_quotes[i]) / deposit_quotes[i] * 100
+            # print(f"model: {model_quote} market: {deposit_quotes[i]} perdiff: {per_diff}")
+
+        logger.debug(f"asserted market quote matched -done")
+        logger.debug(f"--------------------------------------------------------")
+        # self.assertEqual(1, 1)
+
+    def test_date_many(self):
+        """Test over all OIS, and EUR instruments for every available date in the input data set"""
+
+        logger.debug(f"--------------------------------------------------------")
+        logger.debug("Starting loop, performming bootstrap over all OIS instruments, EUR, for each unique date.")
+        # these inputs must be given by user
+        # mon = "09"
+        # day = "24"
+        # year = "2025"
+        # date_str = f"{day}.{mon}.{year}"
+        # refDate = datetime(int(year), int(mon), int(day))
+        holidays = _ECB()
+
+        df = self.quotes_df.copy()
+
+
+        eur_ois = df[(df["Currency"] == "EUR") & (df["Instrument"] == "OIS")]
+
+
+        for date, subset in eur_ois.groupby("Date"):
+            logger.debug(f"--------------------------------------------------------")
+            logger.debug(f"Processing {date}...")
+            print(subset)
+            day = date.split(".")[0]
+            mon = date.split(".")[1]
+            year = date.split(".")[2]
+            refDate=datetime(int(year), int(mon), int(day))
+            logger.debug(f"--------------------------------------------------------")
+            
+            df_ins = subset   
+            logger.debug("CSV loaded")
+
+            ins_spec = sfc.load_specifications_from_pd(df_ins, refDate, holidays)
+            ins_quotes = df_ins["Quote"].tolist()
+            logger.debug("instrument specifications created")
+
+            # print("--------------DEBUG PARSING")
+            # print(ins_quotes[0])
+            # print(df_ins["DayCountFixed"].tolist()[0])
+            # print(df_ins.iloc[min_i:max_i].copy())
+            # print(len(ins_spec), len(ins_quotes))
+            # print(len(df_ins["Quote"].tolist()))
+            # print(len(df_ins.iloc[np.r_[min_i:max_i, min_i2:max_i2]]))
+            # for i in range(len(ins_quotes)):
+            #     print(i, ins_quotes[i])
+
+            print("--------------Starting bootstrapper")
+            logger.debug(f"starting bootstrapper of {len(ins_quotes)} instruments")
+            curve = bootstrap_curve(
+                ref_date=refDate,
+                curve_id="OIS_estr",
+                day_count_convention=df_ins["DayCountFixed"].tolist()[0],  # taken the first entry and assume is valid for all other deposits
+                instruments=ins_spec,
+                quotes=ins_quotes,
+                interpolation_type=InterpolationType.LINEAR_LOG,
+                extrapolation_type=ExtrapolationType.LINEAR_LOG,
+            )
+            # print(curve.get_dates())
+            self.assertIsInstance(curve, DiscountCurve)
+            self.assertEqual(curve.get_dates()[0], refDate)
+            logger.debug("bootstrapped curve dates matched")
+            # the discount curve needs to be able to get the same market quote for the instrument
+            for i in range(len(ins_spec)):
+                model_quote = get_quote(refDate, ins_spec[i], {"discount_curve": curve, "fixing_curve": curve})
+                self.assertAlmostEqual(model_quote, ins_quotes[i], delta=tolerance_from_quote(ins_quotes[i]))  # we adjust to check up to decimal fo the given market quote
+                # per_diff = (model_quote - deposit_quotes[i]) / deposit_quotes[i] * 100
+                # print(f"model: {model_quote} market: {deposit_quotes[i]} perdiff: {per_diff}")
+
+            logger.debug(f"asserted market quote matched -done")
+            logger.debug(f"--------------------------------------------------------")
+            # self.assertEqual(1, 1)
+
+        logger.debug(f"All unique datets -done")
+        logger.debug(f"--------------------------------------------------------")
 
 
 if __name__ == "__main__":

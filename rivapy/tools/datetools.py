@@ -713,7 +713,7 @@ class Schedule:
             to_ = datetime(to_.year, to_.month, monthrange(to_.year, to_.month)[-1])
         if _date_to_datetime(dates[-1]) != to_:
             # ... by adding a short stub or ...
-            if not long_stub:
+            if not long_stub or len(dates) == 1:  # 2025 HN
                 dates.append(to_)
             # ... by extending last period.
             else:

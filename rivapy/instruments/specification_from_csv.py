@@ -4,7 +4,7 @@ from dateutil.relativedelta import relativedelta
 from typing import Union as _Union
 from holidays import HolidayBase as _HolidayBase
 from holidays import EuropeanCentralBank as _ECB
-
+from rivapy.instruments._logger import logger
 from rivapy.instruments import (
     DepositSpecification,
     ForwardRateAgreementSpecification,
@@ -39,6 +39,8 @@ def load_specifications_from_pd(df: pd.DataFrame, ref_date: datetime, calendar: 
     # df = pd.read_csv(file_path, parse_dates=True)
     specs = []
     for _, row in df.iterrows():
+        # if row["Maturity"] == "2M": # DEBUG TEST 2025
+        #     logger.debug("debugging for spepcific instrument case")
         spec = make_specification_from_row(row, ref_date, calendar)
         specs.append(spec)
     return specs
@@ -273,11 +275,24 @@ def make_ois_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Holid
     # we use the helper function with spotlag in place of maturity to effctively shift the date
     spot_date = calc_end_day(start_day=ref_date, term=spotLag, business_day_convention=rollConvFix, calendar=calendar)
     expiry = calc_end_day(spot_date, maturity, rollConvFix, calendar)  # get expiry of swap (cannot be before last paydate of legs)
+    expiry_unadjusted = calc_end_day(start_day=spot_date, term=maturity, calendar=calendar)
 
     # FIXED LEG
     fix_schedule = Schedule(
-        start_day=spot_date, end_day=expiry, time_period=fixPayFreq, business_day_convention=rollConvFix, calendar=calendar, ref_date=ref_date
+        start_day=spot_date,
+        end_day=expiry_unadjusted,
+        time_period=fixPayFreq,
+        business_day_convention=rollConvFix,
+        calendar=calendar,
+        ref_date=ref_date,
     ).generate_dates(False)
+
+    if fix_schedule[-1] != expiry:
+        logger.error(
+            "Unexpected schedule generation for OIS fixed leg: last date in schedule {} does not match adjusted expiry {}".format(
+                fix_schedule[-1], expiry
+            )
+        )
 
     fix_start_dates = fix_schedule[:-1]
     fix_end_dates = fix_schedule[1:]
@@ -298,7 +313,7 @@ def make_ois_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Holid
     # FLOAT LEG - OIS
     flt_schedule = Schedule(
         start_day=spot_date,
-        end_day=expiry,
+        end_day=expiry_unadjusted,
         time_period=underlyingPayFreq,
         business_day_convention=rollConvFloat,
         calendar=calendar,

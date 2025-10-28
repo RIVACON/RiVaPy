@@ -239,19 +239,21 @@ def bootstrap_curve(
     logger.info("Starting bootstrapper.")
 
     # Sanity checks:
-    logger.debug("Input sanity checks")
+    logger.info("Input sanity checks")
     assert len(instruments) == len(quotes), "Number of quotes does not equal number of instruments."
     # TODO implement more input qualit checks:
     # curves given of correct type that match instrument type - or will this be done in the "market container" class?
 
+    logger.info("Curve dictionary import")
     if curves == None:
         curves = {}
-        print("* curves dictionary is empty, will bootstrap single discount curve")
+        logger.info("* curves dictionary is empty, will bootstrap single discount curve")
     else:
-        print("* curves dictionary provided, will bootstrap forward curve")
+        logger.info("* curves dictionary provided, will bootstrap forward curve")
 
     #############################################################
     # initialize: # alternatively..
+    logger.info("discount curve value init")
     yc_dates = [ref_date]
     dfs = [1.0]
     if isinstance(day_count_convention, str):  # normalizes type
@@ -263,6 +265,7 @@ def bootstrap_curve(
     # Sort instruments # Obtain dates
     # check for instruments with duplicate end dates # for now, through exceptiion if there is
     #
+    logger.info("Duplicate instrument date filter")
     instruments_by_date = {}
     for i, inst in enumerate(instruments):
         end_date = inst.get_end_date()  # implement for all specs #TODO
@@ -273,6 +276,8 @@ def bootstrap_curve(
     #############################################################
     # base curve creatiion check #TODO think about improving how to handle input curves if given for multicurve bootstrapping
     # given instrument types, check for required curves
+
+    logger.info("Determine instrument types provided")
     ins_types = []
     flag_irs_bootstrapped_as_fwd = False
     for inst in instruments:
@@ -280,6 +285,7 @@ def bootstrap_curve(
         if ins_type not in ins_types:
             ins_types.append(ins_type)
 
+    logger.info("Toggle single/multi curve bootstrapping")
     if "discount_curve" not in curves:
         flag_multi_curve = False
         curves["discount_curve"] = DiscountCurve(
@@ -301,7 +307,7 @@ def bootstrap_curve(
                 raise Exception("Fixing curve is not of type DiscountCurve")
 
         else:
-            print("IRS swap present but no fixing curve provided, will use bootstrapped curve in place")
+            logger.info("IRS swap present but no fixing curve provided, will use bootstrapped curve in place")
             flag_irs_bootstrapped_as_fwd = True
             if flag_multi_curve:
                 curves["fixing_curve"] = DiscountCurve(
@@ -319,11 +325,13 @@ def bootstrap_curve(
     lower = 1.0e-5  # DEBUG TODO REMOVE if not implement bracket search
     upper = 5.0
 
+    logger.info("Sort instruments by date and start bootstrapping")
     for end_date in sorted(instruments_by_date):
         quote, inst = instruments_by_date[end_date]  # use the market quote to compare with brentq
         yc_dates.append(end_date)  # next date
-        dfs.append(dfs[-1])  # append a dummy value for the next date
-
+        prev_df = dfs[-1]  # previous discount factor for bracket search
+        dfs.append(prev_df)  # append a dummy value for the next date
+        
         # arguments to be passed to the error function for the brentq root solver
         ARGS = (
             -1,  # since we will look at the latest addition to our discount curve.
@@ -342,9 +350,33 @@ def bootstrap_curve(
 
         try:
 
-            solution = brentq(error_fn, lower, upper, ARGS, xtol=1e-6)
-            dfs[-1] = solution
+            #solution = brentq(error_fn, lower, upper, ARGS, xtol=1e-6)
+            #dfs[-1] = solution
+            #logger.debug(f"Bootstrapped DF for {end_date}: {solution} for {inst.ins_type()}")
 
+            lower, upper = find_bracket(error_fn, prev_df, ARGS)
+            #lower, upper = prev_df * 0.8, prev_df * 1.2  # DEBUG TODO REMOVE if not implement bracket search
+            
+            logger.debug(f"Finding lower: {lower} and upper: {upper} bracket for root finding")
+
+            solution, result = brentq(
+                error_fn,
+                lower,
+                upper,
+                args=ARGS,
+                xtol=1e-6,
+                full_output=True,   # <--- enables access to iteration info
+                disp=True           # optional: prints if solver fails
+            )
+            dfs[-1] = solution
+            # Log detailed solver diagnostics
+            logger.debug(
+                f"Bootstrapped DF for {end_date}: {solution:.10f} "
+                f"for {inst.ins_type()} | "
+                f"iterations={result.iterations}, "
+                f"function_calls={result.function_calls}, "
+                f"converged={result.converged}"
+            )
             # TODO if clause here to say which curve is being updated....
             # curves dict needs to be updated before final interation check ...
             # if flag_irs_bootstrapped_as_fwd == True:  # meaning the passed forward curve needs to be updating alongside the discount curve
@@ -363,6 +395,7 @@ def bootstrap_curve(
     # this is to improve the values for the whole curve
     # check for convergence: max change in zero rate estimate must be below tolerance.
     # max_diff = float("inf")
+    logger.info("Iterative refinement step")
     max_diff = 0.0
     iteration = 0
     while iteration < max_iterations and (max_diff > tolerance or iteration == 0):
@@ -394,9 +427,10 @@ def bootstrap_curve(
                 # print(f"{i} DF:{dfs[i]} * {tolerance} * {dcc.yf(ref_date, end_date)} * 0.1 = {tol_brent}")
                 dfs[i] = brentq(error_fn, 0.00001, 5.0, ARGS, xtol=tol_brent)
                 total_evals += 1
+                logger.debug(f" refinement DF for {end_date}: {dfs[i]} for {inst.ins_type()} with total evals: {total_evals}")
 
             except Exception as e:
-                raise Exception(f"Refinement failed at {end_date}: {str(e)}")
+                raise Exception(f"Refinement failed at {end_date}: {str(e)} total evals: {total_evals}")
 
         max_diff = 0.0
         # Convergence check
@@ -451,6 +485,7 @@ def bootstrap_curve(
     # TODO adding 150Y pillar to avoid explicit extrapolation???
 
     # create final discount curve
+    logger.info("Curve Complete and output")
     curve = DiscountCurve(
         id=curve_id,
         refdate=ref_date,
@@ -544,8 +579,48 @@ def error_fn(
     # print(f"using {df_val} -> calc_quote: {calc_quote} - ref_quote: {ref_quote} = {calc_quote - ref_quote}")
     return calc_quote - ref_quote
 
+def find_bracket(error_fn, guess, args, expand=2.0, max_tries=10, 
+                 min_lower=1e-8, max_upper=10.0):
+    """
+    Tries to find a [lower, upper] bracket where error_fn(lower) and error_fn(upper)
+    have opposite signs, indicating a root lies between them.
 
-def find_bracket(error_fn, initial_guess, *args):
+    Parameters
+    ----------
+    error_fn : callable
+        Your pricing error function (same as passed to brentq).
+    guess : float
+        A rough estimate for the root (e.g., previous DF).
+    args : tuple
+        Extra arguments passed to error_fn.
+    expand : float
+        Factor by which to widen the bracket each iteration.
+    max_tries : int
+        Maximum number of expansions before giving up.
+    min_lower, max_upper : float
+        Hard limits to keep brackets within safe numeric bounds.
+    """
+    lower = max(guess * 0.8, min_lower)
+    upper = min(guess * 1.2, max_upper)
+
+    f_lower = error_fn(lower, *args)
+    f_upper = error_fn(upper, *args)
+
+    tries = 0
+    while f_lower * f_upper > 0 and tries < max_tries:
+        # Expand symmetrically outward
+        lower = max(lower / expand, min_lower)
+        upper = min(upper * expand, max_upper)
+        f_lower = error_fn(lower, *args)
+        f_upper = error_fn(upper, *args)
+        tries += 1
+
+    if f_lower * f_upper > 0:
+        raise RuntimeError("Could not find valid bracket for brentq")
+
+    return lower, upper
+
+def find_bracket_OLD(error_fn, initial_guess, *args):
     """Optional function to help find an applicable upper and lower bound
     for the brentq solver to ensure a sign change across the given error function
     applied over the boundary limits
