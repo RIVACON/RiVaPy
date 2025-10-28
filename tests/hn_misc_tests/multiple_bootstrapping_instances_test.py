@@ -74,7 +74,7 @@ if __name__ == "__main__":
         start_date + dt.timedelta(days=30),
         start_date + dt.timedelta(days=60),
         start_date + dt.timedelta(days=90),
-        start_date + dt.timedelta(days=181),  # 180 - error due to BCC roll oveer mismatch between start and end date... look into! #TODO
+        start_date + dt.timedelta(days=181),  # 180 - error due to BCC roll oveer mismatch between start and end date... look into! 
         start_date + dt.timedelta(days=270),
     ]
 

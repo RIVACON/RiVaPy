@@ -152,13 +152,12 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         # give dates where applicable as optional, if not given, calculate based on spot lag, index spot lag, and forward period YMxZM (e.g. 1Mx4M)
         # e.g. for trade date D1 and spotLag, S1, and start_period = 1Mx4M
         # start_date = D1 + S1 + 1Month # this is the date it starts accruing interest
-        # but how much interest? -> the pre agreed FRA rate, fixed
+        # but how much interest? -> the pre-agreed FRA rate, fixed
         # how is it settled? -> at settledate=start date, and using
         # The floating rate index (e.g., LIBOR, SOFR, EURIBOR) used to determine the settlement amoun
         # This is determined at the fixing_date ( usually spot lag before, e.g. 2 days)
 
         # if trade date, spotlag, startperiod,endperiod give, then recalcualte start_datet etc...
-        # TODO: get clarification on roll_day function
         if trade_date and spot_days and start_period and end_period:
             spot_date = roll_day(
                 day=trade_date + timedelta(days=spot_days),  # need holiday

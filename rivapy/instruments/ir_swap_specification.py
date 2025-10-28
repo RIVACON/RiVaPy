@@ -36,7 +36,7 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
         currency: _Union[Currency, str],
         day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
     ):
-        """_summary_
+        """Constructor for the IrSwapLegSpecification class used to define both fixed and floating legs.
 
         Args:
             obj_id (str): obj ID for the instrument.
@@ -79,7 +79,7 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
 
     @property
     def end_dates(self) -> _List[datetime]:
-        """end datets for the interest periods
+        """end dates for the interest periods
 
         Returns:
             _List[datetime]: _description_
@@ -95,7 +95,7 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
         """pay dates for the interest periods
 
         Returns:
-            _List[datetime]: _description_
+            _List[datetime]: 
         """
         return self._pay_dates
 
@@ -117,7 +117,7 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
         """If only a float is given, assume a constant notional and create a ConstNotionalStructure.
 
         Args:
-            value (_Union[float, NotionalStructure]): _description_
+            value (_Union[float, NotionalStructure]): 
         """
         if isinstance(value, (int, float)):
             self._notional_structure = ConstNotionalStructure(float(value))
@@ -161,7 +161,7 @@ class IrFixedLegSpecification(IrSwapLegSpecification):
         currency: _Union[Currency, str],
         day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
     ):
-        """_summary_
+        """Constructor for a fixed leg of an interest rate swap.
 
         Args:
             fixed_rate (float): The fixed interest rate defining this leg of the swap.
@@ -231,8 +231,8 @@ class IrFloatLegSpecification(IrSwapLegSpecification):
         day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
         rate_day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
         spread: float = 0.0,
-    ):  # TODO do we need to implemente BCC, roll convention here as well or is that handled elsewhere??
-        """_summary_
+    ):  
+        """Constructor for a floating leg of an interest rate swap.
 
         Args:
             obj_id (str): obj ID for the instrument.
@@ -249,7 +249,7 @@ class IrFloatLegSpecification(IrSwapLegSpecification):
             day_count_convention (_Union[DayCounterType, str], optional): The day count convention used.. Defaults to DayCounterType.ThirtyU360.
             rate_day_count_convention (_Union[DayCounterType, str], optional): The day count convention used for the underlying
                                                 . Defaults to DayCounterType.ThirtyU360.
-            spread (float, optional): _description_. Defaults to 0.0.
+            spread (float, optional): Defaults to 0.0.
         """
         super().__init__(obj_id, notional, start_dates, end_dates, pay_dates, currency, day_count_convention)
         self.reset_dates = reset_dates  # TODO: ADD setters to get rid of error notification?
@@ -353,12 +353,11 @@ class IrOISLegSpecification(IrSwapLegSpecification):
         # freq?
         # rate currency vs notional currency?
         # leg holidays, and rate holidays - again to be dealt with in the scheduler?
-        # #TODO do we need to implemente BCC, roll convention here as well or is that handled elsewhere??
         # FYI scheduler needs, start date, end date, freq, roll convention, holiday...
         # for the reset dates, will need fixing lag
         # for the pay dates generation, will need payLag
 
-        """_summary_
+        """Constructor for a floating leg of an overnight index swap.
 
         Args:
             obj_id (str): obj ID for the instrument.
@@ -375,10 +374,10 @@ class IrOISLegSpecification(IrSwapLegSpecification):
             day_count_convention (_Union[DayCounterType, str], optional): The day count convention used.. Defaults to DayCounterType.ThirtyU360.
             rate_day_count_convention (_Union[DayCounterType, str], optional): The day count convention used for the underlying
                                                 . Defaults to DayCounterType.ThirtyU360.
-            spread (float, optional): _description_. Defaults to 0.0.
+            spread (float, optional): . Defaults to 0.0.
         """
         super().__init__(obj_id, notional, start_dates, end_dates, pay_dates, currency, day_count_convention)
-        self.rate_reset_dates = rate_reset_dates  # TODO: ADD setters to get rid of error notification?
+        self.rate_reset_dates = rate_reset_dates  
         self.rate_start_dates = rate_start_dates
         self.rate_end_dates = rate_end_dates
         self._spread = spread
@@ -458,15 +457,16 @@ class IrOISLegSpecification(IrSwapLegSpecification):
     def ois_scheduler_2D(start_dates: _List[datetime], end_dates: _List[datetime]):
         """The OIS makeshift scheduler to account for expected 2D array structure of
             >>> rivapy.instruments.interest_rate_swap_pricer.populate_cashflows_ois
-            #TODO look how Schedule() class would handle this
+            Alternatively, the rivapy Scheduler class is used. 
+            This is a simplified version for testing purposes.
         Args:
-            start_dates (_List[datetime]): _description_
+            start_dates (_List[datetime]): start dates for a given accrual period, containing the daily start rates inside that accrual period
             end_dates (_List[datetime]): _description_
 
         Returns:
-            _type_: _description_
+            _type_: Multi-dimensional lists of datetimes
         """
-        # CONSIDER USING A SCHEDULER FUNCTION ONCE IT IS FINISHED
+        
         daily_rate_start_dates = []  # 2D list: coupon i -> list of daily starts
         daily_rate_end_dates = []  # 2D list: coupon i -> list of daily ends
         daily_rate_reset_dates = []  # 2D list: coupon i -> list of reset dates
@@ -550,7 +550,7 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
         self._validate_derived_issued_instrument()
         self.pay_leg = pay_leg
         self.receive_leg = receive_leg
-        self.day_count_convention = day_count_convention  # TODO: correct syntax with setter?? HN
+        self.day_count_convention = day_count_convention  
         self.business_day_convention = RollConvention.to_string(business_day_convention)
         if calendar is None:
             self.calendar = _ECB(years=range(issue_date.year, maturity_date.year + 1))

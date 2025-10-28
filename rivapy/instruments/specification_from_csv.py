@@ -28,7 +28,7 @@ from rivapy.tools.datetools import (
 
 
 def load_specifications_from_pd(df: pd.DataFrame, ref_date: datetime, calendar: _Union[_HolidayBase, str] = _ECB()):
-    """Takes in a pandas data frame which already has the required columns.
+    """Takes in a pandas data frame which must have has the required columns.
 
     Args:
         df (pd.DataFrame): Contains the column information for the market quotes of a given instrument
@@ -62,6 +62,16 @@ def make_specification_from_row(row: pd.DataFrame, ref_date: datetime, calendar:
 
 
 def make_deposit_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_HolidayBase, str] = _ECB()):
+    """Create a deposit specification object given the required information from an input data frame row.
+
+    Args:
+        row (pd.DataFrame): Row containing the required information for the deposit specification specified by header information
+        ref_date (datetime): The reference date for the deposit instrument
+        calendar (_Union[_HolidayBase, str], optional): calendar object from which date calculations are affected. Defaults to _ECB().
+
+    Returns:
+        _type_: DepositSpecification object
+    """
     label = row["Instrument"] + "_" + row["Maturity"]
 
     dep_spec = DepositSpecification(
@@ -90,6 +100,18 @@ def make_deposit_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_H
 
 
 def make_fra_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_HolidayBase, str] = _ECB()):
+    """Create a Forward rate agreement (FRA) specification object given the required information from an input data frame row.
+    In the Maturity column, the format is expected to be of the form "YYMxZZM" where YY is the number of months to the start date
+    and ZZ is the number of months to the end date. This is different compared to the other instruments in this column by design.
+
+    Args:
+        row (pd.DataFrame): Row containing the required information for the FRA specification specified by header information
+        ref_date (datetime): The reference date for the FRA instrument
+        calendar (_Union[_HolidayBase, str], optional): calendar object from which date calculations are affected. Defaults to _ECB().
+
+    Returns:
+        _type_: ForwardRateAgreement Specification object
+    """
     label = row["Instrument"] + "_" + row["Maturity"]
     # maturity must be in the form of YYMxZZM where YY and ZZ are integers
     s = row["Maturity"].upper()
@@ -146,7 +168,17 @@ def make_fra_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Holid
 
 
 def make_irswap_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_HolidayBase, str] = _ECB()):
+    """Create a interest rate swap (IRS) specification object given the required information from an input data frame row.
+    Creates both fixed and floating legs.
 
+    Args:
+        row (pd.DataFrame): Row containing the required information for the IRS specification specified by header information
+        ref_date (datetime): The reference date for the IRS instrument
+        calendar (_Union[_HolidayBase, str], optional): calendar object from which date calculations are affected. Defaults to _ECB().
+
+    Returns:
+        _type_: IRS specification object
+    """
     # the following information is expected:
     instr = row["Instrument"]
     fixDayCount = row["DayCountFixed"]
@@ -250,6 +282,17 @@ def make_irswap_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Ho
 
 
 def make_ois_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_HolidayBase, str] = _ECB()):
+    """Create an overnight index swap (OIS) specification object given the required information from an input data frame row.
+    Creates both fixed and floating legs.
+
+    Args:
+        row (pd.DataFrame): Row containing the required information for the OIS specification specified by header information
+        ref_date (datetime): The reference date for the OIS instrument
+        calendar (_Union[_HolidayBase, str], optional): calendar object from which date calculations are affected. Defaults to _ECB().
+
+    Returns:
+        _type_: OIS specification object
+    """
     label = row["Instrument"] + "_" + row["Maturity"]
 
     # the following information is expected:

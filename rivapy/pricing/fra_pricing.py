@@ -21,7 +21,7 @@ class ForwardRateAgreementPricer:
         discount_curve: DiscountCurve,
         forward_curve: DiscountCurve = None,
     ):
-        """_summary_
+        """Initializes the FRA pricer with valuation date, FRA specification, discount curve and forward curve.
 
         Args:
             val_date (_Union[date, datetime]): specific date for which the value of the financial instrument is calculated.
