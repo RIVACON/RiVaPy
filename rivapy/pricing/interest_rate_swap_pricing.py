@@ -773,19 +773,18 @@ class InterestRateSwapPricer:
         # -----------------------------
         # Fast analytical OIS path:
         # - If the floating leg is OIS, compute the fixed rate (par swap rate)
-        #   analytically using discount factors on the fixed leg payment dates:
+        #   analytically using discount factors (P) on the fixed leg payment dates:
         #       R = (1 - P(T_N)) / sum_i alpha_i * P(T_i)
+        # - where alpha_i is the year fraction for the fixed leg payment period i (accrual factor)
         # - This is equivalent to pricing the compounded overnight floating leg.
         # -----------------------------
         try:
             if hasattr(float_leg, "leg_type") and float_leg.leg_type == IrLegType.OIS:
+
                 return InterestRateSwapPricer.compute_swap_rate_ois_analytical(
                             ref_date, discount_curve, fixing_curve, float_leg, fixed_leg
                         )
-            #if getattr(float_leg, "leg_type", None) == IrLegType.OIS:
-            #    # For OIS float leg we assume standard OIS setup and no adjustments are needed.
-            #    # We compute the par rate for the fixed leg against the discount factors.
-            #    return InterestRateSwapPricer._compute_ois_analytical_rate(ref_date, discount_curve, fixed_leg)
+
         except Exception:
             # If anything unexpected (missing attributes) happens, fall back to generic route
             logger.debug("Fast OIS path failed/fell through; using generic pricing path.")
@@ -867,9 +866,45 @@ class InterestRateSwapPricer:
         ) -> float:
 
         """
-        Analytical OIS fair rate computation without daily compounding loops.
-        VERSION 2: handle date structure?
+        Computes the fair (par) fixed rate for an Overnight Indexed Swap (OIS)
+        using an analytical shortcut based on discount factors.
+
+        This method assumes that the floating leg is a compounded overnight leg
+        and that, under standard OIS discounting, the present value of the floating
+        leg can be derived directly from the discount curve without simulating
+        daily compounding. 
+        [https://btrm.org/wp-content/uploads/2024/03/BTRM-WP15_SOFR-OIS-Curve-Construction_Dec-2020.pdf]
+
+        The par OIS rate is computed as:
+
+            R = (sum_i N_i * [P(T_i) - P(T_{i+1})]) / (sum_i N_i * alpha_i * P(T_{i+1}))
+
+        where:
+            - P(T_i): discount factor at period start/end,
+            - alpha_i: accrual year fraction on the fixed leg,
+            - N_i: notional applicable for that period.
+
+        Assumptions:
+            - The floating leg is fully collateralized and discounted on the
+              same OIS curve.
+            - The compounded overnight rate is implied by the discount factors.
+            - No spread, lag, or convexity correction is applied.
+            - Notionals and accrual conventions are consistent with the given curves.
+            - Forward curve is used only for projected notionals or FX conversions,
+              not for rate projection.
+            - The fixed leg is currently not explictily used as it assumes that it has 
+              the same notional structure and payment dates as the floating leg, which
+              usually the case.
+
+
+        Raises:
+            ValueError: If the computed annuity (denominator) is zero,
+                        indicating invalid leg setup or inconsistent inputs.
+
+        Returns:
+            float: The fair fixed rate (as a decimal, e.g. 0.025 for 2.5%).
         """
+        
 
 
         dcc = DayCounter(discount_curve.daycounter)

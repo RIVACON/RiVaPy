@@ -2096,7 +2096,8 @@ class TestReferenceDateDependance(unittest.TestCase):
             self.assertAlmostEqual(model_quote, ins_quotes[i], delta=1e-5)  # since the quotes are only to 5 decimals
             # per_diff = (model_quote - deposit_quotes[i]) / deposit_quotes[i] * 100
             # print(f"model: {model_quote} market: {deposit_quotes[i]} perdiff: {per_diff}")
-
+            print(i, model_quote, curve.get_df()[i])
+            
         logger.debug(f"asserted market quote matched -done")
         logger.debug(f"--------------------------------------------------------")
         # self.assertEqual(1, 1)
