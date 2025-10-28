@@ -292,11 +292,11 @@ class PricingRequest:
     @_rho_scale.setter
     def _rho_scale(self, rho_scale: float):
         if rho_scale is not None:
-            if isinstance(rho_scale, float):
-                self.__rho_scale = rho_scale
+            if isinstance(rho_scale, (int, float)):
+                self.__rho_scale = float(rho_scale)
                 self.calc_rho = True
             else:
-                raise TypeError("'" + str(rho_scale) + "' must be of type float!")
+                raise TypeError("'" + str(rho_scale) + "' must be a number (int or float)!")
 
     @property
     def _calc_vega(self):
@@ -319,11 +319,11 @@ class PricingRequest:
     @_vega_scale.setter
     def _vega_scale(self, vega_scale: float):
         if vega_scale is not None:
-            if isinstance(vega_scale, float):
-                self.__vega_scale = vega_scale
+            if isinstance(vega_scale, (int, float)):
+                self.__vega_scale = float(vega_scale)
                 self.calc_vega = True
             else:
-                raise TypeError("'" + str(vega_scale) + "' must be of type float!")
+                raise TypeError("'" + str(vega_scale) + "' must be a number (int or float)!")
 
     @property
     def _calc_cross_volga(self):
@@ -378,11 +378,11 @@ class PricingRequest:
     @_theta_scale.setter
     def _theta_scale(self, theta_scale: float):
         if theta_scale is not None:
-            if isinstance(theta_scale, float):
-                self.__theta_scale = theta_scale
+            if isinstance(theta_scale, (int, float)):
+                self.__theta_scale = float(theta_scale)
                 self.calc_theta = True
             else:
-                raise TypeError("'" + str(theta_scale) + "' must be of type float!")
+                raise TypeError("'" + str(theta_scale) + "' must be a number (int or float)!")
 
     @property
     def _calc_spline(self):
@@ -435,10 +435,10 @@ class PricingRequest:
     @_calc_pricing_data.setter
     def _calc_pricing_data(self, calc_pricing_data: bool):
         if calc_pricing_data is not None:
-            if isinstance(calc_pricing_data, float):
+            if isinstance(calc_pricing_data, bool):
                 self.__calc_pricing_data = calc_pricing_data
             else:
-                raise TypeError("'" + str(calc_pricing_data) + "' must be of type float!")
+                raise TypeError("'" + str(calc_pricing_data) + "' must be of type bool!")
 
     @property
     def _calc_expected_cashflows(self):

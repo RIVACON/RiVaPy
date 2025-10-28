@@ -56,7 +56,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         start_period: int = None,
         # _Optional[_Union[Period, str]] = None,
         end_period: int = None,
-        index_alias: str = None,
+        ir_index: str = None,
         issuer: _Optional[_Union[Issuer, str]] = None,
         securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
         rating: _Union[Rating, str] = Rating.NONE,
@@ -98,7 +98,7 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
             spot_days (int): time difference between fixing date and start dategiven in days.
             start_period (int): forward start period given in months e.g. 1 from 1Mx4M
             end_period (int): forward end period given in months e.g. 4 from 1Mx4M
-            index_alias (str): ID of the underlying Index rate used for the floating rate for fixing.
+            ir_index (str): ID of the underlying Index rate used for the floating rate for fixing.
             issuer (str, optional): Name/id of issuer. Defaults to None.
             securitization_level (_Union[SecuritizationLevel, str], optional): Securitization level. Defaults to None.
             rating (_Union[Rating, str]): Paper rating.
@@ -138,9 +138,9 @@ class ForwardRateAgreementSpecification(interfaces.FactoryObject):
         # if end_period is not None:
         self.end_period = end_period
 
-        if index_alias is not None:
-            self._index_alias = index_alias
-            self._index = get_index_by_alias(index_alias)
+        if ir_index is not None:
+            self._ir_index = ir_index
+            self._index = get_index_by_alias(ir_index)
             self._indexdata = self._index.value
         if issuer is not None:
             self._issuer = issuer

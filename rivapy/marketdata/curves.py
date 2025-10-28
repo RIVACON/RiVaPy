@@ -116,37 +116,6 @@ class DiscountCurve:
         x, y = zip(*self.values)
         return y
 
-    # def value(self, refdate: Union[date, datetime], d: Union[date, datetime]) -> float:
-    #     """Return discount factor for a given date
-
-    #     Args:
-    #         refdate (Union[date, datetime]): The reference date. If the reference date is in the future (compared to the curves reference date), the forward discount factor will be returned.
-    #         d (Union[date, datetime]): The date for which the discount factor will be returned
-
-    #     Returns:
-    #         float: discount factor
-    #     """
-    #     if not isinstance(refdate, datetime):
-    #         refdate = datetime(refdate, 0, 0, 0)
-    #     if not isinstance(d, datetime):
-    #         d = datetime(d, 0, 0, 0)
-    #     if refdate < self.refdate:
-    #         raise Exception("The given reference date is before the curves reference date.")
-    #     return self._get_pyvacon_obj().value(refdate, d)
-
-    # def _get_pyvacon_obj(self):
-    #     if self._pyvacon_obj is None:
-    #         self._pyvacon_obj = _DiscountCurve(
-    #             self.id,
-    #             self.refdate,
-    #             [x for x in self.get_dates()],
-    #             [x for x in self.get_df()],
-    #             self.daycounter.value,
-    #             self.interpolation,
-    #             self.extrapolation,
-    #         )
-    #     return self._pyvacon_obj
-
     # Change the name with value once full pyvacon dependencies are removed throughout rivapy
     def value(self, refdate: Union[date, datetime], d: Union[date, datetime], payment_dates=None, annual_payment_frequency=None) -> float:
         """Return discount factor for a given date
@@ -204,6 +173,24 @@ class DiscountCurve:
             df = interp.interp(yf_list, df_list, dcc.yf(self.refdate, d, payment_dates, annual_payment_frequency), self.extrapolation)
 
         return df
+
+    def value_rate(self, refdate: Union[date, datetime], d: Union[date, datetime]) -> float:
+        """Return continuously compounded zero rate for a given date
+
+        Args:
+            refdate (Union[date, datetime]): The reference date. If the reference date is in the future (compared to the curves reference date), the forward rate will be returned.
+            d (Union[date, datetime]): The date for which the continuously compounded zero rate will be returned.
+        Returns:
+            float: continuously compounded zero rate
+        """
+        if not isinstance(refdate, datetime):
+            refdate = datetime(refdate, 0, 0, 0)
+        if not isinstance(d, datetime):
+            d = datetime(d, 0, 0, 0)
+        if refdate < self.refdate:
+            raise Exception("The given reference date is before the curves reference date.")
+        r = -math.log(self.value(refdate, d)) / DayCounter(self.daycounter).yf(refdate, d)
+        return r
 
     def value_yf(self, yf: float) -> float:
         """Return discount factor for a given yearfrac as of the curve's reference date.
@@ -300,22 +287,25 @@ class DiscountCurve:
 
         return df
 
-    def value_rate(self, refdate: Union[date, datetime], d: Union[date, datetime]) -> float:
-        """Return continuously compounded zero rate for a given date
+    def value_fwd_rate(self, refdate: Union[date, datetime], d1: Union[date, datetime], d2: Union[date, datetime]) -> float:
+        """Return forward continuously compounded zero rate for a given date
 
         Args:
             refdate (Union[date, datetime]): The reference date. If the reference date is in the future (compared to the curves reference date), the forward rate will be returned.
-            d (Union[date, datetime]): The date for which the continuously compounded zero rate will be returned.
+            d1 (Union[date, datetime]): The start date of the period for which the forward continuously compounded zero rate will be returned.
+            d2 (Union[date, datetime]): The end date of the period for which the forward continuously compounded zero rate will be returned.
         Returns:
-            float: continuously compounded zero rate
+            float: forward continuously compounded zero rate
         """
         if not isinstance(refdate, datetime):
             refdate = datetime(refdate, 0, 0, 0)
-        if not isinstance(d, datetime):
-            d = datetime(d, 0, 0, 0)
+        if not isinstance(d1, datetime):
+            d1 = datetime(d1, 0, 0, 0)
+        if not isinstance(d2, datetime):
+            d2 = datetime(d2, 0, 0, 0)
         if refdate < self.refdate:
             raise Exception("The given reference date is before the curves reference date.")
-        r = -math.log(self.value(refdate, d)) / DayCounter(self.daycounter).yf(refdate, d)
+        r = -math.log(self.value_fwd(refdate, d1, d2)) / DayCounter(self.daycounter).yf(d1, d2)
         return r
 
     def __call__(self, t: float, refdate: Union[date, datetime] = None, d: Union[date, datetime] = None) -> float:
@@ -707,10 +697,6 @@ class DiscountCurveComposition(interfaces.FactoryObject):
             results.append(c + 0.001)
         return results
 
-    def value_fwd(self, refdate: Union[date, datetime], d1: Union[date, datetime], d2: Union[date, datetime]) -> float:
-        """Return forward discount factor for a given date"""
-        return self.value(refdate, d2) / self.value(refdate, d1)
-
     def value(self, refdate: Union[date, datetime], d: Union[date, datetime]) -> float:
         r = self.value_rate(refdate, d)
         yf = self._dc.yf(refdate, d)
@@ -718,6 +704,15 @@ class DiscountCurveComposition(interfaces.FactoryObject):
 
     def value_rate(self, refdate: Union[date, datetime], d: Union[date, datetime]) -> float:
         return self.a.value_rate(refdate, d) * self.b.value_rate(refdate, d) + self.c.value_rate(refdate, d)
+
+    def value_fwd(self, refdate: Union[date, datetime], d1: Union[date, datetime], d2: Union[date, datetime]) -> float:
+        """Return forward discount factor for a given date"""
+        return self.value(refdate, d2) / self.value(refdate, d1)
+
+    def value_fwd_rate(self, refdate: Union[date, datetime], d1: Union[date, datetime], d2: Union[date, datetime]) -> float:
+        """Return forward continuously compounded zero rate for a given date"""
+        r = -math.log(self.value_fwd(refdate, d1, d2)) / self._dc.yf(d1, d2)
+        return r
 
     def __mul__(self, other):
         # TODO unittests
@@ -787,9 +782,9 @@ class DiscountCurveParametrized(interfaces.FactoryObject):
             d2 = datetime(d2, 0, 0, 0)
         if refdate < self.refdate:
             raise Exception("The given reference date is before the curves reference date.")
-        yf1 = self._dc.yf(refdate, d1)
-        yf2 = self._dc.yf(refdate, d2)
-        return self.value(refdate, d2) / self.value(refdate, d1)
+        yf1 = self.value(refdate, d1)
+        yf2 = self.value(refdate, d2)
+        return yf2 / yf1
 
     def value(self, refdate: Union[date, datetime], d: Union[date, datetime]) -> float:
         """Return discount factor for a given date
@@ -828,6 +823,27 @@ class DiscountCurveParametrized(interfaces.FactoryObject):
             raise Exception("The given reference date is before the curves reference date.")
         yf = self._dc.yf(refdate, d)
         return self.rate_parametrization(yf, refdate, d)
+
+    def value_fwd_rate(self, refdate: Union[date, datetime], d1: Union[date, datetime], d2: Union[date, datetime]) -> float:
+        """Return forward continuously compounded zero rate for a given date
+
+        Args:
+            refdate (Union[date, datetime]): The reference date. If the reference date is in the future (compared to the curves reference date), the forward rate will be returned.
+            d1 (Union[date, datetime]): The start date of the period for which the forward continuously compounded zero rate will be returned.
+            d2 (Union[date, datetime]): The end date of the period for which the forward continuously compounded zero rate will be returned.
+        Returns:
+            float: forward continuously compounded zero rate
+        """
+        if not isinstance(refdate, datetime):
+            refdate = datetime(refdate, 0, 0, 0)
+        if not isinstance(d1, datetime):
+            d1 = datetime(d1, 0, 0, 0)
+        if not isinstance(d2, datetime):
+            d2 = datetime(d2, 0, 0, 0)
+        if refdate < self.refdate:
+            raise Exception("The given reference date is before the curves reference date.")
+        r = -math.log(self.value_fwd(refdate, d1, d2)) / self._dc.yf(d1, d2)
+        return r
 
     @staticmethod
     def _create_sample(n_samples: int, seed: int = None, refdate: Union[datetime, date] = None, parametrization_type=NelsonSiegel) -> list:

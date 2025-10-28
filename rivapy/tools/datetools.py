@@ -851,6 +851,29 @@ def _term_to_period(term: _Union[Period, str]) -> Period:
         raise TypeError("The term '" + str(term) + "' must be provided as Period or string!")
 
 
+def _period_to_string(period: _Union[Period, str]) -> str:
+    """
+    Converts a period into string format.
+
+    Args:
+        period (Period): Period to be converted.
+
+    Returns:
+        str: Period in string format.
+    """
+    if isinstance(period, Period):
+        if period.years > 0 and period.months == 0 and period.days == 0:
+            return str(period.years) + "Y"
+        elif period.months > 0 and period.years == 0 and period.days == 0:
+            return str(period.months) + "M"
+        elif period.days > 0 and period.years == 0 and period.months == 0:
+            return str(period.days) + "D"
+        else:
+            raise Exception("The period '" + str(period) + "' cannot be converted to string format!")
+    elif isinstance(period, str):
+        return period
+
+
 def _is_ambiguous_date(day: _Union[date, datetime]) -> bool:
     """
     Checks if a given day is an ambiguous date, i.e. 30th of January, March, May, July, August, October or December.
