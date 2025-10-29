@@ -97,34 +97,6 @@ class DummyDepositSpec(DepositSpecification):
         )
 
 
-class DummyFRASpec:  # TODO remove? or overhaul...
-    def __init__(self, end_date):
-        self._end_date = end_date
-
-    def get_end_date(self):
-        return self._end_date
-
-    def ins_type(self):
-        return Instrument.FRA
-
-
-class DummyIRSSpec:  # TODO remove? or overhaul...
-    def __init__(self, end_date):
-        self._end_date = end_date
-
-    def get_end_date(self):
-        return self._end_date
-
-    def ins_type(self):
-        return Instrument.IRS
-
-    def get_float_leg(self):
-        return None
-
-    def get_fixed_leg(self):
-        return None
-
-
 class TestBootstrapCurveFunctions(unittest.TestCase):
 
     def test_input_length_assertion(self):
@@ -224,7 +196,8 @@ class TestFindBracket(unittest.TestCase):
         def fake_error_fn(x, *args):
             return x - 1
 
-        lower, upper = find_bracket(fake_error_fn, 1.5)
+        ARGS = ()
+        lower, upper = find_bracket(fake_error_fn, 1.5, ARGS)
         self.assertLess(lower, 1)
         self.assertGreater(upper, 1)
 
@@ -232,8 +205,9 @@ class TestFindBracket(unittest.TestCase):
         def fake_error_fn(x, *args):
             return 1
 
+        ARGS = ()
         with self.assertRaises(RuntimeError):
-            find_bracket(fake_error_fn, 2)
+            find_bracket(fake_error_fn, 2, ARGS)
 
 
 class TestGetQuote(unittest.TestCase):
@@ -263,12 +237,11 @@ class TestGetQuote(unittest.TestCase):
             instrument_spec=inst,
             curve_dict={"discount_curve": curve},
         )
-        # self.assertEqual(result, 0.01)  # TODO input expected calculated value, 0.01 is dummy
+        # self.assertEqual(result, 0.01)
         self.assertAlmostEqual(result, 0.024508664452316253, delta=1e-8)
 
-    def test_get_quote_fra(self):  # TODO -> verify correctness of the FRA specificaiton first... changes were made
+    def test_get_quote_fra(self):
 
-        # inst = DummyFRASpec(date(2025, 1, 1))
         ref_date = datetime(2023, 1, 28)
         start_date = datetime(2023, 7, 28)  # 6mx3m
         end_date = datetime(2023, 10, 28)
@@ -321,7 +294,7 @@ class TestGetQuote(unittest.TestCase):
         self.assertAlmostEqual(result, 0.049315806932066504, delta=1e-8)
 
     def test_get_quote_irs(self):
-        # inst = DummyIRSSpec(date(2025, 1, 1))
+
         # 1Y maturity with quartlery payment
         ref_date = datetime(2019, 8, 31)
         start_dates = [ref_date + relativedelta(months=3 * i) for i in range(4)]
@@ -448,7 +421,7 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
 
     def test_fra_bootstrap(self):
         # Minimal FRA: 6Mx3M, 2.5% rate
-        # start_date = self.ref_date + relativedelta(months=6) #TODO why was there an issue with the dates before? triggered fra_spec date error???
+        # start_date = self.ref_date + relativedelta(months=6)
         # end_date = self.ref_date + relativedelta(months=9)
         ref_date = datetime(2023, 1, 28)
         issue_date = datetime(2023, 7, 28)
@@ -1360,7 +1333,7 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
 
 
 class TestAutomaticInstrumentCreation(unittest.TestCase):
-    """_summary_
+    """Helper functions used to create instrument speficiations from dataframes.
 
     Args:
         unittest (_type_): _description_
@@ -1408,16 +1381,6 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         parRate = float(input_data["Quote"])
         currency = input_data["Currency"]
         label = instr + "_" + maturity
-
-        ##################
-        # # get spot date # form Thomas
-        # spot_date = get_end_date(self.refDate, self.spotLag)
-        # # end date of the accrual period
-        # end_date = get_end_date(spot_date, self.maturity)
-
-        # # start date of FRA is endDate - tenor
-        # start_date = get_start_date(end_date, self.tenor)
-        # self.label, "dummy_issuer", "NONE", self.currency, self.refDate, start_date, end_date, 100, self.parRate, self.floatDayCount)
 
         #######################
         # the fixing date is equivanlent to
@@ -1479,24 +1442,6 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         currency = input_data["Currency"]
         label = instr + "_" + maturity
 
-        # NEED TO CHECK OUTPUT OF SCHEDULER
-        # def __init__(
-        #     self,
-        #     start_day: _Union[date, datetime],
-        #     end_day: _Union[date, datetime],
-        #     time_period: _Union[Period, str],
-        #     backwards: bool = True,
-        #     # stub_mode: str = "automatic", # could alternatively be "force" or "none" (i.e. force a stub period even if not necessary, or do not allow stub periods at all)
-        #     stub_type_is_Long: bool = True,
-        #     # stub_placement: str = "ending", # could alternatively be "beginning" (i.e. place stub period at the end, at the beginning)
-        #     business_day_convention: _Union[RollConvention, str] = RollConvention.MODIFIED_FOLLOWING,
-        #     calendar: _Optional[_Union[_HolidayBase, str]] = None,
-        #     roll_convention: _Union[RollRule, str] = RollRule.NONE,
-        #     settle_days: int = 0,
-        #     ref_date: _Optional[_Union[date, datetime]] = None,
-        # ):
-        # get swap leg schedule # assume same for both fix and float legs?
-        # we use the helper function with spotlag in place of maturity to effctively shift the date
         spot_date = calc_end_day(start_day=refDate, term=spotLag, business_day_convention=rollConvFix, calendar=holidays)
         expiry = calc_end_day(spot_date, maturity, rollConvFix, holidays)
 
@@ -1934,7 +1879,10 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         # self.assertEqual(1, 1)
 
     def test_multicurve_bootstrap_ois_3M(self):
-        """Test of the bootstrap function for multicurve generation..."""
+        """Test of the bootstrap function in the context of multicurve bootstrapping
+        using ois and irs specifications parsed from a datafram of expected format
+
+        """
 
         # these inputs must be given by user
         refDate = datetime(2019, 3, 1)
@@ -1979,7 +1927,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         # self.assertEqual(1, 1)
 
         ##################################################
-        # select for 3M instruments!
+        # select for 3M instruments
         min_i = 0
         max_i = -1
 
@@ -2016,6 +1964,14 @@ class TestReferenceDateDependance(unittest.TestCase):
     The finer points is because the start dates, and the adjustments to the date can affect
     the actual day count fractions, and thus the cash flows, and thus the curve. Especially after applying
     conventions like modified following.
+
+    Error was determined in the case of OIS, when feeding dates to the scheduler,
+    if the expiry date is adjusted, when rolling back to get the start date, the start date can
+    be earlier than the actual start date, causing inconsistencies and uexpected behaviour in the Scheduler.
+    This is affected by the roll convention used.
+
+    The solution implemented was for OIS swaps to calculate the actual expiry including the roll convention
+    as well as an unadjusted expiry from which the rest of the dates can be calculated from.
     """
 
     def setUp(self):
@@ -2031,7 +1987,7 @@ class TestReferenceDateDependance(unittest.TestCase):
         self.column_names = column_names
 
     def test_date1(self):
-        """Using 2025 09 24 as a control date, to ensure the proper bootstrapping from frontmark data."""
+        """Using 2025 09 24 as a control date, to ensure the proper bootstrapping from Frontmark data example."""
 
         logger.debug(f"--------------------------------------------------------")
         logger.debug("test_date dependency 1 start")
@@ -2054,7 +2010,7 @@ class TestReferenceDateDependance(unittest.TestCase):
         logger.debug("CSV loaded")
 
         min_i = 0
-        max_i = 18  # 19-25 problematic?
+        max_i = 18  # internal selection to determine problematic dates
         min_i2 = 26
         max_i2 = len(df_ins)
         # ins_spec = sfc.load_specifications_from_pd(df_ins.iloc[np.r_[min_i:max_i, min_i2:max_i2]], refDate, holidays)
@@ -2096,7 +2052,7 @@ class TestReferenceDateDependance(unittest.TestCase):
             self.assertAlmostEqual(model_quote, ins_quotes[i], delta=1e-5)  # since the quotes are only to 5 decimals
             # per_diff = (model_quote - deposit_quotes[i]) / deposit_quotes[i] * 100
             # print(f"model: {model_quote} market: {deposit_quotes[i]} perdiff: {per_diff}")
-            print(i, model_quote, curve.get_df()[i])
+            # print(i, model_quote, curve.get_df()[i])
 
         logger.debug(f"asserted market quote matched -done")
         logger.debug(f"--------------------------------------------------------")

@@ -28,8 +28,8 @@ from rivapy.tools.datetools import DayCounter
 from scipy.optimize import brentq
 
 
-# import quote calculators
-from rivapy.pricing.deposit_pricing import DepositPricer  # TODO SUBJECT TO CHANGE based on architecture
+# import quote calculators # TODO SUBJECT TO CHANGE based on architecture
+from rivapy.pricing.deposit_pricing import DepositPricer  
 from rivapy.pricing.fra_pricing import ForwardRateAgreementPricer
 from rivapy.pricing.interest_rate_swap_pricing import InterestRateSwapPricer
 
@@ -37,168 +37,7 @@ from rivapy.pricing.interest_rate_swap_pricing import InterestRateSwapPricer
 ##########
 # Classes
 
-# TODO reading from table
-# class InstrumentSpecFromTable:
-#     """
-#     Definition of input instruments for IR boostrapping from a given .CSV
-#     with predefined columns.
-#     """
 
-#     def __init__(self, ref_date, input_data, holidays):
-
-#         self.refDate = ref_date
-#         self.instr = input_data["Instrument"]
-#         self.fixDayCount = input_data["DayCountFixed"]
-#         self.floatDayCount = input_data["DayCountFloat"]
-#         self.basisDayCount = input_data["DayCountBasis"]
-#         self.maturity = input_data["Maturity"]
-#         self.tenor = input_data["UnderlyingTenor"]
-#         self.underlyingPayFreq = input_data["UnderlyingPaymentFrequency"]
-#         self.basisTenor = input_data["BasisTenor"]
-#         self.basisPayFreq = input_data["BasisPaymentFrequency"]
-#         self.fixPayFreq = input_data["PaymentFrequencyFixed"]
-#         self.rollConvFloat = input_data["RollConventionFloat"]
-#         self.rollConvFix = input_data["RollConventionFixed"]
-#         self.rollConvBasis = input_data["RollConventionBasis"]
-#         self.spotLag = input_data["SpotLag"]
-#         self.label = self.instr + "_" + self.maturity
-#         self.currency = input_data["Currency"]
-#         self.holidays = holidays
-#         self.parRate = input_data["Quote"]
-
-#     def get_instrument(self):
-#         """
-#         Instrument specification based on the "Instrument" field the input data
-#         """
-#         if self.instr.upper() == Instrument.IRS:
-#             instrument = self.get_irs_spec()
-#         elif self.instr.upper() == Instrument.OIS:
-#             instrument = self.get_irs_spec()
-#         elif self.instr.upper() == Instrument.TBS:
-#             instrument = self.get_tbs_spec()
-#         elif self.instr.upper() == Instrument.DEPOSIT:
-#             instrument = self.get_deposit_spec()
-#         elif self.instr.upper() == Instrument.FRA:
-#             instrument = self.get_fra_spec()
-#         else:
-#             raise ValueError("Unknown instrument type")
-#         return instrument
-
-#     def get_irs_spec(self):  # TODO
-#         """
-#         Specification for interest rate swaps
-#         """
-#         # get floating leg schedule
-#         floatleg = self.get_float_leg(self.underlyingPayFreq, self.tenor, self.rollConvFloat, self.spotLag)
-#         # get fix leg schedule
-#         fixedleg = self.get_fix_leg(self.fixPayFreq, self.rollConvFix, self.spotLag)
-
-#         # get expiry of swap (cannot be before last paydate of legs)
-#         spot_date = get_end_date(self.refDate, self.spotLag)
-#         expiry = get_end_date(spot_date, self.maturity)
-
-#         # SecuritizationLevel is not used in the bootstrapping algorithm
-#         ir_swap = pyvacon.finance.specification.InterestRateSwapSpecification(
-#             self.label, "dummy_issuer", "COLLATERALIZED", self.currency, expiry, fixedleg, floatleg
-#         )
-#         return ir_swap
-
-#     def get_tbs_spec(self):  # TODO
-#         """
-#         Specification for tenor basis swaps
-#         """
-#         # get floating leg schedule
-#         floatleg = self.get_float_leg(self.underlyingPayFreq, self.tenor, self.rollConvFloat, self.spotLag)
-#         floatleg_basis = self.get_float_leg(self.basisPayFreq, self.basisTenor, self.rollConvBasis, self.spotLag)
-
-#         # get fix leg schedule
-#         fixedleg = self.get_fix_leg(self.fixPayFreq, self.rollConvFix, self.spotLag)
-
-#         # get expiry of swap (cannot be before last paydate of legs)
-#         spot_date = get_end_date(self.refDate, self.spotLag)
-#         expiry = get_end_date(spot_date, self.maturity)
-
-#         # the basis leg should be the pay leg
-#         basis_swap = pyvacon.finance.specification.InterestRateBasisSwapSpecification(
-#             self.label, "dummy_issuer", "COLLATERALIZED", self.currency, expiry, floatleg_basis, floatleg, fixedleg
-#         )
-#         return basis_swap
-
-#     def get_deposit_spec(self):  # TODO
-#         """
-#         Specification for deposits
-#         """
-
-#         # get spot date
-#         spot_date = get_end_date(self.refDate, self.spotLag)
-#         # end date of the accrual period
-#         end_date = get_end_date(spot_date, self.maturity)
-
-#         # start date of FRA is endDate - tenor
-#         start_date = get_start_date(end_date, self.tenor)
-
-#         # specification of the deposit
-#         deposit = pyvacon.finance.specification.DepositSpecification(
-#             self.label, "dummy_issuer", "NONE", self.currency, self.refDate, start_date, end_date, 100, self.parRate, self.floatDayCount
-#         )
-#         return deposit
-
-#     def get_fra_spec(self):  # TODO
-#         """
-#         Specification for FRAs/Futures
-#         """
-#         # get spot date
-#         spot_date = get_end_date(self.refDate, self.spotLag)
-
-#         # end date of the accrual period
-#         end_date = get_end_date(spot_date, self.maturity)
-
-#         # start date of FRA is endDate - tenor
-#         start_date = get_start_date(end_date, self.tenor)
-
-#         # expiry of FRA is the fixing date
-#         expiry_date = get_start_date(start_date, self.spotLag)
-
-#         # specification of the deposit
-#         fra = pyvacon.finance.specification.InterestRateFutureSpecification(
-#             self.label, "dummy_issuer", "NONE", self.currency, "dummy_udlId", expiry_date, 100, start_date, end_date, self.floatDayCount
-#         )
-
-#         return fra
-
-#     def get_float_leg(self, pay_freq, reset_freq, roll_conv, spot_days="0D"):  # TODO
-
-#         # get swap leg schedule
-#         flt_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_days)
-
-#         # get start dates
-#         flt_start_dates = flt_schedule[:-1]
-
-#         # get end dates
-#         flt_end_dates = flt_schedule[1:]
-#         flt_pay_dates = flt_end_dates
-
-#         # get reset dates
-#         flt_reset_schedule = get_schedule(self.refDate, self.maturity, reset_freq, roll_conv, self.holidays, spot_days)
-#         flt_reset_dates = flt_reset_schedule[:-1]
-
-#         flt_notionals = [1.0 for _ in range(len(flt_start_dates))]
-#         floatleg = pyvacon.finance.specification.IrFloatLegSpecification(
-#             flt_notionals, flt_reset_dates, flt_start_dates, flt_end_dates, flt_pay_dates, self.currency, "dummy_undrl", self.floatDayCount, 0.0
-#         )
-#         return floatleg
-
-#     def get_fix_leg(self, pay_freq, roll_conv, spot_days="0D"):  # TODO
-#         # get fix leg schedule
-#         fix_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_days)
-#         fix_start_dates = fix_schedule[:-1]
-#         fix_end_dates = fix_schedule[1:]
-#         fix_pay_dates = fix_end_dates
-#         fix_notionals = [1.0 for _ in range(len(fix_start_dates))]
-#         fixedleg = pyvacon.finance.specification.IrFixedLegSpecification(
-#             self.parRate, fix_notionals, fix_start_dates, fix_end_dates, fix_pay_dates, self.currency, self.fixDayCount
-#         )
-#         return fixedleg
 
 
 ######################################################
@@ -241,7 +80,7 @@ def bootstrap_curve(
     # Sanity checks:
     logger.info("Input sanity checks")
     assert len(instruments) == len(quotes), "Number of quotes does not equal number of instruments."
-    # TODO implement more input qualit checks:
+    # TODO implement more input quality checks:
     # curves given of correct type that match instrument type - or will this be done in the "market container" class?
 
     logger.info("Curve dictionary import")
@@ -268,7 +107,7 @@ def bootstrap_curve(
     logger.info("Duplicate instrument date filter")
     instruments_by_date = {}
     for i, inst in enumerate(instruments):
-        end_date = inst.get_end_date()  # implement for all specs #TODO
+        end_date = inst.get_end_date()  
         if end_date in instruments_by_date:
             raise Exception(f"Duplicate expiry date found: {end_date}")
         instruments_by_date[end_date] = (quotes[i], inst)
@@ -292,7 +131,7 @@ def bootstrap_curve(
             "dummy_id_discount", ref_date, yc_dates, dfs, interpolation_type, extrapolation_type, day_count_convention
         )
         # this means this is the target output curve
-    else:  # TODO #This means the discount curve was given. We thereforer want to output a FORWARD  curve, e.g. 3M, 6M,...
+    else:  #This means the discount curve was given. We therefore want to output a FORWARD curve, e.g. 3M, 6M,...
         flag_multi_curve = True
 
     # cannot multicurve bootstrap with deposits involved
@@ -317,12 +156,12 @@ def bootstrap_curve(
                 curves["fixing_curve"] = curves["discount_curve"]
 
     #############################################################
-    # # start with loglinear interpolation to obtain good initial values for all dates #TODO make logliner interpolator
+    # # start with loglinear interpolation to obtain good initial values for all dates 
     # this means i have to pass into the rror function the interpolation types desired which is different
     # from the inter and extra type we want for the final discount curve
     # bootstrap loop over ordered expiry dates which is also sorted here
 
-    lower = 1.0e-5  # DEBUG TODO REMOVE if not implement bracket search
+    lower = 1.0e-5  # initial bracket values for brentq
     upper = 5.0
 
     logger.info("Sort instruments by date and start bootstrapping")
@@ -355,7 +194,7 @@ def bootstrap_curve(
             #logger.debug(f"Bootstrapped DF for {end_date}: {solution} for {inst.ins_type()}")
 
             lower, upper = find_bracket(error_fn, prev_df, ARGS)
-            #lower, upper = prev_df * 0.8, prev_df * 1.2  # DEBUG TODO REMOVE if not implement bracket search
+            #lower, upper = prev_df * 0.8, prev_df * 1.2  # this is not good enouhg to work for all cases c.f. above
             
             logger.debug(f"Finding lower: {lower} and upper: {upper} bracket for root finding")
 
@@ -377,22 +216,15 @@ def bootstrap_curve(
                 f"function_calls={result.function_calls}, "
                 f"converged={result.converged}"
             )
-            # TODO if clause here to say which curve is being updated....
-            # curves dict needs to be updated before final interation check ...
-            # if flag_irs_bootstrapped_as_fwd == True:  # meaning the passed forward curve needs to be updating alongside the discount curve
-            #     curves["discount_curve"] = DiscountCurve(
-            #         "bootstrappedYC", ref_date, yc_dates, dfs, interpolation_type, extrapolation_type, day_count_convention
-            #     )
-            #     curves["fixing_curve"] = curves["discount_curve"]
 
         except Exception as e:
             raise Exception(f"Initial bootstrap failed at {end_date}: {str(e)}")
 
-    # In principle, this will have produced a curve.
+    # In principle, this will have produced a curve. It can be improved upon with refinement
 
     #############################################################
     # Iterative refinement with real interpolator
-    # this is to improve the values for the whole curve
+    # this is to improve the values for the whole curve, as each subsequent point is dependant on the previous ones
     # check for convergence: max change in zero rate estimate must be below tolerance.
     # max_diff = float("inf")
     logger.info("Iterative refinement step")
@@ -400,7 +232,7 @@ def bootstrap_curve(
     iteration = 0
     while iteration < max_iterations and (max_diff > tolerance or iteration == 0):
 
-        total_evals = 0  # ??number of attempts?
+        total_evals = 0  #
 
         for i, end_date in enumerate(sorted(instruments_by_date), start=1):  # iterate through all end dates
             quote, inst = instruments_by_date[end_date]  # use the quote to compare with brentq
@@ -460,7 +292,7 @@ def bootstrap_curve(
                 "dummy_id_perturbed", ref_date, yc_dates, dfs_perturbed, interpolation_type, extrapolation_type, day_count_convention
             )
 
-            # Multi-curve logic possible logic and single curve
+            # Multi-curve and single curve flag logic
             if flag_multi_curve:
                 # This is a forward curve — use Given discount curve for discounting
                 curves["fixing_curve"] = yc_perturbed
@@ -525,9 +357,8 @@ def error_fn(
     Pass relevant instrument information in order to calculate the fair rate given the current
     curve data.
 
-    #TODO think about how to better implement in the case where forward curve is the same as discount curve
+    #TODO think about how to IMPROVE implementation in the case where forward curve is the same as discount curve
 
-    #TODO what to do in case discount curve is GIVEN, i.e. in multicurve bootstrapping
 
     Args:
         df_val (float): discount factor value used as guess for next value of the bootstrapped discount curve
@@ -552,11 +383,6 @@ def error_fn(
     # here reference date is used as placeholder
     yc = DiscountCurve("bootstrappedYC", ref_date, yc_dates, df_tmp, interpolation_type, extrapolation_type, day_count_convention)
     curves_copy = curves.copy()
-
-    # #In single curve this is fine...
-    # curves_copy["discount_curve"] = yc
-    # if flag_irs_bootstrapped_as_fwd:
-    #     curves_copy["fixing_curve"] = yc
 
     # Multi-curve logic possible logic and ssingle curve
     if flag_multi_curve:
@@ -620,36 +446,6 @@ def find_bracket(error_fn, guess, args, expand=2.0, max_tries=10,
 
     return lower, upper
 
-def find_bracket_OLD(error_fn, initial_guess, *args):
-    """Optional function to help find an applicable upper and lower bound
-    for the brentq solver to ensure a sign change across the given error function
-    applied over the boundary limits
-
-    Args:
-        error_fn (function): Error function
-        initial_guess (float: initial guess of the correct result from which to find the boundary limits
-    Raises:
-        RuntimeError: _description_
-
-    Returns:
-       floats: lower and upper bound
-    """
-    lower = initial_guess * 0.5
-    upper = initial_guess * 1.5
-    f_lower = error_fn(lower, *args)
-    f_upper = error_fn(upper, *args)
-
-    count = 0
-    while f_lower * f_upper > 0 and count < 50:
-        lower *= 0.5
-        upper *= 1.5
-        f_lower = error_fn(lower, *args)
-        f_upper = error_fn(upper, *args)
-        count += 1
-
-    if f_lower * f_upper > 0:
-        raise RuntimeError(f"Could not find a sign change around initial guess {initial_guess}")
-    return lower, upper
 
 
 def get_quote(
@@ -660,8 +456,8 @@ def get_quote(
     """Get the instrument specific fair quote calculation result to be used in the bootstrapper.
 
     Args:
-        ref_date (_Union[date, datetime]): _description_
-        instrument_spec (_Union[DepositSpecification, ForwardRateAgreementSpecification, InterestRateSwapSpecification]): _description_
+        ref_date (_Union[date, datetime]): 
+        instrument_spec (_Union[DepositSpecification, ForwardRateAgreementSpecification, InterestRateSwapSpecification]): 
         curve_dict (dict): Dictionary containing the market data curves needed for discounting or fwd rates.
 
     Returns:
@@ -683,7 +479,7 @@ def get_quote(
 
     elif instrument_spec.ins_type() == Instrument.IRS:
 
-        yc_discount = curve_dict["discount_curve"]  # TODO decide how to pass which curves
+        yc_discount = curve_dict["discount_curve"]  
         yc_forward = curve_dict["fixing_curve"]
         # according to pyvayon example, the fixing table is assumed to default to empty to allow the code to run...
         fixing_table = FixingTable()
@@ -708,7 +504,7 @@ def get_quote(
     elif instrument_spec.ins_type() == Instrument.FXF:  # fx forward
         pass
 
-    # # DEBUG TODO REMOVE
+    # # DEBUG 
     # print(f"Calculated quote for {instrument_spec.ins_type()} is {quote}")
     return quote
 

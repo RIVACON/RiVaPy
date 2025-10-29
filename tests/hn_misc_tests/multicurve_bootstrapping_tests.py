@@ -31,7 +31,6 @@ ref_date = dt.datetime(2019, 8, 31)  # refdate = dt.datetime(2017, 8, 31)
 # boot_curve_ois
 # Discount CURVE:
 
-# TODO FIX
 # since multiple runs in a file seem to not work at the moment...
 
 # daycounter: DayCounterType.Act365Fixed
