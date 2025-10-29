@@ -21,7 +21,7 @@ class TestDiscountCurve(unittest.TestCase):
     #  at the moment, it is assumed the target date is correctly calculated  before input with correct business day logic/roll convention
     #  there is at the moment a potential issue with the roll convention and the given reference date, for now assume it is correct #TODO
     # plot - calls the value or value in order to plot.
-    # TODO: consider how to wrape both value and value depending on if the interpolationType is a pyvacon or Rivapy construction respectively
+    # TODO: consider how to wrap both value and value depending on if the interpolationType is a pyvacon or Rivapy construction respectively
 
     def setUp(self):
         """Test data, simple linear case. Extend to more robust if requested."""

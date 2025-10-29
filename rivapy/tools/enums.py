@@ -131,6 +131,7 @@ class InterpolationType(_MyEnum):
 class ExtrapolationType(_MyEnum):
     NONE = "NONE"
     CONSTANT = "CONSTANT"
+    CONSTANT_DF = "CONSTANT_DF"
     LINEAR = "LINEAR"
     LINEAR_LOG = "LINEAR_LOG"
 
