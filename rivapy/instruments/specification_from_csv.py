@@ -66,7 +66,7 @@ def make_deposit_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_H
 
     dep_spec = DepositSpecification(
         obj_id=label,
-        fixing_date=ref_date,
+        issue_date=ref_date,
         # end_date: _Optional[_Union[date, datetime]] = None,
         # start_date: _Optional[_Union[date, datetime]] = None,
         # maturity_date: _Optional[_Union[date, datetime]] = None,

@@ -417,6 +417,8 @@ class BondPricingTests(TestCase):
             notional=100.0,
             issuer="None",
             securitization_level=SecuritizationLevel.SUBORDINATED,
+            day_count_convention="ACTACTICMA",
+            business_day_convention="ModifiedFollowing",
             margin=0.00,
             frequency="1Y",
             fixings=fix_table,
@@ -485,10 +487,14 @@ class BondPricingTests(TestCase):
             notional=100.0,
             issuer="None",
             securitization_level=SecuritizationLevel.SUBORDINATED,
+            day_count_convention="ACTACTICMA",
+            business_day_convention="ModifiedFollowing",
             margin=0.00,
             index="EURIBOR_1Y",
             frequency="1Y",
             fixings=fix_table,
+            adjust_accruals=False,
+            adjust_schedule=False,
         )
         self.assertEqual(float_index_bond_spec._index, "EURIBOR_1Y")
         self.assertEqual(float_index_bond_spec._ir_index.value.name, "EURIBOR 12M")

@@ -110,7 +110,7 @@ class DeterministicCashflowPricer:
             # print(spec._notional.get_amortization_schedule())
             dcc = DayCounter(spec.day_count_convention)
             for d1, d2 in zip(dates[:-1], dates[1:]):
-                payment_date = roll_day(d2, spec.calendar, spec.business_day_convention, settle_days=spec.payment_days)
+
                 if spec.coupon_type == "float":
                     if val_date is None or fwd_curve is None:
                         raise ValueError("val_date and fwd_curve must be provided for floating rate cashflow calculation.")
@@ -118,14 +118,21 @@ class DeterministicCashflowPricer:
                 else:
                     rate = spec.coupon
                 # normalize day count convention to canonical string before comparison
+                if spec._adjust_accruals is False:
+                    d1_adj = d1
+                    d2_adj = d2
+                else:
+                    d1_adj = roll_day(d1, spec.calendar, spec.business_day_convention)
+                    d2_adj = roll_day(d2, spec.calendar, spec.business_day_convention)
                 if DayCounterType.to_string(spec.day_count_convention) == DayCounterType.ActActICMA.value:
                     nr = spec.get_nr_annual_payments()
                     if nr == 0:
                         raise ValueError("Number of annual payments is zero. Please check the frequency setting in the bond specification.")
-                    dcv = dcc.yf(d1, d2, dates, nr)
+                    dcv = dcc.yf(d1_adj, d2_adj, dates, nr)
                 else:
-                    dcv = dcc.yf(d1, d2)
-                amount = spec._notional.get_amount_per_date(d1) * rate * dcv
+                    dcv = dcc.yf(d1_adj, d2_adj)
+                amount = spec._notional.get_amount_per_date(d1_adj) * rate * dcv
+                payment_date = roll_day(d2_adj, spec.calendar, spec.business_day_convention, settle_days=spec.payment_days)
                 cashflows.append((payment_date, amount))
         # add notional amortizations to cashflow list
         cashflows.extend(spec._notional.get_amortization_schedule())
@@ -218,7 +225,7 @@ class DeterministicCashflowPricer:
             # schedule = specification.get_schedule()
             # # schedule for payment periods rolled out
             # dates = schedule._roll_out(from_=specification._start_date, to_=specification._end_date, term=_term_to_period(specification._frequency))
-            dates = specification.dates
+            dates = specification.accrual_dates
             dates = sorted(dates)
             # find the last coupon date before or on trade_date
             last_coupon_date = None

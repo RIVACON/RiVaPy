@@ -29,13 +29,23 @@ class _MyEnum(_Enum):
             str: _description_
         """
 
-        def has_value(cls, value):
-            return value in cls._value2member_map_
-
+        # Accept either the enum's stored value (e.g. 'Act360') or its name/key (e.g. 'ACT360')
+        # Matching is case-insensitive for robustness.
         if isinstance(value, str):
-            if not cls.has_value(value):
-                raise Exception("Unknown  " + cls.__name__ + ": " + value)
-            return value
+            v = value.strip()
+            # direct match against stored values (exact)
+            for member in cls:
+                if v == member.value:
+                    return member.value
+            # exact name/key match
+            if v in cls.__members__:
+                return cls[v].value
+            # case-insensitive match against names or values
+            uv = v.upper()
+            for member in cls:
+                if uv == member.name.upper() or uv == str(member.value).upper():
+                    return member.value
+            raise Exception("Unknown " + cls.__name__ + ": " + value)
         if isinstance(value, cls):
             return value.value
         raise Exception("Given value " + str(value) + " does not belong to enum " + cls.__name__)
@@ -58,14 +68,23 @@ class _MyIntEnum(_Enum):
             str: _description_
         """
 
-        def has_value(cls, value):
-            return value in cls._value2member_map_
-
+        # Accept either the enum name (string) or integer value. Return the enum NAME as string.
         if isinstance(value, str):
-            cls[value]  # check if the string exists as key
-            return value
+            v = value.strip()
+            # direct name/key match
+            if v in cls.__members__:
+                return v
+            # case-insensitive name match
+            uv = v.upper()
+            for member in cls:
+                if uv == member.name.upper():
+                    return member.name
+            raise Exception("Unknown " + cls.__name__ + ": " + value)
         elif isinstance(value, int):
-            return cls._value2member_map_[value].name
+            try:
+                return cls(value).name
+            except Exception:
+                raise Exception("Unknown " + cls.__name__ + ": " + str(value))
         if isinstance(value, cls):
             return value.name
         raise Exception("Given value " + str(value) + " does not belong to enum " + cls.__name__)
@@ -546,6 +565,7 @@ class IRIndexMetadata:
     tenor: str
     spot_days: int
     business_day_convention: str
+    day_count_convention: str
     roll_convention: str
     calendar: str
     aliases: List[str]
@@ -558,6 +578,7 @@ class InterestRateIndex(_MyEnum):
         tenor="1M",
         spot_days=2,
         business_day_convention="ModifiedFollowing",
+        day_count_convention="ACT360",
         roll_convention="EOM",
         calendar="TARGET",
         aliases=["EUR1M", " EUR 1M", "EURIBOR 1M"],
@@ -568,6 +589,7 @@ class InterestRateIndex(_MyEnum):
         tenor="3M",
         spot_days=2,
         business_day_convention="ModifiedFollowing",
+        day_count_convention="ACT360",
         roll_convention="EOM",
         calendar="TARGET",
         aliases=["EUR3M", " EUR 3M", "EURIBOR 3M", "EURIBOR_3M"],
@@ -578,6 +600,7 @@ class InterestRateIndex(_MyEnum):
         tenor="6M",
         spot_days=2,
         business_day_convention="ModifiedFollowing",
+        day_count_convention="ACT360",
         roll_convention="EOM",
         calendar="TARGET",
         aliases=["EUR6M", "EUR 6M", "EURIBOR 6M"],
@@ -588,6 +611,7 @@ class InterestRateIndex(_MyEnum):
         tenor="12M",
         spot_days=2,
         business_day_convention="ModifiedFollowing",
+        day_count_convention="ACT360",
         roll_convention="EOM",
         calendar="TARGET",
         aliases=["EUR12M", "EUR 12M", "EURIBOR 12M", "EUR1Y", "EUR_1Y", "EURIBOR_1Y"],
@@ -598,6 +622,7 @@ class InterestRateIndex(_MyEnum):
         tenor="O/N",
         spot_days=0,
         business_day_convention="Following",
+        day_count_convention="ACT360",
         roll_convention="None",
         calendar="TARGET",
         aliases=["EURSTR", "EUR STR", "€STR", "EUR1D", "EUR O/N"],

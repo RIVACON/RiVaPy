@@ -406,12 +406,9 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         self,
         obj_id: str,
         issue_date: _Union[date, datetime],
-        start_date: _Union[date, datetime],
-        end_date: _Union[date, datetime],
         maturity_date: _Union[date, datetime],
         notional: _Union[NotionalStructure, float] = 100.0,
         frequency: _Optional[_Union[Period, str]] = None,
-        first_fixing_date: _Optional[_Union[date, datetime]] = None,
         issue_price: _Optional[float] = None,
         ir_index: _Union[InterestRateIndex, str] = None,
         index: _Optional[_Union[InterestRateIndex, str]] = None,
@@ -429,18 +426,21 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         spot_days: int = 2,
         pays_in_arrears: bool = True,
         issuer: _Optional[_Union[Issuer, str]] = None,
-        rating: _Union[Rating, str] = Rating.NONE,
-        securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
+        rating: _Union[Rating, str] = "NONE",
+        securitization_level: _Union[SecuritizationLevel, str] = "NONE",
         backwards=True,
         stub_type_is_Long=True,
         last_fixing: _Optional[float] = None,
         fixings: _Optional[FixingTable] = None,
+        adjust_start_date: bool = True,
+        adjust_end_date: bool = True,
+        adjust_schedule: bool = True,
+        adjust_accruals: bool = True,
     ):
         """Initializes the DeterministicCashflowBondSpecification object.
 
         Args:
             obj_id (str): Unique identifier for the object.
-            first_fixing_date (_Union[date, datetime]): Date of the first fixing.
             start_date (_Union[date, datetime]): Start date of the first accrual period.
             end_date (_Union[date, datetime]): End of the last accrual period. Not necessarily a good business day.
             maturity_date (_Union[date, datetime]): Adjusted end date of the last accrual period. Is a good business day.
@@ -475,12 +475,17 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
             roll_convention,
             calendar,
         )
-        if first_fixing_date is not None:
-            self._first_fixing_date = _date_to_datetime(first_fixing_date)
+        if not is_business_day(issue_date, calendar) and adjust_start_date:
+            self._start_date = roll_day(issue_date, calendar=calendar, business_day_convention=business_day_convention)
         else:
-            self._first_fixing_date = _date_to_datetime(start_date)
-        self._start_date = _date_to_datetime(start_date)
-        self._end_date = _date_to_datetime(end_date)
+            self._start_date = issue_date
+        if not is_business_day(maturity_date, calendar) and adjust_end_date:
+            self._end_date = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
+        else:
+            self._end_date = maturity_date
+        if not is_business_day(maturity_date, calendar):
+            self._maturity_date = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
+
         if issue_price is not None:
             self._issue_price = _check_non_negativity(issue_price)
         else:
@@ -497,12 +502,17 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         self._pays_in_arrears = pays_in_arrears
         self._backwards = backwards
         self._stub_type_is_Long = stub_type_is_Long
-        self._validate()
         self._last_fixing = last_fixing
         self._fixings = fixings
         self._schedule = None
         self._nr_annual_payments = None
         self._dates = None
+        self._accrual_dates = None
+        self._adjust_start_date = adjust_start_date
+        self._adjust_end_date = adjust_end_date
+        self._adjust_schedule = adjust_schedule
+        self._adjust_accruals = adjust_accruals
+        self._validate()
 
     # region properties
 
@@ -672,26 +682,6 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         self._coupon_type = coupon_type
 
     @property
-    def first_fixing_date(self) -> datetime:
-        """
-        Getter for the first fixing date of the instrument.
-
-        Returns:
-            datetime: The first fixing date.
-        """
-        return self._first_fixing_date
-
-    @first_fixing_date.setter
-    def first_fixing_date(self, first_fixing_date: _Union[date, datetime]):
-        """
-        Setter for the first fixing date of the instrument.
-
-        Args:
-            first_fixing_date (_Union[date,datetime]): The first fixing date.
-        """
-        self._first_fixing_date = _date_to_datetime(first_fixing_date)
-
-    @property
     def backwards(self) -> bool:
         """
         Getter for the backwards flag.
@@ -838,22 +828,32 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
             try:
                 schedule = self._schedule if self._schedule is not None else self.get_schedule()
                 if schedule is not None:
-                    self._dates = schedule._roll_out(
-                        from_=self._start_date if not self._backwards else self._end_date,
-                        to_=self._end_date if not self._backwards else self._start_date,
-                        term=_term_to_period(self._frequency),
-                        long_stub=self._stub_type_is_Long,
-                        backwards=self._backwards,
-                    )
+                    if self._adjust_schedule == False:
+                        self._dates = schedule._roll_out(
+                            from_=self._start_date if not self._backwards else self._end_date,
+                            to_=self._end_date if not self._backwards else self._start_date,
+                            term=_term_to_period(self._frequency),
+                            long_stub=self._stub_type_is_Long,
+                            backwards=self._backwards,
+                            roll_convention_=self._roll_convention,
+                        )
+                    else:
+                        self._dates = schedule.generate_dates(False)
+                    if self._adjust_accruals:
+                        rolled = [roll_day(d, self._calendar, self._business_day_convention) for d in self._dates]
+                    else:
+                        rolled = self._dates
+                    self._accrual_dates = rolled
                     if isinstance(self._notional, LinearNotionalStructure):
                         self._notional.n_steps = len(self._dates)
                         self._notional._notional = list(
                             np.linspace(self._notional.start_notional, self._notional.end_notional, self._notional.n_steps)
                         )
-                        self._notional.start_date = self._dates[:-1]
-                        self._notional.end_date = self._dates[1:]
+                        self._notional.start_date = rolled[:-1]
+                        self._notional.end_date = rolled[1:]
                 else:
                     self._dates = []
+                    self._accrual_dates = []
             except Exception as e:
                 # Optionally log the error here
                 self._dates = []
@@ -870,6 +870,30 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         if not _is_ascending_date_list(dates):
             raise ValueError("Dates must be a list of ascending datetime objects.")
         self._dates = dates
+
+    @property
+    def accrual_dates(self) -> _List[datetime]:
+        """
+        Getter for the accrual dates of the instrument that mark start and end dates of the accrual periods.
+
+        Returns:
+            _List[datetime]: The accrual dates of the instrument.
+        """
+        if self._accrual_dates is None:
+            _ = self.dates  # Trigger dates property to populate accrual_dates
+        return self._accrual_dates if self._accrual_dates is not None else []
+
+    @accrual_dates.setter
+    def accrual_dates(self, accrual_dates: _List[datetime]):
+        """
+        Setter for the accrual dates of the instrument that mark start and end dates of the accrual periods.
+
+        Args:
+            accrual_dates (_List[datetime]): The accrual dates of the instrument.
+        """
+        if not _is_ascending_date_list(accrual_dates):
+            raise ValueError("Accrual dates must be a list of ascending datetime objects.")
+        self._accrual_dates = accrual_dates
 
     @property
     def index(self) -> float:
@@ -913,11 +937,46 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         """
         self._ir_index = ir_index
 
+    @property
+    def adjust_start_date(self) -> bool:
+        return self._adjust_start_date
+
+    @adjust_start_date.setter
+    def adjust_start_date(self, value: bool):
+        self._adjust_start_date = value
+        if not is_business_day(self._issue_date, self._calendar) and self._adjust_start_date:
+            self._start_date = roll_day(self._issuedate, calendar=self._calendar, business_day_convention=self._business_day_convention)
+
+    @property
+    def adjust_end_date(self) -> bool:
+        return self._adjust_end_date
+
+    @adjust_end_date.setter
+    def adjust_end_date(self, value: bool):
+        self._adjust_end_date = value
+        if not is_business_day(self._maturity_date, self._calendar) and self._adjust_end_date:
+            self._end_date = roll_day(self._maturity_date, calendar=self._calendar, business_day_convention=self._business_day_convention)
+
+    @property
+    def adjust_schedule(self) -> bool:
+        return self._adjust_schedule
+
+    @adjust_schedule.setter
+    def adjust_schedule(self, value: bool):
+        self._adjust_schedule = value
+
+    @property
+    def adjust_accruals(self) -> bool:
+        return self._adjust_accruals
+
+    @adjust_accruals.setter
+    def adjust_accruals(self, value: bool):
+        self._adjust_accruals = value
+
     # endregion
 
     def _validate(self):
         """Validates the parameters of the instrument."""
-        _check_start_at_or_before_end(self._first_fixing_date, self._start_date)
         _check_start_before_end(self._start_date, self._end_date)
         # _check_start_at_or_before_end(self._end_date, self._maturity_date) # TODO special case modified following BCC
         _check_non_negativity(self._payment_days)
@@ -980,22 +1039,10 @@ class FixedRateBondSpecification(DeterministicCashflowBondSpecification):
         adjust_start_date: bool = True,
         adjust_end_date: bool = False,
     ):
-        if not is_business_day(issue_date, calendar) and adjust_start_date:
-            start_date = roll_day(issue_date, calendar=calendar, business_day_convention=business_day_convention)
-        else:
-            start_date = issue_date
-        if not is_business_day(maturity_date, calendar) and adjust_end_date:
-            end_date = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
-        else:
-            end_date = maturity_date
-        if not is_business_day(maturity_date, calendar):
-            maturity_date = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
         super().__init__(
             obj_id=obj_id,
             spot_days=spot_days,
             issue_date=issue_date,
-            start_date=start_date,
-            end_date=end_date,
             maturity_date=maturity_date,
             notional=notional,
             amortization_scheme=amortization_scheme,
@@ -1012,28 +1059,6 @@ class FixedRateBondSpecification(DeterministicCashflowBondSpecification):
             securitization_level=securitization_level,
             calendar=calendar,
         )
-        self._adjust_start_date = adjust_start_date
-        self._adjust_end_date = adjust_end_date
-
-    @property
-    def adjust_start_date(self) -> bool:
-        return self._adjust_start_date
-
-    @adjust_start_date.setter
-    def adjust_start_date(self, value: bool):
-        self._adjust_start_date = value
-        if not is_business_day(self._issue_date, self._calendar) and self._adjust_start_date:
-            self._start_date = roll_day(self._issuedate, calendar=self._calendar, business_day_convention=self._business_day_convention)
-
-    @property
-    def adjust_end_date(self) -> bool:
-        return self._adjust_end_date
-
-    @adjust_end_date.setter
-    def adjust_end_date(self, value: bool):
-        self._adjust_end_date = value
-        if not is_business_day(self._maturity_date, self._calendar) and self._adjust_end_date:
-            self._end_date = roll_day(self._maturity_date, calendar=self._calendar, business_day_convention=self._business_day_convention)
 
     @staticmethod
     def _create_sample(n_samples: int, seed: int = None):
@@ -1103,14 +1128,14 @@ class ZeroBondSpecification(DeterministicCashflowBondSpecification):
         issuer: Optional[_Union[Issuer, str]] = None,
         securitization_level: Optional[_Union[SecuritizationLevel, str]] = "NONE",
         rating: Optional[_Union[Rating, str]] = "NONE",
+        adjust_start_date: bool = True,
+        adjust_end_date: bool = True,
     ):
         if not is_business_day(maturity_date, calendar):
             maturity_date = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
         super().__init__(
             obj_id=obj_id,
             issue_date=issue_date,
-            start_date=issue_date,
-            end_date=maturity_date,
             maturity_date=maturity_date,
             notional=notional,
             amortization_scheme=amortization_scheme,
@@ -1122,6 +1147,8 @@ class ZeroBondSpecification(DeterministicCashflowBondSpecification):
             rating=rating,
             securitization_level=securitization_level,
             calendar=calendar,
+            adjust_start_date=adjust_start_date,
+            adjust_end_date=adjust_end_date,
         )
 
     @staticmethod
@@ -1180,54 +1207,54 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
         frequency: Optional[_Union[Period, str]] = None,
         amortization_scheme: _Optional[_Union[str, AmortizationScheme]] = None,
         index: Optional[_Union[InterestRateIndex, str]] = None,
-        business_day_convention: RollConvention = "ModifiedFollowing",
+        business_day_convention: Optional[RollConvention] = None,
+        day_count_convention: Optional[DayCounterType] = None,
         issuer: Optional[_Union[Issuer, str]] = None,
         securitization_level: Optional[_Union[SecuritizationLevel, str]] = "NONE",
         rating: Optional[_Union[Rating, str]] = "NONE",
-        day_count_convention: DayCounterType = "ActActICMA",
         fixings: Optional[FixingTable] = None,
         spot_days: int = 2,
-        calendar: Optional[_Union[_HolidayBase, str]] = _ECB(),
+        calendar: Optional[_Union[_HolidayBase, str]] = None,
         stub_type_is_Long: bool = True,
         adjust_start_date: bool = True,
         adjust_end_date: bool = False,
+        adjust_schedule: bool = False,
+        adjust_accruals: bool = True,
     ):
-        if not is_business_day(issue_date, calendar) and adjust_start_date:
-            start_date = roll_day(issue_date, calendar=calendar, business_day_convention=business_day_convention)
-        else:
-            start_date = issue_date
-        first_fixing_date = calc_start_day(start_date, f"{spot_days}D", business_day_convention=business_day_convention, calendar=calendar)
-        if not is_business_day(maturity_date, calendar) and adjust_end_date:
-            end_date = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
-        else:
-            end_date = maturity_date
-        if not is_business_day(maturity_date, calendar):
-            maturity_date = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
+
         if index is None and frequency is None:
             raise ValueError("Either index or frequency must be provided for a floating rate bond.")
         elif index is not None:
             if isinstance(index, str):
                 # get_index_by_alias will raise if alias unknown
-                self._ir_index = get_index_by_alias(index)
+                ir_index = get_index_by_alias(index)
             else:
-                self._ir_index = index
-            # derive frequency from the index tenor if available
-            try:
-                frequency = self._ir_index.value.tenor
-            except Exception:
-                # leave frequency as provided if index doesn't expose tenor
-                frequency = frequency
+                ir_index = index
+            # if not explicitly provided, extract conventions from index
+            if business_day_convention is None:
+                business_day_convention = ir_index.value.business_day_convention
+            if day_count_convention is None:
+                day_count_convention = ir_index.value.day_count_convention
+            if frequency is None:
+                frequency = ir_index.value.tenor
+            if calendar is None:
+                if ir_index.value.calendar.upper() == "TARGET":
+                    calendar = _ECB()
+                else:
+                    calendar = ir_index.value.calendar
         else:
-            # no index info given, rely on provided frequency
+            # no index info given, rely on provided frequency or use default conventions
             frequency = frequency
-            self._ir_index = None
+            ir_index = None
+            business_day_convention = "ModifiedFollowing" if business_day_convention is None else business_day_convention
+            day_count_convention = "ACT360" if day_count_convention is None else day_count_convention
+            calendar = calendar if calendar is not None else _ECB()
+
         super().__init__(
             obj_id=obj_id,
             fixings=fixings,
             spot_days=spot_days,
             issue_date=issue_date,
-            start_date=start_date,
-            end_date=end_date,
             maturity_date=maturity_date,
             notional=notional,
             amortization_scheme=amortization_scheme,
@@ -1236,7 +1263,7 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
             coupon_type="float",
             frequency=frequency,
             index=index,
-            ir_index=self._ir_index,
+            ir_index=ir_index,
             day_count_convention=day_count_convention,
             business_day_convention=business_day_convention,
             notional_exchange=True,
@@ -1245,29 +1272,12 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
             issuer=issuer,
             rating=rating,
             securitization_level=securitization_level,
+            calendar=calendar,
+            adjust_start_date=adjust_start_date,
+            adjust_end_date=adjust_end_date,
+            adjust_schedule=adjust_schedule,
+            adjust_accruals=adjust_accruals,
         )
-        self._adjust_start_date = adjust_start_date
-        self._adjust_end_date = adjust_end_date
-
-    @property
-    def adjust_start_date(self) -> bool:
-        return self._adjust_start_date
-
-    @adjust_start_date.setter
-    def adjust_start_date(self, value: bool):
-        self._adjust_start_date = value
-        if not is_business_day(self._issue_date, self._calendar) and self._adjust_start_date:
-            self._start_date = roll_day(self._issuedate, calendar=self._calendar, business_day_convention=self._business_day_convention)
-
-    @property
-    def adjust_end_date(self) -> bool:
-        return self._adjust_end_date
-
-    @adjust_end_date.setter
-    def adjust_end_date(self, value: bool):
-        self._adjust_end_date = value
-        if not is_business_day(self._maturity_date, self._calendar) and self._adjust_end_date:
-            self._end_date = roll_day(self._maturity_date, calendar=self._calendar, business_day_convention=self._business_day_convention)
 
     @staticmethod
     def _create_sample(n_samples: int, seed: int = None):

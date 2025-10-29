@@ -25,7 +25,7 @@ from rivapy.tools.datetools import (
     is_business_day,
     serialize_date,
 )
-from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating, RollRule, Instrument
+from rivapy.tools.enums import DayCounterType, InterestRateIndex, RollConvention, SecuritizationLevel, Currency, Rating, RollRule, Instrument
 
 import rivapy.tools.interfaces as interfaces
 
@@ -40,8 +40,6 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
         obj_id: str,
         issue_date: _Optional[_Union[date, datetime]] = None,
         fixing_date: _Optional[_Union[date, datetime]] = None,
-        start_date: _Optional[_Union[date, datetime]] = None,
-        end_date: _Optional[_Union[date, datetime]] = None,
         maturity_date: _Optional[_Union[date, datetime]] = None,
         currency: _Union[Currency, str] = "EUR",
         notional: float = 100.0,
@@ -57,6 +55,7 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
         payment_days: int = 0,
         adjust_start_date: bool = True,
         adjust_end_date: bool = False,
+        index: _Optional[_Union[InterestRateIndex, str]] = None,
     ):
         """
         Deposit specification.
@@ -89,146 +88,44 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
         self.fixing_date = fixing_date
 
         # check and adjust spot_days for O/N and T/N deposits
-        if term == "O/N" or (fixing_date is not None and start_date is not None and fixing_date == start_date):
+        if term == "O/N":
             spd = 0
-            if term != None and term != "O/N" and fixing_date is not None and start_date is not None and fixing_date == start_date:
+            if term != None and term != "O/N":
                 logger.error(f"term given as {term} and not as 'O/N' but fixing_date == start_date -> inconsistent data")
-            elif term == "O/N" and (fixing_date is not None and start_date is not None and fixing_date != start_date):
+            elif term == "O/N":
                 logger.error(f"term given as {term} but fixing_date != start_date -> inconsistent data")
             logger.info("Setting spot_days to 0: O/N deposit or fixing_date equal to start_date.")
-        elif term == "T/N" or (fixing_date is not None and start_date is not None and fixing_date + relativedelta(days=1) == start_date):
+        elif term == "T/N":
             spd = 1
-            if (
-                term != None
-                and term != "T/N"
-                and fixing_date is not None
-                and start_date is not None
-                and fixing_date + relativedelta(days=1) == start_date
-            ):
+            if term != None and term != "T/N":
                 logger.error(f"term given as {term} and not as 'T/N' but fixing_date + 1 day == start_date -> inconsistent data")
-            elif term == "T/N" and (fixing_date is not None and start_date is not None and fixing_date + relativedelta(days=1) != start_date):
+            elif term == "T/N":
                 logger.error(f"term given as {term} but fixing_date + 1 day != start_date -> inconsistent data")
             logger.info("Setting spot_days to 1: T/N deposit or fixing_date + 1 day equal to start_date.")
         else:
             spd = spot_days
 
-        # set fixing date,  start date, end date, and maturity date
-        # checking and setting fixing date
-        if fixing_date is not None:
-            if not is_business_day(fixing_date, calendar=calendar):
-                fd = roll_day(fixing_date, calendar=calendar, business_day_convention=business_day_convention)
-                logger.warning(
-                    "Set fixing_date, " + str(fixing_date) + ", to a good business day acc. to business_day_convention and calendar:" + str(fd)
-                )
-            else:
-                fd = fixing_date
-        elif start_date is not None:
-            fd = next_or_previous_business_day(
-                calc_start_day(
-                    roll_day(start_date, calendar=calendar, business_day_convention=business_day_convention),
-                    f"{spd}D",
-                    business_day_convention=business_day_convention,
-                    calendar=calendar,
-                ),
-                calendar=calendar,
-                following_first=False,
+        if maturity_date is None and term is None:
+            raise ValueError("Either maturity_date or term must be provided for DepositSpecification.")
+        elif maturity_date is None and term is not None:
+            # calculate maturity date from term and start date
+            if issue_date is None:
+                raise ValueError("issue_date must be provided if maturity_date is to be calculated from term.")
+            maturity_date = (
+                calc_end_day(issue_date, term, business_day_convention, calendar) + relativedelta(_term_to_period(term))
+                if adjust_start_date
+                else issue_date + relativedelta(_term_to_period(term))
             )
-            fixing_date = fd
-            logger.info(
-                "Set fixing_date, "
-                + str(start_date)
-                + " to start_date adjusted backwards by spot_days, business_day_convention, and calendar:"
-                + str(fd)
-            )
-        else:
-            raise ValueError("Either fixing_date or start_date must be provided.")
-
-        # checking and setting start date
-        if start_date is not None:
-            if not is_business_day(start_date, calendar=calendar) and adjust_start_date:
-                sd = roll_day(start_date, calendar=calendar, business_day_convention=business_day_convention)
-                logger.info(
-                    "Start_date, " + str(start_date) + " no business day, moved to next business day acc. to business_day_convention:" + str(sd)
-                )
-            else:
-                sd = start_date
-        elif fixing_date is not None and adjust_start_date:
-            sd = calc_end_day(
-                fixing_date,
-                f"{spd}D",
-                business_day_convention=business_day_convention,
-                calendar=calendar,
-                roll_convention=roll_convention,
-            )
-            logger.info("Set start_date, " + str(sd) + ", to fixing_date adjusted by spot_days and business_day_convention:" + str(sd))
-        elif fixing_date is not None:
-            sd = fd + timedelta(days=spd)
-            logger.info(
-                "Set start_date to fixing_date, " + str(fd) + ", adjusted by spot_days without business day adjustment (i.e. unadjusted): " + str(sd)
-            )
-        else:
-            raise ValueError("Either fixing_date or start_date must be provided.")
-        if issue_date is None:
-            issue_date = sd
-        # checking and setting end date
-        if end_date is not None and (not adjust_end_date or is_business_day(end_date, calendar=calendar)):
-            ed = end_date
-        elif end_date is not None:
-            ed = roll_day(end_date, calendar=calendar, business_day_convention=business_day_convention)
-            logger.info("Set end_date, " + str(end_date) + ", to next business day acc. to business_day_convention:" + str(ed))
-        elif term is not None and not adjust_end_date:
-            ed = calc_end_day(sd, term, calendar=calendar, roll_convention=roll_convention)
-            logger.info("Set end_date to start_date " + "adjusted by term and roll_convention, not adjusted by business_day_convention: " + str(ed))
-        elif term is not None:
-            ed = calc_end_day(sd, term, calendar=calendar, roll_convention=roll_convention, business_day_convention=business_day_convention)
-            logger.info("Set end_date to start_date adjusted by term, roll_convention, and business_day_convention: " + str(ed))
-        elif maturity_date is not None:
-            if not is_business_day(maturity_date, calendar=calendar) and adjust_end_date:
-                ed = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
-            else:
-                ed = maturity_date
-        else:
-            raise ValueError("Either end_date, term and start_date, or maturity_date must be provided.")
-
-        # checking and setting maturity date
-        if maturity_date is not None:
-            if not is_business_day(maturity_date, calendar=calendar):
-                md = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
-                logger.info("Set maturity_date, " + str(maturity_date) + ", to next business day acc. to business_day_convention:" + str(md))
-            else:
-                md = maturity_date
-        else:
-            md = roll_day(ed, calendar=calendar, business_day_convention=business_day_convention)
-            logger.info("Set maturity_date to end_date, " + str(ed) + ", adjusted by business_day_convention:" + str(md))
-
-        if (
-            term is None
-        ):  # since we can somtimes get a mix of datetime and date, (which should be discussed...) we normalize to date here to find the difference in days
-            if isinstance(ed, datetime):
-                ed_date = ed.date()
-            else:
-                ed_date = ed
-            if isinstance(sd, datetime):
-                sd_date = sd.date()
-            else:
-                sd_date = sd
-            t = f"{(ed_date - sd_date).days}D"
-            logger.info("Set term to the difference between end_date and start_date in days.")
-        else:
-            t = term
 
         super().__init__(
             obj_id=obj_id,
-            first_fixing_date=fd,
             spot_days=spd,
             issue_date=issue_date,
-            start_date=sd,
-            end_date=ed,
-            maturity_date=md,
+            maturity_date=maturity_date,
             notional=notional,
             currency=currency,
             coupon=rate,
-            frequency=t,
+            frequency=term,
             day_count_convention=day_count_convention,
             business_day_convention=business_day_convention,
             roll_convention=roll_convention,
@@ -237,6 +134,9 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
             payment_days=payment_days,
             issuer=issuer,
             securitization_level=securitization_level,
+            adjust_end_date=adjust_end_date,
+            adjust_start_date=adjust_start_date,
+            index=index,
         )
 
     @staticmethod
@@ -276,8 +176,7 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
     def _to_dict(self) -> dict:
         result = {
             "obj_id": self.obj_id,
-            "fixing_date": serialize_date(self.fixing_date),
-            "start_date": serialize_date(self.start_date),
+            "issue_date": serialize_date(self.issue_date),
             "maturity_date": serialize_date(self.maturity_date),
             "currency": self.currency,
             "notional": self.notional,

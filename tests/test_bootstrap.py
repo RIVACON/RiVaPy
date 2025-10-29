@@ -43,7 +43,7 @@ from holidays import EuropeanCentralBank as _ECB
 
 
 # Helper functions
-def tolerance_from_quote(q:float)->float:
+def tolerance_from_quote(q: float) -> float:
     """
     Determine an appropriate delta for assertAlmostEqual
     based on the number of decimals in the quote.
@@ -52,6 +52,7 @@ def tolerance_from_quote(q:float)->float:
     decimals = len(s.split(".")[1]) if "." in s else 0
     delta = 0.5 * 10 ** (-decimals)
     return delta
+
 
 def deep_equal(obj1, obj2):
     if type(obj1) != type(obj2):
@@ -65,31 +66,31 @@ def deep_equal(obj1, obj2):
 
 # Minimal instrument specification classes for testing
 class DummyDepositSpec(DepositSpecification):
-    def __init__(self, end_date=None, start_date=None, ref_date=None):
+    def __init__(self, maturity_date=None, issue_date=None, ref_date=None):
         """Setting up base deposit specification for tests.
         For now, as O/N deposit with 1 day accrual.
         """
         ##########################################
-        # setting up depoist
+        # setting up deposit
         # calculation date
         if ref_date is None:
             ref_date = datetime(2019, 8, 31)
 
         # start date of the accrual period with spot lag equal to 2 days
-        if start_date is None:
-            start_date = ref_date + timedelta(days=2)
+        if issue_date is None:
+            issue_date = ref_date + timedelta(days=2)
 
         # end date of the accrual period is 1 day after startdate
-        if end_date is None:
-            end_date = start_date + timedelta(days=1)
+        if maturity_date is None:
+            maturity_date = issue_date + timedelta(days=1)
 
         super().__init__(
             obj_id="dummy_deposit",
             issuer="dummy_issuer",
             currency="EUR",
             fixing_date=ref_date,
-            start_date=start_date,
-            maturity_date=end_date,
+            issue_date=issue_date,
+            maturity_date=maturity_date,
             notional=100.0,
             rate=0.01,
             day_count_convention="Act360",
@@ -133,7 +134,7 @@ class TestBootstrapCurveFunctions(unittest.TestCase):
                 ref_date=date(2024, 1, 1),
                 curve_id="curve1",
                 day_count_convention=DayCounterType.ThirtyU360,
-                instruments=[DummyDepositSpec(end_date=datetime(2025, 1, 1))],
+                instruments=[DummyDepositSpec(maturity_date=datetime(2025, 1, 1))],
                 quotes=[],
             )
 
@@ -161,7 +162,7 @@ class TestBootstrapCurveFunctions(unittest.TestCase):
         # here this end_date is being saved into the maturity date..., and the end date is calculated internally in deposit spec
         # inst = DummyDepositSpec(ref_date=datetime(2024, 1, 1), start_date=datetime(2024, 1, 1), end_date=datetime(2025, 1, 1))
         # here we input an end date that would coincide with the maturity date by desgien
-        inst = DummyDepositSpec(ref_date=datetime(2024, 1, 1), start_date=datetime(2024, 1, 1), end_date=datetime(2024, 1, 3))
+        inst = DummyDepositSpec(ref_date=datetime(2024, 1, 1), issue_date=datetime(2024, 1, 1), maturity_date=datetime(2024, 1, 3))
         result = bootstrap_curve(
             ref_date=datetime(2024, 1, 1),
             curve_id="curve1",
@@ -244,7 +245,7 @@ class TestGetQuote(unittest.TestCase):
 
     def test_get_quote_deposit(self):
         refdate = datetime(2024, 1, 1)
-        inst = DummyDepositSpec(ref_date=refdate, start_date=refdate, end_date=datetime(2024, 1, 3))
+        inst = DummyDepositSpec(ref_date=refdate, issue_date=refdate, maturity_date=datetime(2024, 1, 3))
         days_to_maturity = [1, 180, 365, 720, 3 * 365, 4 * 365, 10 * 365]
         dates = [refdate + timedelta(days=d) for d in days_to_maturity]
         flat_rate = 0.025
@@ -413,13 +414,13 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
     def test_deposit_bootstrap(self):
         # Minimal deposit: 6M, 2% rate
         logger.debug("Creating 1 deposit instrument")
-        start_date = self.ref_date + timedelta(days=2)  # spot lag of 2 days
-        end_date = start_date + timedelta(days=1)  # 1 day after startdate
+        issue_date = self.ref_date + timedelta(days=2)  # spot lag of 2 days
+        maturity_date = issue_date + timedelta(days=1)  # 1 day after startdate
         deposit = DepositSpecification(
             obj_id="dep1",
             notional=100,
-            start_date=start_date,
-            end_date=end_date,
+            issue_date=issue_date,
+            maturity_date=maturity_date,
             currency="EUR",
             day_count_convention=self.day_count,
             rate=0.01,  # rate different from "market quote" to ensure that rate here is NOT used in deposit bootstrapping
@@ -438,7 +439,7 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
         logger.debug("Checking assertions")
         self.assertIsInstance(curve, DiscountCurve)
         self.assertEqual(curve.get_dates()[0], self.ref_date)
-        self.assertEqual(curve.get_dates()[1], end_date)
+        self.assertEqual(curve.get_dates()[1], maturity_date)
 
         # the discount curve needs to be able to get the same market quote for the instrument
         model_quote = get_quote(self.ref_date, deposit, {"discount_curve": curve})
@@ -450,19 +451,19 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
         # start_date = self.ref_date + relativedelta(months=6) #TODO why was there an issue with the dates before? triggered fra_spec date error???
         # end_date = self.ref_date + relativedelta(months=9)
         ref_date = datetime(2023, 1, 28)
-        start_date = datetime(2023, 7, 28)
-        end_date = datetime(2023, 10, 28)
+        issue_date = datetime(2023, 7, 28)
+        maturity_date = datetime(2023, 10, 28)
         fra = ForwardRateAgreementSpecification(
             obj_id="dummy_id",
             trade_date=ref_date,
             # maturity_date=mat_date,
             notional=1000.0,
             rate=0.025,
-            start_date=start_date,
-            end_date=end_date,
+            start_date=issue_date,
+            end_date=maturity_date,
             udlID="dummy_underlying_index",
-            rate_start_date=start_date,
-            rate_end_date=end_date,
+            rate_start_date=issue_date,
+            rate_end_date=maturity_date,
             day_count_convention=self.day_count,
             rate_day_count_convention=self.day_count,
             currency="EUR",
@@ -476,8 +477,8 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
         deposit = DepositSpecification(
             obj_id="dep1",
             notional=1000.0,
-            start_date=ref_date,
-            end_date=start_date,
+            issue_date=ref_date,
+            maturity_date=issue_date,
             currency="EUR",
             day_count_convention=self.day_count,
             rate=0.02,
@@ -495,8 +496,8 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
 
         self.assertIsInstance(curve, DiscountCurve)
         self.assertEqual(curve.get_dates()[0], self.ref_date)
-        self.assertEqual(curve.get_dates()[1], start_date)
-        self.assertEqual(curve.get_dates()[2], end_date)
+        self.assertEqual(curve.get_dates()[1], issue_date)
+        self.assertEqual(curve.get_dates()[2], maturity_date)
 
     def test_irs_bootstrap(self):
         # test that at least, the bootstrap completes
@@ -545,8 +546,8 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
         deposit = DepositSpecification(
             obj_id="dep1",
             notional=1_000_000,
-            start_date=self.ref_date,
-            end_date=self.ref_date + timedelta(days=182),
+            issue_date=self.ref_date,
+            maturity_date=self.ref_date + timedelta(days=182),
             currency="EUR",
             day_count_convention=self.day_count,
             rate=0.02,
@@ -594,8 +595,8 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
         deposit = DepositSpecification(
             obj_id="dep1",
             notional=1_000_000,
-            start_date=ref_date,
-            end_date=d1,
+            issue_date=ref_date,
+            maturity_date=d1,
             currency="EUR",
             day_count_convention=self.day_count,
             rate=0.02,
@@ -720,7 +721,7 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
                 issuer="dummy_issuer",
                 currency="EUR",
                 fixing_date=ref_date,
-                start_date=start_date,
+                issue_date=start_date,
                 maturity_date=end_date_deposits[i],
                 notional=100.0,
                 rate=quotes_deposits[i],
@@ -1328,8 +1329,8 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
         deposit = DepositSpecification(
             obj_id="dep1",
             notional=1_000_000,
-            start_date=self.ref_date,
-            end_date=d1,
+            issue_date=self.ref_date,
+            maturity_date=d1,
             currency="EUR",
             day_count_convention=self.day_count,
             rate=0.02,
@@ -1426,7 +1427,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
 
         dep_spec = DepositSpecification(
             obj_id=label,
-            fixing_date=refDate,
+            issue_date=refDate,
             currency=currency,
             # notional: float = 100.0, # we let notional default to 100
             rate=parRate,
@@ -1635,11 +1636,12 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         # end_day = calc_end_day()
         # generate_dates
         fix_schedule = Schedule(
-            start_day=spot_date, end_day=expiry_unadjusted,#expiry,
-              time_period=fixPayFreq, 
-              business_day_convention=rollConvFix, 
-              calendar=holidays, 
-              ref_date=refDate
+            start_day=spot_date,
+            end_day=expiry_unadjusted,  # expiry,
+            time_period=fixPayFreq,
+            business_day_convention=rollConvFix,
+            calendar=holidays,
+            ref_date=refDate,
         ).generate_dates(False)
 
         # fix_schedule = get_schedule(self.refDate, self.maturity, pay_freq, roll_conv, self.holidays, spot_days)
@@ -1649,7 +1651,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
 
         flt_schedule = Schedule(
             start_day=spot_date,
-            end_day=expiry_unadjusted,#expiry,
+            end_day=expiry_unadjusted,  # expiry,
             time_period=underlyingPayFreq,
             business_day_convention=rollConvFloat,
             calendar=holidays,
@@ -1932,9 +1934,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         # self.assertEqual(1, 1)
 
     def test_multicurve_bootstrap_ois_3M(self):
-        """Test of the bootstrap function for multicurve generation...
-
-        """
+        """Test of the bootstrap function for multicurve generation..."""
 
         # these inputs must be given by user
         refDate = datetime(2019, 3, 1)
@@ -2097,7 +2097,7 @@ class TestReferenceDateDependance(unittest.TestCase):
             # per_diff = (model_quote - deposit_quotes[i]) / deposit_quotes[i] * 100
             # print(f"model: {model_quote} market: {deposit_quotes[i]} perdiff: {per_diff}")
             print(i, model_quote, curve.get_df()[i])
-            
+
         logger.debug(f"asserted market quote matched -done")
         logger.debug(f"--------------------------------------------------------")
         # self.assertEqual(1, 1)
@@ -2117,9 +2117,7 @@ class TestReferenceDateDependance(unittest.TestCase):
 
         df = self.quotes_df.copy()
 
-
         eur_ois = df[(df["Currency"] == "EUR") & (df["Instrument"] == "OIS")]
-
 
         for date, subset in eur_ois.groupby("Date"):
             logger.debug(f"--------------------------------------------------------")
@@ -2128,10 +2126,10 @@ class TestReferenceDateDependance(unittest.TestCase):
             day = date.split(".")[0]
             mon = date.split(".")[1]
             year = date.split(".")[2]
-            refDate=datetime(int(year), int(mon), int(day))
+            refDate = datetime(int(year), int(mon), int(day))
             logger.debug(f"--------------------------------------------------------")
-            
-            df_ins = subset   
+
+            df_ins = subset
             logger.debug("CSV loaded")
 
             ins_spec = sfc.load_specifications_from_pd(df_ins, refDate, holidays)
@@ -2166,7 +2164,9 @@ class TestReferenceDateDependance(unittest.TestCase):
             # the discount curve needs to be able to get the same market quote for the instrument
             for i in range(len(ins_spec)):
                 model_quote = get_quote(refDate, ins_spec[i], {"discount_curve": curve, "fixing_curve": curve})
-                self.assertAlmostEqual(model_quote, ins_quotes[i], delta=tolerance_from_quote(ins_quotes[i]))  # we adjust to check up to decimal fo the given market quote
+                self.assertAlmostEqual(
+                    model_quote, ins_quotes[i], delta=tolerance_from_quote(ins_quotes[i])
+                )  # we adjust to check up to decimal fo the given market quote
                 # per_diff = (model_quote - deposit_quotes[i]) / deposit_quotes[i] * 100
                 # print(f"model: {model_quote} market: {deposit_quotes[i]} perdiff: {per_diff}")
 
