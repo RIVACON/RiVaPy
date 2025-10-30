@@ -39,7 +39,6 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
         self,
         obj_id: str,
         issue_date: _Optional[_Union[date, datetime]] = None,
-        fixing_date: _Optional[_Union[date, datetime]] = None,
         maturity_date: _Optional[_Union[date, datetime]] = None,
         currency: _Union[Currency, str] = "EUR",
         notional: float = 100.0,
@@ -57,51 +56,56 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
         adjust_end_date: bool = False,
         index: _Optional[_Union[InterestRateIndex, str]] = None,
     ):
-        """
-        Deposit specification.
-        Accrual start is adjusted according business day conventions, payment occurs on the maturity date (plus settlement days), spot days are adjusted to 1 or 0 respectively if deposit is T/N or O/N.
+        """Create a short-term deposit specification.
+
+        Accrual start is adjusted according to the provided business day convention. Payment
+        occurs on the maturity date (plus any settlement/payment days). For overnight ("O/N")
+        and tomorrow-next ("T/N") deposits the :pyarg:`spot_days` is set to 0 and 1,
+        respectively.
 
         Args:
-            obj_id (str): (Preferably) Unique label of the deposit.
-            fixing_date (_Union[date, datetime]): Date on which the reference rate is set. Must be a business day and must lie at or before the start_date. is rolled to business day according to business_day_convention if not provided as business day.
-            start_date (_Union[date, datetime]): Date on when deposits begins for accrual or settlement. Is rolled to business day according to the business_day_convention if adjust_start_date is True. Must lie at or after the fixing_date.
-            end_date (_Union[date, datetime]): Date on which the deposit ends for accrual or settlement. May be a holiday according to applicable calendar. Must lie after the start_date and will be rolled according to business day convention if adjust_end_date is True.
-            maturity_date (_Union[date, datetime]): Date when deposit matures formally, lies on a good business day. Must lie at or after the end_date.
-            currency (str, optional): Currency as alphabetic, Defaults to 'EUR'.
-            notional (float, optional): Deposit's notional/face value. Must be positive. Defaults to 100.0.
-            rate (float): Deposit fixed rate.
-            term (_Union[Period, str], optional): Deposit term. If provided and no end date is given, it is used to calculate the end date from the start date.
-            day_count_convention (Union[DayCounter, str], optional): Day count convention for determining period length. Defaults to DayCounter.ThirtyU360.
-            business_day_convention (Union[RollConvention, str], optional): Set of rules defining the adjustment of  days to ensure each date being a business day with respect to a given holiday calendar. Defaults to RollConvention.FOLLOWING
-            roll_convention (Union[RollRule],str], optional): Roll convention to be applied when building a schedule. Defaults to RollRule.NONE.
-            spot_days (int, optional): Number of days after fixing date when the deposit is actually settled. Defaults to 2 and is set to 0, if start_date == fixing_date or O/N deposit, and is set to 1 for T/N deposit or start_date = fixing_date+1.
-            calendar (Union[HolidayBase, str], optional): Holiday calendar to be used for business day adjustment. Defaults to ECB calendar.
-            issuer (str, optional): Name/id of issuer. Defaults to None.
-            securitization_level (_Union[SecuritizationLevel, str], optional): Securitization level. Defaults to None.
-            payment_days (int, optional): Number of days after maturity date when the cashflow is actually paid. Defaults to 2.
-            adjust_start_date (bool, optional): Whether to adjust the start date to the next business day if it falls on a holiday. Defaults to True.
-            adjust_end_date (bool, optional): Whether to adjust the end date to the next business day if it falls on a holiday. Defaults to False.
+            obj_id (str): Identifier for the deposit (e.g. ISIN or internal id).
+            issue_date (date | datetime, optional): Fixing/start date of the deposit. Required
+                if :pyarg:`maturity_date` is computed from :pyarg:`term`.
+            maturity_date (date | datetime, optional): Maturity date. If ``None`` and
+                :pyarg:`term` is provided, the maturity will be derived from
+                :pyarg:`issue_date` and :pyarg:`term`.
+            currency (Currency | str, optional): Currency code or enum. Defaults to "EUR".
+            notional (float, optional): Face value; must be positive. Defaults to 100.0.
+            rate (float, optional): Fixed deposit rate (coupon). Defaults to 0.0.
+            term (Period | str, optional): Tenor of the deposit (e.g. "3M", "1Y", "O/N", "T/N").
+            day_count_convention (DayCounterType | str, optional): Day count convention.
+                Defaults to :pydata:`DayCounterType.ACT360`.
+            business_day_convention (RollConvention | str, optional): Business day convention
+                used for rolling dates. Defaults to :pydata:`RollConvention.MODIFIED_FOLLOWING`.
+            roll_convention (RollRule | str, optional): Roll rule when building schedules.
+                Defaults to :pydata:`RollRule.EOM`.
+            spot_days (int, optional): Settlement lag in days. Defaults to 2; overridden to 0
+                for O/N and 1 for T/N when :pyarg:`term` is set accordingly.
+            calendar (HolidayBase | str, optional): Holiday calendar to use. Defaults to ECB.
+            issuer (Issuer | str, optional): Issuer identifier.
+            securitization_level (SecuritizationLevel | str, optional): Securitization level.
+                Defaults to :pydata:`SecuritizationLevel.NONE`.
+            payment_days (int, optional): Days after maturity when payment occurs. Defaults to 0.
+            adjust_start_date (bool, optional): If True, roll :pyarg:`issue_date` forward to a
+                business day when required. The adjusted date will be used for calculations. Defaults to True.
+            adjust_end_date (bool, optional): If True, roll :pyarg:`maturity_date` forward to a
+                business day when required. The adjusted date will be used for calculations. Defaults to False.
+            index (InterestRateIndex | str, optional): Optional reference index.
+
+        Raises:
+            ValueError: If neither :pyarg:`maturity_date` nor :pyarg:`term` is provided, or if
+                :pyarg:`issue_date` is required to compute :pyarg:`maturity_date` but is missing.
         """
         self.rate = rate
-
-        # Store original input of fixing date
-        self.fixing_date = fixing_date
 
         # check and adjust spot_days for O/N and T/N deposits
         if term == "O/N":
             spd = 0
-            if term != None and term != "O/N":
-                logger.error(f"term given as {term} and not as 'O/N' but fixing_date == start_date -> inconsistent data")
-            elif term == "O/N":
-                logger.error(f"term given as {term} but fixing_date != start_date -> inconsistent data")
-            logger.info("Setting spot_days to 0: O/N deposit or fixing_date equal to start_date.")
+            logger.info("Setting spot_days to 0: O/N deposit.")
         elif term == "T/N":
             spd = 1
-            if term != None and term != "T/N":
-                logger.error(f"term given as {term} and not as 'T/N' but fixing_date + 1 day == start_date -> inconsistent data")
-            elif term == "T/N":
-                logger.error(f"term given as {term} but fixing_date + 1 day != start_date -> inconsistent data")
-            logger.info("Setting spot_days to 1: T/N deposit or fixing_date + 1 day equal to start_date.")
+            logger.info("Setting spot_days to 1: T/N deposit.")
         else:
             spd = spot_days
 

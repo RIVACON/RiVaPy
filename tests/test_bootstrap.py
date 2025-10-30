@@ -88,7 +88,6 @@ class DummyDepositSpec(DepositSpecification):
             obj_id="dummy_deposit",
             issuer="dummy_issuer",
             currency="EUR",
-            fixing_date=ref_date,
             issue_date=issue_date,
             maturity_date=maturity_date,
             notional=100.0,
@@ -693,7 +692,6 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
                 obj_id="DEPOSIT_" + str(i + 1),
                 issuer="dummy_issuer",
                 currency="EUR",
-                fixing_date=ref_date,
                 issue_date=start_date,
                 maturity_date=end_date_deposits[i],
                 notional=100.0,
@@ -1383,10 +1381,9 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         label = instr + "_" + maturity
 
         #######################
-        # the fixing date is equivanlent to
         # so from the file, we know the TERM for sure, the MATURITY for sure, and we give the REFERENCE DATE
 
-        # our deposit spepcificaiton can be created using the FIXING_DATE = ,refdate, spotlag, and MATURITY to calculate the term, start, end_date
+        # our deposit spepcificaiton can be created using the refdate, spotlag, and MATURITY to calculate the term, start, end_date
 
         dep_spec = DepositSpecification(
             obj_id=label,

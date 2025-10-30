@@ -49,6 +49,14 @@ from rivapy.marketdata.curves import DiscountCurve
 
 
 class BondBaseSpecification(interfaces.FactoryObject):
+    """Base class for bond-like instrument specifications.
+
+    This class implements common properties shared by bonds, deposits and other
+    deterministic cashflow instruments such as issue/maturity dates, notional
+    handling, currency and basic validation. Subclasses should implement
+    instrument-specific schedule and cashflow behaviour.
+    """
+
     # ToDo: amend setter and property to handle float vs notional structure upon initialization, focus on Const and Linear, and variable with provided %-vector (as in FBG)
     # ToDo: amend setter and property to handle amortization scheme upon initialization
     # ToDo: adjust getCashFlows methods in derived classes accordingly
@@ -102,6 +110,12 @@ class BondBaseSpecification(interfaces.FactoryObject):
         self._validate_derived_issued_instrument()
 
     def set_amortization_scheme(self, amortization_scheme) -> AmortizationScheme:
+        """Resolve an amortization scheme descriptor into an AmortizationScheme.
+
+        Accepts None, a string identifier, or an AmortizationScheme instance.
+        Returns a concrete AmortizationScheme object that will be used by the
+        notional handling logic.
+        """
         if amortization_scheme is None:
             return ZeroAmortizationScheme()
         elif isinstance(amortization_scheme, str):
@@ -112,6 +126,13 @@ class BondBaseSpecification(interfaces.FactoryObject):
             raise ValueError("Invalid amortization scheme provided.")
 
     def set_notional_structure(self, notional, amortization_scheme) -> NotionalStructure:
+        """Create or validate the notional structure for this instrument.
+
+        The function accepts numeric notionals (int/float) and converts them to
+        a constant notional structure, or passes through already-constructed
+        NotionalStructure objects. The behaviour depends on the provided
+        amortization scheme.
+        """
         if amortization_scheme is None:
             if isinstance(notional, _Union[int, float]):
                 return ConstNotionalStructure(_check_positivity(notional))
@@ -401,6 +422,12 @@ class BondBaseSpecification(interfaces.FactoryObject):
 
 
 class DeterministicCashflowBondSpecification(BondBaseSpecification):
+    """Specification for instruments that produce deterministic cashflows.
+
+    This class provides common scheduling, accrual and pricing-related fields
+    (frequency, coupon, day count convention, fixings, etc.) used by concrete
+    bond-like instrument types (fixed-rate, floating-rate, zero-coupon).
+    """
 
     def __init__(
         self,
@@ -442,7 +469,7 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         Args:
             obj_id (str): Unique identifier for the object.
             start_date (_Union[date, datetime]): Start date of the first accrual period.
-            end_date (_Union[date, datetime]): End of the last accrual period. Not necessarily a good business day.
+            end_date (_Union[date, datetime]): End of the last accrual period.
             maturity_date (_Union[date, datetime]): Adjusted end date of the last accrual period. Is a good business day.
             notional (float): Notional amount of the instrument.
             coupon (float): Fixed coupon rate .
@@ -459,6 +486,10 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
             fwd_curve (_Optional[DiscountCurve], optional): Forward curve used for pricing. Defaults to None.
             last_fixing (_Optional[float], optional): Last known fixing rate. Defaults to None.
             fixings (_Optional[FixingTable], optional): Fixing table containing historical fixings. Defaults to None.
+            adjust_start_date (bool, optional): Whether to adjust the start date to a business day. Defaults to True.
+            adjust_end_date (bool, optional): Whether to adjust the end date to a business day. Defaults to True.
+            adjust_schedule (bool, optional): Whether to adjust the schedule dates to business days. Defaults to True.
+            adjust_accruals (bool, optional): Whether to adjust the accrual dates to business days. Defaults to True.
         """
         super().__init__(
             obj_id,
@@ -1017,6 +1048,11 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
 
 
 class FixedRateBondSpecification(DeterministicCashflowBondSpecification):
+    """Specification for fixed-rate bonds.
+
+    Stores coupon, frequency and other fixed-rate specific settings and
+    delegates schedule construction to the base class behaviour.
+    """
 
     def __init__(
         self,
@@ -1113,6 +1149,11 @@ class FixedRateBondSpecification(DeterministicCashflowBondSpecification):
 
 
 class ZeroBondSpecification(DeterministicCashflowBondSpecification):
+    """Specification for zero-coupon bonds.
+
+    Zero bonds have a single payout at maturity; this class wires the base
+    behaviour to use coupon_type 'zero' and appropriate notional handling.
+    """
 
     def __init__(
         self,
@@ -1195,6 +1236,12 @@ class ZeroBondSpecification(DeterministicCashflowBondSpecification):
 
 
 class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
+    """Specification for floating-rate bonds.
+
+    Supports providing the floating index via enum, string alias or explicit
+    index object. The class derives payment frequency from the index when
+    available and wires fixings/first fixing date handling used by the pricer.
+    """
 
     def __init__(
         self,
