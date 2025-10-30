@@ -24,8 +24,12 @@ from typing import Tuple, Union as _Union, List as _List
 
 
 class DeterministicCashflowPricer:
-    """
-    DeterministicCashflowPricer - A static class for pricing cashflow-based instruments
+    """Deterministic cashflow pricer utilities.
+
+    This class provides static and instance helpers for pricing deterministic cashflow
+    instruments (fixed- and floating-rate bonds, deposits, zero-coupon instruments).
+    It contains methods to generate expected cashflows, discount them, compute PVs,
+    yields, z-spreads and duration measures.
     """
 
     def __init__(
@@ -273,6 +277,20 @@ class DeterministicCashflowPricer:
         fwd_curve: _Union[DiscountCurve, None] = None,
         cashflows: _Union[List[Tuple[datetime, float]], None] = None,
     ) -> float:
+        """Discount and sum cashflows to obtain present value.
+
+        Args:
+            val_date (date | datetime): Valuation date used for discounting.
+            specification (DeterministicCashflowBondSpecification): Instrument specification.
+            discount_curve (DiscountCurve): Curve used to obtain discount factors.
+            fwd_curve (DiscountCurve, optional): Forward curve used for floating-rate cashflows.
+            cashflows (List[(date, amount)], optional): Precomputed cashflows; if not
+                provided they will be generated from the specification.
+
+        Returns:
+            float: Present value obtained by discounting future cashflows occurring after val_date.
+        """
+
         # logger.info('Start computing pv cashflows for bond ' + specification.obj_id)
 
         if cashflows is None:
@@ -296,6 +314,17 @@ class DeterministicCashflowPricer:
         discount_curve: DiscountCurve,
         fwd_curve: _Union[DiscountCurve, None] = None,
     ) -> float:
+        """Compute the dirty price (present value including accrued interest) of a bond.
+
+        Args:
+            val_date (date | datetime): Valuation date.
+            specification (DeterministicCashflowBondSpecification): Instrument specification.
+            discount_curve (DiscountCurve): Curve used for discounting.
+            fwd_curve (DiscountCurve, optional): Forward curve for floating-rate cashflows.
+
+        Returns:
+            float: Dirty price (PV of future cashflows after val_date).
+        """
         logger.info("Start computing dirty price for bond " + specification.obj_id)
         pv_cashflows = DeterministicCashflowPricer.get_pv_cashflows(val_date, specification, discount_curve, fwd_curve)
         logger.info("Finished computing dirty price for bond " + specification.obj_id + ", dirty_price: " + str(pv_cashflows))
@@ -316,6 +345,17 @@ class DeterministicCashflowPricer:
         discount_curve: DiscountCurve,
         fwd_curve: _Union[DiscountCurve, None] = None,
     ) -> float:
+        """Compute the clean price of a bond (dirty price minus accrued interest).
+
+        Args:
+            val_date (date | datetime): Valuation date.
+            specification (DeterministicCashflowBondSpecification): Instrument specification.
+            discount_curve (DiscountCurve): Discount curve used for discounting.
+            fwd_curve (DiscountCurve, optional): Forward curve for floating-rate cashflows.
+
+        Returns:
+            float: Clean price (dirty price less accrued interest).
+        """
         dirty_price = DeterministicCashflowPricer.get_dirty_price(val_date, specification, discount_curve, fwd_curve)
         accrued_interest = DeterministicCashflowPricer.get_accrued_interest(specification, val_date)
         return dirty_price - accrued_interest
@@ -400,6 +440,14 @@ class DeterministicCashflowPricer:
     ############################# PRICER ONLY METHODS BELOW #####################################
 
     def macaulay_duration(self) -> float:
+        """Compute the Macaulay duration for the instrument.
+
+        Macaulay duration is the weighted average time until cashflows are received,
+        weighted by the present value of the cashflows.
+
+        Returns:
+            float: Macaulay duration expressed in the same time units used by day count.
+        """
         logger.info("Start computing macaulay duration for bond " + self._spec.obj_id)
         cashflows = self.expected_cashflows()
         pv_cashflows = DeterministicCashflowPricer.get_pv_cashflows(
@@ -422,6 +470,18 @@ class DeterministicCashflowPricer:
         self,
         target_dirty_price: float = 100.0,
     ) -> float:
+        """Compute the modified duration for the instrument.
+
+        Modified duration approximates the percentage price change for a unit change
+        in yield and is computed from the Macaulay duration and yield.
+
+        Args:
+            target_dirty_price (float, optional): Dirty price used for yield inversion.
+                Defaults to 100.0.
+
+        Returns:
+            float: Modified duration.
+        """
         logger.info("Start computing modified duration for bond " + self._spec.obj_id)
         macaulay_duration = self.macaulay_duration()
         yld = self.compute_yield(target_dirty_price)
