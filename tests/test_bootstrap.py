@@ -2041,6 +2041,8 @@ class TestReferenceDateDependance(unittest.TestCase):
             quotes=ins_quotes,
             interpolation_type=InterpolationType.LINEAR_LOG,
             extrapolation_type=ExtrapolationType.LINEAR_LOG,
+            #interpolation_type=InterpolationType.HAGAN_DF,
+            #extrapolation_type=ExtrapolationType.CONSTANT_DF,
         )
         # print(curve.get_dates())
         self.assertIsInstance(curve, DiscountCurve)
@@ -2110,6 +2112,8 @@ class TestReferenceDateDependance(unittest.TestCase):
                 day_count_convention=df_ins["DayCountFixed"].tolist()[0],  # taken the first entry and assume is valid for all other deposits
                 instruments=ins_spec,
                 quotes=ins_quotes,
+                #interpolation_type=InterpolationType.HAGAN_DF,
+                #extrapolation_type=ExtrapolationType.CONSTANT_DF,
                 interpolation_type=InterpolationType.LINEAR_LOG,
                 extrapolation_type=ExtrapolationType.LINEAR_LOG,
             )

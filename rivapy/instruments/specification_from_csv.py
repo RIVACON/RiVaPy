@@ -12,6 +12,7 @@ from rivapy.instruments import (
     IrFixedLegSpecification,
     IrFloatLegSpecification,
     IrOISLegSpecification,
+    InterestRateBasisSwapSpecification,
 )
 from rivapy.instruments.components import ConstNotionalStructure
 from rivapy.tools.datetools import (
@@ -417,3 +418,166 @@ def make_ois_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Holid
     )
 
     return ois
+
+
+def make_basis_swap_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_HolidayBase, str] = _ECB()):
+    """Create a basis swap (BS) specification object given the required information from an input data frame row.
+    Creates both fixed and floating legs.
+
+    Args:
+        row (pd.DataFrame): Row containing the required information for the IRS specification specified by header information
+        ref_date (datetime): The reference date for the IRS instrument
+        calendar (_Union[_HolidayBase, str], optional): calendar object from which date calculations are affected. Defaults to _ECB().
+
+    Returns:
+        _type_: IRS specification object
+    """
+    # TODO THIS NEEDS to be ammended to take in the new expected maturtiy or TBS instrument
+    # type and to correctls parse the information and generates dates for the
+    # pay leg, recieve leg, and the "spread leg"
+    # mainly basd on tenors. the spprad leg will by design have the frequency of the pay leg
+    # the following information is expected:
+    instr = row["Instrument"]
+    fixDayCount = row["DayCountFixed"]
+    floatDayCount = row["DayCountFloat"]
+    basisDayCount = row["DayCountBasis"]
+    maturity = row["Maturity"]
+    underlyingIndex = row["UnderlyingIndex"]
+    tenor = row["UnderlyingTenor"]
+    underlyingPayFreq = row["UnderlyingPaymentFrequency"]
+    basisTenor = row["BasisTenor"]
+    basisPayFreq = row["BasisPaymentFrequency"]
+    fixPayFreq = row["PaymentFrequencyFixed"]
+    rollConvFloat = row["RollConventionFloat"]
+    rollConvFix = row["RollConventionFixed"]
+    rollConvBasis = row["RollConventionBasis"]
+    spotLag = row["SpotLag"]  # expect form "1D", i.e 1 day
+    parRate = float(row["Quote"])
+    currency = row["Currency"]
+    label = instr + "_" + maturity
+
+    # we use the helper function with spotlag in place of maturity to effctively shift the date
+    spot_date = calc_end_day(start_day=ref_date, term=spotLag, business_day_convention=rollConvFix, calendar=calendar)
+    expiry = calc_end_day(spot_date, maturity, rollConvFix, calendar)  # get expiry of swap (cannot be before last paydate of legs)
+
+    # FIXED LEG
+    fix_schedule = Schedule(
+        start_day=spot_date, end_day=expiry, time_period=fixPayFreq, business_day_convention=rollConvFix, calendar=calendar, ref_date=ref_date
+    ).generate_dates(False)
+
+    fix_start_dates = fix_schedule[:-1]
+    fix_end_dates = fix_schedule[1:]
+    fix_pay_dates = fix_end_dates
+
+    # # definition of the SPREAD leg - which represents the
+    spread_leg = IrFixedLegSpecification(
+        fixed_rate=parRate,
+        obj_id=label + "_spread_leg",
+        notional=100.0,
+        start_dates=fix_start_dates,
+        end_dates=fix_end_dates,
+        pay_dates=fix_pay_dates,
+        currency=currency,
+        day_count_convention=rollConvFix,
+    )
+
+    # PAY LEG
+    # FLOAT LEG
+    flt_schedule = Schedule(
+        start_day=spot_date,
+        end_day=expiry,
+        time_period=underlyingPayFreq,
+        business_day_convention=rollConvFloat,
+        calendar=calendar,
+        ref_date=ref_date,
+    ).generate_dates(False)
+
+    flt_start_dates = flt_schedule[:-1]
+    flt_end_dates = flt_schedule[1:]
+    flt_pay_dates = flt_end_dates
+
+    flt_reset_schedule = Schedule(
+        start_day=spot_date, end_day=expiry, time_period=tenor, business_day_convention=rollConvFloat, calendar=calendar, ref_date=ref_date
+    ).generate_dates(False)
+
+    flt_reset_dates = flt_reset_schedule[:-1]
+
+    ns = ConstNotionalStructure(100.0)
+    spread = 0.00
+
+    # # definition of the floating leg
+    pay_leg = IrFloatLegSpecification(
+        obj_id=label + "_pay_leg",
+        notional=ns,
+        reset_dates=flt_reset_dates,
+        start_dates=flt_start_dates,
+        end_dates=flt_end_dates,
+        rate_start_dates=flt_start_dates,
+        rate_end_dates=flt_end_dates,
+        pay_dates=flt_pay_dates,
+        currency=currency,
+        udl_id=underlyingIndex,
+        fixing_id="test_fixing_id",
+        day_count_convention=rollConvFloat,
+        spread=spread,
+    )
+
+    # RECEIVE LEG
+    # FLOAT LEG
+    flt_schedule2 = Schedule(
+        start_day=spot_date,
+        end_day=expiry,
+        time_period=underlyingPayFreq,
+        business_day_convention=rollConvFloat,
+        calendar=calendar,
+        ref_date=ref_date,
+    ).generate_dates(False)
+
+    flt_start_dates2 = flt_schedule2[:-1]
+    flt_end_dates2 = flt_schedule2[1:]
+    flt_pay_dates2 = flt_end_dates2
+
+    flt_reset_schedule2 = Schedule(
+        start_day=spot_date, end_day=expiry, time_period=tenor, business_day_convention=rollConvFloat, calendar=calendar, ref_date=ref_date
+    ).generate_dates(
+        False
+    )  # TODO NEEDS CHANGE
+
+    flt_reset_dates2 = flt_reset_schedule2[:-1]
+
+    ns = ConstNotionalStructure(100.0)
+    spread = 0.00
+
+    # # definition of the floating leg
+    receive_leg = IrFloatLegSpecification(
+        obj_id=label + "_receive_leg",
+        notional=ns,
+        reset_dates=flt_reset_dates2,
+        start_dates=flt_start_dates2,
+        end_dates=flt_end_dates2,
+        rate_start_dates=flt_start_dates2,
+        rate_end_dates=flt_end_dates2,
+        pay_dates=flt_pay_dates2,
+        currency=currency,
+        udl_id=underlyingIndex,
+        fixing_id="test_fixing_id",
+        day_count_convention=rollConvFloat,
+        spread=spread,
+    )
+
+    # # definition of the IR swap - assume fixed leg is the pay leg
+    ir_swap = InterestRateBasisSwapSpecification(
+        obj_id=label,
+        notional=ns,
+        issue_date=ref_date,
+        maturity_date=expiry,
+        pay_leg=pay_leg,
+        receive_leg=receive_leg,
+        spread_leg=spread_leg,
+        currency=currency,
+        day_count_convention=rollConvFloat,
+        issuer="dummy_issuer",
+        securitization_level="COLLATERALIZED",
+    )
+
+    return ir_swap
