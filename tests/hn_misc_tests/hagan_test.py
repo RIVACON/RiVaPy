@@ -182,16 +182,24 @@ if __name__ == "__main__":
     # instruments = other_deposits
     # quotes = quotes_deposits
 
-    estr = bootstrap_curve(ref_date, "ESTR_DC", DayCounterType.Act365Fixed, instruments, quotes)
+    #estr = bootstrap_curve(ref_date, "ESTR_DC", DayCounterType.Act365Fixed, instruments, quotes)
+    estr = bootstrap_curve(ref_date, "ESTR_DC", DayCounterType.Act365Fixed, instruments, quotes,
+                                interpolation_type=InterpolationType.LINEAR_LOG,
+                                extrapolation_type=ExtrapolationType.LINEAR_LOG,)
+    estr_hagan_df = bootstrap_curve(ref_date, "ESTR_DC_HAGAN", DayCounterType.Act365Fixed, instruments, quotes,
+                            interpolation_type=InterpolationType.HAGAN_DF,
+                            extrapolation_type=ExtrapolationType.CONSTANT_DF,)
 
     plt.figure(1)
     estr.plot(discount_factors=True)
+    estr_hagan_df.plot(discount_factors=True)
     plt.xlabel("year")
     plt.ylabel("DF")
     plt.legend()
 
     plt.figure(2)
     estr.plot(discount_factors=False)
+    estr_hagan_df.plot(discount_factors=False)
     plt.xlabel("year")
     plt.ylabel("zero rate")
     plt.legend()
