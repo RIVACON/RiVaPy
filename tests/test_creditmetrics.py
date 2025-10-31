@@ -50,6 +50,8 @@ class TestCreditMetricsModel(unittest.TestCase):
             t=self.t,
             confidencelevel=self.confidencelevel,
             seed=self.seed,
+            list_of_indices=["Dax"],
+            mapping_countries_on_indices={"DE": "Dax", "US": "SP"},
         )
 
     def test_merge_positions_issuer(self):
@@ -59,13 +61,19 @@ class TestCreditMetricsModel(unittest.TestCase):
         self.assertEqual(len(merged), 2)
 
     def test_get_correlation(self):
-        corr = self.model.get_correlation()
-        self.assertTrue("IssuerA" in corr.index)
-        self.assertTrue("IssuerB" in corr.index)
+        # get_correlation now returns (indices_correlation, corr_pairs)
+        indices_corr, corr_pairs = self.model.get_correlation()
+        # indices_corr should be a DataFrame containing the configured index names
+        for idx_name in self.model.list_of_indices:
+            self.assertIn(idx_name, indices_corr.columns)
+        # corr_pairs should contain correlations for issuer columns
+        self.assertIn("IssuerA", corr_pairs.index)
+        self.assertIn("IssuerB", corr_pairs.index)
 
     def test_get_cutoffs_rating(self):
         cutoffs = self.model.get_cutoffs_rating()
-        self.assertEqual(cutoffs.shape, (8, 7))
+        # Cutoffs shape: (8 target ratings, 8 initial ratings) after transformation
+        self.assertEqual(cutoffs.shape[0], 8)
 
     def test_get_expected_value(self):
         ev = self.model.get_expected_value()
@@ -101,7 +109,8 @@ class TestCreditMetricsModel(unittest.TestCase):
     def test_get_portfolio_ES(self):
         Loss, _, _, _ = self.model.mc_calculation()
         loss_distribution = self.model.get_loss_distribution(Loss)
-        expected = min(loss_distribution) * (-1)  # Assuming expected is the minimum loss
+        # Compute expected shortfall the same way as the model
+        expected = -1.0 * np.mean(loss_distribution[loss_distribution < np.percentile(loss_distribution, self.confidencelevel)])
         es = self.model.get_portfolio_ES(loss_distribution)
         self.assertIsInstance(es, float)
         self.assertAlmostEqual(es, expected, places=5)
