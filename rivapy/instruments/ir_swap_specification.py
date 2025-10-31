@@ -1060,9 +1060,9 @@ class InterestRateBasisSwapSpecification(interfaces.FactoryObject):
         """Return instrument type
 
         Returns:
-            Instrument: Interest Rate Swap
+            Instrument: Basis Swap
         """
-        return Instrument.IRS
+        return Instrument.BS
 
     # temp placeholder
     def get_end_date(self):

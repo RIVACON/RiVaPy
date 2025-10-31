@@ -19,6 +19,7 @@ from rivapy.instruments.ir_swap_specification import (
     IrFixedLegSpecification,
     IrFloatLegSpecification,
     IrSwapLegSpecification,
+    InterestRateBasisSwapSpecification,
 )
 from rivapy.marketdata import DiscountCurve
 from rivapy.marketdata.fixing_table import FixingTable
@@ -137,7 +138,7 @@ def bootstrap_curve(
     if Instrument.DEPOSIT in ins_types and flag_multi_curve == True:
         raise Exception("Deposits cannot be used in multicurve bootstrapping")
 
-    if Instrument.IRS in ins_types:
+    if Instrument.IRS or Instrument.BS in ins_types:
         # check if curves has a fixing curve
         if "fixing_curve" in curves:
             if not isinstance(curves["fixing_curve"], DiscountCurve):
@@ -390,7 +391,7 @@ def error_fn(
     else:
         # Single-curve: updating discount curve itself
         curves_copy["discount_curve"] = yc
-        if flag_irs_bootstrapped_as_fwd:  # if it is an irs instrument that needs the forward curve as well
+        if flag_irs_bootstrapped_as_fwd:  # if it is an irs instrument that needs the forward curve as well or TBS
             curves_copy["fixing_curve"] = yc
 
     calc_quote = get_quote(ref_date, instrument_spec, curves_copy)
@@ -447,7 +448,9 @@ def find_bracket(error_fn, guess, args, expand=2.0, max_tries=10, min_lower=1e-8
 
 def get_quote(
     ref_date: _Union[date, datetime],
-    instrument_spec: _Union[DepositSpecification, ForwardRateAgreementSpecification, InterestRateSwapSpecification],
+    instrument_spec: _Union[
+        DepositSpecification, ForwardRateAgreementSpecification, InterestRateSwapSpecification, InterestRateBasisSwapSpecification
+    ],
     curve_dict: dict,
 ):
     """Get the instrument specific fair quote calculation result to be used in the bootstrapper.
@@ -498,14 +501,37 @@ def get_quote(
         # std::make_shared<const FixingTable>(),
         # std::make_shared<const InterestRateSwapPricingParameter>()
 
+        yc_discount = curve_dict["discount_curve"]
+        yc_forward = curve_dict["fixing_curve"]  # THIS IS THE CURVE TO BE SOLVED
+        yc_basis_curve = curve_dict.get("basis_curve", None)  # THIS IS THE EXISTING KNOWN CURVE - assume is for SHORT
+        # NOTE - the rerquirement is that error_fn has the flags to determine if discoutn curve is the same as fixing curve or not already
+
+        if yc_basis_curve is None:
+            raise Exception("Missing basis curve for pricing TBS")
+
+        fixing_table = FixingTable()
+
+        pay_leg = instrument_spec.get_pay_leg()
+        receive_leg = instrument_spec.get_receive_leg()
+        spread_leg = instrument_spec.get_spread_leg()
+        fixing_grace_period = 0  # TODO take in as parameter? in pyvacon example, the extra swap parameters are assumed to be empty, only the curves were passed as arguments...
         pricing_params = {
             "fixing_grace_period": fixing_grace_period,
             "set_rate": True,
             "desired_rate": 1.0,
         }  # need annuity again for spread_leg(modeled as fixed leg)
 
-        yc_discount = curve_dict["discount_curve"]
-        yc_forward = curve_dict["fixing_curve"]
+        quote = InterestRateSwapPricer.compute_basis_spread(
+            ref_date,
+            discount_curve=yc_discount,
+            payLegFixingCurve=yc_basis_curve,
+            receiveLegFixingCurve=yc_forward,
+            pay_leg=pay_leg,
+            receive_leg=receive_leg,
+            spread_leg=spread_leg,
+            fixing_map=fixing_table,
+            pricing_params=pricing_params,
+        )
 
         # TODO NEED TO HANDLE WHICH SITUATION WE ARE IN in case which curves are given etc...
         # HERE IS THE GENRAL GET QUOTE ARGUMENTS
@@ -538,21 +564,6 @@ def get_quote(
         # 			Analytics_FAIL("Missing basis curve for pricing basis swap");
         # 		}
         # 	}
-        quote = InterestRateSwapPricer.compute_basis_spread(
-            ref_date,
-            discount_curve=DiscountCurve,
-            payLegFixingCurve=DiscountCurve,
-            receiveLegFixingCurve=DiscountCurve,
-            pay_leg=IrFloatLegSpecification,
-            receive_leg=IrFloatLegSpecification,
-            spread_leg=IrFixedLegSpecification,
-            fixing_map=fixing_table,
-            pricing_params=pricing_params,
-        )
-
-        pass
-    elif instrument_spec.ins_type() == Instrument.FXF:  # fx forward
-        pass
 
     # # DEBUG
     # print(f"Calculated quote for {instrument_spec.ins_type()} is {quote}")

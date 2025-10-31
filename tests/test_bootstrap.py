@@ -30,6 +30,7 @@ from rivapy.instruments.ir_swap_specification import (
     IrFixedLegSpecification,
     IrFloatLegSpecification,
     IrOISLegSpecification,
+    InterestRateBasisSwapSpecification,
 )
 from rivapy.tools.enums import DayCounterType, InterpolationType, ExtrapolationType, Instrument
 from rivapy.instruments.components import ConstNotionalStructure
@@ -54,7 +55,7 @@ def tolerance_from_quote(q: float) -> float:
     return delta
 
 
-def deep_equal(obj1, obj2):
+def deep_equal_OLD(obj1, obj2):
     if type(obj1) != type(obj2):
         return False
     if hasattr(obj1, "__dict__") and hasattr(obj2, "__dict__"):
@@ -62,6 +63,50 @@ def deep_equal(obj1, obj2):
     if isinstance(obj1, (list, tuple)):
         return all(deep_equal(x, y) for x, y in zip(obj1, obj2))
     return obj1 == obj2
+
+
+def deep_equal(obj1, obj2, path="root"):
+    """Recursively compare two objects and print where they differ."""
+    if type(obj1) != type(obj2):
+        print(f"Type mismatch at {path}: {type(obj1)} != {type(obj2)}")
+        return False
+
+    # handle objects with __dict__ (custom classes)
+    if hasattr(obj1, "__dict__") and hasattr(obj2, "__dict__"):
+        all_equal = True
+        keys1, keys2 = set(obj1.__dict__.keys()), set(obj2.__dict__.keys())
+
+        for key in keys1 | keys2:
+            if key not in obj1.__dict__:
+                print(f"Missing key {path}.{key} in obj1")
+                all_equal = False
+                continue
+            if key not in obj2.__dict__:
+                print(f"Missing key {path}.{key} in obj2")
+                all_equal = False
+                continue
+
+            if not deep_equal(obj1.__dict__[key], obj2.__dict__[key], f"{path}.{key}"):
+                all_equal = False
+        return all_equal
+
+    # handle lists and tuples
+    if isinstance(obj1, (list, tuple)):
+        all_equal = True
+        for i, (x, y) in enumerate(zip(obj1, obj2)):
+            if not deep_equal(x, y, f"{path}[{i}]"):
+                all_equal = False
+        if len(obj1) != len(obj2):
+            print(f"Length mismatch at {path}: {len(obj1)} != {len(obj2)}")
+            all_equal = False
+        return all_equal
+
+    # base case: primitive comparison
+    if obj1 != obj2:
+        print(f"Value mismatch at {path}: {obj1} != {obj2}")
+        return False
+
+    return True
 
 
 # Minimal instrument specification classes for testing
@@ -1342,6 +1387,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         # set directory and file name for Input Quotes
         dirName = "./notebooks/marketdata"  # "./"
         fileName = "/inputQuotes_includeFRAs.csv"  # "/inputQuotes.csv"
+        # fileName = "/multi_dates_tbs.csv"  # "/inputQuotes.csv"
 
         df = pd.read_csv(dirName + fileName, sep=";", decimal=",")
         column_names = list(df.columns)
@@ -1497,7 +1543,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
             currency=currency,
             udl_id=underlyingIndex,
             fixing_id="test_fixing_id",
-            day_count_convention=rollConvFloat,
+            day_count_convention=floatDayCount,
             spread=spread,
         )
 
@@ -1510,7 +1556,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
             end_dates=fix_end_dates,
             pay_dates=fix_pay_dates,
             currency=currency,
-            day_count_convention=rollConvFix,
+            day_count_convention=fixDayCount,
         )
 
         # get expiry of swap (cannot be before last paydate of legs)
@@ -1525,7 +1571,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
             pay_leg=fixed_leg,
             receive_leg=float_leg,
             currency=currency,
-            day_count_convention=rollConvFloat,
+            day_count_convention=floatDayCount,
             issuer="dummy_issuer",
             securitization_level="COLLATERALIZED",
         )
@@ -1651,7 +1697,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
             end_dates=fix_end_dates,
             pay_dates=fix_pay_dates,
             currency=currency,
-            day_count_convention=rollConvFix,
+            day_count_convention=fixDayCount,
         )
 
         # # definition of the IR swap
@@ -1663,7 +1709,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
             pay_leg=fixed_leg,
             receive_leg=ois_leg,
             currency=currency,
-            day_count_convention=rollConvFloat,
+            day_count_convention=floatDayCount,
             issuer="dummy_issuer",
             securitization_level="COLLATERALIZED",
         )
@@ -1673,6 +1719,183 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         self.assertIsInstance(oi_swap, InterestRateSwapSpecification)
         self.assertIsInstance(oi_swap2, InterestRateSwapSpecification)
         self.assertTrue(deep_equal(oi_swap, oi_swap2))
+
+    def test_create_TBS_from_df(self):
+        """
+        Create a tenor basis swap (TBS) specification:
+        - Pay short floating leg
+        - Receive long floating leg
+        - Pay fixed spread leg (represents market quote)
+        """
+        df = self.quotes_df.copy()
+        df_irs = df[df["Instrument"] == "TBS"]
+
+        example_irs = df_irs.iloc[0]
+        row = example_irs.copy()
+
+        # these inputs must be given by user
+        refDate = datetime(2019, 3, 1)
+        holidays = _ECB()
+
+        # --- Extract general fields ---
+        instr = row["Instrument"]
+        currency = row["Currency"]
+        maturity = row["Maturity"]
+        spot_lag = row["SpotLag"]
+        roll_conv = row["RollConventionFloat"]
+        fixDayCount = row["DayCountFloat"]
+        floatDayCount = row["DayCountFloat"]
+        basisDayCount = row["DayCountBasis"]
+        rollConvFix = row["RollConventionFixed"]
+        rollConvBasis = row["RollConventionBasis"]
+        # --- Long (receive) leg info ---
+        long_index = row["UnderlyingIndex"]
+        long_tenor = row["UnderlyingTenor"]
+        long_freq = row["UnderlyingPaymentFrequency"]
+
+        # --- Short (pay) leg info ---
+        short_index = row["UnderlyingIndex"]
+        short_tenor = row["UnderlyingTenorShort"]
+        short_freq = row["UnderlyingPaymentFrequencyShort"]
+
+        # --- Spread (basis quote) ---
+        spread_rate = float(row["Quote"]) / 10000.0  # e.g. 8.5 bps -> 0.00085
+
+        # --- Spot and maturity dates ---
+        spot_date = calc_end_day(refDate, spot_lag, roll_conv, holidays)
+        expiry = calc_end_day(spot_date, maturity, roll_conv, holidays)
+        label = f"{instr}_{maturity}"
+
+        ns = ConstNotionalStructure(100.0)
+
+        # --------------------------------------------
+        # PAY FLOATING LEG (short tenor, pays basis)
+        short_schedule = Schedule(
+            start_day=spot_date,
+            end_day=expiry,
+            time_period=short_freq,
+            business_day_convention=roll_conv,
+            calendar=holidays,
+            ref_date=refDate,
+        ).generate_dates(False)
+
+        short_start = short_schedule[:-1]
+        short_end = short_schedule[1:]
+        short_pay = short_end
+        short_reset = Schedule(
+            start_day=spot_date,
+            end_day=expiry,
+            time_period=short_tenor,
+            business_day_convention=roll_conv,
+            calendar=holidays,
+            ref_date=refDate,
+        ).generate_dates(False)[:-1]
+
+        pay_leg = IrFloatLegSpecification(
+            obj_id=label + "_pay_leg",
+            notional=ns,
+            reset_dates=short_reset,
+            start_dates=short_start,
+            end_dates=short_end,
+            rate_start_dates=short_start,
+            rate_end_dates=short_end,
+            pay_dates=short_pay,
+            currency=currency,
+            udl_id=short_index,
+            fixing_id="test_fixing_id",
+            day_count_convention=floatDayCount,
+            spread=float(row["Quote"]),  # this is the quoted basis
+        )
+
+        # --------------------------------------------
+        # RECEIVE FLOATING LEG (long tenor)
+
+        long_schedule = Schedule(
+            start_day=spot_date,
+            end_day=expiry,
+            time_period=long_freq,
+            business_day_convention=roll_conv,
+            calendar=holidays,
+            ref_date=refDate,
+        ).generate_dates(False)
+
+        long_start = long_schedule[:-1]
+        long_end = long_schedule[1:]
+        long_pay = long_end
+        long_reset = Schedule(
+            start_day=spot_date,
+            end_day=expiry,
+            time_period=long_tenor,
+            business_day_convention=roll_conv,
+            calendar=holidays,
+            ref_date=refDate,
+        ).generate_dates(False)[:-1]
+
+        receive_leg = IrFloatLegSpecification(
+            obj_id=label + "_receive_leg",
+            notional=ns,
+            reset_dates=long_reset,
+            start_dates=long_start,
+            end_dates=long_end,
+            rate_start_dates=long_start,
+            rate_end_dates=long_end,
+            pay_dates=long_pay,
+            currency=currency,
+            udl_id=long_index,
+            fixing_id="test_fixing_id",
+            day_count_convention=floatDayCount,
+            spread=0.0,
+        )
+
+        # --------------------------------------------
+        #  FIXED SPREAD LEG
+        # The spread leg represents the fixed +x bps cashflows applied to the pay leg
+        spread_schedule = Schedule(
+            start_day=spot_date,
+            end_day=expiry,
+            time_period=short_freq,  # same freq as short leg
+            business_day_convention=rollConvFix,
+            calendar=holidays,
+            ref_date=refDate,
+        ).generate_dates(False)
+
+        spread_start = spread_schedule[:-1]
+        spread_end = spread_schedule[1:]
+        spread_pay = spread_end
+
+        spread_leg = IrFixedLegSpecification(
+            fixed_rate=spread_rate,
+            obj_id=label + "_spread_leg",
+            notional=100.0,
+            start_dates=spread_start,
+            end_dates=spread_end,
+            pay_dates=spread_pay,
+            currency=currency,
+            day_count_convention=fixDayCount,
+        )
+
+        # --------------------------------------------
+        # Combine into full TBS object
+        basis_swap = InterestRateBasisSwapSpecification(
+            obj_id=label,
+            notional=ns,
+            issue_date=refDate,
+            maturity_date=expiry,
+            pay_leg=pay_leg,
+            receive_leg=receive_leg,
+            spread_leg=spread_leg,
+            currency=currency,
+            day_count_convention=floatDayCount,
+            issuer="dummy_issuer",
+            securitization_level="COLLATERALIZED",
+        )
+
+        basis_swap2 = sfc.make_basis_swap_spec(row, refDate, holidays)
+
+        self.maxDiff = None
+        self.assertIsInstance(basis_swap, InterestRateBasisSwapSpecification)
+        self.assertIsInstance(basis_swap2, InterestRateBasisSwapSpecification)
+        self.assertTrue(deep_equal(basis_swap, basis_swap2))
 
     def test_create_FRA_from_df(self):
         """Assuming a 3Mx6M Forward rate agreement instrument"""
@@ -1952,6 +2175,146 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
             # print(f"model: {model_quote} market: {deposit_quotes[i]} perdiff: {per_diff}")
 
 
+class TestBSBootstrap(unittest.TestCase):
+    """ """
+
+    def setUp(self):
+        """_summary_"""
+        # set directory and file name for Input Quotes
+        dirName = "./notebooks/marketdata"  # "./"
+        fileName = "/multi_dates_tbs.csv"  # "/inputQuotes.csv"
+
+        df = pd.read_csv(dirName + fileName, sep=";", decimal=",")
+        column_names = list(df.columns)
+
+        self.quotes_df = df
+        self.column_names = column_names
+
+    def test_tbs_3m_6m(self):
+        """Using 2025 09 24 as a control date, to ensure the proper bootstrapping from Frontmark data example."""
+
+        logger.debug(f"--------------------------------------------------------")
+        logger.debug("start")
+        # these inputs must be given by user
+        mon = "09"
+        day = "24"
+        year = "2025"
+        date_str = f"{day}.{mon}.{year}"
+        refDate = datetime(int(year), int(mon), int(day))
+        holidays = _ECB()
+
+        df = self.quotes_df.copy()
+
+        A = df[df["Date"] == date_str]
+
+        logger.debug(f"Creating OIS discount Curve")
+        # df_ins = df[df["Instrument"] == "OIS"]
+        # dc_df_temp = df[(df["Date"] == selected_date) & (df["Currency"] == selected_currency)  & (df["UnderlyingIndex"] == "ESTR") & (df["Instrument"] == "OIS") ]
+        df_ins = df[(df["Date"] == date_str) & (df["Currency"] == "EUR") & (df["UnderlyingIndex"] == "EONIA") & (df["Instrument"] == "OIS")]
+
+        logger.debug("CSV loaded")
+
+        ins_spec = sfc.load_specifications_from_pd(df_ins, refDate, holidays)
+        ins_quotes = df_ins["Quote"].tolist()
+        logger.debug("instrument specifications created")
+
+        print("--------------Starting bootstrapper")
+        logger.debug(f" OIS starting bootstrapper of {len(ins_quotes)} instruments")
+        curve = bootstrap_curve(
+            ref_date=refDate,
+            curve_id="OIS_estr",
+            day_count_convention=df_ins["DayCountFixed"].tolist()[0],  # taken the first entry and assume is valid for all other deposits
+            instruments=ins_spec,
+            quotes=ins_quotes,
+            interpolation_type=InterpolationType.LINEAR_LOG,
+            extrapolation_type=ExtrapolationType.LINEAR_LOG,
+            # interpolation_type=InterpolationType.HAGAN_DF,
+            # extrapolation_type=ExtrapolationType.CONSTANT_DF,
+        )
+
+        # --------------------------------- IR for 3M
+        logger.debug(f"Loading  instruments for reference date and, currency, and EURIBOR for SHORT LEG, e.g. 3M in this case")
+        df_ins_3m = df[
+            (df["Date"] == date_str)
+            & (df["Currency"] == "EUR")
+            & (df["UnderlyingIndex"] == "EURIBOR")
+            & (df["Instrument"] == "IRS")
+            & (df["UnderlyingTenor"] == "3M")
+        ]
+
+        ins_spec_3m = sfc.load_specifications_from_pd(df_ins_3m, refDate, holidays)
+        ins_quotes_3m = df_ins_3m["Quote"].tolist()
+        logger.debug("instrument specifications created")
+
+        curves = {"discount_curve": curve}
+        print("--------------Starting bootstrapper")
+        logger.debug(f" IRS starting bootstrapper of {len(ins_quotes_3m)} instruments")
+        curve_3m = bootstrap_curve(
+            ref_date=refDate,
+            curve_id="euribor3m",
+            day_count_convention=df_ins_3m["DayCountFixed"].tolist()[0],  # taken the first entry and assume is valid for all other deposits
+            instruments=ins_spec_3m,
+            quotes=ins_quotes_3m,
+            curves=curves,
+            interpolation_type=InterpolationType.LINEAR_LOG,
+            extrapolation_type=ExtrapolationType.LINEAR_LOG,
+            # interpolation_type=InterpolationType.HAGAN_DF,
+            # extrapolation_type=ExtrapolationType.CONSTANT_DF,
+        )
+
+        # --------------------------------- TBS
+        logger.debug(f"Loading TBS instruments for reference date and, currency, and EURIBOR, 6M long tenor")
+        df_ins_tbs = df[
+            (df["Date"] == date_str)
+            & (df["Currency"] == "EUR")
+            & (df["UnderlyingIndex"] == "EURIBOR")
+            & (df["Instrument"] == "TBS")
+            & (df["UnderlyingTenor"] == "6M")
+        ]
+
+        if df_ins_tbs.empty:
+            raise ValueError(f"No TBS instruments found for date {date_str} with EUR/EURIBOR.")
+
+        ins_spec_tbs = sfc.load_specifications_from_pd(df_ins_tbs, refDate, holidays)
+        # ins_quotes_tbs = df_ins_tbs["Quote"].tolist()
+        ins_quotes_tbs = (df_ins_tbs["Quote"] / 10_000).tolist()
+        logger.debug("instrument specifications created")
+
+        curves["basis_curve"] = curve_3m
+
+        print("--------------Starting bootstrapper")
+        logger.debug(f" TBS starting bootstrapper of {len(df_ins_tbs)} instruments")
+        curve_6m = bootstrap_curve(
+            ref_date=refDate,
+            curve_id="OIS_estr",
+            day_count_convention=df_ins_tbs["DayCountFixed"].tolist()[0],  # taken the first entry and assume is valid for all other deposits
+            instruments=ins_spec_tbs,
+            quotes=ins_quotes_tbs,
+            curves=curves,
+            interpolation_type=InterpolationType.LINEAR_LOG,
+            extrapolation_type=ExtrapolationType.LINEAR_LOG,
+            # interpolation_type=InterpolationType.HAGAN_DF,
+            # extrapolation_type=ExtrapolationType.CONSTANT_DF,
+        )
+
+        # print(curve.get_dates())
+        self.assertIsInstance(curve_6m, DiscountCurve)
+        self.assertEqual(curve_6m.get_dates()[0], refDate)
+        logger.debug("bootstrapped curve dates matched")
+        # the discount curve needs to be able to get the same market quote for the instrument
+        for i in range(len(ins_spec_tbs)):
+            model_quote = get_quote(refDate, ins_spec_tbs[i], {"discount_curve": curve, "fixing_curve": curve_6m, "basis_curve": curve_3m})
+            # compare to given basis points
+            self.assertAlmostEqual(model_quote * 10000, ins_quotes[i], delta=1e-5)  # since the quotes are only to 5 decimals
+            # per_diff = (model_quote - deposit_quotes[i]) / deposit_quotes[i] * 100
+            # print(f"model: {model_quote} market: {deposit_quotes[i]} perdiff: {per_diff}")
+            # print(i, model_quote, curve.get_df()[i])
+
+        logger.debug(f"asserted market quote matched -done")
+        logger.debug(f"--------------------------------------------------------")
+        # self.assertEqual(1, 1)
+
+
 class TestReferenceDateDependance(unittest.TestCase):
     """Noticed that depending on the stated reference date, which is needed to calculate
     the start dates of the instruments, the bootstrapped curve can differ slightly.
@@ -2038,8 +2401,8 @@ class TestReferenceDateDependance(unittest.TestCase):
             quotes=ins_quotes,
             interpolation_type=InterpolationType.LINEAR_LOG,
             extrapolation_type=ExtrapolationType.LINEAR_LOG,
-            #interpolation_type=InterpolationType.HAGAN_DF,
-            #extrapolation_type=ExtrapolationType.CONSTANT_DF,
+            # interpolation_type=InterpolationType.HAGAN_DF,
+            # extrapolation_type=ExtrapolationType.CONSTANT_DF,
         )
         # print(curve.get_dates())
         self.assertIsInstance(curve, DiscountCurve)
@@ -2109,8 +2472,8 @@ class TestReferenceDateDependance(unittest.TestCase):
                 day_count_convention=df_ins["DayCountFixed"].tolist()[0],  # taken the first entry and assume is valid for all other deposits
                 instruments=ins_spec,
                 quotes=ins_quotes,
-                #interpolation_type=InterpolationType.HAGAN_DF,
-                #extrapolation_type=ExtrapolationType.CONSTANT_DF,
+                # interpolation_type=InterpolationType.HAGAN_DF,
+                # extrapolation_type=ExtrapolationType.CONSTANT_DF,
                 interpolation_type=InterpolationType.LINEAR_LOG,
                 extrapolation_type=ExtrapolationType.LINEAR_LOG,
             )
