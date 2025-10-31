@@ -253,7 +253,7 @@ class CreditMetricsModel:
         issuer_names = issuer_info["IssuerName"].to_list()
         Loss = pd.DataFrame(np.zeros((self.n_simulation, len(issuer_ids))), columns=issuer_ids, index=range(self.n_simulation))
         rr_scenarios = pd.DataFrame(np.zeros((self.n_simulation, len(issuer_ids))), columns=issuer_ids, index=range(self.n_simulation))
-        # np.random.seed(self.seed)
+        np.random.seed(self.seed)
 
         # random numbers for indices
         normal_random_indices = np.random.randn(len(self.list_of_indices), self.n_simulation)

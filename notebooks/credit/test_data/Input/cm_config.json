@@ -1,0 +1,12 @@
+{
+  "list_of_indices": [
+    "DAX",
+    "SP",
+    "CAC"
+  ],
+  "mapping_countries_on_indices": {
+    "DE": "DAX",
+    "US": "SP",
+    "FR": "CAC"
+  }
+}
