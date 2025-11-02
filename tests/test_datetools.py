@@ -21,7 +21,7 @@ from rivapy.tools.datetools import (
     next_or_previous_business_day,
 )
 from datetime import date, datetime
-from holidays import DE, ECB
+from rivapy.tools.holidays_compat import DE, ECB
 
 
 class DayCounterTests(TestCase):

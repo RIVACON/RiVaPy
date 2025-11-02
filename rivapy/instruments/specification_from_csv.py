@@ -2,8 +2,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from typing import Union as _Union
-from holidays import HolidayBase as _HolidayBase
-from holidays import EuropeanCentralBank as _ECB
+from rivapy.tools.holidays_compat import HolidayBase as _HolidayBase, EuropeanCentralBank as _ECB
 from rivapy.instruments._logger import logger
 from rivapy.instruments import (
     DepositSpecification,

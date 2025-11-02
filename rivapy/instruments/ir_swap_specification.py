@@ -3,7 +3,7 @@ from locale import currency
 from typing import List as _List, Union as _Union, Tuple, Dict
 import numpy as np
 from datetime import datetime, date, timedelta
-from holidays import HolidayBase as _HolidayBase, ECB as _ECB
+from rivapy.tools.holidays_compat import HolidayBase as _HolidayBase, ECB as _ECB
 from rivapy.instruments._logger import logger
 
 from rivapy.tools.datetools import Period, Schedule, _date_to_datetime, _datetime_to_date_list, _term_to_period, serialize_date
@@ -95,7 +95,7 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
         """pay dates for the interest periods
 
         Returns:
-            _List[datetime]: 
+            _List[datetime]:
         """
         return self._pay_dates
 
@@ -117,7 +117,7 @@ class IrSwapLegSpecification(interfaces.FactoryObject):
         """If only a float is given, assume a constant notional and create a ConstNotionalStructure.
 
         Args:
-            value (_Union[float, NotionalStructure]): 
+            value (_Union[float, NotionalStructure]):
         """
         if isinstance(value, (int, float)):
             self._notional_structure = ConstNotionalStructure(float(value))
@@ -231,7 +231,7 @@ class IrFloatLegSpecification(IrSwapLegSpecification):
         day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
         rate_day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
         spread: float = 0.0,
-    ):  
+    ):
         """Constructor for a floating leg of an interest rate swap.
 
         Args:
@@ -377,7 +377,7 @@ class IrOISLegSpecification(IrSwapLegSpecification):
             spread (float, optional): . Defaults to 0.0.
         """
         super().__init__(obj_id, notional, start_dates, end_dates, pay_dates, currency, day_count_convention)
-        self.rate_reset_dates = rate_reset_dates  
+        self.rate_reset_dates = rate_reset_dates
         self.rate_start_dates = rate_start_dates
         self.rate_end_dates = rate_end_dates
         self._spread = spread
@@ -457,7 +457,7 @@ class IrOISLegSpecification(IrSwapLegSpecification):
     def ois_scheduler_2D(start_dates: _List[datetime], end_dates: _List[datetime]):
         """The OIS makeshift scheduler to account for expected 2D array structure of
             >>> rivapy.instruments.interest_rate_swap_pricer.populate_cashflows_ois
-            Alternatively, the rivapy Scheduler class is used. 
+            Alternatively, the rivapy Scheduler class is used.
             This is a simplified version for testing purposes.
         Args:
             start_dates (_List[datetime]): start dates for a given accrual period, containing the daily start rates inside that accrual period
@@ -466,7 +466,7 @@ class IrOISLegSpecification(IrSwapLegSpecification):
         Returns:
             _type_: Multi-dimensional lists of datetimes
         """
-        
+
         daily_rate_start_dates = []  # 2D list: coupon i -> list of daily starts
         daily_rate_end_dates = []  # 2D list: coupon i -> list of daily ends
         daily_rate_reset_dates = []  # 2D list: coupon i -> list of reset dates
@@ -550,7 +550,7 @@ class InterestRateSwapSpecification(interfaces.FactoryObject):
         self._validate_derived_issued_instrument()
         self.pay_leg = pay_leg
         self.receive_leg = receive_leg
-        self.day_count_convention = day_count_convention  
+        self.day_count_convention = day_count_convention
         self.business_day_convention = RollConvention.to_string(business_day_convention)
         if calendar is None:
             self.calendar = _ECB(years=range(issue_date.year, maturity_date.year + 1))

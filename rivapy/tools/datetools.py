@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from dateutil.rrule import WE
 from calendar import monthrange, isleap
 from typing import List as _List, Union as _Union, Callable
-from holidays import HolidayBase as _HolidayBase
+from rivapy.tools.holidays_compat import HolidayBase as _HolidayBase
 
 # from holidays import DE
 from holidays.financial.european_central_bank import ECB as _ECB

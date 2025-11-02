@@ -1,7 +1,7 @@
 # hnguyen, 2024-09-08
 # unit tests for Forward rate agreement specification class
 import math
-from holidays import ECB  # ??
+from rivapy.tools.holidays_compat import ECB  # ??
 
 import unittest
 import datetime as dt

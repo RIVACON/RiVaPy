@@ -10,8 +10,7 @@ from dateutil.relativedelta import relativedelta
 from rivapy.tools.enums import InterestRateIndex, Rating, SecuritizationLevel, Currency, DayCounterType, RollConvention, RollRule
 from typing import List, Tuple, Optional as _Optional, Union as _Union
 from rivapy.tools.datetools import Period, _date_to_datetime, _term_to_period, _string_to_calendar, DayCounter, Schedule, roll_day
-from holidays import HolidayBase as _HolidayBase
-from holidays import EuropeanCentralBank as _ECB
+from rivapy.tools.holidays_compat import HolidayBase as _HolidayBase, EuropeanCentralBank as _ECB
 from rivapy.tools._validators import (
     _check_positivity,
     _check_start_before_end,

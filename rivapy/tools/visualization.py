@@ -1,3 +1,15 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.dates import date2num, DateFormatter
+from rivapy.pricing.bond_pricing import DeterministicCashflowPricer
+from rivapy.instruments import DepositSpecification, ForwardRateAgreementSpecification
+from rivapy.tools.datetools import Period, _date_to_datetime, _term_to_period, _string_to_calendar, DayCounter, Schedule, calc_start_day, roll_day
+from matplotlib.path import Path
+import matplotlib.patches as patches
+from rivapy.pricing.bond_pricing import DeterministicCashflowPricer
+from rivapy.pricing import ForwardRateAgreementPricer
+
+
 def _map_dates_to_xcoords(dates_list):
     """
     Map dates to x-coordinates so that periods shorter than 7 days are true to scale,
@@ -92,8 +104,6 @@ def _add_period_brace(ax, x1, x2, label, y_levels, timeline_y, y_base=-0.2, y_st
     y_levels.append((x1, x2, y))
     mid_x = (x1 + x2) / 2
     # Draw a true curly bracket using Bezier curves
-    from matplotlib.path import Path
-    import matplotlib.patches as patches
 
     dx = x2 - x1
     height = 0.18
@@ -128,14 +138,6 @@ def _add_period_brace(ax, x1, x2, label, y_levels, timeline_y, y_base=-0.2, y_st
         va="top",
         bbox=dict(facecolor="white", edgecolor="lightgray", alpha=0.9, pad=2),
     )
-
-
-import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib.dates import date2num, DateFormatter
-from rivapy.pricing.bond_pricing import DeterministicCashflowPricer
-from rivapy.instruments import DepositSpecification, ForwardRateAgreementSpecification
-from rivapy.tools.datetools import Period, _date_to_datetime, _term_to_period, _string_to_calendar, DayCounter, Schedule, roll_day
 
 
 def plot_timeline_and_cf(
@@ -242,23 +244,30 @@ def plot_deposit(spec: DepositSpecification, val_date) -> plt.Figure:
     payment_date = roll_day(
         spec._maturity_date, calendar=spec._calendar, business_day_convention=spec._business_day_convention, settle_days=spec._payment_days
     )
+    # calc_start_day signature: (end_day, term, business_day_convention=..., calendar=..., ...)
+    # pass business_day_convention and calendar as keyword args to avoid ordering errors
+    fixing_date = calc_start_day(
+        spec.issue_date,
+        _term_to_period(spec.frequency),
+        business_day_convention=spec._business_day_convention,
+        calendar=spec._calendar,
+    )
     relevant_dates = {
-        "Fixing Date": spec.first_fixing_date,
+        "Fixing Date": fixing_date,
         "Start Date": spec.start_date,
         "End Date": spec.end_date,
         "Maturity Date": spec.maturity_date,
         "Payment Date": payment_date,
     }
     periods = []
-    if spec.first_fixing_date != spec.start_date:
-        periods.append(("Settlement Period", spec.first_fixing_date, spec.start_date))
+    if fixing_date != spec.start_date:
+        periods.append(("Settlement Period", fixing_date, spec.start_date))
     if spec.start_date != spec.end_date:
         periods.append(("Accrual Period", spec.start_date, spec.end_date))
     if spec.end_date != spec.maturity_date:
         periods.append(("Mon Accrual Period", spec.end_date, spec.maturity_date))
     if spec.maturity_date != payment_date:
         periods.append(("Payment Lag)", spec.maturity_date, payment_date))
-    from rivapy.pricing.bond_pricing import DeterministicCashflowPricer
 
     cashflows = DeterministicCashflowPricer.get_expected_cashflows(spec, val_date)
     return plot_timeline_and_cf(relevant_dates, periods, cashflows)
@@ -287,7 +296,6 @@ def plot_fra(spec: ForwardRateAgreementSpecification, val_date, fwd_curve) -> pl
         periods.append(("End Period", spec._trade_date, spec._end_date))
     if spec._start_date != payment_date:
         periods.append(("Payment Lag", spec._start_date, payment_date))
-    from rivapy.pricing import ForwardRateAgreementPricer
 
     cashflows = ForwardRateAgreementPricer.get_expected_cashflows(spec, val_date, fwd_curve)
     return plot_timeline_and_cf(relevant_dates, periods, cashflows, figsize=(12, 13), height_ratios=[1, 3.0])

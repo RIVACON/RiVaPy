@@ -6,7 +6,7 @@ import numpy as np
 import json
 import hashlib
 from rivapy.tools.datetime_grid import DateTimeGrid
-from holidays import ECB, UnitedStates, Germany
+from rivapy.tools.holidays_compat import ECB, UnitedStates, Germany
 
 
 class DateTimeFunction(abc.ABC):

@@ -41,8 +41,7 @@ from rivapy.tools.datetools import (
     RollRule,
     serialize_date,
 )
-from holidays import HolidayBase as _HolidayBase
-from holidays import ECB as _ECB
+from rivapy.tools.holidays_compat import HolidayBase as _HolidayBase, ECB as _ECB
 
 # placeholder
 from rivapy.marketdata.curves import DiscountCurve
@@ -253,7 +252,9 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Returns:
             str: Instrument's securitisation level.
         """
-        return self._securitization_level.value
+        if isinstance(self._securitization_level, SecuritizationLevel):
+            return self._securitization_level.value
+        return self._securitization_level
 
     @securitization_level.setter
     def securitization_level(self, securitisation_level: _Union[SecuritizationLevel, str]):
@@ -460,7 +461,7 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         last_fixing: _Optional[float] = None,
         fixings: _Optional[FixingTable] = None,
         adjust_start_date: bool = True,
-        adjust_end_date: bool = True,
+        adjust_end_date: bool = False,
         adjust_schedule: bool = True,
         adjust_accruals: bool = True,
     ):
