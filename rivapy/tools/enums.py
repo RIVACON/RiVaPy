@@ -553,6 +553,7 @@ class Instrument(_MyEnum):
 
     IRS = "IRS"
     TBS = "TBS"
+    BS = "BS"
     DEPOSIT = "DEPOSIT"
     OIS = "OIS"
     FRA = "FRA"

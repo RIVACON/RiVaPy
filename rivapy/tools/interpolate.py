@@ -377,13 +377,19 @@ class Interpolator:
         # Case A: x < first grid point
         if x < x_cells[0]:
             if extrapolation.upper() == "CONSTANT_DF":
-                # Integrate forward rates up to the first point
-                # This gives the cumulative area integral f(s) ds = y
-                y = Interpolator.hagan_integrate(x_cells, fwd, x_cells[0])
 
-                # Compute *average rate* up to the first knot:
-                # r = (1/x_o) * integral(f(s) ds)
-                r = y / x_cells[0]
+                # Handle the special case where first grid point is 0
+                if x_cells[0] == 0:
+                    # Use the forward rate of the first segment as the extrapolation rate
+                    r = fwd[0]
+                else:
+                    # Integrate forward rates up to the first point
+                    # This gives the cumulative area integral f(s) ds = y
+                    y = Interpolator.hagan_integrate(x_cells, fwd, x_cells[0])
+                    # Compute *average rate* up to the first knot:
+                    # r = (1/x_o) * integral(f(s) ds)
+                    r = y / x_cells[0]
+
 
                 # Now assume that beyond this point, the discount factor
                 # decays at that "constant average rate":

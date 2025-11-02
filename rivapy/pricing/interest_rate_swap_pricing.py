@@ -304,7 +304,7 @@ class InterestRateSwapPricer:
                 entry.rate = leg_spread + (1.0 / fwd_rate - 1.0) / rate_yf
 
             else:
-                fixing = fixing_map.get_fixing(udl, float_leg_spec.reset_dates[i])  
+                fixing = fixing_map.get_fixing(udl, float_leg_spec.reset_dates[i])
                 if fixing is None:  # i.e. no fixing available
 
                     if val_date - float_leg_spec.reset_dates[i] > fixing_grace_period:
@@ -660,7 +660,7 @@ class InterestRateSwapPricer:
             desired_rate = pricing_params["desired_rate"]
             cashflow_table = InterestRateSwapPricer._populate_cashflows_fix(
                 val_date, leg_spec, discount_curve, forward_curve, fixing_map, set_rate, desired_rate
-            )  
+            )
         elif leg_spec.leg_type == IrLegType.FLOAT:
             # print("generating cashflow table for FLOAT leg")
             cashflow_table = InterestRateSwapPricer._populate_cashflows_float(
@@ -690,7 +690,7 @@ class InterestRateSwapPricer:
         # return PV* pricing_data.fx_rate
 
     def price(self):
-        """price a full swap, with a pay leg and a receive leg in the context of 
+        """price a full swap, with a pay leg and a receive leg in the context of
         pricing container and pricer having been initlialized with required inputs."""
 
         # # PricingResults& results, -> implement also
@@ -709,7 +709,7 @@ class InterestRateSwapPricer:
         # fx_receive_leg = # double fxReceiveLeg)
 
         # unit in days
-        fixing_grace_period = self._pricing_param["fixing_grace_period"]  
+        fixing_grace_period = self._pricing_param["fixing_grace_period"]
 
         # TODO check structure again....
         # price = InterestRateSwapPricer.price_leg(valDate, discountCurveReceiveLeg, fixingCurveReceiveLeg, fxForwardCurveReceiveLeg, spec->getReceiveLeg(), fixingMap, fixingGracePeriod) * fxReceiveLeg;
@@ -785,15 +785,11 @@ class InterestRateSwapPricer:
         try:
             if hasattr(float_leg, "leg_type") and float_leg.leg_type == IrLegType.OIS:
 
-                return InterestRateSwapPricer.compute_swap_rate_ois_analytical(
-                            ref_date, discount_curve, fixing_curve, float_leg, fixed_leg
-                        )
+                return InterestRateSwapPricer.compute_swap_rate_ois_analytical(ref_date, discount_curve, fixing_curve, float_leg, fixed_leg)
 
         except Exception:
             # If anything unexpected (missing attributes) happens, fall back to generic route
             logger.debug("Fast OIS path failed/fell through; using generic pricing path.")
-
-
 
         # if fixed_leg.obj_id == "OIS_2M_fixed_leg3": # DEBUG TEST 2025
         #    logger.debug("OIS_2M_fixed_leg3 detected")
@@ -837,8 +833,38 @@ class InterestRateSwapPricer:
         # note that the current price leg doesnt take spreads as options for the moment, it is left as a # TODO for now...
         return (pv_pay - pv_rec_s0) / (py_rec_s1 - pv_rec_s0)
 
-    # TODO
-    def compute_basis_spread(self):
+    # # TODO
+    # 		double InterestRateSwapPricer::computeBasisSpread(
+    # 		const boost::posix_time::ptime& refDate,
+    # 		const std::shared_ptr<const DiscountCurve>& discountCurve,
+    # 		const std::shared_ptr<const DiscountCurve>& receiveLegFixingCurve,
+    # 		const std::shared_ptr<const DiscountCurve>& payLegFixingCurve,
+    # 		const std::shared_ptr<const IrFloatLegSpecification>& receiveLeg,
+    # 		const std::shared_ptr<const IrFloatLegSpecification>& payLeg,
+    # 		const std::shared_ptr<const IrFixedLegSpecification>& fixedLeg,
+    # 		std::shared_ptr<const FixingTable> fixingMap,
+    # 		std::shared_ptr<const InterestRateSwapPricingParameter> param
+    # 	)
+    # 	{
+    # 		const boost::posix_time::time_duration& fixingGracePeriod = param->fixingGracePeriod;
+    # 		double receiveLegPV = price(refDate, discountCurve, receiveLegFixingCurve, nullptr, receiveLeg, fixingMap, fixingGracePeriod);
+    # 		double payLegPV = price(refDate, discountCurve, payLegFixingCurve, nullptr, payLeg, fixingMap, fixingGracePeriod);
+    # 		double fixedLegPV01 = price(refDate, discountCurve, std::shared_ptr<const DiscountCurve>(), nullptr, fixedLeg,
+    # 									fixingMap, fixingGracePeriod, true, 1.); # the one there means its the annuity again, the true means use the given rate (1.0) for fixed rate
+    # 		return (receiveLegPV - payLegPV) / fixedLegPV01;
+    # 	}
+    @staticmethod
+    def compute_basis_spread(
+        ref_date: _Union[date, datetime],
+        discount_curve: DiscountCurve,
+        payLegFixingCurve: DiscountCurve,
+        receiveLegFixingCurve: DiscountCurve,
+        pay_leg: IrFloatLegSpecification,
+        receive_leg: IrFloatLegSpecification,
+        spread_leg: IrFixedLegSpecification,
+        fixing_map: FixingTable = None,
+        pricing_params: dict = {"fixing_grace_period": 0.0},
+    ) -> float:
         # ref date
         # discount curve
         # receiveLegFixingCurve
@@ -849,16 +875,22 @@ class InterestRateSwapPricer:
         # fixing grace period comes from the extra param
 
         # noFxFowardCruve, set to null
+        fixing_grace_period = pricing_params["fixing_grace_period"]
 
-        receive_leg_PV = 1  # price_leg(refDate, discountCurve, receiveLegFixingCurve, nullptr, receiveLeg, fixingMap, fixingGracePeriod)
-        pay_leg_PV = 1  # price_leg(refDate, discountCurve, payLegFixingCurve,     nullptr, payLeg, fixingMap, fixingGracePeriod);
-        fixed_leg_PV01 = 1
+        # price_leg(refDate, discountCurve, receiveLegFixingCurve, nullptr, receiveLeg, fixingMap, fixingGracePeriod)
+        receive_leg_PV = InterestRateSwapPricer.price_leg(
+            ref_date, discount_curve, receiveLegFixingCurve, None, receive_leg, fixing_map, fixing_grace_period
+        )
+        # price_leg(refDate, discountCurve, payLegFixingCurve,     nullptr, payLeg, fixingMap, fixingGracePeriod);
+        pay_leg_PV = InterestRateSwapPricer.price_leg(ref_date, discount_curve, payLegFixingCurve, None, pay_leg, fixing_map, fixing_grace_period)
         # price_leg(refDate, discountCurve, std::shared_ptr<const DiscountCurve>(), nullptr, fixedLeg, fixingMap, fixingGracePeriod, true, 1.);
+        fixed_leg_PV01 = InterestRateSwapPricer.price_leg(
+            ref_date, discount_curve, payLegFixingCurve, None, spread_leg, fixing_map, fixing_grace_period, pricing_params
+        )  # should not need a fixing curve since its a fixed leg, we default to the pay leg
 
         # # for fixed, we are setting the rate to 1
 
         return (receive_leg_PV - pay_leg_PV) / fixed_leg_PV01
-
 
     @staticmethod
     def compute_swap_rate_ois_analytical(
@@ -867,8 +899,7 @@ class InterestRateSwapPricer:
         forward_curve: DiscountCurve,
         float_leg: IrOISLegSpecification,
         fixed_leg: IrFixedLegSpecification,
-        ) -> float:
-
+    ) -> float:
         """
         Computes the fair (par) fixed rate for an Overnight Indexed Swap (OIS)
         using an analytical shortcut based on discount factors.
@@ -896,7 +927,7 @@ class InterestRateSwapPricer:
             - Notionals and accrual conventions are consistent with the given curves.
             - Forward curve is used only for projected notionals or FX conversions,
               not for rate projection.
-            - The fixed leg is currently not explictily used as it assumes that it has 
+            - The fixed leg is currently not explictily used as it assumes that it has
               the same notional structure and payment dates as the floating leg, which
               usually the case.
 
@@ -908,8 +939,6 @@ class InterestRateSwapPricer:
         Returns:
             float: The par fixed rate that equates PV_fixed = PV_float (analytical) (as a decimal, e.g. 0.025 for 2.5%).
         """
-        
-
 
         dcc = DayCounter(discount_curve.daycounter)
         num_periods = len(float_leg.start_dates)
@@ -927,7 +956,7 @@ class InterestRateSwapPricer:
 
         start_dates = float_leg.start_dates
         end_dates = float_leg.end_dates
-        #pay_dates = float_leg.pay_dates
+        # pay_dates = float_leg.pay_dates
 
         pv_float = 0.0
         annuity = 0.0
@@ -953,7 +982,6 @@ class InterestRateSwapPricer:
 
         # fair fixed rate = PV_float / Annuity
         return pv_float / annuity
-
 
 
 #########################################################################
@@ -1003,10 +1031,6 @@ def get_projected_notionals(
     return result
 
 
-
-
-
-
 # getPricingData
 
 
@@ -1014,13 +1038,6 @@ def get_projected_notionals(
 
 
 # computeSwapSpread
-
-
-# computeBasisSpread
-
-
-
-
 
 
 if __name__ == "__main__":

@@ -29,15 +29,13 @@ from scipy.optimize import brentq
 
 
 # import quote calculators # TODO SUBJECT TO CHANGE based on architecture
-from rivapy.pricing.deposit_pricing import DepositPricer  
+from rivapy.pricing.deposit_pricing import DepositPricer
 from rivapy.pricing.fra_pricing import ForwardRateAgreementPricer
 from rivapy.pricing.interest_rate_swap_pricing import InterestRateSwapPricer
 
 
 ##########
 # Classes
-
-
 
 
 ######################################################
@@ -107,7 +105,7 @@ def bootstrap_curve(
     logger.info("Duplicate instrument date filter")
     instruments_by_date = {}
     for i, inst in enumerate(instruments):
-        end_date = inst.get_end_date()  
+        end_date = inst.get_end_date()
         if end_date in instruments_by_date:
             raise Exception(f"Duplicate expiry date found: {end_date}")
         instruments_by_date[end_date] = (quotes[i], inst)
@@ -131,7 +129,7 @@ def bootstrap_curve(
             "dummy_id_discount", ref_date, yc_dates, dfs, interpolation_type, extrapolation_type, day_count_convention
         )
         # this means this is the target output curve
-    else:  #This means the discount curve was given. We therefore want to output a FORWARD curve, e.g. 3M, 6M,...
+    else:  # This means the discount curve was given. We therefore want to output a FORWARD curve, e.g. 3M, 6M,...
         flag_multi_curve = True
 
     # cannot multicurve bootstrap with deposits involved
@@ -156,7 +154,7 @@ def bootstrap_curve(
                 curves["fixing_curve"] = curves["discount_curve"]
 
     #############################################################
-    # # start with loglinear interpolation to obtain good initial values for all dates 
+    # # start with loglinear interpolation to obtain good initial values for all dates
     # this means i have to pass into the rror function the interpolation types desired which is different
     # from the inter and extra type we want for the final discount curve
     # bootstrap loop over ordered expiry dates which is also sorted here
@@ -170,7 +168,7 @@ def bootstrap_curve(
         yc_dates.append(end_date)  # next date
         prev_df = dfs[-1]  # previous discount factor for bracket search
         dfs.append(prev_df)  # append a dummy value for the next date
-        
+
         # arguments to be passed to the error function for the brentq root solver
         ARGS = (
             -1,  # since we will look at the latest addition to our discount curve.
@@ -189,13 +187,13 @@ def bootstrap_curve(
 
         try:
 
-            #solution = brentq(error_fn, lower, upper, ARGS, xtol=1e-6)
-            #dfs[-1] = solution
-            #logger.debug(f"Bootstrapped DF for {end_date}: {solution} for {inst.ins_type()}")
+            # solution = brentq(error_fn, lower, upper, ARGS, xtol=1e-6)
+            # dfs[-1] = solution
+            # logger.debug(f"Bootstrapped DF for {end_date}: {solution} for {inst.ins_type()}")
 
             lower, upper = find_bracket(error_fn, prev_df, ARGS)
-            #lower, upper = prev_df * 0.8, prev_df * 1.2  # this is not good enouhg to work for all cases c.f. above
-            
+            # lower, upper = prev_df * 0.8, prev_df * 1.2  # this is not good enouhg to work for all cases c.f. above
+
             logger.debug(f"Finding lower: {lower} and upper: {upper} bracket for root finding")
 
             solution, result = brentq(
@@ -204,8 +202,8 @@ def bootstrap_curve(
                 upper,
                 args=ARGS,
                 xtol=1e-6,
-                full_output=True,   # <--- enables access to iteration info
-                disp=True           # optional: prints if solver fails
+                full_output=True,  # <--- enables access to iteration info
+                disp=True,  # optional: prints if solver fails
             )
             dfs[-1] = solution
             # Log detailed solver diagnostics
@@ -405,8 +403,8 @@ def error_fn(
     # print(f"using {df_val} -> calc_quote: {calc_quote} - ref_quote: {ref_quote} = {calc_quote - ref_quote}")
     return calc_quote - ref_quote
 
-def find_bracket(error_fn, guess, args, expand=2.0, max_tries=10, 
-                 min_lower=1e-8, max_upper=10.0):
+
+def find_bracket(error_fn, guess, args, expand=2.0, max_tries=10, min_lower=1e-8, max_upper=10.0):
     """
     Tries to find a [lower, upper] bracket where error_fn(lower) and error_fn(upper)
     have opposite signs, indicating a root lies between them.
@@ -447,7 +445,6 @@ def find_bracket(error_fn, guess, args, expand=2.0, max_tries=10,
     return lower, upper
 
 
-
 def get_quote(
     ref_date: _Union[date, datetime],
     instrument_spec: _Union[DepositSpecification, ForwardRateAgreementSpecification, InterestRateSwapSpecification],
@@ -456,8 +453,8 @@ def get_quote(
     """Get the instrument specific fair quote calculation result to be used in the bootstrapper.
 
     Args:
-        ref_date (_Union[date, datetime]): 
-        instrument_spec (_Union[DepositSpecification, ForwardRateAgreementSpecification, InterestRateSwapSpecification]): 
+        ref_date (_Union[date, datetime]):
+        instrument_spec (_Union[DepositSpecification, ForwardRateAgreementSpecification, InterestRateSwapSpecification]):
         curve_dict (dict): Dictionary containing the market data curves needed for discounting or fwd rates.
 
     Returns:
@@ -479,7 +476,7 @@ def get_quote(
 
     elif instrument_spec.ins_type() == Instrument.IRS:
 
-        yc_discount = curve_dict["discount_curve"]  
+        yc_discount = curve_dict["discount_curve"]
         yc_forward = curve_dict["fixing_curve"]
         # according to pyvayon example, the fixing table is assumed to default to empty to allow the code to run...
         fixing_table = FixingTable()
@@ -494,17 +491,70 @@ def get_quote(
 
         quote = InterestRateSwapPricer.compute_swap_rate(ref_date, yc_discount, yc_forward, float_leg, fixed_leg, fixing_table, pricing_params)
 
-    elif instrument_spec.ins_type() == Instrument.TBS:  # tenor basis swap
+    elif instrument_spec.ins_type() == Instrument.BS:  #  basis swap # E.g. tenor basis swap
         # 	return InterestRateSwapPricer::computeBasisSpread(
         # refDate, ycDiscount, ycFwdReceive, ycFwdPay,
         # basisSwap->getReceiveLeg(), basisSwap->getPayLeg(), basisSwap->getSpreadLeg(),
         # std::make_shared<const FixingTable>(),
         # std::make_shared<const InterestRateSwapPricingParameter>()
+
+        pricing_params = {
+            "fixing_grace_period": fixing_grace_period,
+            "set_rate": True,
+            "desired_rate": 1.0,
+        }  # need annuity again for spread_leg(modeled as fixed leg)
+
+        yc_discount = curve_dict["discount_curve"]
+        yc_forward = curve_dict["fixing_curve"]
+
+        # TODO NEED TO HANDLE WHICH SITUATION WE ARE IN in case which curves are given etc...
+        # HERE IS THE GENRAL GET QUOTE ARGUMENTS
+        #         double YieldCurveBootstrapper::getQuote(const boost::posix_time::ptime& refDate,
+        # 	const std::shared_ptr<const BaseSpecification>& instrument,
+        # 	const std::shared_ptr<const DiscountCurve>& yc,
+        # 	const std::shared_ptr<const DiscountCurve>& discountCurve,
+        # 	const std::shared_ptr<const DiscountCurve>& basisCurve)
+        # {
+        # WHAT TO DO IN CASE OF BASIS SWAP
+        # 	const std::shared_ptr<const InterestRateBasisSwapSpecification> basisSwap = std::dynamic_pointer_cast<const InterestRateBasisSwapSpecification>(instrument);
+        # 	if (basisSwap != nullptr) {
+        # 		if (basisCurve != nullptr) {
+        # 			if (discountCurve != nullptr)
+        # 				return InterestRateSwapPricer::computeBasisSpread(
+        # 					refDate, discountCurve, yc, basisCurve,
+        # 					basisSwap->getReceiveLeg(), basisSwap->getPayLeg(), basisSwap->getSpreadLeg(),
+        # 					std::make_shared<const FixingTable>(),
+        # 					std::make_shared<const InterestRateSwapPricingParameter>()
+        # 				);
+        # 			else
+        # 				return InterestRateSwapPricer::computeBasisSpread(
+        # 					refDate, yc, yc, basisCurve,
+        # 					basisSwap->getReceiveLeg(), basisSwap->getPayLeg(), basisSwap->getSpreadLeg(),
+        # 					std::make_shared<const FixingTable>(),
+        # 					std::make_shared<const InterestRateSwapPricingParameter>()
+        # 				);
+        # 		}
+        # 		else {
+        # 			Analytics_FAIL("Missing basis curve for pricing basis swap");
+        # 		}
+        # 	}
+        quote = InterestRateSwapPricer.compute_basis_spread(
+            ref_date,
+            discount_curve=DiscountCurve,
+            payLegFixingCurve=DiscountCurve,
+            receiveLegFixingCurve=DiscountCurve,
+            pay_leg=IrFloatLegSpecification,
+            receive_leg=IrFloatLegSpecification,
+            spread_leg=IrFixedLegSpecification,
+            fixing_map=fixing_table,
+            pricing_params=pricing_params,
+        )
+
         pass
     elif instrument_spec.ins_type() == Instrument.FXF:  # fx forward
         pass
 
-    # # DEBUG 
+    # # DEBUG
     # print(f"Calculated quote for {instrument_spec.ins_type()} is {quote}")
     return quote
 
