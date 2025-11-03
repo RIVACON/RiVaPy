@@ -473,7 +473,26 @@ class BondPricingTests(TestCase):
         self.assertAlmostEqual(bpricer.z_spread(price), 0.0, delta=1e-6)
         self.assertAlmostEqual(bpricer.macaulay_duration(), mc_duration, delta=1e-3)
         self.assertAlmostEqual(bpricer.modified_duration(price), mc_duration / 1.05, delta=1e-3)
-        print(bpricer.get_accrued_interest(float_bond_spec, ref_date, dc))
+
+        float_bond_spec_2 = FloatingRateBondSpecification(
+            "PV_BOND",
+            issue_date=datetime(2023, 1, 1),
+            maturity_date=datetime(2025, 1, 1),
+            currency=Currency.EUR,
+            notional=100.0,
+            issuer="None",
+            securitization_level=SecuritizationLevel.SUBORDINATED,
+            day_count_convention="30E360",
+            business_day_convention="ModifiedFollowing",
+            margin=0.00,
+            frequency="1Y",
+            fixings=fix_table,
+            adjust_start_date=False,
+            adjust_end_date=False,
+            adjust_schedule=False,
+            adjust_accruals=False,
+        )
+        self.assertAlmostEqual(bpricer.get_accrued_interest(float_bond_spec_2, ref_date, dc), 1.666666666666, delta=1e-6)
 
     def test_index_float_bond(self):
         ref_date = datetime(2023, 5, 1)

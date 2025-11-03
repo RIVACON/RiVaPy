@@ -23,6 +23,9 @@ try:
     except Exception:
         UnitedStates = None
         Germany = None
+    # provide short aliases expected by tests
+    DE = Germany
+    US = UnitedStates
 except Exception:
     # If the holidays package is not available, expose minimal placeholders so
     # imports do not fail at module import time. Attempting to use these
@@ -37,3 +40,5 @@ except Exception:
     EuropeanCentralBank = None
     UnitedStates = None
     Germany = None
+    DE = None
+    US = None
