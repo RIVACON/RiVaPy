@@ -134,7 +134,7 @@ class DummyDepositSpec(DepositSpecification):
             currency="EUR",
             issue_date=issue_date,
             maturity_date=maturity_date,
-            notional=100.0,
+            notional=1.0,
             rate=0.01,
             day_count_convention="Act360",
         )
@@ -1526,7 +1526,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         # reset_dates3 = start_dates3
         # end_dates3 = [x + relativedelta(months=3) for x in start_dates3]
         # pay_dates3 = end_dates3
-        ns = ConstNotionalStructure(100.0)
+        ns = ConstNotionalStructure(1.0)
         spread = 0.00
 
         # # definition of the floating leg
@@ -1550,7 +1550,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         fixed_leg = IrFixedLegSpecification(
             fixed_rate=parRate,
             obj_id=label + "_fixed_leg3",
-            notional=100.0,
+            notional=1.0,
             start_dates=fix_start_dates,
             end_dates=fix_end_dates,
             pay_dates=fix_pay_dates,
@@ -1665,7 +1665,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         # print(flt_reset_dates)
         # print(daily_rate_reset_dates)
 
-        ns = ConstNotionalStructure(100.0)
+        ns = ConstNotionalStructure(1.0)
         spread = 0.00
 
         # # definition of the floating leg
@@ -1691,7 +1691,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         fixed_leg = IrFixedLegSpecification(
             fixed_rate=parRate,
             obj_id=label + "_fixed_leg3",
-            notional=100.0,
+            notional=1.0,
             start_dates=fix_start_dates,
             end_dates=fix_end_dates,
             pay_dates=fix_pay_dates,
@@ -1765,7 +1765,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         expiry = calc_end_day(spot_date, maturity, roll_conv, holidays)
         label = f"{instr}_{maturity}"
 
-        ns = ConstNotionalStructure(100.0)
+        ns = ConstNotionalStructure(1.0)
 
         # --------------------------------------------
         # PAY FLOATING LEG (short tenor, pays basis)
@@ -1803,7 +1803,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
             udl_id=short_index,
             fixing_id="test_fixing_id",
             day_count_convention=floatDayCount,
-            spread=float(row["Quote"]),  # this is the quoted basis
+            spread=0.0,  # this is the quoted basis
         )
 
         # --------------------------------------------
@@ -1865,7 +1865,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         spread_leg = IrFixedLegSpecification(
             fixed_rate=spread_rate,
             obj_id=label + "_spread_leg",
-            notional=100.0,
+            notional=1.0,
             start_dates=spread_start,
             end_dates=spread_end,
             pay_dates=spread_pay,
@@ -1916,7 +1916,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
         fra_spec = ForwardRateAgreementSpecification(
             obj_id=label,
             trade_date=refDate,
-            notional=100,
+            notional=1,
             rate=float(input_data["Quote"]),
             start_date=start_date,
             end_date=end_date,
