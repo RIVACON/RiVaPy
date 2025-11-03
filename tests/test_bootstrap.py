@@ -1382,7 +1382,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
     """
 
     def setUp(self):
-        """_summary_"""
+        """Setup input file"""
         # set directory and file name for Input Quotes
         dirName = "./notebooks/marketdata"  # "./"
         fileName = "/inputQuotes_includeFRAs.csv"  # "/inputQuotes.csv"
@@ -2178,7 +2178,7 @@ class TestBSBootstrap(unittest.TestCase):
     """ """
 
     def setUp(self):
-        """_summary_"""
+        """Set up input file"""
         # set directory and file name for Input Quotes
         dirName = "./notebooks/marketdata"  # "./"
         fileName = "/multi_dates_tbs.csv"  # "/inputQuotes.csv"
@@ -2628,7 +2628,7 @@ class TestReferenceDateDependance(unittest.TestCase):
     """
 
     def setUp(self):
-        """_summary_"""
+        """Set up input file"""
         # set directory and file name for Input Quotes
         dirName = "./notebooks/marketdata"  # "./"
         fileName = "/multi_dates.csv"  # "/inputQuotes.csv"
