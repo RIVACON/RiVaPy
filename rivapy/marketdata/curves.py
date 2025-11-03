@@ -4,6 +4,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import dateutil.relativedelta as relativedelta
+
+from rivapy.marketdata._logger import logger
+
+
 import rivapy.tools.interfaces as interfaces
 import rivapy.tools._validators as validators
 
@@ -224,6 +228,21 @@ class DiscountCurve:
     def value_fwd(self, val_date: Union[date, datetime], d1: Union[date, datetime], d2: Union[date, datetime]) -> float:
         """Return forward discount factor for a given date (without dependencies from pyvacon)
 
+        The `value_fwd()` method has been updated to support forward valuation scenarios
+        (`val_date > refdate`) by rebasing the curve from its construction date to the new
+        valuation date.
+
+        The rebasement follows the relationship:
+
+            DF(val_date, t) = DF(refdate, t) / DF(refdate, val_date)
+
+        This adjustment ensures that discount factors and forward rates remain consistent
+        across time, even when the valuation date is later than the curve’s reference date.
+
+        This approach aligns with market-standard practices for OIS and collateralized
+        discounting frameworks, where forward discounting must be time-consistent with
+        the curve’s anchor date.
+
         Args:
             refdate (Union[date, datetime]): The reference date. If the reference date is in the future
                                             (compared to the curves reference date), the forward discount
@@ -265,7 +284,6 @@ class DiscountCurve:
         df_list = [x for x in self.get_df()]
 
         # DEBUG TODO REMOVE
-        # print("7777777777777777777777777777777777777777777777")
         # print("Debugging value_fwd: x (yearfrac), then y (df) lists")
         # print(yf_list)
         # print(df_list)
@@ -281,8 +299,22 @@ class DiscountCurve:
         # print(dcc.yf(refdate, d))
 
         # give FWD value if given refdate is greater than curves reference date
-        df1 = interp.interp(yf_list, df_list, dcc.yf(val_date, d1), self.extrapolation)
-        df2 = interp.interp(yf_list, df_list, dcc.yf(val_date, d2), self.extrapolation)
+        # df1 = interp.interp(yf_list, df_list, dcc.yf(val_date, d1), self.extrapolation)
+        # df2 = interp.interp(yf_list, df_list, dcc.yf(val_date, d2), self.extrapolation)
+
+        x1 = dcc.yf(self.refdate, d1)
+        x2 = dcc.yf(self.refdate, d2)
+        df1 = interp.interp(yf_list, df_list, x1, self.extrapolation)
+        df2 = interp.interp(yf_list, df_list, x2, self.extrapolation)
+
+        if val_date > self.refdate:
+            xval = dcc.yf(self.refdate, val_date)
+            df_val = interp.interp(yf_list, df_list, xval, self.extrapolation)
+            # rebase curve to val_date
+            logger.info(f"{val_date} > {self.refdate}: forward valuation")
+            df1 /= df_val
+            df2 /= df_val
+
         df = df2 / df1
 
         return df

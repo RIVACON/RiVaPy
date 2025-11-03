@@ -1,6 +1,6 @@
 # 2025.09.09 Bootstrapping without pyvacon
 import unittest
-
+import sys
 
 from tests.setup_logging import setup_logging_for_tests
 
@@ -2191,7 +2191,11 @@ class TestBSBootstrap(unittest.TestCase):
         self.column_names = column_names
 
     def test_tbs_3m_6m(self):
-        """Using 2025 09 24 as a control date, to ensure the proper bootstrapping from Frontmark data example."""
+        """Using 2025 09 24 as a control date, to ensure the proper bootstrapping from Frontmark data example.
+        Goes through the complete process of bootstrapping 3 times
+        1. produce OIS curve for discounting
+        2. produce fwd curve e.g. 3M euribor from IRS instruments
+        3. produce 6M euribor from TBS instruments and 3m Euribor"""
 
         logger.debug(f"--------------------------------------------------------")
         logger.debug("start")
@@ -2232,6 +2236,13 @@ class TestBSBootstrap(unittest.TestCase):
             # extrapolation_type=ExtrapolationType.CONSTANT_DF,
         )
 
+        # OUtput discoutn curve dates and values for test:
+        print(" OIS: curve valueus (date, DF)")
+        dates_ois = curve.get_dates()
+        df_ois = curve.get_df()
+        for i in range(len(dates_ois)):
+            print(f"{dates_ois[i]} , {df_ois[i]}")
+
         # --------------------------------- IR for 3M
         logger.debug(f"Loading  instruments for reference date and, currency, and EURIBOR for SHORT LEG, e.g. 3M in this case")
         df_ins_3m = df[
@@ -2262,6 +2273,13 @@ class TestBSBootstrap(unittest.TestCase):
             # extrapolation_type=ExtrapolationType.CONSTANT_DF,
         )
 
+        # OUtput discoutn curve dates and values for test:
+        print(" 3m euribor: curve valueus (date, DF)")
+        dates_3m = curve_3m.get_dates()
+        df_3m = curve_3m.get_df()
+        for i in range(len(dates_3m)):
+            print(f"{dates_3m[i]} , {df_3m[i]}")
+
         # --------------------------------- TBS
         logger.debug(f"Loading TBS instruments for reference date and, currency, and EURIBOR, 6M long tenor")
         df_ins_tbs = df[
@@ -2275,9 +2293,13 @@ class TestBSBootstrap(unittest.TestCase):
         if df_ins_tbs.empty:
             raise ValueError(f"No TBS instruments found for date {date_str} with EUR/EURIBOR.")
 
+        print("--------- TBS instruments used ...")
+        for _, item in df_ins_tbs.iterrows():
+            print(item["Date"], item["Instrument"], item["Maturity"], item["Quote"], item["UnderlyingTenorShort"], item["UnderlyingTenor"])
+
         ins_spec_tbs = sfc.load_specifications_from_pd(df_ins_tbs, refDate, holidays)
         # ins_quotes_tbs = df_ins_tbs["Quote"].tolist()
-        ins_quotes_tbs = (df_ins_tbs["Quote"] / 10_000).tolist()
+        ins_quotes_tbs = (df_ins_tbs["Quote"] / 10000.0).tolist()
         logger.debug("instrument specifications created")
 
         curves["basis_curve"] = curve_3m
@@ -2305,7 +2327,279 @@ class TestBSBootstrap(unittest.TestCase):
         for i in range(len(ins_spec_tbs)):
             model_quote = get_quote(refDate, ins_spec_tbs[i], {"discount_curve": curve, "fixing_curve": curve_6m, "basis_curve": curve_3m})
             # compare to given basis points
-            self.assertAlmostEqual(model_quote * 10000, ins_quotes[i], delta=1e-5)  # since the quotes are only to 5 decimals
+            self.assertAlmostEqual(model_quote, ins_quotes_tbs[i], delta=1e-5)  # since the quotes are only to 5 decimals
+            # per_diff = (model_quote - deposit_quotes[i]) / deposit_quotes[i] * 100
+            # print(f"model: {model_quote} market: {deposit_quotes[i]} perdiff: {per_diff}")
+            # print(i, model_quote, curve.get_df()[i])
+
+        logger.debug(f"asserted market quote matched -done")
+        logger.debug(f"--------------------------------------------------------")
+        # self.assertEqual(1, 1)
+
+    def test_tbs_premade(self):
+        """To speed up the test, and test only the production of the TBS curve given a discount curve and basis curve (e.g. 3M euribor)"""
+
+        logger.debug(f"--------------------------------------------------------")
+        logger.debug("start")
+        # these inputs must be given by user
+        mon = "09"
+        day = "24"
+        year = "2025"
+        date_str = f"{day}.{mon}.{year}"
+        refDate = datetime(int(year), int(mon), int(day))
+        holidays = _ECB()
+
+        df = self.quotes_df.copy()
+
+        A = df[df["Date"] == date_str]
+
+        logger.debug(f"Creating OIS discount Curve")
+        # df_ins = df[df["Instrument"] == "OIS"]
+        # dc_df_temp = df[(df["Date"] == selected_date) & (df["Currency"] == selected_currency)  & (df["UnderlyingIndex"] == "ESTR") & (df["Instrument"] == "OIS") ]
+        df_ins = df[(df["Date"] == date_str) & (df["Currency"] == "EUR") & (df["UnderlyingIndex"] == "EONIA") & (df["Instrument"] == "OIS")]
+
+        logger.debug("CSV loaded")
+
+        ins_spec = sfc.load_specifications_from_pd(df_ins, refDate, holidays)
+        ins_quotes = df_ins["Quote"].tolist()
+        logger.debug("instrument specifications created")
+
+        print("--------------Starting bootstrapper")
+        logger.debug(f" OIS starting bootstrapper of {len(ins_quotes)} instruments")
+        # curve = bootstrap_curve(
+        #     ref_date=refDate,
+        #     curve_id="OIS_estr",
+        #     day_count_convention=df_ins["DayCountFixed"].tolist()[0],  # taken the first entry and assume is valid for all other deposits
+        #     instruments=ins_spec,
+        #     quotes=ins_quotes,
+        #     interpolation_type=InterpolationType.LINEAR_LOG,
+        #     extrapolation_type=ExtrapolationType.LINEAR_LOG,
+        #     # interpolation_type=InterpolationType.HAGAN_DF,
+        #     # extrapolation_type=ExtrapolationType.CONSTANT_DF,
+        # )
+        ois_dates = [
+            datetime(2025, 9, 24, 0, 0),
+            datetime(2025, 10, 3, 0, 0),
+            datetime(2025, 10, 10, 0, 0),
+            datetime(2025, 10, 27, 0, 0),
+            datetime(2025, 11, 26, 0, 0),
+            datetime(2025, 12, 29, 0, 0),
+            datetime(2026, 1, 26, 0, 0),
+            datetime(2026, 2, 26, 0, 0),
+            datetime(2026, 3, 26, 0, 0),
+            datetime(2026, 4, 27, 0, 0),
+            datetime(2026, 5, 26, 0, 0),
+            datetime(2026, 6, 26, 0, 0),
+            datetime(2026, 7, 27, 0, 0),
+            datetime(2026, 8, 26, 0, 0),
+            datetime(2026, 9, 28, 0, 0),
+            datetime(2027, 3, 30, 0, 0),
+            datetime(2027, 9, 27, 0, 0),
+            datetime(2028, 9, 26, 0, 0),
+            datetime(2029, 9, 26, 0, 0),
+            datetime(2030, 9, 26, 0, 0),
+            datetime(2031, 9, 26, 0, 0),
+            datetime(2032, 9, 27, 0, 0),
+            datetime(2033, 9, 26, 0, 0),
+            datetime(2034, 9, 26, 0, 0),
+            datetime(2035, 9, 26, 0, 0),
+            datetime(2040, 9, 26, 0, 0),
+            datetime(2045, 9, 26, 0, 0),
+            datetime(2055, 9, 27, 0, 0),
+        ]
+
+        ois_dfs = [
+            1.0,
+            0.9995183313174537,
+            0.9991111934028121,
+            0.9981592783704503,
+            0.9964906189442938,
+            0.9946699855622928,
+            0.9931280849220783,
+            0.9914487731890309,
+            0.9899089952356281,
+            0.9882165869484604,
+            0.9866937212054259,
+            0.9850722027277637,
+            0.983433328030071,
+            0.9818472981388028,
+            0.9801584057930596,
+            0.9706595090105641,
+            0.9604274957650127,
+            0.9388051694832871,
+            0.9160391166426118,
+            0.8922971398755308,
+            0.8681004825478764,
+            0.8432558412799663,
+            0.8181088759777948,
+            0.7927910510425162,
+            0.7677179931517396,
+            0.6488447684675088,
+            0.5517820851696722,
+            0.41133831341116706,
+        ]
+        # ACT365FIXED, LINEAR, NONE -  EXPECT ERROR TO BE THROWN for EXTRAPOLATIOn
+        curve = DiscountCurve(
+            "OIS_estr",
+            refDate,
+            ois_dates,
+            ois_dfs,
+            InterpolationType.LINEAR_LOG,
+            ExtrapolationType.LINEAR_LOG,
+            DayCounterType.ACT360,
+        )
+
+        # OUtput discoutn curve dates and values for test:
+        print(" OIS: curve valueus (date, DF)")
+        dates_ois = curve.get_dates()
+        df_ois = curve.get_df()
+        for i in range(len(dates_ois)):
+            print(f"{dates_ois[i]} , {df_ois[i]}")
+
+        # --------------------------------- IR for 3M
+        logger.debug(f"Loading  instruments for reference date and, currency, and EURIBOR for SHORT LEG, e.g. 3M in this case")
+        df_ins_3m = df[
+            (df["Date"] == date_str)
+            & (df["Currency"] == "EUR")
+            & (df["UnderlyingIndex"] == "EURIBOR")
+            & (df["Instrument"] == "IRS")
+            & (df["UnderlyingTenor"] == "3M")
+        ]
+
+        ins_spec_3m = sfc.load_specifications_from_pd(df_ins_3m, refDate, holidays)
+        ins_quotes_3m = df_ins_3m["Quote"].tolist()
+        logger.debug("instrument specifications created")
+
+        curves = {"discount_curve": curve}
+        print("--------------Starting bootstrapper")
+        logger.debug(f" IRS starting bootstrapper of {len(ins_quotes_3m)} instruments")
+        # curve_3m = bootstrap_curve(
+        #     ref_date=refDate,
+        #     curve_id="euribor3m",
+        #     day_count_convention=df_ins_3m["DayCountFixed"].tolist()[0],  # taken the first entry and assume is valid for all other deposits
+        #     instruments=ins_spec_3m,
+        #     quotes=ins_quotes_3m,
+        #     curves=curves,
+        #     interpolation_type=InterpolationType.LINEAR_LOG,
+        #     extrapolation_type=ExtrapolationType.LINEAR_LOG,
+        #     # interpolation_type=InterpolationType.HAGAN_DF,
+        #     # extrapolation_type=ExtrapolationType.CONSTANT_DF,
+        # )
+
+        eur3m_dates = [
+            datetime(2025, 9, 24, 0, 0),
+            datetime(2026, 9, 28, 0, 0),
+            datetime(2027, 9, 27, 0, 0),
+            datetime(2028, 9, 26, 0, 0),
+            datetime(2029, 9, 26, 0, 0),
+            datetime(2030, 9, 26, 0, 0),
+            datetime(2031, 9, 26, 0, 0),
+            datetime(2032, 9, 27, 0, 0),
+            datetime(2033, 9, 26, 0, 0),
+            datetime(2034, 9, 26, 0, 0),
+            datetime(2035, 9, 26, 0, 0),
+            datetime(2036, 9, 26, 0, 0),
+            datetime(2037, 9, 28, 0, 0),
+            datetime(2040, 9, 26, 0, 0),
+            datetime(2045, 9, 26, 0, 0),
+            datetime(2050, 9, 26, 0, 0),
+            datetime(2055, 9, 27, 0, 0),
+            datetime(2065, 9, 28, 0, 0),
+            datetime(2075, 9, 26, 0, 0),
+            datetime(2085, 9, 26, 0, 0),
+        ]
+
+        eur3m_dfs = [
+            1.0,
+            0.9799030353171693,
+            0.9597990484748371,
+            0.9380048482094476,
+            0.9149505395343006,
+            0.8912209769075741,
+            0.8670805932120672,
+            0.8423413056820628,
+            0.8173570936292627,
+            0.7921402251628151,
+            0.7670503220512309,
+            0.7422680023945799,
+            0.7177013315988795,
+            0.6486808461523088,
+            0.5525449999385698,
+            0.4763668626646936,
+            0.4129322567797108,
+            0.31451512666881004,
+            0.24795753632011802,
+            0.20081662961055713,
+        ]
+        # ACT365FIXED, LINEAR, NONE -  EXPECT ERROR TO BE THROWN for EXTRAPOLATIOn
+        curve_3m = DiscountCurve(
+            "euribor3m",
+            refDate,
+            eur3m_dates,
+            eur3m_dfs,
+            InterpolationType.LINEAR_LOG,
+            ExtrapolationType.LINEAR_LOG,
+            DayCounterType.ACT360,
+        )
+
+        # OUtput discoutn curve dates and values for test:
+        print(" 3m euribor: curve valueus (date, DF)")
+        dates_3m = curve_3m.get_dates()
+        df_3m = curve_3m.get_df()
+        for i in range(len(dates_3m)):
+            print(f"{dates_3m[i]} , {df_3m[i]}")
+
+        # --------------------------------- TBS
+        logger.debug(f"Loading TBS instruments for reference date and, currency, and EURIBOR, 6M long tenor")
+        df_ins_tbs = df[
+            (df["Date"] == date_str)
+            & (df["Currency"] == "EUR")
+            & (df["UnderlyingIndex"] == "EURIBOR")
+            & (df["Instrument"] == "TBS")
+            & (df["UnderlyingTenor"] == "6M")
+        ]
+
+        if df_ins_tbs.empty:
+            raise ValueError(f"No TBS instruments found for date {date_str} with EUR/EURIBOR.")
+
+        print("--------- TBS instruments used ...")
+        for _, item in df_ins_tbs.iterrows():
+            print(item["Date"], item["Instrument"], item["Maturity"], item["Quote"], item["UnderlyingTenorShort"], item["UnderlyingTenor"])
+            logger.info(
+                f"{item["Date"]}, {item["Instrument"]}, {item["Maturity"]}, {item["Quote"]}, {item["UnderlyingTenorShort"]}, {item["UnderlyingTenor"]}"
+            )
+
+        ins_spec_tbs = sfc.load_specifications_from_pd(df_ins_tbs, refDate, holidays)
+        # ins_quotes_tbs = df_ins_tbs["Quote"].tolist()
+        ins_quotes_tbs = (df_ins_tbs["Quote"] / 10000.0).tolist()
+        logger.debug("instrument specifications created")
+
+        curves["basis_curve"] = curve_3m
+
+        print("--------------Starting bootstrapper")
+        logger.debug(f" TBS starting bootstrapper of {len(df_ins_tbs)} instruments")
+        curve_6m = bootstrap_curve(
+            ref_date=refDate,
+            curve_id="OIS_estr",
+            day_count_convention=df_ins_tbs["DayCountFixed"].tolist()[0],  # taken the first entry and assume is valid for all other deposits
+            instruments=ins_spec_tbs,
+            quotes=ins_quotes_tbs,
+            curves=curves,
+            interpolation_type=InterpolationType.LINEAR_LOG,
+            extrapolation_type=ExtrapolationType.LINEAR_LOG,
+            # interpolation_type=InterpolationType.HAGAN_DF,
+            # extrapolation_type=ExtrapolationType.CONSTANT_DF,
+        )
+
+        # print(curve.get_dates())
+        self.assertIsInstance(curve_6m, DiscountCurve)
+        self.assertEqual(curve_6m.get_dates()[0], refDate)
+        logger.debug("bootstrapped curve dates matched")
+        # the discount curve needs to be able to get the same market quote for the instrument
+        for i in range(len(ins_spec_tbs)):
+            model_quote = get_quote(refDate, ins_spec_tbs[i], {"discount_curve": curve, "fixing_curve": curve_6m, "basis_curve": curve_3m})
+            # compare to given basis points
+            self.assertAlmostEqual(model_quote, ins_quotes_tbs[i], delta=1e-5)  # since the quotes are only to 5 decimals
             # per_diff = (model_quote - deposit_quotes[i]) / deposit_quotes[i] * 100
             # print(f"model: {model_quote} market: {deposit_quotes[i]} perdiff: {per_diff}")
             # print(i, model_quote, curve.get_df()[i])
@@ -2499,4 +2793,14 @@ class TestReferenceDateDependance(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    # Open a file for capturing output
+    with open("test_output.txt", "w") as f:
+        # Save original stdout
+        original_stdout = sys.stdout
+        sys.stdout = f
+        # Run your tests
+        unittest.main(argv=["first-arg-is-ignored"], exit=False)
+
+        # Restore stdout
+        sys.stdout = original_stdout
+    # unittest.main()

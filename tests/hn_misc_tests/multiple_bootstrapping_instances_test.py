@@ -46,8 +46,8 @@ if __name__ == "__main__":
         obj_id="OVERNIGHT_DEPOSIT",
         issuer="dummy_issuer",
         currency=ccy,
-        fixing_date=ref_date,
-        start_date=start_date,
+        issue_date=ref_date,
+        # start_date=start_date,
         maturity_date=end_date,
         notional=notional,
         rate=rate,
@@ -74,7 +74,7 @@ if __name__ == "__main__":
         start_date + dt.timedelta(days=30),
         start_date + dt.timedelta(days=60),
         start_date + dt.timedelta(days=90),
-        start_date + dt.timedelta(days=181),  # 180 - error due to BCC roll oveer mismatch between start and end date... look into! 
+        start_date + dt.timedelta(days=181),  # 180 - error due to BCC roll oveer mismatch between start and end date... look into!
         start_date + dt.timedelta(days=270),
     ]
 
@@ -90,8 +90,8 @@ if __name__ == "__main__":
             obj_id="DEPOSIT_" + str(i + 1),
             issuer="dummy_issuer",
             currency=ccy,
-            fixing_date=ref_date,
-            start_date=start_date,
+            issue_date=ref_date,
+            # start_date=start_date,
             maturity_date=end_date_deposits[i],
             notional=notional,
             rate=quotes_deposits[i],
@@ -676,8 +676,8 @@ if __name__ == "__main__":
         obj_id="OVERNIGHT_DEPOSIT",
         issuer="dummy_issuer",
         currency=ccy,
-        fixing_date=ref_date,
-        start_date=start_date,
+        issue_date=ref_date,
+        # start_date=start_date,
         maturity_date=end_date,
         notional=notional,
         rate=rate,

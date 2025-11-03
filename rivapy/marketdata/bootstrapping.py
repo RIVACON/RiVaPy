@@ -192,10 +192,51 @@ def bootstrap_curve(
             # dfs[-1] = solution
             # logger.debug(f"Bootstrapped DF for {end_date}: {solution} for {inst.ins_type()}")
 
+            # -  DEBUG 11.2025
+            # just before calling find_bracket for the failing end_date
+            print("INSIDE LOOP FOR BOOTSTRAP")
+            print("---- DEBUG START for end_date:", end_date, "quote(raw):", quote)
+            print("prev_df (guess):", prev_df)
+
+            # Evaluate error_fn at a few DF points (inside realistic DF support (1e-8, 1.0]))
+            test_dfs = [max(1e-10, prev_df * 0.5), max(1e-10, prev_df * 0.9), min(0.9999999, prev_df * 1.0), min(0.9999999, prev_df * 1.1)]
+            for td in test_dfs:
+                try:
+                    val = error_fn(
+                        td,
+                        -1,
+                        dfs,
+                        yc_dates,
+                        inst,
+                        ref_date,
+                        quote,
+                        curves,
+                        # InterpolationType.HAGAN_DF,
+                        # ExtrapolationType.CONSTANT_DF,
+                        InterpolationType.LINEAR_LOG,
+                        ExtrapolationType.LINEAR_LOG,
+                        day_count_convention,
+                        flag_irs_bootstrapped_as_fwd,
+                        flag_multi_curve,
+                    )
+                except Exception as e:
+                    val = f"EXC:{e}"
+                print(f"error_fn({td:.12f}) = {val}")
+
+            # Also quickly check the sign/units of quote here:
+            print("Raw quote value (from market):", quote, "— are these bps? If so, convert: quote = quote*1e-4")
+            # -
+
             lower, upper = find_bracket(error_fn, prev_df, ARGS)
             # lower, upper = prev_df * 0.8, prev_df * 1.2  # this is not good enouhg to work for all cases c.f. above
 
             logger.debug(f"Finding lower: {lower} and upper: {upper} bracket for root finding")
+
+            # -  DEBUG 11.2025
+            print(
+                f"-----------------------------------------[BOOTSTRAP] Solving for DF of {end_date}, initial guess: {prev_df}, market quote: {quote}"
+            )
+            # -  DEBUG 11.2025
 
             solution, result = brentq(
                 error_fn,
@@ -215,6 +256,9 @@ def bootstrap_curve(
                 f"function_calls={result.function_calls}, "
                 f"converged={result.converged}"
             )
+
+            # -  DEBUG 11.2025
+            print(f"-----------------------------------------[BOOTSTRAP] Solved DF({end_date}) = {solution}")
 
         except Exception as e:
             raise Exception(f"Initial bootstrap failed at {end_date}: {str(e)}")
@@ -388,6 +432,7 @@ def error_fn(
         # This is a forward curve — use Given discount curve for discounting
         curves_copy["fixing_curve"] = yc
         # Keep discount_curve unchanged
+        # print("UPDATING ONLY FIXING CURVE IN MULTI CURVE BOOTSTRAP")
     else:
         # Single-curve: updating discount curve itself
         curves_copy["discount_curve"] = yc
@@ -402,6 +447,13 @@ def error_fn(
     # print(yc.get_df())
     # print("----------------")
     # print(f"using {df_val} -> calc_quote: {calc_quote} - ref_quote: {ref_quote} = {calc_quote - ref_quote}")
+
+    # inside error_fn, after constructing yc and curves_copy and computing calc_quote
+    # calc_quote = get_quote(...)
+    # compute model_residual = calc_quote - ref_quote or whichever sign convention you use
+    print(f"[DEBUG error_fn] df_val={df_val:.12f}, calc_quote={calc_quote}, ref_quote={ref_quote}, residual={calc_quote - ref_quote}")
+    # optionally print underlying leg PVs (you can return them from compute_basis_spread or log inside).
+
     return calc_quote - ref_quote
 
 
@@ -532,6 +584,10 @@ def get_quote(
             fixing_map=fixing_table,
             pricing_params=pricing_params,
         )
+
+        # discount_curve: DiscountCurve,
+        # payLegFixingCurve: DiscountCurve,
+        # receiveLegFixingCurve: DiscountCurve,
 
         # TODO NEED TO HANDLE WHICH SITUATION WE ARE IN in case which curves are given etc...
         # HERE IS THE GENRAL GET QUOTE ARGUMENTS

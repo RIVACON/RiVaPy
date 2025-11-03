@@ -145,7 +145,7 @@ def make_fra_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Holid
     fra_spec = ForwardRateAgreementSpecification(
         obj_id=label,
         trade_date=ref_date,
-        notional=100,
+        notional=1.0,
         rate=float(row["Quote"]),
         start_date=start_date,
         end_date=end_date,
@@ -219,7 +219,7 @@ def make_irswap_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Ho
     fixed_leg = IrFixedLegSpecification(
         fixed_rate=parRate,
         obj_id=label + "_fixed_leg3",
-        notional=100.0,
+        notional=1.0,
         start_dates=fix_start_dates,
         end_dates=fix_end_dates,
         pay_dates=fix_pay_dates,
@@ -247,7 +247,7 @@ def make_irswap_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Ho
 
     flt_reset_dates = flt_reset_schedule[:-1]
 
-    ns = ConstNotionalStructure(100.0)
+    ns = ConstNotionalStructure(1.0)
     spread = 0.00
 
     # # definition of the floating leg
@@ -348,7 +348,7 @@ def make_ois_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Holid
     fixed_leg = IrFixedLegSpecification(
         fixed_rate=parRate,
         obj_id=label + "_fixed_leg3",
-        notional=100.0,
+        notional=1.0,
         start_dates=fix_start_dates,
         end_dates=fix_end_dates,
         pay_dates=fix_pay_dates,
@@ -383,7 +383,7 @@ def make_ois_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Holid
     daily_rate_reset_dates = res[2]  # 2D list: coupon i -> list of reset dates
     daily_rate_pay_dates = res[3]
 
-    ns = ConstNotionalStructure(100.0)
+    ns = ConstNotionalStructure(1.0)
     spread = 0.00
 
     # # definition of the floating leg
@@ -468,7 +468,7 @@ def make_basis_swap_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union
     # we use the helper function with spotlag in place of maturity to effctively shift the date
     spot_date = calc_end_day(start_day=ref_date, term=spotLag, business_day_convention=rollConvFloat, calendar=calendar)
     expiry = calc_end_day(spot_date, maturity, rollConvFloat, calendar)  # get expiry of swap (cannot be before last paydate of legs)
-    ns = ConstNotionalStructure(100.0)
+    ns = ConstNotionalStructure(1.0)
     spread = float(row["Quote"])
 
     # -------------------------------
@@ -506,7 +506,7 @@ def make_basis_swap_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union
         udl_id=underlyingIndex,
         fixing_id="test_fixing_id",
         day_count_convention=floatDayCount,
-        spread=spread,
+        spread=0.0,  # what should this be?
     )
 
     # -------------------------------
@@ -564,7 +564,7 @@ def make_basis_swap_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union
     spread_leg = IrFixedLegSpecification(
         fixed_rate=spreadRate,
         obj_id=label + "_spread_leg",
-        notional=100.0,
+        notional=1.0,
         start_dates=spread_start_dates,
         end_dates=spread_end_dates,
         pay_dates=spread_pay_dates,
