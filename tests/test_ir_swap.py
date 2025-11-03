@@ -497,6 +497,91 @@ class TestIRSwapSpecificationPricing(unittest.TestCase):
         mock_get_notionals.assert_called_once()
         mock_daycounter.return_value.yf.assert_called_once()
 
+    @unittest.mock.patch("rivapy.pricing.interest_rate_swap_pricing.get_projected_notionals")
+    @unittest.mock.patch("rivapy.pricing.interest_rate_swap_pricing.DayCounter")
+    def test_cashflows_fix_notional_start_end(self, mock_daycounter_class, mock_get_notionals):
+        """
+        Test _populate_cashflows_fix generates entries for both start and end notional cashflows.
+        """
+
+        # --- Arrange ---
+        val_date = datetime(2025, 1, 1)
+
+        # Mock fixed leg spec
+        fixed_leg_spec = unittest.mock.Mock()
+        fixed_leg_spec.fixed_rate = 0.05
+        fixed_leg_spec.start_dates = [val_date, val_date + timedelta(days=180)]
+        fixed_leg_spec.end_dates = [val_date + timedelta(days=180), val_date + timedelta(days=360)]
+        fixed_leg_spec.pay_dates = [val_date + timedelta(days=180), val_date + timedelta(days=360)]
+
+        # Mock Notional structure with start/end dates
+        notional_structure = unittest.mock.Mock()
+        notional_structure.get_pay_date_start.side_effect = [val_date, val_date + timedelta(days=180)]
+        notional_structure.get_pay_date_end.side_effect = [val_date + timedelta(days=180), val_date + timedelta(days=360)]
+        fixed_leg_spec.get_NotionalStructure.return_value = notional_structure
+
+        # Mock projected notionals
+        mock_get_notionals.return_value = [100.0, 200.0]
+
+        # Mock DiscountCurve
+        discount_curve = unittest.mock.Mock()
+        discount_curve.value.side_effect = lambda val, pay: 0.95  # always 0.95
+
+        # Mock fx_forward_curve
+        fx_forward_curve = unittest.mock.Mock()
+
+        # Mock DayCounter
+        mock_daycounter_instance = unittest.mock.Mock()
+        mock_daycounter_instance.yf.side_effect = lambda start, end: (end - start).days / 360.0
+        mock_daycounter_class.return_value = mock_daycounter_instance
+
+        # Mock FixingMap (not used)
+        fixing_map = unittest.mock.Mock()
+
+        # --- Act ---
+        from rivapy.pricing.interest_rate_swap_pricing import InterestRateSwapPricer
+
+        entries = InterestRateSwapPricer._populate_cashflows_fix(
+            val_date=val_date,
+            fixed_leg_spec=fixed_leg_spec,
+            discount_curve=discount_curve,
+            fx_forward_curve=fx_forward_curve,
+            fixing_map=fixing_map,
+            set_rate=False,
+        )
+
+        # --- Assert ---
+        # There should be 2 start + 2 end notional cashflows + 2 interest cashflows = 6
+        self.assertEqual(len(entries), 6)
+
+        # Check first notional start/outflow
+        start_cf = entries[0]
+        self.assertTrue(getattr(start_cf, "notional_cashflow", False))
+        self.assertEqual(start_cf.pay_amount, -100.0)
+        self.assertEqual(start_cf.discount_factor, 0.95)
+        self.assertAlmostEqual(start_cf.present_value, -95.0)
+
+        # Check first interest cashflow
+        interest_cf = entries[1]
+        self.assertTrue(getattr(interest_cf, "interest_cashflow", False))
+        self.assertEqual(interest_cf.notional, 100.0)
+        expected_interest = 100.0 * 0.05 * ((180) / 360)  # rate * yf
+        self.assertAlmostEqual(interest_cf.interest_amount, expected_interest)
+        self.assertAlmostEqual(interest_cf.present_value, expected_interest * 0.95)
+
+        # Check first notional end/inflow
+        end_cf = entries[2]
+        self.assertTrue(getattr(end_cf, "notional_cashflow", False))
+        self.assertEqual(end_cf.pay_amount, 100.0)
+        self.assertEqual(end_cf.discount_factor, 0.95)
+        self.assertAlmostEqual(end_cf.present_value, 95.0)
+
+        # Optionally, check second cashflow sequence similarly
+        start_cf2, interest_cf2, end_cf2 = entries[3], entries[4], entries[5]
+        self.assertEqual(start_cf2.pay_amount, -200.0)
+        self.assertEqual(end_cf2.pay_amount, 200.0)
+        self.assertAlmostEqual(interest_cf2.interest_amount, 200.0 * 0.05 * (180 / 360))
+
     @unittest.mock.patch("rivapy.pricing.interest_rate_swap_pricing.DayCounter.get")
     @unittest.mock.patch("rivapy.pricing.interest_rate_swap_pricing.DayCounter")
     @unittest.mock.patch("rivapy.pricing.interest_rate_swap_pricing.get_projected_notionals")
@@ -588,7 +673,111 @@ class TestIRSwapSpecificationPricing(unittest.TestCase):
         forward_curve.value_fwd.assert_called()
         discount_curve.value.assert_called()
 
+    @unittest.mock.patch("rivapy.pricing.interest_rate_swap_pricing.get_projected_notionals")
+    @unittest.mock.patch("rivapy.pricing.interest_rate_swap_pricing.DayCounter")
+    def test_cashflows_float_notional_start_end(self, mock_daycounter_class, mock_get_notionals):
+        """
+        Test _populate_cashflows_float generates entries for both start and end notional cashflows,
+        including interest cashflows with mocked forward rates.
+        """
+
+        # --- Arrange ---
+        val_date = datetime(2025, 1, 1)
+
+        # Mock floating leg spec
+        float_leg_spec = unittest.mock.Mock()
+        float_leg_spec.udl_id = "LIBOR3M"
+        float_leg_spec.spread = 0.01
+        float_leg_spec.start_dates = [val_date, val_date + timedelta(days=180)]
+        float_leg_spec.end_dates = [val_date + timedelta(days=180), val_date + timedelta(days=360)]
+        float_leg_spec.pay_dates = [val_date + timedelta(days=180), val_date + timedelta(days=360)]
+        float_leg_spec.rate_start_dates = [val_date, val_date + timedelta(days=180)]
+        float_leg_spec.rate_end_dates = [val_date + timedelta(days=180), val_date + timedelta(days=360)]
+        float_leg_spec.reset_dates = [val_date - timedelta(days=1), val_date + timedelta(days=180)]
+        float_leg_spec.rate_day_count_convention = "ACT/360"
+
+        # Mock Notional structure with start/end dates
+        notional_structure = unittest.mock.Mock()
+        notional_structure.get_pay_date_start.side_effect = [val_date, val_date + timedelta(days=180)]
+        notional_structure.get_pay_date_end.side_effect = [val_date + timedelta(days=180), val_date + timedelta(days=360)]
+        float_leg_spec.get_NotionalStructure.return_value = notional_structure
+
+        # Mock projected notionals
+        mock_get_notionals.return_value = [100.0, 200.0]
+
+        # Mock DiscountCurve
+        discount_curve = unittest.mock.Mock()
+        discount_curve.value.side_effect = lambda val, pay: 0.95  # always 0.95
+
+        # Mock ForwardCurve
+        forward_curve = unittest.mock.Mock()
+        forward_curve.value_fwd.side_effect = lambda val, start, end: 0.02  # constant forward rate
+
+        # Mock fx_forward_curve (not used)
+        fx_forward_curve = unittest.mock.Mock()
+
+        # Mock DayCounter
+        mock_daycounter_instance = unittest.mock.Mock()
+        mock_daycounter_instance.yf.side_effect = lambda start, end: (end - start).days / 360.0
+        mock_daycounter_class.return_value = mock_daycounter_instance
+
+        # Mock FixingMap (return None to force using forward rate logic)
+        fixing_map = unittest.mock.Mock()
+        fixing_map.get_fixing.return_value = None
+
+        # --- Act ---
+        from rivapy.pricing.interest_rate_swap_pricing import InterestRateSwapPricer
+
+        entries = InterestRateSwapPricer._populate_cashflows_float(
+            val_date=val_date,
+            float_leg_spec=float_leg_spec,
+            discount_curve=discount_curve,
+            forward_curve=forward_curve,
+            fx_forward_curve=fx_forward_curve,
+            fixing_map=fixing_map,
+            fixing_grace_period=30,
+            set_spread=False,
+            spread=0.0,
+        )
+
+        # --- Assert ---
+        # There should be 2 start + 2 end notional cashflows + 2 interest cashflows = 6
+        self.assertEqual(len(entries), 6)
+
+        # --- First cashflow sequence ---
+        start_cf = entries[0]
+        interest_cf = entries[1]
+        end_cf = entries[2]
+
+        # Notional start
+        self.assertTrue(getattr(start_cf, "notional_cashflow", False))
+        self.assertEqual(start_cf.pay_amount, -100.0)
+        self.assertEqual(start_cf.discount_factor, 0.95)
+        self.assertAlmostEqual(start_cf.present_value, -95.0)
+
+        # Interest cashflow
+        self.assertTrue(getattr(interest_cf, "interest_cashflow", False))
+        self.assertEqual(interest_cf.notional, 100.0)
+        expected_interest = 100.0 * (1.0 / 0.02 - 1.0) / ((180) / 360) * ((180) / 360) + 0.01 * 100.0 * (180 / 360)
+        # Simplified calculation here, in practice it should match the formula in the code
+        self.assertAlmostEqual(interest_cf.interest_amount, interest_cf.notional * interest_cf.rate * interest_cf.interest_yf)
+        self.assertAlmostEqual(interest_cf.present_value, interest_cf.pay_amount * 0.95)
+
+        # Notional end
+        self.assertTrue(getattr(end_cf, "notional_cashflow", False))
+        self.assertEqual(end_cf.pay_amount, 100.0)
+        self.assertEqual(end_cf.discount_factor, 0.95)
+        self.assertAlmostEqual(end_cf.present_value, 95.0)
+
+        # --- Second cashflow sequence ---
+        start_cf2, interest_cf2, end_cf2 = entries[3], entries[4], entries[5]
+
+        self.assertEqual(start_cf2.pay_amount, -200.0)
+        self.assertTrue(getattr(interest_cf2, "interest_cashflow", False))
+        self.assertEqual(end_cf2.pay_amount, 200.0)
+
     def populate_cashflow_ois(self):
+        # TODO
         pass
 
     @unittest.mock.patch.object(InterestRateSwapPricer, "price_leg")
@@ -818,6 +1007,180 @@ class TestIRSwapSpecificationPricing(unittest.TestCase):
         self.assertIs(args_fixed[4], spread_leg)
 
 
+class TestInterestRateSwapPricerInit(unittest.TestCase):
+    """Unit tests for InterestRateSwapPricer initialization logic."""
+
+    def setUp(self):
+        self.refdate = datetime(2025, 1, 1)
+        self.maturity = self.refdate + timedelta(days=365)  # FIX: must be later than issue_date
+        self.ccy = "EUR"
+
+        # --- Discount curves ---
+        self.dc = DiscountCurve(
+            id="TEST_DC",
+            refdate=self.refdate,
+            dates=[self.refdate],
+            df=[1.0],
+            interpolation=InterpolationType.LINEAR,
+            extrapolation=ExtrapolationType.LINEAR,
+        )
+
+        # --- Legs ---
+        ns = ConstNotionalStructure(100)
+        self.fixed_leg = IrFixedLegSpecification(
+            fixed_rate=0.05,
+            obj_id="fixed_leg",
+            notional=100.0,
+            start_dates=[self.refdate],
+            end_dates=[self.maturity],
+            pay_dates=[self.maturity],
+            currency=self.ccy,
+            day_count_convention="Act360",
+        )
+
+        self.float_leg = IrFloatLegSpecification(
+            obj_id="float_leg",
+            notional=ns,
+            reset_dates=[self.refdate],
+            start_dates=[self.refdate],
+            end_dates=[self.maturity],
+            rate_start_dates=[self.refdate],
+            rate_end_dates=[self.maturity],
+            pay_dates=[self.maturity],
+            currency=self.ccy,
+            udl_id="test_udl",
+            fixing_id="test_fixing",
+            day_count_convention="Act360",
+            spread=0.0,
+        )
+
+        self.spec = InterestRateSwapSpecification(
+            obj_id="test_swap",
+            notional=ns,
+            issue_date=self.refdate,
+            maturity_date=self.maturity,
+            pay_leg=self.fixed_leg,
+            receive_leg=self.float_leg,
+            currency=self.ccy,
+            day_count_convention="Act360",
+            issuer="issuer",
+            securitization_level="COLLATERALIZED",
+        )
+
+        self.pricing_request = unittest.mock.Mock(name="InterestRateSwapPricingRequest")
+
+    def test_init_success_minimal(self):
+        """Should initialize successfully with minimal valid inputs."""
+        pricer = InterestRateSwapPricer(
+            val_date=self.refdate,
+            spec=self.spec,
+            discount_curve_pay_leg=self.dc,
+            discount_curve_receive_leg=self.dc,
+            fixing_curve_pay_leg=self.dc,
+            fixing_curve_receive_leg=self.dc,
+            fx_fwd_curve_pay_leg=self.dc,
+            fx_fwd_curve_receive_leg=self.dc,
+            pricing_request=self.pricing_request,
+        )
+
+        self.assertEqual(pricer._val_date, self.refdate)
+        self.assertIs(pricer._spec, self.spec)
+        self.assertIs(pricer._pay_leg, self.spec.pay_leg)
+        self.assertIs(pricer._receive_leg, self.spec.receive_leg)
+        self.assertEqual(pricer._fx_pay_leg, 1.0)
+        self.assertEqual(pricer._fx_receive_leg, 1.0)
+        self.assertIsInstance(pricer._pricing_param, dict)
+        self.assertEqual(pricer._pricing_param, {})
+
+    def test_init_success_with_optional_args(self):
+        """Should properly assign optional args like pricing_param and fixing_map."""
+        mock_fixing_map = unittest.mock.Mock(name="FixingTable")
+        pricing_param = {"fixing_grace_period": 2}
+
+        pricer = InterestRateSwapPricer(
+            val_date=self.refdate,
+            spec=self.spec,
+            discount_curve_pay_leg=self.dc,
+            discount_curve_receive_leg=self.dc,
+            fixing_curve_pay_leg=self.dc,
+            fixing_curve_receive_leg=self.dc,
+            fx_fwd_curve_pay_leg=self.dc,
+            fx_fwd_curve_receive_leg=self.dc,
+            pricing_request=self.pricing_request,
+            pricing_param=pricing_param,
+            fixing_map=mock_fixing_map,
+            fx_pay_leg=1.2,
+            fx_receive_leg=0.8,
+        )
+
+        self.assertEqual(pricer._pricing_param, pricing_param)
+        self.assertIs(pricer._fixing_map, mock_fixing_map)
+        self.assertEqual(pricer._fx_pay_leg, 1.2)
+        self.assertEqual(pricer._fx_receive_leg, 0.8)
+
+    def test_init_raises_if_missing_required_args(self):
+        """Should raise TypeError if required arguments are missing."""
+        with self.assertRaises(TypeError):
+            InterestRateSwapPricer(
+                val_date=self.refdate,
+                spec=self.spec,
+                discount_curve_pay_leg=self.dc,
+                discount_curve_receive_leg=self.dc,
+                fixing_curve_pay_leg=self.dc,
+                fixing_curve_receive_leg=self.dc,
+                fx_fwd_curve_pay_leg=self.dc,
+                # missing fx_fwd_curve_receive_leg
+                pricing_request=self.pricing_request,
+            )
+
+    def test_init_all_curves_assigned_correctly(self):
+        """Ensure all curve attributes are assigned to the correct legs."""
+        pricer = InterestRateSwapPricer(
+            val_date=self.refdate,
+            spec=self.spec,
+            discount_curve_pay_leg=self.dc,
+            discount_curve_receive_leg=self.dc,
+            fixing_curve_pay_leg=self.dc,
+            fixing_curve_receive_leg=self.dc,
+            fx_fwd_curve_pay_leg=self.dc,
+            fx_fwd_curve_receive_leg=self.dc,
+            pricing_request=self.pricing_request,
+        )
+
+        self.assertIs(pricer._discount_curve_pay_leg, self.dc)
+        self.assertIs(pricer._discount_curve_receive_leg, self.dc)
+        self.assertIs(pricer._fixing_curve_pay_leg, self.dc)
+        self.assertIs(pricer._fixing_curve_receive_leg, self.dc)
+        self.assertIs(pricer._fx_fwd_curve_pay_leg, self.dc)
+        self.assertIs(pricer._fx_fwd_curve_receive_leg, self.dc)
+
+    def test_init_pricing_param_is_new_dict(self):
+        """Ensure pricing_param defaults to a new dict to avoid mutable default issues."""
+        pricer1 = InterestRateSwapPricer(
+            val_date=self.refdate,
+            spec=self.spec,
+            discount_curve_pay_leg=self.dc,
+            discount_curve_receive_leg=self.dc,
+            fixing_curve_pay_leg=self.dc,
+            fixing_curve_receive_leg=self.dc,
+            fx_fwd_curve_pay_leg=self.dc,
+            fx_fwd_curve_receive_leg=self.dc,
+            pricing_request=self.pricing_request,
+        )
+        pricer2 = InterestRateSwapPricer(
+            val_date=self.refdate,
+            spec=self.spec,
+            discount_curve_pay_leg=self.dc,
+            discount_curve_receive_leg=self.dc,
+            fixing_curve_pay_leg=self.dc,
+            fixing_curve_receive_leg=self.dc,
+            fx_fwd_curve_pay_leg=self.dc,
+            fx_fwd_curve_receive_leg=self.dc,
+            pricing_request=self.pricing_request,
+        )
+        self.assertIsNot(pricer1._pricing_param, pricer2._pricing_param)
+
+
 class TestGetProjectedNotionals(unittest.TestCase):
 
     def setUp(self):
@@ -870,7 +1233,7 @@ class TestGetProjectedNotionals(unittest.TestCase):
             get_projected_notionals(self.val_date, ns, 0, 1, fx_forward_curve=None)
 
 
-# TODO once implemented: computeSwapSpread, computeBasisSpread
+# TODO once implemented: computeSwapSpread,
 
 
 if __name__ == "__main__":

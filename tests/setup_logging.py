@@ -76,7 +76,7 @@ def setup_logging_for_tests(log_file="rivapy_test.log"):
     ch.setLevel(logging.INFO)
 
     # Common format
-    # formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s") # does not include callback trace
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")  # does not include callback trace
     # formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(funcName)s() - %(message)s")
 
     # Formatter includes function and external caller
@@ -90,11 +90,12 @@ def setup_logging_for_tests(log_file="rivapy_test.log"):
     #     "(Δ +%(delta).3fs, total +%(total_elapsed).3fs)"
     # )
 
-    formatter = CallerFormatter(
-        "%(asctime)s (+%(delta).3fs, total +%(total_elapsed).3fs) - %(name)s - %(levelname)s - "
-        "%(filename)s:%(lineno)d - %(funcName)s() - "
-        "[called by %(external_caller)s] - %(message)s"
-    )
+    # For callbacks and intense debugging
+    # formatter = CallerFormatter(
+    #     "%(asctime)s (+%(delta).3fs, total +%(total_elapsed).3fs) - %(name)s - %(levelname)s - "
+    #     "%(filename)s:%(lineno)d - %(funcName)s() - "
+    #     "[called by %(external_caller)s] - %(message)s"
+    # )
 
     fh.setFormatter(formatter)
     ch.setFormatter(formatter)

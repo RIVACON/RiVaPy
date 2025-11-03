@@ -1,5 +1,5 @@
 # 2025.07.24 Hans Nguyen
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from scipy.optimize import brentq
 from rivapy.tools.interfaces import BaseDatedCurve
 from rivapy.instruments.bond_specifications import DeterministicCashflowBondSpecification
@@ -242,6 +242,9 @@ class InterestRateSwapPricer:
         Returns:
             _List[CashFlow]: list of CashFlow objects.
         """
+
+        fixing_grace_period_dt = timedelta(days=fixing_grace_period)
+
         entries = []
         udl = float_leg_spec.udl_id
 
@@ -314,7 +317,7 @@ class InterestRateSwapPricer:
                 fixing = fixing_map.get_fixing(udl, float_leg_spec.reset_dates[i])
                 if fixing is None:  # i.e. no fixing available
 
-                    if val_date - float_leg_spec.reset_dates[i] > fixing_grace_period:
+                    if val_date - float_leg_spec.reset_dates[i] > fixing_grace_period_dt:
                         raise ValueError(f"Missing fixing for {udl} on {float_leg_spec.reset_dates[i]}")
 
                     else:
