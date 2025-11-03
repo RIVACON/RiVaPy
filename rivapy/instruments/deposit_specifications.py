@@ -9,8 +9,7 @@ import numpy as np
 import logging
 from rivapy.instruments.bond_specifications import DeterministicCashflowBondSpecification
 from datetime import datetime, date, timedelta
-from holidays import HolidayBase as _HolidayBase
-from holidays import EuropeanCentralBank as _ECB
+from rivapy.tools.holidays_compat import HolidayBase as _HolidayBase, ECB as _ECB
 from dateutil.relativedelta import relativedelta
 from rivapy.instruments.components import Issuer
 
@@ -44,17 +43,16 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
         notional: float = 100.0,
         rate: float = 0.00,
         term: _Optional[_Union[Period, str]] = None,
-        day_count_convention: _Union[DayCounterType, str] = DayCounterType.ACT360,
-        business_day_convention: _Union[RollConvention, str] = RollConvention.MODIFIED_FOLLOWING,
-        roll_convention: _Union[RollRule, str] = RollRule.EOM,
+        day_count_convention: _Union[DayCounterType, str] = "ACT360",
+        business_day_convention: _Union[RollConvention, str] = "ModifiedFollowing",
+        roll_convention: _Union[RollRule, str] = "EOM",
         spot_days: int = 2,
         calendar: _Union[_HolidayBase, str] = _ECB(),
         issuer: _Optional[_Union[Issuer, str]] = None,
-        securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
+        securitization_level: _Union[SecuritizationLevel, str] = "NONE",
         payment_days: int = 0,
         adjust_start_date: bool = True,
         adjust_end_date: bool = False,
-        index: _Optional[_Union[InterestRateIndex, str]] = None,
     ):
         """Create a short-term deposit specification.
 
@@ -115,11 +113,25 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
             # calculate maturity date from term and start date
             if issue_date is None:
                 raise ValueError("issue_date must be provided if maturity_date is to be calculated from term.")
-            maturity_date = (
-                calc_end_day(issue_date, term, business_day_convention, calendar) + relativedelta(_term_to_period(term))
-                if adjust_start_date
-                else issue_date + relativedelta(_term_to_period(term))
-            )
+            # calculate maturity date from term and start date
+            # roll_day signature: roll_day(day, calendar, business_day_convention, ...)
+            # previously the calendar and business day convention were passed in the wrong order
+            if adjust_start_date:
+                help_date = roll_day(issue_date, calendar, business_day_convention)
+            else:
+                help_date = issue_date
+            # _term_to_period returns a Period(years, months, days)
+            period = _term_to_period(term)
+            maturity_date = help_date + relativedelta(years=period.years, months=period.months, days=period.days)
+        if isinstance(issue_date, date):
+            issue_date = datetime.combine(issue_date, datetime.min.time())
+        if isinstance(maturity_date, date):
+            maturity_date = datetime.combine(maturity_date, datetime.min.time())
+
+        if term is None:
+            term = f"{(maturity_date - issue_date).days}D"
+        else:
+            term = term
 
         super().__init__(
             obj_id=obj_id,
@@ -140,7 +152,6 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
             securitization_level=securitization_level,
             adjust_end_date=adjust_end_date,
             adjust_start_date=adjust_start_date,
-            index=index,
         )
 
     @staticmethod

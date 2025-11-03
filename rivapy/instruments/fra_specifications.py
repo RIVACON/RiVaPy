@@ -4,7 +4,7 @@ from typing import List as _List, Union as _Union, Tuple, Optional as _Optional
 import numpy as np
 from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
-from holidays import HolidayBase as _HolidayBase, ECB as _ECB
+from rivapy.tools.holidays_compat import HolidayBase as _HolidayBase, ECB as _ECB
 from rivapy.instruments.components import Issuer
 from rivapy.tools.datetools import (
     Period,

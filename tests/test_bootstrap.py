@@ -39,8 +39,7 @@ from rivapy.tools.datetools import DayCounter, Period, Schedule, calc_end_day, c
 
 # for specification from file tests
 import rivapy.instruments.specification_from_csv as sfc
-from holidays import HolidayBase as _HolidayBase
-from holidays import EuropeanCentralBank as _ECB
+from rivapy.tools.holidays_compat import HolidayBase as _HolidayBase, EuropeanCentralBank as _ECB
 
 
 # Helper functions
