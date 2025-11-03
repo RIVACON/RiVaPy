@@ -299,11 +299,18 @@ class InterestRateSwapPricer:
             # # DEBUG TODO REMOVE
             # print(f"notional {i}:{notionals[i]} for {entry.end_date}")
             if val_date <= float_leg_spec.reset_dates[i]:
-                # print("swap calculating fwd_rate for floating leg")  # DEBUG TODO REMOVE
+                # print("swap calculating fwd_rate for floating leg")  # DEBUG 11.2025 TODO REMOVE
+                # print(f"rate_start={float_leg_spec.rate_start_dates[i]}, rate_end={float_leg_spec.rate_end_dates[i]}")
+                # print(
+                #     f"DF_start={forward_curve.value(val_date, float_leg_spec.rate_start_dates[i])}, DF_end={forward_curve.value(val_date, float_leg_spec.rate_end_dates[i])}"
+                # )
+                # print(f"value_fwd={forward_curve.value_fwd(val_date, float_leg_spec.rate_start_dates[i], float_leg_spec.rate_end_dates[i])}")
+
                 fwd_rate = forward_curve.value_fwd(val_date, float_leg_spec.rate_start_dates[i], float_leg_spec.rate_end_dates[i])
                 entry.rate = leg_spread + (1.0 / fwd_rate - 1.0) / rate_yf
-
+                # print(f"leg_spread: {leg_spread} rate_yf: {rate_yf} fwd_rate: {fwd_rate} calculated rate: {entry.rate} ")
             else:
+                # print("GOT JERE INSTEAD : val_date:", val_date, " cf restet date:", float_leg_spec.reset_dates[i])
                 fixing = fixing_map.get_fixing(udl, float_leg_spec.reset_dates[i])
                 if fixing is None:  # i.e. no fixing available
 
@@ -678,6 +685,23 @@ class InterestRateSwapPricer:
         else:
             raise ValueError(f"Unknown leg type {leg_spec.type}")
 
+        # inside price_leg just after cashflow construction
+        # - DEBUG 11.2025
+        # print("\n=== DEBUG FLOAT LEG ===")
+        # total_pv = 0.0
+        # for i, cf in enumerate(cashflow_table):
+        #     print(
+        #         f"[{i}] pay_date={cf.pay_date}, "
+        #         f"notional={cf.notional:.2f}, "
+        #         f"rate={cf.rate:.6f}, "
+        #         f"yf={cf.interest_yf:.6f}, "
+        #         f"pay_amt={cf.pay_amount:.6f}, "
+        #         f"DF={cf.discount_factor:.6f}, "
+        #         f"PV={cf.present_value:.6f}"
+        #     )
+        #     total_pv += cf.present_value
+        # print(f"--- Total leg PV = {total_pv:.6f}\n")
+
         PV = 0
         # print("----------------------------------------------------------")
         # print("DEBUG: price leg pv values")  # DEBUG TODO REMOVE
@@ -889,6 +913,17 @@ class InterestRateSwapPricer:
         )  # should not need a fixing curve since its a fixed leg, we default to the pay leg
 
         # # for fixed, we are setting the rate to 1
+
+        # # - DEBUG 11.2025
+        # print("INSIDE COMPUTE BASIS SPREAD")
+        # print("receive_leg_PV:", receive_leg_PV)
+        # print("pay_leg_PV:", pay_leg_PV)
+        # print("fixed_leg_PV01:", fixed_leg_PV01)
+        # print("INSIDE COMPUTE BASIS SPREAD: receive_leg_PV:", receive_leg_PV, "pay_leg_PV:", pay_leg_PV, "fixed_leg_PV01:", fixed_leg_PV01)
+
+        if abs(fixed_leg_PV01) < 1e-12:
+            raise Exception(f"fixed_leg_PV01 too small ({fixed_leg_PV01}), cannot divide — check fixed leg annuity / conventions")
+        # -
 
         return (receive_leg_PV - pay_leg_PV) / fixed_leg_PV01
 

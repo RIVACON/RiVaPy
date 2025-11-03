@@ -751,6 +751,72 @@ class TestIRSwapSpecificationPricing(unittest.TestCase):
         self.assertIs(args_float[2], fixing_curve)  # forward curve used for float leg
         self.assertIs(args_fixed[2], fixing_curve)  # forward curve also passed for fixed leg annuity
 
+    @unittest.mock.patch("rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.price_leg")
+    def test_compute_basis_spread(self, mock_price_leg):
+        """
+        Test fair basis spread calculation:
+        basis_spread = (PV_receive_leg - PV_pay_leg) / PV01_fixed_leg
+
+        The function calls price_leg three times:
+        1. receive_leg PV (using receiveLegFixingCurve)
+        2. pay_leg PV (using payLegFixingCurve)
+        3. fixed_leg PV01 (using payLegFixingCurve, desired_rate=1)
+        """
+
+        # --- Arrange ---
+        mock_price_leg.side_effect = [300.0, 250.0, 20.0]  # receive_leg PV, pay_leg PV, fixed_leg PV01
+
+        ref_date = datetime(2024, 1, 1)
+
+        # create mock curves and legs
+        discount_curve = unittest.mock.Mock(name="discount_curve")
+        pay_fixing_curve = unittest.mock.Mock(name="pay_fixing_curve")
+        receive_fixing_curve = unittest.mock.Mock(name="receive_fixing_curve")
+        pay_leg = unittest.mock.Mock(name="pay_leg")
+        receive_leg = unittest.mock.Mock(name="receive_leg")
+        spread_leg = unittest.mock.Mock(name="spread_leg")
+        fixing_map = unittest.mock.Mock(name="fixing_map")
+
+        pricing_params = {"fixing_grace_period": 0.0}
+
+        # --- Act ---
+        result = InterestRateSwapPricer.compute_basis_spread(
+            ref_date=ref_date,
+            discount_curve=discount_curve,
+            payLegFixingCurve=pay_fixing_curve,
+            receiveLegFixingCurve=receive_fixing_curve,
+            pay_leg=pay_leg,
+            receive_leg=receive_leg,
+            spread_leg=spread_leg,
+            fixing_map=fixing_map,
+            pricing_params=pricing_params,
+        )
+
+        # --- Assert ---
+        # expected = (receive_leg_PV - pay_leg_PV) / fixed_leg_PV01 = (300 - 250) / 20 = 2.5
+        expected_spread = (300.0 - 250.0) / 20.0
+        self.assertAlmostEqual(result, expected_spread)
+
+        # Check calls
+        self.assertEqual(mock_price_leg.call_count, 3)
+
+        # Check that the right arguments were passed for each call
+        args_receive = mock_price_leg.call_args_list[0][0]
+        args_pay = mock_price_leg.call_args_list[1][0]
+        args_fixed = mock_price_leg.call_args_list[2][0]
+
+        # receive leg should use receiveLegFixingCurve
+        self.assertIs(args_receive[2], receive_fixing_curve)
+        self.assertIs(args_receive[4], receive_leg)
+
+        # pay leg should use payLegFixingCurve
+        self.assertIs(args_pay[2], pay_fixing_curve)
+        self.assertIs(args_pay[4], pay_leg)
+
+        # fixed leg should also use payLegFixingCurve
+        self.assertIs(args_fixed[2], pay_fixing_curve)
+        self.assertIs(args_fixed[4], spread_leg)
+
 
 class TestGetProjectedNotionals(unittest.TestCase):
 

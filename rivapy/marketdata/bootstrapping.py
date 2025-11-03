@@ -19,6 +19,7 @@ from rivapy.instruments.ir_swap_specification import (
     IrFixedLegSpecification,
     IrFloatLegSpecification,
     IrSwapLegSpecification,
+    InterestRateBasisSwapSpecification,
 )
 from rivapy.marketdata import DiscountCurve
 from rivapy.marketdata.fixing_table import FixingTable
@@ -137,7 +138,7 @@ def bootstrap_curve(
     if Instrument.DEPOSIT in ins_types and flag_multi_curve == True:
         raise Exception("Deposits cannot be used in multicurve bootstrapping")
 
-    if Instrument.IRS in ins_types:
+    if Instrument.IRS or Instrument.BS in ins_types:
         # check if curves has a fixing curve
         if "fixing_curve" in curves:
             if not isinstance(curves["fixing_curve"], DiscountCurve):
@@ -191,10 +192,51 @@ def bootstrap_curve(
             # dfs[-1] = solution
             # logger.debug(f"Bootstrapped DF for {end_date}: {solution} for {inst.ins_type()}")
 
+            # -  DEBUG 11.2025
+            # just before calling find_bracket for the failing end_date
+            # print("INSIDE LOOP FOR BOOTSTRAP")
+            # print("---- DEBUG START for end_date:", end_date, "quote(raw):", quote)
+            # print("prev_df (guess):", prev_df)
+
+            # Evaluate error_fn at a few DF points (inside realistic DF support (1e-8, 1.0]))
+            test_dfs = [max(1e-10, prev_df * 0.5), max(1e-10, prev_df * 0.9), min(0.9999999, prev_df * 1.0), min(0.9999999, prev_df * 1.1)]
+            for td in test_dfs:
+                try:
+                    val = error_fn(
+                        td,
+                        -1,
+                        dfs,
+                        yc_dates,
+                        inst,
+                        ref_date,
+                        quote,
+                        curves,
+                        # InterpolationType.HAGAN_DF,
+                        # ExtrapolationType.CONSTANT_DF,
+                        InterpolationType.LINEAR_LOG,
+                        ExtrapolationType.LINEAR_LOG,
+                        day_count_convention,
+                        flag_irs_bootstrapped_as_fwd,
+                        flag_multi_curve,
+                    )
+                except Exception as e:
+                    val = f"EXC:{e}"
+                # print(f"error_fn({td:.12f}) = {val}")
+
+            # Also quickly check the sign/units of quote here:
+            # print("Raw quote value (from market):", quote, "— are these bps? If so, convert: quote = quote*1e-4")
+            # -
+
             lower, upper = find_bracket(error_fn, prev_df, ARGS)
             # lower, upper = prev_df * 0.8, prev_df * 1.2  # this is not good enouhg to work for all cases c.f. above
 
             logger.debug(f"Finding lower: {lower} and upper: {upper} bracket for root finding")
+
+            # -  DEBUG 11.2025
+            # print(
+            #     f"-----------------------------------------[BOOTSTRAP] Solving for DF of {end_date}, initial guess: {prev_df}, market quote: {quote}"
+            # )
+            # # -  DEBUG 11.2025
 
             solution, result = brentq(
                 error_fn,
@@ -214,6 +256,9 @@ def bootstrap_curve(
                 f"function_calls={result.function_calls}, "
                 f"converged={result.converged}"
             )
+
+            # -  DEBUG 11.2025
+            # print(f"-----------------------------------------[BOOTSTRAP] Solved DF({end_date}) = {solution}")
 
         except Exception as e:
             raise Exception(f"Initial bootstrap failed at {end_date}: {str(e)}")
@@ -387,10 +432,11 @@ def error_fn(
         # This is a forward curve — use Given discount curve for discounting
         curves_copy["fixing_curve"] = yc
         # Keep discount_curve unchanged
+        # print("UPDATING ONLY FIXING CURVE IN MULTI CURVE BOOTSTRAP")
     else:
         # Single-curve: updating discount curve itself
         curves_copy["discount_curve"] = yc
-        if flag_irs_bootstrapped_as_fwd:  # if it is an irs instrument that needs the forward curve as well
+        if flag_irs_bootstrapped_as_fwd:  # if it is an irs instrument that needs the forward curve as well or TBS
             curves_copy["fixing_curve"] = yc
 
     calc_quote = get_quote(ref_date, instrument_spec, curves_copy)
@@ -401,6 +447,12 @@ def error_fn(
     # print(yc.get_df())
     # print("----------------")
     # print(f"using {df_val} -> calc_quote: {calc_quote} - ref_quote: {ref_quote} = {calc_quote - ref_quote}")
+
+    # inside error_fn, after constructing yc and curves_copy and computing calc_quote
+    # compute model_residual = calc_quote - ref_quote or whichever sign convention you use
+    # print(f"[DEBUG error_fn] df_val={df_val:.12f}, calc_quote={calc_quote}, ref_quote={ref_quote}, residual={calc_quote - ref_quote}")
+    # optionally print underlying leg PVs (you can return them from compute_basis_spread or log inside).
+
     return calc_quote - ref_quote
 
 
@@ -447,7 +499,9 @@ def find_bracket(error_fn, guess, args, expand=2.0, max_tries=10, min_lower=1e-8
 
 def get_quote(
     ref_date: _Union[date, datetime],
-    instrument_spec: _Union[DepositSpecification, ForwardRateAgreementSpecification, InterestRateSwapSpecification],
+    instrument_spec: _Union[
+        DepositSpecification, ForwardRateAgreementSpecification, InterestRateSwapSpecification, InterestRateBasisSwapSpecification
+    ],
     curve_dict: dict,
 ):
     """Get the instrument specific fair quote calculation result to be used in the bootstrapper.
@@ -498,14 +552,41 @@ def get_quote(
         # std::make_shared<const FixingTable>(),
         # std::make_shared<const InterestRateSwapPricingParameter>()
 
+        yc_discount = curve_dict["discount_curve"]
+        yc_forward = curve_dict["fixing_curve"]  # THIS IS THE CURVE TO BE SOLVED
+        yc_basis_curve = curve_dict.get("basis_curve", None)  # THIS IS THE EXISTING KNOWN CURVE - assume is for SHORT
+        # NOTE - the rerquirement is that error_fn has the flags to determine if discoutn curve is the same as fixing curve or not already
+
+        if yc_basis_curve is None:
+            raise Exception("Missing basis curve for pricing TBS")
+
+        fixing_table = FixingTable()
+
+        pay_leg = instrument_spec.get_pay_leg()
+        receive_leg = instrument_spec.get_receive_leg()
+        spread_leg = instrument_spec.get_spread_leg()
+        fixing_grace_period = 0  # TODO take in as parameter? in pyvacon example, the extra swap parameters are assumed to be empty, only the curves were passed as arguments...
         pricing_params = {
             "fixing_grace_period": fixing_grace_period,
             "set_rate": True,
             "desired_rate": 1.0,
         }  # need annuity again for spread_leg(modeled as fixed leg)
 
-        yc_discount = curve_dict["discount_curve"]
-        yc_forward = curve_dict["fixing_curve"]
+        quote = InterestRateSwapPricer.compute_basis_spread(
+            ref_date,
+            discount_curve=yc_discount,
+            payLegFixingCurve=yc_basis_curve,
+            receiveLegFixingCurve=yc_forward,
+            pay_leg=pay_leg,
+            receive_leg=receive_leg,
+            spread_leg=spread_leg,
+            fixing_map=fixing_table,
+            pricing_params=pricing_params,
+        )
+
+        # discount_curve: DiscountCurve,
+        # payLegFixingCurve: DiscountCurve,
+        # receiveLegFixingCurve: DiscountCurve,
 
         # TODO NEED TO HANDLE WHICH SITUATION WE ARE IN in case which curves are given etc...
         # HERE IS THE GENRAL GET QUOTE ARGUMENTS
@@ -538,21 +619,6 @@ def get_quote(
         # 			Analytics_FAIL("Missing basis curve for pricing basis swap");
         # 		}
         # 	}
-        quote = InterestRateSwapPricer.compute_basis_spread(
-            ref_date,
-            discount_curve=DiscountCurve,
-            payLegFixingCurve=DiscountCurve,
-            receiveLegFixingCurve=DiscountCurve,
-            pay_leg=IrFloatLegSpecification,
-            receive_leg=IrFloatLegSpecification,
-            spread_leg=IrFixedLegSpecification,
-            fixing_map=fixing_table,
-            pricing_params=pricing_params,
-        )
-
-        pass
-    elif instrument_spec.ins_type() == Instrument.FXF:  # fx forward
-        pass
 
     # # DEBUG
     # print(f"Calculated quote for {instrument_spec.ins_type()} is {quote}")

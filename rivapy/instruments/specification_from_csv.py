@@ -57,6 +57,8 @@ def make_specification_from_row(row: pd.DataFrame, ref_date: datetime, calendar:
         return make_fra_spec(row, ref_date, calendar)
     elif inst_type == "IRS":
         return make_irswap_spec(row, ref_date, calendar)
+    elif inst_type == "TBS":
+        return make_basis_swap_spec(row, ref_date, calendar)
     else:
         raise ValueError(f"Unsupported instrument type {inst_type}")
 
@@ -142,7 +144,7 @@ def make_fra_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Holid
     fra_spec = ForwardRateAgreementSpecification(
         obj_id=label,
         trade_date=ref_date,
-        notional=100,
+        notional=1.0,
         rate=float(row["Quote"]),
         start_date=start_date,
         end_date=end_date,
@@ -216,12 +218,12 @@ def make_irswap_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Ho
     fixed_leg = IrFixedLegSpecification(
         fixed_rate=parRate,
         obj_id=label + "_fixed_leg3",
-        notional=100.0,
+        notional=1.0,
         start_dates=fix_start_dates,
         end_dates=fix_end_dates,
         pay_dates=fix_pay_dates,
         currency=currency,
-        day_count_convention=rollConvFix,
+        day_count_convention=fixDayCount,
     )
 
     # FLOAT LEG
@@ -244,7 +246,7 @@ def make_irswap_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Ho
 
     flt_reset_dates = flt_reset_schedule[:-1]
 
-    ns = ConstNotionalStructure(100.0)
+    ns = ConstNotionalStructure(1.0)
     spread = 0.00
 
     # # definition of the floating leg
@@ -260,7 +262,7 @@ def make_irswap_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Ho
         currency=currency,
         udl_id=underlyingIndex,
         fixing_id="test_fixing_id",
-        day_count_convention=rollConvFloat,
+        day_count_convention=floatDayCount,
         spread=spread,
     )
 
@@ -273,7 +275,7 @@ def make_irswap_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Ho
         pay_leg=fixed_leg,
         receive_leg=float_leg,
         currency=currency,
-        day_count_convention=rollConvFloat,
+        day_count_convention=floatDayCount,
         issuer="dummy_issuer",
         securitization_level="COLLATERALIZED",
     )
@@ -345,12 +347,12 @@ def make_ois_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Holid
     fixed_leg = IrFixedLegSpecification(
         fixed_rate=parRate,
         obj_id=label + "_fixed_leg3",
-        notional=100.0,
+        notional=1.0,
         start_dates=fix_start_dates,
         end_dates=fix_end_dates,
         pay_dates=fix_pay_dates,
         currency=currency,
-        day_count_convention=rollConvFix,
+        day_count_convention=fixDayCount,
     )
 
     # FLOAT LEG - OIS
@@ -380,7 +382,7 @@ def make_ois_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Holid
     daily_rate_reset_dates = res[2]  # 2D list: coupon i -> list of reset dates
     daily_rate_pay_dates = res[3]
 
-    ns = ConstNotionalStructure(100.0)
+    ns = ConstNotionalStructure(1.0)
     spread = 0.00
 
     # # definition of the floating leg
@@ -411,7 +413,7 @@ def make_ois_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union[_Holid
         pay_leg=fixed_leg,
         receive_leg=float_leg,
         currency=currency,
-        day_count_convention=rollConvFloat,
+        day_count_convention=floatDayCount,
         issuer="dummy_issuer",
         securitization_level="COLLATERALIZED",
     )
@@ -451,79 +453,64 @@ def make_basis_swap_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union
     rollConvFix = row["RollConventionFixed"]
     rollConvBasis = row["RollConventionBasis"]
     spotLag = row["SpotLag"]  # expect form "1D", i.e 1 day
-    parRate = float(row["Quote"])
+
+    # special for Basis swap, e.g. TBS
+    tenorShort = row["UnderlyingTenorShort"]
+    underlyingPayFreqShort = row["UnderlyingPaymentFrequencyShort"]
+    fixPayFreqShort = row["PaymentFrequencyFixedShort"]
+
+    # FOR A TBS, the quote given is the basis point spread, e.g. +8.5 bps
+    spreadRate = float(row["Quote"]) / 10000.0  # convert to decimal
     currency = row["Currency"]
     label = instr + "_" + maturity
 
     # we use the helper function with spotlag in place of maturity to effctively shift the date
-    spot_date = calc_end_day(start_day=ref_date, term=spotLag, business_day_convention=rollConvFix, calendar=calendar)
-    expiry = calc_end_day(spot_date, maturity, rollConvFix, calendar)  # get expiry of swap (cannot be before last paydate of legs)
+    spot_date = calc_end_day(start_day=ref_date, term=spotLag, business_day_convention=rollConvFloat, calendar=calendar)
+    expiry = calc_end_day(spot_date, maturity, rollConvFloat, calendar)  # get expiry of swap (cannot be before last paydate of legs)
+    ns = ConstNotionalStructure(1.0)
+    spread = float(row["Quote"])
 
-    # FIXED LEG
-    fix_schedule = Schedule(
-        start_day=spot_date, end_day=expiry, time_period=fixPayFreq, business_day_convention=rollConvFix, calendar=calendar, ref_date=ref_date
-    ).generate_dates(False)
-
-    fix_start_dates = fix_schedule[:-1]
-    fix_end_dates = fix_schedule[1:]
-    fix_pay_dates = fix_end_dates
-
-    # # definition of the SPREAD leg - which represents the
-    spread_leg = IrFixedLegSpecification(
-        fixed_rate=parRate,
-        obj_id=label + "_spread_leg",
-        notional=100.0,
-        start_dates=fix_start_dates,
-        end_dates=fix_end_dates,
-        pay_dates=fix_pay_dates,
-        currency=currency,
-        day_count_convention=rollConvFix,
-    )
-
-    # PAY LEG
-    # FLOAT LEG
-    flt_schedule = Schedule(
+    # -------------------------------
+    # PAY LEG (float) - short tenor
+    pay_schedule = Schedule(
         start_day=spot_date,
         end_day=expiry,
-        time_period=underlyingPayFreq,
+        time_period=underlyingPayFreqShort,
         business_day_convention=rollConvFloat,
         calendar=calendar,
         ref_date=ref_date,
     ).generate_dates(False)
 
-    flt_start_dates = flt_schedule[:-1]
-    flt_end_dates = flt_schedule[1:]
-    flt_pay_dates = flt_end_dates
+    pay_start_dates = pay_schedule[:-1]
+    pay_end_dates = pay_schedule[1:]
+    pay_pay_dates = pay_end_dates
 
-    flt_reset_schedule = Schedule(
-        start_day=spot_date, end_day=expiry, time_period=tenor, business_day_convention=rollConvFloat, calendar=calendar, ref_date=ref_date
+    pay_reset_schedule = Schedule(
+        start_day=spot_date, end_day=expiry, time_period=tenorShort, business_day_convention=rollConvFloat, calendar=calendar, ref_date=ref_date
     ).generate_dates(False)
 
-    flt_reset_dates = flt_reset_schedule[:-1]
-
-    ns = ConstNotionalStructure(100.0)
-    spread = 0.00
+    pay_reset_dates = pay_reset_schedule[:-1]
 
     # # definition of the floating leg
     pay_leg = IrFloatLegSpecification(
         obj_id=label + "_pay_leg",
         notional=ns,
-        reset_dates=flt_reset_dates,
-        start_dates=flt_start_dates,
-        end_dates=flt_end_dates,
-        rate_start_dates=flt_start_dates,
-        rate_end_dates=flt_end_dates,
-        pay_dates=flt_pay_dates,
+        reset_dates=pay_reset_dates,
+        start_dates=pay_start_dates,
+        end_dates=pay_end_dates,
+        rate_start_dates=pay_start_dates,
+        rate_end_dates=pay_end_dates,
+        pay_dates=pay_pay_dates,
         currency=currency,
         udl_id=underlyingIndex,
         fixing_id="test_fixing_id",
-        day_count_convention=rollConvFloat,
-        spread=spread,
+        day_count_convention=floatDayCount,
+        spread=0.0,  # what should this be?
     )
 
-    # RECEIVE LEG
-    # FLOAT LEG
-    flt_schedule2 = Schedule(
+    # -------------------------------
+    # RECIEVE LEG (float) - long tenor
+    rec_schedule = Schedule(
         start_day=spot_date,
         end_day=expiry,
         time_period=underlyingPayFreq,
@@ -532,40 +519,60 @@ def make_basis_swap_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union
         ref_date=ref_date,
     ).generate_dates(False)
 
-    flt_start_dates2 = flt_schedule2[:-1]
-    flt_end_dates2 = flt_schedule2[1:]
-    flt_pay_dates2 = flt_end_dates2
+    rec_start_dates = rec_schedule[:-1]
+    rec_end_dates = rec_schedule[1:]
+    rec_pay_dates = rec_end_dates
 
-    flt_reset_schedule2 = Schedule(
+    rec_reset_schedule = Schedule(
         start_day=spot_date, end_day=expiry, time_period=tenor, business_day_convention=rollConvFloat, calendar=calendar, ref_date=ref_date
     ).generate_dates(
         False
     )  # TODO NEEDS CHANGE
 
-    flt_reset_dates2 = flt_reset_schedule2[:-1]
-
-    ns = ConstNotionalStructure(100.0)
-    spread = 0.00
+    rec_reset_dates = rec_reset_schedule[:-1]
 
     # # definition of the floating leg
     receive_leg = IrFloatLegSpecification(
         obj_id=label + "_receive_leg",
         notional=ns,
-        reset_dates=flt_reset_dates2,
-        start_dates=flt_start_dates2,
-        end_dates=flt_end_dates2,
-        rate_start_dates=flt_start_dates2,
-        rate_end_dates=flt_end_dates2,
-        pay_dates=flt_pay_dates2,
+        reset_dates=rec_reset_dates,
+        start_dates=rec_start_dates,
+        end_dates=rec_end_dates,
+        rate_start_dates=rec_start_dates,
+        rate_end_dates=rec_end_dates,
+        pay_dates=rec_pay_dates,
         currency=currency,
         udl_id=underlyingIndex,
         fixing_id="test_fixing_id",
-        day_count_convention=rollConvFloat,
-        spread=spread,
+        day_count_convention=floatDayCount,
+        spread=0.0,
+    )
+
+    # -------------------------------
+    # The spread leg represents the fixed +x bps cashflows applied to the pay leg
+    # same payment frerq as short leg
+    spread_schedule = Schedule(
+        start_day=spot_date, end_day=expiry, time_period=fixPayFreqShort, business_day_convention=rollConvFix, calendar=calendar, ref_date=ref_date
+    ).generate_dates(False)
+
+    spread_start_dates = spread_schedule[:-1]
+    spread_end_dates = spread_schedule[1:]
+    spread_pay_dates = spread_end_dates
+
+    # # definition of the SPREAD leg - which represents the
+    spread_leg = IrFixedLegSpecification(
+        fixed_rate=spreadRate,
+        obj_id=label + "_spread_leg",
+        notional=1.0,
+        start_dates=spread_start_dates,
+        end_dates=spread_end_dates,
+        pay_dates=spread_pay_dates,
+        currency=currency,
+        day_count_convention=fixDayCount,
     )
 
     # # definition of the IR swap - assume fixed leg is the pay leg
-    ir_swap = InterestRateBasisSwapSpecification(
+    basis_swap = InterestRateBasisSwapSpecification(
         obj_id=label,
         notional=ns,
         issue_date=ref_date,
@@ -574,9 +581,9 @@ def make_basis_swap_spec(row: pd.DataFrame, ref_date: datetime, calendar: _Union
         receive_leg=receive_leg,
         spread_leg=spread_leg,
         currency=currency,
-        day_count_convention=rollConvFloat,
+        day_count_convention=floatDayCount,
         issuer="dummy_issuer",
         securitization_level="COLLATERALIZED",
     )
 
-    return ir_swap
+    return basis_swap
