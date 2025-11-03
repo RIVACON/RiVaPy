@@ -194,9 +194,9 @@ def bootstrap_curve(
 
             # -  DEBUG 11.2025
             # just before calling find_bracket for the failing end_date
-            print("INSIDE LOOP FOR BOOTSTRAP")
-            print("---- DEBUG START for end_date:", end_date, "quote(raw):", quote)
-            print("prev_df (guess):", prev_df)
+            # print("INSIDE LOOP FOR BOOTSTRAP")
+            # print("---- DEBUG START for end_date:", end_date, "quote(raw):", quote)
+            # print("prev_df (guess):", prev_df)
 
             # Evaluate error_fn at a few DF points (inside realistic DF support (1e-8, 1.0]))
             test_dfs = [max(1e-10, prev_df * 0.5), max(1e-10, prev_df * 0.9), min(0.9999999, prev_df * 1.0), min(0.9999999, prev_df * 1.1)]
@@ -221,10 +221,10 @@ def bootstrap_curve(
                     )
                 except Exception as e:
                     val = f"EXC:{e}"
-                print(f"error_fn({td:.12f}) = {val}")
+                # print(f"error_fn({td:.12f}) = {val}")
 
             # Also quickly check the sign/units of quote here:
-            print("Raw quote value (from market):", quote, "— are these bps? If so, convert: quote = quote*1e-4")
+            # print("Raw quote value (from market):", quote, "— are these bps? If so, convert: quote = quote*1e-4")
             # -
 
             lower, upper = find_bracket(error_fn, prev_df, ARGS)
@@ -233,10 +233,10 @@ def bootstrap_curve(
             logger.debug(f"Finding lower: {lower} and upper: {upper} bracket for root finding")
 
             # -  DEBUG 11.2025
-            print(
-                f"-----------------------------------------[BOOTSTRAP] Solving for DF of {end_date}, initial guess: {prev_df}, market quote: {quote}"
-            )
-            # -  DEBUG 11.2025
+            # print(
+            #     f"-----------------------------------------[BOOTSTRAP] Solving for DF of {end_date}, initial guess: {prev_df}, market quote: {quote}"
+            # )
+            # # -  DEBUG 11.2025
 
             solution, result = brentq(
                 error_fn,
@@ -258,7 +258,7 @@ def bootstrap_curve(
             )
 
             # -  DEBUG 11.2025
-            print(f"-----------------------------------------[BOOTSTRAP] Solved DF({end_date}) = {solution}")
+            # print(f"-----------------------------------------[BOOTSTRAP] Solved DF({end_date}) = {solution}")
 
         except Exception as e:
             raise Exception(f"Initial bootstrap failed at {end_date}: {str(e)}")
@@ -449,9 +449,8 @@ def error_fn(
     # print(f"using {df_val} -> calc_quote: {calc_quote} - ref_quote: {ref_quote} = {calc_quote - ref_quote}")
 
     # inside error_fn, after constructing yc and curves_copy and computing calc_quote
-    # calc_quote = get_quote(...)
     # compute model_residual = calc_quote - ref_quote or whichever sign convention you use
-    print(f"[DEBUG error_fn] df_val={df_val:.12f}, calc_quote={calc_quote}, ref_quote={ref_quote}, residual={calc_quote - ref_quote}")
+    # print(f"[DEBUG error_fn] df_val={df_val:.12f}, calc_quote={calc_quote}, ref_quote={ref_quote}, residual={calc_quote - ref_quote}")
     # optionally print underlying leg PVs (you can return them from compute_basis_spread or log inside).
 
     return calc_quote - ref_quote
