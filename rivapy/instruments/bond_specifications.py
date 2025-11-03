@@ -1,7 +1,4 @@
 import abc
-import calendar
-from turtle import fd
-from flask import logging
 import numpy as np
 from rivapy.instruments._logger import logger
 from rivapy.instruments.components import (
@@ -17,7 +14,7 @@ import rivapy.tools.interfaces as interfaces
 from scipy.optimize import brentq
 
 from collections import defaultdict
-from typing import Optional, Dict, Tuple, List as _List, Union as _Union, Optional as _Optional
+from typing import Dict, Tuple, List as _List, Union as _Union, Optional as _Optional
 from dateutil.relativedelta import relativedelta
 from rivapy.tools.enums import Currency, Rating, SecuritizationLevel, RollConvention, InterestRateIndex, get_index_by_alias
 from rivapy.tools.datetools import _date_to_datetime, Schedule, Period, DayCounterType, DayCounter, _string_to_period
@@ -111,9 +108,19 @@ class BondBaseSpecification(interfaces.FactoryObject):
     def set_amortization_scheme(self, amortization_scheme) -> AmortizationScheme:
         """Resolve an amortization scheme descriptor into an AmortizationScheme.
 
-        Accepts None, a string identifier, or an AmortizationScheme instance.
-        Returns a concrete AmortizationScheme object that will be used by the
-        notional handling logic.
+        Accepts one of:
+          - None: returns a ZeroAmortizationScheme
+          - str: resolves the identifier via AmortizationScheme._from_string
+          - AmortizationScheme instance: returned unchanged
+
+        Args:
+            amortization_scheme (None | str | AmortizationScheme): descriptor.
+
+        Returns:
+            AmortizationScheme: concrete amortization scheme object.
+
+        Raises:
+            ValueError: if the provided argument type is not supported.
         """
         if amortization_scheme is None:
             return ZeroAmortizationScheme()
@@ -128,9 +135,20 @@ class BondBaseSpecification(interfaces.FactoryObject):
         """Create or validate the notional structure for this instrument.
 
         The function accepts numeric notionals (int/float) and converts them to
-        a constant notional structure, or passes through already-constructed
-        NotionalStructure objects. The behaviour depends on the provided
-        amortization scheme.
+        a concrete NotionalStructure (constant, linear, or variable) depending
+        on the provided amortization scheme. If a NotionalStructure instance is
+        provided it is validated / passed through.
+
+        Args:
+            notional (NotionalStructure | int | float): notional or notional descriptor.
+            amortization_scheme (AmortizationScheme | None): resolved amortization scheme
+                that controls which notional structure is appropriate.
+
+        Returns:
+            NotionalStructure: instance representing the instrument notional.
+
+        Raises:
+            ValueError: when inputs cannot be converted into a valid notional structure.
         """
         if amortization_scheme is None:
             if isinstance(notional, _Union[int, float]):
@@ -170,6 +188,23 @@ class BondBaseSpecification(interfaces.FactoryObject):
     def _create_sample(
         n_samples: int, seed: int = None, ref_date=None, issuers: _List[str] = None, sec_levels: _List[str] = None, currencies: _List[str] = None
     ) -> _List[dict]:
+        """Create a small list of example bond specifications for testing.
+
+        This helper generates a list of dictionaries that mimic the kwargs used
+        to construct bond specifications. It is intended for internal testing
+        and examples only.
+
+        Args:
+            n_samples (int): Number of sample entries to generate.
+            seed (int, optional): RNG seed for reproducible samples.
+            ref_date (date | datetime, optional): Reference date for issue/maturity generation.
+            issuers (List[str], optional): Optional pool of issuer names to sample from.
+            sec_levels (List[str], optional): Optional securitization levels to sample from.
+            currencies (List[str], optional): Optional currencies to sample from.
+
+        Returns:
+            List[dict]: List of parameter dictionaries usable to create bond specs.
+        """
         if seed is not None:
             np.random.seed(seed)
         if ref_date is None:
@@ -357,7 +392,8 @@ class BondBaseSpecification(interfaces.FactoryObject):
 
     @business_day_convention.setter
     def business_day_convention(self, business_day_convention: _Union[RollConvention, str]):
-        self._business_day_convention = DayCounterType.to_string(business_day_convention)
+        # business_day_convention represents a RollConvention; normalize accordingly
+        self._business_day_convention = RollConvention.to_string(business_day_convention)
 
     @property
     def roll_convention(self) -> str:
@@ -425,9 +461,20 @@ class BondBaseSpecification(interfaces.FactoryObject):
 class DeterministicCashflowBondSpecification(BondBaseSpecification):
     """Specification for instruments that produce deterministic cashflows.
 
-    This class provides common scheduling, accrual and pricing-related fields
-    (frequency, coupon, day count convention, fixings, etc.) used by concrete
-    bond-like instrument types (fixed-rate, floating-rate, zero-coupon).
+    This class centralizes fields and behaviours common to instruments whose
+    cashflows can be determined deterministically from the specification
+    (for example fixed-rate bonds, floating-rate notes and zero-coupon bonds).
+
+    Responsibilities
+        - Hold instrument conventions (frequency, day-count, business-day rules).
+        - Manage notional / amortization schemes.
+        - Create and adjust accrual/payment schedules (via :class:`Schedule` / :func:`roll_day`).
+
+    Notes
+        - Subclasses typically call ``super().__init__(...)`` with their specific
+          defaults (coupon, margin, index, etc.).
+        - Dates are normalized to datetimes internally; callers can pass
+          ``datetime`` or ``date`` objects.
     """
 
     def __init__(
@@ -465,32 +512,45 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         adjust_schedule: bool = True,
         adjust_accruals: bool = True,
     ):
-        """Initializes the DeterministicCashflowBondSpecification object.
+        """Create a deterministic cashflow bond specification.
 
         Args:
             obj_id (str): Unique identifier for the object.
-            start_date (_Union[date, datetime]): Start date of the first accrual period.
-            end_date (_Union[date, datetime]): End of the last accrual period.
-            maturity_date (_Union[date, datetime]): Adjusted end date of the last accrual period. Is a good business day.
-            notional (float): Notional amount of the instrument.
-            coupon (float): Fixed coupon rate .
-            margin (float): Spread added to the floating rate coupon.
-            tenor (_Union[Period, str]): Tenor of the underlying floating index of the instrument.
-            frequency (_Union[Period, str]): Payment frequency of the instrument.
-            day_count_convention (_Union[DayCounterType, str], optional): Day count convention. Defaults to DayCounterType.ACT360.
-            business_day_convention (_Union[RollConvention, str], optional): Business day convention. Defaults to RollConvention.MODIFIED_FOLLOWING.
-            roll_convention (_Union[RollRule, str], optional): Roll convention. Defaults to RollRule.EOM.
-            calendar (_Union[_HolidayBase, str], optional): Holiday calendar. Defaults to _ECB().
-            payment_days (int, optional): Number of payment days that pass between accrual end or maturity to payment. Defaults to 0.
-            notional_exchange (bool, optional): Indicates if notional is exchanged at maturity. Defaults
-            pays_in_arrears (bool, optional): Indicates if the instrument pays in arrears. Defaults to True.
-            fwd_curve (_Optional[DiscountCurve], optional): Forward curve used for pricing. Defaults to None.
-            last_fixing (_Optional[float], optional): Last known fixing rate. Defaults to None.
-            fixings (_Optional[FixingTable], optional): Fixing table containing historical fixings. Defaults to None.
-            adjust_start_date (bool, optional): Whether to adjust the start date to a business day. Defaults to True.
-            adjust_end_date (bool, optional): Whether to adjust the end date to a business day. Defaults to True.
-            adjust_schedule (bool, optional): Whether to adjust the schedule dates to business days. Defaults to True.
-            adjust_accruals (bool, optional): Whether to adjust the accrual dates to business days. Defaults to True.
+            issue_date (date | datetime): Issue date for the instrument. Corresponds to the ``start date´´ of the first accrual period if ``adjust_start_date`` is False.
+            maturity_date (date | datetime): Maturity date for the instrument. Will be rolled to a business day acc. to business day convention.
+                The unrolled maturity date corresponds to the ``end date´´ of the last accrual period if ``adjust_end_date`` is False.
+            notional (NotionalStructure | float, optional): Notional or a notional structure. Defaults to 100.0.
+            frequency (Period | str, optional): Payment frequency (e.g. '1Y', '6M'). When None, frequency may be derived from an index.
+            issue_price (float, optional): Issue price for priced instruments. Defaults to None.
+            ir_index (InterestRateIndex | str, optional): Internal index reference (enum or alias).
+            index (InterestRateIndex | str, optional): External index alias used for fixings.
+            currency (Currency | str, optional): Currency code or enum. Defaults to 'EUR'.
+            notional_exchange (bool, optional): If True notional is exchanged at maturity. Defaults to True.
+            coupon (float, optional): Fixed coupon rate. Defaults to 0.0.
+            margin (float, optional): Floating leg spread (for floaters). Defaults to 0.0.
+            amortization_scheme (str | AmortizationScheme, optional): Amortization descriptor or object.
+            day_count_convention (DayCounterType | str, optional): Day count convention. Defaults to 'ACT360'.
+            business_day_convention (RollConvention | str, optional): Business-day adjustment rule. Defaults to 'ModifiedFollowing'.
+            roll_convention (RollRule | str, optional): Roll convention for schedule generation. Defaults to 'NONE'.
+            calendar (HolidayBase | str, optional): Holiday calendar used for adjustments. Defaults to ECB calendar.
+            coupon_type (str, optional): 'fix'|'float'|'zero'. Defaults to 'fix'.
+            payment_days (int, optional): Payment lag in days. Defaults to 0.
+            spot_days (int, optional): Spot settlement days. Defaults to 2.
+            pays_in_arrears (bool, optional): If True coupon is paid in arrears. Defaults to True.
+            issuer (Issuer | str, optional): Issuer identifier. Defaults to None.
+            rating (Rating | str, optional): Issuer or instrument rating. Defaults to 'NONE'.
+            securitization_level (SecuritizationLevel | str, optional): Securitization level. Defaults to 'NONE'.
+            backwards (bool, optional): Generate schedule backwards. Defaults to True.
+            stub_type_is_Long (bool, optional): Use long stub when generating schedule. Defaults to True.
+            last_fixing (float, optional): Last known fixing. Defaults to None.
+            fixings (FixingTable, optional): Fixing table for historical fixings. Defaults to None.
+            adjust_start_date (bool, optional): Adjust the start date to a business day acc. to business day convention. Defaults to True.
+            adjust_end_date (bool, optional): Adjust the end date to a business day acc. to business day convention. Defaults to False.
+            adjust_schedule (bool, optional): Adjust generated schedule dates to business days. Defaults to True.
+            adjust_accruals (bool, optional): Adjust schedule dates to business days. Defaults to True. if ``adjust_schedule`` is True also accrual dates are adjusted.
+
+        Raises:
+            ValueError: on invalid argument combinations or types (validated by :meth:`_validate`).
         """
         super().__init__(
             obj_id,
@@ -977,7 +1037,8 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
     def adjust_start_date(self, value: bool):
         self._adjust_start_date = value
         if not is_business_day(self._issue_date, self._calendar) and self._adjust_start_date:
-            self._start_date = roll_day(self._issuedate, calendar=self._calendar, business_day_convention=self._business_day_convention)
+            # fix typo: use _issue_date (datetime) not _issuedate
+            self._start_date = roll_day(self._issue_date, calendar=self._calendar, business_day_convention=self._business_day_convention)
 
     @property
     def adjust_end_date(self) -> bool:
@@ -1017,7 +1078,14 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
             raise ValueError("Calendar must be a HolidayBase or string.")
 
     def get_schedule(self) -> Schedule:
-        """Returns the schedule of the accrual periods of the instrument."""
+        """Return a configured :class:`Schedule` for the instrument.
+
+        The returned Schedule is constructed from the instrument's start/end
+        dates, frequency/tenor, stub and roll conventions and calendar.
+
+        Returns:
+            Schedule: schedule object configured for this instrument.
+        """
         return Schedule(
             start_day=self._start_date,
             end_day=self._end_date,
@@ -1030,7 +1098,15 @@ class DeterministicCashflowBondSpecification(BondBaseSpecification):
         )
 
     def get_nr_annual_payments(self) -> float:
-        """Returns the number of annual payments of the instrument."""
+        """Compute the (approximate) number of annual payments implied by frequency.
+
+        Returns:
+            float: number of payments per year implied by the frequency. If
+                frequency is not set 0.0 is returned.
+
+        Raises:
+            ValueError: if the frequency resolves to a non-positive period.
+        """
         if self._frequency is None:
             logger.warning("Frequency is not set. Returning 0.")
             return 0.0
@@ -1066,16 +1142,38 @@ class FixedRateBondSpecification(DeterministicCashflowBondSpecification):
         frequency: _Union[Period, str],
         amortization_scheme: _Optional[_Union[str, AmortizationScheme]] = None,
         business_day_convention: RollConvention = "ModifiedFollowing",
-        issuer: Optional[_Union[Issuer, str]] = None,
-        securitization_level: Optional[_Union[SecuritizationLevel, str]] = "NONE",
-        rating: Optional[_Union[Rating, str]] = "NONE",
+        issuer: _Optional[_Union[Issuer, str]] = None,
+        securitization_level: _Optional[_Union[SecuritizationLevel, str]] = "NONE",
+        rating: _Optional[_Union[Rating, str]] = "NONE",
         day_count_convention: _Union[DayCounterType, str] = "ActActICMA",
         spot_days: int = 2,
-        calendar: Optional[_Union[_HolidayBase, str]] = _ECB(),
+        calendar: _Optional[_Union[_HolidayBase, str]] = _ECB(),
         stub_type_is_Long: bool = True,
         adjust_start_date: bool = True,
         adjust_end_date: bool = False,
     ):
+        """Create a fixed-rate bond specification.
+
+        Args:
+            obj_id (str): Unique identifier for the bond.
+            notional (NotionalStructure | float): Notional or notional structure.
+            currency (Currency | str): Currency code or enum.
+            issue_date (date | datetime): Issue date of the bond.
+            maturity_date (date | datetime): Maturity date of the bond.
+            coupon (float): Fixed coupon rate (decimal, e.g. 0.03 for 3%).
+            frequency (Period | str): Payment frequency (tenor) for coupons.
+            amortization_scheme (str | AmortizationScheme, optional): Amortization descriptor or object.
+            business_day_convention (RollConvention | str, optional): Business day convention used for schedule adjustments.
+            issuer (Issuer | str, optional): Issuer identifier.
+            securitization_level (SecuritizationLevel | str, optional): Securitization level.
+            rating (Rating | str, optional): Instrument rating.
+            day_count_convention (DayCounterType | str, optional): Day count convention for accruals.
+            spot_days (int, optional): Spot settlement days. Defaults to 2.
+            calendar (HolidayBase | str, optional): Calendar used for business-day adjustments.
+            stub_type_is_Long (bool, optional): Use long stub when generating schedule. Defaults to True.
+            adjust_start_date (bool, optional): Adjust start date to business day. Defaults to True.
+            adjust_end_date (bool, optional): Adjust end date to business day. Defaults to False.
+        """
         super().__init__(
             obj_id=obj_id,
             spot_days=spot_days,
@@ -1095,10 +1193,21 @@ class FixedRateBondSpecification(DeterministicCashflowBondSpecification):
             rating=rating,
             securitization_level=securitization_level,
             calendar=calendar,
+            adjust_start_date=adjust_start_date,
+            adjust_end_date=adjust_end_date,
         )
 
     @staticmethod
     def _create_sample(n_samples: int, seed: int = None):
+        """Return a list of example FixedRateBondSpecification instances.
+
+        Args:
+            n_samples (int): Number of sample instances to create.
+            seed (int, optional): RNG seed for reproducibility.
+
+        Returns:
+            List[FixedRateBondSpecification]: Example fixed-rate bonds.
+        """
         result = []
         if seed is not None:
             np.random.seed(seed)
@@ -1128,6 +1237,11 @@ class FixedRateBondSpecification(DeterministicCashflowBondSpecification):
         return result
 
     def _to_dict(self) -> Dict:
+        """Serialize the fixed-rate bond specification to a dictionary.
+
+        Returns:
+            Dict: JSON-serializable representation of the specification.
+        """
         dict = {
             "obj_id": self.obj_id,
             "issuer": self._issuer,
@@ -1165,14 +1279,32 @@ class ZeroBondSpecification(DeterministicCashflowBondSpecification):
         maturity_date: _Union[date, datetime],
         amortization_scheme: _Optional[_Union[str, AmortizationScheme]] = None,
         issue_price: float = 100.0,
-        calendar: Optional[_Union[_HolidayBase, str]] = _ECB(),
+        calendar: _Optional[_Union[_HolidayBase, str]] = _ECB(),
         business_day_convention: RollConvention = "ModifiedFollowing",
-        issuer: Optional[_Union[Issuer, str]] = None,
-        securitization_level: Optional[_Union[SecuritizationLevel, str]] = "NONE",
-        rating: Optional[_Union[Rating, str]] = "NONE",
+        issuer: _Optional[_Union[Issuer, str]] = None,
+        securitization_level: _Optional[_Union[SecuritizationLevel, str]] = "NONE",
+        rating: _Optional[_Union[Rating, str]] = "NONE",
         adjust_start_date: bool = True,
         adjust_end_date: bool = True,
     ):
+        """Create a zero-coupon bond specification.
+
+        Args:
+            obj_id (str): Unique identifier for the bond.
+            notional (float): Notional amount.
+            currency (Currency | str): Currency code or enum.
+            issue_date (date | datetime): Issue date.
+            maturity_date (date | datetime): Maturity date.
+            amortization_scheme (str | AmortizationScheme, optional): Amortization descriptor or object.
+            issue_price (float, optional): Issue price. Defaults to 100.0.
+            calendar (HolidayBase | str, optional): Holiday calendar used for adjustments.
+            business_day_convention (RollConvention | str, optional): Business-day adjustment convention.
+            issuer (Issuer | str, optional): Issuer id.
+            securitization_level (SecuritizationLevel | str, optional): Securitization level.
+            rating (Rating | str, optional): Instrument rating.
+            adjust_start_date (bool, optional): Adjust start date to business day. Defaults to True.
+            adjust_end_date (bool, optional): Adjust end date to business day. Defaults to True.
+        """
         if not is_business_day(maturity_date, calendar):
             maturity_date = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
         super().__init__(
@@ -1195,6 +1327,15 @@ class ZeroBondSpecification(DeterministicCashflowBondSpecification):
 
     @staticmethod
     def _create_sample(n_samples: int, seed: int = None):
+        """Return a list of example ZeroBondSpecification instances.
+
+        Args:
+            n_samples (int): Number of sample instances to create.
+            seed (int, optional): RNG seed for reproducibility.
+
+        Returns:
+            List[ZeroBondSpecification]: Example zero-coupon bonds.
+        """
         result = []
         if seed is not None:
             np.random.seed(seed)
@@ -1220,6 +1361,11 @@ class ZeroBondSpecification(DeterministicCashflowBondSpecification):
         return result
 
     def _to_dict(self) -> Dict:
+        """Serialize the zero-coupon bond specification to a dictionary.
+
+        Returns:
+            Dict: JSON-serializable representation of the specification.
+        """
         dict = {
             "obj_id": self.obj_id,
             "issuer": self._issuer,
@@ -1252,23 +1398,56 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
         issue_date: _Union[date, datetime],
         maturity_date: _Union[date, datetime],
         margin: float,
-        frequency: Optional[_Union[Period, str]] = None,
+        frequency: _Optional[_Union[Period, str]] = None,
         amortization_scheme: _Optional[_Union[str, AmortizationScheme]] = None,
-        index: Optional[_Union[InterestRateIndex, str]] = None,
-        business_day_convention: Optional[RollConvention] = None,
-        day_count_convention: Optional[DayCounterType] = None,
-        issuer: Optional[_Union[Issuer, str]] = None,
-        securitization_level: Optional[_Union[SecuritizationLevel, str]] = "NONE",
-        rating: Optional[_Union[Rating, str]] = "NONE",
-        fixings: Optional[FixingTable] = None,
+        index: _Optional[_Union[InterestRateIndex, str]] = None,
+        business_day_convention: _Optional[RollConvention] = None,
+        day_count_convention: _Optional[DayCounterType] = None,
+        issuer: _Optional[_Union[Issuer, str]] = None,
+        securitization_level: _Optional[_Union[SecuritizationLevel, str]] = "NONE",
+        rating: _Optional[_Union[Rating, str]] = "NONE",
+        fixings: _Optional[FixingTable] = None,
         spot_days: int = 2,
-        calendar: Optional[_Union[_HolidayBase, str]] = None,
+        calendar: _Optional[_Union[_HolidayBase, str]] = None,
         stub_type_is_Long: bool = True,
         adjust_start_date: bool = True,
         adjust_end_date: bool = False,
         adjust_schedule: bool = False,
         adjust_accruals: bool = True,
     ):
+        """Create a floating-rate bond specification.
+
+        Either ``index`` or ``frequency`` must be provided. If ``index`` is
+        supplied and contains convention information, frequency, calendar and
+        day-count are inferred from it unless explicitly overridden.
+
+        Args:
+            obj_id (str): Unique identifier for the bond.
+            notional (NotionalStructure | float): Notional or notional structure.
+            currency (Currency | str): Currency code or enum.
+            issue_date (date | datetime): Issue date.
+            maturity_date (date | datetime): Maturity date.
+            margin (float): Spread added to the floating index (decimal).
+            frequency (Period | str, optional): Payment frequency. May be inferred from index.
+            amortization_scheme (str | AmortizationScheme, optional): Amortization descriptor or object.
+            index (InterestRateIndex | str, optional): Index alias or enum used for fixings.
+            business_day_convention (RollConvention | str, optional): Business day convention.
+            day_count_convention (DayCounterType | str, optional): Day count convention.
+            issuer (Issuer | str, optional): Issuer identifier.
+            securitization_level (SecuritizationLevel | str, optional): Securitization level.
+            rating (Rating | str, optional): Instrument rating.
+            fixings (FixingTable, optional): Fixing table for historical fixings.
+            spot_days (int, optional): Spot settlement days. Defaults to 2.
+            calendar (HolidayBase | str, optional): Holiday calendar. May be inferred from index.
+            stub_type_is_Long (bool, optional): Use long stub when generating schedule. Defaults to True.
+            adjust_start_date (bool, optional): Adjust start date to business day. Defaults to True.
+            adjust_end_date (bool, optional): Adjust end date to business day. Defaults to False.
+            adjust_schedule (bool, optional): Adjust schedule dates to business days. Defaults to False.
+            adjust_accruals (bool, optional): Adjust accrual dates to business days. Defaults to True.
+
+        Raises:
+            ValueError: If neither index nor frequency is provided.
+        """
 
         if index is None and frequency is None:
             raise ValueError("Either index or frequency must be provided for a floating rate bond.")
@@ -1329,6 +1508,15 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
 
     @staticmethod
     def _create_sample(n_samples: int, seed: int = None):
+        """Return a list of example FloatingRateBondSpecification instances.
+
+        Args:
+            n_samples (int): Number of sample instances to create.
+            seed (int, optional): RNG seed for reproducibility.
+
+        Returns:
+            List[FloatingRateBondSpecification]: Example floating-rate bonds.
+        """
         result = []
         if seed is not None:
             np.random.seed(seed)
@@ -1360,6 +1548,11 @@ class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
         return result
 
     def _to_dict(self) -> Dict:
+        """Serialize the floating-rate bond specification to a dictionary.
+
+        Returns:
+            Dict: JSON-serializable representation of the specification.
+        """
         dict = {
             "obj_id": self.obj_id,
             "issuer": self._issuer,

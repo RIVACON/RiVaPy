@@ -187,7 +187,9 @@ class DeterministicCashflowPricer:
             business_day_convention=specification._business_day_convention,
             calendar=specification._calendar,
         )
-        if fixing_date <= curve.refdate:
+        refdate = getattr(curve, "refdate", None) if curve is not None else None
+        # guard against calc_start_day returning None (invalid inputs) or refdate being None
+        if fixing_date is not None and refdate is not None and fixing_date <= refdate:
             try:
                 print(specification._ir_index)
                 fix_name = (
@@ -258,6 +260,18 @@ class DeterministicCashflowPricer:
                 rate = DeterministicCashflowPricer.get_float_rate(specification, trade_date, last_coupon_date, next_coupon_date, fwd_curve)
             else:
                 rate = specification._coupon
+            print(
+                "Fraction: ",
+                accrual_fraction,
+                " YF: ",
+                yf,
+                "Trade date: ",
+                trade_date,
+                " Last coupon: ",
+                last_coupon_date,
+                " Next coupon: ",
+                next_coupon_date,
+            )
             accrued_interest = specification._notional.get_amount_per_date(trade_date) * rate * accrual_fraction * yf
             return accrued_interest
 

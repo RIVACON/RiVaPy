@@ -11,7 +11,7 @@ from rivapy.instruments.bond_specifications import DeterministicCashflowBondSpec
 from datetime import datetime, date, timedelta
 from rivapy.tools.holidays_compat import HolidayBase as _HolidayBase, ECB as _ECB
 from dateutil.relativedelta import relativedelta
-from rivapy.instruments.components import Issuer
+from rivapy.instruments.components import Issuer, NotionalStructure
 
 from rivapy.tools.datetools import (
     Period,
@@ -40,7 +40,7 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
         issue_date: _Optional[_Union[date, datetime]] = None,
         maturity_date: _Optional[_Union[date, datetime]] = None,
         currency: _Union[Currency, str] = "EUR",
-        notional: float = 100.0,
+        notional: _Union[NotionalStructure, float] = 100.0,
         rate: float = 0.00,
         term: _Optional[_Union[Period, str]] = None,
         day_count_convention: _Union[DayCounterType, str] = "ACT360",
@@ -63,13 +63,15 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
 
         Args:
             obj_id (str): Identifier for the deposit (e.g. ISIN or internal id).
-            issue_date (date | datetime, optional): Fixing/start date of the deposit. Required
+            issue_date (date | datetime, optional): Fixing date and start date (of accrual period) of the deposit
+                is calculated based on the provided issue date given :pyarg:`spot_days` and :pyarg:`adjust_start_date`. Required
                 if :pyarg:`maturity_date` is computed from :pyarg:`term`.
             maturity_date (date | datetime, optional): Maturity date. If ``None`` and
                 :pyarg:`term` is provided, the maturity will be derived from
-                :pyarg:`issue_date` and :pyarg:`term`.
+                :pyarg:`issue_date` and :pyarg:`term`. Corresponds to end date (of accrual period). If non business day, always adjusted according to
+                :pyarg:`business_day_convention` while end date adjustment is controlled by :pyarg:`adjust_end_date`.
             currency (Currency | str, optional): Currency code or enum. Defaults to "EUR".
-            notional (float, optional): Face value; must be positive. Defaults to 100.0.
+            notional (NotionalStructure | float, optional): Face value; maybe passed as float or notional structure, amount must be positive. Defaults to 100.0.
             rate (float, optional): Fixed deposit rate (coupon). Defaults to 0.0.
             term (Period | str, optional): Tenor of the deposit (e.g. "3M", "1Y", "O/N", "T/N").
             day_count_convention (DayCounterType | str, optional): Day count convention.
@@ -86,10 +88,9 @@ class DepositSpecification(DeterministicCashflowBondSpecification):
                 Defaults to :pydata:`SecuritizationLevel.NONE`.
             payment_days (int, optional): Days after maturity when payment occurs. Defaults to 0.
             adjust_start_date (bool, optional): If True, roll :pyarg:`issue_date` forward to a
-                business day when required. The adjusted date will be used for calculations. Defaults to True.
+                business day when required, to ensure accrual starts on a business day. The adjusted date will be used for calculations. Defaults to True.
             adjust_end_date (bool, optional): If True, roll :pyarg:`maturity_date` forward to a
-                business day when required. The adjusted date will be used for calculations. Defaults to False.
-            index (InterestRateIndex | str, optional): Optional reference index.
+                business day when required, to ensure accrual ends on a business day. The adjusted date will be used for calculations. Defaults to False.
 
         Raises:
             ValueError: If neither :pyarg:`maturity_date` nor :pyarg:`term` is provided, or if
