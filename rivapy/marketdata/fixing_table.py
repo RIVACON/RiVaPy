@@ -10,9 +10,7 @@ import bisect
 
 # Class
 class FixingTable:
-    """Contains all the past fixings of an instrument.
-    refactored by Hans Nguyen from Christan Menn (c++)
-    """
+    """Container for historical fixings."""
 
     def __init__(self, id: str = None, fixings: Dict[str, Tuple[_List[datetime], _List[float]]] = None):
         # id: Optional[str] = None,
