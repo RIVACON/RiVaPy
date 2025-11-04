@@ -1384,7 +1384,7 @@ class TestAutomaticInstrumentCreation(unittest.TestCase):
     def setUp(self):
         """Setup input file"""
         # set directory and file name for Input Quotes
-        dirName = "./notebooks/marketdata"  # "./"
+        dirName = "./sample_data"  # "./"
         fileName = "/inputQuotes_includeFRAs.csv"  # "/inputQuotes.csv"
         # fileName = "/multi_dates_tbs.csv"  # "/inputQuotes.csv"
 
@@ -2180,7 +2180,7 @@ class TestBSBootstrap(unittest.TestCase):
     def setUp(self):
         """Set up input file"""
         # set directory and file name for Input Quotes
-        dirName = "./notebooks/marketdata"  # "./"
+        dirName = "./sample_data"  # "./"
         fileName = "/multi_dates_tbs.csv"  # "/inputQuotes.csv"
 
         df = pd.read_csv(dirName + fileName, sep=";", decimal=",")
@@ -2630,7 +2630,7 @@ class TestReferenceDateDependance(unittest.TestCase):
     def setUp(self):
         """Set up input file"""
         # set directory and file name for Input Quotes
-        dirName = "./notebooks/marketdata"  # "./"
+        dirName = "./sample_data"  # "./"
         fileName = "/multi_dates.csv"  # "/inputQuotes.csv"
 
         df = pd.read_csv(dirName + fileName, sep=";", decimal=",")
