@@ -21,4 +21,4 @@
         "editor.defaultFormatter": "ms-python.black-formatter"
     },
     "black-formatter.args": ["--line-length", "150"]
-}
+} 
