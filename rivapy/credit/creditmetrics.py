@@ -312,6 +312,6 @@ class CreditMetricsModel:
             Float: Expected shorfall of porfolio.
         """
 
-        expectedShortfall = -1.0 * np.mean(loss_distribution[loss_distribution < np.percentile(loss_distribution, self.confidencelevel)])
+        expectedShortfall = -1.0 * np.mean(loss_distribution[loss_distribution <= np.percentile(loss_distribution, self.confidencelevel)])
 
         return expectedShortfall

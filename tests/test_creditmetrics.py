@@ -8,7 +8,7 @@ from rivapy.instruments.components import Issuer
 class TestCreditMetricsModel(unittest.TestCase):
     def setUp(self):
         # Minimal Testdaten
-        self.n_simulation = 10
+        self.n_simulation = 100
         self.transition_matrix = (
             np.matrix(
                 """
@@ -37,7 +37,7 @@ class TestCreditMetricsModel(unittest.TestCase):
         )
         self.r = 0.01
         self.t = 1
-        self.confidencelevel = 95
+        self.confidencelevel = 5
         self.seed = 42
 
         self.model = CreditMetricsModel(
@@ -101,7 +101,7 @@ class TestCreditMetricsModel(unittest.TestCase):
         Loss, _, _, _ = self.model.mc_calculation()
         loss_distribution = self.model.get_loss_distribution(Loss)
         expected = np.sort(loss_distribution)
-        expected = (-1) * np.interp((100 - self.confidencelevel) / 100, np.linspace(0, 1, len(expected)), expected)
+        expected = (-1) * np.interp((self.confidencelevel) / 100, np.linspace(0, 1, len(expected)), expected)
         var = self.model.get_portfolio_VaR(loss_distribution)
         self.assertIsInstance(var, float)
         self.assertAlmostEqual(var, expected, places=5)
@@ -110,7 +110,7 @@ class TestCreditMetricsModel(unittest.TestCase):
         Loss, _, _, _ = self.model.mc_calculation()
         loss_distribution = self.model.get_loss_distribution(Loss)
         # Compute expected shortfall the same way as the model
-        expected = -1.0 * np.mean(loss_distribution[loss_distribution < np.percentile(loss_distribution, self.confidencelevel)])
+        expected = -1.0 * np.mean(loss_distribution[loss_distribution <= np.percentile(loss_distribution, self.confidencelevel)])
         es = self.model.get_portfolio_ES(loss_distribution)
         self.assertIsInstance(es, float)
         self.assertAlmostEqual(es, expected, places=5)
