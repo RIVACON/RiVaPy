@@ -1,0 +1,843 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Credit Metrics &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=d2ebc91c" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.svg"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Notebook Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../search.html">Search Page</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Credit Metrics</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/credit/credit_metrics.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Credit-Metrics">
+<h1>Credit Metrics<a class="headerlink" href="#Credit-Metrics" title="Link to this heading"></a></h1>
+<section id="CreditMetrics-—-overview-and-scope">
+<h2>CreditMetrics — overview and scope<a class="headerlink" href="#CreditMetrics-—-overview-and-scope" title="Link to this heading"></a></h2>
+<p>This notebook implements a CreditMetrics-style credit migration model (originally developed by J.P. Morgan). Note: CreditMetrics (credit migration and valuation changes due to rating transitions) is a distinct concept from RiskMetrics / MSCI RiskMetrics (market risk and volatility modelling). Avoid mixing both names.</p>
+<p>Model summary</p>
+<ul class="simple">
+<li><p>Goal: quantify portfolio value changes driven by credit rating migrations and defaults over a fixed horizon T (e.g. 1 year).</p></li>
+<li><p>Inputs:</p>
+<ul>
+<li><p>Transition matrix (N x N): probabilities to move from initial rating i to target rating j over horizon T.</p></li>
+<li><p>Positions: exposures and recovery rates per instrument (grouped by issuer).</p></li>
+<li><p>Issuer metadata: id, name, rating, country, (used to map index correlations).</p></li>
+<li><p>Historical price series: indices and issuer equity proxies used to estimate correlations.</p></li>
+<li><p>Parameters: risk-free rate r, horizon t, number of simulations n_sim, random seed, confidence level for VaR/ES.</p></li>
+</ul>
+</li>
+<li><p>Key steps:</p>
+<ol class="arabic simple">
+<li><p>Convert transition probabilities to thresholds: for each initial rating compute cumulative target probs and apply norm.ppf to get cutoffs.</p></li>
+<li><p>Estimate correlations between issuers and reference indices from historical returns.</p></li>
+<li><p>Generate correlated normal factors via Cholesky: for each simulation draw index factors Y and issuer idiosyncratic Z. Asset score: r_k = rho * Y + sqrt(1 - rho^2) * Z_k.</p></li>
+<li><p>Map simulated score r_k against cutoffs to determine target rating and resulting present value V_t for that rating.</p></li>
+<li><p>Compute loss per scenario and issuer: Loss = V_t - ExpectedValue (EV). Aggregate to portfolio loss distribution.</p></li>
+<li><p>Compute portfolio VaR and ES at the given confidence level.</p></li>
+</ol>
+</li>
+</ul>
+<p>References</p>
+<ul class="simple">
+<li><p>J.P. Morgan, “CreditMetrics — A Credit Risk Measurement Framework” (1997)</p></li>
+</ul>
+</section>
+<section id="Introduction">
+<h2>Introduction<a class="headerlink" href="#Introduction" title="Link to this heading"></a></h2>
+<p>CreditMetrics was developed by J.P Morgan in 1997 and is used as a tool for accessing portfolio risk due to changes in debt value caused by changes in credit quality. CreditMetrics is a framework that enables business owners to quantify the impact of credit risk on the value of their portfolios and assess risk.</p>
+<section id="Approach">
+<h3>Approach<a class="headerlink" href="#Approach" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Identify the credit-sensitive instruments in the portfolio. These are instruments whose value depends on the creditworthiness of a counterparty or debtor. Examples of credit-sensitive instruments are loans, bonds, credit default swaps and other derivatives.</p></li>
+<li><p>Assign a credit rating to each counterparty or obligor. A credit rating is a measure of the probability of default or downgrade of a counterparty or obligor, based on historical data and expert judgement. Credit ratings are usually expressed in letter grades such as AAA, AA, A, BBB, BB, B, CCC, CC, C and D. The lower the rating, the higher the probability of default. The lower the rating, the higher the risk of default or downgrade.</p></li>
+<li><p>Estimate the transition matrix and recovery rate for each rating category. A transition matrix is a table that shows the probability of a counterparty or obligor moving from one rating category to another over a given time horizon, such as one year. A recovery rate is the percentage of an instrument’s face value that can be recovered in the event of a default or downgrade. For example, if a bond with a nominal value of USD 100 defaults and the bondholder recovers USD 40, the recovery rate is
+40%.</p></li>
+<li><p>Simulate the future credit ratings and values of the credit-sensitive instruments in the portfolio. Using the transition matrix and recovery rate, CreditMetrics can create scenarios of possible future credit ratings and values of the credit-sensitive instruments in the portfolio, taking into account the correlations between them. Correlations are measures of how the credit quality of different counterparties or debtors tends to develop together. For example, if two counterparties or obligors
+are in the same industry or region, there may be a positive correlation, meaning that their credit quality tends to improve or deteriorate together.</p></li>
+<li><p>Calculate the credit value at risk (CVaR) and the credit value distribution of the portfolio. CVaR is a measure of the potential loss in value of the portfolio due to credit risk over a given time horizon and confidence level. For example, a CVaR of USD 10 million at a 95% confidence level over one year means that there is a 5% probability that the portfolio will lose more than USD 10 million in value over one year due to credit risk. The credit value distribution is a chart that shows the
+probability of different losses or gains in the value of the portfolio due to credit risk.</p></li>
+<li><p>Analyse the sources and drivers of credit risk in the portfolio. CreditMetrics can provide various reports and statistics to help business owners understand the sources and drivers of credit risk in their portfolio, such as the contribution of each instrument, counterparty or rating category to CVaR and credit value distribution, as well as the sensitivity of portfolio value to changes in credit ratings, recovery rates or correlations, and the diversification benefits of adding or removing
+instruments or counterparties from the portfolio.</p></li>
+<li><p>Implement strategies to mitigate or hedge credit risk in the portfolio. Based on the credit risk analysis, entrepreneurs can implement strategies to mitigate or hedge the credit risk in their portfolio, such as adjusting the portfolio composition, diversifying the portfolio across different instruments, counterparties or rating categories, transferring the credit risk to third parties, e.g. insurers or guarantors, or using credit derivatives such as credit default swaps to hedge against
+certain credit events.</p></li>
+</ol>
+</section>
+<section id="Assumptions">
+<h3>Assumptions<a class="headerlink" href="#Assumptions" title="Link to this heading"></a></h3>
+<section id="Distribution-of-credit-ratings-and-assets:">
+<h4>Distribution of credit ratings and assets:<a class="headerlink" href="#Distribution-of-credit-ratings-and-assets:" title="Link to this heading"></a></h4>
+<p>CreditMetrics assumes that the portfolio’s credit ratings and assets follow a normal distribution (or lognormal distribution), which means that extreme events are rare and symmetric. In reality, however, credit ratings and assets can exhibit fat tails, skewness and correlation, meaning that extreme events are more likely and asymmetric. During the 2008 financial crisis, for example, many assets experienced significant downgrades and losses that were not captured by the normal distribution. To
+address this limitation, CreditMetrics can be modified to use alternative distributions that better reflect the empirical characteristics of credit risk, such as the Student-T distribution or the skewed normal distribution.</p>
+</section>
+<section id="Transition-matrix-and-the-recovery-rate:">
+<h4>Transition matrix and the recovery rate:<a class="headerlink" href="#Transition-matrix-and-the-recovery-rate:" title="Link to this heading"></a></h4>
+<p>CreditMetrics uses a transition matrix to estimate the probability that an asset will move from one credit rating to another over a given time horizon. In addition, a recovery rate is used to estimate the percentage of the asset that can be recovered in the event of default. However, these parameters are not constant and can vary depending on the economic cycle, sector and issuer. For example, during a recession, the transition matrix may show a higher probability of downgrades and defaults and
+the recovery rate may be below average. To address this limitation, CreditMetrics can be modified to use dynamic transition matrices and recovery rates that reflect current and expected market conditions, such as macroeconomic factors, industry outlook and issuer-specific information.</p>
+</section>
+</section>
+</section>
+<section id="Implementation-approach">
+<h2>Implementation approach<a class="headerlink" href="#Implementation-approach" title="Link to this heading"></a></h2>
+<p>The process of asset value changes of the company determines its creditworthiness and defaults</p>
+<ul>
+<li><p>The model links asset value changes to credit rating changes and explains how the firm value-based model is parameterised</p></li>
+<li><p>The value of a company’s assets determines its ability to pay its debtors</p></li>
+<li><p>We assume that there are a number of tiers to the asset value that determine a company’s credit rating at the end of the period</p></li>
+<li><p>The percentage changes in asset value are normally distributed and parameterised by a mean <span class="math notranslate nohighlight">\(\mu\)</span> and a standard deviation <span class="math notranslate nohighlight">\(/delta\)</span> (not the volatility of the value of a credit instrument - the volatility of the return on assets for a given name)</p></li>
+<li><p>There are threshold values for the return on assets <span class="math notranslate nohighlight">\(𝑍_{𝐷EF}\)</span>, <span class="math notranslate nohighlight">\(𝑍_{𝐶𝐶𝐶}\)</span>, <span class="math notranslate nohighlight">\(𝑍_{𝐵𝐵𝐵}\)</span>, etc., so that if <span class="math notranslate nohighlight">\(𝑟_𝑘 &lt; 𝑍𝐷𝑒𝑓\)</span>, then the debitor defaults, if <span class="math notranslate nohighlight">\(𝑍_{𝐷EF}&lt;\)</span>𝑟_𝑘&lt;𝑍_{𝐶𝐶𝐶}$, then the debitor is downgraded to CCC</p></li>
+<li><p>Modelling the return on an asset:</p>
+<div class="math notranslate nohighlight">
+\[r_k=pY+\sqrt{1-p^2}Z_k\]</div>
+</li>
+</ul>
+<p><img alt="alt text" src="../../_images/CreditMetrics.png" /></p>
+</section>
+<section id="Basic-Assumptions">
+<h2>Basic Assumptions<a class="headerlink" href="#Basic-Assumptions" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Number N of creditworthiness classes (or rating classes)</p></li>
+<li><p>Bond prices are constant within a rating class</p></li>
+<li><p>Loss is quantified by a change in credit rating for the period T1=1 (e.g. one year)</p></li>
+<li><p>Losses result exclusively from changes in creditworthiness - losses due to changes in market prices are not considered</p></li>
+</ul>
+</section>
+<section id="Import-Librarieres-für-RiVaPy-Test">
+<h2>Import Librarieres für RiVaPy Test<a class="headerlink" href="#Import-Librarieres-für-RiVaPy-Test" title="Link to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Cell 1 - Imports and helpers</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;../../../..&#39;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">yfinance</span> <span class="k">as</span> <span class="nn">yf</span>
+<span class="kn">import</span> <span class="nn">plotly.express</span> <span class="k">as</span> <span class="nn">px</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">rivapy</span>
+<span class="c1"># from rivapy.instruments.components import Issuer</span>
+<span class="c1"># from rivapy.credit.creditmetrics import CreditMetricsModel</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">&quot;display.width&quot;</span><span class="p">,</span> <span class="mi">160</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">&quot;display.max_columns&quot;</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+c:\Users\Anwender\source\repos\RiVaPy\docs\source\notebooks\credit\../../../..\rivapy\__init__.py:13: UserWarning: The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.
+  warnings.warn(&#34;The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.&#34;)
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">formatter</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;float&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">{: 0.5f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Required-test-data">
+<h2>Required test data<a class="headerlink" href="#Required-test-data" title="Link to this heading"></a></h2>
+<section id="Transition-matrix">
+<h3>Transition matrix<a class="headerlink" href="#Transition-matrix" title="Link to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># User inputs</span>
+<span class="n">TransMat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">90.81, 8.33, 0.68, 0.06, 0.08, 0.02, 0.01, 0.01;</span>
+<span class="s2">0.70, 90.65, 7.79, 0.64, 0.06, 0.13, 0.02, 0.01;</span>
+<span class="s2">0.09, 2.27, 91.05, 5.52, 0.74, 0.26, 0.01, 0.06;</span>
+<span class="s2">0.02, 0.33, 5.95, 85.93, 5.30, 1.17, 1.12, 0.18;</span>
+<span class="s2">0.03, 0.14, 0.67, 7.73, 80.53, 8.84, 1.00, 1.06;</span>
+<span class="s2">0.01, 0.11, 0.24, 0.43, 6.48, 83.46, 4.07, 5.20;</span>
+<span class="s2">0.21, 0, 0.22, 1.30, 2.38, 11.24, 64.86, 19.79&quot;&quot;&quot;</span><span class="p">)</span><span class="o">/</span><span class="mi">100</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Download-market-data-from-Yahoo-Finance-(indices-+-5-issuers)">
+<h3>Download market data from Yahoo Finance (indices + 5 issuers)<a class="headerlink" href="#Download-market-data-from-Yahoo-Finance-(indices-+-5-issuers)" title="Link to this heading"></a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="s2">&quot;2015-01-01&quot;</span>
+<span class="n">end</span> <span class="o">=</span> <span class="s2">&quot;2025-10-31&quot;</span>  <span class="c1"># current date in your environment</span>
+
+<span class="n">tickers</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;^GDAXI&quot;</span><span class="p">,</span>  <span class="c1"># DAX</span>
+    <span class="s2">&quot;^GSPC&quot;</span><span class="p">,</span>   <span class="c1"># S&amp;P500</span>
+    <span class="s2">&quot;^FCHI&quot;</span><span class="p">,</span>   <span class="c1"># CAC40</span>
+    <span class="s2">&quot;VOW3.DE&quot;</span><span class="p">,</span> <span class="c1"># Volkswagen (DE)</span>
+    <span class="s2">&quot;BAS.DE&quot;</span><span class="p">,</span>  <span class="c1"># BASF (DE)</span>
+    <span class="s2">&quot;GM&quot;</span><span class="p">,</span>      <span class="c1"># General Motors (US)</span>
+    <span class="s2">&quot;AAPL&quot;</span><span class="p">,</span>    <span class="c1"># Apple (US)</span>
+    <span class="s2">&quot;BNP.PA&quot;</span>   <span class="c1"># BNP Paribas (FR)</span>
+<span class="p">]</span>
+
+<span class="c1"># download closing prices and merge on Date</span>
+<span class="n">df_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">tk</span> <span class="ow">in</span> <span class="n">tickers</span><span class="p">:</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">yf</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="n">tk</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)[[</span><span class="s2">&quot;Close&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Close&quot;</span><span class="p">:</span> <span class="n">tk</span><span class="p">})</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="n">df_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+<span class="c1"># merge sequentially on Date</span>
+<span class="n">df_merged</span> <span class="o">=</span> <span class="n">df_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">df_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+    <span class="n">df_merged</span> <span class="o">=</span> <span class="n">df_merged</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;Date&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;outer&quot;</span><span class="p">)</span>
+
+<span class="c1"># rename columns to friendly short names</span>
+<span class="n">rename_map</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;^GDAXI&quot;</span><span class="p">:</span> <span class="s2">&quot;DAX&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;^GSPC&quot;</span><span class="p">:</span> <span class="s2">&quot;SP&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;^FCHI&quot;</span><span class="p">:</span> <span class="s2">&quot;CAC&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;VOW3.DE&quot;</span><span class="p">:</span> <span class="s2">&quot;VW&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;BAS.DE&quot;</span><span class="p">:</span> <span class="s2">&quot;BASF&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;GM&quot;</span><span class="p">:</span> <span class="s2">&quot;GM&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AAPL&quot;</span><span class="p">:</span> <span class="s2">&quot;Apple&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;BNP.PA&quot;</span><span class="p">:</span> <span class="s2">&quot;BNP&quot;</span>
+<span class="p">}</span>
+<span class="n">df_merged</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">rename_map</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">df_merged</span> <span class="o">=</span> <span class="n">df_merged</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;Date&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">df_merged</span> <span class="o">=</span> <span class="n">df_merged</span><span class="o">.</span><span class="n">set_axis</span><span class="p">([</span><span class="s1">&#39;Date&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">rename_map</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="p">)</span>
+<span class="n">df_merged</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
+  df = yf.download(tk, start=start, end=end)[[&#34;Close&#34;]].rename(columns={&#34;Close&#34;: tk})
+[*********************100%***********************]  1 of 1 completed
+C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
+  df = yf.download(tk, start=start, end=end)[[&#34;Close&#34;]].rename(columns={&#34;Close&#34;: tk})
+[*********************100%***********************]  1 of 1 completed
+C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
+  df = yf.download(tk, start=start, end=end)[[&#34;Close&#34;]].rename(columns={&#34;Close&#34;: tk})
+[*********************100%***********************]  1 of 1 completed
+C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
+  df = yf.download(tk, start=start, end=end)[[&#34;Close&#34;]].rename(columns={&#34;Close&#34;: tk})
+[*********************100%***********************]  1 of 1 completed
+C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
+  df = yf.download(tk, start=start, end=end)[[&#34;Close&#34;]].rename(columns={&#34;Close&#34;: tk})
+[*********************100%***********************]  1 of 1 completed
+C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
+  df = yf.download(tk, start=start, end=end)[[&#34;Close&#34;]].rename(columns={&#34;Close&#34;: tk})
+[*********************100%***********************]  1 of 1 completed
+C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
+  df = yf.download(tk, start=start, end=end)[[&#34;Close&#34;]].rename(columns={&#34;Close&#34;: tk})
+[*********************100%***********************]  1 of 1 completed
+C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
+  df = yf.download(tk, start=start, end=end)[[&#34;Close&#34;]].rename(columns={&#34;Close&#34;: tk})
+[*********************100%***********************]  1 of 1 completed
+C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:25: PerformanceWarning: dropping on a non-lexsorted multi-index without a level parameter may impact performance.
+  df_merged = df_merged.merge(df, on=&#34;Date&#34;, how=&#34;outer&#34;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Date</th>
+      <th>DAX</th>
+      <th>SP</th>
+      <th>CAC</th>
+      <th>VW</th>
+      <th>BASF</th>
+      <th>GM</th>
+      <th>Apple</th>
+      <th>BNP</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2015-01-02</td>
+      <td>9764.730469</td>
+      <td>2058.199951</td>
+      <td>4252.290039</td>
+      <td>103.257195</td>
+      <td>39.671352</td>
+      <td>26.952736</td>
+      <td>24.261047</td>
+      <td>27.449556</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2015-01-05</td>
+      <td>9473.160156</td>
+      <td>2020.579956</td>
+      <td>4111.359863</td>
+      <td>99.749275</td>
+      <td>37.974976</td>
+      <td>26.558189</td>
+      <td>23.577570</td>
+      <td>26.116777</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2015-01-06</td>
+      <td>9469.660156</td>
+      <td>2002.609985</td>
+      <td>4083.500000</td>
+      <td>100.371651</td>
+      <td>37.963596</td>
+      <td>26.960478</td>
+      <td>23.579796</td>
+      <td>25.433735</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2015-01-07</td>
+      <td>9518.179688</td>
+      <td>2025.900024</td>
+      <td>4112.729980</td>
+      <td>100.994011</td>
+      <td>38.214062</td>
+      <td>27.726343</td>
+      <td>23.910431</td>
+      <td>25.008911</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2015-01-08</td>
+      <td>9837.610352</td>
+      <td>2062.139893</td>
+      <td>4260.189941</td>
+      <td>104.021019</td>
+      <td>39.773819</td>
+      <td>28.004856</td>
+      <td>24.829124</td>
+      <td>25.819681</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="Prepare-Issuer-objects-and-Positions">
+<h3>Prepare Issuer objects and Positions<a class="headerlink" href="#Prepare-Issuer-objects-and-Positions" title="Link to this heading"></a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">issuers_info</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;obj_id&quot;</span><span class="p">:</span> <span class="s2">&quot;VOW&quot;</span><span class="p">,</span>  <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;VW&quot;</span><span class="p">,</span>   <span class="s2">&quot;rating&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span>   <span class="s2">&quot;country&quot;</span><span class="p">:</span> <span class="s2">&quot;DE&quot;</span><span class="p">,</span> <span class="s2">&quot;sector&quot;</span><span class="p">:</span> <span class="s2">&quot;Industrials&quot;</span><span class="p">,</span> <span class="s2">&quot;esg_rating&quot;</span><span class="p">:</span> <span class="s2">&quot;AA&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;obj_id&quot;</span><span class="p">:</span> <span class="s2">&quot;BASF&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;BASF&quot;</span><span class="p">,</span>        <span class="s2">&quot;rating&quot;</span><span class="p">:</span> <span class="s2">&quot;BBB&quot;</span><span class="p">,</span> <span class="s2">&quot;country&quot;</span><span class="p">:</span> <span class="s2">&quot;DE&quot;</span><span class="p">,</span> <span class="s2">&quot;sector&quot;</span><span class="p">:</span> <span class="s2">&quot;Industrials&quot;</span><span class="p">,</span>  <span class="s2">&quot;esg_rating&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;obj_id&quot;</span><span class="p">:</span> <span class="s2">&quot;GM&quot;</span><span class="p">,</span>   <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;GM&quot;</span><span class="p">,</span><span class="s2">&quot;rating&quot;</span><span class="p">:</span> <span class="s2">&quot;BB&quot;</span><span class="p">,</span> <span class="s2">&quot;country&quot;</span><span class="p">:</span> <span class="s2">&quot;US&quot;</span><span class="p">,</span> <span class="s2">&quot;sector&quot;</span><span class="p">:</span> <span class="s2">&quot;Industrials&quot;</span><span class="p">,</span> <span class="s2">&quot;esg_rating&quot;</span><span class="p">:</span> <span class="s2">&quot;BBB&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;obj_id&quot;</span><span class="p">:</span> <span class="s2">&quot;AAPL&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Apple&quot;</span><span class="p">,</span>       <span class="s2">&quot;rating&quot;</span><span class="p">:</span> <span class="s2">&quot;AA&quot;</span><span class="p">,</span>  <span class="s2">&quot;country&quot;</span><span class="p">:</span> <span class="s2">&quot;US&quot;</span><span class="p">,</span> <span class="s2">&quot;sector&quot;</span><span class="p">:</span> <span class="s2">&quot;Industrials&quot;</span><span class="p">,</span> <span class="s2">&quot;esg_rating&quot;</span><span class="p">:</span> <span class="s2">&quot;AAA&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;obj_id&quot;</span><span class="p">:</span> <span class="s2">&quot;BNP&quot;</span><span class="p">,</span>  <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;BNP&quot;</span><span class="p">,</span>  <span class="s2">&quot;rating&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span>   <span class="s2">&quot;country&quot;</span><span class="p">:</span> <span class="s2">&quot;FR&quot;</span><span class="p">,</span> <span class="s2">&quot;sector&quot;</span><span class="p">:</span> <span class="s2">&quot;Industrials&quot;</span><span class="p">,</span>    <span class="s2">&quot;esg_rating&quot;</span><span class="p">:</span> <span class="s2">&quot;AA&quot;</span><span class="p">},</span>
+<span class="p">]</span>
+
+<span class="n">issuer_list</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">rivapy</span><span class="o">.</span><span class="n">instruments</span><span class="o">.</span><span class="n">Issuer</span><span class="p">(</span><span class="n">obj_id</span><span class="o">=</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;obj_id&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">rating</span><span class="o">=</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;rating&quot;</span><span class="p">],</span> <span class="n">country</span><span class="o">=</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;country&quot;</span><span class="p">],</span> <span class="n">sector</span><span class="o">=</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;sector&quot;</span><span class="p">],</span> <span class="n">esg_rating</span><span class="o">=</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;esg_rating&quot;</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">issuers_info</span>
+<span class="p">]</span>
+
+<span class="c1"># Create 10 positions, with some duplicates (same issuer appears multiple times)</span>
+<span class="n">positions</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span>
+    <span class="p">{</span><span class="s2">&quot;IssuerID&quot;</span><span class="p">:</span> <span class="s2">&quot;VOW&quot;</span><span class="p">,</span>  <span class="s2">&quot;Exposure&quot;</span><span class="p">:</span> <span class="mi">1_000_000</span><span class="p">,</span> <span class="s2">&quot;RecoveryRate&quot;</span><span class="p">:</span> <span class="mf">0.40</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;IssuerID&quot;</span><span class="p">:</span> <span class="s2">&quot;VOW&quot;</span><span class="p">,</span>  <span class="s2">&quot;Exposure&quot;</span><span class="p">:</span> <span class="mi">500_000</span><span class="p">,</span>   <span class="s2">&quot;RecoveryRate&quot;</span><span class="p">:</span> <span class="mf">0.40</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;IssuerID&quot;</span><span class="p">:</span> <span class="s2">&quot;BASF&quot;</span><span class="p">,</span> <span class="s2">&quot;Exposure&quot;</span><span class="p">:</span> <span class="mi">750_000</span><span class="p">,</span>   <span class="s2">&quot;RecoveryRate&quot;</span><span class="p">:</span> <span class="mf">0.35</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;IssuerID&quot;</span><span class="p">:</span> <span class="s2">&quot;BASF&quot;</span><span class="p">,</span> <span class="s2">&quot;Exposure&quot;</span><span class="p">:</span> <span class="mi">250_000</span><span class="p">,</span>   <span class="s2">&quot;RecoveryRate&quot;</span><span class="p">:</span> <span class="mf">0.40</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;IssuerID&quot;</span><span class="p">:</span> <span class="s2">&quot;GM&quot;</span><span class="p">,</span>   <span class="s2">&quot;Exposure&quot;</span><span class="p">:</span> <span class="mi">600_000</span><span class="p">,</span>   <span class="s2">&quot;RecoveryRate&quot;</span><span class="p">:</span> <span class="mf">0.30</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;IssuerID&quot;</span><span class="p">:</span> <span class="s2">&quot;GM&quot;</span><span class="p">,</span>   <span class="s2">&quot;Exposure&quot;</span><span class="p">:</span> <span class="mi">400_000</span><span class="p">,</span>   <span class="s2">&quot;RecoveryRate&quot;</span><span class="p">:</span> <span class="mf">0.45</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;IssuerID&quot;</span><span class="p">:</span> <span class="s2">&quot;AAPL&quot;</span><span class="p">,</span> <span class="s2">&quot;Exposure&quot;</span><span class="p">:</span> <span class="mi">1_200_000</span><span class="p">,</span> <span class="s2">&quot;RecoveryRate&quot;</span><span class="p">:</span> <span class="mf">0.45</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;IssuerID&quot;</span><span class="p">:</span> <span class="s2">&quot;BNP&quot;</span><span class="p">,</span>  <span class="s2">&quot;Exposure&quot;</span><span class="p">:</span> <span class="mi">900_000</span><span class="p">,</span>   <span class="s2">&quot;RecoveryRate&quot;</span><span class="p">:</span> <span class="mf">0.40</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;IssuerID&quot;</span><span class="p">:</span> <span class="s2">&quot;BNP&quot;</span><span class="p">,</span>  <span class="s2">&quot;Exposure&quot;</span><span class="p">:</span> <span class="mi">100_000</span><span class="p">,</span>   <span class="s2">&quot;RecoveryRate&quot;</span><span class="p">:</span> <span class="mf">0.40</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;IssuerID&quot;</span><span class="p">:</span> <span class="s2">&quot;AAPL&quot;</span><span class="p">,</span> <span class="s2">&quot;Exposure&quot;</span><span class="p">:</span> <span class="mi">300_000</span><span class="p">,</span>   <span class="s2">&quot;RecoveryRate&quot;</span><span class="p">:</span> <span class="mf">0.45</span><span class="p">},</span>
+<span class="p">])</span>
+
+<span class="n">positions</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>IssuerID</th>
+      <th>Exposure</th>
+      <th>RecoveryRate</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>VOW</td>
+      <td>1000000</td>
+      <td>0.40</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>VOW</td>
+      <td>500000</td>
+      <td>0.40</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>BASF</td>
+      <td>750000</td>
+      <td>0.35</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>BASF</td>
+      <td>250000</td>
+      <td>0.40</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>GM</td>
+      <td>600000</td>
+      <td>0.30</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>GM</td>
+      <td>400000</td>
+      <td>0.45</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>AAPL</td>
+      <td>1200000</td>
+      <td>0.45</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>BNP</td>
+      <td>900000</td>
+      <td>0.40</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>BNP</td>
+      <td>100000</td>
+      <td>0.40</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>AAPL</td>
+      <td>300000</td>
+      <td>0.45</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="Configure-indices-list,-mapping">
+<h3>Configure indices list, mapping<a class="headerlink" href="#Configure-indices-list,-mapping" title="Link to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">list_of_indices</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;DAX&quot;</span><span class="p">,</span> <span class="s2">&quot;SP&quot;</span><span class="p">,</span> <span class="s2">&quot;CAC&quot;</span><span class="p">]</span>
+<span class="n">mapping_countries_on_indices</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;DE&quot;</span><span class="p">:</span> <span class="s2">&quot;DAX&quot;</span><span class="p">,</span> <span class="s2">&quot;US&quot;</span><span class="p">:</span> <span class="s2">&quot;SP&quot;</span><span class="p">,</span> <span class="s2">&quot;FR&quot;</span><span class="p">:</span> <span class="s2">&quot;CAC&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Configure-model-parameter-(time-horizons-other-than-1-are-not-implemented-yet)">
+<h3>Configure model parameter (time horizons other than 1 are not implemented yet)<a class="headerlink" href="#Configure-model-parameter-(time-horizons-other-than-1-are-not-implemented-yet)" title="Link to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_sim</span> <span class="o">=</span> <span class="mi">1000000</span>
+<span class="n">seed</span> <span class="o">=</span> <span class="mi">42</span>
+<span class="n">r</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="c1"># t = 1.0</span>
+<span class="n">confidencelevel</span> <span class="o">=</span> <span class="mf">1.0</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="Utilisation-of-credit-metrics-model-within-RiVaPy">
+<h2>Utilisation of credit metrics model within RiVaPy<a class="headerlink" href="#Utilisation-of-credit-metrics-model-within-RiVaPy" title="Link to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ensure stock data has Date column and other columns expected by model</span>
+<span class="n">stock_data</span> <span class="o">=</span> <span class="n">df_merged</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="c1"># keep only columns we need (Date + indices + issuer tickers)</span>
+<span class="n">expected_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Date&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">list_of_indices</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;VW&quot;</span><span class="p">,</span> <span class="s2">&quot;BASF&quot;</span><span class="p">,</span> <span class="s2">&quot;GM&quot;</span><span class="p">,</span> <span class="s2">&quot;Apple&quot;</span><span class="p">,</span> <span class="s2">&quot;BNP&quot;</span><span class="p">]</span>
+<span class="n">stock_data</span> <span class="o">=</span> <span class="n">stock_data</span><span class="p">[[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">expected_cols</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">stock_data</span><span class="o">.</span><span class="n">columns</span><span class="p">]]</span>
+
+<span class="c1"># instantiate model</span>
+<span class="n">cm</span> <span class="o">=</span> <span class="n">rivapy</span><span class="o">.</span><span class="n">credit</span><span class="o">.</span><span class="n">CreditMetricsModel</span><span class="p">(</span>
+    <span class="n">n_simulation</span><span class="o">=</span><span class="n">n_sim</span><span class="p">,</span>
+    <span class="n">transition_matrix</span><span class="o">=</span><span class="n">TransMat</span><span class="p">,</span>
+    <span class="n">position_data</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span>
+    <span class="n">issuer_data</span><span class="o">=</span><span class="n">issuer_list</span><span class="p">,</span>
+    <span class="n">stock_data</span><span class="o">=</span><span class="n">stock_data</span><span class="p">,</span>
+    <span class="n">r</span><span class="o">=</span><span class="n">r</span><span class="p">,</span>
+    <span class="n">t</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">confidencelevel</span><span class="o">=</span><span class="n">confidencelevel</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+    <span class="n">list_of_indices</span><span class="o">=</span><span class="n">list_of_indices</span><span class="p">,</span>
+    <span class="n">mapping_countries_on_indices</span><span class="o">=</span><span class="n">mapping_countries_on_indices</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="MC-Simulation">
+<h2>MC-Simulation<a class="headerlink" href="#MC-Simulation" title="Link to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mc_scenarios</span><span class="p">,</span> <span class="n">rr_scenarios</span><span class="p">,</span> <span class="n">issuer_ids</span><span class="p">,</span> <span class="n">issuer_names</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">mc_calculation</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;mc_scenarios shape:&quot;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mc_scenarios</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;issuer_ids:&quot;</span><span class="p">,</span> <span class="n">issuer_ids</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+c:\Users\Anwender\source\repos\RiVaPy\docs\source\notebooks\credit\../../../..\rivapy\credit\creditmetrics.py:119: FutureWarning: The default fill_method=&#39;pad&#39; in DataFrame.pct_change is deprecated and will be removed in a future version. Either fill in any non-leading NA values prior to calling pct_change or specify &#39;fill_method=None&#39; to not fill NA values.
+  returns = mergedData.pct_change()
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+mc_scenarios shape: (1000000, 5)
+issuer_ids: [&#39;AAPL&#39; &#39;BASF&#39; &#39;BNP&#39; &#39;GM&#39; &#39;VOW&#39;]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mc_scenarios</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>AAPL</th>
+      <th>BASF</th>
+      <th>BNP</th>
+      <th>GM</th>
+      <th>VOW</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>count</th>
+      <td>1000000.000000</td>
+      <td>1000000.000000</td>
+      <td>1000000.000000</td>
+      <td>1000000.000000</td>
+      <td>1000000.000000</td>
+    </tr>
+    <tr>
+      <th>mean</th>
+      <td>-220.681148</td>
+      <td>-3147.221156</td>
+      <td>-525.265020</td>
+      <td>-9762.214976</td>
+      <td>-790.884810</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>8912.190968</td>
+      <td>29700.405362</td>
+      <td>14690.892796</td>
+      <td>66048.381580</td>
+      <td>22124.910294</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>-824917.500000</td>
+      <td>-636352.500000</td>
+      <td>-599640.000000</td>
+      <td>-633216.000000</td>
+      <td>-899460.000000</td>
+    </tr>
+    <tr>
+      <th>25%</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>50%</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>75%</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>0.000000</td>
+      <td>1083.750000</td>
+      <td>300.000000</td>
+      <td>6720.000000</td>
+      <td>450.000000</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="Calculate-VaR-and-Expected-Shortfall">
+<h2>Calculate VaR and Expected Shortfall<a class="headerlink" href="#Calculate-VaR-and-Expected-Shortfall" title="Link to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">loss_distribution</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_loss_distribution</span><span class="p">(</span><span class="n">mc_scenarios</span><span class="p">)</span>
+<span class="n">portfolio_VaR</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_portfolio_VaR</span><span class="p">(</span><span class="n">loss_distribution</span><span class="p">)</span>
+<span class="n">portfolio_ES</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_portfolio_ES</span><span class="p">(</span><span class="n">loss_distribution</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Portfolio VaR (</span><span class="si">{</span><span class="n">confidencelevel</span><span class="si">}</span><span class="s2">%): </span><span class="si">{</span><span class="n">portfolio_VaR</span><span class="si">:</span><span class="s2">,.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Portfolio ES  (</span><span class="si">{</span><span class="n">confidencelevel</span><span class="si">}</span><span class="s2">%): </span><span class="si">{</span><span class="n">portfolio_ES</span><span class="si">:</span><span class="s2">,.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Portfolio VaR (1.0%): 633,216.00
+Portfolio ES  (1.0%): 680,521.23
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">loss_distribution</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Portfolio Loss Distribution&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">title_text</span><span class="o">=</span><span class="s2">&quot;Portfolio Loss&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span><span class="n">title_text</span><span class="o">=</span><span class="s2">&quot;Frequency&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="admonition warning">
+<p>Data type cannot be displayed: application/vnd.plotly.v1+json</p>
+</div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">min</span><span class="p">(</span><span class="n">loss_distribution</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+-2242686.0
+</pre></div></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
