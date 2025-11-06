@@ -9,6 +9,7 @@ Instruments
    :maxdepth: 2
    :caption: Contents:
    
+   rate
    equity
    credit
    power
