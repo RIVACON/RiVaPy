@@ -1322,7 +1322,7 @@ class EnergyPriceForwardCurve:
     def _create_shape(self):
         """Creates a shape using the ``self._pfc_shaper`` model"""
         self._pfc_shaper.calibrate()
-        self._pfc_shape = self._pfc_shaper.apply(self._apply_schedule)
+        self._pfc_shape = self._pfc_shaper.apply(self._apply_schedule.get_schedule())
 
     def get_pfc(self) -> pd.DataFrame:
         """Returns the PFC
