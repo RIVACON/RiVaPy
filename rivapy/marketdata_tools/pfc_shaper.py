@@ -37,12 +37,8 @@ class PFCShaper(interfaces.FactoryObject):
         self.__normalization_order = [("D", "%Y-%m-%d"), ("W", "%G-%V"), ("ME", "%Y-%m")]
 
     @abc.abstractmethod
-    def calibrate(self) -> pd.DataFrame:
-        """Calibration of the shaping model
-
-        Returns:
-            np.ndarray: Numpy array containing the fit.
-        """
+    def calibrate(self):
+        """Calibration of the shaping model"""
         pass
 
     @abc.abstractmethod
@@ -55,6 +51,28 @@ class PFCShaper(interfaces.FactoryObject):
         pass
 
     def _preprocess(self, spot: pd.DataFrame, remove_outlier: bool, lower_quantile: float, upper_quantile: float) -> pd.DataFrame:
+        """
+        Preprocess spot price data by ensuring hourly continuity, interpolating missing values,
+        and optionally removing outliers based on normalized yearly values.
+
+        This method performs the following steps:
+          1. Aggregates duplicate timestamps by taking the mean of their values.
+          2. Reindexes the time series to ensure a continuous hourly frequency and
+             linearly interpolates missing values.
+          3. If `remove_outlier=True`, normalizes the time series on a yearly basis and
+             removes data points outside the specified quantile range.
+
+        Args:
+            spot (pd.DataFrame): Raw spot price data indexed by datetime. The first column
+                is assumed to contain the price values.
+            remove_outlier (bool): Whether to remove outliers after normalization.
+            lower_quantile (float): Lower quantile threshold (e.g., 0.01) used for outlier removal.
+            upper_quantile (float): Upper quantile threshold (e.g., 0.99) used for outlier removal.
+
+        Returns:
+            pd.DataFrame: A cleaned and time-continuous spot price time series, with optional
+            outliers removed.
+        """
         # remove duplicate hours by replacing these with their mean
         spot = spot.groupby(level=0).mean()
 
@@ -76,12 +94,27 @@ class PFCShaper(interfaces.FactoryObject):
         return spot
 
     def _normalize_year(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Normalize time series values by their yearly mean.
+
+        This method computes the mean value for each calendar year and divides all data
+        points within that year by the corresponding annual mean. The result is a
+        year-normalized time series where each year has an average value of 1.
+
+        Args:
+            df (pd.DataFrame): A DataFrame indexed by datetime, containing one or more
+                numeric columns to be normalized.
+
+        Returns:
+            pd.DataFrame: A DataFrame where the values of each year have been normalized
+            relative to their annual mean.
+        """
         yearly_mean = df.resample("YE").transform("mean")
 
         normalized = df / yearly_mean
         return normalized
 
-    def normalize_shape(self, shape: pd.DataFrame, ignore_normalization_config: bool = True) -> pd.DataFrame:
+    def normalize_shape(self, shape: pd.DataFrame) -> pd.DataFrame:
         """Normalizes the shape based on ``normalization_config``.\n
         ``D`` defines the number of days at the beginning of the shape over which the individual mean is normalized to one.\n
         ``W`` defines the number of weeks at the beginning of the shape over which the individual mean is normalized to one.\n
@@ -97,7 +130,6 @@ class PFCShaper(interfaces.FactoryObject):
 
         Args:
             shape (pd.DataFrame): Shape which should be normalized
-            ignore_normalization_config (bool): Wether the normalization config should be ignored such that only a yearly normalization takes place. Defaults to True.
 
         Returns:
             pd.DataFrame: Normalized shape
@@ -107,7 +139,7 @@ class PFCShaper(interfaces.FactoryObject):
 
         # yearly normalization
 
-        if (self.normalization_config is None) or (ignore_normalization_config == True):
+        if self.normalization_config is None:
             shape_df = self._normalize_year(df=shape)
             return shape_df
         else:
@@ -162,15 +194,21 @@ class SimpleCategoricalRegression(PFCShaper):
 
     .. math::
 
-        s(t) = s_0 + \sum^{23}_{i=1}\\beta^h_i\cdot\mathbb{I}_{h(t)=i} + \\beta^d\cdot\mathbb{I}_{d(t)=1}  + \\beta^H\cdot\mathbb{I}_{H(t)=1} + \sum^{12}_{i=2}\\beta^m_i\cdot\mathbb{I}_{m(t)=i}
+        s(t) = s_0 + \sum^{23}_{i=1}\beta^h_i\cdot\mathbb{I}_{h(t)=i} + \beta^d\cdot\mathbb{I}_{d(t)=1}  + \beta^H\cdot\mathbb{I}_{H(t)=1} + \sum^{12}_{i=2}\beta^m_i\cdot\mathbb{I}_{m(t)=i}
 
-    where:\n
-    :math:`s_0`: Shape level level\n
-    :math:`\mathbb{I}_x = \\begin{cases} 1, & \\text{if the } x \\text{ expression renders true} \\\\ 0, & \\text{if the } x \\text{ expression renders false} \\end{cases}` \n
-    :math:`h(t)`: Hour of t\n
-    :math:`d(t) = \\begin{cases} 1, & \\text{if t is a weekday} \\\\ 0, & \\text{if t is a day on a weekend} \\end{cases}` \n
-    :math:`H(t) = \\begin{cases} 1, & \\text{if t public holidy} \\\\ 0, & \\text{if t is not a public holiday} \\end{cases}` \n
-    :math:`m(t)`: Month of t\n
+    where:
+
+    :math:`s_0`: Shape level level
+
+    :math:`\mathbb{I}_x = \begin{cases} 1, & \text{if the } x \text{ expression renders true} \\ 0, & \text{if the } x \text{ expression renders false} \end{cases}`
+
+    :math:`h(t)`: Hour of t
+
+    :math:`d(t) = \begin{cases} 1, & \text{if t is a weekday} \\ 0, & \text{if t is a day on a weekend} \end{cases}`
+
+    :math:`H(t) = \begin{cases} 1, & \text{if t public holidy} \\ 0, & \text{if t is not a public holiday} \end{cases}`
+
+    :math:`m(t)`: Month of t
 
     Args:
         spot_prices (pd.DataFrame): Data used to calibrate the shaping model.
@@ -179,6 +217,9 @@ class SimpleCategoricalRegression(PFCShaper):
             Here ``D`` defines the number of days at the beginning of the shape over which the individual mean is normalized to one.
             ``W`` defines the number of weeks at the beginning of the shape over which the individual mean is normalized to one.
             ``ME`` defines the number of months at the beginning of the shape over which the individual mean is normalized to one. The remaining shape is then normalized over the individual years.Defaults to None.
+        remove_outlier (bool): Wether to remove outliers for the seasonality shape regression. Defaults to False.
+        lower_quantile (float): Lower quantile for outlier detection. Defauls to 0.005.
+        upper_quantile (float): Upper quantile for outlier detection. Defaults to 0.995.
     """
 
     def __init__(
@@ -186,8 +227,14 @@ class SimpleCategoricalRegression(PFCShaper):
         spot_prices: pd.DataFrame,
         holiday_calendar: holidays.HolidayBase,
         normalization_config: Optional[Dict[Literal["D", "W", "M"], Optional[int]]] = None,
+        remove_outlier: bool = False,
+        lower_quantile: float = 0.005,
+        upper_quantile: float = 0.995,
     ):
         super().__init__(spot_prices=spot_prices, holiday_calendar=holiday_calendar, normalization_config=normalization_config)
+        self.remove_outlier = remove_outlier
+        self.lower_quantile = lower_quantile
+        self.upper_quantile = upper_quantile
 
     def _transform(self, datetimes_list: List[dt.datetime]) -> np.ndarray:
         """Transforms a list of datetimes in a numpy array which can then be used for the linear regression.
@@ -216,14 +263,12 @@ class SimpleCategoricalRegression(PFCShaper):
 
         month = pd.get_dummies(_datetime_series.dt.month, prefix="month", drop_first=True).astype(int).to_numpy().reshape(-1, 11)
 
-        quarter = pd.get_dummies(_datetime_series.dt.quarter, prefix="quarter", drop_first=True).astype(int).to_numpy().reshape(-1, 3)
-
         offset = np.ones(shape=(len(_datetime_series), 1))
         return np.concatenate([offset, weekday, holiday, month, hours], axis=1)
 
-    def calibrate(self, remove_outlier: bool, lower_quantile: float = 0.005, upper_quantile: float = 0.995):
+    def calibrate(self):
         spot = self.spot_prices.copy()
-        spot = self._preprocess(spot=spot, remove_outlier=remove_outlier, lower_quantile=lower_quantile, upper_quantile=upper_quantile)
+        spot = self._preprocess(spot=spot, remove_outlier=self.remove_outlier, lower_quantile=self.lower_quantile, upper_quantile=self.upper_quantile)
 
         spot_normalized = self._normalize_year(spot)
         data_array = self._transform(datetimes_list=self.spot_prices.index)
@@ -248,19 +293,47 @@ class SimpleCategoricalRegression(PFCShaper):
 
 class CategoricalRegression(PFCShaper):
     r"""Linear regression model using categorical predictor variables to construct a PFC shape.
+    We follow the methodology in:
+    
+    https://cem-a.org/wp-content/uploads/2019/10/A-Structureal-Model-for-Electricity-Forward-Prices.pdf
+    
+    https://ieeexplore.ieee.org/document/6607349
+    
+    https://www.researchgate.net/publication/229051446_Robust_Calculation_and_Parameter_Estimation_of_the_Hourly_Price_Forward_Curve
 
+    We create a regression model for bot the seasonality shape and the intra day shape. For the regression model of the seasonality shape, 
+    the days are split into weekday, Saturdays and Sundays. Public holidays are considered as Sundays while bridge days are expected to behave like Saturdays.
+    Afterwards, weekdays are split into clusters representing the month they are in, while Saturdays and Sundays are assigned to clusters reaching over three months.
+    For the regression model of the intra day shape we keep the seasonality clusters but add a hourly cluster for each individual hour such that the
+    total number of intra day clusters becomes #Season Clusters * 24.
+    
     .. math::
+        \begin{aligned}
+            y_\text{season}(d) &= \frac{\frac{1}{24}\sum_{i=1}^{24}h_i^d}{\frac{1}{N_y}\sum_{i=1}^{N_y} h_i^y} \\
+            \hat{y}_\text{season}(d) & =\beta^{0}_\text{season} + \sum_{c \in C^\text{season}}\beta^c\cdot\mathbb{I}_{\text{Cluster}(d)=c} \\
+            y_\text{id}(h,d) &= \frac{h_i^d}{\frac{1}{24}\sum_{i=1}^{24}h_i^d} \\
+            \hat{y}_\text{id}(h,d) & =\beta^{0}_\text{id} + \sum_{c \in C^\text{id}}\beta^c\cdot\mathbb{I}_{\text{Cluster}(h)=c} \\
+            s(h,d) &= \hat{y}_\text{id}(h,d)\cdot\hat{y}_\text{season}(d)
+        \end{aligned}
+    
+    where:
+    
+    :math:`h_i^d`: i-th hour of d-th day
+    
+    :math:`h_i^y`: i-th hour of the year y
+    
+    :math:`N_y`: number of days in year y
+    
+    :math:`C^\text{season}`: set of all clusters for the seasonality shape
+    
+    :math:`C^\text{id}`: set of all clusters for the intra day shape
+    
+    :math:`\text{Cluster}(X)`: returns the cluster of X
 
-        s_S(t) = \beta^{0}_S + \sum^{|C_S|-1}_{c=1}\sum^{N}_{i=1}\\beta^c\cdot\mathbb{I}_{t\in c}\cdot\frac{\hat{d}}{\hat{y}}
-        s_{id}(t) = \beta^{0}_{id} + \sum^{23}_{i=1}\\beta^h_i\cdot\mathbb{I}_{h(t)=i} + \\beta^d\cdot\mathbb{I}_{d(t)=1}  + \\beta^H\cdot\mathbb{I}_{H(t)=1} + \sum^{12}_{i=2}\\beta^m_i\cdot\mathbb{I}_{m(t)=i}
-
-    where:\n
-    :math:`S_0`: Spot price level\n
-    :math:`\mathbb{I}_x = \\begin{cases} 1, & \\text{if the } x \\text{ expression renders true} \\\\ 0, & \\text{if the } x \\text{ expression renders false} \\end{cases}` \n
-    :math:`h(t)`: Hour of t\n
-    :math:`d(t) = \\begin{cases} 1, & \\text{if t is a weekday} \\\\ 0, & \\text{if t is a day on a weekend} \\end{cases}` \n
-    :math:`H(t) = \\begin{cases} 1, & \\text{if t public holidy} \\\\ 0, & \\text{if t is not a public holiday} \\end{cases}` \n
-    :math:`m(t)`: Month of t\n
+    :math:`\mathbb{I}_x = \begin{cases}
+    1, & \text{if the } x \text{ expression renders true}\\
+    0, & \text{if the } x \text{ expression renders false}
+    \end{cases}`
 
     Args:
         spot_prices (pd.DataFrame): Data used to calibrate the shaping model.
@@ -269,6 +342,12 @@ class CategoricalRegression(PFCShaper):
             Here ``D`` defines the number of days at the beginning of the shape over which the individual mean is normalized to one.
             ``W`` defines the number of weeks at the beginning of the shape over which the individual mean is normalized to one.
             ``ME`` defines the number of months at the beginning of the shape over which the individual mean is normalized to one. The remaining shape is then normalized over the individual years.Defaults to None.
+        remove_outlier_season (bool): Wether to remove outliers for the seasonality shape regression. Defaults to False.
+        remove_outlier_id (bool): Wether to remove outliers for the intra day shape regression. Defaults to False.
+        lower_quantile_season (float): Lower quantile for outlier detection. Defauls to 0.005.
+        upper_quantile_season (float): Upper quantile for outlier detection. Defaults to 0.995.
+        lower_quantile_id (float): Lower quantile for outlier detection. Defauls to 0.005.
+        upper_quantile_id (float): Upper quantile for outlier detection. Defaults to 0.995.
     """
 
     def __init__(
@@ -276,13 +355,31 @@ class CategoricalRegression(PFCShaper):
         spot_prices: pd.DataFrame,
         holiday_calendar: holidays.HolidayBase,
         normalization_config: Optional[Dict[Literal["D", "W", "M"], Optional[int]]] = None,
+        remove_outlier_season: bool = False,
+        remove_outlier_id: bool = False,
+        lower_quantile_season: float = 0.005,
+        upper_quantile_season: float = 0.995,
+        lower_quantile_id: float = 0.005,
+        upper_quantile_id: float = 0.995,
     ):
         super().__init__(spot_prices=spot_prices, holiday_calendar=holiday_calendar, normalization_config=normalization_config)
-
-    def _set_regression_parameters(self, params: np.ndarray):
-        super()._set_regression_parameters(params=params)
+        self.remove_outlier_season = remove_outlier_season
+        self.remove_outlier_id = remove_outlier_id
+        self.lower_quantile_season = lower_quantile_season
+        self.upper_quantile_season = upper_quantile_season
+        self.lower_quantile_id = lower_quantile_id
+        self.upper_quantile_id = upper_quantile_id
 
     def _create_cluster_df(self, day_list: List[dt.datetime], use_hours: bool = False):
+        """Create a DataFrame containing the clusters for the regression models.
+
+        Args:
+            day_list (List[dt.datetime]): List of datetimes for which a clustering should be performed
+            use_hours (bool, optional): Wether to extend the clustering to include hours. Defaults to False.
+
+        Returns:
+            None
+        """
         holidays_list = pd.to_datetime(list(self.holiday_calendar.keys()))
         cluster_df = pd.DataFrame(index=day_list)
 
@@ -343,6 +440,15 @@ class CategoricalRegression(PFCShaper):
         return cluster_df
 
     def __add_hours_cluster(self, df: pd.DataFrame, clusters_clmn: str, hours_clmn: str, unique_clusters: List[int], unique_hours: List[int]):
+        """Add hourly clustering in the `cluster_hours` column of the provided DataFrame
+
+        Args:
+            df (pd.DataFrame): DataFrame containing the infos needed for an hourly clustering.
+            clusters_clmn (str): Column containing the seasonality clusters
+            hours_clmn (str): Columns containing the hours
+            unique_clusters (List[int]): List of all clusters
+            unique_hours (List[int]): List of all hourly clusters
+        """
         df["cluster_hours"] = 0
         count = 1
         for cluster in unique_clusters:
@@ -351,6 +457,18 @@ class CategoricalRegression(PFCShaper):
                 count += 1
 
     def _create_one_hot_matrix(self, rows: int, clusters: pd.Series, max_clusters: int, adjust_clusters: bool, offset_col: bool):
+        """Create a matrix for a one hot encoding of a clusters pandas Series.
+
+        Args:
+            rows (int): Number of data points
+            clusters (pd.Series): Series containing the cluster for each data point
+            max_clusters (int): Total number of individual clusters
+            adjust_clusters (bool): Wether to adjust cluster by subtracting each cluster by one.
+            offset_col (bool): Wether to use the last column as an intercept for the regression model.
+
+        Returns:
+            _type_: _description_
+        """
         one_hot = np.zeros(shape=(rows, max_clusters))
         if adjust_clusters:
             cluster_series = clusters - 1
@@ -379,6 +497,25 @@ class CategoricalRegression(PFCShaper):
 
     @staticmethod
     def _remove_outliers(df: pd.DataFrame, value_clmn: str, grouping_clmn: str, lower_quantile: float, upper_quantile: float):
+        """
+        Remove outliers from a DataFrame based on quantile thresholds within groups.
+
+        This function applies a quantile-based filter to the values in `value_clmn` for each
+        unique category defined in `grouping_clmn`. For each group, values below the
+        `lower_quantile` or above the `upper_quantile` are considered outliers and removed.
+        The filtered rows are then returned as a cleaned DataFrame.
+
+        Args:
+            df (pd.DataFrame): Input DataFrame containing the data.
+            value_clmn (str): Name of the column containing the numerical values to evaluate for outliers.
+            grouping_clmn (str): Name of the column used to group the data before applying the quantile filter.
+            lower_quantile (float): Lower quantile threshold (e.g., 0.05). Values below this quantile are removed.
+            upper_quantile (float): Upper quantile threshold (e.g., 0.95). Values above this quantile are removed.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing only the data points within the specified quantile bounds for each group.
+        """
+
         def remove_outliers(series, lower_quantile=lower_quantile, upper_quantile=upper_quantile):
             lower_bound = series.quantile(lower_quantile)
             upper_bound = series.quantile(upper_quantile)
@@ -390,12 +527,6 @@ class CategoricalRegression(PFCShaper):
 
     def calibrate(
         self,
-        remove_outlier_season: bool,
-        remove_outlier_id: bool,
-        lower_quantile_season: float = 0.005,
-        upper_quantile_season: float = 0.995,
-        lower_quantile_id: float = 0.005,
-        upper_quantile_id: float = 0.995,
     ):
         spot = self.spot_prices.copy()
         spot = self._preprocess(spot=spot)
@@ -408,14 +539,14 @@ class CategoricalRegression(PFCShaper):
         cluster_df_daily = cluster_df[["year", "month", "day", "weekday", "day_indicator", "cluster"]].drop_duplicates().sort_index()
         calib_season_df = pd.merge(season_shape, cluster_df_daily, left_index=True, right_index=True)
 
-        if remove_outlier_season:
+        if self.remove_outlier_season:
             value_clmn = calib_season_df.columns[0]
             calib_season_df = self._remove_outliers(
                 df=calib_season_df,
                 value_clmn=value_clmn,
                 grouping_clmn="cluster",
-                lower_quantile=lower_quantile_season,
-                upper_quantile=upper_quantile_season,
+                lower_quantile=self.lower_quantile_season,
+                upper_quantile=self.upper_quantile_season,
             )
 
         self.__max_cluster = calib_season_df["cluster"].max()
@@ -437,14 +568,14 @@ class CategoricalRegression(PFCShaper):
 
         calib_id_df = pd.merge(id_shape, cluster_df, left_index=True, right_index=True)
 
-        if remove_outlier_id:
+        if self.remove_outlier_id:
             value_clmn = calib_id_df.columns[0]
             calib_id_df = self._remove_outliers(
                 df=calib_id_df,
                 grouping_clmn="cluster_hours",
                 value_clmn=value_clmn,
-                lower_quantile=lower_quantile_id,
-                upper_quantile=upper_quantile_id,
+                lower_quantile=self.lower_quantile_id,
+                upper_quantile=self.upper_quantile_id,
             )
 
         self.__max_hour_clusters = calib_id_df["cluster_hours"].max()
@@ -483,7 +614,9 @@ class CategoricalRegression(PFCShaper):
 
         cluster_df["shape"] = (season_fit * id_fit).squeeze()
         cluster_df["shape"] = self._normalize_year(df=cluster_df.loc[:, "shape"])
-        return pd.DataFrame(cluster_df.loc[:, "shape"])
+        shape_df = pd.DataFrame(cluster_df.loc[:, "shape"])
+        shape_df = self.normalize_shape(shape=shape_df)
+        return shape_df
 
     def _to_dict(self):
         return super()._to_dict()

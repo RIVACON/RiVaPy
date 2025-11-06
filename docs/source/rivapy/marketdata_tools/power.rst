@@ -21,3 +21,8 @@ Shaping
    :members:
    :undoc-members:
    :show-inheritance:
+
+.. autoclass:: rivapy.marketdata_tools.SimpleCategoricalRegression
+   :members:
+   :undoc-members:
+   :show-inheritance:
