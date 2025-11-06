@@ -1,0 +1,744 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Day Counter, Roll Conventions and Schedules &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=d2ebc91c" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.svg"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Module Documentation" href="../../rivapy/index.html" />
+    <link rel="prev" title="Interest Rate Swap" href="../instruments/ir_swap.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Notebook Gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#market-data">Market Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#pricing">Pricing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#financial-instruments">Financial Instruments</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#tools">Tools</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Day Counter, Roll Conventions and Schedules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#The-Basics">The Basics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Schedules">Schedules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../search.html">Search Page</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Notebook Gallery</a></li>
+      <li class="breadcrumb-item active">Day Counter, Roll Conventions and Schedules</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/tools/daycounter_rollconventions_schedules.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <p><img alt="image1" src="images/rivacon_frontmark_combined_header.png" /></p>
+<section id="Day-Counter,-Roll-Conventions-and-Schedules">
+<h1>Day Counter, Roll Conventions and Schedules<a class="headerlink" href="#Day-Counter,-Roll-Conventions-and-Schedules" title="Link to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">holidays</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">,</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">dateutil.relativedelta</span> <span class="kn">import</span> <span class="n">relativedelta</span>
+
+<span class="c1"># Get the current working directory</span>
+<span class="n">current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+
+<span class="c1"># Get the grandparent directory</span>
+<span class="n">grandparent_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_dir</span><span class="p">,</span> <span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="s2">&quot;..&quot;</span><span class="p">))</span>
+
+<span class="c1"># Add the grandparent directory to sys.path</span>
+<span class="k">if</span> <span class="n">grandparent_dir</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">grandparent_dir</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Grandparent directory containing Rivapy module added to sys.path:&quot;</span><span class="p">,</span> <span class="n">grandparent_dir</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.enums</span> <span class="kn">import</span> <span class="n">RollConvention</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">Period</span><span class="p">,</span> <span class="n">Schedule</span><span class="p">,</span> <span class="n">roll_day</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Grandparent directory containing Rivapy module added to sys.path: c:\Users\DrHansNguyen\Documents
+</pre></div></div>
+</div>
+<section id="The-Basics">
+<h2>The Basics<a class="headerlink" href="#The-Basics" title="Link to this heading"></a></h2>
+<p>For financial instrument valuation some basic ingredients are needed that are easily neglected when looking at the overall valuation concepts, instrument types, and models. When being precise one has to properly deal with dates at which e.g. payments are due, periods such as accrual periods start and end, etc. Here we briefly introduce</p>
+<ul class="simple">
+<li><p>calenders</p></li>
+<li><p>business day conventions</p></li>
+<li><p>roll conventions</p></li>
+<li><p>schedules, and</p></li>
+<li><p>day count conventions.</p></li>
+</ul>
+<section id="Holiday-calendar">
+<h3>Holiday calendar<a class="headerlink" href="#Holiday-calendar" title="Link to this heading"></a></h3>
+<p>Holiday calenders are at the heart of any financial library. They are used to determine whether a specific date corresponds to a bank holiday. Which calendar to use depends on the context in which the date is used. For financial instruments it is usually the instrument’s settlement systen, the papying agent’s system, or the clearing house that governs the applicable calender. Across the EUR-zone the relevant calendar is often the TARGET2 calender.</p>
+<p>RIVAPY uses the Python library <a class="reference external" href="https://holidays.readthedocs.io/en/latest/">holidays</a> as a Holiday calendar for determining business days. The following example uses the holiday calendar of the Euopean Central Bank below (i.e. TARGET2).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ecb_holidays</span> <span class="o">=</span> <span class="n">holidays</span><span class="o">.</span><span class="n">ECB</span><span class="p">(</span><span class="mi">2024</span><span class="p">)</span>       <span class="c1"># Optionally a year or a list of years can be provided.</span>
+                                        <span class="c1"># By default the years are automatically extended when needed, see below.</span>
+
+<span class="k">for</span> <span class="n">d</span><span class="p">,</span><span class="n">n</span> <span class="ow">in</span> <span class="n">ecb_holidays</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">ecb_holidays</span><span class="o">.</span><span class="n">is_working_day</span><span class="p">(</span><span class="s2">&quot;2023-1-1&quot;</span><span class="p">))</span>  <span class="c1"># This can be used to check for working day (holidays and weekends considered)</span>
+                                                <span class="c1"># and adds 2023 to ecb_holidays</span>
+
+<span class="k">for</span> <span class="n">d</span><span class="p">,</span><span class="n">n</span> <span class="ow">in</span> <span class="n">ecb_holidays</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2024-01-01 New Year&#39;s Day
+2024-03-29 Good Friday
+2024-04-01 Easter Monday
+2024-05-01 Labour Day
+2024-12-25 Christmas Day
+2024-12-26 Christmas Holiday
+False
+2024-01-01 New Year&#39;s Day
+2024-03-29 Good Friday
+2024-04-01 Easter Monday
+2024-05-01 Labour Day
+2024-12-25 Christmas Day
+2024-12-26 Christmas Holiday
+2023-01-01 New Year&#39;s Day
+2023-04-07 Good Friday
+2023-04-10 Easter Monday
+2023-05-01 Labour Day
+2023-12-25 Christmas Day
+2023-12-26 Christmas Holiday
+</pre></div></div>
+</div>
+</section>
+<section id="Date-Rolling:-Business-day-conventions-and-Roll-Conventions">
+<h3>Date Rolling: Business day conventions and Roll Conventions<a class="headerlink" href="#Date-Rolling:-Business-day-conventions-and-Roll-Conventions" title="Link to this heading"></a></h3>
+<p>Dealing with financial instruments and payment unambiguous information is required on how to ‘roll’ dates that fall on a bank holiday or that need to be moved to the start date of a subsequent or previous period when building schedules for a given start or end date.</p>
+<section id="Business-Day-Conventions">
+<h4>Business Day Conventions<a class="headerlink" href="#Business-Day-Conventions" title="Link to this heading"></a></h4>
+<p>Business day conventions (bdc) determine how dates are adjusted if they fall on non-business days (e.g., weekends or holidays). These conventions are essential in determining the exact timing of payments or other financial events. Common business day conventions include:</p>
+<ol class="arabic">
+<li><div class="line-block">
+<div class="line"><strong>Unadjusted</strong></div>
+<div class="line">The date is not adjusted, even if it falls on a non-business day.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line"><strong>Following</strong></div>
+<div class="line">If the date falls on a non-business day, it is rolled forward to the next business day.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line"><strong>Modified Following</strong></div>
+<div class="line">Similar to Following, but if rolling forward moves the date to the next month, it is rolled backward to the preceding business day.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line"><strong>Preceding</strong></div>
+<div class="line">If the date falls on a non-business day, it is rolled backward to the previous business day.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line"><strong>Modified Preceding</strong></div>
+<div class="line">Similar to Preceding, but if rolling backward moves the date to the previous month, it is rolled forward to the next business day.</div>
+</div>
+</li>
+</ol>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example of selecting a business day convention in rivapy</span>
+<span class="n">business_day_convention</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">RollConvention</span><span class="o">.</span><span class="n">UNADJUSTED</span><span class="p">,</span>
+                    <span class="n">RollConvention</span><span class="o">.</span><span class="n">FOLLOWING</span><span class="p">,</span>
+                    <span class="n">RollConvention</span><span class="o">.</span><span class="n">MODIFIED_FOLLOWING</span><span class="p">,</span>
+                    <span class="n">RollConvention</span><span class="o">.</span><span class="n">PRECEDING</span><span class="p">,</span>
+                    <span class="n">RollConvention</span><span class="o">.</span><span class="n">MODIFIED_PRECEDING</span><span class="p">,</span>
+                    <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 01.01.2021 is a friday, notice how MODIFIED_PRECEDING is the following business day</span>
+<span class="k">for</span> <span class="n">bdc</span> <span class="ow">in</span> <span class="n">business_day_convention</span><span class="p">:</span>
+    <span class="n">rolled_day</span> <span class="o">=</span> <span class="n">roll_day</span><span class="p">(</span><span class="n">day</span> <span class="o">=</span> <span class="n">date</span><span class="p">(</span><span class="mi">2021</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+                         <span class="n">calendar</span> <span class="o">=</span> <span class="n">holidays</span><span class="o">.</span><span class="n">ECB</span><span class="p">(),</span>
+                         <span class="n">business_day_convention</span> <span class="o">=</span> <span class="n">bdc</span><span class="p">,</span>
+                         <span class="n">start_day</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">settle_days</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">rolled_day</span><span class="o">.</span><span class="n">date</span><span class="p">(),</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2"> &quot;</span><span class="p">,</span> <span class="n">bdc</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2021-01-01        UNADJUSTED
+2021-01-04        FOLLOWING
+2021-01-04        MODIFIED_FOLLOWING
+2020-12-31        PRECEDING
+2021-01-04        MODIFIED_PRECEDING
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="Roll-Conventions">
+<h3>Roll Conventions<a class="headerlink" href="#Roll-Conventions" title="Link to this heading"></a></h3>
+<p>Roll Conventions (aka ‘roll rules’) govern the rolling forward (or backward) of dates when building schedules for financial instruments. Common roll rules include</p>
+<ol class="arabic simple">
+<li><p><strong>End-of-Month (EOF)</strong> Rolls to the last calender day of a month, adjusting for shorter month. E.g. if the start date is March 15 and frequency is set to monthly then future dates are April 15, May 15, etc.</p></li>
+<li><p><strong>Day-of-Month (DOF)</strong> Rolls to the same calender day each period. E. g. if the start date is Jan 31 and frequency is set to monthly then next dates are Feb 28 (or Feb 29 in leap years), March 31, etc.</p></li>
+<li><p><strong>IMM Dates</strong> Rolls to the 3rd Wednesday of March, June, Sept, dec (used in futures/swaps).</p></li>
+</ol>
+<p>Other roll rules may be defined by individual contracts, e.g. rules that link dates to a specific day of the week (“the first Monday of each month in year 2020”).</p>
+</section>
+</section>
+<section id="Schedules">
+<h2>Schedules<a class="headerlink" href="#Schedules" title="Link to this heading"></a></h2>
+<p>For different financial instruments such as bonds or swaps a vector for certain dates is needed. These vectors are usually called schedules. They may describe the dates where certain payments or other events (such as fixings) occur. Such schedules are normally based on some construction logic. The generation of schedules is therefore often governed by algorithms, which are called schedule generators. To create such a schedule with a generator, we have three main ingredients:</p>
+<ul class="simple">
+<li><p>A holiday calendar since most often schedules contain only business days,</p></li>
+<li><p>Periods describing the frequency of the dates such as monthly, yearly, quarterly etc.,</p></li>
+<li><p>a role convention that may adjust period end or start dates,</p></li>
+<li><p>a business day convention which defines what happens if the algorithm ends at a holiday.</p></li>
+</ul>
+<section id="Periods">
+<h3>Periods<a class="headerlink" href="#Periods" title="Link to this heading"></a></h3>
+<p>A period is described by the number of years/months/days and is the basis in the schedule generation.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">period_1yr</span> <span class="o">=</span> <span class="n">Period</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># create a period of 1 year (first argument of this method describes years, second month and last days)</span>
+<span class="n">period_3m</span> <span class="o">=</span> <span class="n">Period</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">period_30days</span> <span class="o">=</span> <span class="n">Period</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">30</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Schedule-generation">
+<h3>Schedule generation<a class="headerlink" href="#Schedule-generation" title="Link to this heading"></a></h3>
+<p>To create a schedule we first have to create a specification containing the information described above (holidays, periods, roll rules, business day conventions). We may then call the generate method to create a list of dates defining the schedule.</p>
+<p><strong>Additional Options:</strong></p>
+<ul class="simple">
+<li><p><strong>``backwards``</strong> <em>(bool, optional)</em>:
+Defines the direction for rolling out the schedule.</p>
+<ul>
+<li><p><strong>True</strong>: The schedule will be rolled out <em>backwards</em> (from the end day to the start day).</p></li>
+<li><p><strong>False</strong>: The schedule will be rolled out <em>forwards</em> (from the start day to the end day).</p></li>
+<li><p>Defaults to <strong>True</strong>.</p></li>
+</ul>
+</li>
+<li><p><strong>``stub``</strong> <em>(bool, optional)</em>:
+Defines the behavior for the first/last period when it is shorter than the others.</p>
+<ul>
+<li><p><strong>True</strong>: The first/last period is accepted even if it is shorter.</p></li>
+<li><p><strong>False</strong>: The remaining days of the shorter period are added to the neighboring period.</p></li>
+<li><p>Defaults to <strong>True</strong>.</p></li>
+</ul>
+</li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#no business day adjustments</span>
+<span class="n">unadjusted_schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">_roll_out</span><span class="p">(</span><span class="n">from_</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">to_</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">term</span><span class="o">=</span><span class="n">period_3m</span><span class="p">,</span> <span class="n">backwards</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                  <span class="n">long_stub</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="c1"># Show undajusted schedule</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unadjusted:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">unadjusted_schedule</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">date</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">()</span>
+
+<span class="c1"># adjust for business days (holidays and weekends)</span>
+<span class="n">schedule_2024_3m_period</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">start_day</span> <span class="o">=</span> <span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+                                    <span class="n">end_day</span> <span class="o">=</span> <span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+                                    <span class="n">time_period</span> <span class="o">=</span> <span class="n">period_3m</span><span class="p">,</span>
+                                    <span class="n">backwards</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                                    <span class="n">business_day_convention</span> <span class="o">=</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">MODIFIED_FOLLOWING</span><span class="p">,</span>
+                                    <span class="n">calendar</span> <span class="o">=</span> <span class="n">holidays</span><span class="o">.</span><span class="n">ECB</span><span class="p">())</span>
+<span class="n">adjusted_schedule</span> <span class="o">=</span> <span class="n">schedule_2024_3m_period</span><span class="o">.</span><span class="n">generate_dates</span><span class="p">(</span><span class="n">ends_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Adjusted for Working Day:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">adjusted_schedule</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">date</span><span class="p">())</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Unadjusted:
+2024-01-01
+2024-04-01
+2024-07-01
+2024-10-01
+2025-01-01
+
+Adjusted for Working Day:
+2024-01-02
+2024-04-02
+2024-07-01
+2024-10-01
+2025-01-02
+</pre></div></div>
+</div>
+</section>
+<section id="Day-Count-Conventions">
+<h3>Day Count Conventions<a class="headerlink" href="#Day-Count-Conventions" title="Link to this heading"></a></h3>
+<p>Let’s imagine we have a financial product (e.g. Bond) which pays us interest of 5% p.a. each month over a year. Additionally let’s ignore business days and assume we receive a coupon every month with the schedule being 01.01.2025, 01.02.2025, …, 01.01.2026. Without further information, it is not clear how the coupon (as a year fraction of 5% times Nominal) is calculated for each monthly period:</p>
+<ul class="simple">
+<li><p>Should the the coupon for the first period in January (01.01.2025 - 01.02.2025, 31 days) be the same as for the second period in February (01.02.2025 - 01.03.2025, 28 days)?</p></li>
+<li><p>Are the period start days e.g. 01.01.2025 or the period end days e.g. 01.01.2026 included or excluded in the calculation?</p></li>
+</ul>
+<p><strong>Day Count Conventions</strong> (or Date Conventions, Day Count Fractions) give answers to these questions by defining how the time between two dates is measured for financial calculations. They determine how interest accrues between dates. An official source on day count conventions as well as other market conventions can be found <a class="reference external" href="../../images/2006-isda-definitions.pdf">here</a>. For an overview you can check out <a class="reference external" href="../../images/Interest-Rate-Instruments-and-Market-Conventions.pdf">this</a>.</p>
+<section id="Actual/Actual-(ISDA)">
+<h4>Actual/Actual (ISDA)<a class="headerlink" href="#Actual/Actual-(ISDA)" title="Link to this heading"></a></h4>
+<p>This Day Count Convention counts the actual days between period start and period end date divided by the actual number of days in the year (365 or 366 in a leap year). If the period spans over a leap year and a normal year, the days are splitted and the year fraction is computed as:</p>
+<div class="math notranslate nohighlight">
+\[\frac{Days\; in\; non leap\; year}{365} + \frac{Days\; in\; leap\; year}{366}\]</div>
+<p>The <strong>first day</strong> in the period is <strong>included</strong>, the <strong>last day is excluded</strong>.</p>
+<p>Actual/Actual (ISDA) is primarily used in derivatives markets and swaps.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">DayCounter</span> <span class="k">as</span> <span class="n">dc</span>
+<span class="c1"># Here you see an example using rivapy</span>
+<span class="c1"># The period contains 31 days in the leap year 2024 and 31 days in the nonleap year 2025</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dc</span><span class="p">(</span><span class="s2">&quot;ActAct&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)))</span>   <span class="c1">#last day is excluded</span>
+<span class="nb">print</span><span class="p">(</span><span class="mi">31</span><span class="o">/</span><span class="mi">366</span><span class="o">+</span><span class="mi">31</span><span class="o">/</span><span class="mi">365</span><span class="p">)</span> <span class="c1"># Should be the same result</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+0.16963096040122763
+0.16963096040122763
+</pre></div></div>
+</div>
+</section>
+<section id="Actual/365-(Fixed)">
+<h4>Actual/365 (Fixed)<a class="headerlink" href="#Actual/365-(Fixed)" title="Link to this heading"></a></h4>
+<p>This can be seen as a simplification of the Actual/Actual (ISDA) Convention, where the denominator is always 365.</p>
+</section>
+<section id="Actual/360">
+<h4>Actual/360<a class="headerlink" href="#Actual/360" title="Link to this heading"></a></h4>
+<p>Same as the Convention above, but the denominator is always 360.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d1</span> <span class="o">=</span> <span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">d2</span> <span class="o">=</span> <span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Days in period:&quot;</span><span class="p">,(</span><span class="n">d2</span> <span class="o">-</span> <span class="n">d1</span><span class="p">)</span><span class="o">.</span><span class="n">days</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Act365Fixed:</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">dc</span><span class="p">(</span><span class="s2">&quot;Act365Fixed&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">))</span> <span class="c1"># equal to 366/365</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Act360:</span><span class="se">\t\t</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">dc</span><span class="p">(</span><span class="s2">&quot;Act360&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">))</span>         <span class="c1"># equal to 366/360</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Days in period: 366
+Act365Fixed:     1.0027397260273974
+Act360:          1.0166666666666666
+</pre></div></div>
+</div>
+</section>
+<section id="ACT/ACT-(ICMA)">
+<h4>ACT/ACT (ICMA)<a class="headerlink" href="#ACT/ACT-(ICMA)" title="Link to this heading"></a></h4>
+<p>This Day Count Convention is commonly used in bond markets to calculate the day count fraction, particularly for determining accrued interest and bond yields. It provides a standardized way to calculate the fraction of a year represented by a given period, based on actual calendar days and the bond’s coupon schedule.</p>
+<div class="math notranslate nohighlight">
+\[\text{Day Count Fraction} = \sum_{c\in \text{C}}\frac{\mathbb{I}\left(d_1 \leq c_{\text{end}} \land d_2 \geq c_{\text{start}}\right)\cdot\text{days}\left(\min(d_2, c_{\text{end}})-\max(d_1, c_{\text{start}})\right)}{\text{days}\left(d_2 - d_1\right)\cdot f_\text{Coupon}}\]</div>
+<p>Where:</p>
+<ul class="simple">
+<li><p><strong>:math:`C`</strong>: is the sorted set of coupon payment dates.</p></li>
+<li><p><strong>:math:`c_{text{start}}`</strong>: is the start date of the coupon period.</p></li>
+<li><p><strong>:math:`c_{text{end}}`</strong>: is the end date of the coupon period.</p></li>
+<li><p><strong>:math:`mathbb{I}left(dotsright)`</strong>: is an indicator function is returns 1 if the expression inside renders true, otherwise it returns 0.</p></li>
+<li><p><strong>:math:`text{days}(dots)`</strong>: returns the actual days between to dates.</p></li>
+<li><p><strong>:math:`f_text{Coupon}`</strong>: annual coupon frequency (1 for annualy coupon payment, 2 for semi annual etc.)</p></li>
+</ul>
+<p>The <strong>first day</strong> in the period is <strong>included</strong>, the <strong>last day is excluded</strong>.</p>
+<p><strong>Example</strong>: Semi-annual bond with last coupon on 1st May, next coupon on 1 November (number of days: 184). On 31st May, the year franction is calculated as:</p>
+<div class="math notranslate nohighlight">
+\[\frac{30}{184 \times 2} = \frac{30}{368}\]</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ACT/ACT ICMA is used for bonds and requires additional arguments for coupon payment dates and frequency</span>
+<span class="n">coupon_schedule</span> <span class="o">=</span> <span class="p">[</span><span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dc</span><span class="o">.</span><span class="n">yf_ActActICMA</span><span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">31</span><span class="p">),</span> <span class="n">coupon_schedule</span><span class="o">=</span><span class="n">coupon_schedule</span><span class="p">,</span> <span class="n">coupon_frequency</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="mi">30</span><span class="o">/</span><span class="mi">368</span><span class="p">)</span> <span class="c1"># Should be the same result</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+0.08152173913043478
+0.08152173913043478
+</pre></div></div>
+</div>
+</section>
+<section id="30/360-(ISDA)-or-%22Bond-Basis%22">
+<h4>30/360 (ISDA) or “Bond Basis”<a class="headerlink" href="#30/360-(ISDA)-or-%22Bond-Basis%22" title="Link to this heading"></a></h4>
+<p>This convention assumes that each month has 30 days and that the year has 360 days. The formula is therefore given by:</p>
+<div class="math notranslate nohighlight">
+\[\frac{360 (Y_{2} - Y_{1}) + 30(M_{2}-M_{1}) + D_{2}-D_{1}}{360}\]</div>
+<p>where</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(Y_{1}\)</span> is the year of the period start date.</p></li>
+<li><p><span class="math notranslate nohighlight">\(Y_{2}\)</span> is the year of the period end date (day immeadiately following last day included).</p></li>
+<li><p><span class="math notranslate nohighlight">\(M_{1}\)</span> is the month (expressed as a number) of the period start date.</p></li>
+<li><p><span class="math notranslate nohighlight">\(M_{2}\)</span> is the month (expressed as a number) of the period end date (day immeadiately following last day included).</p></li>
+<li><p><span class="math notranslate nohighlight">\(D_{1}\)</span> is the calendar day (expressed as a number) of the period start date, unless this number is 31, in which case <span class="math notranslate nohighlight">\(D_{1}\)</span> is set to 30.</p></li>
+<li><p><span class="math notranslate nohighlight">\(D_{2}\)</span> is the calendar day (expressed as a number) of the period end date (day immeadiately following last day included), unless this number is 31 and <span class="math notranslate nohighlight">\(D_{1}&gt;29\)</span>, in which case <span class="math notranslate nohighlight">\(D_{2}\)</span> is set to 30.</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># in this example we have 31 included days, because the period end date is excluded</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dc</span><span class="o">.</span><span class="n">yf_30360ISDA</span><span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)))</span>
+<span class="c1"># Y1=Y2=2025, M1=1, M2=2, D1=D2=1</span>
+<span class="c1"># the result should be 30/360=1/12=0,083333...</span>
+
+<span class="c1"># now we move the period one day back (still 31 included days)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dc</span><span class="o">.</span><span class="n">yf_30360ISDA</span><span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">31</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">31</span><span class="p">)))</span>
+<span class="c1"># Y1=2024, Y2=2025, M1=12, M2=1, D1=D2=30</span>
+<span class="c1"># the result should be (360+30*(-11))/360=1/12=0,083333...</span>
+<span class="c1"># and same as picking one or both of the calendar days to 30th e.g. date(2024,12,30) and date(2025,1,31)</span>
+
+<span class="c1"># we pick a period where D1 and D2 is not adjusted (still 31 included days)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dc</span><span class="o">.</span><span class="n">yf_30360ISDA</span><span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">29</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">30</span><span class="p">)))</span>
+<span class="c1"># Y1=Y2=2025, M1=4, M2=5, D1=29, D2=30</span>
+<span class="c1"># the result should be (30+1)/360=0,08611111...</span>
+
+<span class="c1"># moving the period one day forward changes D1 but not D2 (still 31 included days)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dc</span><span class="o">.</span><span class="n">yf_30360ISDA</span><span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">30</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">31</span><span class="p">)))</span>
+<span class="c1"># Y1=Y2=2025, M1=4, M2=5, D1=30, D2=30 (because D1&gt;29)</span>
+<span class="c1"># the result should be 30/360=1/12=0,083333...</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+0.08333333333333333
+0.08333333333333337
+0.08611111111111111
+0.08333333333333333
+</pre></div></div>
+</div>
+</section>
+<section id="30E/360-or-%22Eurobond-Basis%22">
+<h4>30E/360 or “Eurobond Basis”<a class="headerlink" href="#30E/360-or-%22Eurobond-Basis%22" title="Link to this heading"></a></h4>
+<p>This convention follows the same formula as the previous 30/360 (ISDA) convention, but has a simpler adjustment to <span class="math notranslate nohighlight">\(D_{2}\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\frac{360 (Y_{2} - Y_{1}) + 30(M_{2}-M_{1}) + D_{2}-D_{1}}{360}\]</div>
+<p>where</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(Y_{1}\)</span> is the year of the period start date.</p></li>
+<li><p><span class="math notranslate nohighlight">\(Y_{2}\)</span> is the year of the period end date (day immeadiately following last day included).</p></li>
+<li><p><span class="math notranslate nohighlight">\(M_{1}\)</span> is the month (expressed as a number) of the period start date.</p></li>
+<li><p><span class="math notranslate nohighlight">\(M_{2}\)</span> is the month (expressed as a number) of the period end date (day immeadiately following last day included).</p></li>
+<li><p><span class="math notranslate nohighlight">\(D_{1}\)</span> is the calendar day (expressed as a number) of the period start date, unless this number is 31, in which case <span class="math notranslate nohighlight">\(D_{1}\)</span> is set to 30.</p></li>
+<li><p><span class="math notranslate nohighlight">\(D_{2}\)</span> is the calendar day (expressed as a number) of the period end date (day immeadiately following last day included), <strong>unless this number is 31, in which case :math:`D_{2}` is set to 30</strong>.</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># all of the examples below have the same result</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dc</span><span class="o">.</span><span class="n">yf_30E360</span><span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">31</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">31</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dc</span><span class="o">.</span><span class="n">yf_30E360</span><span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">31</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">30</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dc</span><span class="o">.</span><span class="n">yf_30E360</span><span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">30</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">31</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dc</span><span class="o">.</span><span class="n">yf_30E360</span><span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">30</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">30</span><span class="p">)))</span>
+<span class="c1"># Y1=2024, Y2=2025, M1=12, M2=1, D1=D2=30</span>
+<span class="c1"># the result should be (360+30*(-11))/360=1/12=0,083333...</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+0.08333333333333337
+0.08333333333333337
+0.08333333333333337
+0.08333333333333337
+</pre></div></div>
+</div>
+</section>
+<section id="30U/360-or-30/360-US">
+<h4>30U/360 or 30/360 US<a class="headerlink" href="#30U/360-or-30/360-US" title="Link to this heading"></a></h4>
+<p>This convention is also known as the 30/360 U.S. Treasury method and is an extension the 30/360 (ISDA) convention. The only difference is the handling of the last day in february:</p>
+<div class="math notranslate nohighlight">
+\[\frac{360 (Y_{2} - Y_{1}) + 30(M_{2}-M_{1}) + D_{2}-D_{1}}{360}\]</div>
+<p>where</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(Y_{1}\)</span> is the year of the period start date.</p></li>
+<li><p><span class="math notranslate nohighlight">\(Y_{2}\)</span> is the year of the period end date (day immeadiately following last day included).</p></li>
+<li><p><span class="math notranslate nohighlight">\(M_{1}\)</span> is the month (expressed as a number) of the period start date.</p></li>
+<li><p><span class="math notranslate nohighlight">\(M_{2}\)</span> is the month (expressed as a number) of the period end date (day immeadiately following last day included).</p></li>
+<li><p><span class="math notranslate nohighlight">\(D_{1}\)</span> is the calendar day (expressed as a number) of the period start date, unless:</p>
+<ul>
+<li><p>if <span class="math notranslate nohighlight">\(D_{1}=31\)</span>, set <span class="math notranslate nohighlight">\(D_{1}=30\)</span>.</p></li>
+<li><p><strong>if :math:`D_{1}` is the last day of february</strong> (<span class="math notranslate nohighlight">\(M_{1}=2\)</span>, <span class="math notranslate nohighlight">\(D_{1}=29\)</span> in leap years or <span class="math notranslate nohighlight">\(D_{1}=28\)</span> in nonleap years), <strong>set :math:`D_{1}=30`</strong></p></li>
+</ul>
+</li>
+<li><p><span class="math notranslate nohighlight">\(D_{2}\)</span> is the calendar day (expressed as a number) of the period end date (day immeadiately following last day included), unless:</p>
+<ul>
+<li><p>if <span class="math notranslate nohighlight">\(D_{2}=31\)</span> and <span class="math notranslate nohighlight">\(D_{1}&gt;29\)</span>, set <span class="math notranslate nohighlight">\(D_{2}=30\)</span>.</p></li>
+<li><p><strong>if :math:`D_{1}` and :math:`D_{2}` are the last days of february, set :math:`D_{2}=30`</strong>.</p></li>
+</ul>
+</li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">dc</span><span class="o">.</span><span class="n">yf_30U360</span><span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">29</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">28</span><span class="p">)))</span>
+<span class="c1">#Y1=2024, Y2=2025, M1=M2=2, D1=D2=30</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">dc</span><span class="o">.</span><span class="n">yf_30U360</span><span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">28</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">28</span><span class="p">)))</span>
+<span class="c1">#Y1=2024, Y2=2025, M1=M2=2, D1=D2=28</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">dc</span><span class="o">.</span><span class="n">yf_30U360</span><span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">28</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">28</span><span class="p">)))</span> <span class="c1"># (360+28-30)/360</span>
+<span class="c1">#Y1=2023, Y2=2024, M1=M2=2, D1=30, D2=28</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+1.0
+1.0
+0.9944444444444445
+</pre></div></div>
+</div>
+<p>Below you can find a function printing all the introduced Day Count Conventions at once for a specified period:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">DayCounter</span> <span class="k">as</span> <span class="n">dc</span>
+
+<span class="c1"># this is how you can get the year fraction based on a date count convention in rivapy:</span>
+<span class="c1"># Options:</span>
+<span class="c1">#</span>
+<span class="c1">#   - &quot;ActActICMA&quot;</span>
+<span class="c1">#   - &quot;Act365Fixed&quot;</span>
+<span class="c1">#   - &quot;ActAct&quot;</span>
+<span class="c1">#   - &quot;Act360&quot;</span>
+<span class="c1">#   - &quot;30U360&quot;</span>
+<span class="c1">#   - &quot;30E360&quot;</span>
+<span class="c1">#   - &quot;30360ISDA&quot;</span>
+<span class="n">d1</span> <span class="o">=</span> <span class="n">date</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">31</span><span class="p">)</span>
+<span class="n">d2</span> <span class="o">=</span> <span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">coupon_schedule</span> <span class="o">=</span> <span class="p">[</span><span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="n">dc</span><span class="p">(</span><span class="s2">&quot;ActAct&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">)</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="n">dc</span><span class="o">.</span><span class="n">yf_ActActICMA</span><span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">31</span><span class="p">),</span> <span class="n">coupon_schedule</span><span class="o">=</span><span class="n">coupon_schedule</span><span class="p">,</span> <span class="n">coupon_frequency</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="c1">#printing all implemented types in rivapy</span>
+
+<span class="k">def</span> <span class="nf">show_day_counter</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span><span class="n">d2</span><span class="p">,</span><span class="n">dc_names</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dc_names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">dc_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">dc_names</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;d1&quot;</span><span class="o">+</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">d1</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;d2&quot;</span><span class="o">+</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">d2</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">dc_name</span> <span class="ow">in</span> <span class="n">dc_names</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dc_name</span> <span class="o">!=</span> <span class="s2">&quot;ActActICMA&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">dc_name</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span><span class="p">,</span><span class="n">dc</span><span class="p">(</span><span class="n">dc_name</span><span class="p">)</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span><span class="n">d2</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">dc_name</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span><span class="p">,</span><span class="n">dc</span><span class="o">.</span><span class="n">yf_ActActICMA</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">coupon_schedule</span><span class="o">=</span><span class="n">coupon_schedule</span><span class="p">,</span> <span class="n">coupon_frequency</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="n">show_day_counter</span><span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">1</span><span class="p">),[</span><span class="s2">&quot;ActActICMA&quot;</span><span class="p">,</span><span class="s2">&quot;30360ISDA&quot;</span><span class="p">,</span><span class="s2">&quot;30E360&quot;</span><span class="p">,</span> <span class="s2">&quot;30U360&quot;</span><span class="p">,</span><span class="s2">&quot;ActAct&quot;</span><span class="p">,</span> <span class="s2">&quot;Act360&quot;</span><span class="p">,</span><span class="s2">&quot;Act365Fixed&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+0.08241758241758242
+d1: 2024-01-01
+d2: 2024-07-01
+ActActICMA: 0.5
+30360ISDA: 0.5
+30E360: 0.5
+30U360: 0.5
+ActAct: 0.4972677595628415
+Act360: 0.5055555555555555
+Act365Fixed: 0.4986301369863014
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d1</span> <span class="o">=</span> <span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">29</span><span class="p">)</span>
+<span class="n">delta</span> <span class="o">=</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">years</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">months</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">days</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">d2</span> <span class="o">=</span> <span class="n">d1</span> <span class="o">+</span> <span class="n">delta</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;d1:&quot;</span><span class="p">,</span> <span class="n">d1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;d2:&quot;</span><span class="p">,</span> <span class="n">d2</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+d1: 2024-02-29
+d2: 2024-03-29
+</pre></div></div>
+</div>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../instruments/ir_swap.html" class="btn btn-neutral float-left" title="Interest Rate Swap" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../rivapy/index.html" class="btn btn-neutral float-right" title="Module Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

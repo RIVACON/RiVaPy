@@ -56,10 +56,12 @@
 <li class="toctree-l2"><a class="reference internal" href="../marketdata_tools/index.html">Market Data Tools</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">Instruments</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="index.html#rivapy.instruments.ComboSpecification"><code class="docutils literal notranslate"><span class="pre">ComboSpecification</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="rate.html">Interest Rate Instruments</a></li>
 <li class="toctree-l3"><a class="reference internal" href="equity.html">Equity Instruments</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Credit Instruments</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#bonds">Bonds</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-rivapy.instruments.cds_specification">Credit Default Swaps</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#deposits">Deposits</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="power.html">Power Instruments</a></li>
@@ -110,9 +112,14 @@
 <section id="bonds">
 <h2>Bonds<a class="headerlink" href="#bonds" title="Link to this heading"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.ZeroCouponBondSpecification">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.instruments.bond_specifications.</span></span><span class="sig-name descname"><span class="pre">ZeroCouponBondSpecification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issue_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maturity_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">currency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'EUR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notional</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">securitization_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.SecuritizationLevel" title="rivapy.tools.enums.SecuritizationLevel"><span class="pre">SecuritizationLevel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rating</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Rating</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Rating.NONE</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/bond_specifications.html#ZeroCouponBondSpecification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.bond_specifications.ZeroCouponBondSpecification" title="Link to this definition"></a></dt>
-<dd><p>Zero coupon bond specification.</p>
+<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.BondBaseSpecification">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.instruments.bond_specifications.</span></span><span class="sig-name descname"><span class="pre">BondBaseSpecification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issue_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maturity_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">currency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Currency</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'EUR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notional</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NotionalStructure</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amortization_scheme</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AmortizationScheme</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">securitization_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.SecuritizationLevel" title="rivapy.tools.enums.SecuritizationLevel"><span class="pre">SecuritizationLevel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NONE'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rating</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Rating</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NONE'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day_count_convention</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.DayCounterType" title="rivapy.tools.enums.DayCounterType"><span class="pre">DayCounterType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ACT360'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">business_day_convention</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.RollConvention" title="rivapy.tools.enums.RollConvention"><span class="pre">RollConvention</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ModifiedFollowing'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll_convention</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RollRule</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NONE'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calendar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">HolidayBase</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/bond_specifications.html#BondBaseSpecification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.bond_specifications.BondBaseSpecification" title="Link to this definition"></a></dt>
+<dd><p>Base class for bond-like instrument specifications.</p>
+<p>This class implements common properties shared by bonds, deposits and other
+deterministic cashflow instruments such as issue/maturity dates, notional
+handling, currency and basic validation. Subclasses should implement
+instrument-specific schedule and cashflow behaviour.</p>
+<p>Base bond specification.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -128,62 +135,243 @@
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.ZeroCouponBondSpecification._create_sample">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_create_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_levels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">currencies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/bond_specifications.html#ZeroCouponBondSpecification._create_sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.bond_specifications.ZeroCouponBondSpecification._create_sample" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.ZeroCouponBondSpecification.expected_cashflows">
-<span class="sig-name descname"><span class="pre">expected_cashflows</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/rivapy/instruments/bond_specifications.html#ZeroCouponBondSpecification.expected_cashflows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.bond_specifications.ZeroCouponBondSpecification.expected_cashflows" title="Link to this definition"></a></dt>
-<dd><p>Return a list of all expected cashflows (here only the final notional) together with their payment date.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The resulting list of all cashflows.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>_List[Tuple[datetime, float]]</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.PlainVanillaCouponBondSpecification">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.instruments.bond_specifications.</span></span><span class="sig-name descname"><span class="pre">PlainVanillaCouponBondSpecification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issue_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maturity_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accrual_start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coupon_freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coupon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">currency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'EUR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notional</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">securitization_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.SecuritizationLevel" title="rivapy.tools.enums.SecuritizationLevel"><span class="pre">SecuritizationLevel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stub</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rating</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Rating</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Rating.NONE</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/bond_specifications.html#PlainVanillaCouponBondSpecification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.bond_specifications.PlainVanillaCouponBondSpecification" title="Link to this definition"></a></dt>
-<dd><p>PlainVanillaCouponBond specification.</p>
+<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.BondBaseSpecification._create_sample">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_create_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_levels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">currencies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/rivapy/instruments/bond_specifications.html#BondBaseSpecification._create_sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.bond_specifications.BondBaseSpecification._create_sample" title="Link to this definition"></a></dt>
+<dd><p>Create a small list of example bond specifications for testing.</p>
+<p>This helper generates a list of dictionaries that mimic the kwargs used
+to construct bond specifications. It is intended for internal testing
+and examples only.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>obj_id</strong> (<em>str</em>) – (Preferably) Unique label of the bond, e.g. ISIN.</p></li>
-<li><p><strong>issue_date</strong> (<em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – Date of bond issuance.</p></li>
-<li><p><strong>maturity_date</strong> (<em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – Bond’s maturity/expiry date. Must lie after the issue_date.</p></li>
-<li><p><strong>first_coupondate</strong> (<em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The first coupon date.</p></li>
-<li><p><strong>coupon_freq</strong> (<em>str</em>) – Frequency of coupons. Defaults to ‘1Y’ for yearly. Internally, the method <a class="reference internal" href="../rivapy.tools.html#rivapy.tools.Period.from_string" title="rivapy.tools.Period.from_string"><code class="xref py py-func docutils literal notranslate"><span class="pre">rivapy.tools.Period.from_string()</span></code></a> is used, see the definition of valid strings there.</p></li>
-<li><p><strong>coupon</strong> (<em>float</em>) – Coupon as relative number (multiplied internaly by notional to get absolute cashflow).</p></li>
-<li><p><strong>currency</strong> (<em>str</em><em>, </em><em>optional</em>) – Currency as alphabetic, Defaults to ‘EUR’.</p></li>
-<li><p><strong>notional</strong> (<em>float</em><em>, </em><em>optional</em>) – Bond’s notional/face value. Must be positive. Defaults to 100.0.</p></li>
-<li><p><strong>issuer</strong> (<em>str</em><em>, </em><em>optional</em>) – Name/id of issuer. Defaults to None.</p></li>
-<li><p><strong>securitization_level</strong> (<em>_Union</em><em>[</em><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.SecuritizationLevel" title="rivapy.tools.enums.SecuritizationLevel"><em>SecuritizationLevel</em></a><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Securitization level. Defaults to None.</p></li>
-<li><p><strong>rating</strong> (<em>_Union</em><em>[</em><em>Rating</em><em>, </em><em>str</em><em>]</em>) – Paper rating.</p></li>
+<li><p><strong>n_samples</strong> (<em>int</em>) – Number of sample entries to generate.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – RNG seed for reproducible samples.</p></li>
+<li><p><strong>ref_date</strong> (<em>date</em><em> | </em><em>datetime</em><em>, </em><em>optional</em>) – Reference date for issue/maturity generation.</p></li>
+<li><p><strong>issuers</strong> (<em>List</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Optional pool of issuer names to sample from.</p></li>
+<li><p><strong>sec_levels</strong> (<em>List</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Optional securitization levels to sample from.</p></li>
+<li><p><strong>currencies</strong> (<em>List</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Optional currencies to sample from.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of parameter dictionaries usable to create bond specs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.BondBaseSpecification.business_day_convention">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">business_day_convention</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.bond_specifications.BondBaseSpecification.business_day_convention" title="Link to this definition"></a></dt>
+<dd><p>Getter for FRA’s day count convention.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FRA’s day count convention.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.BondBaseSpecification.calendar">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calendar</span></span><a class="headerlink" href="#rivapy.instruments.bond_specifications.BondBaseSpecification.calendar" title="Link to this definition"></a></dt>
+<dd><p>Getter for the calendar used for business day adjustment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The calendar used for business day adjustment.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.BondBaseSpecification.currency">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">currency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.bond_specifications.BondBaseSpecification.currency" title="Link to this definition"></a></dt>
+<dd><p>Getter for bond’s currency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Bond’s ISO 4217 currency code</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.BondBaseSpecification.day_count_convention">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">day_count_convention</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.bond_specifications.BondBaseSpecification.day_count_convention" title="Link to this definition"></a></dt>
+<dd><p>Getter for instruments’s day count convention.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>instruments’s day count convention.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.BondBaseSpecification.issue_date">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">issue_date</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">date</span></em><a class="headerlink" href="#rivapy.instruments.bond_specifications.BondBaseSpecification.issue_date" title="Link to this definition"></a></dt>
+<dd><p>Getter for bond’s issue date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Bond’s issue date.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>date</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.BondBaseSpecification.issuer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">issuer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.bond_specifications.BondBaseSpecification.issuer" title="Link to this definition"></a></dt>
+<dd><p>Getter for instrument’s issuer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Instrument’s issuer.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.BondBaseSpecification.maturity_date">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">maturity_date</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">date</span></em><a class="headerlink" href="#rivapy.instruments.bond_specifications.BondBaseSpecification.maturity_date" title="Link to this definition"></a></dt>
+<dd><p>Getter for bond’s maturity date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Bond’s maturity date.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>date</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.BondBaseSpecification.notional">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">notional</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">NotionalStructure</span></em><a class="headerlink" href="#rivapy.instruments.bond_specifications.BondBaseSpecification.notional" title="Link to this definition"></a></dt>
+<dd><p>Getter for bond’s face value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Bond’s face value.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.BondBaseSpecification.notional_amount">
+<span class="sig-name descname"><span class="pre">notional_amount</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/instruments/bond_specifications.html#BondBaseSpecification.notional_amount"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.bond_specifications.BondBaseSpecification.notional_amount" title="Link to this definition"></a></dt>
+<dd><p>Get the notional amount at a specific date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>index</strong> (<em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>, </em><em>int</em><em>]</em>) – The index for which to get the notional amount, may be a date or an integer index. If None, returns the full notional structure.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The notional amount at the specified index.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.BondBaseSpecification.rating">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rating</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.bond_specifications.BondBaseSpecification.rating" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.BondBaseSpecification.roll_convention">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">roll_convention</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.bond_specifications.BondBaseSpecification.roll_convention" title="Link to this definition"></a></dt>
+<dd><p>Getter for the roll convention used for business day adjustment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The roll convention used for business day adjustment.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.BondBaseSpecification.securitization_level">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">securitization_level</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.bond_specifications.BondBaseSpecification.securitization_level" title="Link to this definition"></a></dt>
+<dd><p>Getter for instrument’s securitisation level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Instrument’s securitisation level.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.BondBaseSpecification.set_amortization_scheme">
+<span class="sig-name descname"><span class="pre">set_amortization_scheme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amortization_scheme</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AmortizationScheme</span></span></span><a class="reference internal" href="../../_modules/rivapy/instruments/bond_specifications.html#BondBaseSpecification.set_amortization_scheme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.bond_specifications.BondBaseSpecification.set_amortization_scheme" title="Link to this definition"></a></dt>
+<dd><p>Resolve an amortization scheme descriptor into an AmortizationScheme.</p>
+<dl class="simple">
+<dt>Accepts one of:</dt><dd><ul class="simple">
+<li><p>None: returns a ZeroAmortizationScheme</p></li>
+<li><p>str: resolves the identifier via AmortizationScheme._from_string</p></li>
+<li><p>AmortizationScheme instance: returned unchanged</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.PlainVanillaCouponBondSpecification._create_sample">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_create_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_levels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">currencies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/bond_specifications.html#PlainVanillaCouponBondSpecification._create_sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.bond_specifications.PlainVanillaCouponBondSpecification._create_sample" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>amortization_scheme</strong> (<em>None</em><em> | </em><em>str</em><em> | </em><em>AmortizationScheme</em>) – descriptor.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>concrete amortization scheme object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>AmortizationScheme</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if the provided argument type is not supported.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.PlainVanillaCouponBondSpecification.expected_cashflows">
-<span class="sig-name descname"><span class="pre">expected_cashflows</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/rivapy/instruments/bond_specifications.html#PlainVanillaCouponBondSpecification.expected_cashflows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.bond_specifications.PlainVanillaCouponBondSpecification.expected_cashflows" title="Link to this definition"></a></dt>
-<dd><p>Return a list of all expected cashflows (final notional and coupons) together with their payment date.</p>
+<dt class="sig sig-object py" id="rivapy.instruments.bond_specifications.BondBaseSpecification.set_notional_structure">
+<span class="sig-name descname"><span class="pre">set_notional_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">notional</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amortization_scheme</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NotionalStructure</span></span></span><a class="reference internal" href="../../_modules/rivapy/instruments/bond_specifications.html#BondBaseSpecification.set_notional_structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.bond_specifications.BondBaseSpecification.set_notional_structure" title="Link to this definition"></a></dt>
+<dd><p>Create or validate the notional structure for this instrument.</p>
+<p>The function accepts numeric notionals (int/float) and converts them to
+a concrete NotionalStructure (constant, linear, or variable) depending
+on the provided amortization scheme. If a NotionalStructure instance is
+provided it is validated / passed through.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The resulting list of all cashflows.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>notional</strong> (<em>NotionalStructure</em><em> | </em><em>int</em><em> | </em><em>float</em>) – notional or notional descriptor.</p></li>
+<li><p><strong>amortization_scheme</strong> (<em>AmortizationScheme</em><em> | </em><em>None</em>) – resolved amortization scheme
+that controls which notional structure is appropriate.</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>_List[Tuple[datetime, float]]</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>instance representing the instrument notional.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NotionalStructure</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – when inputs cannot be converted into a valid notional structure.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -216,6 +404,104 @@
 <dt class="sig sig-object py" id="rivapy.instruments.cds_specification.CDSSpecification.validate">
 <span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/cds_specification.html#CDSSpecification.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.cds_specification.CDSSpecification.validate" title="Link to this definition"></a></dt>
 <dd><p>Some simple validation</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="deposits">
+<h2>Deposits<a class="headerlink" href="#deposits" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.instruments.deposit_specifications.DepositSpecification">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.instruments.deposit_specifications.</span></span><span class="sig-name descname"><span class="pre">DepositSpecification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issue_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maturity_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">currency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Currency</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'EUR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notional</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NotionalStructure</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.Period" title="rivapy.tools.datetools.Period"><span class="pre">Period</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day_count_convention</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.DayCounterType" title="rivapy.tools.enums.DayCounterType"><span class="pre">DayCounterType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ACT360'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">business_day_convention</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.RollConvention" title="rivapy.tools.enums.RollConvention"><span class="pre">RollConvention</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ModifiedFollowing'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll_convention</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RollRule</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'EOM'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spot_days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calendar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">HolidayBase</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="components.html#rivapy.instruments.components.Issuer" title="rivapy.instruments.components.Issuer"><span class="pre">Issuer</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">securitization_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.SecuritizationLevel" title="rivapy.tools.enums.SecuritizationLevel"><span class="pre">SecuritizationLevel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NONE'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payment_days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjust_start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjust_end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/deposit_specifications.html#DepositSpecification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.deposit_specifications.DepositSpecification" title="Link to this definition"></a></dt>
+<dd><p>Create a short-term deposit specification.</p>
+<p>Accrual start is adjusted according to the provided business day convention. Payment
+occurs on the maturity date (plus any settlement/payment days). For overnight (“O/N”)
+and tomorrow-next (“T/N”) deposits the <a href="#id1"><span class="problematic" id="id2">:pyarg:`spot_days`</span></a> is set to 0 and 1,
+respectively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj_id</strong> (<em>str</em>) – Identifier for the deposit (e.g. ISIN or internal id).</p></li>
+<li><p><strong>issue_date</strong> (<em>date</em><em> | </em><em>datetime</em><em>, </em><em>optional</em>) – Fixing date and start date (of accrual period) of the deposit
+is calculated based on the provided issue date given <a href="#id3"><span class="problematic" id="id4">:pyarg:`spot_days`</span></a> and <a href="#id5"><span class="problematic" id="id6">:pyarg:`adjust_start_date`</span></a>. Required
+if <a href="#id7"><span class="problematic" id="id8">:pyarg:`maturity_date`</span></a> is computed from <a href="#id9"><span class="problematic" id="id10">:pyarg:`term`</span></a>.</p></li>
+<li><p><strong>maturity_date</strong> (<em>date</em><em> | </em><em>datetime</em><em>, </em><em>optional</em>) – Maturity date. If <code class="docutils literal notranslate"><span class="pre">None</span></code> and
+<a href="#id11"><span class="problematic" id="id12">:pyarg:`term`</span></a> is provided, the maturity will be derived from
+<a href="#id13"><span class="problematic" id="id14">:pyarg:`issue_date`</span></a> and <a href="#id15"><span class="problematic" id="id16">:pyarg:`term`</span></a>. Corresponds to end date (of accrual period). If non business day, always adjusted according to
+<a href="#id17"><span class="problematic" id="id18">:pyarg:`business_day_convention`</span></a> while end date adjustment is controlled by <a href="#id19"><span class="problematic" id="id20">:pyarg:`adjust_end_date`</span></a>.</p></li>
+<li><p><strong>currency</strong> (<em>Currency</em><em> | </em><em>str</em><em>, </em><em>optional</em>) – Currency code or enum. Defaults to “EUR”.</p></li>
+<li><p><strong>notional</strong> (<em>NotionalStructure</em><em> | </em><em>float</em><em>, </em><em>optional</em>) – Face value; maybe passed as float or notional structure, amount must be positive. Defaults to 100.0.</p></li>
+<li><p><strong>rate</strong> (<em>float</em><em>, </em><em>optional</em>) – Fixed deposit rate (coupon). Defaults to 0.0.</p></li>
+<li><p><strong>term</strong> (<a class="reference internal" href="../rivapy.tools.html#rivapy.tools.Period" title="rivapy.tools.Period"><em>Period</em></a><em> | </em><em>str</em><em>, </em><em>optional</em>) – Tenor of the deposit (e.g. “3M”, “1Y”, “O/N”, “T/N”).</p></li>
+<li><p><strong>day_count_convention</strong> (<a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.DayCounterType" title="rivapy.tools.enums.DayCounterType"><em>DayCounterType</em></a><em> | </em><em>str</em><em>, </em><em>optional</em>) – Day count convention.
+Defaults to <a href="#id21"><span class="problematic" id="id22">:pydata:`DayCounterType.ACT360`</span></a>.</p></li>
+<li><p><strong>business_day_convention</strong> (<a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.RollConvention" title="rivapy.tools.enums.RollConvention"><em>RollConvention</em></a><em> | </em><em>str</em><em>, </em><em>optional</em>) – Business day convention
+used for rolling dates. Defaults to <a href="#id23"><span class="problematic" id="id24">:pydata:`RollConvention.MODIFIED_FOLLOWING`</span></a>.</p></li>
+<li><p><strong>roll_convention</strong> (<em>RollRule</em><em> | </em><em>str</em><em>, </em><em>optional</em>) – Roll rule when building schedules.
+Defaults to <a href="#id25"><span class="problematic" id="id26">:pydata:`RollRule.EOM`</span></a>.</p></li>
+<li><p><strong>spot_days</strong> (<em>int</em><em>, </em><em>optional</em>) – Settlement lag in days. Defaults to 2; overridden to 0
+for O/N and 1 for T/N when <a href="#id27"><span class="problematic" id="id28">:pyarg:`term`</span></a> is set accordingly.</p></li>
+<li><p><strong>calendar</strong> (<em>HolidayBase</em><em> | </em><em>str</em><em>, </em><em>optional</em>) – Holiday calendar to use. Defaults to ECB.</p></li>
+<li><p><strong>issuer</strong> (<a class="reference internal" href="components.html#rivapy.instruments.components.Issuer" title="rivapy.instruments.components.Issuer"><em>Issuer</em></a><em> | </em><em>str</em><em>, </em><em>optional</em>) – Issuer identifier.</p></li>
+<li><p><strong>securitization_level</strong> (<a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.SecuritizationLevel" title="rivapy.tools.enums.SecuritizationLevel"><em>SecuritizationLevel</em></a><em> | </em><em>str</em><em>, </em><em>optional</em>) – Securitization level.
+Defaults to <a href="#id29"><span class="problematic" id="id30">:pydata:`SecuritizationLevel.NONE`</span></a>.</p></li>
+<li><p><strong>payment_days</strong> (<em>int</em><em>, </em><em>optional</em>) – Days after maturity when payment occurs. Defaults to 0.</p></li>
+<li><p><strong>adjust_start_date</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, roll <a href="#id31"><span class="problematic" id="id32">:pyarg:`issue_date`</span></a> forward to a
+business day when required, to ensure accrual starts on a business day. The adjusted date will be used for calculations. Defaults to True.</p></li>
+<li><p><strong>adjust_end_date</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, roll <a href="#id33"><span class="problematic" id="id34">:pyarg:`maturity_date`</span></a> forward to a
+business day when required, to ensure accrual ends on a business day. The adjusted date will be used for calculations. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If neither <a href="#id35"><span class="problematic" id="id36">:pyarg:`maturity_date`</span></a> nor <a href="#id37"><span class="problematic" id="id38">:pyarg:`term`</span></a> is provided, or if
+    <a href="#id39"><span class="problematic" id="id40">:pyarg:`issue_date`</span></a> is required to compute <a href="#id41"><span class="problematic" id="id42">:pyarg:`maturity_date`</span></a> but is missing.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.instruments.deposit_specifications.DepositSpecification._create_sample">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_create_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_levels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">currencies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rivapy.instruments.deposit_specifications.DepositSpecification" title="rivapy.instruments.deposit_specifications.DepositSpecification"><span class="pre">DepositSpecification</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/rivapy/instruments/deposit_specifications.html#DepositSpecification._create_sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.deposit_specifications.DepositSpecification._create_sample" title="Link to this definition"></a></dt>
+<dd><p>Create a small list of example bond specifications for testing.</p>
+<p>This helper generates a list of dictionaries that mimic the kwargs used
+to construct bond specifications. It is intended for internal testing
+and examples only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_samples</strong> (<em>int</em>) – Number of sample entries to generate.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – RNG seed for reproducible samples.</p></li>
+<li><p><strong>ref_date</strong> (<em>date</em><em> | </em><em>datetime</em><em>, </em><em>optional</em>) – Reference date for issue/maturity generation.</p></li>
+<li><p><strong>issuers</strong> (<em>List</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Optional pool of issuer names to sample from.</p></li>
+<li><p><strong>sec_levels</strong> (<em>List</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Optional securitization levels to sample from.</p></li>
+<li><p><strong>currencies</strong> (<em>List</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Optional currencies to sample from.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of parameter dictionaries usable to create bond specs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.instruments.deposit_specifications.DepositSpecification.get_end_date">
+<span class="sig-name descname"><span class="pre">get_end_date</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/deposit_specifications.html#DepositSpecification.get_end_date"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.deposit_specifications.DepositSpecification.get_end_date" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.instruments.deposit_specifications.DepositSpecification.ins_type">
+<span class="sig-name descname"><span class="pre">ins_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/deposit_specifications.html#DepositSpecification.ins_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.deposit_specifications.DepositSpecification.ins_type" title="Link to this definition"></a></dt>
+<dd><p>Return instrument type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Forward rate agreement</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Instrument</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

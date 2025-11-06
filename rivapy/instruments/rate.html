@@ -1,0 +1,732 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interest Rate Instruments &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=d2ebc91c" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.svg"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Equity Instruments" href="equity.html" />
+    <link rel="prev" title="Instruments" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Module Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../marketdata/index.html">Market Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../marketdata_tools/index.html">Market Data Tools</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Instruments</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="index.html#rivapy.instruments.ComboSpecification"><code class="docutils literal notranslate"><span class="pre">ComboSpecification</span></code></a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Interest Rate Instruments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#forward-rate-agreement">Forward Rate Agreement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#interest">Interest</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="equity.html">Equity Instruments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="credit.html">Credit Instruments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="power.html">Power Instruments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="components.html">Components</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../models/index.html">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pricing/index.html">Pricing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rivapy.tools.html">Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rivapy.interfaces.html">Interfaces</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../search.html">Search Page</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module Documentation</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Instruments</a></li>
+      <li class="breadcrumb-item active">Interest Rate Instruments</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/rivapy/instruments/rate.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="interest-rate-instruments">
+<h1>Interest Rate Instruments<a class="headerlink" href="#interest-rate-instruments" title="Link to this heading"></a></h1>
+<p>This section contains financial instruments w.r.t. interest rates whose credit component is x.</p>
+<section id="forward-rate-agreement">
+<h2>Forward Rate Agreement<a class="headerlink" href="#forward-rate-agreement" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.instruments.fra_specifications.</span></span><span class="sig-name descname"><span class="pre">ForwardRateAgreementSpecification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trade_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notional</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">udlID</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate_start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate_end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maturity_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day_count_convention</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.DayCounterType" title="rivapy.tools.enums.DayCounterType"><span class="pre">DayCounterType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DayCounterType.ThirtyU360</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">business_day_convention</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.RollConvention" title="rivapy.tools.enums.RollConvention"><span class="pre">RollConvention</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">RollConvention.FOLLOWING</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate_day_count_convention</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.DayCounterType" title="rivapy.tools.enums.DayCounterType"><span class="pre">DayCounterType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DayCounterType.ThirtyU360</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate_business_day_convention</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.RollConvention" title="rivapy.tools.enums.RollConvention"><span class="pre">RollConvention</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">RollConvention.FOLLOWING</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calendar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">HolidayBase</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">currency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Currency</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'EUR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payment_days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spot_days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ir_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="components.html#rivapy.instruments.components.Issuer" title="rivapy.instruments.components.Issuer"><span class="pre">Issuer</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">securitization_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.SecuritizationLevel" title="rivapy.tools.enums.SecuritizationLevel"><span class="pre">SecuritizationLevel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">SecuritizationLevel.NONE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rating</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Rating</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Rating.NONE</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/fra_specifications.html#ForwardRateAgreementSpecification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification" title="Link to this definition"></a></dt>
+<dd><p>Constructor for Forward Rate Agreement specification.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj_id</strong> (<em>str</em>) – (Preferably) Unique label of the FRA</p></li>
+<li><p><strong>trade_date</strong> (<em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – FRA Trade date.</p></li>
+<li><p><strong>maturity_date</strong> (<em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – FRA’s maturity/expiry date. Must lie after the trade_date.</p></li>
+<li><p><strong>notional</strong> (<em>float</em><em>, </em><em>optional</em>) – Fra’s notional/face value. Must be positive.</p></li>
+<li><p><strong>rate</strong> (<em>float</em>) – Agreed upon forward rate, a.k.a. FRA rate.</p></li>
+<li><p><strong>start_date</strong> (<em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – start date of the interest rate (FRA_rate) reference period from which interest is accrued.</p></li>
+<li><p><strong>end_date</strong> (<em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – end date of the interest rate (FRA_rate) reference period from which interest is accrued.</p></li>
+<li><p><strong>udlID</strong> (<em>str</em>) – ID of the underlying Index rate used for the floating rate for fixing.</p></li>
+<li><p><strong>rate_start_date</strong> (<em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – start date of fixing period for the floating rate</p></li>
+<li><p><strong>rate_end_date</strong> (<em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – end date of fixing period for the floating rate</p></li>
+<li><p><strong>day_count_convention</strong> (<em>Union</em><em>[</em><em>DayCounter</em><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Day count convention for determining period
+length. Defaults to DayCounter.ThirtyU360.</p></li>
+<li><p><strong>business_day_convention</strong> (<em>Union</em><em>[</em><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.RollConvention" title="rivapy.tools.enums.RollConvention"><em>RollConvention</em></a><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Set of rules defining the adjustment of
+days to ensure each date being a business
+day with respect to a given holiday
+calendar. Defaults to
+RollConvention.FOLLOWING</p></li>
+<li><p><strong>rate_day_count_convention</strong> (<em>Union</em><em>[</em><em>DayCounter</em><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Day count convention for determining period
+length. Defaults to DayCounter.ThirtyU360.</p></li>
+<li><p><strong>rate_business_day_convention</strong> (<em>Union</em><em>[</em><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.RollConvention" title="rivapy.tools.enums.RollConvention"><em>RollConvention</em></a><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Set of rules defining the adjustment of
+days to ensure each date being a business
+day with respect to a given holiday
+calendar. Defaults to
+RollConvention.FOLLOWING</p></li>
+<li><p><strong>calendar</strong> (<em>Union</em><em>[</em><em>HolidayBase</em><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Holiday calendar defining the bank holidays of a country or
+province (but not all non-business days as for example
+Saturdays and Sundays).
+Defaults (through constructor) to holidays.ECB
+(= Target2 calendar) between start_day and end_day.</p></li>
+<li><p><strong>currency</strong> (<em>str</em><em>, </em><em>optional</em>) – Currency as alphabetic, Defaults to ‘EUR’.</p></li>
+<li><p><strong>payment_days</strong> (<em>int</em>) – Number of days for payment after the start date. Defaults to 0.</p></li>
+<li><p><strong>spot_days</strong> (<em>int</em>) – time difference between fixing date and start dategiven in days.</p></li>
+<li><p><strong>start_period</strong> (<em>int</em>) – forward start period given in months e.g. 1 from 1Mx4M</p></li>
+<li><p><strong>end_period</strong> (<em>int</em>) – forward end period given in months e.g. 4 from 1Mx4M</p></li>
+<li><p><strong>ir_index</strong> (<em>str</em>) – ID of the underlying Index rate used for the floating rate for fixing.</p></li>
+<li><p><strong>issuer</strong> (<em>str</em><em>, </em><em>optional</em>) – Name/id of issuer. Defaults to None.</p></li>
+<li><p><strong>securitization_level</strong> (<em>_Union</em><em>[</em><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.SecuritizationLevel" title="rivapy.tools.enums.SecuritizationLevel"><em>SecuritizationLevel</em></a><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Securitization level. Defaults to None.</p></li>
+<li><p><strong>rating</strong> (<em>_Union</em><em>[</em><em>Rating</em><em>, </em><em>str</em><em>]</em>) – Paper rating.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification._create_sample">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_create_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_levels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">currencies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification" title="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification"><span class="pre">ForwardRateAgreementSpecification</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/rivapy/instruments/fra_specifications.html#ForwardRateAgreementSpecification._create_sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification._create_sample" title="Link to this definition"></a></dt>
+<dd><p>Create a random sample of multiple instruments of this type with varied specification parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_samples</strong> (<em>int</em>) – The number of desired sample objects</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Seed number to allow repeated result. Defaults to None.</p></li>
+<li><p><strong>ref_date</strong> (<em>_type_</em><em>, </em><em>optional</em>) – Reference date . Defaults to None.</p></li>
+<li><p><strong>issuers</strong> (<em>_List</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – list of issuers. Defaults to None.</p></li>
+<li><p><strong>sec_levels</strong> (<em>_List</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – list of possible securitization levels. Defaults to None.</p></li>
+<li><p><strong>currencies</strong> (<em>_List</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – list of possible currencies used. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>where each entry is a dict representing with the information needed to specify an instrument.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_List[<a class="reference internal" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification" title="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification">ForwardRateAgreementSpecification</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.business_day_convention">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">business_day_convention</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.business_day_convention" title="Link to this definition"></a></dt>
+<dd><p>Getter for FRA’s underlying rate’s business_day_convention.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FRA’s underlying rate’s business_day_convention.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.calendar">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calendar</span></span><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.calendar" title="Link to this definition"></a></dt>
+<dd><p>Calender used for this instrument</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_description_</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.currency">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">currency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.currency" title="Link to this definition"></a></dt>
+<dd><p>Getter for FRA’s currency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FRA’s  currency code</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.day_count_convention">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">day_count_convention</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.day_count_convention" title="Link to this definition"></a></dt>
+<dd><p>Getter for FRA’s day count convention.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FRA’s day count convention.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.end_date">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end_date</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">date</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.end_date" title="Link to this definition"></a></dt>
+<dd><p>Getter for FRA’s end date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FRA’s end date.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>date</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.end_period">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end_period</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.end_period" title="Link to this definition"></a></dt>
+<dd><p>Getter for the spot lag</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_description_</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.get_end_date">
+<span class="sig-name descname"><span class="pre">get_end_date</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/fra_specifications.html#ForwardRateAgreementSpecification.get_end_date"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.get_end_date" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.get_schedule">
+<span class="sig-name descname"><span class="pre">get_schedule</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.Schedule" title="rivapy.tools.datetools.Schedule"><span class="pre">Schedule</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/instruments/fra_specifications.html#ForwardRateAgreementSpecification.get_schedule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.get_schedule" title="Link to this definition"></a></dt>
+<dd><p>Returns the schedule of the accrual periods of the instrument.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.index">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.index" title="Link to this definition"></a></dt>
+<dd><p>Getter for the underlying Index rate used for the floating rate for fixing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_description_</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.ins_type">
+<span class="sig-name descname"><span class="pre">ins_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/fra_specifications.html#ForwardRateAgreementSpecification.ins_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.ins_type" title="Link to this definition"></a></dt>
+<dd><p>Return instrument type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Forward rate agreement</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Instrument</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.issuer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">issuer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.issuer" title="Link to this definition"></a></dt>
+<dd><p>Getter for instrument’s issuer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Instrument’s issuer.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.maturity_date">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">maturity_date</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">date</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.maturity_date" title="Link to this definition"></a></dt>
+<dd><p>Getter for FRA’s maturity date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FRA’s maturity date.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>date</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.notional">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">notional</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.notional" title="Link to this definition"></a></dt>
+<dd><p>Getter for FRA’s face value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FRA’s face value.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.payment_days">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">payment_days</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.payment_days" title="Link to this definition"></a></dt>
+<dd><p>Getter for the number of settlement days.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of settlement days.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.rate">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.rate" title="Link to this definition"></a></dt>
+<dd><p>Getter for instrument’s rate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Instrument’s rate.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.rate_business_day_convention">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rate_business_day_convention</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.rate_business_day_convention" title="Link to this definition"></a></dt>
+<dd><p>Getter for FRA’s underlying rate’s business_day_convention.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FRA’s underlying rate’s business_day_convention.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.rate_day_count_convention">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rate_day_count_convention</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.rate_day_count_convention" title="Link to this definition"></a></dt>
+<dd><p>Getter for FRA’s underlying rate’s day count convention.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FRA’s underlying rate’s day count convention.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.rate_end_date">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rate_end_date</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">date</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.rate_end_date" title="Link to this definition"></a></dt>
+<dd><p>Getter for FRA’s end date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FRA’s end date.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>date</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.rate_start_date">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rate_start_date</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">date</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.rate_start_date" title="Link to this definition"></a></dt>
+<dd><p>Getter for FRA’s start date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FRA’s start date.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>date</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.rating">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rating</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.rating" title="Link to this definition"></a></dt>
+<dd><p>Getter for instrument’s rating.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>instrument’s rating</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.securitization_level">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">securitization_level</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.securitization_level" title="Link to this definition"></a></dt>
+<dd><p>Getter for instrument’s securitisation level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Instrument’s securitisation level.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.spot_days">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">spot_days</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.spot_days" title="Link to this definition"></a></dt>
+<dd><p>Getter for the spot lag given in days</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_description_</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.start_date">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_date</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">date</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.start_date" title="Link to this definition"></a></dt>
+<dd><p>Getter for FRA’s start date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FRA’s start date.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>date</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.start_period">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_period</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.start_period" title="Link to this definition"></a></dt>
+<dd><p>Getter for the start period, given in Months</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_description_</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.trade_date">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trade_date</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">date</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.trade_date" title="Link to this definition"></a></dt>
+<dd><p>Getter for FRA’s issue date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FRA’s issue date.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>date</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.udlID">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">udlID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.udlID" title="Link to this definition"></a></dt>
+<dd><p>Getter for ID of the instruments underlying.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Instrument’s udlID.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="interest">
+<h2>Interest<a class="headerlink" href="#interest" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.instruments.ir_swap_specification.</span></span><span class="sig-name descname"><span class="pre">InterestRateSwapSpecification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notional</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">NotionalStructure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issue_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maturity_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pay_leg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">IrFixedLegSpecification</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">IrFloatLegSpecification</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">IrOISLegSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receive_leg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">IrFixedLegSpecification</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">IrFloatLegSpecification</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">IrOISLegSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">currency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Currency</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'EUR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calendar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">HolidayBase</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day_count_convention</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.DayCounterType" title="rivapy.tools.enums.DayCounterType"><span class="pre">DayCounterType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DayCounterType.ThirtyU360</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">business_day_convention</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.RollConvention" title="rivapy.tools.enums.RollConvention"><span class="pre">RollConvention</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">RollConvention.FOLLOWING</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">securitization_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.SecuritizationLevel" title="rivapy.tools.enums.SecuritizationLevel"><span class="pre">SecuritizationLevel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">SecuritizationLevel.NONE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rating</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Rating</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Rating.NONE</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/ir_swap_specification.html#InterestRateSwapSpecification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification" title="Link to this definition"></a></dt>
+<dd><p>Specification of the entire swap, encapsulating both the pay leg and the receive leg.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj_id</strong> (<em>str</em>) – _description_</p></li>
+<li><p><strong>notional</strong> (<em>_Union</em><em>[</em><em>float</em><em>, </em><em>NotionalStructure</em><em>]</em>) – _description_</p></li>
+<li><p><strong>issue_date</strong> (<em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – _description_</p></li>
+<li><p><strong>maturity_date</strong> (<em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – _description_</p></li>
+<li><p><strong>pay_leg</strong> (<em>_Union</em><em>[</em><em>IrFixedLegSpecification</em><em>, </em><em>IrFloatLegSpecification</em><em>]</em>) – _description_</p></li>
+<li><p><strong>receive_leg</strong> (<em>_Union</em><em>[</em><em>IrFixedLegSpecification</em><em>, </em><em>IrFloatLegSpecification</em><em>]</em>) – _description_</p></li>
+<li><p><strong>currency</strong> (<em>_Union</em><em>[</em><em>Currency</em><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – _description_. Defaults to “EUR”.</p></li>
+<li><p><strong>calendar</strong> (<em>_Union</em><em>[</em><em>_HolidayBase</em><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>day_count_convention</strong> (<em>_Union</em><em>[</em><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.DayCounterType" title="rivapy.tools.enums.DayCounterType"><em>DayCounterType</em></a><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – _description_. Defaults to DayCounterType.ThirtyU360.</p></li>
+<li><p><strong>business_day_convention</strong> (<em>_Union</em><em>[</em><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.RollConvention" title="rivapy.tools.enums.RollConvention"><em>RollConvention</em></a><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – _description_. Defaults to RollConvention.FOLLOWING.</p></li>
+<li><p><strong>issuer</strong> (<em>str</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>securitization_level</strong> (<em>_Union</em><em>[</em><a class="reference internal" href="../rivapy.tools.html#rivapy.tools.enums.SecuritizationLevel" title="rivapy.tools.enums.SecuritizationLevel"><em>SecuritizationLevel</em></a><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – _description_. Defaults to SecuritizationLevel.NONE.</p></li>
+<li><p><strong>rating</strong> (<em>_Union</em><em>[</em><em>Rating</em><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – _description_. Defaults to Rating.NONE.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification._create_sample">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_create_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_levels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">currencies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification" title="rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification"><span class="pre">InterestRateSwapSpecification</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/rivapy/instruments/ir_swap_specification.html#InterestRateSwapSpecification._create_sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification._create_sample" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.currency">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">currency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.currency" title="Link to this definition"></a></dt>
+<dd><p>Getter for IR swap’s currency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>IR swap’s ISO 4217 currency code</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.get_end_date">
+<span class="sig-name descname"><span class="pre">get_end_date</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/ir_swap_specification.html#InterestRateSwapSpecification.get_end_date"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.get_end_date" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.get_fixed_leg">
+<span class="sig-name descname"><span class="pre">get_fixed_leg</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/ir_swap_specification.html#InterestRateSwapSpecification.get_fixed_leg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.get_fixed_leg" title="Link to this definition"></a></dt>
+<dd><p>get the fixed leg (only possible for fixed vs. floating swaps -&gt; throws otherwise)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.get_float_leg">
+<span class="sig-name descname"><span class="pre">get_float_leg</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/ir_swap_specification.html#InterestRateSwapSpecification.get_float_leg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.get_float_leg" title="Link to this definition"></a></dt>
+<dd><p>get the float leg (only possible for fixed vs. floating swaps -&gt; throws otherwise)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.get_pay_leg">
+<span class="sig-name descname"><span class="pre">get_pay_leg</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/ir_swap_specification.html#InterestRateSwapSpecification.get_pay_leg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.get_pay_leg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.get_receive_leg">
+<span class="sig-name descname"><span class="pre">get_receive_leg</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/ir_swap_specification.html#InterestRateSwapSpecification.get_receive_leg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.get_receive_leg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.ins_type">
+<span class="sig-name descname"><span class="pre">ins_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/instruments/ir_swap_specification.html#InterestRateSwapSpecification.ins_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.ins_type" title="Link to this definition"></a></dt>
+<dd><p>Return instrument type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Interest Rate Swap</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Instrument</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.issue_date">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">issue_date</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">date</span></em><a class="headerlink" href="#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.issue_date" title="Link to this definition"></a></dt>
+<dd><p>Getter for IR swap’s issue date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>IR swap’s issue date.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>date</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.issuer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">issuer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.issuer" title="Link to this definition"></a></dt>
+<dd><p>Getter for instrument’s issuer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Instrument’s issuer.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.maturity_date">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">maturity_date</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">date</span></em><a class="headerlink" href="#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.maturity_date" title="Link to this definition"></a></dt>
+<dd><p>Getter for IR swap’s maturity date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>IR swap’s maturity date.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>date</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.notional_structure">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">notional_structure</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">NotionalStructure</span></em><a class="headerlink" href="#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.notional_structure" title="Link to this definition"></a></dt>
+<dd><p>Return the notionals</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>class object detailing the notionals, start dates, …</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>NotionalStructure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.rating">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rating</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.rating" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.securitization_level">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">securitization_level</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.securitization_level" title="Link to this definition"></a></dt>
+<dd><p>Getter for instrument’s securitisation level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Instrument’s securitisation level.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Instruments" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="equity.html" class="btn btn-neutral float-right" title="Equity Instruments" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

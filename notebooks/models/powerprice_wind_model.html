@@ -69,6 +69,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#pricing">Pricing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#financial-instruments">Financial Instruments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#tools">Tools</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../rivapy/index.html">Module Documentation</a></li>
@@ -119,7 +120,7 @@
 <span class="kn">from</span> <span class="nn">rivapy.tools.datetime_grid</span> <span class="kn">import</span> <span class="n">DateTimeGrid</span>
 
 <span class="kn">from</span> <span class="nn">rivapy.models</span> <span class="kn">import</span> <span class="n">OrnsteinUhlenbeck</span>
-<span class="kn">from</span> <span class="nn">rivapy.models.residual_demand_model</span> <span class="kn">import</span> <span class="n">WindPowerForecastModel</span><span class="p">,</span> <span class="n">WindPowerForecastModelParameter</span><span class="p">,</span> <span class="n">MultiRegionWindForecastModel</span><span class="p">,</span> <span class="n">LinearDemandForwardModel</span>
+<span class="kn">from</span> <span class="nn">rivapy.models.residual_demand_fwd_model</span> <span class="kn">import</span> <span class="n">WindPowerForecastModel</span><span class="p">,</span> <span class="n">WindPowerForecastModelParameter</span><span class="p">,</span> <span class="n">MultiRegionWindForecastModel</span><span class="p">,</span> <span class="n">LinearDemandForwardModel</span>
 
 <span class="o">%</span><span class="k">load_ext</span> autoreload
 <span class="o">%</span><span class="k">autoreload</span> 2
@@ -132,14 +133,14 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\Users\doeltz\development\RiVaPy\docs\source\notebooks\models\../../../..\rivapy\__init__.py:11: UserWarning: The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.
+c:\Users\DrHansNguyen\Documents\MyRivacon\RiVaPy\rivapy\__init__.py:11: UserWarning: The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.
   warnings.warn(&#39;The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.&#39;)
 </pre></div></div>
 </div>
 <section id="Simulation-of-Powerprices-and-Wind">
 <h2>Simulation of Powerprices and Wind<a class="headerlink" href="#Simulation-of-Powerprices-and-Wind" title="Link to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">params</span> <span class="o">=</span> <span class="n">WindPowerForecastModelParameter</span><span class="p">(</span><span class="n">n_call_strikes</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">min_strike</span><span class="o">=-</span><span class="mf">7.0</span><span class="p">,</span> <span class="n">max_strike</span><span class="o">=</span><span class="mf">7.0</span><span class="p">)</span>
@@ -166,7 +167,7 @@ C:\Users\doeltz\development\RiVaPy\docs\source\notebooks\models\../../../..\riva
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">LinearDemandForwardModel</span><span class="p">(</span><span class="n">wind_power_forecast</span><span class="o">=</span><span class="n">wind</span><span class="p">,</span>
@@ -177,7 +178,7 @@ C:\Users\doeltz\development\RiVaPy\docs\source\notebooks\models\../../../..\riva
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">timegrid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">365</span><span class="p">)</span>
@@ -190,7 +191,7 @@ C:\Users\doeltz\development\RiVaPy\docs\source\notebooks\models\../../../..\riva
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Keys of simulated values: &#39;</span><span class="p">,</span> <span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -205,12 +206,12 @@ C:\Users\doeltz\development\RiVaPy\docs\source\notebooks\models\../../../..\riva
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Keys of simulated values:  {&#39;Wind_Germany_FWD0&#39;, &#39;Power_Germany_FWD0&#39;, &#39;Region_0_FWD0&#39;}
+Keys of simulated values:  {&#39;Wind_Germany_FWD0&#39;, &#39;Region_0_FWD0&#39;, &#39;Power_Germany_FWD0&#39;}
 final mean power price:  99.78492806280833
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">timepoint</span> <span class="o">=</span> <span class="mi">180</span>
@@ -240,7 +241,7 @@ final mean power price:  99.78492806280833
 <h2>Simulation with forecasts at discrete timepoints only<a class="headerlink" href="#Simulation-with-forecasts-at-discrete-timepoints-only" title="Link to this heading"></a></h2>
 <p>In real life, forecasts arrive at discrete times only. This effect can be handled by simply defining the list of timegridpoints where new forecasts come. This list can then be handed over to the get method of the results.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[56]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Keys of simulated values: &#39;</span><span class="p">,</span> <span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -256,12 +257,12 @@ final mean power price:  99.78492806280833
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Keys of simulated values:  {&#39;Wind_Germany_FWD0&#39;, &#39;Power_Germany_FWD0&#39;, &#39;Region_0_FWD0&#39;}
+Keys of simulated values:  {&#39;Wind_Germany_FWD0&#39;, &#39;Region_0_FWD0&#39;, &#39;Power_Germany_FWD0&#39;}
 final mean power price:  99.78492806280833
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[57]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>

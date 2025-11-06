@@ -1,0 +1,1208 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rivapy.instruments.ir_swap_specification &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=d2ebc91c" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.svg"/>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../search.html">Search Page</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rivapy.instruments.ir_swap_specification</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rivapy.instruments.ir_swap_specification</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span> <span class="k">as</span> <span class="n">_abstractmethod</span>
+<span class="kn">from</span> <span class="nn">locale</span> <span class="kn">import</span> <span class="n">currency</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span> <span class="k">as</span> <span class="n">_List</span><span class="p">,</span> <span class="n">Union</span> <span class="k">as</span> <span class="n">_Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.holidays_compat</span> <span class="kn">import</span> <span class="n">HolidayBase</span> <span class="k">as</span> <span class="n">_HolidayBase</span><span class="p">,</span> <span class="n">ECB</span> <span class="k">as</span> <span class="n">_ECB</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments._logger</span> <span class="kn">import</span> <span class="n">logger</span>
+
+<span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">Period</span><span class="p">,</span> <span class="n">Schedule</span><span class="p">,</span> <span class="n">_date_to_datetime</span><span class="p">,</span> <span class="n">_datetime_to_date_list</span><span class="p">,</span> <span class="n">_term_to_period</span><span class="p">,</span> <span class="n">serialize_date</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.enums</span> <span class="kn">import</span> <span class="n">DayCounterType</span><span class="p">,</span> <span class="n">RollConvention</span><span class="p">,</span> <span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="n">Currency</span><span class="p">,</span> <span class="n">Rating</span><span class="p">,</span> <span class="n">Instrument</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools._validators</span> <span class="kn">import</span> <span class="n">_check_positivity</span><span class="p">,</span> <span class="n">_check_start_before_end</span><span class="p">,</span> <span class="n">_string_to_calendar</span><span class="p">,</span> <span class="n">_is_ascending_date_list</span>
+<span class="kn">import</span> <span class="nn">rivapy.tools.interfaces</span> <span class="k">as</span> <span class="nn">interfaces</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">Period</span><span class="p">,</span> <span class="n">Schedule</span>
+
+<span class="kn">from</span> <span class="nn">rivapy.instruments.bond_specifications</span> <span class="kn">import</span> <span class="n">BondBaseSpecification</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.components</span> <span class="kn">import</span> <span class="n">NotionalStructure</span><span class="p">,</span> <span class="n">ConstNotionalStructure</span><span class="p">,</span> <span class="n">VariableNotionalStructure</span>  <span class="c1"># , ResettingNotionalStructure</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.enums</span> <span class="kn">import</span> <span class="n">IrLegType</span>
+
+<span class="c1"># Base each swap leg, off of the IRSwapBaseSpecification</span>
+<span class="c1"># This IRSwapBaseSpecification is in turn, based off of the BondBaseSpecification</span>
+<span class="c1"># Can think about basing the float/fixed leg off of the BondFlaoting/Fixed Note class...</span>
+
+<span class="c1"># WIP</span>
+
+
+<span class="k">class</span> <span class="nc">IrSwapLegSpecification</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base interest rate swap leg specification used to define both fixed and floating legs.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">notional</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NotionalStructure</span><span class="p">],</span>
+        <span class="n">start_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">end_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">pay_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">currency</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Currency</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">ThirtyU360</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for the IrSwapLegSpecification class used to define both fixed and floating legs.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            obj_id (str): obj ID for the instrument.</span>
+<span class="sd">            notional (_Union[float, NotionalStructure]): If given a singular float, will convert to ConstNotinalStructure. Contains the notional information.</span>
+<span class="sd">            start_dates (_List[datetime]): start date of interest accrual period.</span>
+<span class="sd">            end_dates (_List[datetime]): end date of interest accrual period.</span>
+<span class="sd">            pay_dates (_List[datetime]): Dates when both legs of the swap exchange cash flows.</span>
+<span class="sd">            currency (_Union[Currency, str]): The currency of the swap</span>
+<span class="sd">            day_count_convention (_Union[DayCounterType, str], optional): The day count convention used. Defaults to DayCounterType.ThirtyU360.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obj_id</span> <span class="o">=</span> <span class="n">obj_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notional_structure</span> <span class="o">=</span> <span class="n">notional</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_dates</span> <span class="o">=</span> <span class="n">start_dates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_dates</span> <span class="o">=</span> <span class="n">end_dates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pay_dates</span> <span class="o">=</span> <span class="n">pay_dates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currency</span> <span class="o">=</span> <span class="n">Currency</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">currency</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">day_count_convention</span> <span class="o">=</span> <span class="n">day_count_convention</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">currency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The swap leg&#39;s currency as a string.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_currency</span>
+
+    <span class="nd">@currency</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">currency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Currency</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_currency</span> <span class="o">=</span> <span class="n">Currency</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">start_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;start dates for the interest periods</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _List[datetime]: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_dates</span>
+
+    <span class="nd">@start_dates</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">start_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_dates</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">end_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;end dates for the interest periods</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _List[datetime]: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_dates</span>
+
+    <span class="nd">@end_dates</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">end_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_dates</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pay_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;pay dates for the interest periods</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _List[datetime]:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pay_dates</span>
+
+    <span class="nd">@pay_dates</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">pay_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pay_dates</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">notional_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NotionalStructure</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the notionals</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            NotionalStructure: class object detailing the notionals, start dates, ...</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional_structure</span>
+
+    <span class="nd">@notional_structure</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">notional_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NotionalStructure</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;If only a float is given, assume a constant notional and create a ConstNotionalStructure.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (_Union[float, NotionalStructure]):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_notional_structure</span> <span class="o">=</span> <span class="n">ConstNotionalStructure</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_notional_structure</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="c1"># @abstractmethod</span>
+    <span class="c1"># def reset_dates(self) -&gt; _List[datetime]:</span>
+    <span class="c1">#    &quot;&quot;&quot; #TODO brought over from pyvacon, for float leg?</span>
+    <span class="c1">#    &quot;&quot;&quot;</span>
+    <span class="c1">#    pass</span>
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="n">return_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;obj_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_id</span><span class="p">,</span>
+            <span class="s2">&quot;notional&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">notional_structure</span><span class="p">,</span>
+            <span class="s2">&quot;start_dates&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_dates</span><span class="p">,</span>
+            <span class="s2">&quot;end_dates&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_dates</span><span class="p">,</span>
+            <span class="s2">&quot;pay_dates&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pay_dates</span><span class="p">,</span>
+            <span class="s2">&quot;currency&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span><span class="p">,</span>
+            <span class="s2">&quot;day_count_convention&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">day_count_convention</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">return_dict</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">pass</span>  <span class="c1"># TODO</span>
+
+
+<span class="k">class</span> <span class="nc">IrFixedLegSpecification</span><span class="p">(</span><span class="n">IrSwapLegSpecification</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Specification for a fixed leg for an interest rate swap.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">fixed_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">notional</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NotionalStructure</span><span class="p">],</span>
+        <span class="n">start_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">end_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">pay_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">currency</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Currency</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">ThirtyU360</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for a fixed leg of an interest rate swap.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fixed_rate (float): The fixed interest rate defining this leg of the swap.</span>
+<span class="sd">            obj_id (str): obj ID for the instrument.</span>
+<span class="sd">            notional (_Union[float, NotionalStructure]): If given a singular float, will convert to ConstNotinalStructure. Contains the notional information.</span>
+<span class="sd">            start_dates (_List[datetime]): start date of interest accrual period.</span>
+<span class="sd">            end_dates (_List[datetime]): end date of interest accrual period.</span>
+<span class="sd">            pay_dates (_List[datetime]): Dates when both legs of the swap exchange cash flows.</span>
+<span class="sd">            currency (_Union[Currency, str]): The currency of the swap</span>
+<span class="sd">            day_count_convention (_Union[DayCounterType, str], optional): The day count convention used. Defaults to DayCounterType.ThirtyU360.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span> <span class="n">notional</span><span class="p">,</span> <span class="n">start_dates</span><span class="p">,</span> <span class="n">end_dates</span><span class="p">,</span> <span class="n">pay_dates</span><span class="p">,</span> <span class="n">currency</span><span class="p">,</span> <span class="n">day_count_convention</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fixed_rate</span> <span class="o">=</span> <span class="n">fixed_rate</span>  <span class="c1"># _check_positivity(fixed_rate) # TODO is there a need for it to be always positive?</span>
+
+    <span class="c1"># region properties</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">leg_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">FIXED</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fixed_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_rate</span>
+
+    <span class="nd">@fixed_rate</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">fixed_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_rate</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="c1"># @property</span>
+    <span class="c1"># def reset_dates(self) -&gt; _List[datetime]:</span>
+    <span class="c1">#    return self.start_dates</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">udl_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>  <span class="c1"># fixed leg has no underlying</span>
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">return_dict</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_to_dict</span><span class="p">()</span>
+        <span class="n">return_dict</span><span class="p">[</span><span class="s2">&quot;fixed_rate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixed_rate</span>
+        <span class="k">return</span> <span class="n">return_dict</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">pass</span>  <span class="c1"># TODO</span>
+
+    <span class="c1"># endregion</span>
+
+    <span class="k">def</span> <span class="nf">get_NotionalStructure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">notional_structure</span>
+
+
+<span class="k">class</span> <span class="nc">IrFloatLegSpecification</span><span class="p">(</span><span class="n">IrSwapLegSpecification</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">notional</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NotionalStructure</span><span class="p">],</span>
+        <span class="n">reset_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">start_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">end_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">rate_start_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>  <span class="c1"># are these needed here? or are they obtained from the underlying</span>
+        <span class="n">rate_end_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">pay_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">currency</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Currency</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">udl_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">fixing_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">ThirtyU360</span><span class="p">,</span>
+        <span class="n">rate_day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">ThirtyU360</span><span class="p">,</span>
+        <span class="n">spread</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for a floating leg of an interest rate swap.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            obj_id (str): obj ID for the instrument.</span>
+<span class="sd">            notional (_Union[float, NotionalStructure]): If given a singular float, will convert to ConstNotinalStructure. Contains the notional information.</span>
+<span class="sd">            reset_dates (_List[datetime]): Date on which the floating rate (e.g., SOFR, LIBOR) is determined</span>
+<span class="sd">            start_dates (_List[datetime]): Date the entire swap begins (effective date)</span>
+<span class="sd">            end_dates (_List[datetime]): Date the swap matures</span>
+<span class="sd">            rate_start_dates (_List[datetime]): start dates for the determination of the underlying rate</span>
+<span class="sd">            rate_end_dates (_List[datetime]): end dates for the determination of the underlying rate</span>
+<span class="sd">            pay_dates (_List[datetime]): Dates when both legs of the swap exchange cash flows.</span>
+<span class="sd">            currency (_Union[Currency, str]): The currency of the swap</span>
+<span class="sd">            udl_id (str): ID of the underlying rate</span>
+<span class="sd">            fixing_id (str): fixing id</span>
+<span class="sd">            day_count_convention (_Union[DayCounterType, str], optional): The day count convention used.. Defaults to DayCounterType.ThirtyU360.</span>
+<span class="sd">            rate_day_count_convention (_Union[DayCounterType, str], optional): The day count convention used for the underlying</span>
+<span class="sd">                                                . Defaults to DayCounterType.ThirtyU360.</span>
+<span class="sd">            spread (float, optional): Defaults to 0.0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span> <span class="n">notional</span><span class="p">,</span> <span class="n">start_dates</span><span class="p">,</span> <span class="n">end_dates</span><span class="p">,</span> <span class="n">pay_dates</span><span class="p">,</span> <span class="n">currency</span><span class="p">,</span> <span class="n">day_count_convention</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_dates</span> <span class="o">=</span> <span class="n">reset_dates</span>  <span class="c1"># TODO: ADD setters to get rid of error notification?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rate_start_dates</span> <span class="o">=</span> <span class="n">rate_start_dates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rate_end_dates</span> <span class="o">=</span> <span class="n">rate_end_dates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spread</span> <span class="o">=</span> <span class="n">spread</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">udl_id</span> <span class="o">=</span> <span class="n">udl_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fixing_id</span> <span class="o">=</span> <span class="n">fixing_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rate_day_count_convention</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">rate_day_count_convention</span><span class="p">)</span>
+
+    <span class="c1"># TODO to_dict method</span>
+
+    <span class="c1"># region properties</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">leg_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">FLOAT</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">reset_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reset_dates</span>
+
+    <span class="nd">@reset_dates</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">reset_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_dates</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">udl_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_udl_id</span>
+
+    <span class="nd">@udl_id</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">udl_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_udl_id</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fixing_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fixing_id</span>
+
+    <span class="nd">@fixing_id</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">fixing_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixing_id</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">spread</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spread</span>
+
+    <span class="nd">@spread</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">spread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spread</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rate_day_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate_day_count</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rate_start_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rate_start_dates</span>
+
+    <span class="nd">@rate_start_dates</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">rate_start_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rate_start_dates</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rate_end_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rate_end_dates</span>
+
+    <span class="nd">@rate_end_dates</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">rate_end_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rate_end_dates</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">get_underlyings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">udl_id</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixing_id</span><span class="p">}</span>
+
+    <span class="c1"># endregion</span>
+
+    <span class="k">def</span> <span class="nf">get_NotionalStructure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">notional_structure</span>
+
+
+<span class="k">class</span> <span class="nc">IrOISLegSpecification</span><span class="p">(</span><span class="n">IrSwapLegSpecification</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">notional</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NotionalStructure</span><span class="p">],</span>
+        <span class="n">rate_reset_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">start_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">end_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">rate_start_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>  <span class="c1"># are these needed here? or are they obtained from the underlying</span>
+        <span class="n">rate_end_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">pay_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">currency</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Currency</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">udl_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">fixing_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">ThirtyU360</span><span class="p">,</span>
+        <span class="n">rate_day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">ThirtyU360</span><span class="p">,</span>
+        <span class="n">spread</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="c1"># fixingLag?</span>
+        <span class="c1"># payLag?</span>
+        <span class="c1"># freq?</span>
+        <span class="c1"># rate currency vs notional currency?</span>
+        <span class="c1"># leg holidays, and rate holidays - again to be dealt with in the scheduler?</span>
+        <span class="c1"># FYI scheduler needs, start date, end date, freq, roll convention, holiday...</span>
+        <span class="c1"># for the reset dates, will need fixing lag</span>
+        <span class="c1"># for the pay dates generation, will need payLag</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for a floating leg of an overnight index swap.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            obj_id (str): obj ID for the instrument.</span>
+<span class="sd">            notional (_Union[float, NotionalStructure]): If given a singular float, will convert to ConstNotinalStructure. Contains the notional information.</span>
+<span class="sd">            reset_dates (_List[datetime]): Date on which the floating rate (e.g., SOFR, LIBOR) is determined</span>
+<span class="sd">            start_dates (_List[datetime]): Date the entire swap begins (effective date)</span>
+<span class="sd">            end_dates (_List[datetime]): Date the swap matures</span>
+<span class="sd">            rate_start_dates (_List[datetime]): start dates for the determination of the underlying rate</span>
+<span class="sd">            rate_end_dates (_List[datetime]): end dates for the determination of the underlying rate</span>
+<span class="sd">            pay_dates (_List[datetime]): Dates when both legs of the swap exchange cash flows.</span>
+<span class="sd">            currency (_Union[Currency, str]): The currency of the swap</span>
+<span class="sd">            udl_id (str): ID of the underlying rate</span>
+<span class="sd">            fixing_id (str): fixing id</span>
+<span class="sd">            day_count_convention (_Union[DayCounterType, str], optional): The day count convention used.. Defaults to DayCounterType.ThirtyU360.</span>
+<span class="sd">            rate_day_count_convention (_Union[DayCounterType, str], optional): The day count convention used for the underlying</span>
+<span class="sd">                                                . Defaults to DayCounterType.ThirtyU360.</span>
+<span class="sd">            spread (float, optional): . Defaults to 0.0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span> <span class="n">notional</span><span class="p">,</span> <span class="n">start_dates</span><span class="p">,</span> <span class="n">end_dates</span><span class="p">,</span> <span class="n">pay_dates</span><span class="p">,</span> <span class="n">currency</span><span class="p">,</span> <span class="n">day_count_convention</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rate_reset_dates</span> <span class="o">=</span> <span class="n">rate_reset_dates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rate_start_dates</span> <span class="o">=</span> <span class="n">rate_start_dates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rate_end_dates</span> <span class="o">=</span> <span class="n">rate_end_dates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spread</span> <span class="o">=</span> <span class="n">spread</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">udl_id</span> <span class="o">=</span> <span class="n">udl_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fixing_id</span> <span class="o">=</span> <span class="n">fixing_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rate_day_count_convention</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">rate_day_count_convention</span><span class="p">)</span>
+
+    <span class="c1"># TODO to_dict method</span>
+
+    <span class="c1"># region properties</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">leg_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">OIS</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">reset_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rate_reset_dates</span>
+
+    <span class="nd">@reset_dates</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">rate_reset_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rate_reset_dates</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">udl_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_udl_id</span>
+
+    <span class="nd">@udl_id</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">udl_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_udl_id</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fixing_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fixing_id</span>
+
+    <span class="nd">@fixing_id</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">fixing_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixing_id</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">spread</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spread</span>
+
+    <span class="nd">@spread</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">spread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spread</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rate_day_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate_day_count</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rate_start_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rate_start_dates</span>
+
+    <span class="nd">@rate_start_dates</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">rate_start_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rate_start_dates</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rate_end_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rate_end_dates</span>
+
+    <span class="nd">@rate_end_dates</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">rate_end_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rate_end_dates</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">get_underlyings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">udl_id</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixing_id</span><span class="p">}</span>
+
+    <span class="c1"># endregion</span>
+
+    <span class="k">def</span> <span class="nf">get_NotionalStructure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">notional_structure</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">ois_scheduler_2D</span><span class="p">(</span><span class="n">start_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span> <span class="n">end_dates</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">datetime</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The OIS makeshift scheduler to account for expected 2D array structure of</span>
+<span class="sd">            &gt;&gt;&gt; rivapy.instruments.interest_rate_swap_pricer.populate_cashflows_ois</span>
+<span class="sd">            Alternatively, the rivapy Scheduler class is used.</span>
+<span class="sd">            This is a simplified version for testing purposes.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            start_dates (_List[datetime]): start dates for a given accrual period, containing the daily start rates inside that accrual period</span>
+<span class="sd">            end_dates (_List[datetime]): _description_</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: Multi-dimensional lists of datetimes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">daily_rate_start_dates</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># 2D list: coupon i -&gt; list of daily starts</span>
+        <span class="n">daily_rate_end_dates</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># 2D list: coupon i -&gt; list of daily ends</span>
+        <span class="n">daily_rate_reset_dates</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># 2D list: coupon i -&gt; list of reset dates</span>
+        <span class="n">pay_dates</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># 1D list: one pay date per coupon</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">start_dates</span><span class="p">)):</span>
+
+            <span class="c1"># for this test we keep it simple and ignore conventions e.g. business day or so. i.e just take every day</span>
+            <span class="n">num_days</span> <span class="o">=</span> <span class="p">(</span><span class="n">end_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_dates</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">days</span>
+            <span class="n">daily_schedule</span> <span class="o">=</span> <span class="p">[</span><span class="n">start_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_days</span><span class="p">)]</span>
+
+            <span class="c1"># Build start/end date pairs for accrual periods</span>
+            <span class="n">starts</span> <span class="o">=</span> <span class="n">daily_schedule</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># all except last</span>
+            <span class="n">ends</span> <span class="o">=</span> <span class="n">daily_schedule</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>  <span class="c1"># all except first</span>
+
+            <span class="n">daily_rate_start_dates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">starts</span><span class="p">)</span>
+            <span class="n">daily_rate_end_dates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ends</span><span class="p">)</span>
+
+            <span class="c1"># 4. Compute reset dates (fixing lag applied to each start)</span>
+            <span class="c1"># resets = [add_business_days(start, fixingLag, rateHolidays)</span>
+            <span class="c1">#           for start in starts]</span>
+            <span class="c1"># assume simple case reset date is the same as start date</span>
+            <span class="n">resets</span> <span class="o">=</span> <span class="n">starts</span>  <span class="c1"># reset dates are equal to start dates if spot lag is 0.</span>
+            <span class="n">daily_rate_reset_dates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resets</span><span class="p">)</span>
+
+            <span class="c1"># Compute payment date for the coupon</span>
+            <span class="c1"># pay_date = add_business_days(end_dates[i], payLag, holidays)</span>
+            <span class="c1"># assume simple case, pay date is end date</span>
+            <span class="n">pay_date</span> <span class="o">=</span> <span class="n">end_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">pay_dates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pay_date</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">daily_rate_start_dates</span><span class="p">,</span> <span class="n">daily_rate_end_dates</span><span class="p">,</span> <span class="n">daily_rate_reset_dates</span><span class="p">,</span> <span class="n">pay_dates</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="InterestRateSwapSpecification">
+<a class="viewcode-back" href="../../../rivapy/instruments/rate.html#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification">[docs]</a>
+<span class="k">class</span> <span class="nc">InterestRateSwapSpecification</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">notional</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NotionalStructure</span><span class="p">],</span>
+        <span class="n">issue_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">maturity_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">pay_leg</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">IrFixedLegSpecification</span><span class="p">,</span> <span class="n">IrFloatLegSpecification</span><span class="p">,</span> <span class="n">IrOISLegSpecification</span><span class="p">],</span>
+        <span class="n">receive_leg</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">IrFixedLegSpecification</span><span class="p">,</span> <span class="n">IrFloatLegSpecification</span><span class="p">,</span> <span class="n">IrOISLegSpecification</span><span class="p">],</span>
+        <span class="n">currency</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Currency</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;EUR&quot;</span><span class="p">,</span>
+        <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">ThirtyU360</span><span class="p">,</span>
+        <span class="n">business_day_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">RollConvention</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">FOLLOWING</span><span class="p">,</span>
+        <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">securitization_level</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">SecuritizationLevel</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+        <span class="n">rating</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Rating</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Specification of the entire swap, encapsulating both the pay leg and the receive leg.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            obj_id (str): _description_</span>
+<span class="sd">            notional (_Union[float, NotionalStructure]): _description_</span>
+<span class="sd">            issue_date (_Union[date, datetime]): _description_</span>
+<span class="sd">            maturity_date (_Union[date, datetime]): _description_</span>
+<span class="sd">            pay_leg (_Union[IrFixedLegSpecification, IrFloatLegSpecification]): _description_</span>
+<span class="sd">            receive_leg (_Union[IrFixedLegSpecification, IrFloatLegSpecification]): _description_</span>
+<span class="sd">            currency (_Union[Currency, str], optional): _description_. Defaults to &quot;EUR&quot;.</span>
+<span class="sd">            calendar (_Union[_HolidayBase, str], optional): _description_. Defaults to None.</span>
+<span class="sd">            day_count_convention (_Union[DayCounterType, str], optional): _description_. Defaults to DayCounterType.ThirtyU360.</span>
+<span class="sd">            business_day_convention (_Union[RollConvention, str], optional): _description_. Defaults to RollConvention.FOLLOWING.</span>
+<span class="sd">            issuer (str, optional): _description_. Defaults to None.</span>
+<span class="sd">            securitization_level (_Union[SecuritizationLevel, str], optional): _description_. Defaults to SecuritizationLevel.NONE.</span>
+<span class="sd">            rating (_Union[Rating, str], optional): _description_. Defaults to Rating.NONE.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obj_id</span> <span class="o">=</span> <span class="n">obj_id</span>
+        <span class="k">if</span> <span class="n">issuer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">issuer</span> <span class="o">=</span> <span class="n">issuer</span>
+        <span class="k">if</span> <span class="n">securitization_level</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">securitization_level</span> <span class="o">=</span> <span class="n">securitization_level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">issue_date</span> <span class="o">=</span> <span class="n">issue_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maturity_date</span> <span class="o">=</span> <span class="n">maturity_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currency</span> <span class="o">=</span> <span class="n">currency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notional_structure</span> <span class="o">=</span> <span class="n">notional</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rating</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">rating</span><span class="p">)</span>
+        <span class="c1"># validate dates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_derived_issued_instrument</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pay_leg</span> <span class="o">=</span> <span class="n">pay_leg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">receive_leg</span> <span class="o">=</span> <span class="n">receive_leg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">day_count_convention</span> <span class="o">=</span> <span class="n">day_count_convention</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">business_day_convention</span> <span class="o">=</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">business_day_convention</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">calendar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calendar</span> <span class="o">=</span> <span class="n">_ECB</span><span class="p">(</span><span class="n">years</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="n">issue_date</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">maturity_date</span><span class="o">.</span><span class="n">year</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calendar</span> <span class="o">=</span> <span class="n">_string_to_calendar</span><span class="p">(</span><span class="n">calendar</span><span class="p">)</span>
+
+<div class="viewcode-block" id="InterestRateSwapSpecification._create_sample">
+<a class="viewcode-back" href="../../../rivapy/instruments/rate.html#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification._create_sample">[docs]</a>
+    <span class="nd">@staticmethod</span>  <span class="c1"># TODO</span>
+    <span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span>
+        <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ref_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">issuers</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sec_levels</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">currencies</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="s2">&quot;InterestRateSwapSpecification&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ref_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ref_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ref_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">ref_date</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">issuers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">issuers</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Issuer_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">n_samples</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">currencies</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">currencies</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Currency</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sec_levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sec_levels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">SecuritizationLevel</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
+            <span class="n">days</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">15.0</span> <span class="o">*</span> <span class="mf">365.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">issue_date</span> <span class="o">=</span> <span class="n">ref_date</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=-</span><span class="mi">365</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">InterestRateSwapSpecification</span><span class="p">(</span>
+                    <span class="n">obj_id</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;IRS_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">issue_date</span><span class="o">=</span><span class="n">issue_date</span><span class="p">,</span>
+                    <span class="n">maturity_date</span><span class="o">=</span><span class="n">ref_date</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">days</span><span class="p">),</span>
+                    <span class="n">currency</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">currencies</span><span class="p">),</span>
+                    <span class="n">notional</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mf">100.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="mf">10_000.0</span><span class="p">,</span> <span class="mf">100_0000.0</span><span class="p">]),</span>
+                    <span class="n">issuer</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">issuers</span><span class="p">),</span>
+                    <span class="n">securitization_level</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">sec_levels</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_validate_derived_issued_instrument</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__issue_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__maturity_date</span> <span class="o">=</span> <span class="n">_check_start_before_end</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__issue_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__maturity_date</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;obj_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_id</span><span class="p">,</span>
+            <span class="s2">&quot;issuer&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">issuer</span><span class="p">,</span>
+            <span class="s2">&quot;securitization_level&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">securitization_level</span><span class="p">,</span>
+            <span class="s2">&quot;issue_date&quot;</span><span class="p">:</span> <span class="n">serialize_date</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">issue_date</span><span class="p">),</span>
+            <span class="s2">&quot;maturity_date&quot;</span><span class="p">:</span> <span class="n">serialize_date</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maturity_date</span><span class="p">),</span>
+            <span class="s2">&quot;currency&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span><span class="p">,</span>
+            <span class="s2">&quot;notional&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">notional_structure</span><span class="p">,</span>
+            <span class="s2">&quot;rating&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rating</span><span class="p">,</span>
+            <span class="s2">&quot;receive_leg&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">receive_leg</span><span class="p">,</span>
+            <span class="s2">&quot;pay_leg&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pay_leg</span><span class="p">,</span>
+            <span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calendar</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">calendar</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">),</span>
+            <span class="s2">&quot;day_count_convention&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">day_count_convention</span><span class="p">,</span>
+            <span class="s2">&quot;business_day_convention&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">business_day_convention</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="c1"># region properties</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">issuer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for instrument&#39;s issuer.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Instrument&#39;s issuer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__issuer</span>
+
+    <span class="nd">@issuer</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">issuer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for instrument&#39;s issuer.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            issuer(str): Issuer of the instrument.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__issuer</span> <span class="o">=</span> <span class="n">issuer</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rating</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rating</span>
+
+    <span class="nd">@rating</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">rating</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rating</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Rating</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rating</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">rating</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">securitization_level</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for instrument&#39;s securitisation level.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Instrument&#39;s securitisation level.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__securitization_level</span>
+
+    <span class="nd">@securitization_level</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">securitization_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">securitisation_level</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__securitization_level</span> <span class="o">=</span> <span class="n">SecuritizationLevel</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">securitisation_level</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">issue_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for IR swap&#39;s issue date.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            date: IR swap&#39;s issue date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__issue_date</span>
+
+    <span class="nd">@issue_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">issue_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issue_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for IR swap&#39;s issue date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            issue_date (Union[datetime, date]): IR swap&#39;s issue date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__issue_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">issue_date</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">maturity_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for IR swap&#39;s maturity date.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            date: IR swap&#39;s maturity date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__maturity_date</span>
+
+    <span class="nd">@maturity_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">maturity_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maturity_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for IR swap&#39;s maturity date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            maturity_date (Union[datetime, date]): IR swap&#39;s maturity date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__maturity_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">maturity_date</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">currency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for IR swap&#39;s currency.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: IR swap&#39;s ISO 4217 currency code</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__currency</span>
+
+    <span class="nd">@currency</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">currency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__currency</span> <span class="o">=</span> <span class="n">Currency</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">currency</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">notional_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NotionalStructure</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the notionals</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            NotionalStructure: class object detailing the notionals, start dates, ...</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional_structure</span>
+
+    <span class="nd">@notional_structure</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">notional_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NotionalStructure</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;If only a float is given, assume a constant notional and create a ConstNotionalStructure.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (_Union[float, NotionalStructure]): _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_notional_structure</span> <span class="o">=</span> <span class="n">ConstNotionalStructure</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_notional_structure</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="InterestRateSwapSpecification.get_pay_leg">
+<a class="viewcode-back" href="../../../rivapy/instruments/rate.html#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.get_pay_leg">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_pay_leg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pay_leg</span></div>
+
+
+<div class="viewcode-block" id="InterestRateSwapSpecification.get_receive_leg">
+<a class="viewcode-back" href="../../../rivapy/instruments/rate.html#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.get_receive_leg">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_receive_leg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">receive_leg</span></div>
+
+
+<div class="viewcode-block" id="InterestRateSwapSpecification.get_fixed_leg">
+<a class="viewcode-back" href="../../../rivapy/instruments/rate.html#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.get_fixed_leg">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_fixed_leg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;get the fixed leg (only possible for fixed vs. floating swaps -&gt; throws otherwise)&quot;&quot;&quot;</span>
+
+        <span class="n">pay_leg_is_fixed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pay_leg</span><span class="p">()</span><span class="o">.</span><span class="n">leg_type</span> <span class="o">==</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">FIXED</span>
+        <span class="n">receive_leg_is_fixed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_receive_leg</span><span class="p">()</span><span class="o">.</span><span class="n">leg_type</span> <span class="o">==</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">FIXED</span>
+
+        <span class="k">if</span> <span class="n">pay_leg_is_fixed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">receive_leg_is_fixed</span><span class="p">:</span>
+            <span class="n">leg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pay_leg</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">receive_leg_is_fixed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">pay_leg_is_fixed</span><span class="p">:</span>
+            <span class="n">leg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_receive_leg</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Swap is not comprised of one fixed leg and one float/OIS leg!&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">leg</span></div>
+
+
+<div class="viewcode-block" id="InterestRateSwapSpecification.get_float_leg">
+<a class="viewcode-back" href="../../../rivapy/instruments/rate.html#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.get_float_leg">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_float_leg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;get the float leg (only possible for fixed vs. floating swaps -&gt; throws otherwise)&quot;&quot;&quot;</span>
+
+        <span class="n">pay_leg_is_float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pay_leg</span><span class="p">()</span><span class="o">.</span><span class="n">leg_type</span> <span class="ow">in</span> <span class="p">[</span><span class="n">IrLegType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">,</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">OIS</span><span class="p">]</span>
+        <span class="n">receive_leg_is_float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_receive_leg</span><span class="p">()</span><span class="o">.</span><span class="n">leg_type</span> <span class="ow">in</span> <span class="p">[</span><span class="n">IrLegType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">,</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">OIS</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">pay_leg_is_float</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">receive_leg_is_float</span><span class="p">:</span>
+            <span class="n">leg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pay_leg</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">receive_leg_is_float</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">pay_leg_is_float</span><span class="p">:</span>
+            <span class="n">leg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_receive_leg</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Swap is not comprised of one fixed leg and one float/OIS leg!&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">leg</span></div>
+
+
+<div class="viewcode-block" id="InterestRateSwapSpecification.ins_type">
+<a class="viewcode-back" href="../../../rivapy/instruments/rate.html#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.ins_type">[docs]</a>
+    <span class="k">def</span> <span class="nf">ins_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return instrument type</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Instrument: Interest Rate Swap</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Instrument</span><span class="o">.</span><span class="n">IRS</span></div>
+
+
+    <span class="c1"># temp placeholder</span>
+<div class="viewcode-block" id="InterestRateSwapSpecification.get_end_date">
+<a class="viewcode-back" href="../../../rivapy/instruments/rate.html#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification.get_end_date">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_end_date</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">maturity_date</span></div>
+</div>
+
+
+    <span class="c1"># endregion</span>
+
+
+<span class="k">class</span> <span class="nc">InterestRateBasisSwapSpecification</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">notional</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NotionalStructure</span><span class="p">],</span>
+        <span class="n">issue_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">maturity_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">pay_leg</span><span class="p">:</span> <span class="n">IrFloatLegSpecification</span><span class="p">,</span>
+        <span class="n">receive_leg</span><span class="p">:</span> <span class="n">IrFloatLegSpecification</span><span class="p">,</span>
+        <span class="n">spread_leg</span><span class="p">:</span> <span class="n">IrFixedLegSpecification</span><span class="p">,</span>
+        <span class="n">currency</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Currency</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;EUR&quot;</span><span class="p">,</span>
+        <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">ThirtyU360</span><span class="p">,</span>
+        <span class="n">business_day_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">RollConvention</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">FOLLOWING</span><span class="p">,</span>
+        <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">securitization_level</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">SecuritizationLevel</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+        <span class="n">rating</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Rating</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Specification of the entire swap, encapsulating both the pay leg and the receive leg.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            obj_id (str): _description_</span>
+<span class="sd">            notional (_Union[float, NotionalStructure]): _description_</span>
+<span class="sd">            issue_date (_Union[date, datetime]): _description_</span>
+<span class="sd">            maturity_date (_Union[date, datetime]): _description_</span>
+<span class="sd">            pay_leg (_Union[IrFixedLegSpecification, IrFloatLegSpecification]): _description_</span>
+<span class="sd">            receive_leg (_Union[IrFixedLegSpecification, IrFloatLegSpecification]): _description_</span>
+<span class="sd">            currency (_Union[Currency, str], optional): _description_. Defaults to &quot;EUR&quot;.</span>
+<span class="sd">            calendar (_Union[_HolidayBase, str], optional): _description_. Defaults to None.</span>
+<span class="sd">            day_count_convention (_Union[DayCounterType, str], optional): _description_. Defaults to DayCounterType.ThirtyU360.</span>
+<span class="sd">            business_day_convention (_Union[RollConvention, str], optional): _description_. Defaults to RollConvention.FOLLOWING.</span>
+<span class="sd">            issuer (str, optional): _description_. Defaults to None.</span>
+<span class="sd">            securitization_level (_Union[SecuritizationLevel, str], optional): _description_. Defaults to SecuritizationLevel.NONE.</span>
+<span class="sd">            rating (_Union[Rating, str], optional): _description_. Defaults to Rating.NONE.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obj_id</span> <span class="o">=</span> <span class="n">obj_id</span>
+        <span class="k">if</span> <span class="n">issuer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">issuer</span> <span class="o">=</span> <span class="n">issuer</span>
+        <span class="k">if</span> <span class="n">securitization_level</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">securitization_level</span> <span class="o">=</span> <span class="n">securitization_level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">issue_date</span> <span class="o">=</span> <span class="n">issue_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maturity_date</span> <span class="o">=</span> <span class="n">maturity_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currency</span> <span class="o">=</span> <span class="n">currency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notional_structure</span> <span class="o">=</span> <span class="n">notional</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rating</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">rating</span><span class="p">)</span>
+        <span class="c1"># validate dates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_derived_issued_instrument</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pay_leg</span> <span class="o">=</span> <span class="n">pay_leg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">receive_leg</span> <span class="o">=</span> <span class="n">receive_leg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spread_leg</span> <span class="o">=</span> <span class="n">spread_leg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">day_count_convention</span> <span class="o">=</span> <span class="n">day_count_convention</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">business_day_convention</span> <span class="o">=</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">business_day_convention</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">calendar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calendar</span> <span class="o">=</span> <span class="n">_ECB</span><span class="p">(</span><span class="n">years</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="n">issue_date</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">maturity_date</span><span class="o">.</span><span class="n">year</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calendar</span> <span class="o">=</span> <span class="n">_string_to_calendar</span><span class="p">(</span><span class="n">calendar</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>  <span class="c1"># TODO</span>
+    <span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span>
+        <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ref_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">issuers</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sec_levels</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">currencies</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="s2">&quot;InterestRateBasisSwapSpecification&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ref_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ref_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ref_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">ref_date</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">issuers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">issuers</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Issuer_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">n_samples</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">currencies</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">currencies</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Currency</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sec_levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sec_levels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">SecuritizationLevel</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
+            <span class="n">days</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">15.0</span> <span class="o">*</span> <span class="mf">365.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">issue_date</span> <span class="o">=</span> <span class="n">ref_date</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=-</span><span class="mi">365</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+            <span class="n">pay_leg</span> <span class="o">=</span> <span class="n">IrFloatLegSpecification</span><span class="p">()</span>  <span class="c1"># TODO how to randomly generate?</span>
+            <span class="n">receive_leg</span> <span class="o">=</span> <span class="n">IrFloatLegSpecification</span><span class="p">()</span>
+            <span class="n">spread_leg</span> <span class="o">=</span> <span class="n">IrFixedLegSpecification</span><span class="p">()</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">InterestRateBasisSwapSpecification</span><span class="p">(</span>
+                    <span class="n">obj_id</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;IRS_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">issue_date</span><span class="o">=</span><span class="n">issue_date</span><span class="p">,</span>
+                    <span class="n">maturity_date</span><span class="o">=</span><span class="n">ref_date</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">days</span><span class="p">),</span>
+                    <span class="n">pay_leg</span><span class="o">=</span><span class="n">pay_leg</span><span class="p">,</span>
+                    <span class="n">receive_leg</span><span class="o">=</span><span class="n">receive_leg</span><span class="p">,</span>
+                    <span class="n">spread_leg</span><span class="o">=</span><span class="n">spread_leg</span><span class="p">,</span>
+                    <span class="n">currency</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">currencies</span><span class="p">),</span>
+                    <span class="n">notional</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mf">100.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="mf">10_000.0</span><span class="p">,</span> <span class="mf">100_0000.0</span><span class="p">]),</span>
+                    <span class="n">issuer</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">issuers</span><span class="p">),</span>
+                    <span class="n">securitization_level</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">sec_levels</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">_validate_derived_issued_instrument</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__issue_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__maturity_date</span> <span class="o">=</span> <span class="n">_check_start_before_end</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__issue_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__maturity_date</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;obj_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_id</span><span class="p">,</span>
+            <span class="s2">&quot;issuer&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">issuer</span><span class="p">,</span>
+            <span class="s2">&quot;securitization_level&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">securitization_level</span><span class="p">,</span>
+            <span class="s2">&quot;issue_date&quot;</span><span class="p">:</span> <span class="n">serialize_date</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">issue_date</span><span class="p">),</span>
+            <span class="s2">&quot;maturity_date&quot;</span><span class="p">:</span> <span class="n">serialize_date</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maturity_date</span><span class="p">),</span>
+            <span class="s2">&quot;currency&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span><span class="p">,</span>
+            <span class="s2">&quot;notional&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">notional_structure</span><span class="p">,</span>
+            <span class="s2">&quot;rating&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rating</span><span class="p">,</span>
+            <span class="s2">&quot;receive_leg&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">receive_leg</span><span class="p">,</span>
+            <span class="s2">&quot;pay_leg&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pay_leg</span><span class="p">,</span>
+            <span class="s2">&quot;spread_leg&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">spread_leg</span><span class="p">,</span>
+            <span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calendar</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">calendar</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">),</span>
+            <span class="s2">&quot;day_count_convention&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">day_count_convention</span><span class="p">,</span>
+            <span class="s2">&quot;business_day_convention&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">business_day_convention</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="c1"># region properties</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">issuer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for instrument&#39;s issuer.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Instrument&#39;s issuer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__issuer</span>
+
+    <span class="nd">@issuer</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">issuer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for instrument&#39;s issuer.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            issuer(str): Issuer of the instrument.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__issuer</span> <span class="o">=</span> <span class="n">issuer</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rating</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rating</span>
+
+    <span class="nd">@rating</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">rating</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rating</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Rating</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rating</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">rating</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">securitization_level</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for instrument&#39;s securitisation level.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Instrument&#39;s securitisation level.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__securitization_level</span>
+
+    <span class="nd">@securitization_level</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">securitization_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">securitisation_level</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__securitization_level</span> <span class="o">=</span> <span class="n">SecuritizationLevel</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">securitisation_level</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">issue_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for IR swap&#39;s issue date.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            date: IR swap&#39;s issue date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__issue_date</span>
+
+    <span class="nd">@issue_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">issue_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issue_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for IR swap&#39;s issue date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            issue_date (Union[datetime, date]): IR swap&#39;s issue date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__issue_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">issue_date</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">maturity_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for IR swap&#39;s maturity date.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            date: IR swap&#39;s maturity date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__maturity_date</span>
+
+    <span class="nd">@maturity_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">maturity_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maturity_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for IR swap&#39;s maturity date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            maturity_date (Union[datetime, date]): IR swap&#39;s maturity date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__maturity_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">maturity_date</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">currency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for IR swap&#39;s currency.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: IR swap&#39;s ISO 4217 currency code</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__currency</span>
+
+    <span class="nd">@currency</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">currency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__currency</span> <span class="o">=</span> <span class="n">Currency</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">currency</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">notional_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NotionalStructure</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the notionals</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            NotionalStructure: class object detailing the notionals, start dates, ...</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional_structure</span>
+
+    <span class="nd">@notional_structure</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">notional_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NotionalStructure</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;If only a float is given, assume a constant notional and create a ConstNotionalStructure.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (_Union[float, NotionalStructure]): _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_notional_structure</span> <span class="o">=</span> <span class="n">ConstNotionalStructure</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_notional_structure</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">get_pay_leg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pay_leg</span>
+
+    <span class="k">def</span> <span class="nf">get_receive_leg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">receive_leg</span>
+
+    <span class="k">def</span> <span class="nf">get_spread_leg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spread_leg</span>
+
+    <span class="k">def</span> <span class="nf">get_fixed_leg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;get the fixed leg (only possible for fixed vs. floating swaps -&gt; throws otherwise)&quot;&quot;&quot;</span>
+
+        <span class="n">pay_leg_is_fixed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pay_leg</span><span class="p">()</span><span class="o">.</span><span class="n">leg_type</span> <span class="o">==</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">FIXED</span>
+        <span class="n">receive_leg_is_fixed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_receive_leg</span><span class="p">()</span><span class="o">.</span><span class="n">leg_type</span> <span class="o">==</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">FIXED</span>
+
+        <span class="k">if</span> <span class="n">pay_leg_is_fixed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">receive_leg_is_fixed</span><span class="p">:</span>
+            <span class="n">leg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pay_leg</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">receive_leg_is_fixed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">pay_leg_is_fixed</span><span class="p">:</span>
+            <span class="n">leg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_receive_leg</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Swap is not comprised of one fixed leg and one float/OIS leg!&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">leg</span>
+
+    <span class="k">def</span> <span class="nf">get_float_leg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;get the float leg (only possible for fixed vs. floating swaps -&gt; throws otherwise)&quot;&quot;&quot;</span>
+
+        <span class="n">pay_leg_is_float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pay_leg</span><span class="p">()</span><span class="o">.</span><span class="n">leg_type</span> <span class="ow">in</span> <span class="p">[</span><span class="n">IrLegType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">,</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">OIS</span><span class="p">]</span>
+        <span class="n">receive_leg_is_float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_receive_leg</span><span class="p">()</span><span class="o">.</span><span class="n">leg_type</span> <span class="ow">in</span> <span class="p">[</span><span class="n">IrLegType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">,</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">OIS</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">pay_leg_is_float</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">receive_leg_is_float</span><span class="p">:</span>
+            <span class="n">leg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pay_leg</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">receive_leg_is_float</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">pay_leg_is_float</span><span class="p">:</span>
+            <span class="n">leg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_receive_leg</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Swap is not comprised of one fixed leg and one float/OIS leg!&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">leg</span>
+
+    <span class="k">def</span> <span class="nf">ins_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return instrument type</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Instrument: Basis Swap</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Instrument</span><span class="o">.</span><span class="n">BS</span>
+
+    <span class="c1"># temp placeholder</span>
+    <span class="k">def</span> <span class="nf">get_end_date</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">maturity_date</span>
+
+    <span class="c1"># endregion</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

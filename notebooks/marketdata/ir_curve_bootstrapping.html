@@ -1,0 +1,1135 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multi-Curve Bootstrapping &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=d2ebc91c" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.svg"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Lucia-Schwartz Model" href="../models/lucia_schwartz.html" />
+    <link rel="prev" title="Discount Curves" href="discount_curves.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Notebook Gallery</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#market-data">Market Data</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="discount_curves.html">Discount Curves</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Multi-Curve Bootstrapping</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Introduction">Introduction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Input-Instruments-for-Interest-Rate-Curve-Bootstrapping">Input Instruments for Interest Rate Curve Bootstrapping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Bootstrapping-EUR-Curves">Bootstrapping EUR Curves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Plotting-IR-Curves">Plotting IR Curves</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#pricing">Pricing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#financial-instruments">Financial Instruments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#tools">Tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../search.html">Search Page</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Notebook Gallery</a></li>
+      <li class="breadcrumb-item active">Multi-Curve Bootstrapping</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/marketdata/ir_curve_bootstrapping.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <p><img alt="image1" src="../../_images/logo.png" /></p>
+<section id="Multi-Curve-Bootstrapping">
+<h1>Multi-Curve Bootstrapping<a class="headerlink" href="#Multi-Curve-Bootstrapping" title="Link to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># import datetime as dt</span>
+<span class="c1"># from dateutil.relativedelta import relativedelta</span>
+<span class="c1"># import rivapy.marketdata.bootstrapping as bootstr</span>
+<span class="c1"># import math</span>
+<span class="c1"># import pandas as pd</span>
+<span class="c1"># import pyvacon</span>
+<span class="c1"># # the next line is a jupyter internal command to show the matplotlib graphs within the notebook</span>
+<span class="c1"># %matplotlib inline</span>
+<span class="c1"># import matplotlib.pyplot as plt</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+
+<span class="c1">#imports</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">from</span> <span class="nn">dateutil.relativedelta</span> <span class="kn">import</span> <span class="n">relativedelta</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">rivapy.marketdata.bootstrapping</span> <span class="kn">import</span> <span class="n">bootstrap_curve</span><span class="p">,</span> <span class="n">get_quote</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.deposit_specifications</span> <span class="kn">import</span> <span class="n">DepositSpecification</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.fra_specifications</span> <span class="kn">import</span> <span class="n">ForwardRateAgreementSpecification</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.ir_swap_specification</span> <span class="kn">import</span> <span class="n">InterestRateSwapSpecification</span><span class="p">,</span> <span class="n">IrFixedLegSpecification</span><span class="p">,</span> <span class="n">IrFloatLegSpecification</span><span class="p">,</span> <span class="n">IrOISLegSpecification</span><span class="p">,</span> <span class="n">InterestRateBasisSwapSpecification</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.components</span> <span class="kn">import</span> <span class="n">ConstNotionalStructure</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.enums</span> <span class="kn">import</span> <span class="n">DayCounterType</span><span class="p">,</span> <span class="n">InterpolationType</span><span class="p">,</span> <span class="n">ExtrapolationType</span>
+
+<span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="kn">from</span> <span class="nn">rivapy.tools._validators</span> <span class="kn">import</span> <span class="n">print_member_values</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing.deposit_pricing</span> <span class="kn">import</span> <span class="n">DepositPricer</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing.interest_rate_swap_pricing</span> <span class="kn">import</span> <span class="n">InterestRateSwapPricer</span>
+<span class="kn">from</span> <span class="nn">rivapy.marketdata.curves</span> <span class="kn">import</span> <span class="n">DiscountCurve</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">DayCounter</span><span class="p">,</span> <span class="n">Period</span><span class="p">,</span> <span class="n">Schedule</span><span class="p">,</span> <span class="n">calc_end_day</span><span class="p">,</span> <span class="n">calc_start_day</span>
+<span class="c1">#testing</span>
+<span class="kn">import</span> <span class="nn">rivapy.instruments.specification_from_csv</span> <span class="k">as</span> <span class="nn">sfc</span>
+<span class="kn">from</span> <span class="nn">holidays</span> <span class="kn">import</span> <span class="n">HolidayBase</span> <span class="k">as</span> <span class="n">_HolidayBase</span>
+<span class="kn">from</span> <span class="nn">holidays</span> <span class="kn">import</span> <span class="n">EuropeanCentralBank</span> <span class="k">as</span> <span class="n">_ECB</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+c:\Users\DrHansNguyen\Documents\MyRivacon\RiVaPy\rivapy\__init__.py:11: UserWarning: The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.
+  warnings.warn(&#39;The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.&#39;)
+</pre></div></div>
+</div>
+<section id="Introduction">
+<h2>Introduction<a class="headerlink" href="#Introduction" title="Link to this heading"></a></h2>
+<p>In this notebook we introduce the basic principles of multi-curve bootstrapping.</p>
+<p>Before the credit crisis a single-curve framework was used for pricing interest rate derivatives. Both the forecasting of future cashflows as well as the discounting of future cashflows was based on the same curve. This curve was considered to be risk-free and was bootstrapped using a mixture of instruments indexed to rates with different tenors.</p>
+<p>Since the crisis, however, a widening of the spreads in tenor basis swaps has been observed. As a result, two interest rate swaps indexed e.g. to the 3M EURIBOR and 6M EURIBOR can no longer be priced using the same curve. Furthermore, a distinction needs to be made between the curve for the forward rates and the discount curve. This has led to the introduction of the multi-curve framework with separate curves for each tenor.</p>
+<p>In the multi-curve setup the curves are constructed based on instruments homogeneous in the referenced index. A set of instruments needs to be selected for each curve, with one instrument per maturity. Each instrument requires a quote as well as the respective instrument definition, which is called a specification in the context of pyvacon.</p>
+</section>
+<section id="Input-Instruments-for-Interest-Rate-Curve-Bootstrapping">
+<h2>Input Instruments for Interest Rate Curve Bootstrapping<a class="headerlink" href="#Input-Instruments-for-Interest-Rate-Curve-Bootstrapping" title="Link to this heading"></a></h2>
+<p>The following instruments are currently available for ir curve bootstrapping</p>
+<ul class="simple">
+<li><p>Deposits</p></li>
+<li><p>IR Futures</p></li>
+<li><p>IR Swaps</p></li>
+<li><p>IR Basis-Swaps</p></li>
+<li><p>FX Swaps</p></li>
+</ul>
+<section id="Setting-up-deposits-/-fixings">
+<h3>Setting up deposits / fixings<a class="headerlink" href="#Setting-up-deposits-/-fixings" title="Link to this heading"></a></h3>
+<p>The fixing of the underlying reference rate is published daily and represents a certain average rate earned over a period corresponding to the tenor. The rate is calculated from quotes obtained from a panel of selected banks. The start date (spot date) of the period can deviate from the fixing date. This difference is referred to as the spot lag.</p>
+<p>The fixing is usually used as the starting point for the bootstrapping of forward curves. It can be specified as a deposit in pyvacon.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># calculation date</span>
+<span class="n">ref_date</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2019</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">31</span><span class="p">)</span>
+
+<span class="c1"># start date of the accrual period with spot lag equal to 2 days</span>
+<span class="n">start_date</span> <span class="o">=</span> <span class="n">ref_date</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># end date of the accrual period is 1 day after startdate</span>
+<span class="n">end_date</span> <span class="o">=</span> <span class="n">start_date</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># specification of the deposit</span>
+<span class="n">ccy</span> <span class="o">=</span> <span class="s2">&quot;EUR&quot;</span>
+<span class="n">dcc</span> <span class="o">=</span> <span class="s2">&quot;Act365Fixed&quot;</span><span class="c1">#&quot;Act360&quot;normally a bond is ACT360, we keep consistency with the swaps</span>
+<span class="n">rate</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="n">notional</span> <span class="o">=</span> <span class="mf">100.0</span>
+<span class="n">deposit</span> <span class="o">=</span> <span class="n">DepositSpecification</span><span class="p">(</span>
+    <span class="n">obj_id</span><span class="o">=</span><span class="s2">&quot;OVERNIGHT_DEPOSIT&quot;</span><span class="p">,</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;dummy_issuer&quot;</span><span class="p">,</span>
+    <span class="n">currency</span><span class="o">=</span><span class="n">ccy</span><span class="p">,</span>
+    <span class="n">issue_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span>
+    <span class="n">maturity_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
+    <span class="n">notional</span><span class="o">=</span><span class="n">notional</span><span class="p">,</span>
+    <span class="n">rate</span><span class="o">=</span><span class="n">rate</span><span class="p">,</span>
+    <span class="n">day_count_convention</span><span class="o">=</span><span class="n">dcc</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># check dates, deposit start date cannot be the same as  maturity date</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ref date: </span><span class="si">{</span><span class="n">ref_date</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;start date: </span><span class="si">{</span><span class="n">start_date</span><span class="si">}</span><span class="s2"> with spot lag 2 days&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;end date: </span><span class="si">{</span><span class="n">end_date</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;adjusted start date: </span><span class="si">{</span><span class="n">deposit</span><span class="o">.</span><span class="n">start_date</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;adjusted end date: </span><span class="si">{</span><span class="n">deposit</span><span class="o">.</span><span class="n">maturity_date</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+ref date: 2019-08-31 00:00:00
+start date: 2019-09-02 00:00:00 with spot lag 2 days
+end date: 2019-09-03 00:00:00
+adjusted start date: 2019-08-30 00:00:00
+adjusted end date: 2019-09-03 00:00:00
+</pre></div></div>
+</div>
+</section>
+<section id="Setting-up-an-interest-rate-swap">
+<h3>Setting up an interest rate swap<a class="headerlink" href="#Setting-up-an-interest-rate-swap" title="Link to this heading"></a></h3>
+<p>A plain vanilla interest rate swap is a financial contract in which a stream of fixed payments is exchanged for floating payments linked to a reference index. The par rate (r) of a swap is the fixed rate under which the value of the two streams (legs) is equal:</p>
+<div class="math notranslate nohighlight">
+\[r \cdot \sum_{i=1}^n dcf_{i} \cdot P(0,t_{i} ) = \sum_{k=1}^m F_{k} \cdot dcf_{k} \cdot P(0,t_{k})\]</div>
+<p>where <span class="math notranslate nohighlight">\(t_{i}\)</span>, <span class="math notranslate nohighlight">\(i=1,..,n\)</span> and <span class="math notranslate nohighlight">\(t_{k}\)</span>, <span class="math notranslate nohighlight">\(i=1,..,m\)</span> are the payment structures of the fixed and floating legs, and <span class="math notranslate nohighlight">\(P(0,t_{i/k})\)</span> are the corresponding discount factors, <span class="math notranslate nohighlight">\(dcf_{i/k}\)</span> is the day count fraction for the period <span class="math notranslate nohighlight">\([t_{(i/k-1)},t_{i/k}]\)</span>, and <span class="math notranslate nohighlight">\(F_{k}\)</span> is the expected value of underlying reference rate for the period <span class="math notranslate nohighlight">\([t_{(k-1)},t_{k}]\)</span>.</p>
+<p>The standard payment frequency of the fixed leg depends on the currency of the swap as well as the tenor of the underlying. In the EUR market swaps are usually quoted with annual fixed payments.</p>
+<p>The payment frequency of the floating leg usually coincides with the tenor of the underlying reference index. In some currencies, however, the floating rate can be compounded and payed out at less frequent intervals (e.g. CAD).</p>
+<p>In the context of pyvacon an IRS can be defined using an InterestRateSwapSpecification.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># start dates of the accrual periods corresponding to the tenor of the underlying index (3 months). The spot lag is set to 0.</span>
+<span class="n">start_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">ref_date</span> <span class="o">+</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">months</span><span class="o">=</span><span class="mi">3</span><span class="o">*</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)]</span>
+
+<span class="c1"># reset dates are equal to start dates if spot lag is 0.</span>
+<span class="n">reset_dates</span> <span class="o">=</span> <span class="n">start_dates</span>
+
+<span class="c1"># the end dates of the accral periods</span>
+<span class="n">end_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">+</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">months</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">start_dates</span><span class="p">]</span>
+
+<span class="c1"># the actual payment dates of the cashflows may differ from the end of the accrual period (e.g. OIS).</span>
+<span class="c1"># in the standard case these two sets of dates coincide</span>
+<span class="n">pay_dates</span> <span class="o">=</span> <span class="n">end_dates</span>
+<span class="n">ns</span> <span class="o">=</span> <span class="n">ConstNotionalStructure</span><span class="p">(</span><span class="mf">100.0</span><span class="p">)</span>
+<span class="n">spread</span> <span class="o">=</span> <span class="mf">0.00</span>
+
+<span class="c1"># definition of the floating leg</span>
+<span class="n">float_leg</span> <span class="o">=</span><span class="n">IrFloatLegSpecification</span><span class="p">(</span><span class="n">obj_id</span> <span class="o">=</span> <span class="s1">&#39;dummy_float_leg&#39;</span><span class="p">,</span> <span class="n">notional</span> <span class="o">=</span> <span class="n">ns</span><span class="p">,</span> <span class="n">reset_dates</span><span class="o">=</span><span class="n">reset_dates</span><span class="p">,</span> <span class="n">start_dates</span><span class="o">=</span><span class="n">start_dates</span><span class="p">,</span> <span class="n">end_dates</span><span class="o">=</span><span class="n">end_dates</span><span class="p">,</span>
+                                   <span class="n">rate_start_dates</span><span class="o">=</span><span class="n">start_dates</span><span class="p">,</span> <span class="n">rate_end_dates</span><span class="o">=</span><span class="n">end_dates</span><span class="p">,</span> <span class="n">pay_dates</span><span class="o">=</span><span class="n">pay_dates</span><span class="p">,</span> <span class="n">currency</span> <span class="o">=</span> <span class="s2">&quot;EUR&quot;</span><span class="p">,</span>
+                                   <span class="n">udl_id</span><span class="o">=</span><span class="s2">&quot;test_udl_id&quot;</span><span class="p">,</span> <span class="n">fixing_id</span><span class="o">=</span><span class="s2">&quot;test_fixing_id&quot;</span><span class="p">,</span> <span class="n">day_count_convention</span><span class="o">=</span><span class="s2">&quot;Act365Fixed&quot;</span><span class="p">,</span> <span class="n">spread</span><span class="o">=</span><span class="n">spread</span><span class="p">)</span>
+
+<span class="c1"># # definition of the fixed leg</span>
+<span class="c1">#Note that a fixed rate is given for the specification as it is required.</span>
+<span class="c1">#However, for the creation of the bootrstrapped curve, the market quotes are used as the target swap par rate</span>
+<span class="n">fixed_leg</span> <span class="o">=</span> <span class="n">IrFixedLegSpecification</span><span class="p">(</span><span class="n">fixed_rate</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">obj_id</span> <span class="o">=</span> <span class="s1">&#39;dummy_fixed_leg&#39;</span><span class="p">,</span> <span class="n">notional</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span> <span class="n">start_dates</span><span class="o">=</span><span class="n">start_dates</span><span class="p">,</span>
+                                    <span class="n">end_dates</span><span class="o">=</span><span class="n">end_dates</span><span class="p">,</span> <span class="n">pay_dates</span><span class="o">=</span><span class="n">pay_dates</span><span class="p">,</span> <span class="n">currency</span><span class="o">=</span><span class="s1">&#39;EUR&#39;</span><span class="p">,</span> <span class="n">day_count_convention</span><span class="o">=</span><span class="s1">&#39;Act365Fixed&#39;</span><span class="p">)</span>
+
+<span class="c1"># # definition of the IR swap</span>
+<span class="n">ir_swap</span> <span class="o">=</span> <span class="n">InterestRateSwapSpecification</span><span class="p">(</span><span class="n">obj_id</span><span class="o">=</span><span class="s2">&quot;3M_SWAP&quot;</span><span class="p">,</span> <span class="n">notional</span><span class="o">=</span><span class="n">ns</span><span class="p">,</span> <span class="n">issue_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span> <span class="n">maturity_date</span><span class="o">=</span><span class="n">pay_dates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                                        <span class="n">pay_leg</span><span class="o">=</span><span class="n">fixed_leg</span><span class="p">,</span> <span class="n">receive_leg</span><span class="o">=</span><span class="n">float_leg</span><span class="p">,</span><span class="n">currency</span><span class="o">=</span><span class="s1">&#39;EUR&#39;</span><span class="p">,</span> <span class="n">day_count_convention</span><span class="o">=</span><span class="s2">&quot;Act365Fixed&quot;</span><span class="p">,</span>
+                                        <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;dummy_issuer&quot;</span><span class="p">,</span> <span class="n">securitization_level</span><span class="o">=</span><span class="s2">&quot;COLLATERALIZED&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#2Y maturity 3M swap</span>
+<span class="n">start_dates2</span> <span class="o">=</span> <span class="p">[</span><span class="n">ref_date</span> <span class="o">+</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">months</span><span class="o">=</span><span class="mi">3</span><span class="o">*</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="mi">2</span><span class="p">)]</span>
+<span class="n">reset_dates2</span> <span class="o">=</span> <span class="n">start_dates2</span>
+<span class="n">end_dates2</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">+</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">months</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">start_dates2</span><span class="p">]</span>
+<span class="n">pay_dates2</span> <span class="o">=</span> <span class="n">end_dates2</span>
+
+<span class="n">ns</span> <span class="o">=</span> <span class="n">ConstNotionalStructure</span><span class="p">(</span><span class="mf">100.0</span><span class="p">)</span>
+<span class="n">spread</span> <span class="o">=</span> <span class="mf">0.00</span>
+
+<span class="c1"># # definition of the floating leg</span>
+<span class="n">float_leg2</span> <span class="o">=</span><span class="n">IrFloatLegSpecification</span><span class="p">(</span><span class="n">obj_id</span> <span class="o">=</span> <span class="s1">&#39;dummy_float_leg2&#39;</span><span class="p">,</span> <span class="n">notional</span> <span class="o">=</span> <span class="n">ns</span><span class="p">,</span> <span class="n">reset_dates</span><span class="o">=</span><span class="n">reset_dates2</span><span class="p">,</span> <span class="n">start_dates</span><span class="o">=</span><span class="n">start_dates2</span><span class="p">,</span> <span class="n">end_dates</span><span class="o">=</span><span class="n">end_dates2</span><span class="p">,</span>
+                                   <span class="n">rate_start_dates</span><span class="o">=</span><span class="n">start_dates2</span><span class="p">,</span> <span class="n">rate_end_dates</span><span class="o">=</span><span class="n">end_dates2</span><span class="p">,</span> <span class="n">pay_dates</span><span class="o">=</span><span class="n">pay_dates2</span><span class="p">,</span> <span class="n">currency</span> <span class="o">=</span> <span class="s2">&quot;EUR&quot;</span><span class="p">,</span>
+                                   <span class="n">udl_id</span><span class="o">=</span><span class="s2">&quot;test_udl_id&quot;</span><span class="p">,</span> <span class="n">fixing_id</span><span class="o">=</span><span class="s2">&quot;test_fixing_id&quot;</span><span class="p">,</span> <span class="n">day_count_convention</span><span class="o">=</span><span class="s2">&quot;Act365Fixed&quot;</span><span class="p">,</span> <span class="n">spread</span><span class="o">=</span><span class="n">spread</span><span class="p">)</span>
+
+<span class="c1"># # definition of the fixed leg</span>
+<span class="n">fixed_leg2</span> <span class="o">=</span> <span class="n">IrFixedLegSpecification</span><span class="p">(</span><span class="n">fixed_rate</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">obj_id</span> <span class="o">=</span> <span class="s1">&#39;dummy_fixed_leg2&#39;</span><span class="p">,</span> <span class="n">notional</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span> <span class="n">start_dates</span><span class="o">=</span><span class="n">start_dates2</span><span class="p">,</span>
+                                    <span class="n">end_dates</span><span class="o">=</span><span class="n">end_dates2</span><span class="p">,</span> <span class="n">pay_dates</span><span class="o">=</span><span class="n">pay_dates2</span><span class="p">,</span> <span class="n">currency</span><span class="o">=</span><span class="s1">&#39;EUR&#39;</span><span class="p">,</span> <span class="n">day_count_convention</span><span class="o">=</span><span class="s1">&#39;Act365Fixed&#39;</span><span class="p">)</span>
+
+<span class="c1"># # definition of the IR swap</span>
+<span class="n">ir_swap2</span> <span class="o">=</span> <span class="n">InterestRateSwapSpecification</span><span class="p">(</span><span class="n">obj_id</span><span class="o">=</span><span class="s2">&quot;3M_SWAP2&quot;</span><span class="p">,</span> <span class="n">notional</span><span class="o">=</span><span class="n">ns</span><span class="p">,</span> <span class="n">issue_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span> <span class="n">maturity_date</span><span class="o">=</span><span class="n">pay_dates2</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                                        <span class="n">pay_leg</span><span class="o">=</span><span class="n">fixed_leg2</span><span class="p">,</span> <span class="n">receive_leg</span><span class="o">=</span><span class="n">float_leg2</span><span class="p">,</span><span class="n">currency</span><span class="o">=</span><span class="s1">&#39;EUR&#39;</span><span class="p">,</span> <span class="n">day_count_convention</span><span class="o">=</span><span class="s2">&quot;Act365Fixed&quot;</span><span class="p">,</span>
+                                        <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;dummy_issuer&quot;</span><span class="p">,</span> <span class="n">securitization_level</span><span class="o">=</span><span class="s2">&quot;COLLATERALIZED&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Setting-up-an-overnight-indexed-swap">
+<h3>Setting up an overnight indexed swap<a class="headerlink" href="#Setting-up-an-overnight-indexed-swap" title="Link to this heading"></a></h3>
+<p>An OIS is an interest rate swap where the floating payments are linked to a compounded overnight rate. The floating payments are obtained as:</p>
+<div class="math notranslate nohighlight">
+\[N\prod_{i=1}^n (1+dcf_{i}\cdot I_{i-1})-1\]</div>
+<p>where <span class="math notranslate nohighlight">\(N\)</span> is the notional, <span class="math notranslate nohighlight">\(dcf_{i}\)</span> is the day count fraction for the one-day period <span class="math notranslate nohighlight">\([t_{i-1},t_{i}]\)</span> and <span class="math notranslate nohighlight">\(I_{i-1}\)</span> is the fixing of the ON rate corresponding to time <span class="math notranslate nohighlight">\(t_{i-1}\)</span>.</p>
+<p>The overnight rate represents the default risk over one night and can, therefore, be regarded as mostly risk free. This rate is used to discount cashflows from collateralized trades as this rate is most often paid as interest for the collateral.</p>
+<p>In the current pyvacon setting the OIS will be defined as plain vanilla IRS without compounding.</p>
+</section>
+<section id="Setting-up-a-tenor-basis-swap">
+<h3>Setting up a tenor basis swap<a class="headerlink" href="#Setting-up-a-tenor-basis-swap" title="Link to this heading"></a></h3>
+<p>Basis swaps can be quoted in a fixed-fixed (as a portfolio of 2 fixed vs floating IRS) or in a float-float (as a single swap) convention. The market standard usually depends on the currency.</p>
+<section id="Fixed-Fixed-Basis-Swaps-(EUR-convention)">
+<h4>Fixed-Fixed Basis Swaps (EUR convention)<a class="headerlink" href="#Fixed-Fixed-Basis-Swaps-(EUR-convention)" title="Link to this heading"></a></h4>
+<p>In certain currencies (e.g EUR, SEK, DKK and NOK) basis swaps are quoted as the difference between two IRS with identical fixed legs and floating legs indexed to different tenors. With this convention the spread is usually paid annually, independent of the tenors of the floating legs. The par spread <span class="math notranslate nohighlight">\(s^{xy}\)</span> is defined via:</p>
+<div class="math notranslate nohighlight">
+\[s^{xy} \cdot \sum_{l} dcf_{i} \cdot P(0,t_{l})= \sum_{k} dcf_{k} \cdot F_{k}^{y} \cdot P(0,t_{k})-\sum_{i} dcf_{i} \cdot F_{i}^{x} \cdot P(0,t_{i} )\]</div>
+<p>where <span class="math notranslate nohighlight">\(t_{i}\)</span>, <span class="math notranslate nohighlight">\(t_{k}\)</span> are grids corresponding to the tenors <span class="math notranslate nohighlight">\(x,y\)</span> with <span class="math notranslate nohighlight">\(x&lt;y\)</span> , <span class="math notranslate nohighlight">\(t_{l}\)</span> is the fixed payment grid.</p>
+</section>
+<section id="Float-Float-Basis-Swaps">
+<h4>Float-Float Basis Swaps<a class="headerlink" href="#Float-Float-Basis-Swaps" title="Link to this heading"></a></h4>
+<p>In case of a single swap notation, the frequency of the floating payments usually coincides with the tenors of the reference rate. The spread is paid with the shorter leg. The par spread <span class="math notranslate nohighlight">\(s^{xy}\)</span> is defined via:</p>
+<div class="math notranslate nohighlight">
+\[\sum_{i} dcf_{i} \cdot (F_{i}^{x}+s^{xy} ) \cdot P(0,t_{i})= \sum_{k}dcf_{k} \cdot F_{k}^{y} \cdot P(0,t_{k})\]</div>
+<p>where <span class="math notranslate nohighlight">\(t_{i}\)</span>, <span class="math notranslate nohighlight">\(t_{k}\)</span> are grids corresponding to the tenors <span class="math notranslate nohighlight">\(x,y\)</span> with <span class="math notranslate nohighlight">\(x&lt;y\)</span> .</p>
+<p>For some currencies (USD, CAD) the floating leg corresponding to the shorter tenor is compounded to align the payment of both legs. In this case the payment frequency of the spread coincides with the longer tenor.</p>
+<p>In pyvacon a basis swap can be specified using InterestRateBasisSwapSpecification. Here two floating legs corresponding to the two reference indices need to be defined along with a fixed leg corresponding to the spread payments.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># # we consider a 3M vs 6M basis swap. A pay and receive floating legs need to be specified (spread = receive - pay).</span>
+<span class="c1"># # The definition of the pay leg (3M) will be taken from the ir swap above</span>
+<span class="c1"># floatleg_3M = floatleg</span>
+
+<span class="c1"># # get the 6M floating leg (receive leg)</span>
+<span class="c1"># start_dates_6M = [refdate + relativedelta(months=6 * i) for i in range(2)]</span>
+<span class="c1"># reset_dates_6M = start_dates_6M</span>
+<span class="c1"># end_dates_6M = [refdate + relativedelta(months=6 * (i+1)) for i in range(2)]</span>
+<span class="c1"># notionals_6M = [1.0 for i in range(len(start_dates_6M))]</span>
+<span class="c1"># floatleg_6M = pyvacon.finance.specification.IrFloatLegSpecification(</span>
+<span class="c1">#     notionals_6M, reset_dates_6M, start_dates_6M, end_dates_6M, end_dates_6M,</span>
+<span class="c1">#     &#39;EUR&#39;, &#39;dummy_udl&#39;, &#39;Act365Fixed&#39;, 0.0)</span>
+
+<span class="c1"># # the 3M leg is the payleg, 6M - the receve leg.</span>
+<span class="c1"># basis_swap = pyvacon.finance.specification.InterestRateBasisSwapSpecification(</span>
+<span class="c1">#     &#39;3M6M_BASIS_SWAP&#39;, &#39;test&#39;, &#39;COLLATERALIZED&#39;, &#39;EUR&#39;, end_dates_6M[-1], floatleg_3M, floatleg_6M,  fixedleg)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># we consider a 3M vs 6M basis swap. A pay and receive floating legs need to be specified (spread = receive - pay).</span>
+
+<span class="c1"># these inputs must be given by user</span>
+<span class="n">holidays</span> <span class="o">=</span> <span class="n">_ECB</span><span class="p">()</span>
+
+<span class="c1"># --- Defining general fields ---</span>
+<span class="n">instr</span> <span class="o">=</span> <span class="s2">&quot;TBS&quot;</span>
+<span class="n">currency</span> <span class="o">=</span> <span class="s2">&quot;EUR&quot;</span>
+<span class="n">maturity</span> <span class="o">=</span> <span class="s2">&quot;1M&quot;</span>
+<span class="n">spot_lag</span> <span class="o">=</span> <span class="s2">&quot;2D&quot;</span>
+<span class="n">roll_conv</span> <span class="o">=</span> <span class="s2">&quot;ModifiedFollowing&quot;</span>
+<span class="n">fixDayCount</span> <span class="o">=</span> <span class="s2">&quot;Act360&quot;</span>
+<span class="n">floatDayCount</span> <span class="o">=</span> <span class="s2">&quot;Act360&quot;</span>
+<span class="n">basisDayCount</span> <span class="o">=</span> <span class="s2">&quot;Act360&quot;</span>
+<span class="n">rollConvFix</span> <span class="o">=</span> <span class="s2">&quot;ModifiedFollowing&quot;</span>
+<span class="n">rollConvBasis</span> <span class="o">=</span> <span class="s2">&quot;ModifiedFollowing&quot;</span>
+<span class="c1"># --- Long (receive) leg info ---</span>
+<span class="n">long_index</span> <span class="o">=</span> <span class="s2">&quot;EURIBOR&quot;</span>
+<span class="n">long_tenor</span> <span class="o">=</span> <span class="s2">&quot;6M&quot;</span>
+<span class="n">long_freq</span> <span class="o">=</span> <span class="s2">&quot;6M&quot;</span>
+
+<span class="c1"># --- Short (pay) leg info ---</span>
+<span class="n">short_index</span> <span class="o">=</span> <span class="s2">&quot;EURIBOR&quot;</span>
+<span class="n">short_tenor</span> <span class="o">=</span> <span class="s2">&quot;3M&quot;</span>
+<span class="n">short_freq</span> <span class="o">=</span> <span class="s2">&quot;3M&quot;</span>
+
+<span class="c1"># --- Spread (basis quote) ---</span>
+<span class="n">spread_rate</span> <span class="o">=</span> <span class="mf">9.85</span> <span class="o">/</span> <span class="mf">10000.0</span>  <span class="c1"># e.g. 8.5 bps -&gt; 0.00085</span>
+
+<span class="c1"># --- Spot and maturity dates ---</span>
+<span class="n">spot_date</span> <span class="o">=</span> <span class="n">calc_end_day</span><span class="p">(</span><span class="n">ref_date</span><span class="p">,</span> <span class="n">spot_lag</span><span class="p">,</span> <span class="n">roll_conv</span><span class="p">,</span> <span class="n">holidays</span><span class="p">)</span>
+<span class="n">expiry</span> <span class="o">=</span> <span class="n">calc_end_day</span><span class="p">(</span><span class="n">spot_date</span><span class="p">,</span> <span class="n">maturity</span><span class="p">,</span> <span class="n">roll_conv</span><span class="p">,</span> <span class="n">holidays</span><span class="p">)</span>
+<span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">instr</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">maturity</span><span class="si">}</span><span class="s2">&quot;</span>
+
+<span class="n">ns</span> <span class="o">=</span> <span class="n">ConstNotionalStructure</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+
+<span class="c1"># --------------------------------------------</span>
+<span class="c1"># PAY FLOATING LEG (short tenor, pays basis)</span>
+<span class="n">short_schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span>
+    <span class="n">start_day</span><span class="o">=</span><span class="n">spot_date</span><span class="p">,</span>
+    <span class="n">end_day</span><span class="o">=</span><span class="n">expiry</span><span class="p">,</span>
+    <span class="n">time_period</span><span class="o">=</span><span class="n">short_freq</span><span class="p">,</span>
+    <span class="n">business_day_convention</span><span class="o">=</span><span class="n">roll_conv</span><span class="p">,</span>
+    <span class="n">calendar</span><span class="o">=</span><span class="n">holidays</span><span class="p">,</span>
+    <span class="n">ref_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">generate_dates</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">short_start</span> <span class="o">=</span> <span class="n">short_schedule</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">short_end</span> <span class="o">=</span> <span class="n">short_schedule</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+<span class="n">short_pay</span> <span class="o">=</span> <span class="n">short_end</span>
+<span class="n">short_reset</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span>
+    <span class="n">start_day</span><span class="o">=</span><span class="n">spot_date</span><span class="p">,</span>
+    <span class="n">end_day</span><span class="o">=</span><span class="n">expiry</span><span class="p">,</span>
+    <span class="n">time_period</span><span class="o">=</span><span class="n">short_tenor</span><span class="p">,</span>
+    <span class="n">business_day_convention</span><span class="o">=</span><span class="n">roll_conv</span><span class="p">,</span>
+    <span class="n">calendar</span><span class="o">=</span><span class="n">holidays</span><span class="p">,</span>
+    <span class="n">ref_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">generate_dates</span><span class="p">(</span><span class="kc">False</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="n">pay_leg</span> <span class="o">=</span> <span class="n">IrFloatLegSpecification</span><span class="p">(</span>
+    <span class="n">obj_id</span><span class="o">=</span><span class="n">label</span> <span class="o">+</span> <span class="s2">&quot;_pay_leg&quot;</span><span class="p">,</span>
+    <span class="n">notional</span><span class="o">=</span><span class="n">ns</span><span class="p">,</span>
+    <span class="n">reset_dates</span><span class="o">=</span><span class="n">short_reset</span><span class="p">,</span>
+    <span class="n">start_dates</span><span class="o">=</span><span class="n">short_start</span><span class="p">,</span>
+    <span class="n">end_dates</span><span class="o">=</span><span class="n">short_end</span><span class="p">,</span>
+    <span class="n">rate_start_dates</span><span class="o">=</span><span class="n">short_start</span><span class="p">,</span>
+    <span class="n">rate_end_dates</span><span class="o">=</span><span class="n">short_end</span><span class="p">,</span>
+    <span class="n">pay_dates</span><span class="o">=</span><span class="n">short_pay</span><span class="p">,</span>
+    <span class="n">currency</span><span class="o">=</span><span class="n">currency</span><span class="p">,</span>
+    <span class="n">udl_id</span><span class="o">=</span><span class="n">short_index</span><span class="p">,</span>
+    <span class="n">fixing_id</span><span class="o">=</span><span class="s2">&quot;test_fixing_id&quot;</span><span class="p">,</span>
+    <span class="n">day_count_convention</span><span class="o">=</span><span class="n">floatDayCount</span><span class="p">,</span>
+    <span class="n">spread</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>  <span class="c1"># this is the quoted basis</span>
+<span class="p">)</span>
+
+<span class="c1"># --------------------------------------------</span>
+<span class="c1"># RECEIVE FLOATING LEG (long tenor)</span>
+
+<span class="n">long_schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span>
+    <span class="n">start_day</span><span class="o">=</span><span class="n">spot_date</span><span class="p">,</span>
+    <span class="n">end_day</span><span class="o">=</span><span class="n">expiry</span><span class="p">,</span>
+    <span class="n">time_period</span><span class="o">=</span><span class="n">long_freq</span><span class="p">,</span>
+    <span class="n">business_day_convention</span><span class="o">=</span><span class="n">roll_conv</span><span class="p">,</span>
+    <span class="n">calendar</span><span class="o">=</span><span class="n">holidays</span><span class="p">,</span>
+    <span class="n">ref_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">generate_dates</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">long_start</span> <span class="o">=</span> <span class="n">long_schedule</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">long_end</span> <span class="o">=</span> <span class="n">long_schedule</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+<span class="n">long_pay</span> <span class="o">=</span> <span class="n">long_end</span>
+<span class="n">long_reset</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span>
+    <span class="n">start_day</span><span class="o">=</span><span class="n">spot_date</span><span class="p">,</span>
+    <span class="n">end_day</span><span class="o">=</span><span class="n">expiry</span><span class="p">,</span>
+    <span class="n">time_period</span><span class="o">=</span><span class="n">long_tenor</span><span class="p">,</span>
+    <span class="n">business_day_convention</span><span class="o">=</span><span class="n">roll_conv</span><span class="p">,</span>
+    <span class="n">calendar</span><span class="o">=</span><span class="n">holidays</span><span class="p">,</span>
+    <span class="n">ref_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">generate_dates</span><span class="p">(</span><span class="kc">False</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="n">receive_leg</span> <span class="o">=</span> <span class="n">IrFloatLegSpecification</span><span class="p">(</span>
+    <span class="n">obj_id</span><span class="o">=</span><span class="n">label</span> <span class="o">+</span> <span class="s2">&quot;_receive_leg&quot;</span><span class="p">,</span>
+    <span class="n">notional</span><span class="o">=</span><span class="n">ns</span><span class="p">,</span>
+    <span class="n">reset_dates</span><span class="o">=</span><span class="n">long_reset</span><span class="p">,</span>
+    <span class="n">start_dates</span><span class="o">=</span><span class="n">long_start</span><span class="p">,</span>
+    <span class="n">end_dates</span><span class="o">=</span><span class="n">long_end</span><span class="p">,</span>
+    <span class="n">rate_start_dates</span><span class="o">=</span><span class="n">long_start</span><span class="p">,</span>
+    <span class="n">rate_end_dates</span><span class="o">=</span><span class="n">long_end</span><span class="p">,</span>
+    <span class="n">pay_dates</span><span class="o">=</span><span class="n">long_pay</span><span class="p">,</span>
+    <span class="n">currency</span><span class="o">=</span><span class="n">currency</span><span class="p">,</span>
+    <span class="n">udl_id</span><span class="o">=</span><span class="n">long_index</span><span class="p">,</span>
+    <span class="n">fixing_id</span><span class="o">=</span><span class="s2">&quot;test_fixing_id&quot;</span><span class="p">,</span>
+    <span class="n">day_count_convention</span><span class="o">=</span><span class="n">floatDayCount</span><span class="p">,</span>
+    <span class="n">spread</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># --------------------------------------------</span>
+<span class="c1">#  FIXED SPREAD LEG</span>
+<span class="c1"># The spread leg represents the fixed +x bps cashflows applied to the pay leg</span>
+<span class="n">spread_schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span>
+    <span class="n">start_day</span><span class="o">=</span><span class="n">spot_date</span><span class="p">,</span>
+    <span class="n">end_day</span><span class="o">=</span><span class="n">expiry</span><span class="p">,</span>
+    <span class="n">time_period</span><span class="o">=</span><span class="n">short_freq</span><span class="p">,</span>  <span class="c1"># same freq as short leg</span>
+    <span class="n">business_day_convention</span><span class="o">=</span><span class="n">rollConvFix</span><span class="p">,</span>
+    <span class="n">calendar</span><span class="o">=</span><span class="n">holidays</span><span class="p">,</span>
+    <span class="n">ref_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">generate_dates</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">spread_start</span> <span class="o">=</span> <span class="n">spread_schedule</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">spread_end</span> <span class="o">=</span> <span class="n">spread_schedule</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+<span class="n">spread_pay</span> <span class="o">=</span> <span class="n">spread_end</span>
+
+<span class="n">spread_leg</span> <span class="o">=</span> <span class="n">IrFixedLegSpecification</span><span class="p">(</span>
+    <span class="n">fixed_rate</span><span class="o">=</span><span class="n">spread_rate</span><span class="p">,</span>
+    <span class="n">obj_id</span><span class="o">=</span><span class="n">label</span> <span class="o">+</span> <span class="s2">&quot;_spread_leg&quot;</span><span class="p">,</span>
+    <span class="n">notional</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">start_dates</span><span class="o">=</span><span class="n">spread_start</span><span class="p">,</span>
+    <span class="n">end_dates</span><span class="o">=</span><span class="n">spread_end</span><span class="p">,</span>
+    <span class="n">pay_dates</span><span class="o">=</span><span class="n">spread_pay</span><span class="p">,</span>
+    <span class="n">currency</span><span class="o">=</span><span class="n">currency</span><span class="p">,</span>
+    <span class="n">day_count_convention</span><span class="o">=</span><span class="n">fixDayCount</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># --------------------------------------------</span>
+<span class="c1"># Combine into full TBS object</span>
+<span class="n">basis_swap</span> <span class="o">=</span> <span class="n">InterestRateBasisSwapSpecification</span><span class="p">(</span>
+    <span class="n">obj_id</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+    <span class="n">notional</span><span class="o">=</span><span class="n">ns</span><span class="p">,</span>
+    <span class="n">issue_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span>
+    <span class="n">maturity_date</span><span class="o">=</span><span class="n">expiry</span><span class="p">,</span>
+    <span class="n">pay_leg</span><span class="o">=</span><span class="n">pay_leg</span><span class="p">,</span>
+    <span class="n">receive_leg</span><span class="o">=</span><span class="n">receive_leg</span><span class="p">,</span>
+    <span class="n">spread_leg</span><span class="o">=</span><span class="n">spread_leg</span><span class="p">,</span>
+    <span class="n">currency</span><span class="o">=</span><span class="n">currency</span><span class="p">,</span>
+    <span class="n">day_count_convention</span><span class="o">=</span><span class="n">floatDayCount</span><span class="p">,</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;dummy_issuer&quot;</span><span class="p">,</span>
+    <span class="n">securitization_level</span><span class="o">=</span><span class="s2">&quot;COLLATERALIZED&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<br/><br/></pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="Bootstrapping-EUR-Curves">
+<h2>Bootstrapping EUR Curves<a class="headerlink" href="#Bootstrapping-EUR-Curves" title="Link to this heading"></a></h2>
+<p>In the EUR market most interest rate derivatives are indexed to the Euribor benchmark rate and the Euro OverNight Index Average (Eonia) in case of Overnight indexed swaps (<a class="reference external" href="https://www.emmi-benchmarks.eu/emmi/about-us.html">https://www.emmi-benchmarks.eu/emmi/about-us.html</a>). Derivatives indexed to the 1M, 3M, 6M and 12M tenors can be found.</p>
+<p>In this notebook we present the construction of the OIS discounting curve and the two most commonly used tenor curves - the 3M and 6M tenors.</p>
+<p>The bootstrapping of different tenors needs to be performed sequentially. At first the OIS curve needs to be constructed, since it is used as the discount curve in the bootstrapping algorithm for all other tenors. The OIS curve is calibrated under the assumption that the forward and discount curves coincide.</p>
+<p>The order of construction of the other tenors depends on the defined input instruments. If the derivatives only depend on one tenor (outright quotes), there are no restrictions on the order. However, for most currencies, one or two tenors will be more liquid (depending on the maturity) and all other tenors will be represented as basis swaps with respect to the main tenor. In this case the correct bootstrapping order needs to be followed and the corresponding basis index needs to be provided.</p>
+<section id="Sample-curve-specification">
+<h3>Sample curve specification<a class="headerlink" href="#Sample-curve-specification" title="Link to this heading"></a></h3>
+<p>We define a few example specifications to show the expected syntax. Further below we showcase real data.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># sample &quot;OIS&quot; discounting curve</span>
+<span class="n">instruments</span> <span class="o">=</span> <span class="p">[</span><span class="n">deposit</span><span class="p">,</span> <span class="n">ir_swap</span><span class="p">]</span>
+<span class="n">quotes</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0025</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">]</span>
+<span class="n">sample_dc</span> <span class="o">=</span> <span class="n">bootstrap_curve</span><span class="p">(</span>
+            <span class="n">ref_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span>
+            <span class="n">curve_id</span><span class="o">=</span><span class="s2">&quot;OIS_DC&quot;</span><span class="p">,</span>
+            <span class="n">day_count_convention</span><span class="o">=</span><span class="s2">&quot;Act360&quot;</span><span class="p">,</span>  <span class="c1"># taken the first entry and assume is valid for all other deposits</span>
+            <span class="n">instruments</span><span class="o">=</span><span class="n">instruments</span><span class="p">,</span>
+            <span class="n">quotes</span><span class="o">=</span><span class="n">quotes</span><span class="p">,</span>
+            <span class="n">interpolation_type</span><span class="o">=</span><span class="n">InterpolationType</span><span class="o">.</span><span class="n">LINEAR_LOG</span><span class="p">,</span>
+            <span class="n">extrapolation_type</span><span class="o">=</span><span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">LINEAR_LOG</span><span class="p">,</span>
+        <span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># sample 3M EURIBOR curve with OIS discounting</span>
+<span class="n">instruments</span> <span class="o">=</span> <span class="p">[</span><span class="n">ir_swap</span><span class="p">,</span> <span class="n">ir_swap2</span><span class="p">]</span>
+<span class="n">quotes</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.003</span><span class="p">,</span> <span class="mf">0.0075</span><span class="p">]</span>
+
+<span class="n">euribor_3m</span> <span class="o">=</span> <span class="n">bootstrap_curve</span><span class="p">(</span>
+            <span class="n">ref_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span>
+            <span class="n">curve_id</span><span class="o">=</span><span class="s2">&quot;EUR3M_DC&quot;</span><span class="p">,</span>
+            <span class="n">day_count_convention</span><span class="o">=</span><span class="s2">&quot;Act360&quot;</span><span class="p">,</span>  <span class="c1"># taken the first entry and assume is valid for all other deposits</span>
+            <span class="n">instruments</span><span class="o">=</span><span class="n">instruments</span><span class="p">,</span>
+            <span class="n">quotes</span><span class="o">=</span><span class="n">quotes</span><span class="p">,</span>
+            <span class="n">curves</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;discount_curve&quot;</span><span class="p">:</span> <span class="n">sample_dc</span><span class="p">},</span>
+            <span class="n">interpolation_type</span><span class="o">=</span><span class="n">InterpolationType</span><span class="o">.</span><span class="n">LINEAR_LOG</span><span class="p">,</span>
+            <span class="n">extrapolation_type</span><span class="o">=</span><span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">LINEAR_LOG</span><span class="p">,</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># sample 6M EURIBOR curve with ois bootstrapping and the 3M EURIBOR curve as the basis index</span>
+<span class="n">quotes</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.003</span><span class="p">,</span> <span class="mf">0.006</span><span class="p">]</span>
+<span class="c1"># the basis swap is used instead of the ir swap</span>
+<span class="n">instruments</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">basis_swap</span>
+<span class="c1">#euribor_6m = bootstr.bootstrap_curve(refdate, &#39;EUR6M_DC&#39;, &#39;Act365Fixed&#39;, instruments, quotes, estr, euribor_3m)</span>
+
+
+<span class="n">euribor_6m</span> <span class="o">=</span> <span class="n">bootstrap_curve</span><span class="p">(</span>
+            <span class="n">ref_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span>
+            <span class="n">curve_id</span><span class="o">=</span><span class="s2">&quot;EUR6M_DC&quot;</span><span class="p">,</span>
+            <span class="n">day_count_convention</span><span class="o">=</span><span class="s2">&quot;Act360&quot;</span><span class="p">,</span>  <span class="c1"># taken the first entry and assume is valid for all other deposits</span>
+            <span class="n">instruments</span><span class="o">=</span><span class="n">instruments</span><span class="p">,</span>
+            <span class="n">quotes</span><span class="o">=</span><span class="n">quotes</span><span class="p">,</span>
+            <span class="n">curves</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;discount_curve&quot;</span><span class="p">:</span> <span class="n">sample_dc</span><span class="p">,</span> <span class="s2">&quot;basis_curve&quot;</span><span class="p">:</span> <span class="n">euribor_3m</span><span class="p">},</span>
+            <span class="n">interpolation_type</span><span class="o">=</span><span class="n">InterpolationType</span><span class="o">.</span><span class="n">LINEAR_LOG</span><span class="p">,</span>
+            <span class="n">extrapolation_type</span><span class="o">=</span><span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">LINEAR_LOG</span><span class="p">,</span>
+        <span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sample_dc</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">euribor_3m</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">euribor_6m</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_marketdata_ir_curve_bootstrapping_19_0.png" src="../../_images/notebooks_marketdata_ir_curve_bootstrapping_19_0.png" />
+</div>
+</div>
+</section>
+<section id="EUR-market-data">
+<h3>EUR market data<a class="headerlink" href="#EUR-market-data" title="Link to this heading"></a></h3>
+<p>We now present the calibration of EUR curves based on actual market data. The input quotes as well as the instrument definition and conventions are provided in an input csv. file and are loaded into a pandas data frame object:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># set holiday calendar</span>
+<span class="n">holidays</span><span class="o">=</span> <span class="n">_ECB</span><span class="p">()</span>
+
+<span class="c1"># set directory and file name for Input Quotes</span>
+<span class="n">dirName</span> <span class="o">=</span> <span class="s2">&quot;./sample_data&quot;</span>
+<span class="n">fileName</span> <span class="o">=</span> <span class="s2">&quot;/multi_dates_tbs.csv&quot;</span>
+
+<span class="c1"># get instrument quotes and conventions from input .csv file</span>
+<span class="n">dfQuotes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">dirName</span> <span class="o">+</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;;&quot;</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+<span class="n">column_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dfQuotes</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+
+<span class="n">dfQuotes</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Date</th>
+      <th>Maturity</th>
+      <th>Instrument</th>
+      <th>Currency</th>
+      <th>Quote</th>
+      <th>UnderlyingIndex</th>
+      <th>UnderlyingTenor</th>
+      <th>UnderlyingPaymentFrequency</th>
+      <th>BasisIndex</th>
+      <th>BasisTenor</th>
+      <th>...</th>
+      <th>DayCountFixed</th>
+      <th>DayCountFloat</th>
+      <th>DayCountBasis</th>
+      <th>RollConventionFixed</th>
+      <th>RollConventionFloat</th>
+      <th>RollConventionBasis</th>
+      <th>SpotLag</th>
+      <th>UnderlyingTenorShort</th>
+      <th>UnderlyingPaymentFrequencyShort</th>
+      <th>PaymentFrequencyFixedShort</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>26.09.2025</td>
+      <td>7Y</td>
+      <td>OIS</td>
+      <td>USD</td>
+      <td>0.03449</td>
+      <td>SOFR</td>
+      <td>1D</td>
+      <td>1Y</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>...</td>
+      <td>Act360</td>
+      <td>Act360</td>
+      <td>NaN</td>
+      <td>ModifiedFollowing</td>
+      <td>ModifiedFollowing</td>
+      <td>NaN</td>
+      <td>2D</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>26.09.2025</td>
+      <td>14D</td>
+      <td>OIS</td>
+      <td>EUR</td>
+      <td>0.02013</td>
+      <td>EONIA</td>
+      <td>1D</td>
+      <td>14D</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>...</td>
+      <td>Act360</td>
+      <td>Act360</td>
+      <td>NaN</td>
+      <td>ModifiedFollowing</td>
+      <td>ModifiedFollowing</td>
+      <td>NaN</td>
+      <td>2D</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>26.09.2025</td>
+      <td>1M</td>
+      <td>OIS</td>
+      <td>EUR</td>
+      <td>0.02013</td>
+      <td>EONIA</td>
+      <td>1D</td>
+      <td>1M</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>...</td>
+      <td>Act360</td>
+      <td>Act360</td>
+      <td>NaN</td>
+      <td>ModifiedFollowing</td>
+      <td>ModifiedFollowing</td>
+      <td>NaN</td>
+      <td>2D</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>26.09.2025</td>
+      <td>2M</td>
+      <td>OIS</td>
+      <td>EUR</td>
+      <td>0.02012</td>
+      <td>EONIA</td>
+      <td>1D</td>
+      <td>2M</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>...</td>
+      <td>Act360</td>
+      <td>Act360</td>
+      <td>NaN</td>
+      <td>ModifiedFollowing</td>
+      <td>ModifiedFollowing</td>
+      <td>NaN</td>
+      <td>2D</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>26.09.2025</td>
+      <td>3M</td>
+      <td>OIS</td>
+      <td>EUR</td>
+      <td>0.02016</td>
+      <td>EONIA</td>
+      <td>1D</td>
+      <td>3M</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>...</td>
+      <td>Act360</td>
+      <td>Act360</td>
+      <td>NaN</td>
+      <td>ModifiedFollowing</td>
+      <td>ModifiedFollowing</td>
+      <td>NaN</td>
+      <td>2D</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>11323</th>
+      <td>23.07.2025</td>
+      <td>3y</td>
+      <td>TBS</td>
+      <td>EUR</td>
+      <td>8.90000</td>
+      <td>EURIBOR</td>
+      <td>12M</td>
+      <td>1y</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>...</td>
+      <td>Act360</td>
+      <td>Act360</td>
+      <td>NaN</td>
+      <td>ModifiedFollowing</td>
+      <td>ModifiedFollowing</td>
+      <td>NaN</td>
+      <td>2D</td>
+      <td>6M</td>
+      <td>6M</td>
+      <td>6M</td>
+    </tr>
+    <tr>
+      <th>11324</th>
+      <td>23.07.2025</td>
+      <td>6y</td>
+      <td>TBS</td>
+      <td>EUR</td>
+      <td>6.95000</td>
+      <td>EURIBOR</td>
+      <td>6M</td>
+      <td>6M</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>...</td>
+      <td>Act360</td>
+      <td>Act360</td>
+      <td>NaN</td>
+      <td>ModifiedFollowing</td>
+      <td>ModifiedFollowing</td>
+      <td>NaN</td>
+      <td>2D</td>
+      <td>3M</td>
+      <td>3M</td>
+      <td>3M</td>
+    </tr>
+    <tr>
+      <th>11325</th>
+      <td>23.07.2025</td>
+      <td>60y</td>
+      <td>TBS</td>
+      <td>EUR</td>
+      <td>-2.35000</td>
+      <td>EURIBOR</td>
+      <td>6M</td>
+      <td>6M</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>...</td>
+      <td>Act360</td>
+      <td>Act360</td>
+      <td>NaN</td>
+      <td>ModifiedFollowing</td>
+      <td>ModifiedFollowing</td>
+      <td>NaN</td>
+      <td>2D</td>
+      <td>3M</td>
+      <td>3M</td>
+      <td>3M</td>
+    </tr>
+    <tr>
+      <th>11326</th>
+      <td>23.07.2025</td>
+      <td>30y</td>
+      <td>TBS</td>
+      <td>EUR</td>
+      <td>20.40000</td>
+      <td>EURIBOR</td>
+      <td>12M</td>
+      <td>1y</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>...</td>
+      <td>Act360</td>
+      <td>Act360</td>
+      <td>NaN</td>
+      <td>ModifiedFollowing</td>
+      <td>ModifiedFollowing</td>
+      <td>NaN</td>
+      <td>2D</td>
+      <td>6M</td>
+      <td>6M</td>
+      <td>6M</td>
+    </tr>
+    <tr>
+      <th>11327</th>
+      <td>23.07.2025</td>
+      <td>8y</td>
+      <td>TBS</td>
+      <td>EUR</td>
+      <td>11.00000</td>
+      <td>EURIBOR</td>
+      <td>12M</td>
+      <td>1y</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>...</td>
+      <td>Act360</td>
+      <td>Act360</td>
+      <td>NaN</td>
+      <td>ModifiedFollowing</td>
+      <td>ModifiedFollowing</td>
+      <td>NaN</td>
+      <td>2D</td>
+      <td>6M</td>
+      <td>6M</td>
+      <td>6M</td>
+    </tr>
+  </tbody>
+</table>
+<p>11328 rows × 22 columns</p>
+</div></div>
+</div>
+</section>
+<section id="€STR-curve">
+<h3>€STR curve<a class="headerlink" href="#€STR-curve" title="Link to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Select for a specific date</span>
+<span class="n">mon</span> <span class="o">=</span> <span class="s2">&quot;09&quot;</span>
+<span class="n">day</span> <span class="o">=</span> <span class="s2">&quot;24&quot;</span>
+<span class="n">year</span> <span class="o">=</span> <span class="s2">&quot;2025&quot;</span>
+<span class="n">date_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">day</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">mon</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="n">ref_date</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">year</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">mon</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">day</span><span class="p">))</span>
+
+<span class="c1"># get input data for the ESTR curve</span>
+<span class="n">dfQuotesOIS</span> <span class="o">=</span> <span class="n">dfQuotes</span><span class="p">[(</span><span class="n">dfQuotes</span><span class="p">[</span><span class="s2">&quot;Date&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">date_str</span><span class="p">)</span>
+                       <span class="o">&amp;</span> <span class="p">(</span><span class="n">dfQuotes</span><span class="p">[</span><span class="s2">&quot;Currency&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;EUR&quot;</span><span class="p">)</span>
+                       <span class="o">&amp;</span> <span class="p">(</span><span class="n">dfQuotes</span><span class="p">[</span><span class="s2">&quot;UnderlyingIndex&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;EONIA&quot;</span><span class="p">)</span>
+                       <span class="o">&amp;</span> <span class="p">(</span><span class="n">dfQuotes</span><span class="p">[</span><span class="s2">&quot;Instrument&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;OIS&quot;</span><span class="p">)]</span>
+
+<span class="n">ins_spec</span> <span class="o">=</span> <span class="n">sfc</span><span class="o">.</span><span class="n">load_specifications_from_pd</span><span class="p">(</span><span class="n">dfQuotesOIS</span><span class="p">,</span> <span class="n">ref_date</span><span class="p">,</span> <span class="n">holidays</span><span class="p">)</span>
+<span class="n">ins_quotes</span> <span class="o">=</span> <span class="n">dfQuotesOIS</span><span class="p">[</span><span class="s2">&quot;Quote&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+
+<span class="c1"># get estr curve</span>
+
+<span class="n">estrCurve</span> <span class="o">=</span> <span class="n">bootstrap_curve</span><span class="p">(</span>
+            <span class="n">ref_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span>
+            <span class="n">curve_id</span><span class="o">=</span><span class="s2">&quot;eonia&quot;</span><span class="p">,</span>
+            <span class="n">day_count_convention</span><span class="o">=</span><span class="n">dfQuotes</span><span class="p">[</span><span class="s2">&quot;DayCountFixed&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span>  <span class="c1"># taken the first entry and assume is valid for all other deposits</span>
+            <span class="n">instruments</span><span class="o">=</span><span class="n">ins_spec</span><span class="p">,</span>
+            <span class="n">quotes</span><span class="o">=</span><span class="n">ins_quotes</span><span class="p">,</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="3M-EURIBOR-curve">
+<h3>3M EURIBOR curve<a class="headerlink" href="#3M-EURIBOR-curve" title="Link to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># get input data for the 3M EURIBOR curve</span>
+<span class="n">dfQuotes3M</span> <span class="o">=</span> <span class="n">dfQuotesOIS</span> <span class="o">=</span> <span class="n">dfQuotes</span><span class="p">[(</span><span class="n">dfQuotes</span><span class="p">[</span><span class="s2">&quot;Date&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">date_str</span><span class="p">)</span>
+                       <span class="o">&amp;</span> <span class="p">(</span><span class="n">dfQuotes</span><span class="p">[</span><span class="s2">&quot;Currency&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;EUR&quot;</span><span class="p">)</span>
+                       <span class="o">&amp;</span> <span class="p">(</span><span class="n">dfQuotes</span><span class="p">[</span><span class="s2">&quot;UnderlyingIndex&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;EURIBOR&quot;</span><span class="p">)</span>
+                       <span class="o">&amp;</span> <span class="p">(</span><span class="n">dfQuotes</span><span class="p">[</span><span class="s2">&quot;Instrument&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;IRS&quot;</span><span class="p">)</span>
+                       <span class="o">&amp;</span> <span class="p">(</span><span class="n">dfQuotes</span><span class="p">[</span><span class="s2">&quot;UnderlyingTenor&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;3M&quot;</span><span class="p">)]</span>
+
+
+<span class="n">ins_spec_3m</span> <span class="o">=</span> <span class="n">sfc</span><span class="o">.</span><span class="n">load_specifications_from_pd</span><span class="p">(</span><span class="n">dfQuotes3M</span><span class="p">,</span> <span class="n">ref_date</span><span class="p">,</span> <span class="n">holidays</span><span class="p">)</span>
+<span class="n">ins_quotes_3m</span> <span class="o">=</span> <span class="n">dfQuotes3M</span><span class="p">[</span><span class="s2">&quot;Quote&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+<span class="c1"># set up curve parameters for the 3M EURIBOR curve. The eonia curve is used for bootstrapping</span>
+<span class="n">curves</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;discount_curve&quot;</span><span class="p">:</span> <span class="n">estrCurve</span><span class="p">}</span>
+
+<span class="c1"># get 3M euribor curve</span>
+<span class="n">euribor3MCurve</span> <span class="o">=</span> <span class="n">bootstrap_curve</span><span class="p">(</span>
+    <span class="n">ref_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span>
+    <span class="n">curve_id</span><span class="o">=</span><span class="s2">&quot;euribor_3m&quot;</span><span class="p">,</span>
+    <span class="n">day_count_convention</span><span class="o">=</span><span class="n">dfQuotes3M</span><span class="p">[</span><span class="s2">&quot;DayCountFixed&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span>  <span class="c1"># taken the first entry and assume is valid for all other deposits</span>
+    <span class="n">instruments</span><span class="o">=</span><span class="n">ins_spec_3m</span><span class="p">,</span>
+    <span class="n">quotes</span><span class="o">=</span><span class="n">ins_quotes_3m</span><span class="p">,</span>
+    <span class="n">curves</span><span class="o">=</span><span class="n">curves</span><span class="p">,</span>
+    <span class="n">interpolation_type</span><span class="o">=</span><span class="n">InterpolationType</span><span class="o">.</span><span class="n">LINEAR_LOG</span><span class="p">,</span>
+    <span class="n">extrapolation_type</span><span class="o">=</span><span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">LINEAR_LOG</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="6M-EURIBOR-curve">
+<h3>6M EURIBOR curve<a class="headerlink" href="#6M-EURIBOR-curve" title="Link to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># get input data for the 6M EURIBOR curve</span>
+<span class="n">dfQuotes6M</span> <span class="o">=</span> <span class="n">dfQuotes</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">dfQuotes</span><span class="p">[</span><span class="s2">&quot;Date&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">date_str</span><span class="p">)</span>
+    <span class="o">&amp;</span> <span class="p">(</span><span class="n">dfQuotes</span><span class="p">[</span><span class="s2">&quot;Currency&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;EUR&quot;</span><span class="p">)</span>
+    <span class="o">&amp;</span> <span class="p">(</span><span class="n">dfQuotes</span><span class="p">[</span><span class="s2">&quot;UnderlyingIndex&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;EURIBOR&quot;</span><span class="p">)</span>
+    <span class="o">&amp;</span> <span class="p">(</span><span class="n">dfQuotes</span><span class="p">[</span><span class="s2">&quot;Instrument&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;TBS&quot;</span><span class="p">)</span>
+    <span class="o">&amp;</span> <span class="p">(</span><span class="n">dfQuotes</span><span class="p">[</span><span class="s2">&quot;UnderlyingTenor&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;6M&quot;</span><span class="p">)</span>
+<span class="p">]</span>
+<span class="n">ins_spec_tbs</span> <span class="o">=</span> <span class="n">sfc</span><span class="o">.</span><span class="n">load_specifications_from_pd</span><span class="p">(</span><span class="n">dfQuotes6M</span><span class="p">,</span> <span class="n">ref_date</span><span class="p">,</span> <span class="n">holidays</span><span class="p">)</span>
+<span class="n">ins_quotes_tbs</span> <span class="o">=</span> <span class="p">(</span><span class="n">dfQuotes6M</span><span class="p">[</span><span class="s2">&quot;Quote&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">10000.0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+<span class="c1"># set up curve parameters for the 6M EURIBOR curve by adding 3m euribor curve as basis curve</span>
+<span class="n">curves</span><span class="p">[</span><span class="s2">&quot;basis_curve&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">euribor3MCurve</span>
+
+<span class="c1"># get 6M euribor curve</span>
+<span class="n">euribor6MCurve</span> <span class="o">=</span> <span class="n">bootstrap_curve</span><span class="p">(</span>
+            <span class="n">ref_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span>
+            <span class="n">curve_id</span><span class="o">=</span><span class="s2">&quot;euribor_6m&quot;</span><span class="p">,</span>
+            <span class="n">day_count_convention</span><span class="o">=</span><span class="n">dfQuotes6M</span><span class="p">[</span><span class="s2">&quot;DayCountFixed&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span>  <span class="c1"># taken the first entry and assume is valid for all other deposits</span>
+            <span class="n">instruments</span><span class="o">=</span><span class="n">ins_spec_tbs</span><span class="p">,</span>
+            <span class="n">quotes</span><span class="o">=</span><span class="n">ins_quotes_tbs</span><span class="p">,</span>
+            <span class="n">curves</span><span class="o">=</span><span class="n">curves</span><span class="p">,</span>
+            <span class="n">interpolation_type</span><span class="o">=</span><span class="n">InterpolationType</span><span class="o">.</span><span class="n">LINEAR_LOG</span><span class="p">,</span>
+            <span class="n">extrapolation_type</span><span class="o">=</span><span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">LINEAR_LOG</span><span class="p">,</span>
+            <span class="c1"># interpolation_type=InterpolationType.HAGAN_DF,</span>
+            <span class="c1"># extrapolation_type=ExtrapolationType.CONSTANT_DF,</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="Plotting-IR-Curves">
+<h2>Plotting IR Curves<a class="headerlink" href="#Plotting-IR-Curves" title="Link to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estrCurve</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">euribor3MCurve</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">euribor6MCurve</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_marketdata_ir_curve_bootstrapping_29_0.png" src="../../_images/notebooks_marketdata_ir_curve_bootstrapping_29_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="discount_curves.html" class="btn btn-neutral float-left" title="Discount Curves" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../models/lucia_schwartz.html" class="btn btn-neutral float-right" title="Lucia-Schwartz Model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

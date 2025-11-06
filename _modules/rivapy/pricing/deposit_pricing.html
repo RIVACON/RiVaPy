@@ -1,0 +1,272 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rivapy.pricing.deposit_pricing &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=d2ebc91c" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.svg"/>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../search.html">Search Page</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rivapy.pricing.deposit_pricing</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rivapy.pricing.deposit_pricing</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">date</span>
+<span class="kn">from</span> <span class="nn">rivapy.marketdata</span> <span class="kn">import</span> <span class="n">DiscountCurve</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing.pricing_request</span> <span class="kn">import</span> <span class="n">PricingRequest</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing._logger</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.deposit_specifications</span> <span class="kn">import</span> <span class="n">DepositSpecification</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">DayCounter</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing.bond_pricing</span> <span class="kn">import</span> <span class="n">DeterministicCashflowPricer</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span> <span class="k">as</span> <span class="n">_Union</span><span class="p">,</span> <span class="n">List</span> <span class="k">as</span> <span class="n">_List</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools._validators</span> <span class="kn">import</span> <span class="n">_check_start_at_or_before_end</span>
+
+
+<div class="viewcode-block" id="DepositPricer">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.deposit_pricing.DepositPricer">[docs]</a>
+<span class="k">class</span> <span class="nc">DepositPricer</span><span class="p">(</span><span class="n">DeterministicCashflowPricer</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">val_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">deposit_spec</span><span class="p">:</span> <span class="n">DepositSpecification</span><span class="p">,</span>
+        <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a pricer for a deposit instrument.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date (date | datetime): Valuation date used for pricing.</span>
+<span class="sd">            deposit_spec (DepositSpecification): Deposit specification containing schedule</span>
+<span class="sd">                and contractual parameters.</span>
+<span class="sd">            discount_curve (DiscountCurve): Discount curve used for discounting cashflows.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span> <span class="o">=</span> <span class="n">val_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spec</span> <span class="o">=</span> <span class="n">deposit_spec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_discount_curve</span> <span class="o">=</span> <span class="n">discount_curve</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_pricer_dates</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_validate_pricer_dates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate that the pricer valuation date is consistent with the discount curve refdate.</span>
+
+<span class="sd">        This updates ``self._discount_curve.refdate`` and ``self._val_date`` to a</span>
+<span class="sd">        canonical ordering using the project&#39;s date validators.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_discount_curve</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span> <span class="o">=</span> <span class="n">_check_start_at_or_before_end</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_discount_curve</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DepositPricer.expected_cashflows">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.deposit_pricing.DepositPricer.expected_cashflows">[docs]</a>
+    <span class="k">def</span> <span class="nf">expected_cashflows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return expected cashflows for the configured deposit and valuation date.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[Tuple[datetime, float]]: List of (pay_date, amount) tuples.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">expected_cashflows</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DepositPricer.get_expected_cashflows">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.deposit_pricing.DepositPricer.get_expected_cashflows">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_expected_cashflows</span><span class="p">(</span>
+        <span class="n">specification</span><span class="p">:</span> <span class="n">DepositSpecification</span><span class="p">,</span> <span class="n">val_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Static helper: get expected cashflows for a deposit specification.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            specification (DepositSpecification): The deposit specification.</span>
+<span class="sd">            val_date (date | datetime, optional): Valuation date to use. If ``None``,</span>
+<span class="sd">                the specification&#39;s default behavior is used.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[Tuple[datetime, float]]: List of (pay_date, amount) tuples.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">val_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_expected_cashflows</span><span class="p">(</span><span class="n">specification</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_expected_cashflows</span><span class="p">(</span><span class="n">specification</span><span class="p">,</span> <span class="n">val_date</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DepositPricer.price">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.deposit_pricing.DepositPricer.price">[docs]</a>
+    <span class="k">def</span> <span class="nf">price</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the present value of the configured deposit using the provided curves.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Present value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_price</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_discount_curve</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DepositPricer.get_price">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.deposit_pricing.DepositPricer.get_price">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_price</span><span class="p">(</span><span class="n">val_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">specification</span><span class="p">:</span> <span class="n">DepositSpecification</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate present value of a deposit using the provided discount curve.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date (date | datetime): Valuation date.</span>
+<span class="sd">            specification (DepositSpecification): Deposit contract specification.</span>
+<span class="sd">            discount_curve (DiscountCurve): Discount curve used for discounting.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Present value (PV) computed from discounted expected cashflows.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_pv_cashflows</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">specification</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DepositPricer.implied_simply_compounded_rate">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.deposit_pricing.DepositPricer.implied_simply_compounded_rate">[docs]</a>
+    <span class="k">def</span> <span class="nf">implied_simply_compounded_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the implied simply compounded rate for the configured deposit.</span>
+
+<span class="sd">        The implied simply compounded rate is the rate that makes the deposit&#39;s PV</span>
+<span class="sd">        equal to zero under a simple-compounding assumption.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Implied simply compounded rate.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">DepositPricer</span><span class="o">.</span><span class="n">get_implied_simply_compounded_rate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_discount_curve</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DepositPricer.get_implied_simply_compounded_rate">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.deposit_pricing.DepositPricer.get_implied_simply_compounded_rate">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_implied_simply_compounded_rate</span><span class="p">(</span><span class="n">val_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">specification</span><span class="p">:</span> <span class="n">DepositSpecification</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the implied simply compounded rate that sets deposit PV to zero.</span>
+
+<span class="sd">        The implementation assumes simple compounding: D(t) = 1 / (1 + rate * dt).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date (date | datetime): Valuation date.</span>
+<span class="sd">            specification (DepositSpecification): Deposit specification with start/end dates</span>
+<span class="sd">                and day count convention.</span>
+<span class="sd">            discount_curve (DiscountCurve): Discount curve used to obtain forward discount</span>
+<span class="sd">                factor between start and end.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The implied simply compounded rate.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If ``discount_curve`` is not an instance of DiscountCurve.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">start_date</span> <span class="o">=</span> <span class="n">specification</span><span class="o">.</span><span class="n">start_date</span>
+        <span class="c1"># maturity_date = specification.maturity_date # date of legal end of the deposit and when payment needs to be made</span>
+        <span class="n">end_date</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">specification</span><span class="o">.</span><span class="n">end_date</span>
+        <span class="p">)</span>  <span class="c1"># period over which interest is calculated # this is the period we need to use as it is the actual accrual period, regardless of when payment is due</span>
+        <span class="n">daycountconvention</span> <span class="o">=</span> <span class="n">specification</span><span class="o">.</span><span class="n">day_count_convention</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">discount_curve</span><span class="p">,</span> <span class="n">DiscountCurve</span><span class="p">):</span>
+            <span class="n">cont_df</span> <span class="o">=</span> <span class="n">discount_curve</span><span class="o">.</span><span class="n">value_fwd</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Discount curve must be of type DiscountCurve&quot;</span><span class="p">)</span>
+
+        <span class="n">dcc</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="n">daycountconvention</span><span class="p">)</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">)</span>
+        <span class="n">simple_rate</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span> <span class="o">/</span> <span class="n">cont_df</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">dt</span>
+        <span class="k">return</span> <span class="n">simple_rate</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

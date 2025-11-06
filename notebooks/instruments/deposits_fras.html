@@ -1,0 +1,716 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deposits and FRAs &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=d2ebc91c" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.svg"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Interest Rate Swap" href="ir_swap.html" />
+    <link rel="prev" title="Repurchase Agreements" href="repurchase_agreement.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Notebook Gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#market-data">Market Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#pricing">Pricing</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#financial-instruments">Financial Instruments</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="repurchase_agreement.html">Repurchase Agreements</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Deposits and FRAs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Definition-of-a-deposit">Definition of a deposit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Definition-of-a-forward-rate-agreement-(FRA)">Definition of a forward rate agreement (FRA)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ir_swap.html">Interest Rate Swap</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#tools">Tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../search.html">Search Page</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Notebook Gallery</a></li>
+      <li class="breadcrumb-item active">Deposits and FRAs</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/instruments/deposits_fras.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <p><img alt="image1" src="../../_images/logo.png" /></p>
+<section id="Deposits-and-FRAs">
+<h1>Deposits and FRAs<a class="headerlink" href="#Deposits-and-FRAs" title="Link to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">dateutil.relativedelta</span> <span class="kn">import</span> <span class="n">relativedelta</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools._validators</span> <span class="kn">import</span> <span class="n">print_member_values</span>
+
+<span class="kn">from</span> <span class="nn">rivapy.marketdata</span> <span class="kn">import</span> <span class="n">DiscountCurve</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments</span> <span class="kn">import</span> <span class="n">DepositSpecification</span><span class="p">,</span> <span class="n">ForwardRateAgreementSpecification</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing</span> <span class="kn">import</span> <span class="n">price</span>
+
+<span class="kn">from</span> <span class="nn">rivapy.tools.enums</span> <span class="kn">import</span> <span class="n">DayCounterType</span><span class="p">,</span> <span class="n">InterpolationType</span><span class="p">,</span> <span class="n">ExtrapolationType</span>
+
+<span class="kn">from</span> <span class="nn">rivapy.pricing.pricing_data</span> <span class="kn">import</span> <span class="n">DepositPricingData</span><span class="p">,</span> <span class="n">ForwardRateAgreementPricingData</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing.pricing_request</span> <span class="kn">import</span>  <span class="n">ForwardRateAgreementPricingRequest</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing.pricing_request</span> <span class="kn">import</span> <span class="n">DepositPricingRequest</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing.bond_pricing</span> <span class="kn">import</span> <span class="n">DeterministicCashflowPricer</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing.deposit_pricing</span> <span class="kn">import</span> <span class="n">DepositPricer</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing.fra_pricing</span> <span class="kn">import</span> <span class="n">ForwardRateAgreementPricer</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">_term_to_period</span><span class="p">,</span> <span class="n">DayCounter</span><span class="p">,</span> <span class="n">roll_day</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">matplotlib.dates</span> <span class="kn">import</span> <span class="n">date2num</span><span class="p">,</span> <span class="n">DateFormatter</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.visualization</span> <span class="kn">import</span> <span class="n">plot_deposit</span><span class="p">,</span> <span class="n">plot_fra</span>
+
+<span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+C:\Users\GunnarSalentin\OneDrive - RIVACON GmbH\Dokumente\git\RiVaPy\rivapy\__init__.py:11: UserWarning: The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.
+  warnings.warn(&#39;The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.&#39;)
+</pre></div></div>
+</div>
+<section id="Definition-of-a-deposit">
+<h2>Definition of a deposit<a class="headerlink" href="#Definition-of-a-deposit" title="Link to this heading"></a></h2>
+<div class="line-block">
+<div class="line">A deposit is simply a short-term bond where at the start date the lender pays the nominal amount <span class="math notranslate nohighlight">\(N\)</span> to the borrower, and at maturity plus settlement days (i.e. the payment date) the borrower pays back the nominal amount plus the accrued interest. Interest is usually expressed using simple compounding, i.e. the amount paid back at the payment date is <span class="math notranslate nohighlight">\(N \cdot (1 + r \cdot \tau)\)</span> where <span class="math notranslate nohighlight">\(r\)</span> is the interest rate and <span class="math notranslate nohighlight">\(\tau\)</span> is the year fraction between start and end date.</div>
+<div class="line">Deposits can be setup in RIVAPY by providing start and end dates directly or by providing a start date and a term. Other instrument specific dates, e.g. fixing date, end date, or maturity date can be passed explicitly when setting up the instrument or will be derived from default values, e.g. spot_days of 2 days, and business day convention.</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up deposit specification</span>
+<span class="n">ccy</span> <span class="o">=</span> <span class="s1">&#39;EUR&#39;</span>
+<span class="n">ref_date</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">issue_date</span> <span class="o">=</span> <span class="n">ref_date</span>
+<span class="n">maturity_date</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">26</span><span class="p">)</span>
+<span class="n">dcc</span> <span class="o">=</span> <span class="s1">&#39;Act360&#39;</span>
+<span class="n">rate</span> <span class="o">=</span> <span class="mf">.03</span>
+<span class="n">notional</span> <span class="o">=</span> <span class="mf">100.</span>
+<span class="n">deposit_spec</span> <span class="o">=</span> <span class="n">DepositSpecification</span><span class="p">(</span>
+    <span class="n">obj_id</span><span class="o">=</span><span class="s1">&#39;dummy_id&#39;</span><span class="p">,</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">currency</span><span class="o">=</span><span class="n">ccy</span><span class="p">,</span>
+    <span class="n">issue_date</span><span class="o">=</span><span class="n">issue_date</span><span class="p">,</span>
+    <span class="n">maturity_date</span><span class="o">=</span><span class="n">maturity_date</span><span class="p">,</span>
+    <span class="n">notional</span><span class="o">=</span><span class="n">notional</span><span class="p">,</span>
+    <span class="n">rate</span><span class="o">=</span><span class="n">rate</span><span class="p">,</span>
+    <span class="n">day_count_convention</span><span class="o">=</span><span class="n">dcc</span><span class="p">,</span>
+    <span class="n">roll_convention</span><span class="o">=</span><span class="s1">&#39;NONE&#39;</span><span class="p">,</span>
+    <span class="n">payment_days</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">spot_days</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="p">)</span>
+<span class="n">print_member_values</span><span class="p">(</span><span class="n">deposit_spec</span><span class="p">)</span>
+
+<span class="n">schedule</span> <span class="o">=</span> <span class="n">deposit_spec</span><span class="o">.</span><span class="n">get_schedule</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Schedule details:&quot;</span><span class="p">)</span>
+<span class="n">dates</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">_roll_out</span><span class="p">(</span>
+    <span class="n">from_</span><span class="o">=</span><span class="n">schedule</span><span class="o">.</span><span class="n">start_day</span><span class="p">,</span>
+    <span class="n">to_</span><span class="o">=</span><span class="n">schedule</span><span class="o">.</span><span class="n">end_day</span><span class="p">,</span>
+    <span class="n">term</span><span class="o">=</span><span class="n">schedule</span><span class="o">.</span><span class="n">time_period</span><span class="p">,</span>
+    <span class="n">ref_date</span><span class="o">=</span><span class="n">ref_date</span>
+<span class="p">)</span>
+<span class="k">for</span> <span class="n">date</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Number of annual payments is not a whole number but a decimal.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Inspecting instance of DepositSpecification:
+
+accrual_dates: [datetime.datetime(2023, 1, 2, 0, 0), datetime.datetime(2024, 1, 26, 0, 0)]
+adjust_accruals: True
+adjust_end_date: False
+adjust_schedule: True
+adjust_start_date: True
+backwards: True
+business_day_convention: ModifiedFollowing
+calendar: {datetime.date(2023, 1, 1): &#34;New Year&#39;s Day&#34;, datetime.date(2023, 4, 7): &#39;Good Friday&#39;, datetime.date(2023, 4, 10): &#39;Easter Monday&#39;, datetime.date(2023, 5, 1): &#39;Labour Day&#39;, datetime.date(2023, 12, 25): &#39;Christmas Day&#39;, datetime.date(2023, 12, 26): &#39;Christmas Holiday&#39;, datetime.date(2024, 1, 1): &#34;New Year&#39;s Day&#34;, datetime.date(2024, 3, 29): &#39;Good Friday&#39;, datetime.date(2024, 4, 1): &#39;Easter Monday&#39;, datetime.date(2024, 5, 1): &#39;Labour Day&#39;, datetime.date(2024, 12, 25): &#39;Christmas Day&#39;, datetime.date(2024, 12, 26): &#39;Christmas Holiday&#39;}
+coupon: 0.03
+coupon_type: fix
+currency: EUR
+dates: [datetime.datetime(2023, 1, 2, 0, 0), datetime.datetime(2024, 1, 26, 0, 0)]
+day_count_convention: Act360
+end_date: 2024-01-26 00:00:00
+frequency: 389D
+index: None
+ir_index: None
+issue_date: 2023-01-02 00:00:00
+issue_price: None
+issuer:
+last_fixing: None
+maturity_date: 2024-01-26 00:00:00
+notional: &lt;rivapy.instruments.components.ConstNotionalStructure object at 0x000001A23C0E75F0&gt;
+notional_exchange: True
+nr_annual_payments: 0.9383033419023136
+obj_id: dummy_id
+payment_days: 5
+pays_in_arrears: True
+rate: 0.03
+rating: NONE
+roll_convention: NONE
+schedule: &lt;rivapy.tools.datetools.Schedule object at 0x000001A23C2DF620&gt;
+securitization_level: NONE
+spot_days: 5
+start_date: 2023-01-02 00:00:00
+stub_type_is_Long: True
+Schedule details:
+2023-01-02
+2024-01-26
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cf</span> <span class="o">=</span> <span class="n">DepositPricer</span><span class="o">.</span><span class="n">get_expected_cashflows</span><span class="p">(</span><span class="n">deposit_spec</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cashflows: </span><span class="si">{</span><span class="n">cf</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Pricing deposit:&quot;</span><span class="p">)</span>
+<span class="c1"># add timeline plot</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_deposit</span><span class="p">(</span><span class="n">deposit_spec</span><span class="p">,</span> <span class="n">ref_date</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+End dates of notional structure are not set.
+End dates of notional structure are not set.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Cashflows: [(datetime.datetime(2023, 1, 2, 0, 0), -100.0), (datetime.datetime(2024, 1, 31, 0, 0), 3.2416666666666663), (datetime.datetime(2024, 1, 31, 0, 0), 100.0)]
+
+Pricing deposit:
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_instruments_deposits_fras_5_2.png" src="../../_images/notebooks_instruments_deposits_fras_5_2.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">term</span> <span class="o">=</span> <span class="s2">&quot;3M&quot;</span>
+<span class="n">deposit_spec_3M</span> <span class="o">=</span> <span class="n">DepositSpecification</span><span class="p">(</span>
+    <span class="n">obj_id</span><span class="o">=</span><span class="s1">&#39;dummy_id&#39;</span><span class="p">,</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">currency</span><span class="o">=</span><span class="n">ccy</span><span class="p">,</span>
+    <span class="n">issue_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span>
+    <span class="n">term</span><span class="o">=</span><span class="n">term</span><span class="p">,</span>
+    <span class="n">notional</span><span class="o">=</span><span class="n">notional</span><span class="p">,</span>
+    <span class="n">rate</span><span class="o">=</span><span class="n">rate</span><span class="p">,</span>
+    <span class="n">day_count_convention</span><span class="o">=</span><span class="n">dcc</span><span class="p">,</span>
+    <span class="n">roll_convention</span><span class="o">=</span><span class="s1">&#39;NONE&#39;</span><span class="p">,</span>  <span class="c1"># explicitly pass as string</span>
+    <span class="n">payment_days</span><span class="o">=</span><span class="mi">0</span>
+<span class="p">)</span>
+<span class="n">print_member_values</span><span class="p">(</span><span class="n">deposit_spec_3M</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Inspecting instance of DepositSpecification:
+
+accrual_dates: [datetime.datetime(2023, 1, 2, 0, 0), datetime.datetime(2023, 4, 3, 0, 0)]
+adjust_accruals: True
+adjust_end_date: False
+adjust_schedule: True
+adjust_start_date: True
+backwards: True
+business_day_convention: ModifiedFollowing
+calendar: {datetime.date(2023, 1, 1): &#34;New Year&#39;s Day&#34;, datetime.date(2023, 4, 7): &#39;Good Friday&#39;, datetime.date(2023, 4, 10): &#39;Easter Monday&#39;, datetime.date(2023, 5, 1): &#39;Labour Day&#39;, datetime.date(2023, 12, 25): &#39;Christmas Day&#39;, datetime.date(2023, 12, 26): &#39;Christmas Holiday&#39;, datetime.date(2024, 1, 1): &#34;New Year&#39;s Day&#34;, datetime.date(2024, 3, 29): &#39;Good Friday&#39;, datetime.date(2024, 4, 1): &#39;Easter Monday&#39;, datetime.date(2024, 5, 1): &#39;Labour Day&#39;, datetime.date(2024, 12, 25): &#39;Christmas Day&#39;, datetime.date(2024, 12, 26): &#39;Christmas Holiday&#39;, datetime.date(2021, 1, 1): &#34;New Year&#39;s Day&#34;, datetime.date(2021, 4, 2): &#39;Good Friday&#39;, datetime.date(2021, 4, 5): &#39;Easter Monday&#39;, datetime.date(2021, 5, 1): &#39;Labour Day&#39;, datetime.date(2021, 12, 25): &#39;Christmas Day&#39;, datetime.date(2021, 12, 26): &#39;Christmas Holiday&#39;}
+coupon: 0.03
+coupon_type: fix
+currency: EUR
+dates: [datetime.datetime(2023, 1, 2, 0, 0), datetime.datetime(2023, 4, 3, 0, 0)]
+day_count_convention: Act360
+end_date: 2023-04-02 00:00:00
+frequency: 3M
+index: None
+ir_index: None
+issue_date: 2023-01-02 00:00:00
+issue_price: None
+issuer:
+last_fixing: None
+maturity_date: 2023-04-03 00:00:00
+notional: &lt;rivapy.instruments.components.ConstNotionalStructure object at 0x000001A23C727B90&gt;
+notional_exchange: True
+nr_annual_payments: 4.0
+obj_id: dummy_id
+payment_days: 0
+pays_in_arrears: True
+rate: 0.03
+rating: NONE
+roll_convention: NONE
+schedule: &lt;rivapy.tools.datetools.Schedule object at 0x000001A23C580710&gt;
+securitization_level: NONE
+spot_days: 2
+start_date: 2023-01-02 00:00:00
+stub_type_is_Long: True
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up (flat) rate curve</span>
+<span class="n">object_id</span> <span class="o">=</span> <span class="s2">&quot;TEST_CURVE&quot;</span>
+<span class="n">flat_rate</span> <span class="o">=</span> <span class="mf">0.025</span>
+
+<span class="n">days_to_maturity</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">365</span><span class="p">,</span> <span class="mi">720</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">365</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">365</span><span class="p">,</span> <span class="mi">10</span> <span class="o">*</span> <span class="mi">365</span><span class="p">]</span>
+<span class="n">dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">ref_date</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">]</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">d</span> <span class="o">/</span> <span class="mf">365.0</span> <span class="o">*</span> <span class="n">flat_rate</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">]</span>
+<span class="n">dc</span> <span class="o">=</span> <span class="n">DiscountCurve</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">object_id</span><span class="p">,</span> <span class="n">refdate</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span> <span class="n">dates</span><span class="o">=</span><span class="n">dates</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">interpolation</span> <span class="o">=</span> <span class="n">InterpolationType</span><span class="o">.</span><span class="n">LINEAR</span><span class="p">,</span> <span class="n">extrapolation</span><span class="o">=</span><span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">LINEAR</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># price deposit</span>
+<span class="nb">print</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected Cashflows: </span><span class="si">{</span><span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_expected_cashflows</span><span class="p">(</span><span class="n">deposit_spec</span><span class="p">,</span><span class="n">ref_date</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Price Deposit: </span><span class="si">{</span><span class="n">DepositPricer</span><span class="o">.</span><span class="n">get_price</span><span class="p">(</span><span class="n">ref_date</span><span class="p">,</span><span class="w"> </span><span class="n">deposit_spec</span><span class="p">,</span><span class="w"> </span><span class="n">dc</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Determine fair rate</span>
+<span class="n">fair_rate</span> <span class="o">=</span> <span class="n">DepositPricer</span><span class="o">.</span><span class="n">get_implied_simply_compounded_rate</span><span class="p">(</span><span class="n">ref_date</span><span class="p">,</span> <span class="n">deposit_spec</span><span class="p">,</span> <span class="n">dc</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fair rate: </span><span class="si">{</span><span class="n">fair_rate</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># new deposit with fair rate</span>
+<span class="n">fair_deposit_spec</span> <span class="o">=</span> <span class="n">DepositSpecification</span><span class="p">(</span><span class="n">obj_id</span> <span class="o">=</span><span class="s1">&#39;dummy_id&#39;</span><span class="p">,</span> <span class="n">issuer</span><span class="o">=</span><span class="s1">&#39;dummy_issuer&#39;</span><span class="p">,</span> <span class="n">securitization_level</span> <span class="o">=</span><span class="s1">&#39;NONE&#39;</span><span class="p">,</span>
+                                    <span class="n">currency</span><span class="o">=</span><span class="n">ccy</span><span class="p">,</span> <span class="n">issue_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span> <span class="n">maturity_date</span><span class="o">=</span><span class="n">deposit_spec</span><span class="o">.</span><span class="n">end_date</span><span class="p">,</span> <span class="n">notional</span><span class="o">=</span><span class="n">deposit_spec</span><span class="o">.</span><span class="n">notional</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="n">fair_rate</span><span class="p">,</span>
+                                    <span class="n">day_count_convention</span><span class="o">=</span><span class="n">deposit_spec</span><span class="o">.</span><span class="n">day_count_convention</span><span class="p">,</span> <span class="n">payment_days</span><span class="o">=</span><span class="n">deposit_spec</span><span class="o">.</span><span class="n">payment_days</span><span class="p">,</span> <span class="n">spot_days</span><span class="o">=</span><span class="n">deposit_spec</span><span class="o">.</span><span class="n">spot_days</span><span class="p">)</span>
+<span class="c1">#print_member_values(fair_deposit_spec)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fair deposit coupon: </span><span class="si">{</span><span class="n">fair_deposit_spec</span><span class="o">.</span><span class="n">coupon</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="c1">#print(DepositPricer.get_price(ref_date, fair_deposit_spec, dc))</span>
+<br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+End dates of notional structure are not set.
+End dates of notional structure are not set.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Expected Cashflows: [(datetime.datetime(2023, 1, 2, 0, 0), -100.0), (datetime.datetime(2024, 1, 31, 0, 0), 3.2416666666666663), (datetime.datetime(2024, 1, 31, 0, 0), 100.0)]
+Price Deposit: 100.4950269333136
+fair rate: 0.024971370182974097
+fair deposit coupon: 0.024971370182974097
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check fair rate</span>
+<span class="c1"># discount factor from curve</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fair_deposit_spec.start_date: </span><span class="si">{</span><span class="n">fair_deposit_spec</span><span class="o">.</span><span class="n">start_date</span><span class="si">}</span><span class="s2">, fair_deposit_spec.end_date: </span><span class="si">{</span><span class="n">fair_deposit_spec</span><span class="o">.</span><span class="n">end_date</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">df_curve</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">value_fwd</span><span class="p">(</span><span class="n">ref_date</span><span class="p">,</span> <span class="n">fair_deposit_spec</span><span class="o">.</span><span class="n">start_date</span><span class="p">,</span> <span class="n">fair_deposit_spec</span><span class="o">.</span><span class="n">end_date</span><span class="p">)</span>
+<span class="c1"># discount factor implied by fair rate (simple compounding, Act/360)</span>
+<span class="n">dcc</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="n">fair_deposit_spec</span><span class="o">.</span><span class="n">day_count_convention</span><span class="p">)</span>
+<span class="c1">#print(f&quot;day count convention: {fair_deposit_spec.day_count_convention}&quot;)</span>
+<span class="n">delta_t</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">fair_deposit_spec</span><span class="o">.</span><span class="n">start_date</span><span class="p">,</span> <span class="n">fair_deposit_spec</span><span class="o">.</span><span class="n">end_date</span><span class="p">)</span>
+<span class="n">df_implied</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="n">delta_t</span> <span class="o">*</span> <span class="n">fair_rate</span><span class="p">)</span>
+<span class="c1">#print(f&quot;Discount factor from curve: {df_curve}, Delta t: {delta_t}, Implied DF: {df_implied}, dcc: {dcc}&quot;)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_curve</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_implied</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+fair_deposit_spec.start_date: 2023-01-02 00:00:00, fair_deposit_spec.end_date: 2024-01-26 00:00:00
+0.9737259973907282
+0.9737259973907281
+</pre></div></div>
+</div>
+<p>The deposit’s cashflows including relevant dates are shown below:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plot_deposit</span><span class="p">(</span><span class="n">deposit_spec_3M</span><span class="p">,</span> <span class="n">ref_date</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Found start date 2022-10-02 00:00:00 such that calc_end_day(start_date, ...) == end_day, but start date is not a business day in the given calendar.
+End dates of notional structure are not set.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_instruments_deposits_fras_11_1.png" src="../../_images/notebooks_instruments_deposits_fras_11_1.png" />
+</div>
+</div>
+</section>
+<section id="Definition-of-a-forward-rate-agreement-(FRA)">
+<h2>Definition of a forward rate agreement (FRA)<a class="headerlink" href="#Definition-of-a-forward-rate-agreement-(FRA)" title="Link to this heading"></a></h2>
+<p>A forward rate agreement is in principle a forward-starting deposit for a time period <span class="math notranslate nohighlight">\([T_1, T_2]\)</span> in the future (which is concluded at a start date <span class="math notranslate nohighlight">\(T_0\)</span>). However, rather than actually entering into a deposit at time <span class="math notranslate nohighlight">\(T_1\)</span>, an FRA is “cash-settled” at <span class="math notranslate nohighlight">\(T_1\)</span> by exchanging the present value of the agreement (using the fixing of the underlying index to discount the cash flows from <span class="math notranslate nohighlight">\(T_2\)</span> to <span class="math notranslate nohighlight">\(T_1\)</span>):</p>
+<div class="math notranslate nohighlight">
+\[PV(T_1) = N \tau \frac {r - K} {1 + r\cdot \tau}\]</div>
+<p>where</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(N\)</span> is the nominal amount</p></li>
+<li><p><span class="math notranslate nohighlight">\(\tau\)</span> is the year fraction between <span class="math notranslate nohighlight">\(T_1\)</span> and <span class="math notranslate nohighlight">\(T_2\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(r\)</span> is the index fixing at <span class="math notranslate nohighlight">\(T_1\)</span> for the period <span class="math notranslate nohighlight">\([T_1, T_2]\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(K\)</span> is the forward rate agreed upon at <span class="math notranslate nohighlight">\(T_0\)</span></p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up FRA</span>
+<span class="n">ccy</span> <span class="o">=</span> <span class="s1">&#39;EUR&#39;</span>
+<span class="n">fra_rate</span> <span class="o">=</span> <span class="mf">.04</span>
+<span class="n">ref_date</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span><span class="mi">28</span><span class="p">)</span>
+<span class="n">start_date</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">28</span><span class="p">)</span>
+<span class="n">end_date</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">28</span><span class="p">)</span>
+
+<span class="n">mat_date</span> <span class="o">=</span> <span class="n">ref_date</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">365</span><span class="p">)</span>
+
+<span class="n">fra</span> <span class="o">=</span> <span class="n">ForwardRateAgreementSpecification</span><span class="p">(</span>
+        <span class="n">obj_id</span><span class="o">=</span> <span class="s1">&#39;dummy_id&#39;</span><span class="p">,</span>
+        <span class="n">trade_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span>
+        <span class="c1">#maturity_date=mat_date,</span>
+        <span class="n">notional</span><span class="o">=</span> <span class="mf">1000.0</span><span class="p">,</span>
+        <span class="n">rate</span><span class="o">=</span> <span class="n">fra_rate</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+        <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
+        <span class="n">udlID</span><span class="o">=</span> <span class="s2">&quot;dummy_underlying_index&quot;</span><span class="p">,</span>
+        <span class="n">rate_start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+        <span class="n">rate_end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
+        <span class="n">day_count_convention</span><span class="o">=</span> <span class="s1">&#39;Act360&#39;</span><span class="p">,</span>
+        <span class="c1">#business_day_convention: _Union[RollConvention, str] = RollConvention.FOLLOWING,</span>
+        <span class="n">rate_day_count_convention</span><span class="o">=</span> <span class="s1">&#39;Act360&#39;</span><span class="p">,</span>
+        <span class="c1">#rate_business_day_convention: _Union[RollConvention, str] = RollConvention.FOLLOWING,</span>
+        <span class="c1">#calendar: _Union[_HolidayBase, str] = None,</span>
+        <span class="n">currency</span><span class="o">=</span><span class="n">ccy</span><span class="p">,</span>
+        <span class="c1"># ex_settle: int =0,</span>
+        <span class="c1"># trade_settle: int= 0,</span>
+        <span class="n">spot_days</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">payment_days</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="c1">#start_period: int = None,</span>
+        <span class="c1">#end_period: int = None,</span>
+        <span class="n">issuer</span><span class="o">=</span> <span class="s2">&quot;dummy_issuer&quot;</span><span class="p">,</span>
+        <span class="n">securitization_level</span><span class="o">=</span> <span class="s2">&quot;NONE&quot;</span><span class="p">,</span>
+        <span class="c1">#rating: _Union[Rating, str] = Rating.NONE, &#39;&#39;</span>
+<span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up curves for pricing</span>
+<span class="c1"># Discount curve</span>
+<span class="n">object_id</span> <span class="o">=</span> <span class="s2">&quot;TEST_DC&quot;</span>
+<span class="n">dsc_rate</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="n">days_to_maturity</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">365</span><span class="p">,</span> <span class="mi">720</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">365</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">365</span><span class="p">,</span> <span class="mi">10</span> <span class="o">*</span> <span class="mi">365</span><span class="p">]</span>
+<span class="n">dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">ref_date</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">]</span>
+<span class="n">df</span> <span class="o">=</span> <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">d</span> <span class="o">/</span> <span class="mf">365.0</span> <span class="o">*</span> <span class="n">dsc_rate</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">]</span>
+<span class="n">dc</span> <span class="o">=</span> <span class="n">DiscountCurve</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">object_id</span><span class="p">,</span> <span class="n">refdate</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span> <span class="n">dates</span><span class="o">=</span><span class="n">dates</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span> <span class="n">InterpolationType</span><span class="o">.</span><span class="n">LINEAR</span><span class="p">)</span>
+
+<span class="c1"># Fixing curve</span>
+<span class="n">object_id</span> <span class="o">=</span> <span class="s2">&quot;TEST_fwd&quot;</span>
+<span class="n">fwd_rate</span> <span class="o">=</span> <span class="mf">0.05</span>
+<span class="n">fwd_df</span> <span class="o">=</span> <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">d</span> <span class="o">/</span> <span class="mf">365.0</span> <span class="o">*</span> <span class="n">fwd_rate</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">]</span>
+<span class="n">fwd_dc</span> <span class="o">=</span> <span class="n">DiscountCurve</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">object_id</span><span class="p">,</span> <span class="n">refdate</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span> <span class="n">dates</span><span class="o">=</span><span class="n">dates</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="n">fwd_df</span><span class="p">,</span><span class="n">interpolation</span><span class="o">=</span> <span class="n">InterpolationType</span><span class="o">.</span><span class="n">LINEAR</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plot_fra</span><span class="p">(</span><span class="n">fra</span><span class="p">,</span> <span class="n">ref_date</span><span class="p">,</span> <span class="n">fwd_dc</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fra</span><span class="o">.</span><span class="n">_maturity_date</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Day count fraction (yf): 0.25205479452054796, Forward rate: 0.05000074869501186
+dt: 0.25555555555555554, Specification_Rate: 0.04, Amount: 2.555746888725252
+Cashflow: 2.5235016624312805
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_instruments_deposits_fras_15_1.png" src="../../_images/notebooks_instruments_deposits_fras_15_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2023-10-28 00:00:00
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Price FRA</span>
+<span class="n">fra_pricing_data</span> <span class="o">=</span> <span class="n">ForwardRateAgreementPricingData</span><span class="p">(</span><span class="n">fra</span><span class="o">=</span> <span class="n">fra</span><span class="p">,</span> <span class="n">val_date</span><span class="o">=</span> <span class="n">ref_date</span><span class="p">,</span> <span class="n">pricing_request</span> <span class="o">=</span> <span class="n">ForwardRateAgreementPricingRequest</span><span class="p">(),</span>
+                                                   <span class="n">pricer</span> <span class="o">=</span> <span class="s2">&quot;ForwardRateAgreementPricer&quot;</span><span class="p">,</span> <span class="n">discount_curve</span> <span class="o">=</span> <span class="n">dc</span><span class="p">,</span> <span class="n">forward_curve</span> <span class="o">=</span> <span class="n">fwd_dc</span><span class="p">,</span>
+                                                   <span class="n">parameters</span> <span class="o">=</span> <span class="p">{})</span>
+<span class="n">fra_pricer</span> <span class="o">=</span> <span class="n">ForwardRateAgreementPricer</span><span class="p">(</span><span class="n">ref_date</span><span class="p">,</span> <span class="n">fra</span><span class="p">,</span> <span class="n">dc</span><span class="p">,</span> <span class="n">fwd_dc</span><span class="p">)</span>
+<span class="n">fra_price</span> <span class="o">=</span>  <span class="n">fra_pricing_data</span><span class="o">.</span><span class="n">price</span><span class="p">()</span>
+<span class="c1"># print(f&#39;Price: {fra_price}&#39;)</span>
+<span class="c1"># expCF = fra_pricer.expected_cashflows()</span>
+<span class="c1"># print(f&#39;Expected Cashflows: {expCF}&#39;)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Day count fraction (yf): 0.25205479452054796, Forward rate: 0.05000074869501186
+dt: 0.25555555555555554, Specification_Rate: 0.04, Amount: 2.555746888725252
+Cashflow: 2.5235016624312805
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Calculate fair FRA rate (from froward curve)</span>
+
+<span class="n">pricer</span> <span class="o">=</span>  <span class="n">ForwardRateAgreementPricer</span><span class="p">(</span><span class="n">val_date</span><span class="o">=</span> <span class="n">ref_date</span><span class="p">,</span> <span class="n">fra_spec</span> <span class="o">=</span> <span class="n">fra</span><span class="p">,</span> <span class="n">discount_curve</span><span class="o">=</span><span class="n">dc</span><span class="p">,</span> <span class="n">forward_curve</span><span class="o">=</span><span class="n">fwd_dc</span> <span class="p">)</span>
+<span class="n">fair_rate</span> <span class="o">=</span> <span class="n">ForwardRateAgreementPricer</span><span class="o">.</span><span class="n">compute_fair_rate</span><span class="p">(</span><span class="n">ref_date</span><span class="p">,</span> <span class="n">fra</span><span class="p">,</span> <span class="n">fwd_dc</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fair_rate</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+0.05000074869501186
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check that &quot;fair&quot; FRA has indeed price 0, use same instrument as before but apply the fair rate from the previous step</span>
+<span class="n">fair_fra</span> <span class="o">=</span> <span class="n">ForwardRateAgreementSpecification</span><span class="p">(</span>
+        <span class="n">obj_id</span><span class="o">=</span> <span class="s1">&#39;fair_dummy_id&#39;</span><span class="p">,</span>
+        <span class="n">trade_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span>
+        <span class="n">maturity_date</span><span class="o">=</span><span class="n">mat_date</span><span class="p">,</span>
+        <span class="n">notional</span><span class="o">=</span> <span class="mf">1000.0</span><span class="p">,</span>
+        <span class="n">rate</span><span class="o">=</span> <span class="n">fair_rate</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+        <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
+        <span class="n">udlID</span><span class="o">=</span> <span class="s2">&quot;dummy_underlying_index&quot;</span><span class="p">,</span>
+        <span class="n">rate_start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+        <span class="n">rate_end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
+        <span class="n">day_count_convention</span><span class="o">=</span> <span class="s1">&#39;Act360&#39;</span><span class="p">,</span>
+        <span class="c1">#business_day_convention: _Union[RollConvention, str] = RollConvention.FOLLOWING,</span>
+        <span class="n">rate_day_count_convention</span><span class="o">=</span> <span class="s1">&#39;Act360&#39;</span><span class="p">,</span>
+        <span class="c1">#rate_business_day_convention: _Union[RollConvention, str] = RollConvention.FOLLOWING,</span>
+        <span class="c1">#calendar: _Union[_HolidayBase, str] = None,</span>
+        <span class="n">currency</span><span class="o">=</span><span class="n">ccy</span><span class="p">,</span>
+        <span class="c1"># ex_settle: int =0,</span>
+        <span class="c1"># trade_settle: int= 0,</span>
+        <span class="c1">#spot_days: int = None,</span>
+        <span class="c1">#start_period: int = None,</span>
+        <span class="c1">#end_period: int = None,</span>
+        <span class="n">issuer</span><span class="o">=</span> <span class="s2">&quot;dummy_issuer&quot;</span><span class="p">,</span>
+        <span class="n">securitization_level</span><span class="o">=</span> <span class="s2">&quot;NONE&quot;</span><span class="p">,</span>
+        <span class="c1">#rating: _Union[Rating, str] = Rating.NONE, &#39;&#39;</span>
+<span class="p">)</span>
+
+
+<span class="n">fair_fra_pricing_data</span> <span class="o">=</span> <span class="n">ForwardRateAgreementPricingData</span><span class="p">(</span><span class="n">fra</span><span class="o">=</span> <span class="n">fair_fra</span><span class="p">,</span> <span class="n">val_date</span><span class="o">=</span> <span class="n">ref_date</span><span class="p">,</span> <span class="n">pricing_request</span> <span class="o">=</span> <span class="n">ForwardRateAgreementPricingRequest</span><span class="p">(),</span>
+                                                   <span class="n">pricer</span> <span class="o">=</span> <span class="s2">&quot;ForwardRateAgreementPricer&quot;</span><span class="p">,</span> <span class="n">discount_curve</span> <span class="o">=</span> <span class="n">dc</span><span class="p">,</span> <span class="n">forward_curve</span> <span class="o">=</span> <span class="n">fwd_dc</span><span class="p">,</span>
+                                                   <span class="n">parameters</span> <span class="o">=</span> <span class="p">{})</span>
+
+<span class="n">fair_fra_price</span> <span class="o">=</span>  <span class="n">fair_fra_pricing_data</span><span class="o">.</span><span class="n">price</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Price: </span><span class="si">{</span><span class="n">fair_fra_price</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Day count fraction (yf): 0.25205479452054796, Forward rate: 0.05000074869501186
+dt: 0.25555555555555554, Specification_Rate: 0.05000074869501186, Amount: 0.0
+Cashflow: 0.0
+Price: 0.0
+</pre></div></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="repurchase_agreement.html" class="btn btn-neutral float-left" title="Repurchase Agreements" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ir_swap.html" class="btn btn-neutral float-right" title="Interest Rate Swap" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

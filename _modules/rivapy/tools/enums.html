@@ -83,7 +83,9 @@
   <h1>Source code for rivapy.tools.enums</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span> <span class="k">as</span> <span class="n">_Enum</span><span class="p">,</span> <span class="n">unique</span> <span class="k">as</span> <span class="n">_unique</span>
-<span class="kn">from</span> <span class="nn">rivapy</span> <span class="kn">import</span> <span class="n">_pyvacon_available</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
 
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -110,13 +112,23 @@
 <span class="sd">            str: _description_</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">def</span> <span class="nf">has_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span>
-
+        <span class="c1"># Accept either the enum&#39;s stored value (e.g. &#39;Act360&#39;) or its name/key (e.g. &#39;ACT360&#39;)</span>
+        <span class="c1"># Matching is case-insensitive for robustness.</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">has_value</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown  &quot;</span> <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="n">value</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">value</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="c1"># direct match against stored values (exact)</span>
+            <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="bp">cls</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="n">member</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">member</span><span class="o">.</span><span class="n">value</span>
+            <span class="c1"># exact name/key match</span>
+            <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__members__</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">cls</span><span class="p">[</span><span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+            <span class="c1"># case-insensitive match against names or values</span>
+            <span class="n">uv</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="bp">cls</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">uv</span> <span class="o">==</span> <span class="n">member</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">or</span> <span class="n">uv</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">member</span><span class="o">.</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+                    <span class="k">return</span> <span class="n">member</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown &quot;</span> <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="n">value</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Given value &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; does not belong to enum &quot;</span> <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
@@ -139,48 +151,50 @@
 <span class="sd">            str: _description_</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">def</span> <span class="nf">has_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span>
-
+        <span class="c1"># Accept either the enum name (string) or integer value. Return the enum NAME as string.</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="bp">cls</span><span class="p">[</span><span class="n">value</span><span class="p">]</span>  <span class="c1"># check if the string exists as key</span>
-            <span class="k">return</span> <span class="n">value</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="c1"># direct name/key match</span>
+            <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__members__</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">v</span>
+            <span class="c1"># case-insensitive name match</span>
+            <span class="n">uv</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="bp">cls</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">uv</span> <span class="o">==</span> <span class="n">member</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+                    <span class="k">return</span> <span class="n">member</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown &quot;</span> <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="n">value</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="p">[</span><span class="n">value</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown &quot;</span> <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">name</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Given value &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; does not belong to enum &quot;</span> <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<span class="k">if</span> <span class="n">_pyvacon_available</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">pyvacon.finance.definition</span> <span class="kn">import</span> <span class="n">DayCounter</span> <span class="k">as</span> <span class="n">_DayCounter</span>
-
-    <span class="n">DayCounterType</span> <span class="o">=</span> <span class="n">_DayCounter</span><span class="o">.</span><span class="n">Type</span>
-
-    <span class="kn">from</span> <span class="nn">pyvacon.numerics.interpolation</span> <span class="kn">import</span> <span class="n">InterpolationType</span>
-    <span class="kn">from</span> <span class="nn">pyvacon.numerics.extrapolation</span> <span class="kn">import</span> <span class="n">ExtrapolationType</span>
-<span class="k">else</span><span class="p">:</span>
-
 <div class="viewcode-block" id="InterpolationType">
 <a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.InterpolationType">[docs]</a>
-    <span class="nd">@_unique</span>
-    <span class="k">class</span> <span class="nc">InterpolationType</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
-        <span class="n">CONSTANT</span> <span class="o">=</span> <span class="s2">&quot;CONSTANT&quot;</span>
-        <span class="n">LINEAR</span> <span class="o">=</span> <span class="s2">&quot;LINEAR&quot;</span>
-        <span class="n">LINEAR_LOG</span> <span class="o">=</span> <span class="s2">&quot;LINEARLOG&quot;</span>
-        <span class="n">CONSTRAINED_SPLINE</span> <span class="o">=</span> <span class="s2">&quot;CONSTRAINED_SPLINE&quot;</span>
-        <span class="n">HAGAN</span> <span class="o">=</span> <span class="s2">&quot;HAGAN&quot;</span>
-        <span class="n">HAGAN_DF</span> <span class="o">=</span> <span class="s2">&quot;HAGAN_DF&quot;</span></div>
+<span class="nd">@_unique</span>
+<span class="k">class</span> <span class="nc">InterpolationType</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+    <span class="n">CONSTANT</span> <span class="o">=</span> <span class="s2">&quot;CONSTANT&quot;</span>
+    <span class="n">LINEAR</span> <span class="o">=</span> <span class="s2">&quot;LINEAR&quot;</span>
+    <span class="n">LINEAR_LOG</span> <span class="o">=</span> <span class="s2">&quot;LINEAR_LOG&quot;</span>
+    <span class="n">CONSTRAINED_SPLINE</span> <span class="o">=</span> <span class="s2">&quot;CONSTRAINED_SPLINE&quot;</span>
+    <span class="n">HAGAN</span> <span class="o">=</span> <span class="s2">&quot;HAGAN&quot;</span>
+    <span class="n">HAGAN_DF</span> <span class="o">=</span> <span class="s2">&quot;HAGAN_DF&quot;</span></div>
+
 
 
 <div class="viewcode-block" id="ExtrapolationType">
 <a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.ExtrapolationType">[docs]</a>
-    <span class="nd">@_unique</span>
-    <span class="k">class</span> <span class="nc">ExtrapolationType</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
-        <span class="n">NONE</span> <span class="o">=</span> <span class="s2">&quot;NONE&quot;</span>
-        <span class="n">CONSTANT</span> <span class="o">=</span> <span class="s2">&quot;CONSTANT&quot;</span>
-        <span class="n">LINEAR</span> <span class="o">=</span> <span class="s2">&quot;LINEAR&quot;</span>
-        <span class="n">LINEAR_LOG</span> <span class="o">=</span> <span class="s2">&quot;LINEARLOG&quot;</span></div>
+<span class="nd">@_unique</span>
+<span class="k">class</span> <span class="nc">ExtrapolationType</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="s2">&quot;NONE&quot;</span>
+    <span class="n">CONSTANT</span> <span class="o">=</span> <span class="s2">&quot;CONSTANT&quot;</span>
+    <span class="n">CONSTANT_DF</span> <span class="o">=</span> <span class="s2">&quot;CONSTANT_DF&quot;</span>
+    <span class="n">LINEAR</span> <span class="o">=</span> <span class="s2">&quot;LINEAR&quot;</span>
+    <span class="n">LINEAR_LOG</span> <span class="o">=</span> <span class="s2">&quot;LINEAR_LOG&quot;</span></div>
 
 
 
@@ -285,13 +299,16 @@
 
 
 
-<span class="c1"># class RollConvention:</span>
-<span class="c1">#     FOLLOWING = &#39;Following&#39;</span>
-<span class="c1">#     MODIFIED_FOLLOWING = &#39;ModifiedFollowing&#39;</span>
-<span class="c1">#     MODIFIED_FOLLOWING_EOM = &#39;ModifiedFollowingEOM&#39;</span>
-<span class="c1">#     PRECEDING = &#39;Preceding&#39;</span>
-<span class="c1">#     MODIFIED_PRECEDING = &#39;ModifiedPreceding&#39;</span>
-<span class="c1">#     UNADJUSTED = &#39;Unadjusted&#39;</span>
+<span class="nd">@_unique</span>
+<span class="k">class</span> <span class="nc">RollRule</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Roll Rules are used for calculating daten when building a schedule and, therefore, rolling forward (or backward) dates by periods or frequencies&quot;&quot;&quot;</span>
+
+    <span class="n">NONE</span> <span class="o">=</span> <span class="s2">&quot;NONE&quot;</span>  <span class="c1"># no roll rule applied,  day of a month drifts if adjustments are made acc. to bdc, i.e. the anchor date changes</span>
+    <span class="n">EOM</span> <span class="o">=</span> <span class="s2">&quot;EOM&quot;</span>  <span class="c1"># rolls from month end to month end, ambiguous days are adjusted to the end of the month, i.e. Mar 30,</span>
+    <span class="n">DOM</span> <span class="o">=</span> <span class="s2">&quot;DOM&quot;</span>  <span class="c1"># rolls from a specific day of month to the same day of month, ambiguous days are adjusted to the same day of month, i.e. Mar 30,</span>
+    <span class="n">IMM</span> <span class="o">=</span> <span class="s2">&quot;IMM&quot;</span>  <span class="c1"># rolls to the third Wednesday of the month, i.e. Mar 30, rolls to Mar 20, if Mar 20 is a weekend, it rolls to Mar 22</span>
+
+
 <div class="viewcode-block" id="DayCounterType">
 <a class="viewcode-back" href="../../../rivapy/rivapy.tools.html#rivapy.tools.enums.DayCounterType">[docs]</a>
 <span class="nd">@_unique</span>
@@ -301,7 +318,9 @@
     <span class="n">ACT360</span> <span class="o">=</span> <span class="s2">&quot;Act360&quot;</span>
     <span class="n">ThirtyU360</span> <span class="o">=</span> <span class="s2">&quot;30U360&quot;</span>
     <span class="n">ThirtyE360</span> <span class="o">=</span> <span class="s2">&quot;30E360&quot;</span>
-    <span class="n">ACT252</span> <span class="o">=</span> <span class="s2">&quot;Act252&quot;</span></div>
+    <span class="n">ACT252</span> <span class="o">=</span> <span class="s2">&quot;Act252&quot;</span>
+    <span class="n">Thirty360ISDA</span> <span class="o">=</span> <span class="s2">&quot;30360ISDA&quot;</span>
+    <span class="n">ActActICMA</span> <span class="o">=</span> <span class="s2">&quot;ActActICMA&quot;</span></div>
 
 
 
@@ -585,6 +604,120 @@
     <span class="n">GB</span> <span class="o">=</span> <span class="s2">&quot;GB&quot;</span>
     <span class="n">JP</span> <span class="o">=</span> <span class="s2">&quot;JP&quot;</span>
     <span class="n">CN</span> <span class="o">=</span> <span class="s2">&quot;CN&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">IrLegType</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enums object for the type of interest rate swap legs.&quot;&quot;&quot;</span>
+
+    <span class="n">FIXED</span> <span class="o">=</span> <span class="s2">&quot;FIXED&quot;</span>
+    <span class="n">FLOAT</span> <span class="o">=</span> <span class="s2">&quot;FLOAT&quot;</span>
+    <span class="n">OIS</span> <span class="o">=</span> <span class="s2">&quot;OIS&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">(</span><span class="n">IrLegType</span><span class="o">.</span><span class="n">FIXED</span><span class="p">,</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">,</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">OIS</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">s</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown leg type &#39;</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+    <span class="c1"># @staticmethod</span>
+    <span class="c1"># def to_string(cls, value: str) -&gt; str:</span>
+    <span class="c1">#     return value.upper()</span>
+
+
+<span class="k">class</span> <span class="nc">Instrument</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enums object for the type of instrument.&quot;&quot;&quot;</span>
+
+    <span class="n">IRS</span> <span class="o">=</span> <span class="s2">&quot;IRS&quot;</span>
+    <span class="n">TBS</span> <span class="o">=</span> <span class="s2">&quot;TBS&quot;</span>
+    <span class="n">BS</span> <span class="o">=</span> <span class="s2">&quot;BS&quot;</span>
+    <span class="n">DEPOSIT</span> <span class="o">=</span> <span class="s2">&quot;DEPOSIT&quot;</span>
+    <span class="n">OIS</span> <span class="o">=</span> <span class="s2">&quot;OIS&quot;</span>
+    <span class="n">FRA</span> <span class="o">=</span> <span class="s2">&quot;FRA&quot;</span>
+    <span class="n">FXF</span> <span class="o">=</span> <span class="s2">&quot;FXF&quot;</span>
+
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">IRIndexMetadata</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">tenor</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">spot_days</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">business_day_convention</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">day_count_convention</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">roll_convention</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">calendar</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">aliases</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">InterestRateIndex</span><span class="p">(</span><span class="n">_MyEnum</span><span class="p">):</span>
+    <span class="n">EUR1M</span> <span class="o">=</span> <span class="n">IRIndexMetadata</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;EURIBOR 1M&quot;</span><span class="p">,</span>
+        <span class="n">currency</span><span class="o">=</span><span class="s2">&quot;EUR&quot;</span><span class="p">,</span>
+        <span class="n">tenor</span><span class="o">=</span><span class="s2">&quot;1M&quot;</span><span class="p">,</span>
+        <span class="n">spot_days</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">business_day_convention</span><span class="o">=</span><span class="s2">&quot;ModifiedFollowing&quot;</span><span class="p">,</span>
+        <span class="n">day_count_convention</span><span class="o">=</span><span class="s2">&quot;ACT360&quot;</span><span class="p">,</span>
+        <span class="n">roll_convention</span><span class="o">=</span><span class="s2">&quot;EOM&quot;</span><span class="p">,</span>
+        <span class="n">calendar</span><span class="o">=</span><span class="s2">&quot;TARGET&quot;</span><span class="p">,</span>
+        <span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;EUR1M&quot;</span><span class="p">,</span> <span class="s2">&quot; EUR 1M&quot;</span><span class="p">,</span> <span class="s2">&quot;EURIBOR 1M&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">EUR3M</span> <span class="o">=</span> <span class="n">IRIndexMetadata</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;EURIBOR 3M&quot;</span><span class="p">,</span>
+        <span class="n">currency</span><span class="o">=</span><span class="s2">&quot;EUR&quot;</span><span class="p">,</span>
+        <span class="n">tenor</span><span class="o">=</span><span class="s2">&quot;3M&quot;</span><span class="p">,</span>
+        <span class="n">spot_days</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">business_day_convention</span><span class="o">=</span><span class="s2">&quot;ModifiedFollowing&quot;</span><span class="p">,</span>
+        <span class="n">day_count_convention</span><span class="o">=</span><span class="s2">&quot;ACT360&quot;</span><span class="p">,</span>
+        <span class="n">roll_convention</span><span class="o">=</span><span class="s2">&quot;EOM&quot;</span><span class="p">,</span>
+        <span class="n">calendar</span><span class="o">=</span><span class="s2">&quot;TARGET&quot;</span><span class="p">,</span>
+        <span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;EUR3M&quot;</span><span class="p">,</span> <span class="s2">&quot; EUR 3M&quot;</span><span class="p">,</span> <span class="s2">&quot;EURIBOR 3M&quot;</span><span class="p">,</span> <span class="s2">&quot;EURIBOR_3M&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">EUR6M</span> <span class="o">=</span> <span class="n">IRIndexMetadata</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;EURIBOR 6M&quot;</span><span class="p">,</span>
+        <span class="n">currency</span><span class="o">=</span><span class="s2">&quot;EUR&quot;</span><span class="p">,</span>
+        <span class="n">tenor</span><span class="o">=</span><span class="s2">&quot;6M&quot;</span><span class="p">,</span>
+        <span class="n">spot_days</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">business_day_convention</span><span class="o">=</span><span class="s2">&quot;ModifiedFollowing&quot;</span><span class="p">,</span>
+        <span class="n">day_count_convention</span><span class="o">=</span><span class="s2">&quot;ACT360&quot;</span><span class="p">,</span>
+        <span class="n">roll_convention</span><span class="o">=</span><span class="s2">&quot;EOM&quot;</span><span class="p">,</span>
+        <span class="n">calendar</span><span class="o">=</span><span class="s2">&quot;TARGET&quot;</span><span class="p">,</span>
+        <span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;EUR6M&quot;</span><span class="p">,</span> <span class="s2">&quot;EUR 6M&quot;</span><span class="p">,</span> <span class="s2">&quot;EURIBOR 6M&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">EUR12M</span> <span class="o">=</span> <span class="n">IRIndexMetadata</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;EURIBOR 12M&quot;</span><span class="p">,</span>
+        <span class="n">currency</span><span class="o">=</span><span class="s2">&quot;EUR&quot;</span><span class="p">,</span>
+        <span class="n">tenor</span><span class="o">=</span><span class="s2">&quot;12M&quot;</span><span class="p">,</span>
+        <span class="n">spot_days</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">business_day_convention</span><span class="o">=</span><span class="s2">&quot;ModifiedFollowing&quot;</span><span class="p">,</span>
+        <span class="n">day_count_convention</span><span class="o">=</span><span class="s2">&quot;ACT360&quot;</span><span class="p">,</span>
+        <span class="n">roll_convention</span><span class="o">=</span><span class="s2">&quot;EOM&quot;</span><span class="p">,</span>
+        <span class="n">calendar</span><span class="o">=</span><span class="s2">&quot;TARGET&quot;</span><span class="p">,</span>
+        <span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;EUR12M&quot;</span><span class="p">,</span> <span class="s2">&quot;EUR 12M&quot;</span><span class="p">,</span> <span class="s2">&quot;EURIBOR 12M&quot;</span><span class="p">,</span> <span class="s2">&quot;EUR1Y&quot;</span><span class="p">,</span> <span class="s2">&quot;EUR_1Y&quot;</span><span class="p">,</span> <span class="s2">&quot;EURIBOR_1Y&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">ESTR</span> <span class="o">=</span> <span class="n">IRIndexMetadata</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;€STR&quot;</span><span class="p">,</span>
+        <span class="n">currency</span><span class="o">=</span><span class="s2">&quot;EUR&quot;</span><span class="p">,</span>
+        <span class="n">tenor</span><span class="o">=</span><span class="s2">&quot;O/N&quot;</span><span class="p">,</span>
+        <span class="n">spot_days</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">business_day_convention</span><span class="o">=</span><span class="s2">&quot;Following&quot;</span><span class="p">,</span>
+        <span class="n">day_count_convention</span><span class="o">=</span><span class="s2">&quot;ACT360&quot;</span><span class="p">,</span>
+        <span class="n">roll_convention</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+        <span class="n">calendar</span><span class="o">=</span><span class="s2">&quot;TARGET&quot;</span><span class="p">,</span>
+        <span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;EURSTR&quot;</span><span class="p">,</span> <span class="s2">&quot;EUR STR&quot;</span><span class="p">,</span> <span class="s2">&quot;€STR&quot;</span><span class="p">,</span> <span class="s2">&quot;EUR1D&quot;</span><span class="p">,</span> <span class="s2">&quot;EUR O/N&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">get_index_by_alias</span><span class="p">(</span><span class="n">alias</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InterestRateIndex</span><span class="p">:</span>
+    <span class="n">alias</span> <span class="o">=</span> <span class="n">alias</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">InterestRateIndex</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">aliases</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">aliases</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">aliases</span> <span class="ow">or</span> <span class="n">alias</span> <span class="o">==</span> <span class="n">index</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;erfolgreich&quot;</span><span class="p">)</span>
+            <span class="nb">str</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">return</span> <span class="n">index</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown index alias: </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 
            </div>

@@ -26,7 +26,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Lucia-Schwartz Model" href="../models/lucia_schwartz.html" />
+    <link rel="next" title="Multi-Curve Bootstrapping" href="ir_curve_bootstrapping.html" />
     <link rel="prev" title="Notebook Gallery" href="../index.html" /> 
 </head>
 
@@ -63,11 +63,13 @@
 <li class="toctree-l4"><a class="reference internal" href="#Exercises">Exercises</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="ir_curve_bootstrapping.html">Multi-Curve Bootstrapping</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#pricing">Pricing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#financial-instruments">Financial Instruments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#tools">Tools</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../rivapy/index.html">Module Documentation</a></li>
@@ -103,10 +105,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <p><img alt="image1" src="../../_images/rivacon_frontmark_combined_header.png" /></p>
+  <p><img alt="image1" src="../../_images/logo.png" /></p>
 <section id="Discount-Curves">
 <h1>Discount Curves<a class="headerlink" href="#Discount-Curves" title="Link to this heading"></a></h1>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -115,7 +117,7 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">rivapy.marketdata.curves</span> <span class="kn">import</span> <span class="n">DiscountCurve</span>
-<span class="kn">from</span> <span class="nn">rivapy.enums</span> <span class="kn">import</span> <span class="n">DayCounterType</span><span class="p">,</span> <span class="n">InterpolationType</span><span class="p">,</span> <span class="n">ExtrapolationType</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.enums</span> <span class="kn">import</span> <span class="n">DayCounterType</span><span class="p">,</span> <span class="n">InterpolationType</span><span class="p">,</span> <span class="n">ExtrapolationType</span>
 
 
 <span class="o">%</span><span class="k">load_ext</span> autoreload
@@ -124,6 +126,15 @@
 <span class="o">%</span><span class="k">matplotlib</span> inline
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+c:\Users\DrHansNguyen\Documents\MyRivacon\RiVaPy\rivapy\__init__.py:11: UserWarning: The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.
+  warnings.warn(&#39;The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.&#39;)
+</pre></div></div>
 </div>
 <section id="Definition-of-Discount-Curves">
 <h2>Definition of Discount Curves<a class="headerlink" href="#Definition-of-Discount-Curves" title="Link to this heading"></a></h2>
@@ -197,16 +208,18 @@
 <span class="n">dsc_fac</span> <span class="o">=</span> <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">rates</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="o">*</span><span class="n">days_to_maturity</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="o">/</span><span class="mi">365</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rates</span><span class="p">))]</span>
 
 <span class="n">dc_linear</span> <span class="o">=</span> <span class="n">DiscountCurve</span><span class="p">(</span><span class="s1">&#39;dc_linear&#39;</span><span class="p">,</span> <span class="n">refdate</span><span class="p">,</span> <span class="n">dates</span><span class="p">,</span> <span class="n">dsc_fac</span><span class="p">,</span> <span class="n">InterpolationType</span><span class="o">.</span><span class="n">LINEAR</span><span class="p">,</span>
-                          <span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">Act365Fixed</span><span class="p">)</span>
+                          <span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">LINEAR</span><span class="p">,</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">Act365Fixed</span><span class="p">)</span>
 <span class="n">dc_hagan</span> <span class="o">=</span> <span class="n">DiscountCurve</span><span class="p">(</span><span class="s1">&#39;dc_hagan&#39;</span><span class="p">,</span> <span class="n">refdate</span><span class="p">,</span> <span class="n">dates</span><span class="p">,</span> <span class="n">dsc_fac</span><span class="p">,</span> <span class="n">InterpolationType</span><span class="o">.</span><span class="n">HAGAN_DF</span><span class="p">,</span>
-                        <span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">Act365Fixed</span><span class="p">)</span>
+                       <span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">Act365Fixed</span><span class="p">)</span>
 
 
 <span class="n">dc_linear</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">discount_factors</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">dc_hagan</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">discount_factors</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;year&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;zero rate&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -226,8 +239,10 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dc</span> <span class="o">=</span> <span class="n">DiscountCurve</span><span class="p">(</span><span class="n">object_id</span><span class="p">,</span> <span class="n">refdate</span><span class="p">,</span><span class="n">dates</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span>
-                            <span class="n">InterpolationType</span><span class="o">.</span><span class="n">HAGAN_DF</span><span class="p">,</span>
-                            <span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+                            <span class="c1">#InterpolationType.HAGAN_DF,</span>
+                            <span class="c1">#ExtrapolationType.NONE,</span>
+                            <span class="n">InterpolationType</span><span class="o">.</span><span class="n">LINEAR</span><span class="p">,</span>
+                            <span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">LINEAR</span><span class="p">,</span>
                              <span class="n">DayCounterType</span><span class="o">.</span><span class="n">Act365Fixed</span><span class="p">)</span>
 <span class="c1">#help(analytics.DiscountCurve)</span>
 </pre></div>
@@ -254,7 +269,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-DF for T=180 days:  0.9853143806656076
+DF for T=180 days:  0.9853143806626516
 </pre></div></div>
 </div>
 <p><strong>b. Forward discount factor for a maturity in 180 days in 90 days</strong></p>
@@ -273,7 +288,7 @@ DF for T=180 days:  0.9853143806656076
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Fwd-DF for T=180 days in 90 days:  0.9926300321180352
+Fwd-DF for T=180 days in 90 days:  0.9926031771263745
 </pre></div></div>
 </div>
 <p>A check proves that the result equally the forward discount curve.</p>
@@ -282,6 +297,7 @@ Fwd-DF for T=180 days in 90 days:  0.9926300321180352
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df2</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">90</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DF for T=90 days: &quot;</span><span class="p">,</span> <span class="n">df2</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fwd-DF (manual calculation): &quot;</span><span class="p">,</span> <span class="n">df1</span><span class="o">/</span><span class="n">df2</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -291,16 +307,96 @@ Fwd-DF for T=180 days in 90 days:  0.9926300321180352
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Fwd-DF (manual calculation):  0.9926300321180352
+DF for T=90 days:  0.9926568878362608
+Fwd-DF (manual calculation):  0.9926031771263745
 </pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dc</span> <span class="o">=</span> <span class="n">DiscountCurve</span><span class="p">(</span><span class="n">object_id</span><span class="p">,</span> <span class="n">refdate</span><span class="p">,</span><span class="n">dates</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span>
+                            <span class="n">InterpolationType</span><span class="o">.</span><span class="n">LINEAR</span><span class="p">,</span>
+                            <span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">LINEAR</span><span class="p">,</span>
+                             <span class="n">DayCounterType</span><span class="o">.</span><span class="n">Act365Fixed</span><span class="p">)</span>
+
+<span class="n">df2</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">90</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DF for T=90 days: &quot;</span><span class="p">,</span> <span class="n">df2</span><span class="p">)</span>
+<span class="n">df1</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">180</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DF for T=180 days: &quot;</span><span class="p">,</span> <span class="n">df1</span><span class="p">)</span>
+<span class="n">fwd_df</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">90</span><span class="p">),</span> <span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">180</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fwd-DF for T=180 days in 90 days: &quot;</span><span class="p">,</span> <span class="n">fwd_df</span><span class="p">)</span>
+<span class="n">days</span> <span class="o">=</span> <span class="mi">10</span><span class="o">*</span><span class="mi">365</span><span class="o">+</span><span class="mi">10</span> <span class="c1"># 10 years and then some days to ensure extrapolation</span>
+<span class="n">df3</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">days</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DF for T=</span><span class="si">{</span><span class="n">days</span><span class="si">}</span><span class="s2"> days: &quot;</span><span class="p">,</span> <span class="n">df3</span><span class="p">)</span>
+<span class="n">days2</span> <span class="o">=</span> <span class="mi">10</span><span class="o">*</span><span class="mi">365</span><span class="o">+</span><span class="mi">60</span> <span class="c1"># 10 years and then some days to ensure extrapolation</span>
+<span class="n">df3</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">days2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DF for T=</span><span class="si">{</span><span class="n">days2</span><span class="si">}</span><span class="s2"> days: &quot;</span><span class="p">,</span> <span class="n">df3</span><span class="p">)</span>
+<span class="n">df3</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">days</span><span class="p">),</span> <span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">days2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fwd-DF for T=</span><span class="si">{</span><span class="n">days2</span><span class="si">}</span><span class="s2"> days in </span><span class="si">{</span><span class="n">days</span><span class="si">}</span><span class="s2">: &quot;</span><span class="p">,</span> <span class="n">df3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+DF for T=90 days:  0.9926568878362608
+DF for T=180 days:  0.9853143806626516
+Fwd-DF for T=180 days in 90 days:  0.9926031771263745
+DF for T=3660 days:  0.7401510872751633
+DF for T=3710 days:  0.7368154202423908
+Fwd-DF for T=3710 days in 3660:  0.9954932619972867
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">DayCounter</span>
+<span class="n">dcc</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="n">DayCounterType</span><span class="o">.</span><span class="n">Act365Fixed</span><span class="p">)</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">180</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">90</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">90</span><span class="p">),</span> <span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">180</span><span class="p">)))</span>
+<br/><br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+0.4931506849315068
+0.2465753424657534
+0.2465753424657534
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#dc.value(refdate + dt.timedelta(days=-90), refdate + dt.timedelta(days=90))</span>
+</pre></div>
+</div>
 </div>
 <p><strong>c. Valuation dates before the reference date</strong></p>
 <p>Valuation dates before the curves reference date result in an exception (uncomment the following code to see the exception).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#dc.value(refdate + dt.timedelta(days=-90), refdate + dt.timedelta(days=90))</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 </div>
@@ -309,7 +405,7 @@ Fwd-DF (manual calculation):  0.9926300321180352
 <h2>Plotting Discount Curves<a class="headerlink" href="#Plotting-Discount-Curves" title="Link to this heading"></a></h2>
 <p>To plot a curve one can simply call the curve’s <em>plot</em> method. This method plots either the discoutn factors or the rates (depending on the argument <em>discount_factors</em>). The granularity of the timegrid on which the curve is plotted can be determined by the argument <em>days</em>. Arguments to matplotlibs plot function can be given using the respective <strong>kwargs</strong>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Example with coarse timegrid</span>
@@ -324,14 +420,14 @@ Fwd-DF (manual calculation):  0.9926300321180352
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/notebooks_marketdata_discount_curves_24_0.png" src="../../_images/notebooks_marketdata_discount_curves_24_0.png" />
+<img alt="../../_images/notebooks_marketdata_discount_curves_28_0.png" src="../../_images/notebooks_marketdata_discount_curves_28_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/notebooks_marketdata_discount_curves_24_1.png" src="../../_images/notebooks_marketdata_discount_curves_24_1.png" />
+<img alt="../../_images/notebooks_marketdata_discount_curves_28_1.png" src="../../_images/notebooks_marketdata_discount_curves_28_1.png" />
 </div>
 </div>
 </section>
@@ -412,7 +508,7 @@ Fwd-DF (manual calculation):  0.9926300321180352
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../index.html" class="btn btn-neutral float-left" title="Notebook Gallery" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../models/lucia_schwartz.html" class="btn btn-neutral float-right" title="Lucia-Schwartz Model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ir_curve_bootstrapping.html" class="btn btn-neutral float-right" title="Multi-Curve Bootstrapping" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

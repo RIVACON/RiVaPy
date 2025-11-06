@@ -183,11 +183,16 @@ the recovery rate may be below average. To address this limitation, CreditMetric
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Cell 1 - Imports and helpers</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">yfinance</span> <span class="k">as</span> <span class="nn">yf</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="o">%</span><span class="k">pip</span> install yfinance
+    <span class="kn">import</span> <span class="nn">yfinance</span> <span class="k">as</span> <span class="nn">yf</span>
+
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;../../../..&#39;</span><span class="p">)</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">yfinance</span> <span class="k">as</span> <span class="nn">yf</span>
 <span class="kn">import</span> <span class="nn">plotly.express</span> <span class="k">as</span> <span class="nn">px</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">import</span> <span class="nn">rivapy</span>
@@ -204,12 +209,12 @@ the recovery rate may be below average. To address this limitation, CreditMetric
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-c:\Users\Anwender\source\repos\RiVaPy\docs\source\notebooks\credit\../../../..\rivapy\__init__.py:13: UserWarning: The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.
+c:\Users\DrHansNguyen\Documents\MyRivacon\RiVaPy\rivapy\__init__.py:13: UserWarning: The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.
   warnings.warn(&#34;The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.&#34;)
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">formatter</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;float&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">{: 0.5f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">})</span>
@@ -222,7 +227,7 @@ c:\Users\Anwender\source\repos\RiVaPy\docs\source\notebooks\credit\../../../..\r
 <section id="Transition-matrix">
 <h3>Transition matrix<a class="headerlink" href="#Transition-matrix" title="Link to this heading"></a></h3>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># User inputs</span>
@@ -241,7 +246,7 @@ c:\Users\Anwender\source\repos\RiVaPy\docs\source\notebooks\credit\../../../..\r
 <section id="Download-market-data-from-Yahoo-Finance-(indices-+-5-issuers)">
 <h3>Download market data from Yahoo Finance (indices + 5 issuers)<a class="headerlink" href="#Download-market-data-from-Yahoo-Finance-(indices-+-5-issuers)" title="Link to this heading"></a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="s2">&quot;2015-01-01&quot;</span>
@@ -293,36 +298,36 @@ c:\Users\Anwender\source\repos\RiVaPy\docs\source\notebooks\credit\../../../..\r
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
+C:\Users\DrHansNguyen\AppData\Local\Temp\ipykernel_29464\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
   df = yf.download(tk, start=start, end=end)[[&#34;Close&#34;]].rename(columns={&#34;Close&#34;: tk})
 [*********************100%***********************]  1 of 1 completed
-C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
+C:\Users\DrHansNguyen\AppData\Local\Temp\ipykernel_29464\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
   df = yf.download(tk, start=start, end=end)[[&#34;Close&#34;]].rename(columns={&#34;Close&#34;: tk})
 [*********************100%***********************]  1 of 1 completed
-C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
+C:\Users\DrHansNguyen\AppData\Local\Temp\ipykernel_29464\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
   df = yf.download(tk, start=start, end=end)[[&#34;Close&#34;]].rename(columns={&#34;Close&#34;: tk})
 [*********************100%***********************]  1 of 1 completed
-C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
+C:\Users\DrHansNguyen\AppData\Local\Temp\ipykernel_29464\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
   df = yf.download(tk, start=start, end=end)[[&#34;Close&#34;]].rename(columns={&#34;Close&#34;: tk})
 [*********************100%***********************]  1 of 1 completed
-C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
+C:\Users\DrHansNguyen\AppData\Local\Temp\ipykernel_29464\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
   df = yf.download(tk, start=start, end=end)[[&#34;Close&#34;]].rename(columns={&#34;Close&#34;: tk})
 [*********************100%***********************]  1 of 1 completed
-C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
+C:\Users\DrHansNguyen\AppData\Local\Temp\ipykernel_29464\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
   df = yf.download(tk, start=start, end=end)[[&#34;Close&#34;]].rename(columns={&#34;Close&#34;: tk})
 [*********************100%***********************]  1 of 1 completed
-C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
+C:\Users\DrHansNguyen\AppData\Local\Temp\ipykernel_29464\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
   df = yf.download(tk, start=start, end=end)[[&#34;Close&#34;]].rename(columns={&#34;Close&#34;: tk})
 [*********************100%***********************]  1 of 1 completed
-C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
+C:\Users\DrHansNguyen\AppData\Local\Temp\ipykernel_29464\2534265038.py:18: FutureWarning: YF.download() has changed argument auto_adjust default to True
   df = yf.download(tk, start=start, end=end)[[&#34;Close&#34;]].rename(columns={&#34;Close&#34;: tk})
 [*********************100%***********************]  1 of 1 completed
-C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:25: PerformanceWarning: dropping on a non-lexsorted multi-index without a level parameter may impact performance.
+C:\Users\DrHansNguyen\AppData\Local\Temp\ipykernel_29464\2534265038.py:25: PerformanceWarning: dropping on a non-lexsorted multi-index without a level parameter may impact performance.
   df_merged = df_merged.merge(df, on=&#34;Date&#34;, how=&#34;outer&#34;)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -362,11 +367,11 @@ C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:25: Performan
       <td>9764.730469</td>
       <td>2058.199951</td>
       <td>4252.290039</td>
-      <td>103.257195</td>
+      <td>103.257187</td>
       <td>39.671352</td>
-      <td>26.952736</td>
-      <td>24.261047</td>
-      <td>27.449556</td>
+      <td>26.952732</td>
+      <td>24.261057</td>
+      <td>27.449545</td>
     </tr>
     <tr>
       <th>1</th>
@@ -374,10 +379,10 @@ C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:25: Performan
       <td>9473.160156</td>
       <td>2020.579956</td>
       <td>4111.359863</td>
-      <td>99.749275</td>
+      <td>99.749283</td>
       <td>37.974976</td>
-      <td>26.558189</td>
-      <td>23.577570</td>
+      <td>26.558193</td>
+      <td>23.577574</td>
       <td>26.116777</td>
     </tr>
     <tr>
@@ -386,11 +391,11 @@ C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:25: Performan
       <td>9469.660156</td>
       <td>2002.609985</td>
       <td>4083.500000</td>
-      <td>100.371651</td>
-      <td>37.963596</td>
-      <td>26.960478</td>
+      <td>100.371643</td>
+      <td>37.963593</td>
+      <td>26.960470</td>
       <td>23.579796</td>
-      <td>25.433735</td>
+      <td>25.433733</td>
     </tr>
     <tr>
       <th>3</th>
@@ -398,10 +403,10 @@ C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:25: Performan
       <td>9518.179688</td>
       <td>2025.900024</td>
       <td>4112.729980</td>
-      <td>100.994011</td>
+      <td>100.994026</td>
       <td>38.214062</td>
-      <td>27.726343</td>
-      <td>23.910431</td>
+      <td>27.726357</td>
+      <td>23.910435</td>
       <td>25.008911</td>
     </tr>
     <tr>
@@ -412,9 +417,9 @@ C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:25: Performan
       <td>4260.189941</td>
       <td>104.021019</td>
       <td>39.773819</td>
-      <td>28.004856</td>
+      <td>28.004848</td>
       <td>24.829124</td>
-      <td>25.819681</td>
+      <td>25.819683</td>
     </tr>
   </tbody>
 </table>
@@ -424,7 +429,7 @@ C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:25: Performan
 <section id="Prepare-Issuer-objects-and-Positions">
 <h3>Prepare Issuer objects and Positions<a class="headerlink" href="#Prepare-Issuer-objects-and-Positions" title="Link to this heading"></a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">issuers_info</span> <span class="o">=</span> <span class="p">[</span>
@@ -459,7 +464,7 @@ C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:25: Performan
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -555,7 +560,7 @@ C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:25: Performan
 <section id="Configure-indices-list,-mapping">
 <h3>Configure indices list, mapping<a class="headerlink" href="#Configure-indices-list,-mapping" title="Link to this heading"></a></h3>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">list_of_indices</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;DAX&quot;</span><span class="p">,</span> <span class="s2">&quot;SP&quot;</span><span class="p">,</span> <span class="s2">&quot;CAC&quot;</span><span class="p">]</span>
@@ -567,7 +572,7 @@ C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:25: Performan
 <section id="Configure-model-parameter-(time-horizons-other-than-1-are-not-implemented-yet)">
 <h3>Configure model parameter (time horizons other than 1 are not implemented yet)<a class="headerlink" href="#Configure-model-parameter-(time-horizons-other-than-1-are-not-implemented-yet)" title="Link to this heading"></a></h3>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_sim</span> <span class="o">=</span> <span class="mi">1000000</span>
@@ -583,7 +588,7 @@ C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:25: Performan
 <section id="Utilisation-of-credit-metrics-model-within-RiVaPy">
 <h2>Utilisation of credit metrics model within RiVaPy<a class="headerlink" href="#Utilisation-of-credit-metrics-model-within-RiVaPy" title="Link to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ensure stock data has Date column and other columns expected by model</span>
@@ -613,7 +618,7 @@ C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:25: Performan
 <section id="MC-Simulation">
 <h2>MC-Simulation<a class="headerlink" href="#MC-Simulation" title="Link to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mc_scenarios</span><span class="p">,</span> <span class="n">rr_scenarios</span><span class="p">,</span> <span class="n">issuer_ids</span><span class="p">,</span> <span class="n">issuer_names</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">mc_calculation</span><span class="p">()</span>
@@ -627,7 +632,7 @@ C:\Users\Anwender\AppData\Local\Temp\ipykernel_22384\2534265038.py:25: Performan
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-c:\Users\Anwender\source\repos\RiVaPy\docs\source\notebooks\credit\../../../..\rivapy\credit\creditmetrics.py:119: FutureWarning: The default fill_method=&#39;pad&#39; in DataFrame.pct_change is deprecated and will be removed in a future version. Either fill in any non-leading NA values prior to calling pct_change or specify &#39;fill_method=None&#39; to not fill NA values.
+c:\Users\DrHansNguyen\Documents\MyRivacon\RiVaPy\rivapy\credit\creditmetrics.py:119: FutureWarning: The default fill_method=&#39;pad&#39; in DataFrame.pct_change is deprecated and will be removed in a future version. Either fill in any non-leading NA values prior to calling pct_change or specify &#39;fill_method=None&#39; to not fill NA values.
   returns = mergedData.pct_change()
 </pre></div></div>
 </div>
@@ -641,7 +646,7 @@ issuer_ids: [&#39;AAPL&#39; &#39;BASF&#39; &#39;BNP&#39; &#39;GM&#39; &#39;VOW&#
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mc_scenarios</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
@@ -649,7 +654,7 @@ issuer_ids: [&#39;AAPL&#39; &#39;BASF&#39; &#39;BNP&#39; &#39;GM&#39; &#39;VOW&#
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -700,7 +705,7 @@ issuer_ids: [&#39;AAPL&#39; &#39;BASF&#39; &#39;BNP&#39; &#39;GM&#39; &#39;VOW&#
       <td>8912.190968</td>
       <td>29700.405362</td>
       <td>14690.892796</td>
-      <td>66048.381580</td>
+      <td>66048.381579</td>
       <td>22124.910294</td>
     </tr>
     <tr>
@@ -751,7 +756,7 @@ issuer_ids: [&#39;AAPL&#39; &#39;BASF&#39; &#39;BNP&#39; &#39;GM&#39; &#39;VOW&#
 <section id="Calculate-VaR-and-Expected-Shortfall">
 <h2>Calculate VaR and Expected Shortfall<a class="headerlink" href="#Calculate-VaR-and-Expected-Shortfall" title="Link to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">loss_distribution</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_loss_distribution</span><span class="p">(</span><span class="n">mc_scenarios</span><span class="p">)</span>
@@ -773,7 +778,7 @@ Portfolio ES  (1.0%): 680,521.23
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">loss_distribution</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Portfolio Loss Distribution&quot;</span><span class="p">)</span>
@@ -793,7 +798,7 @@ Portfolio ES  (1.0%): 680,521.23
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">min</span><span class="p">(</span><span class="n">loss_distribution</span><span class="p">)</span>
@@ -801,7 +806,7 @@ Portfolio ES  (1.0%): 680,521.23
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="output_area docutils container">

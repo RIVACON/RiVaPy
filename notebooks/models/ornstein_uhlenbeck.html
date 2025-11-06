@@ -69,6 +69,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#pricing">Pricing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#financial-instruments">Financial Instruments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#tools">Tools</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../rivapy/index.html">Module Documentation</a></li>
@@ -117,7 +118,7 @@
 </ul>
 <p>The OU model has several properties that make it useful for modeling real-world phenomena. For example, it is a stationary process, meaning that its statistical properties do not change over time. It is also Markovian, meaning that its future behavior depends only on its current state, not on its past history.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
@@ -133,19 +134,19 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/doeltz/doeltz/development/RiVaPy/rivapy/__init__.py:11: UserWarning: The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.
+c:\Users\DrHansNguyen\Documents\MyRivacon\RiVaPy\rivapy\__init__.py:11: UserWarning: The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.
   warnings.warn(&#39;The pyvacon module is not available. You may not use all functionality without this module. Consider installing pyvacon.&#39;)
-2023-05-11 07:25:05.860283: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library &#39;libcudart.so.11.0&#39;; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
-2023-05-11 07:25:05.860298: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
 </pre></div></div>
 </div>
 <section id="Simulation-of-Spot">
 <h2>Simulation of Spot<a class="headerlink" href="#Simulation-of-Spot" title="Link to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rnd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">timegrid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">10_000</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">timegrid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">365.0</span><span class="p">)</span> <span class="c1"># simulate on daily timegrid over 5yrs horizon</span>
+
+<span class="n">rnd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">timegrid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">10_000</span><span class="p">))</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
 <span class="k">for</span> <span class="n">mr_speed</span><span class="p">,</span> <span class="n">volatility</span> <span class="ow">in</span> <span class="p">[(</span><span class="mf">10.0</span><span class="p">,</span><span class="mf">0.3</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.3</span><span class="p">),</span> <span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)]:</span>
     <span class="n">ou_model</span> <span class="o">=</span> <span class="n">rivapy</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">OrnsteinUhlenbeck</span><span class="p">(</span><span class="n">speed_of_mean_reversion</span> <span class="o">=</span> <span class="n">mr_speed</span><span class="p">,</span> <span class="n">volatility</span><span class="o">=</span><span class="n">volatility</span><span class="p">)</span>
@@ -162,11 +163,55 @@
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+&lt;&gt;:9: SyntaxWarning: invalid escape sequence &#39;\l&#39;
+&lt;&gt;:9: SyntaxWarning: invalid escape sequence &#39;\s&#39;
+&lt;&gt;:14: SyntaxWarning: invalid escape sequence &#39;\l&#39;
+&lt;&gt;:14: SyntaxWarning: invalid escape sequence &#39;\s&#39;
+&lt;&gt;:9: SyntaxWarning: invalid escape sequence &#39;\l&#39;
+&lt;&gt;:9: SyntaxWarning: invalid escape sequence &#39;\s&#39;
+&lt;&gt;:14: SyntaxWarning: invalid escape sequence &#39;\l&#39;
+&lt;&gt;:14: SyntaxWarning: invalid escape sequence &#39;\s&#39;
+C:\Users\DrHansNguyen\AppData\Local\Temp\ipykernel_8904\3691699829.py:9: SyntaxWarning: invalid escape sequence &#39;\l&#39;
+  plt.plot(timegrid,sim[:,0],&#39;-&#39;, label=&#39;$\lambda$=&#39;+str(mr_speed)+&#39;, $\sigma$=&#39; + str(volatility))
+C:\Users\DrHansNguyen\AppData\Local\Temp\ipykernel_8904\3691699829.py:9: SyntaxWarning: invalid escape sequence &#39;\s&#39;
+  plt.plot(timegrid,sim[:,0],&#39;-&#39;, label=&#39;$\lambda$=&#39;+str(mr_speed)+&#39;, $\sigma$=&#39; + str(volatility))
+C:\Users\DrHansNguyen\AppData\Local\Temp\ipykernel_8904\3691699829.py:14: SyntaxWarning: invalid escape sequence &#39;\l&#39;
+  label=&#39;$\lambda$=&#39;+str(mr_speed)+&#39;, $\sigma$=&#39; + str(volatility))
+C:\Users\DrHansNguyen\AppData\Local\Temp\ipykernel_8904\3691699829.py:14: SyntaxWarning: invalid escape sequence &#39;\s&#39;
+  label=&#39;$\lambda$=&#39;+str(mr_speed)+&#39;, $\sigma$=&#39; + str(volatility))
+findfont: Font family [&#39;STIXGeneral&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;STIXGeneral&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;STIXGeneral&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;STIXGeneral&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;STIXNonUnicode&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;STIXNonUnicode&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;STIXNonUnicode&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;STIXSizeOneSym&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;STIXSizeTwoSym&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;STIXSizeThreeSym&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;STIXSizeFourSym&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;STIXSizeFiveSym&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;cmsy10&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;cmr10&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;cmtt10&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;cmmi10&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;cmb10&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;cmss10&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;cmex10&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;DejaVu Sans Mono&#39;] not found. Falling back to DejaVu Sans.
+findfont: Font family [&#39;DejaVu Sans Display&#39;] not found. Falling back to DejaVu Sans.
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/notebooks_models_ornstein_uhlenbeck_4_0.png" src="../../_images/notebooks_models_ornstein_uhlenbeck_4_0.png" />
+<img alt="../../_images/notebooks_models_ornstein_uhlenbeck_4_1.png" src="../../_images/notebooks_models_ornstein_uhlenbeck_4_1.png" />
 </div>
 </div>
 </section>
@@ -175,12 +220,10 @@
 <p>The model may be calibrated to data. Here, the data must be given on a uniform grid. The calibration can either be done by maximum likelihood or by minimum least square.</p>
 <p>Here, to test the calibration, we simulate paths of an Ornstein-Uhlenbeck process and calibrate to this simulated data.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">timegrid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">365.0</span><span class="p">)</span> <span class="c1"># simulate on daily timegrid over 5yrs horizon</span>
-
-<span class="n">iters</span> <span class="o">=</span> <span class="mi">100</span> <span class="c1"># number of calibrations performed on simualted data</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><br/><span></span><span class="n">iters</span> <span class="o">=</span> <span class="mi">100</span> <span class="c1"># number of calibrations performed on simualted data</span>
 <span class="n">mean_reversion_speed</span><span class="p">,</span> <span class="n">volatility</span><span class="p">,</span> <span class="n">mean_level</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">iters</span><span class="p">,)),</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">iters</span><span class="p">,)),</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">iters</span><span class="p">,))</span>
 
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="n">iters</span><span class="p">):</span>

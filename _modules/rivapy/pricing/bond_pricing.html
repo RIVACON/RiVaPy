@@ -1,0 +1,665 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rivapy.pricing.bond_pricing &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=d2ebc91c" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.svg"/>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../search.html">Search Page</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rivapy.pricing.bond_pricing</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rivapy.pricing.bond_pricing</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">date</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span> <span class="k">as</span> <span class="n">_Union</span><span class="p">,</span> <span class="n">Optional</span> <span class="k">as</span> <span class="n">_Optional</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">brentq</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.enums</span> <span class="kn">import</span> <span class="n">DayCounterType</span><span class="p">,</span> <span class="n">InterestRateIndex</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.interfaces</span> <span class="kn">import</span> <span class="n">BaseDatedCurve</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.bond_specifications</span> <span class="kn">import</span> <span class="n">DeterministicCashflowBondSpecification</span><span class="p">,</span> <span class="n">FloatingRateBondSpecification</span>
+<span class="kn">from</span> <span class="nn">rivapy.marketdata.curves</span> <span class="kn">import</span> <span class="n">DiscountCurveComposition</span>
+<span class="kn">from</span> <span class="nn">rivapy.marketdata</span> <span class="kn">import</span> <span class="n">DiscountCurveParametrized</span><span class="p">,</span> <span class="n">ConstantRate</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing.pricing_request</span> <span class="kn">import</span> <span class="n">PricingRequest</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments._logger</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">rivapy.marketdata.curves</span> <span class="kn">import</span> <span class="n">DiscountCurve</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Period</span><span class="p">,</span>
+    <span class="n">_date_to_datetime</span><span class="p">,</span>
+    <span class="n">_term_to_period</span><span class="p">,</span>
+    <span class="n">_string_to_calendar</span><span class="p">,</span>
+    <span class="n">DayCounter</span><span class="p">,</span>
+    <span class="n">Schedule</span><span class="p">,</span>
+    <span class="n">roll_day</span><span class="p">,</span>
+    <span class="n">calc_start_day</span><span class="p">,</span>
+    <span class="n">_period_to_string</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span> <span class="k">as</span> <span class="n">_Union</span><span class="p">,</span> <span class="n">List</span> <span class="k">as</span> <span class="n">_List</span>
+
+
+<div class="viewcode-block" id="DeterministicCashflowPricer">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.bond_pricing.DeterministicCashflowPricer">[docs]</a>
+<span class="k">class</span> <span class="nc">DeterministicCashflowPricer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deterministic cashflow pricer utilities.</span>
+
+<span class="sd">    This class provides static and instance helpers for pricing deterministic cashflow</span>
+<span class="sd">    instruments (fixed- and floating-rate bonds, deposits, zero-coupon instruments).</span>
+<span class="sd">    It contains methods to generate expected cashflows, discount them, compute PVs,</span>
+<span class="sd">    yields, z-spreads and duration measures.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">val_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+        <span class="n">spec</span><span class="p">:</span> <span class="n">DeterministicCashflowBondSpecification</span><span class="p">,</span>
+        <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">fwd_curve</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DiscountCurve</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the DeterministicCashflowPricer.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date (datetime): The valuation date.</span>
+<span class="sd">            spec (DeterministicCashflowBondSpecification): The specification of the cashflow instrument.</span>
+<span class="sd">            discount_curve (DiscountCurve): The discount curve to use for pricing.</span>
+<span class="sd">            fwd_curve (Union[DiscountCurve, None], optional): The forward curve to use for pricing. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">val_date</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spec</span> <span class="o">=</span> <span class="n">spec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_discount_curve</span> <span class="o">=</span> <span class="n">discount_curve</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fwd_curve</span> <span class="o">=</span> <span class="n">fwd_curve</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cashflows</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cashflows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the cashflows of the instrument.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Cashflow: The cashflows of the instrument.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cashflows</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cashflows</span> <span class="o">=</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_expected_cashflows</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fwd_curve</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cashflows</span>
+
+    <span class="nd">@cashflows</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">cashflows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the cashflows of the instrument.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Cashflow: The cashflows of the instrument.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cashflows</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="DeterministicCashflowPricer.expected_cashflows">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.expected_cashflows">[docs]</a>
+    <span class="k">def</span> <span class="nf">expected_cashflows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the expected cashflows of the instrument.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[Tuple[datetime, float]]: The expected cashflows of the instrument.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_expected_cashflows</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fwd_curve</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DeterministicCashflowPricer.get_expected_cashflows">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_expected_cashflows">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_expected_cashflows</span><span class="p">(</span>
+        <span class="n">spec</span><span class="p">:</span> <span class="n">DeterministicCashflowBondSpecification</span><span class="p">,</span>
+        <span class="n">val_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fwd_curve</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DiscountCurve</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the expected cashflows for a deterministic cashflow instrument.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            spec (DeterministicCashflowBondSpecification): The instrument specification containing schedule, notional, coupon type, etc.</span>
+<span class="sd">            val_date (datetime.date or datetime, optional): The valuation date, required for floating rate calculation. Defaults to None.</span>
+<span class="sd">            curve (DiscountCurve, optional): The forward curve used for floating rate calculation. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[Tuple[datetime, float]]: A sorted list of tuples, each containing the payment date and cashflow amount.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cashflows</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">_coupon_type</span> <span class="o">!=</span> <span class="s2">&quot;zero&quot;</span><span class="p">:</span>
+            <span class="c1"># schedule = spec.get_schedule()</span>
+            <span class="c1"># # schedule for accrual periods rolled out</span>
+            <span class="c1"># dates = schedule._roll_out(</span>
+            <span class="c1">#     from_=spec._start_date if not spec._backwards else spec._end_date,</span>
+            <span class="c1">#     to_=spec._end_date if not spec._backwards else spec._start_date,</span>
+            <span class="c1">#     term=_term_to_period(spec._frequency),</span>
+            <span class="c1">#     long_stub=spec.stub_type_is_Long,</span>
+            <span class="c1">#     backwards=spec.backwards,</span>
+            <span class="c1"># )</span>
+            <span class="n">dates</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">dates</span>
+            <span class="c1"># print(spec._notional.get_amortization_schedule())</span>
+            <span class="n">dcc</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">day_count_convention</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dates</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dates</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+
+                <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">coupon_type</span> <span class="o">==</span> <span class="s2">&quot;float&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">val_date</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">fwd_curve</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;val_date and fwd_curve must be provided for floating rate cashflow calculation.&quot;</span><span class="p">)</span>
+                    <span class="n">rate</span> <span class="o">=</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_float_rate</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">val_date</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">fwd_curve</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">rate</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">coupon</span>
+                <span class="c1"># normalize day count convention to canonical string before comparison</span>
+                <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">_adjust_accruals</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="n">d1_adj</span> <span class="o">=</span> <span class="n">d1</span>
+                    <span class="n">d2_adj</span> <span class="o">=</span> <span class="n">d2</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">d1_adj</span> <span class="o">=</span> <span class="n">roll_day</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">calendar</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">business_day_convention</span><span class="p">)</span>
+                    <span class="n">d2_adj</span> <span class="o">=</span> <span class="n">roll_day</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">calendar</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">business_day_convention</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">day_count_convention</span><span class="p">)</span> <span class="o">==</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">ActActICMA</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                    <span class="n">nr</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">get_nr_annual_payments</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">nr</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of annual payments is zero. Please check the frequency setting in the bond specification.&quot;</span><span class="p">)</span>
+                    <span class="n">dcv</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">d1_adj</span><span class="p">,</span> <span class="n">d2_adj</span><span class="p">,</span> <span class="n">dates</span><span class="p">,</span> <span class="n">nr</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dcv</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">d1_adj</span><span class="p">,</span> <span class="n">d2_adj</span><span class="p">)</span>
+                <span class="n">amount</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">_notional</span><span class="o">.</span><span class="n">get_amount_per_date</span><span class="p">(</span><span class="n">d1_adj</span><span class="p">)</span> <span class="o">*</span> <span class="n">rate</span> <span class="o">*</span> <span class="n">dcv</span>
+                <span class="n">payment_date</span> <span class="o">=</span> <span class="n">roll_day</span><span class="p">(</span><span class="n">d2_adj</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">calendar</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">business_day_convention</span><span class="p">,</span> <span class="n">settle_days</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">payment_days</span><span class="p">)</span>
+                <span class="n">cashflows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">payment_date</span><span class="p">,</span> <span class="n">amount</span><span class="p">))</span>
+        <span class="c1"># add notional amortizations to cashflow list</span>
+        <span class="n">cashflows</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">_notional</span><span class="o">.</span><span class="n">get_amortization_schedule</span><span class="p">())</span>
+        <span class="c1"># add notional exchanges at start and end date if applicable (and only remaining notionals after amortizations)</span>
+        <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">_notional_exchange</span><span class="p">:</span>
+            <span class="c1"># add notional exchange at start and end date</span>
+            <span class="n">not_init</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">_issue_price</span> <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">_issue_price</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">spec</span><span class="o">.</span><span class="n">_notional</span><span class="o">.</span><span class="n">get_amount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">cashflows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">spec</span><span class="o">.</span><span class="n">_start_date</span><span class="p">,</span> <span class="n">not_init</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+            <span class="n">rem_amount</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">_notional</span><span class="o">.</span><span class="n">get_amount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">spec</span><span class="o">.</span><span class="n">_amortization_scheme</span><span class="o">.</span><span class="n">get_total_amortization</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">rem_amount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">cashflows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="n">roll_day</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">_maturity_date</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">_calendar</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">_business_day_convention</span><span class="p">,</span> <span class="n">settle_days</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">_payment_days</span><span class="p">),</span>
+                        <span class="n">rem_amount</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+        <span class="n">cashflows</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cashflows</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cashflows</span></div>
+
+
+    <span class="c1"># ToDo: consider rate/index period shorter than coupon period</span>
+<div class="viewcode-block" id="DeterministicCashflowPricer.get_float_rate">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_float_rate">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_float_rate</span><span class="p">(</span>
+        <span class="n">specification</span><span class="p">:</span> <span class="n">DeterministicCashflowBondSpecification</span><span class="p">,</span>
+        <span class="n">val_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">d1</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">d2</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">curve</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DiscountCurve</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the floating rate for a given period.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            specification (DeterministicCashflowBondSpecification): The bond or instrument specification containing index, margin, calendar, and conventions.</span>
+<span class="sd">            val_date (datetime.date or datetime, optional): The valuation date as of which forward rates are calculated. Defaults to None.</span>
+<span class="sd">            d1 (datetime.date or datetime, optional): The start date of the interest period. Defaults to None.</span>
+<span class="sd">            d2 (datetime.date or datetime, optional): The end date of the interest period. Defaults to None.</span>
+<span class="sd">            curve (DiscountCurve, optional): The forward curve used for forward rate calculation. Defaults to None.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The floating rate for the given period, including margin.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">specification</span><span class="o">.</span><span class="n">_ir_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># For the first period, check if we have a fixing rate or if d1 is before curve date</span>
+            <span class="n">spot_days</span> <span class="o">=</span> <span class="n">InterestRateIndex</span><span class="p">(</span><span class="n">specification</span><span class="o">.</span><span class="n">_ir_index</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">spot_days</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">spot_days</span> <span class="o">=</span> <span class="n">specification</span><span class="o">.</span><span class="n">_spot_days</span>
+        <span class="n">fixing_date</span> <span class="o">=</span> <span class="n">calc_start_day</span><span class="p">(</span>
+            <span class="n">d1</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">spot_days</span><span class="si">}</span><span class="s2">D&quot;</span><span class="p">,</span>
+            <span class="n">business_day_convention</span><span class="o">=</span><span class="n">specification</span><span class="o">.</span><span class="n">_business_day_convention</span><span class="p">,</span>
+            <span class="n">calendar</span><span class="o">=</span><span class="n">specification</span><span class="o">.</span><span class="n">_calendar</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">refdate</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">curve</span><span class="p">,</span> <span class="s2">&quot;refdate&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">curve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="c1"># guard against calc_start_day returning None (invalid inputs) or refdate being None</span>
+        <span class="k">if</span> <span class="n">fixing_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">refdate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">fixing_date</span> <span class="o">&lt;=</span> <span class="n">refdate</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">specification</span><span class="o">.</span><span class="n">_ir_index</span><span class="p">)</span>
+                <span class="n">fix_name</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">InterestRateIndex</span><span class="p">(</span><span class="n">specification</span><span class="o">.</span><span class="n">_ir_index</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">name</span>
+                    <span class="k">if</span> <span class="n">specification</span><span class="o">.</span><span class="n">_ir_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">InterestRateIndex</span><span class="p">(</span><span class="n">specification</span><span class="o">.</span><span class="n">_ir_index</span><span class="p">),</span> <span class="n">InterestRateIndex</span><span class="p">)</span>
+                    <span class="k">else</span> <span class="n">_period_to_string</span><span class="p">(</span><span class="n">specification</span><span class="o">.</span><span class="n">_frequency</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">rate</span> <span class="o">=</span> <span class="n">specification</span><span class="o">.</span><span class="n">_fixings</span><span class="o">.</span><span class="n">get_fixing</span><span class="p">(</span><span class="n">fix_name</span><span class="p">,</span> <span class="n">fixing_date</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No fixing found for </span><span class="si">{</span><span class="n">specification</span><span class="o">.</span><span class="n">_index</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="n">fixing_date</span><span class="si">}</span><span class="s2">. Using 0.0 as fixed rate. Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">rate</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># For other periods use forward rate from curve</span>
+            <span class="n">rate</span> <span class="o">=</span> <span class="n">curve</span><span class="o">.</span><span class="n">value_fwd_rate</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">)</span> <span class="k">if</span> <span class="n">curve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">0.0</span>
+        <span class="n">rate</span> <span class="o">+=</span> <span class="n">specification</span><span class="o">.</span><span class="n">_margin</span> <span class="o">/</span> <span class="mf">10000.0</span>  <span class="c1"># add margin</span>
+        <span class="k">return</span> <span class="n">rate</span></div>
+
+
+<div class="viewcode-block" id="DeterministicCashflowPricer.get_accrued_interest">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_accrued_interest">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_accrued_interest</span><span class="p">(</span>
+        <span class="n">specification</span><span class="p">:</span> <span class="n">DeterministicCashflowBondSpecification</span><span class="p">,</span>
+        <span class="n">trade_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fwd_curve</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DiscountCurve</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the accrued interest for a given instrument specification.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            specification (DeterministicCashflowBondSpecification): The bond specification.</span>
+<span class="sd">            val_date (datetime.date or datetime, optional): The valuation date. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The accrued interest.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">trade_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;trade_date must be provided.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">specification</span><span class="o">.</span><span class="n">_coupon_type</span> <span class="o">==</span> <span class="s2">&quot;zero&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># schedule = specification.get_schedule()</span>
+            <span class="c1"># # schedule for payment periods rolled out</span>
+            <span class="c1"># dates = schedule._roll_out(from_=specification._start_date, to_=specification._end_date, term=_term_to_period(specification._frequency))</span>
+            <span class="n">dates</span> <span class="o">=</span> <span class="n">specification</span><span class="o">.</span><span class="n">accrual_dates</span>
+            <span class="n">dates</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">dates</span><span class="p">)</span>
+            <span class="c1"># find the last coupon date before or on trade_date</span>
+            <span class="n">last_coupon_date</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">next_coupon_date</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">d</span> <span class="o">&lt;=</span> <span class="n">trade_date</span><span class="p">:</span>
+                    <span class="n">last_coupon_date</span> <span class="o">=</span> <span class="n">d</span>
+                <span class="k">elif</span> <span class="n">d</span> <span class="o">&gt;</span> <span class="n">trade_date</span> <span class="ow">and</span> <span class="n">next_coupon_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">next_coupon_date</span> <span class="o">=</span> <span class="n">d</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">last_coupon_date</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">next_coupon_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mf">0.0</span>  <span class="c1"># No accrued interest if trade_date is before first coupon or after last coupon</span>
+
+            <span class="n">dcc</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="n">specification</span><span class="o">.</span><span class="n">day_count_convention</span><span class="p">)</span>
+            <span class="c1"># Calculate the fraction of the coupon period that has accrued</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">specification</span><span class="p">,</span> <span class="n">FloatingRateBondSpecification</span><span class="p">):</span>
+                <span class="n">accrual_fraction</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">last_coupon_date</span><span class="p">,</span> <span class="n">trade_date</span><span class="p">,</span> <span class="n">specification</span><span class="o">.</span><span class="n">dates</span><span class="p">,</span> <span class="n">specification</span><span class="o">.</span><span class="n">get_nr_annual_payments</span><span class="p">())</span> <span class="o">/</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span>
+                    <span class="n">last_coupon_date</span><span class="p">,</span> <span class="n">next_coupon_date</span><span class="p">,</span> <span class="n">specification</span><span class="o">.</span><span class="n">dates</span><span class="p">,</span> <span class="n">specification</span><span class="o">.</span><span class="n">get_nr_annual_payments</span><span class="p">()</span>
+                <span class="p">)</span>
+                <span class="n">yf</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">last_coupon_date</span><span class="p">,</span> <span class="n">next_coupon_date</span><span class="p">,</span> <span class="n">specification</span><span class="o">.</span><span class="n">dates</span><span class="p">,</span> <span class="n">specification</span><span class="o">.</span><span class="n">get_nr_annual_payments</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">accrual_fraction</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">last_coupon_date</span><span class="p">,</span> <span class="n">trade_date</span><span class="p">)</span> <span class="o">/</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">last_coupon_date</span><span class="p">,</span> <span class="n">next_coupon_date</span><span class="p">)</span>
+                <span class="n">yf</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">last_coupon_date</span><span class="p">,</span> <span class="n">next_coupon_date</span><span class="p">)</span>
+            <span class="c1"># Calculate the accrued interest</span>
+            <span class="k">if</span> <span class="n">specification</span><span class="o">.</span><span class="n">_coupon_type</span> <span class="o">==</span> <span class="s2">&quot;float&quot;</span><span class="p">:</span>
+                <span class="n">rate</span> <span class="o">=</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_float_rate</span><span class="p">(</span><span class="n">specification</span><span class="p">,</span> <span class="n">trade_date</span><span class="p">,</span> <span class="n">last_coupon_date</span><span class="p">,</span> <span class="n">next_coupon_date</span><span class="p">,</span> <span class="n">fwd_curve</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rate</span> <span class="o">=</span> <span class="n">specification</span><span class="o">.</span><span class="n">_coupon</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Fraction: &quot;</span><span class="p">,</span>
+                <span class="n">accrual_fraction</span><span class="p">,</span>
+                <span class="s2">&quot; YF: &quot;</span><span class="p">,</span>
+                <span class="n">yf</span><span class="p">,</span>
+                <span class="s2">&quot;Trade date: &quot;</span><span class="p">,</span>
+                <span class="n">trade_date</span><span class="p">,</span>
+                <span class="s2">&quot; Last coupon: &quot;</span><span class="p">,</span>
+                <span class="n">last_coupon_date</span><span class="p">,</span>
+                <span class="s2">&quot; Next coupon: &quot;</span><span class="p">,</span>
+                <span class="n">next_coupon_date</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">accrued_interest</span> <span class="o">=</span> <span class="n">specification</span><span class="o">.</span><span class="n">_notional</span><span class="o">.</span><span class="n">get_amount_per_date</span><span class="p">(</span><span class="n">trade_date</span><span class="p">)</span> <span class="o">*</span> <span class="n">rate</span> <span class="o">*</span> <span class="n">accrual_fraction</span> <span class="o">*</span> <span class="n">yf</span>
+            <span class="k">return</span> <span class="n">accrued_interest</span></div>
+
+
+<div class="viewcode-block" id="DeterministicCashflowPricer.pv_cashflows">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.pv_cashflows">[docs]</a>
+    <span class="k">def</span> <span class="nf">pv_cashflows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the present value of the cashflows.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The present value of the cashflows.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_pv_cashflows</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_discount_curve</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fwd_curve</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DeterministicCashflowPricer.get_pv_cashflows">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_pv_cashflows">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_pv_cashflows</span><span class="p">(</span>
+        <span class="n">val_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+        <span class="n">specification</span><span class="p">:</span> <span class="n">DeterministicCashflowBondSpecification</span><span class="p">,</span>
+        <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">fwd_curve</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DiscountCurve</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cashflows</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Discount and sum cashflows to obtain present value.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date (date | datetime): Valuation date used for discounting.</span>
+<span class="sd">            specification (DeterministicCashflowBondSpecification): Instrument specification.</span>
+<span class="sd">            discount_curve (DiscountCurve): Curve used to obtain discount factors.</span>
+<span class="sd">            fwd_curve (DiscountCurve, optional): Forward curve used for floating-rate cashflows.</span>
+<span class="sd">            cashflows (List[(date, amount)], optional): Precomputed cashflows; if not</span>
+<span class="sd">                provided they will be generated from the specification.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Present value obtained by discounting future cashflows occurring after val_date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># logger.info(&#39;Start computing pv cashflows for bond &#39; + specification.obj_id)</span>
+
+        <span class="k">if</span> <span class="n">cashflows</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cashflows</span> <span class="o">=</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_expected_cashflows</span><span class="p">(</span>
+                <span class="n">specification</span><span class="p">,</span> <span class="n">val_date</span><span class="o">=</span><span class="n">val_date</span><span class="p">,</span> <span class="n">fwd_curve</span><span class="o">=</span><span class="n">fwd_curve</span>
+            <span class="p">)</span>  <span class="c1"># get only cashflows</span>
+
+        <span class="n">pv_cashflows</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cashflows</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">val_date</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Cashflow &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;, date: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;, df: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
+                <span class="n">pv_cashflows</span> <span class="o">+=</span> <span class="n">df</span> <span class="o">*</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># logger.info(&#39;Finished computing pv cashflows for bond &#39; + specification.obj_id + &#39;, pv_cashflows: &#39;+ str(pv_cashflows) )</span>
+        <span class="k">return</span> <span class="n">pv_cashflows</span></div>
+
+
+<div class="viewcode-block" id="DeterministicCashflowPricer.get_dirty_price">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_dirty_price">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_dirty_price</span><span class="p">(</span>
+        <span class="n">val_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+        <span class="n">specification</span><span class="p">:</span> <span class="n">DeterministicCashflowBondSpecification</span><span class="p">,</span>
+        <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">fwd_curve</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DiscountCurve</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the dirty price (present value including accrued interest) of a bond.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date (date | datetime): Valuation date.</span>
+<span class="sd">            specification (DeterministicCashflowBondSpecification): Instrument specification.</span>
+<span class="sd">            discount_curve (DiscountCurve): Curve used for discounting.</span>
+<span class="sd">            fwd_curve (DiscountCurve, optional): Forward curve for floating-rate cashflows.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Dirty price (PV of future cashflows after val_date).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Start computing dirty price for bond &quot;</span> <span class="o">+</span> <span class="n">specification</span><span class="o">.</span><span class="n">obj_id</span><span class="p">)</span>
+        <span class="n">pv_cashflows</span> <span class="o">=</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_pv_cashflows</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">specification</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">fwd_curve</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Finished computing dirty price for bond &quot;</span> <span class="o">+</span> <span class="n">specification</span><span class="o">.</span><span class="n">obj_id</span> <span class="o">+</span> <span class="s2">&quot;, dirty_price: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">pv_cashflows</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">pv_cashflows</span></div>
+
+
+<div class="viewcode-block" id="DeterministicCashflowPricer.dirty_price">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.dirty_price">[docs]</a>
+    <span class="k">def</span> <span class="nf">dirty_price</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the dirty price of the bond.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The dirty price of the bond.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_dirty_price</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_discount_curve</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fwd_curve</span><span class="p">)</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">clean_price</span><span class="p">(</span>
+        <span class="n">val_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+        <span class="n">specification</span><span class="p">:</span> <span class="n">DeterministicCashflowBondSpecification</span><span class="p">,</span>
+        <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">fwd_curve</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DiscountCurve</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the clean price of a bond (dirty price minus accrued interest).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date (date | datetime): Valuation date.</span>
+<span class="sd">            specification (DeterministicCashflowBondSpecification): Instrument specification.</span>
+<span class="sd">            discount_curve (DiscountCurve): Discount curve used for discounting.</span>
+<span class="sd">            fwd_curve (DiscountCurve, optional): Forward curve for floating-rate cashflows.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Clean price (dirty price less accrued interest).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dirty_price</span> <span class="o">=</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_dirty_price</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">specification</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">fwd_curve</span><span class="p">)</span>
+        <span class="n">accrued_interest</span> <span class="o">=</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_accrued_interest</span><span class="p">(</span><span class="n">specification</span><span class="p">,</span> <span class="n">val_date</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dirty_price</span> <span class="o">-</span> <span class="n">accrued_interest</span>
+
+<div class="viewcode-block" id="DeterministicCashflowPricer.clean_price">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.clean_price">[docs]</a>
+    <span class="k">def</span> <span class="nf">clean_price</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the clean price of the bond.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The clean price of the bond.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dirty_price</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">accrued_interest</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="DeterministicCashflowPricer.compute_yield">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.compute_yield">[docs]</a>
+    <span class="k">def</span> <span class="nf">compute_yield</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_dirty_price</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the yield of the bond.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_dirty_price (float): The target dirty price.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The computed yield.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_compute_yield</span><span class="p">(</span><span class="n">target_dirty_price</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec</span><span class="p">,</span> <span class="n">cashflows</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cashflows</span><span class="p">)</span></div>
+
+
+    <span class="c1"># TODO: add accrued interest</span>
+<div class="viewcode-block" id="DeterministicCashflowPricer.get_compute_yield">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_compute_yield">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_compute_yield</span><span class="p">(</span>
+        <span class="n">target_dirty_price</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">val_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+        <span class="n">specification</span><span class="p">:</span> <span class="n">DeterministicCashflowBondSpecification</span><span class="p">,</span>
+        <span class="n">cashflows</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fwd_curve</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DiscountCurve</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Start computing bond z-spread for bond &quot;</span> <span class="o">+</span> <span class="n">specification</span><span class="o">.</span><span class="n">obj_id</span> <span class="o">+</span> <span class="s2">&quot;, dirty price: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">target_dirty_price</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">cashflows</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cashflows</span> <span class="o">=</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_expected_cashflows</span><span class="p">(</span><span class="n">specification</span><span class="p">,</span> <span class="n">val_date</span><span class="p">,</span> <span class="n">fwd_curve</span><span class="o">=</span><span class="n">fwd_curve</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">target_function</span><span class="p">(</span><span class="n">r</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+            <span class="n">dc</span> <span class="o">=</span> <span class="n">ConstantRate</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+            <span class="n">price</span> <span class="o">=</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_pv_cashflows</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">specification</span><span class="p">,</span> <span class="n">dc</span><span class="p">,</span> <span class="n">cashflows</span><span class="o">=</span><span class="n">cashflows</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Target function called with r: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;, price: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">price</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;, target_dirty_price: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">target_dirty_price</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">price</span> <span class="o">-</span> <span class="n">target_dirty_price</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">brentq</span><span class="p">(</span><span class="n">target_function</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">full_output</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Finished computing bond z-spread&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="DeterministicCashflowPricer.get_z_spread">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_z_spread">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_z_spread</span><span class="p">(</span>
+        <span class="n">target_dirty_price</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">val_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+        <span class="n">specification</span><span class="p">:</span> <span class="n">DeterministicCashflowBondSpecification</span><span class="p">,</span>
+        <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">cashflows</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fwd_curve</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DiscountCurve</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Start computing z-spread for bond &quot;</span> <span class="o">+</span> <span class="n">specification</span><span class="o">.</span><span class="n">obj_id</span> <span class="o">+</span> <span class="s2">&quot;, dirty price: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">target_dirty_price</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">cashflows</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">fwd_curve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cashflows</span> <span class="o">=</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_expected_cashflows</span><span class="p">(</span><span class="n">specification</span><span class="p">,</span> <span class="n">val_date</span><span class="p">,</span> <span class="n">fwd_curve</span><span class="o">=</span><span class="n">fwd_curve</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;To compute z-spread with floating rate bonds, cashflows, or fwd_curve must be provided to calculate cashflows.&quot;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">target_function</span><span class="p">(</span><span class="n">r</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+            <span class="n">dc</span> <span class="o">=</span> <span class="n">DiscountCurveComposition</span><span class="p">(</span><span class="n">discount_curve</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+            <span class="n">price</span> <span class="o">=</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_pv_cashflows</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">specification</span><span class="p">,</span> <span class="n">dc</span><span class="p">,</span> <span class="n">cashflows</span><span class="o">=</span><span class="n">cashflows</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Target function called with r: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;, price: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">price</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;, target_dirty_price: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">target_dirty_price</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">price</span> <span class="o">-</span> <span class="n">target_dirty_price</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">brentq</span><span class="p">(</span><span class="n">target_function</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">full_output</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Finished computing z-spread.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="DeterministicCashflowPricer.z_spread">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.z_spread">[docs]</a>
+    <span class="k">def</span> <span class="nf">z_spread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_dirty_price</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the z-spread of the bond.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_dirty_price (float): The target dirty price.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The computed z-spread.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_z_spread</span><span class="p">(</span><span class="n">target_dirty_price</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_discount_curve</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cashflows</span><span class="p">)</span></div>
+
+
+    <span class="c1">############################# PRICER ONLY METHODS BELOW #####################################</span>
+
+<div class="viewcode-block" id="DeterministicCashflowPricer.macaulay_duration">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.macaulay_duration">[docs]</a>
+    <span class="k">def</span> <span class="nf">macaulay_duration</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the Macaulay duration for the instrument.</span>
+
+<span class="sd">        Macaulay duration is the weighted average time until cashflows are received,</span>
+<span class="sd">        weighted by the present value of the cashflows.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Macaulay duration expressed in the same time units used by day count.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Start computing macaulay duration for bond &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec</span><span class="o">.</span><span class="n">obj_id</span><span class="p">)</span>
+        <span class="n">cashflows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected_cashflows</span><span class="p">()</span>
+        <span class="n">pv_cashflows</span> <span class="o">=</span> <span class="n">DeterministicCashflowPricer</span><span class="o">.</span><span class="n">get_pv_cashflows</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_discount_curve</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fwd_curve</span><span class="p">,</span> <span class="n">cashflows</span><span class="o">=</span><span class="n">cashflows</span>
+        <span class="p">)</span>
+        <span class="c1"># print(pv_cashflows)</span>
+        <span class="n">macaulay_duration</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">dcc</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spec</span><span class="o">.</span><span class="n">day_count_convention</span><span class="p">)</span>  <span class="c1"># , self._spec._get_coupon_frequency if self._spec._coupon_type != &quot;zero&quot; else None)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cashflows</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec</span><span class="o">.</span><span class="n">dates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec</span><span class="o">.</span><span class="n">nr_annual_payments</span><span class="p">)</span>
+                <span class="n">macaulay_duration</span> <span class="o">+=</span> <span class="n">t</span> <span class="o">*</span> <span class="n">df</span> <span class="o">*</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">pv_cashflows</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">macaulay_duration</span> <span class="o">/=</span> <span class="n">pv_cashflows</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Finished computing macaulay duration for bond &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec</span><span class="o">.</span><span class="n">obj_id</span> <span class="o">+</span> <span class="s2">&quot;, macaulay_duration: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">macaulay_duration</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">macaulay_duration</span></div>
+
+
+<div class="viewcode-block" id="DeterministicCashflowPricer.modified_duration">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.modified_duration">[docs]</a>
+    <span class="k">def</span> <span class="nf">modified_duration</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">target_dirty_price</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the modified duration for the instrument.</span>
+
+<span class="sd">        Modified duration approximates the percentage price change for a unit change</span>
+<span class="sd">        in yield and is computed from the Macaulay duration and yield.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_dirty_price (float, optional): Dirty price used for yield inversion.</span>
+<span class="sd">                Defaults to 100.0.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Modified duration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Start computing modified duration for bond &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec</span><span class="o">.</span><span class="n">obj_id</span><span class="p">)</span>
+        <span class="n">macaulay_duration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">macaulay_duration</span><span class="p">()</span>
+        <span class="n">yld</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_yield</span><span class="p">(</span><span class="n">target_dirty_price</span><span class="p">)</span>
+        <span class="n">modified_duration</span> <span class="o">=</span> <span class="n">macaulay_duration</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">yld</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Finished computing modified duration for bond &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec</span><span class="o">.</span><span class="n">obj_id</span> <span class="o">+</span> <span class="s2">&quot;, modified_duration: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">modified_duration</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">modified_duration</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

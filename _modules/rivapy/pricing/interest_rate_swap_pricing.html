@@ -1,0 +1,1220 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rivapy.pricing.interest_rate_swap_pricing &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=d2ebc91c" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.svg"/>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../search.html">Search Page</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rivapy.pricing.interest_rate_swap_pricing</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rivapy.pricing.interest_rate_swap_pricing</h1><div class="highlight"><pre>
+<span></span><span class="c1"># 2025.07.24 Hans Nguyen</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">brentq</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.interfaces</span> <span class="kn">import</span> <span class="n">BaseDatedCurve</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.bond_specifications</span> <span class="kn">import</span> <span class="n">DeterministicCashflowBondSpecification</span>
+<span class="kn">from</span> <span class="nn">rivapy.marketdata</span> <span class="kn">import</span> <span class="n">DiscountCurveParametrized</span><span class="p">,</span> <span class="n">ConstantRate</span><span class="p">,</span> <span class="n">DiscountCurve</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing.pricing_request</span> <span class="kn">import</span> <span class="n">PricingRequest</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing._logger</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.deposit_specifications</span> <span class="kn">import</span> <span class="n">DepositSpecification</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.fra_specifications</span> <span class="kn">import</span> <span class="n">ForwardRateAgreementSpecification</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.ir_swap_specification</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">IrFixedLegSpecification</span><span class="p">,</span>
+    <span class="n">IrFloatLegSpecification</span><span class="p">,</span>
+    <span class="n">IrOISLegSpecification</span><span class="p">,</span>
+    <span class="n">InterestRateSwapSpecification</span><span class="p">,</span>
+    <span class="n">IrSwapLegSpecification</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># from rivapy.pricing.pricing_data import InterestRateSwapPricingData, InterestRateSwapLegPricingData, InterestRateSwapFloatLegPricingData</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing.pricing_data</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">InterestRateSwapPricingData_rivapy</span><span class="p">,</span>
+    <span class="n">InterestRateSwapLegPricingData_rivapy</span><span class="p">,</span>
+    <span class="n">InterestRateSwapFloatLegPricingData_rivapy</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing.pricing_request</span> <span class="kn">import</span> <span class="n">InterestRateSwapPricingRequest</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span> <span class="k">as</span> <span class="n">_List</span><span class="p">,</span> <span class="n">Union</span> <span class="k">as</span> <span class="n">_Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">DayCounter</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.components</span> <span class="kn">import</span> <span class="n">CashFlow</span>
+<span class="kn">from</span> <span class="nn">rivapy.marketdata.fixing_table</span> <span class="kn">import</span> <span class="n">FixingTable</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.components</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="kn">from</span> <span class="nn">rivapy.tools.enums</span> <span class="kn">import</span> <span class="n">IrLegType</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools._validators</span> <span class="kn">import</span> <span class="n">print_member_values</span>
+
+
+<div class="viewcode-block" id="InterestRateSwapPricer">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer">[docs]</a>
+<span class="k">class</span> <span class="nc">InterestRateSwapPricer</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">val_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">spec</span><span class="p">:</span> <span class="n">InterestRateSwapSpecification</span><span class="p">,</span>
+        <span class="n">discount_curve_pay_leg</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">discount_curve_receive_leg</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">fixing_curve_pay_leg</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">fixing_curve_receive_leg</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">fx_fwd_curve_pay_leg</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>  <span class="c1"># TODO FxForwardCurve ... do we need anotheer class</span>
+        <span class="n">fx_fwd_curve_receive_leg</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">pricing_request</span><span class="p">:</span> <span class="n">InterestRateSwapPricingRequest</span><span class="p">,</span>
+        <span class="n">pricing_param</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># mutable argument should be defaulted to none</span>
+        <span class="n">fixing_map</span><span class="p">:</span> <span class="n">FixingTable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fx_pay_leg</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">fx_receive_leg</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the Interest Rate Swap Pricer with all required curves, specifications, and parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date (date | datetime): The valuation date for pricing the swap. This is the anchor date for all time-dependent calculations.</span>
+<span class="sd">            spec (InterestRateSwapSpecification): The swap&#39;s structural details (legs, notionals, schedules, etc.).</span>
+<span class="sd">            discount_curve_pay_leg (DiscountCurve): Discount curve used to present value the pay leg.</span>
+<span class="sd">            discount_curve_receive_leg (DiscountCurve): Discount curve used to present value the receive leg.</span>
+<span class="sd">            fixing_curve_pay_leg (DiscountCurve): Curve used to forecast forward rates for the pay leg (typically for floating legs).</span>
+<span class="sd">            fixing_curve_receive_leg (DiscountCurve): Curve used to forecast forward rates for the receive leg.</span>
+<span class="sd">            fx_fwd_curve_pay_leg (DiscountCurve): FX forward curve to convert the pay leg currency to the pricing currency (if applicable).</span>
+<span class="sd">            fx_fwd_curve_receive_leg (DiscountCurve): FX forward curve to convert the receive leg currency to the pricing currency.</span>
+<span class="sd">            pricing_request (InterestRateSwapPricingRequest): Contains the pricing type, metrics requested (e.g., PV), and other flags. Not yet used properly</span>
+<span class="sd">            pricing_param (Dict, optional): Additional pricing parameters, such as day count conventions, compounding rules, etc.</span>
+<span class="sd">            fixing_map (FixingTable, optional): Historical fixings for floating legs that reference past periods.</span>
+<span class="sd">            fx_pay_leg (float, optional): FX rate multiplier to convert the pay leg currency to base. Default is 1.0 (i.e., same currency).</span>
+<span class="sd">            fx_receive_leg (float, optional): FX rate multiplier to convert the receive leg currency to base. Default is 1.0.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span> <span class="o">=</span> <span class="n">val_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spec</span> <span class="o">=</span> <span class="n">spec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pay_leg</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">pay_leg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_receive_leg</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">receive_leg</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_discount_curve_pay_leg</span> <span class="o">=</span> <span class="n">discount_curve_pay_leg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_discount_curve_receive_leg</span> <span class="o">=</span> <span class="n">discount_curve_receive_leg</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixing_curve_pay_leg</span> <span class="o">=</span> <span class="n">fixing_curve_pay_leg</span>  <span class="c1"># const std::shared_ptr&lt;const DiscountCurve&gt;&amp; fixingCurvePayLeg,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixing_curve_receive_leg</span> <span class="o">=</span> <span class="n">fixing_curve_receive_leg</span>  <span class="c1"># const std::shared_ptr&lt;const DiscountCurve&gt;&amp; fixingCurveReceiveLeg,</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fx_fwd_curve_pay_leg</span> <span class="o">=</span> <span class="n">fx_fwd_curve_pay_leg</span>  <span class="c1"># const std::shared_ptr&lt;const FxForwardCurve&gt;&amp; fxForwardCurvePayLeg,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fx_fwd_curve_receive_leg</span> <span class="o">=</span> <span class="n">fx_fwd_curve_receive_leg</span>  <span class="c1"># const std::shared_ptr&lt;const FxForwardCurve&gt;&amp; fxForwardCurveReceiveLeg,</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pricing_request</span> <span class="o">=</span> <span class="n">pricing_request</span>  <span class="c1"># const PricingRequest&amp; pricingRequest,</span>
+        <span class="k">if</span> <span class="n">pricing_param</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pricing_param</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pricing_param</span> <span class="o">=</span> <span class="n">pricing_param</span>  <span class="c1"># std::shared_ptr&lt;const InterestRateSwapPricingParameter&gt; pricingParam,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixing_map</span> <span class="o">=</span> <span class="n">fixing_map</span>  <span class="c1"># std::shared_ptr&lt;const FixingTable&gt; fixingMap,</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fx_pay_leg</span> <span class="o">=</span> <span class="n">fx_pay_leg</span>  <span class="c1"># double fxPayLeg,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fx_receive_leg</span> <span class="o">=</span> <span class="n">fx_receive_leg</span>  <span class="c1"># double fxReceiveLeg)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pricing_param</span> <span class="o">=</span> <span class="n">pricing_param</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_populate_cashflows_fix</span><span class="p">(</span>
+        <span class="n">val_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">fixed_leg_spec</span><span class="p">:</span> <span class="n">IrFixedLegSpecification</span><span class="p">,</span>
+        <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="c1"># forward_curve: DiscountCurve,</span>
+        <span class="n">fx_forward_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">fixing_map</span><span class="p">:</span> <span class="n">FixingTable</span><span class="p">,</span>
+        <span class="n">set_rate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">desired_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">CashFlow</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a list of CashFlow objects, each with the cashflow amount for the given accrual period</span>
+<span class="sd">        and additional information added to describe the cashflow. For the fixed leg of a swap.</span>
+<span class="sd">        If desired_rate = 1.0, this is to calculate the annuity, for the calculation of fair swap rate.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date (_Union[date, datetime]): valuation date</span>
+<span class="sd">            fixed_leg_spec (IrFixedLegSpecification): specification of the fixed leg of the IR Swap</span>
+<span class="sd">            discount_curve (DiscountCurve): The discount curve used for discounting to calculated the present value</span>
+<span class="sd">            fx_forward_curve (DiscountCurve): fxCurve used for currency conversion for applicable swap (not yet implemented)</span>
+<span class="sd">            fixing_map (FixingTable): Fixing map of historial values (not yet implemented)</span>
+<span class="sd">            fixing_grace_period (float):</span>
+<span class="sd">            set_rate (bool, optional): Flag to manually set a Fixed rate. Defaults to False.</span>
+<span class="sd">            spread (float, optional): Desired rate value. Defaults to 1 (which then calculates annuity).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _List[CashFlow]: list of CashFlow objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># overwrite fixed interest if desired</span>
+        <span class="n">fixed_rate</span> <span class="o">=</span> <span class="n">fixed_leg_spec</span><span class="o">.</span><span class="n">fixed_rate</span>
+        <span class="k">if</span> <span class="n">set_rate</span><span class="p">:</span>
+            <span class="n">fixed_rate</span> <span class="o">=</span> <span class="n">desired_rate</span>  <span class="c1"># if desired_rate = 1.0, this is to calculate the annuity, for the calculation of fair swap rate.</span>
+
+        <span class="c1"># init output storage object</span>
+        <span class="n">entries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">dcc</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">daycounter</span><span class="p">)</span>
+
+        <span class="c1"># get projected notionals</span>
+        <span class="n">leg_notional_structure</span> <span class="o">=</span> <span class="n">fixed_leg_spec</span><span class="o">.</span><span class="n">get_NotionalStructure</span><span class="p">()</span>
+        <span class="c1"># define number of cashflows</span>
+        <span class="n">num_of_start_dates</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fixed_leg_spec</span><span class="o">.</span><span class="n">start_dates</span><span class="p">)</span>
+
+        <span class="n">notionals</span> <span class="o">=</span> <span class="n">get_projected_notionals</span><span class="p">(</span>
+            <span class="n">val_date</span><span class="o">=</span><span class="n">val_date</span><span class="p">,</span>
+            <span class="n">notional_structure</span><span class="o">=</span><span class="n">leg_notional_structure</span><span class="p">,</span>
+            <span class="n">start_period</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">end_period</span><span class="o">=</span><span class="n">num_of_start_dates</span><span class="p">,</span>
+            <span class="n">fx_forward_curve</span><span class="o">=</span><span class="n">fx_forward_curve</span><span class="p">,</span>
+            <span class="n">fixing_map</span><span class="o">=</span><span class="n">fixing_map</span><span class="p">,</span>
+        <span class="p">)</span>  <span class="c1"># output is a lsit of floats</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">notionals</span><span class="p">)):</span>
+
+            <span class="n">notional_start_date</span> <span class="o">=</span> <span class="n">leg_notional_structure</span><span class="o">.</span><span class="n">get_pay_date_start</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">notional_end_date</span> <span class="o">=</span> <span class="n">leg_notional_structure</span><span class="o">.</span><span class="n">get_pay_date_end</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">notional_start_date</span><span class="p">:</span>  <span class="c1"># i.e. not None or empty</span>
+                <span class="c1"># add an intional notional OUTFLOW or not</span>
+                <span class="n">notional_entry</span> <span class="o">=</span> <span class="n">CashFlow</span><span class="p">()</span>
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_date</span> <span class="o">=</span> <span class="n">notional_start_date</span>
+
+                <span class="k">if</span> <span class="n">val_date</span> <span class="o">&lt;=</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">:</span>  <span class="c1"># TODO recheck this business logic</span>
+                    <span class="n">notional_entry</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">=</span> <span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">notional_entry</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">notionals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">present_value</span> <span class="o">=</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">*</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">discount_factor</span>
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">notional_cashflow</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">notional_entry</span><span class="p">)</span>
+
+            <span class="n">entry</span> <span class="o">=</span> <span class="n">CashFlow</span><span class="p">()</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">start_date</span> <span class="o">=</span> <span class="n">fixed_leg_spec</span><span class="o">.</span><span class="n">start_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">end_date</span> <span class="o">=</span> <span class="n">fixed_leg_spec</span><span class="o">.</span><span class="n">end_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">pay_date</span> <span class="o">=</span> <span class="n">fixed_leg_spec</span><span class="o">.</span><span class="n">pay_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">notional</span> <span class="o">=</span> <span class="n">notionals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">rate</span> <span class="o">=</span> <span class="n">fixed_rate</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">interest_yf</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">start_date</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">end_date</span><span class="p">)</span>  <span class="c1"># gives back SINGLE yearfraction</span>
+            <span class="k">if</span> <span class="n">val_date</span> <span class="o">&lt;</span> <span class="n">entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">:</span>
+                <span class="n">entry</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">=</span> <span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">entry</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">interest_amount</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">notional</span> <span class="o">*</span> <span class="n">entry</span><span class="o">.</span><span class="n">rate</span> <span class="o">*</span> <span class="n">entry</span><span class="o">.</span><span class="n">interest_yf</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">interest_amount</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">present_value</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">*</span> <span class="n">entry</span><span class="o">.</span><span class="n">discount_factor</span>
+
+            <span class="c1"># setting main cashflow value</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">val</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">pay_amount</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">interest_cashflow</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+
+            <span class="c1"># # TEMPORARY TEST - inthe case of constant notional structure, but i want a final notional cashflow like a bond</span>
+            <span class="c1"># if i == len(notionals) - 1:  # this checks for the last entry</span>
+            <span class="c1">#     notional_end_date = entry.end_date</span>
+
+            <span class="k">if</span> <span class="n">notional_end_date</span><span class="p">:</span>
+                <span class="c1"># add an intional notional INFLOW or not</span>
+                <span class="n">notional_entry</span> <span class="o">=</span> <span class="n">CashFlow</span><span class="p">()</span>
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_date</span> <span class="o">=</span> <span class="n">notional_end_date</span>
+
+                <span class="k">if</span> <span class="n">val_date</span> <span class="o">&lt;=</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">:</span>  <span class="c1"># TODO recheck this business logic</span>
+                    <span class="n">notional_entry</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">=</span> <span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">notional_entry</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">=</span> <span class="n">notionals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># positive</span>
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">present_value</span> <span class="o">=</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">*</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">discount_factor</span>
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">notional_cashflow</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">notional_entry</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">entries</span>  <span class="c1"># a LIST of ENTRY objects, where each object has the PV</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_populate_cashflows_float</span><span class="p">(</span>
+        <span class="n">val_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">float_leg_spec</span><span class="p">:</span> <span class="n">IrFloatLegSpecification</span><span class="p">,</span>
+        <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">forward_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">fx_forward_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">fixing_map</span><span class="p">:</span> <span class="n">FixingTable</span><span class="p">,</span>
+        <span class="n">fixing_grace_period</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">set_spread</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">spread</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">CashFlow</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a list of CashFlow objects, each with the cashflow amount for the given accrual period</span>
+<span class="sd">        and additional information added to descrive the cashflow.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date (_Union[date, datetime]): valuation date</span>
+<span class="sd">            float_leg_spec (IrFloatLegSpecification): specification of the floating leg of the IR Swap</span>
+<span class="sd">            discount_curve (DiscountCurve): The discount curve used for discounting to calculated the present value</span>
+<span class="sd">            forward_curve (DiscountCurve): forward curve used to determine the forward rate to calculate the interest</span>
+<span class="sd">            fx_forward_curve (DiscountCurve): fxCurve used for currency conversion for applicable swap (not yet implemented)</span>
+<span class="sd">            fixing_map (FixingTable): Fixing map of historial values (not yet implemented)</span>
+<span class="sd">            fixing_grace_period (float):</span>
+<span class="sd">            setSpread (bool, optional): Flag to manually set a spread value. Defaults to False.</span>
+<span class="sd">            spread (float, optional): Desired spread value. Defaults to None.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: No underlying index ID found in fixing table</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _List[CashFlow]: list of CashFlow objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">fixing_grace_period_dt</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">fixing_grace_period</span><span class="p">)</span>
+
+        <span class="n">entries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">udl</span> <span class="o">=</span> <span class="n">float_leg_spec</span><span class="o">.</span><span class="n">udl_id</span>
+
+        <span class="c1"># swap day count convention</span>
+        <span class="n">dcc</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">daycounter</span><span class="p">)</span>
+        <span class="c1"># rate day count convention # note that the specification also has dcc but without the curve...</span>
+        <span class="n">rate_dcc</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="n">float_leg_spec</span><span class="o">.</span><span class="n">rate_day_count_convention</span><span class="p">)</span>
+
+        <span class="c1"># overwrite spread if desired</span>
+        <span class="n">leg_spread</span> <span class="o">=</span> <span class="n">float_leg_spec</span><span class="o">.</span><span class="n">spread</span>
+        <span class="k">if</span> <span class="n">set_spread</span><span class="p">:</span>
+            <span class="n">leg_spread</span> <span class="o">=</span> <span class="n">spread</span>
+
+        <span class="c1"># obtain the notionals and create a list of notionals to be used for each cashflow</span>
+        <span class="n">leg_notional_structure</span> <span class="o">=</span> <span class="n">float_leg_spec</span><span class="o">.</span><span class="n">get_NotionalStructure</span><span class="p">()</span>
+        <span class="c1"># define the number of cashflows</span>
+        <span class="n">num_of_start_dates</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">float_leg_spec</span><span class="o">.</span><span class="n">start_dates</span><span class="p">)</span>
+
+        <span class="n">notionals</span> <span class="o">=</span> <span class="n">get_projected_notionals</span><span class="p">(</span>
+            <span class="n">val_date</span><span class="o">=</span><span class="n">val_date</span><span class="p">,</span>
+            <span class="n">notional_structure</span><span class="o">=</span><span class="n">leg_notional_structure</span><span class="p">,</span>
+            <span class="n">start_period</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">end_period</span><span class="o">=</span><span class="n">num_of_start_dates</span><span class="p">,</span>
+            <span class="n">fx_forward_curve</span><span class="o">=</span><span class="n">fx_forward_curve</span><span class="p">,</span>
+            <span class="n">fixing_map</span><span class="o">=</span><span class="n">fixing_map</span><span class="p">,</span>
+        <span class="p">)</span>  <span class="c1"># output is a list of floats</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">notionals</span><span class="p">)):</span>
+
+            <span class="n">notional_start_date</span> <span class="o">=</span> <span class="n">leg_notional_structure</span><span class="o">.</span><span class="n">get_pay_date_start</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">notional_end_date</span> <span class="o">=</span> <span class="n">leg_notional_structure</span><span class="o">.</span><span class="n">get_pay_date_end</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">notional_start_date</span><span class="p">:</span>  <span class="c1"># i.e. not None or empty</span>
+                <span class="c1"># add an initial notional OUTFLOW or not</span>
+                <span class="n">notional_entry</span> <span class="o">=</span> <span class="n">CashFlow</span><span class="p">()</span>
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_date</span> <span class="o">=</span> <span class="n">notional_start_date</span>
+
+                <span class="k">if</span> <span class="n">val_date</span> <span class="o">&lt;=</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">:</span>  <span class="c1"># TODO recheck this business logic</span>
+                    <span class="n">notional_entry</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">=</span> <span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">notional_entry</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">notionals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">present_value</span> <span class="o">=</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">*</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">discount_factor</span>
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">notional_cashflow</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">notional_entry</span><span class="p">)</span>
+
+            <span class="n">entry</span> <span class="o">=</span> <span class="n">CashFlow</span><span class="p">()</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">start_date</span> <span class="o">=</span> <span class="n">float_leg_spec</span><span class="o">.</span><span class="n">start_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">end_date</span> <span class="o">=</span> <span class="n">float_leg_spec</span><span class="o">.</span><span class="n">end_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">pay_date</span> <span class="o">=</span> <span class="n">float_leg_spec</span><span class="o">.</span><span class="n">pay_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">notional</span> <span class="o">=</span> <span class="n">notionals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">interest_yf</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">start_date</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">end_date</span><span class="p">)</span>
+            <span class="n">rate_yf</span> <span class="o">=</span> <span class="n">rate_dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">float_leg_spec</span><span class="o">.</span><span class="n">rate_start_dates</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">float_leg_spec</span><span class="o">.</span><span class="n">rate_end_dates</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="c1"># # DEBUG TODO REMOVE</span>
+            <span class="c1"># print(f&quot;notional {i}:{notionals[i]} for {entry.end_date}&quot;)</span>
+            <span class="k">if</span> <span class="n">val_date</span> <span class="o">&lt;=</span> <span class="n">float_leg_spec</span><span class="o">.</span><span class="n">reset_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="c1"># print(&quot;swap calculating fwd_rate for floating leg&quot;)  # DEBUG 11.2025 TODO REMOVE</span>
+                <span class="c1"># print(f&quot;rate_start={float_leg_spec.rate_start_dates[i]}, rate_end={float_leg_spec.rate_end_dates[i]}&quot;)</span>
+                <span class="c1"># print(</span>
+                <span class="c1">#     f&quot;DF_start={forward_curve.value(val_date, float_leg_spec.rate_start_dates[i])}, DF_end={forward_curve.value(val_date, float_leg_spec.rate_end_dates[i])}&quot;</span>
+                <span class="c1"># )</span>
+                <span class="c1"># print(f&quot;value_fwd={forward_curve.value_fwd(val_date, float_leg_spec.rate_start_dates[i], float_leg_spec.rate_end_dates[i])}&quot;)</span>
+
+                <span class="n">fwd_rate</span> <span class="o">=</span> <span class="n">forward_curve</span><span class="o">.</span><span class="n">value_fwd</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">float_leg_spec</span><span class="o">.</span><span class="n">rate_start_dates</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">float_leg_spec</span><span class="o">.</span><span class="n">rate_end_dates</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">entry</span><span class="o">.</span><span class="n">rate</span> <span class="o">=</span> <span class="n">leg_spread</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">fwd_rate</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">/</span> <span class="n">rate_yf</span>
+                <span class="c1"># print(f&quot;leg_spread: {leg_spread} rate_yf: {rate_yf} fwd_rate: {fwd_rate} calculated rate: {entry.rate} &quot;)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># print(&quot;GOT JERE INSTEAD : val_date:&quot;, val_date, &quot; cf restet date:&quot;, float_leg_spec.reset_dates[i])</span>
+                <span class="n">fixing</span> <span class="o">=</span> <span class="n">fixing_map</span><span class="o">.</span><span class="n">get_fixing</span><span class="p">(</span><span class="n">udl</span><span class="p">,</span> <span class="n">float_leg_spec</span><span class="o">.</span><span class="n">reset_dates</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">fixing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># i.e. no fixing available</span>
+
+                    <span class="k">if</span> <span class="n">val_date</span> <span class="o">-</span> <span class="n">float_leg_spec</span><span class="o">.</span><span class="n">reset_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">fixing_grace_period_dt</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing fixing for </span><span class="si">{</span><span class="n">udl</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="n">float_leg_spec</span><span class="o">.</span><span class="n">reset_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># fix value of payment i in future based on current discount curve and a period between</span>
+                        <span class="c1"># valDate and valDate+length of original period (workaround if fixing is not available)</span>
+                        <span class="c1"># taken from pyvacon</span>
+                        <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">pay_date</span> <span class="o">&gt;=</span> <span class="n">val_date</span><span class="p">:</span>  <span class="c1"># TODO understand the logic</span>
+                            <span class="n">time_delta</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">end_date</span> <span class="o">-</span> <span class="n">entry</span><span class="o">.</span><span class="n">start_date</span>
+                            <span class="n">fixing</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">forward_curve</span><span class="o">.</span><span class="n">value_fwd</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">val_date</span><span class="p">,</span> <span class="n">val_date</span> <span class="o">+</span> <span class="n">time_delta</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">entry</span><span class="o">.</span><span class="n">interest_yf</span>
+
+                <span class="n">entry</span><span class="o">.</span><span class="n">rate</span> <span class="o">=</span> <span class="n">fixing</span> <span class="o">+</span> <span class="n">spread</span>
+
+            <span class="k">if</span> <span class="n">val_date</span> <span class="o">&lt;=</span> <span class="n">entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">:</span>
+                <span class="n">entry</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">=</span> <span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">entry</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+            <span class="c1"># given rate, notional, and yf, calc interest</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">interest_amount</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">notional</span> <span class="o">*</span> <span class="n">entry</span><span class="o">.</span><span class="n">rate</span> <span class="o">*</span> <span class="n">entry</span><span class="o">.</span><span class="n">interest_yf</span>
+
+            <span class="c1"># scale by forward rate #TODO # required for FX swap...</span>
+            <span class="k">if</span> <span class="n">val_date</span> <span class="o">&lt;=</span> <span class="n">entry</span><span class="o">.</span><span class="n">end_date</span><span class="p">:</span>
+                <span class="n">entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">interest_amount</span> <span class="o">/</span> <span class="n">forward_curve</span><span class="o">.</span><span class="n">value_fwd</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">end_date</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">pay_date</span> <span class="o">&gt;=</span> <span class="n">val_date</span><span class="p">:</span>
+                    <span class="n">entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">interest_amount</span> <span class="o">/</span> <span class="n">forward_curve</span><span class="o">.</span><span class="n">value_fwd</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">val_date</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+            <span class="c1"># given total cashflow amount - discount it</span>
+            <span class="c1"># #DEBUG TODO</span>
+            <span class="c1"># print(f&quot;forward rate: {entry.rate}&quot;)</span>
+            <span class="c1"># print(f&quot;delta_t: {entry.interest_yf}&quot;)</span>
+            <span class="c1"># print(f&quot;discount_factor: {entry.discount_factor}&quot;)</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">present_value</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">*</span> <span class="n">entry</span><span class="o">.</span><span class="n">discount_factor</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">interest_cashflow</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+
+            <span class="c1"># # TEMPORARY TEST - inthe case of constant notional structure, but i want a final notional cashflow like a bond</span>
+            <span class="c1"># if i == len(notionals) - 1:  # this checks for the last entry</span>
+            <span class="c1">#     notional_end_date = entry.end_date</span>
+
+            <span class="k">if</span> <span class="n">notional_end_date</span><span class="p">:</span>
+                <span class="c1"># add an intional notional INFLOW or not</span>
+                <span class="n">notional_entry</span> <span class="o">=</span> <span class="n">CashFlow</span><span class="p">()</span>
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_date</span> <span class="o">=</span> <span class="n">notional_end_date</span>
+
+                <span class="k">if</span> <span class="n">val_date</span> <span class="o">&lt;=</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">:</span>  <span class="c1"># TODO recheck this business logic</span>
+                    <span class="n">notional_entry</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">=</span> <span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">notional_entry</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">=</span> <span class="n">notionals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># positive</span>
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">present_value</span> <span class="o">=</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">*</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">discount_factor</span>
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">notional_cashflow</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">notional_entry</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">entries</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_populate_cashflows_ois</span><span class="p">(</span>
+        <span class="n">val_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">ois_leg_spec</span><span class="p">:</span> <span class="n">IrOISLegSpecification</span><span class="p">,</span>
+        <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">forward_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">fx_forward_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">fixing_map</span><span class="p">:</span> <span class="n">FixingTable</span><span class="p">,</span>
+        <span class="n">fixing_grace_period</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">set_spread</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">spread</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="n">CashFlow</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a list of CashFlow objects, each with the cashflow amount for the given accrual period</span>
+<span class="sd">        and additional information added to describe the cashflow. To be used for OIS leg specifications.</span>
+<span class="sd">        In this case, the daily rates are calculated and compounded to give the total interest for the accrual period.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date (_Union[date, datetime]): valuation date</span>
+<span class="sd">            float_leg_spec (IrFloatLegSpecification): specification of the floating leg of the IR Swap</span>
+<span class="sd">            discount_curve (DiscountCurve): The discount curve used for discounting to calculated the present value</span>
+<span class="sd">            forward_curve (DiscountCurve): forward curve used to determine the forward rate to calculate the interest</span>
+<span class="sd">            fx_forward_curve (DiscountCurve): fxCurve used for currency conversion for applicable swap (not yet implemented)</span>
+<span class="sd">            fixing_map (FixingTable): Fixing map of historial values (not yet implemented)</span>
+<span class="sd">            fixing_grace_period (float):</span>
+<span class="sd">            setSpread (bool, optional): Flag to manually set a spread value. Defaults to False.</span>
+<span class="sd">            spread (float, optional): Desired spread value. Defaults to None.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: No underlying index ID found in fixing table</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _List[CashFlow]: list of CashFlow objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">entries</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># output container to be returned</span>
+        <span class="n">udl</span> <span class="o">=</span> <span class="n">ois_leg_spec</span><span class="o">.</span><span class="n">udl_id</span>  <span class="c1"># get the ID of the underlying</span>
+
+        <span class="c1"># Parameters to consider</span>
+        <span class="c1"># const std::vector&lt;std::vector&lt;boost::posix_time::ptime&gt;&gt;&amp; dailyRateStartDates = oisLeg-&gt;getDailyRateStartDates();</span>
+        <span class="c1"># const std::vector&lt;std::vector&lt;boost::posix_time::ptime&gt;&gt;&amp; dailyRateEndDates = oisLeg-&gt;getDailyRateEndDates();</span>
+        <span class="c1"># const std::vector&lt;std::vector&lt;boost::posix_time::ptime&gt;&gt;&amp; dailyResetDates = oisLeg-&gt;getDailyResetDates();</span>
+        <span class="c1"># const std::vector&lt;boost::posix_time::ptime&gt;&amp; startDates = oisLeg-&gt;getStartDates();</span>
+        <span class="c1"># const std::vector&lt;boost::posix_time::ptime&gt;&amp; endDates = oisLeg-&gt;getEndDates();</span>
+        <span class="c1"># const std::vector&lt;boost::posix_time::ptime&gt;&amp; payDates = oisLeg-&gt;getPayDates();</span>
+        <span class="c1"># std::shared_ptr&lt;const NotionalStructure&gt; notionalStructure = leg-&gt;getNotionalStructure();</span>
+        <span class="c1"># std::vector&lt;double&gt; notionals(leg-&gt;getStartDates().size());</span>
+
+        <span class="c1"># swap day count convention</span>
+        <span class="n">dcc</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">daycounter</span><span class="p">)</span>
+        <span class="c1"># rate day count convention # note that the specification also has dcc but without the curve...</span>
+        <span class="n">rate_dcc</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="n">ois_leg_spec</span><span class="o">.</span><span class="n">rate_day_count_convention</span><span class="p">)</span>
+
+        <span class="c1"># overwrite spread if desired</span>
+        <span class="n">leg_spread</span> <span class="o">=</span> <span class="n">ois_leg_spec</span><span class="o">.</span><span class="n">spread</span>
+        <span class="k">if</span> <span class="n">set_spread</span><span class="p">:</span>
+            <span class="n">leg_spread</span> <span class="o">=</span> <span class="n">spread</span>
+
+        <span class="c1"># obtain the notionals and create a list of notionals to be used for each cashflow</span>
+        <span class="n">leg_notional_structure</span> <span class="o">=</span> <span class="n">ois_leg_spec</span><span class="o">.</span><span class="n">get_NotionalStructure</span><span class="p">()</span>
+        <span class="c1"># define the number of cashflows</span>
+        <span class="n">num_of_start_dates</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ois_leg_spec</span><span class="o">.</span><span class="n">start_dates</span><span class="p">)</span>
+
+        <span class="n">notionals</span> <span class="o">=</span> <span class="n">get_projected_notionals</span><span class="p">(</span>
+            <span class="n">val_date</span><span class="o">=</span><span class="n">val_date</span><span class="p">,</span>
+            <span class="n">notional_structure</span><span class="o">=</span><span class="n">leg_notional_structure</span><span class="p">,</span>
+            <span class="n">start_period</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">end_period</span><span class="o">=</span><span class="n">num_of_start_dates</span><span class="p">,</span>
+            <span class="n">fx_forward_curve</span><span class="o">=</span><span class="n">fx_forward_curve</span><span class="p">,</span>
+            <span class="n">fixing_map</span><span class="o">=</span><span class="n">fixing_map</span><span class="p">,</span>
+        <span class="p">)</span>  <span class="c1"># output is a list of floats</span>
+
+        <span class="c1"># obtained from ois_leg_spec # expect 2D structure</span>
+        <span class="n">daily_rate_start_dates</span> <span class="o">=</span> <span class="n">ois_leg_spec</span><span class="o">.</span><span class="n">rate_start_dates</span>
+        <span class="c1"># [[0],[1]] # i:start datet fo accrual period j:rate start days within the accrual period # e.g i:accrual over 3M, j:reset daily</span>
+        <span class="n">daily_rate_end_dates</span> <span class="o">=</span> <span class="n">ois_leg_spec</span><span class="o">.</span><span class="n">rate_end_dates</span>
+        <span class="n">daily_rate_reset_dates</span> <span class="o">=</span> <span class="n">ois_leg_spec</span><span class="o">.</span><span class="n">rate_reset_dates</span>
+
+        <span class="c1"># for each notional, but essentially each accrual period</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">notionals</span><span class="p">)):</span>
+
+            <span class="n">notional_start_date</span> <span class="o">=</span> <span class="n">leg_notional_structure</span><span class="o">.</span><span class="n">get_pay_date_start</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">notional_end_date</span> <span class="o">=</span> <span class="n">leg_notional_structure</span><span class="o">.</span><span class="n">get_pay_date_end</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">notional_start_date</span><span class="p">:</span>  <span class="c1"># i.e. not None or empty</span>
+                <span class="c1"># add an initial notional OUTFLOW or not</span>
+                <span class="n">notional_entry</span> <span class="o">=</span> <span class="n">CashFlow</span><span class="p">()</span>
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_date</span> <span class="o">=</span> <span class="n">notional_start_date</span>
+
+                <span class="k">if</span> <span class="n">val_date</span> <span class="o">&lt;=</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">:</span>  <span class="c1"># TODO recheck this business logic</span>
+                    <span class="n">notional_entry</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">=</span> <span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">notional_entry</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">notionals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">present_value</span> <span class="o">=</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">*</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">discount_factor</span>
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">notional_cashflow</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">notional_entry</span><span class="p">)</span>
+
+            <span class="n">entry</span> <span class="o">=</span> <span class="n">CashFlow</span><span class="p">()</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">start_date</span> <span class="o">=</span> <span class="n">ois_leg_spec</span><span class="o">.</span><span class="n">start_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">end_date</span> <span class="o">=</span> <span class="n">ois_leg_spec</span><span class="o">.</span><span class="n">end_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">pay_date</span> <span class="o">=</span> <span class="n">ois_leg_spec</span><span class="o">.</span><span class="n">pay_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">notional</span> <span class="o">=</span> <span class="n">notionals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">interest_yf</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">start_date</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">end_date</span><span class="p">)</span>
+
+            <span class="c1"># loop over each resetting datet, i.e. daily to calculate the daily compounded interest to use to calculae coupon for this time period/entry</span>
+            <span class="n">accDf</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># accrual discount factor</span>
+
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">daily_rate_start_dates</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span>
+
+                <span class="n">rate_yf</span> <span class="o">=</span> <span class="n">rate_dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">daily_rate_start_dates</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="n">daily_rate_end_dates</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span>  <span class="c1"># should be a day</span>
+
+                <span class="k">if</span> <span class="n">daily_rate_reset_dates</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">val_date</span><span class="p">:</span>  <span class="c1"># rate not yet fixed</span>
+                    <span class="n">daily_fwd</span> <span class="o">=</span> <span class="n">forward_curve</span><span class="o">.</span><span class="n">value_fwd</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">daily_rate_start_dates</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="n">daily_rate_end_dates</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span>
+                    <span class="n">daily_rate</span> <span class="o">=</span> <span class="n">leg_spread</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">daily_fwd</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">/</span> <span class="n">rate_yf</span>
+
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># rate already fixed</span>
+
+                    <span class="n">fixing</span> <span class="o">=</span> <span class="n">fixing_map</span><span class="o">.</span><span class="n">get_fixing</span><span class="p">(</span><span class="n">udl</span><span class="p">,</span> <span class="n">daily_rate_reset_dates</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span>
+
+                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">fixing</span><span class="p">):</span>  <span class="c1"># math.isnan</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">val_date</span> <span class="o">-</span> <span class="n">daily_rate_reset_dates</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">fixing_grace_period</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fixing for udl </span><span class="si">{</span><span class="n">udl</span><span class="si">}</span><span class="s2">, date </span><span class="si">{</span><span class="n">daily_rate_reset_dates</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="si">}</span><span class="s2"> not provided&quot;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">pay_date</span> <span class="o">&gt;=</span> <span class="n">val_date</span><span class="p">:</span>
+                                <span class="c1"># fix value of payment i in future based on current discount curve and a period between valDate and valDate+length of original period (workaround if fixing is not available)</span>
+                                <span class="n">time_delta</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">end_date</span> <span class="o">-</span> <span class="n">entry</span><span class="o">.</span><span class="n">start_date</span>  <span class="c1"># do we need? we assume daily...</span>
+                                <span class="n">fixing</span> <span class="o">=</span> <span class="p">(</span>
+                                    <span class="mf">1.0</span> <span class="o">/</span> <span class="n">forward_curve</span><span class="o">.</span><span class="n">value_fwd</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">daily_rate_start_dates</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="n">daily_rate_end_dates</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">-</span> <span class="mf">1.0</span>
+                                <span class="p">)</span> <span class="o">/</span> <span class="n">rate_yf</span>
+
+                    <span class="n">daily_rate</span> <span class="o">=</span> <span class="n">leg_spread</span> <span class="o">+</span> <span class="n">fixing</span>
+
+                <span class="n">accDf</span> <span class="o">*=</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">daily_rate</span> <span class="o">*</span> <span class="n">rate_yf</span>  <span class="c1"># compounded daily, hence the multiplication</span>
+            <span class="c1"># accDf now calulated</span>
+
+            <span class="n">rate_yf</span> <span class="o">=</span> <span class="n">rate_dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">daily_rate_start_dates</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">daily_rate_end_dates</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># total accrual period Yf</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">rate</span> <span class="o">=</span> <span class="p">(</span><span class="n">accDf</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">/</span> <span class="n">rate_yf</span>  <span class="c1"># the -1 gives then just the interest portion of the compounded daily</span>
+
+            <span class="k">if</span> <span class="n">val_date</span> <span class="o">&lt;=</span> <span class="n">entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">:</span>
+                <span class="n">entry</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">=</span> <span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">entry</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+            <span class="c1"># given rate, notional, and yf, calc interest</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">interest_amount</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">notional</span> <span class="o">*</span> <span class="n">entry</span><span class="o">.</span><span class="n">rate</span> <span class="o">*</span> <span class="n">entry</span><span class="o">.</span><span class="n">interest_yf</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">interest_amount</span>
+
+            <span class="c1"># # scale by forward rate???? #TODO</span>
+            <span class="c1"># if val_date &lt;= entry.end_date:</span>
+            <span class="c1">#     entry.pay_amount = entry.interest_amount / forward_curve.value_fwd(val_date, entry.end_date, entry.pay_date)</span>
+            <span class="c1"># else:</span>
+            <span class="c1">#     if entry.pay_date &gt;= val_date:</span>
+            <span class="c1">#         entry.pay_amount = entry.interest_amount / forward_curve.value_fwd(val_date, val_date, entry.pay_date)</span>
+            <span class="c1">#     else:</span>
+            <span class="c1">#         entry.pay_amount = 0.0</span>
+
+            <span class="c1"># given total cashflow amount - discount it</span>
+            <span class="c1"># #DEBUG TODO</span>
+            <span class="c1"># print(f&quot;forward rate: {entry.rate}&quot;)</span>
+            <span class="c1"># print(f&quot;delta_t: {entry.interest_yf}&quot;)</span>
+            <span class="c1"># print(f&quot;discount_factor: {entry.discount_factor}&quot;)</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">present_value</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">*</span> <span class="n">entry</span><span class="o">.</span><span class="n">discount_factor</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">interest_cashflow</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+
+            <span class="c1"># # TEMPORARY TEST - inthe case of constant notional structure, but i want a final notional cashflow like a bond</span>
+            <span class="c1"># if i == len(notionals) - 1:  # this checks for the last entry</span>
+            <span class="c1">#     notional_end_date = entry.end_date</span>
+
+            <span class="k">if</span> <span class="n">notional_end_date</span><span class="p">:</span>
+                <span class="c1"># add an intenional notional INFLOW or not</span>
+                <span class="n">notional_entry</span> <span class="o">=</span> <span class="n">CashFlow</span><span class="p">()</span>
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_date</span> <span class="o">=</span> <span class="n">notional_end_date</span>
+
+                <span class="k">if</span> <span class="n">val_date</span> <span class="o">&lt;=</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">:</span>  <span class="c1"># TODO recheck this business logic</span>
+                    <span class="n">notional_entry</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">=</span> <span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_date</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">notional_entry</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">=</span> <span class="n">notionals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># positive</span>
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">present_value</span> <span class="o">=</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">pay_amount</span> <span class="o">*</span> <span class="n">notional_entry</span><span class="o">.</span><span class="n">discount_factor</span>
+                <span class="n">notional_entry</span><span class="o">.</span><span class="n">notional_cashflow</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">notional_entry</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">entries</span>
+
+<div class="viewcode-block" id="InterestRateSwapPricer.price_leg_pricing_data">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.price_leg_pricing_data">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">price_leg_pricing_data</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">pricing_data</span><span class="p">:</span> <span class="n">InterestRateSwapLegPricingData_rivapy</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pricing a single Leg using Pricing Data architecture (not yet fully integrated, to be done once architecture clarified)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date (_type_): _description_</span>
+<span class="sd">            pricing_data (InterestRateSwapLegPricingData): float leg or base leg pricing data ...</span>
+<span class="sd">            param (_type_): extra parameters (not yet used)</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: _description_</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get leg info from PricingData -&gt;spec</span>
+        <span class="n">leg_spec</span> <span class="o">=</span> <span class="n">pricing_data</span><span class="o">.</span><span class="n">spec</span>  <span class="c1"># what kind of leg?</span>
+
+        <span class="k">if</span> <span class="n">leg_spec</span><span class="o">.</span><span class="n">leg_type</span> <span class="o">==</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">FIXED</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pricing_data</span><span class="o">.</span><span class="n">desired_rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">set_rate</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">set_rate</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">cashflow_table</span> <span class="o">=</span> <span class="n">InterestRateSwapPricer</span><span class="o">.</span><span class="n">_populate_cashflows_fix</span><span class="p">(</span>
+                <span class="n">val_date</span><span class="p">,</span>
+                <span class="n">pricing_data</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span>
+                <span class="n">pricing_data</span><span class="o">.</span><span class="n">discount_curve</span><span class="p">,</span>
+                <span class="n">pricing_data</span><span class="o">.</span><span class="n">forward_curve</span><span class="p">,</span>
+                <span class="n">pricing_data</span><span class="o">.</span><span class="n">fixing_map</span><span class="p">,</span>
+                <span class="n">set_rate</span><span class="o">=</span><span class="n">set_rate</span><span class="p">,</span>
+                <span class="n">desired_rate</span><span class="o">=</span><span class="n">pricing_data</span><span class="o">.</span><span class="n">desired_rate</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">leg_spec</span><span class="o">.</span><span class="n">leg_type</span> <span class="o">==</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pricing_data</span><span class="o">.</span><span class="n">spread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">set_spread</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">set_spread</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="c1"># REMOVE THIS TEST?</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pricing_data</span><span class="p">,</span> <span class="n">InterestRateSwapFloatLegPricingData_rivapy</span><span class="p">):</span>
+                <span class="n">cashflow_table</span> <span class="o">=</span> <span class="n">InterestRateSwapPricer</span><span class="o">.</span><span class="n">_populate_cashflows_float</span><span class="p">(</span>
+                    <span class="n">val_date</span><span class="p">,</span>
+                    <span class="n">pricing_data</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span>
+                    <span class="n">pricing_data</span><span class="o">.</span><span class="n">discount_curve</span><span class="p">,</span>
+                    <span class="n">pricing_data</span><span class="o">.</span><span class="n">forward_curve</span><span class="p">,</span>
+                    <span class="n">pricing_data</span><span class="o">.</span><span class="n">fixing_curve</span><span class="p">,</span>
+                    <span class="n">pricing_data</span><span class="o">.</span><span class="n">fixing_map</span><span class="p">,</span>
+                    <span class="n">pricing_data</span><span class="o">.</span><span class="n">fixing_grace_period</span><span class="p">,</span>
+                    <span class="n">set_spread</span><span class="o">=</span><span class="n">set_spread</span><span class="p">,</span>
+                    <span class="n">spread</span><span class="o">=</span><span class="n">pricing_data</span><span class="o">.</span><span class="n">spread</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;pricing data is not of type &#39;InterestRateSwapFloatLegPricingData_rivapy&#39; &quot;</span><span class="p">)</span>  <span class="c1"># TODO UPDATE</span>
+
+        <span class="c1"># elif leg_spec.leg_type ==  IrLegType.OIS:</span>
+        <span class="c1">#    InterestRateSwapPricer._populate_cashflows_ois</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown leg type </span><span class="si">{</span><span class="n">leg_spec</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">PV</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">cashflow_table</span><span class="p">:</span>
+
+            <span class="n">PV</span> <span class="o">+=</span> <span class="n">entry</span><span class="o">.</span><span class="n">present_value</span>
+
+        <span class="c1"># return PV</span>
+        <span class="k">return</span> <span class="n">PV</span> <span class="o">*</span> <span class="n">pricing_data</span><span class="o">.</span><span class="n">fx_rate</span></div>
+
+
+<div class="viewcode-block" id="InterestRateSwapPricer.price_leg">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.price_leg">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">price_leg</span><span class="p">(</span>
+        <span class="n">val_date</span><span class="p">,</span>
+        <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">forward_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">fxForward_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">spec</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">IrFixedLegSpecification</span><span class="p">,</span> <span class="n">IrFloatLegSpecification</span><span class="p">],</span>
+        <span class="n">fixing_map</span><span class="p">:</span> <span class="n">FixingTable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fixing_grace_period</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">pricing_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;set_rate&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;desired_rate&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Price a leg of a IR swap making distinctions for floating and fixed legs as well as OIS legs.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date (_type_): Valuation date</span>
+<span class="sd">            discount_curve (DiscountCurve): discount curve for discounting cashflows</span>
+<span class="sd">            forward_curve (DiscountCurve): forward curve for the forward rate calculations</span>
+<span class="sd">            fxForward_curve (DiscountCurve): fx forward curve for currency conversions for applicable instruments (not yet implemented)</span>
+<span class="sd">            spec (_Union[IrFixedLegSpecification, IrFloatLegSpecification]): Specification object for the leg to be priced</span>
+<span class="sd">            fixing_map (FixingTable, optional): Historical fixing data (not yet implemented). Defaults to None.</span>
+<span class="sd">            fixing_grace_period (float, optional): . Defaults to 0.</span>
+<span class="sd">            pricing_params (_type_, optional): Additional parameters needed for swap pricing. Defaults to {&quot;set_rate&quot;: False, &quot;desired_rate&quot;: 1.0}.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: if unknown leg type is passed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: return the aggregated Present value of the  leg of the swap.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># get leg info from PricingData -&gt;spec</span>
+        <span class="n">leg_spec</span> <span class="o">=</span> <span class="n">spec</span>  <span class="c1"># what kind of leg?</span>
+
+        <span class="k">if</span> <span class="n">leg_spec</span><span class="o">.</span><span class="n">leg_type</span> <span class="o">==</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">FIXED</span><span class="p">:</span>
+            <span class="c1"># print(&quot;generating cashflow table for FIXED leg&quot;)</span>
+            <span class="n">set_rate</span> <span class="o">=</span> <span class="n">pricing_params</span><span class="p">[</span><span class="s2">&quot;set_rate&quot;</span><span class="p">]</span>  <span class="c1"># if we want to set the rate</span>
+            <span class="n">desired_rate</span> <span class="o">=</span> <span class="n">pricing_params</span><span class="p">[</span><span class="s2">&quot;desired_rate&quot;</span><span class="p">]</span>
+            <span class="n">cashflow_table</span> <span class="o">=</span> <span class="n">InterestRateSwapPricer</span><span class="o">.</span><span class="n">_populate_cashflows_fix</span><span class="p">(</span>
+                <span class="n">val_date</span><span class="p">,</span> <span class="n">leg_spec</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">forward_curve</span><span class="p">,</span> <span class="n">fixing_map</span><span class="p">,</span> <span class="n">set_rate</span><span class="p">,</span> <span class="n">desired_rate</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">leg_spec</span><span class="o">.</span><span class="n">leg_type</span> <span class="o">==</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">:</span>
+            <span class="c1"># print(&quot;generating cashflow table for FLOAT leg&quot;)</span>
+            <span class="n">cashflow_table</span> <span class="o">=</span> <span class="n">InterestRateSwapPricer</span><span class="o">.</span><span class="n">_populate_cashflows_float</span><span class="p">(</span>
+                <span class="n">val_date</span><span class="p">,</span> <span class="n">leg_spec</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">forward_curve</span><span class="p">,</span> <span class="n">fxForward_curve</span><span class="p">,</span> <span class="n">fixing_map</span><span class="p">,</span> <span class="n">fixing_grace_period</span>
+            <span class="p">)</span>  <span class="c1"># TODO implement spread</span>
+
+        <span class="k">elif</span> <span class="n">leg_spec</span><span class="o">.</span><span class="n">leg_type</span> <span class="o">==</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">OIS</span><span class="p">:</span>
+            <span class="n">cashflow_table</span> <span class="o">=</span> <span class="n">InterestRateSwapPricer</span><span class="o">.</span><span class="n">_populate_cashflows_ois</span><span class="p">(</span>
+                <span class="n">val_date</span><span class="p">,</span> <span class="n">leg_spec</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">forward_curve</span><span class="p">,</span> <span class="n">fxForward_curve</span><span class="p">,</span> <span class="n">fixing_map</span><span class="p">,</span> <span class="n">fixing_grace_period</span>
+            <span class="p">)</span>
+            <span class="c1"># TODO implement spread</span>
+            <span class="c1"># 2025.10.28 As of now, analytical OIS swap rate calculation does not require full cashflow table as we can calculate</span>
+            <span class="c1"># the fair swap rate directly from discount factors. The method is kept as a fallback for more complex OIS legs that may require full cashflow simulation.</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown leg type </span><span class="si">{</span><span class="n">leg_spec</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># inside price_leg just after cashflow construction</span>
+        <span class="c1"># - DEBUG 11.2025</span>
+        <span class="c1"># print(&quot;\n=== DEBUG FLOAT LEG ===&quot;)</span>
+        <span class="c1"># total_pv = 0.0</span>
+        <span class="c1"># for i, cf in enumerate(cashflow_table):</span>
+        <span class="c1">#     print(</span>
+        <span class="c1">#         f&quot;[{i}] pay_date={cf.pay_date}, &quot;</span>
+        <span class="c1">#         f&quot;notional={cf.notional:.2f}, &quot;</span>
+        <span class="c1">#         f&quot;rate={cf.rate:.6f}, &quot;</span>
+        <span class="c1">#         f&quot;yf={cf.interest_yf:.6f}, &quot;</span>
+        <span class="c1">#         f&quot;pay_amt={cf.pay_amount:.6f}, &quot;</span>
+        <span class="c1">#         f&quot;DF={cf.discount_factor:.6f}, &quot;</span>
+        <span class="c1">#         f&quot;PV={cf.present_value:.6f}&quot;</span>
+        <span class="c1">#     )</span>
+        <span class="c1">#     total_pv += cf.present_value</span>
+        <span class="c1"># print(f&quot;--- Total leg PV = {total_pv:.6f}\n&quot;)</span>
+
+        <span class="n">PV</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># print(&quot;----------------------------------------------------------&quot;)</span>
+        <span class="c1"># print(&quot;DEBUG: price leg pv values&quot;)  # DEBUG TODO REMOVE</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">cashflow_table</span><span class="p">:</span>
+            <span class="c1"># print_member_values(entry)</span>
+            <span class="c1"># print(entry.present_value)</span>
+            <span class="n">PV</span> <span class="o">+=</span> <span class="n">entry</span><span class="o">.</span><span class="n">present_value</span>
+
+        <span class="k">return</span> <span class="n">PV</span></div>
+
+        <span class="c1"># return PV* pricing_data.fx_rate</span>
+
+<div class="viewcode-block" id="InterestRateSwapPricer.price">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.price">[docs]</a>
+    <span class="k">def</span> <span class="nf">price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;price a full swap, with a pay leg and a receive leg in the context of</span>
+<span class="sd">        pricing container and pricer having been initlialized with required inputs.&quot;&quot;&quot;</span>
+
+        <span class="c1"># # PricingResults&amp; results, -&gt; implement also</span>
+        <span class="c1"># val_date = self._val_date    # const  boost::posix_time::ptime&amp; valDate,</span>
+        <span class="c1"># discount_curve_pay_leg = self. # const std::shared_ptr&lt;const DiscountCurve&gt;&amp; discountCurvePayLeg,</span>
+        <span class="c1"># discount_curve_receive_leg= self. # const std::shared_ptr&lt;const DiscountCurve&gt;&amp; discountCurveReceiveLeg,</span>
+        <span class="c1"># fixing_curve_pay_leg = # const std::shared_ptr&lt;const DiscountCurve&gt;&amp; fixingCurvePayLeg,</span>
+        <span class="c1"># fixing_curve_receive_leg= # const std::shared_ptr&lt;const DiscountCurve&gt;&amp; fixingCurveReceiveLeg,</span>
+        <span class="c1"># fx_fwd_curve_pay_leg = # const std::shared_ptr&lt;const FxForwardCurve&gt;&amp; fxForwardCurvePayLeg,</span>
+        <span class="c1"># fx_fwd_curve_receive_leg = # const std::shared_ptr&lt;const FxForwardCurve&gt;&amp; fxForwardCurveReceiveLeg,</span>
+        <span class="c1"># interest_rate_swap_spec = # const std::shared_ptr&lt;const InterestRateSwapSpecification&gt;&amp; spec,</span>
+        <span class="c1"># pricing_request = # const PricingRequest&amp; pricingRequest,</span>
+        <span class="c1"># pricing_param = # std::shared_ptr&lt;const InterestRateSwapPricingParameter&gt; pricingParam,</span>
+        <span class="c1"># fixing_map = # std::shared_ptr&lt;const FixingTable&gt; fixingMap,</span>
+        <span class="c1"># fx_pay_leg = # double fxPayLeg,</span>
+        <span class="c1"># fx_receive_leg = # double fxReceiveLeg)</span>
+
+        <span class="c1"># unit in days</span>
+        <span class="n">fixing_grace_period</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pricing_param</span><span class="p">[</span><span class="s2">&quot;fixing_grace_period&quot;</span><span class="p">]</span>
+
+        <span class="c1"># TODO check structure again....</span>
+        <span class="c1"># price = InterestRateSwapPricer.price_leg(valDate, discountCurveReceiveLeg, fixingCurveReceiveLeg, fxForwardCurveReceiveLeg, spec-&gt;getReceiveLeg(), fixingMap, fixingGracePeriod) * fxReceiveLeg;</span>
+        <span class="c1"># price -= InterestRateSwapPricer.price_leg(valDate, discountCurvePayLeg, fixingCurvePayLeg, fxForwardCurvePayLeg, spec-&gt;getPayLeg(), fixingMap, fixingGracePeriod) * fxPayLeg;</span>
+
+        <span class="c1">#</span>
+        <span class="n">aggregated_price</span> <span class="o">=</span> <span class="n">InterestRateSwapPricer</span><span class="o">.</span><span class="n">price_leg</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span><span class="p">,</span>
+            <span class="n">discount_curve</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_discount_curve_receive_leg</span><span class="p">,</span>
+            <span class="n">forward_curve</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fixing_curve_receive_leg</span><span class="p">,</span>
+            <span class="n">fxForward_curve</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fx_fwd_curve_receive_leg</span><span class="p">,</span>
+            <span class="n">spec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_receive_leg</span><span class="p">,</span>
+            <span class="n">fixing_map</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fixing_map</span><span class="p">,</span>
+            <span class="n">fixing_grace_period</span><span class="o">=</span><span class="n">fixing_grace_period</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">aggregated_price</span> <span class="o">-=</span> <span class="n">InterestRateSwapPricer</span><span class="o">.</span><span class="n">price_leg</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_val_date</span><span class="p">,</span>
+            <span class="n">discount_curve</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_discount_curve_pay_leg</span><span class="p">,</span>
+            <span class="n">forward_curve</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fixing_curve_receive_leg</span><span class="p">,</span>
+            <span class="n">fxForward_curve</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fx_fwd_curve_receive_leg</span><span class="p">,</span>
+            <span class="n">spec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pay_leg</span><span class="p">,</span>
+            <span class="n">fixing_map</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fixing_map</span><span class="p">,</span>
+            <span class="n">fixing_grace_period</span><span class="o">=</span><span class="n">fixing_grace_period</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># results.setPrice(price);</span>
+        <span class="c1"># aggregated_price is already discounted to present value inside the price_leg method</span>
+        <span class="k">return</span> <span class="n">aggregated_price</span></div>
+
+
+    <span class="c1"># static method also then?</span>
+<div class="viewcode-block" id="InterestRateSwapPricer.compute_swap_rate">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.compute_swap_rate">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">compute_swap_rate</span><span class="p">(</span>
+        <span class="n">ref_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">fixing_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">float_leg</span><span class="p">:</span> <span class="n">IrFloatLegSpecification</span><span class="p">,</span>
+        <span class="n">fixed_leg</span><span class="p">:</span> <span class="n">IrFixedLegSpecification</span><span class="p">,</span>
+        <span class="n">fixing_map</span><span class="p">:</span> <span class="n">FixingTable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pricing_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;fixing_grace_period&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">},</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;To calculate the fair swap rate, i.e. the fixed rate(r*) such that</span>
+<span class="sd">                PV_fixed(r*) = PV_float</span>
+<span class="sd">            where</span>
+<span class="sd">                PV_fixed(r*) = r* * Annuity</span>
+<span class="sd">            where</span>
+<span class="sd">                Annuity = sum(notional_i * DF_i * YF_i*)</span>
+
+<span class="sd">        Fast path for OIS floating leg: use analytical OIS formula</span>
+<span class="sd">        so we do not simulate daily compounding each time inside the solver.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ref_date (_Union[date, datetime]): reference date</span>
+<span class="sd">            discount_curve (DiscountCurve): discoutn curve to determine present value</span>
+<span class="sd">            fixing_curve (DiscountCurve): curve used for fwd rates for the floating leg</span>
+<span class="sd">            float_leg (IrFloatLegSpecification): IR swap float leg specification</span>
+<span class="sd">            fixed_leg (IrFixedLegSpecification): IR swap fix leg specification</span>
+<span class="sd">            fixing_map (FixingTable, optional): historical fixing data (TODO). Defaults to None.</span>
+<span class="sd">            fixing_grace_period (int, optional): . Defaults to 0.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: fair rate for the swap</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">fixing_grace_period</span> <span class="o">=</span> <span class="n">pricing_params</span><span class="p">[</span><span class="s2">&quot;fixing_grace_period&quot;</span><span class="p">]</span>
+
+        <span class="c1"># -----------------------------</span>
+        <span class="c1"># Fast analytical OIS path:</span>
+        <span class="c1"># - If the floating leg is OIS, compute the fixed rate (par swap rate)</span>
+        <span class="c1">#   analytically using discount factors (P) on the fixed leg payment dates:</span>
+        <span class="c1">#       R = (1 - P(T_N)) / sum_i alpha_i * P(T_i)</span>
+        <span class="c1"># - where alpha_i is the year fraction for the fixed leg payment period i (accrual factor)</span>
+        <span class="c1"># - This is equivalent to pricing the compounded overnight floating leg.</span>
+        <span class="c1"># -----------------------------</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">float_leg</span><span class="p">,</span> <span class="s2">&quot;leg_type&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">float_leg</span><span class="o">.</span><span class="n">leg_type</span> <span class="o">==</span> <span class="n">IrLegType</span><span class="o">.</span><span class="n">OIS</span><span class="p">:</span>
+
+                <span class="k">return</span> <span class="n">InterestRateSwapPricer</span><span class="o">.</span><span class="n">compute_swap_rate_ois_analytical</span><span class="p">(</span><span class="n">ref_date</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">fixing_curve</span><span class="p">,</span> <span class="n">float_leg</span><span class="p">,</span> <span class="n">fixed_leg</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="c1"># If anything unexpected (missing attributes) happens, fall back to generic route</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Fast OIS path failed/fell through; using generic pricing path.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># if fixed_leg.obj_id == &quot;OIS_2M_fixed_leg3&quot;: # DEBUG TEST 2025</span>
+        <span class="c1">#    logger.debug(&quot;OIS_2M_fixed_leg3 detected&quot;)</span>
+
+        <span class="c1"># -----------------------------</span>
+        <span class="c1"># generic path:</span>
+        <span class="n">float_leg_PV</span> <span class="o">=</span> <span class="n">InterestRateSwapPricer</span><span class="o">.</span><span class="n">price_leg</span><span class="p">(</span><span class="n">ref_date</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">fixing_curve</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">float_leg</span><span class="p">,</span> <span class="n">fixing_map</span><span class="p">,</span> <span class="n">fixing_grace_period</span><span class="p">)</span>
+        <span class="n">fixed_leg_annuity</span> <span class="o">=</span> <span class="n">InterestRateSwapPricer</span><span class="o">.</span><span class="n">price_leg</span><span class="p">(</span>
+            <span class="n">ref_date</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">fixing_curve</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fixed_leg</span><span class="p">,</span> <span class="n">fixing_map</span><span class="p">,</span> <span class="n">fixing_grace_period</span><span class="p">,</span> <span class="n">pricing_params</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">fixed_leg_annuity</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Fixed leg annuity is zero, cannot compute swap rate!&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">float_leg_PV</span> <span class="o">/</span> <span class="n">fixed_leg_annuity</span></div>
+
+
+    <span class="c1"># TODO</span>
+<div class="viewcode-block" id="InterestRateSwapPricer.compute_swap_spread">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.compute_swap_spread">[docs]</a>
+    <span class="k">def</span> <span class="nf">compute_swap_spread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># ref date</span>
+        <span class="c1"># discount curve pay leg</span>
+        <span class="c1"># forward curve pay leg</span>
+        <span class="c1"># fx forward curve pay leg</span>
+        <span class="c1"># discount curve rec leg</span>
+        <span class="c1"># forward curve rec leg</span>
+        <span class="c1"># fx forward curve rec leg</span>
+        <span class="c1"># pay leg spec</span>
+        <span class="c1"># rec leg spec</span>
+        <span class="c1"># fixing map</span>
+        <span class="c1"># extra param: InterestRateSwapPricingParameter</span>
+        <span class="c1"># fx pay</span>
+        <span class="c1"># fx rec</span>
+        <span class="c1"># fixing grace period comes from the extra param</span>
+
+        <span class="c1"># convert all prices into the currency of the swap</span>
+        <span class="n">pv_pay</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">pv_rec_s0</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">py_rec_s1</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># pv_pay =  fxPay * price_leg(refDate, discountCurvePay, forwardCurvePay, fxForwardCurvePay, floatLegPay, fixingMap, fixingGracePeriod);</span>
+        <span class="c1"># pv_rec_s0 = fxRec * price_leg(refDate, discountCurveRec, forwardCurveRec, fxForwardCurveRec, floatLegRec, fixingMap, fixingGracePeriod, true, 0.);set_spread=True, desired_spread = 0.0 #for float it is spread</span>
+        <span class="c1"># py_rec_s1 = fxRec * price_leg(refDate, discountCurveRec, forwardCurveRec, fxForwardCurveRec, floatLegRec, fixingMap, fixingGracePeriod, true, 1.);set_spread=True, desired_spread = 1.0</span>
+        <span class="c1"># note that the current price leg doesnt take spreads as options for the moment, it is left as a # TODO for now...</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">pv_pay</span> <span class="o">-</span> <span class="n">pv_rec_s0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">py_rec_s1</span> <span class="o">-</span> <span class="n">pv_rec_s0</span><span class="p">)</span></div>
+
+
+    <span class="c1"># # TODO</span>
+    <span class="c1"># 		double InterestRateSwapPricer::computeBasisSpread(</span>
+    <span class="c1"># 		const boost::posix_time::ptime&amp; refDate,</span>
+    <span class="c1"># 		const std::shared_ptr&lt;const DiscountCurve&gt;&amp; discountCurve,</span>
+    <span class="c1"># 		const std::shared_ptr&lt;const DiscountCurve&gt;&amp; receiveLegFixingCurve,</span>
+    <span class="c1"># 		const std::shared_ptr&lt;const DiscountCurve&gt;&amp; payLegFixingCurve,</span>
+    <span class="c1"># 		const std::shared_ptr&lt;const IrFloatLegSpecification&gt;&amp; receiveLeg,</span>
+    <span class="c1"># 		const std::shared_ptr&lt;const IrFloatLegSpecification&gt;&amp; payLeg,</span>
+    <span class="c1"># 		const std::shared_ptr&lt;const IrFixedLegSpecification&gt;&amp; fixedLeg,</span>
+    <span class="c1"># 		std::shared_ptr&lt;const FixingTable&gt; fixingMap,</span>
+    <span class="c1"># 		std::shared_ptr&lt;const InterestRateSwapPricingParameter&gt; param</span>
+    <span class="c1"># 	)</span>
+    <span class="c1"># 	{</span>
+    <span class="c1"># 		const boost::posix_time::time_duration&amp; fixingGracePeriod = param-&gt;fixingGracePeriod;</span>
+    <span class="c1"># 		double receiveLegPV = price(refDate, discountCurve, receiveLegFixingCurve, nullptr, receiveLeg, fixingMap, fixingGracePeriod);</span>
+    <span class="c1"># 		double payLegPV = price(refDate, discountCurve, payLegFixingCurve, nullptr, payLeg, fixingMap, fixingGracePeriod);</span>
+    <span class="c1"># 		double fixedLegPV01 = price(refDate, discountCurve, std::shared_ptr&lt;const DiscountCurve&gt;(), nullptr, fixedLeg,</span>
+    <span class="c1"># 									fixingMap, fixingGracePeriod, true, 1.); # the one there means its the annuity again, the true means use the given rate (1.0) for fixed rate</span>
+    <span class="c1"># 		return (receiveLegPV - payLegPV) / fixedLegPV01;</span>
+    <span class="c1"># 	}</span>
+<div class="viewcode-block" id="InterestRateSwapPricer.compute_basis_spread">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.compute_basis_spread">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">compute_basis_spread</span><span class="p">(</span>
+        <span class="n">ref_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">payLegFixingCurve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">receiveLegFixingCurve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">pay_leg</span><span class="p">:</span> <span class="n">IrFloatLegSpecification</span><span class="p">,</span>
+        <span class="n">receive_leg</span><span class="p">:</span> <span class="n">IrFloatLegSpecification</span><span class="p">,</span>
+        <span class="n">spread_leg</span><span class="p">:</span> <span class="n">IrFixedLegSpecification</span><span class="p">,</span>
+        <span class="n">fixing_map</span><span class="p">:</span> <span class="n">FixingTable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pricing_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;fixing_grace_period&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">},</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="c1"># ref date</span>
+        <span class="c1"># discount curve</span>
+        <span class="c1"># receiveLegFixingCurve</span>
+        <span class="c1"># payLegFixingCurve</span>
+        <span class="c1"># receiveLeg spec #floatIRspec</span>
+        <span class="c1"># payLeg spec #floatIRspec</span>
+        <span class="c1"># fixed leg spec # fixedIRspec</span>
+        <span class="c1"># fixing grace period comes from the extra param</span>
+
+        <span class="c1"># noFxFowardCruve, set to null</span>
+        <span class="n">fixing_grace_period</span> <span class="o">=</span> <span class="n">pricing_params</span><span class="p">[</span><span class="s2">&quot;fixing_grace_period&quot;</span><span class="p">]</span>
+
+        <span class="c1"># price_leg(refDate, discountCurve, receiveLegFixingCurve, nullptr, receiveLeg, fixingMap, fixingGracePeriod)</span>
+        <span class="n">receive_leg_PV</span> <span class="o">=</span> <span class="n">InterestRateSwapPricer</span><span class="o">.</span><span class="n">price_leg</span><span class="p">(</span>
+            <span class="n">ref_date</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">receiveLegFixingCurve</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">receive_leg</span><span class="p">,</span> <span class="n">fixing_map</span><span class="p">,</span> <span class="n">fixing_grace_period</span>
+        <span class="p">)</span>
+        <span class="c1"># price_leg(refDate, discountCurve, payLegFixingCurve,     nullptr, payLeg, fixingMap, fixingGracePeriod);</span>
+        <span class="n">pay_leg_PV</span> <span class="o">=</span> <span class="n">InterestRateSwapPricer</span><span class="o">.</span><span class="n">price_leg</span><span class="p">(</span><span class="n">ref_date</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">payLegFixingCurve</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">pay_leg</span><span class="p">,</span> <span class="n">fixing_map</span><span class="p">,</span> <span class="n">fixing_grace_period</span><span class="p">)</span>
+        <span class="c1"># price_leg(refDate, discountCurve, std::shared_ptr&lt;const DiscountCurve&gt;(), nullptr, fixedLeg, fixingMap, fixingGracePeriod, true, 1.);</span>
+        <span class="n">fixed_leg_PV01</span> <span class="o">=</span> <span class="n">InterestRateSwapPricer</span><span class="o">.</span><span class="n">price_leg</span><span class="p">(</span>
+            <span class="n">ref_date</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">payLegFixingCurve</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">spread_leg</span><span class="p">,</span> <span class="n">fixing_map</span><span class="p">,</span> <span class="n">fixing_grace_period</span><span class="p">,</span> <span class="n">pricing_params</span>
+        <span class="p">)</span>  <span class="c1"># should not need a fixing curve since its a fixed leg, we default to the pay leg</span>
+
+        <span class="c1"># # for fixed, we are setting the rate to 1</span>
+
+        <span class="c1"># # - DEBUG 11.2025</span>
+        <span class="c1"># print(&quot;INSIDE COMPUTE BASIS SPREAD&quot;)</span>
+        <span class="c1"># print(&quot;receive_leg_PV:&quot;, receive_leg_PV)</span>
+        <span class="c1"># print(&quot;pay_leg_PV:&quot;, pay_leg_PV)</span>
+        <span class="c1"># print(&quot;fixed_leg_PV01:&quot;, fixed_leg_PV01)</span>
+        <span class="c1"># print(&quot;INSIDE COMPUTE BASIS SPREAD: receive_leg_PV:&quot;, receive_leg_PV, &quot;pay_leg_PV:&quot;, pay_leg_PV, &quot;fixed_leg_PV01:&quot;, fixed_leg_PV01)</span>
+
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">fixed_leg_PV01</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-12</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fixed_leg_PV01 too small (</span><span class="si">{</span><span class="n">fixed_leg_PV01</span><span class="si">}</span><span class="s2">), cannot divide — check fixed leg annuity / conventions&quot;</span><span class="p">)</span>
+        <span class="c1"># -</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">receive_leg_PV</span> <span class="o">-</span> <span class="n">pay_leg_PV</span><span class="p">)</span> <span class="o">/</span> <span class="n">fixed_leg_PV01</span></div>
+
+
+<div class="viewcode-block" id="InterestRateSwapPricer.compute_swap_rate_ois_analytical">
+<a class="viewcode-back" href="../../../rivapy/pricing/pricer.html#rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.compute_swap_rate_ois_analytical">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">compute_swap_rate_ois_analytical</span><span class="p">(</span>
+        <span class="n">ref_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+        <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">forward_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">float_leg</span><span class="p">:</span> <span class="n">IrOISLegSpecification</span><span class="p">,</span>
+        <span class="n">fixed_leg</span><span class="p">:</span> <span class="n">IrFixedLegSpecification</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the fair (par) fixed rate for an Overnight Indexed Swap (OIS)</span>
+<span class="sd">        using an analytical shortcut based on discount factors.</span>
+
+<span class="sd">        This method assumes that the floating leg is a compounded overnight leg</span>
+<span class="sd">        and that, under standard OIS discounting, the present value of the floating</span>
+<span class="sd">        leg can be derived directly from the discount curve without simulating</span>
+<span class="sd">        daily compounding. Much faster than simulating daily compounding for each.</span>
+<span class="sd">        [https://btrm.org/wp-content/uploads/2024/03/BTRM-WP15_SOFR-OIS-Curve-Construction_Dec-2020.pdf]</span>
+
+<span class="sd">        The par OIS rate is computed as:</span>
+
+<span class="sd">            R = (sum_i N_i * [P(T_i) - P(T_{i+1})]) / (sum_i N_i * alpha_i * P(T_{i+1}))</span>
+
+<span class="sd">        where:</span>
+<span class="sd">            - P(T_i): discount factor at period start/end,</span>
+<span class="sd">            - alpha_i: accrual year fraction on the fixed leg,</span>
+<span class="sd">            - N_i: notional applicable for that period.</span>
+
+<span class="sd">        Assumptions:</span>
+<span class="sd">            - The floating leg is fully collateralized and discounted on the</span>
+<span class="sd">              same OIS curve.</span>
+<span class="sd">            - The compounded overnight rate is implied by the discount factors.</span>
+<span class="sd">            - No spread, lag, or convexity correction is applied.</span>
+<span class="sd">            - Notionals and accrual conventions are consistent with the given curves.</span>
+<span class="sd">            - Forward curve is used only for projected notionals or FX conversions,</span>
+<span class="sd">              not for rate projection.</span>
+<span class="sd">            - The fixed leg is currently not explictily used as it assumes that it has</span>
+<span class="sd">              the same notional structure and payment dates as the floating leg, which</span>
+<span class="sd">              usually the case.</span>
+
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the computed annuity (denominator) is zero,</span>
+<span class="sd">                        indicating invalid leg setup or inconsistent inputs.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The par fixed rate that equates PV_fixed = PV_float (analytical) (as a decimal, e.g. 0.025 for 2.5%).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">dcc</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">daycounter</span><span class="p">)</span>
+        <span class="n">num_periods</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">float_leg</span><span class="o">.</span><span class="n">start_dates</span><span class="p">)</span>
+
+        <span class="c1"># get notionals using the same logic as your existing daily compounding path</span>
+        <span class="n">leg_notional_structure</span> <span class="o">=</span> <span class="n">float_leg</span><span class="o">.</span><span class="n">get_NotionalStructure</span><span class="p">()</span>
+        <span class="n">notionals</span> <span class="o">=</span> <span class="n">get_projected_notionals</span><span class="p">(</span>
+            <span class="n">val_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span>
+            <span class="n">notional_structure</span><span class="o">=</span><span class="n">leg_notional_structure</span><span class="p">,</span>
+            <span class="n">start_period</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">end_period</span><span class="o">=</span><span class="n">num_periods</span><span class="p">,</span>
+            <span class="n">fx_forward_curve</span><span class="o">=</span><span class="n">forward_curve</span><span class="p">,</span>
+            <span class="n">fixing_map</span><span class="o">=</span><span class="n">FixingTable</span><span class="p">(),</span>
+        <span class="p">)</span>
+
+        <span class="n">start_dates</span> <span class="o">=</span> <span class="n">float_leg</span><span class="o">.</span><span class="n">start_dates</span>
+        <span class="n">end_dates</span> <span class="o">=</span> <span class="n">float_leg</span><span class="o">.</span><span class="n">end_dates</span>
+        <span class="c1"># pay_dates = float_leg.pay_dates</span>
+
+        <span class="n">pv_float</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">annuity</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="c1"># use analytical compounding shortcut:</span>
+        <span class="c1"># for each coupon period, the compounded OIS rate ≈ (DF_start / DF_end - 1) / YF</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_periods</span><span class="p">):</span>
+            <span class="n">yf</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">start_dates</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">end_dates</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">df_start</span> <span class="o">=</span> <span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">ref_date</span><span class="p">,</span> <span class="n">start_dates</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">df_end</span> <span class="o">=</span> <span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">ref_date</span><span class="p">,</span> <span class="n">end_dates</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+            <span class="c1"># period return implied by discount factors</span>
+            <span class="c1"># period_rate = (df_start / df_end - 1.0) / yf # for DEBUG</span>
+
+            <span class="c1"># PV of floating leg cashflow = notional * (DF_start - DF_end)</span>
+            <span class="n">pv_float</span> <span class="o">+=</span> <span class="n">notionals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">df_start</span> <span class="o">-</span> <span class="n">df_end</span><span class="p">)</span>
+
+            <span class="c1"># annuity = sum of DF_end * yf * notional (denominator in swap rate)</span>
+            <span class="n">annuity</span> <span class="o">+=</span> <span class="n">notionals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">yf</span> <span class="o">*</span> <span class="n">df_end</span>
+
+        <span class="k">if</span> <span class="n">annuity</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Zero annuity in OIS analytical pricing&quot;</span><span class="p">)</span>
+
+        <span class="c1"># fair fixed rate = PV_float / Annuity</span>
+        <span class="k">return</span> <span class="n">pv_float</span> <span class="o">/</span> <span class="n">annuity</span></div>
+</div>
+
+
+
+<span class="c1">#########################################################################</span>
+<span class="c1"># FUNCTIONS</span>
+<span class="k">def</span> <span class="nf">get_projected_notionals</span><span class="p">(</span>
+    <span class="n">val_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+    <span class="n">notional_structure</span><span class="p">:</span> <span class="n">NotionalStructure</span><span class="p">,</span>
+    <span class="n">start_period</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">end_period</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">fx_forward_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+    <span class="n">fixing_map</span><span class="p">:</span> <span class="n">FixingTable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a list with projected notionals, using FX forward curve if applicable, or fixing table(not yet implemented).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        val_date (datetime): The valuation date.</span>
+<span class="sd">        notional_structure (NotionalStructure): The notional structure class object.</span>
+<span class="sd">        start_period (int): Start index of the period range.</span>
+<span class="sd">        end_period (int): End index of the period range (exclusive).</span>
+<span class="sd">        fx_forward_curve (FxForwardCurve): Required for resetting notionals.</span>
+<span class="sd">        fixing_map (FixingTable): Not used (yet).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Check if this is a resetting notional structure</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">notional_structure</span><span class="p">,</span> <span class="n">ResettingNotionalStructure</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">fx_forward_curve</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No FX forward curve provided for resetting leg!&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_period</span><span class="p">,</span> <span class="n">end_period</span><span class="p">):</span>
+            <span class="n">fixing_date</span> <span class="o">=</span> <span class="n">notional_structure</span><span class="o">.</span><span class="n">get_fixing_date</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">fx</span> <span class="o">=</span> <span class="n">fx_forward_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">fixing_date</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">notional_structure</span><span class="o">.</span><span class="n">get_amount</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="n">fx</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">notional_structure</span><span class="p">,</span> <span class="n">ConstNotionalStructure</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_period</span><span class="p">,</span> <span class="n">end_period</span><span class="p">):</span>
+            <span class="c1"># print(i)</span>
+            <span class="c1"># print(notional_structure.get_amount(i))</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">notional_structure</span><span class="o">.</span><span class="n">get_amount</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_period</span><span class="p">,</span> <span class="n">end_period</span><span class="p">):</span>
+            <span class="c1"># print(i)</span>
+            <span class="c1"># print(notional_structure.get_amount(i))</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">notional_structure</span><span class="o">.</span><span class="n">get_amount</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="c1"># getPricingData</span>
+
+
+<span class="c1"># difference between func price and priceImpl???</span>
+
+
+<span class="c1"># computeSwapSpread</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">pass</span>
+    <span class="c1"># InterestRateSwapPricer</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,842 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interest Rate Swap &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=d2ebc91c" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.svg"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Day Counter, Roll Conventions and Schedules" href="../tools/daycounter_rollconventions_schedules.html" />
+    <link rel="prev" title="Deposits and FRAs" href="deposits_fras.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Notebook Gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#market-data">Market Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#pricing">Pricing</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#financial-instruments">Financial Instruments</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="repurchase_agreement.html">Repurchase Agreements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deposits_fras.html">Deposits and FRAs</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Interest Rate Swap</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Definition-of-an-Interest-Rate-Swap">Definition of an Interest Rate Swap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Valuation-of-Interest-Rate-Swaps">Valuation of Interest Rate Swaps</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Tenor-Basis-Swap">Tenor Basis Swap</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#tools">Tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../search.html">Search Page</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Notebook Gallery</a></li>
+      <li class="breadcrumb-item active">Interest Rate Swap</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/instruments/ir_swap.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <p><img alt="image1" src="../../_images/logo.png" /></p>
+<section id="Interest-Rate-Swap">
+<h1>Interest Rate Swap<a class="headerlink" href="#Interest-Rate-Swap" title="Link to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[74]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rivapy.pricing.interest_rate_swap_pricing</span> <span class="kn">import</span> <span class="n">InterestRateSwapPricer</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.ir_swap_specification</span> <span class="kn">import</span> <span class="n">InterestRateSwapSpecification</span><span class="p">,</span> <span class="n">IrFixedLegSpecification</span><span class="p">,</span> <span class="n">IrFloatLegSpecification</span><span class="p">,</span> <span class="n">InterestRateBasisSwapSpecification</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.components</span> <span class="kn">import</span> <span class="n">NotionalStructure</span><span class="p">,</span> <span class="n">ConstNotionalStructure</span><span class="p">,</span> <span class="n">VariableNotionalStructure</span><span class="p">,</span> <span class="n">ResettingNotionalStructure</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing.pricing_data</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">InterestRateSwapFloatLegPricingData_rivapy</span><span class="p">,</span>
+    <span class="n">InterestRateSwapLegPricingData_rivapy</span><span class="p">,</span>
+    <span class="n">InterestRateSwapPricingData_rivapy</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing.pricing_request</span> <span class="kn">import</span> <span class="n">InterestRateSwapPricingRequest</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">from</span> <span class="nn">dateutil.relativedelta</span> <span class="kn">import</span> <span class="n">relativedelta</span>
+<span class="kn">from</span> <span class="nn">rivapy.marketdata.curves</span> <span class="kn">import</span> <span class="n">DiscountCurve</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.enums</span> <span class="kn">import</span> <span class="n">InterpolationType</span><span class="p">,</span> <span class="n">ExtrapolationType</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">dateutil.relativedelta</span> <span class="kn">import</span> <span class="n">relativedelta</span>
+
+<span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+<section id="Definition-of-an-Interest-Rate-Swap">
+<h2>Definition of an Interest Rate Swap<a class="headerlink" href="#Definition-of-an-Interest-Rate-Swap" title="Link to this heading"></a></h2>
+<p>The most common type of an interest rate swap is the so called “plain vanilla” interest rate swap. Here, a company agrees to pay cashflows equal to a predetermined fixed interest rate on a notional principal during a predetermined number of years; in return, it receives interest payments on the same notional principal at a floating rate during the same number of years.</p>
+</section>
+<section id="Valuation-of-Interest-Rate-Swaps">
+<h2>Valuation of Interest Rate Swaps<a class="headerlink" href="#Valuation-of-Interest-Rate-Swaps" title="Link to this heading"></a></h2>
+<p>The value of a swap can, for example, be regarded as the difference between two bonds. From the point of view of a fixed-rate payer, the value of the swap can be regarded as a long position in a floating-rate bond and a short position in a fixed-rate bond.</p>
+<div class="math notranslate nohighlight">
+\[V_{swap} = B_{float} - B_{fix}\]</div>
+<p>Alternatively, a plain vanilla interest rate swap can also be valued making the assumption that forward interest rates are realized. Here, cashflows of the floating leg are calculated assuming that the floating interest rate equals the forward interest rates. The value of the interest rate swap is then the sum of the present value of the net cashflows. This method will be applied in the following.</p>
+<p>For a detailed discussion please refer to Hull, <em>Options, futures, and other derivatives, 8th Edition,</em> 2012, p. 148 ff.</p>
+<p>In the following, we will use a slighly modified example taken from Hull, p. 161 to illustrate how a interest rate swap can be valued.</p>
+<p><strong>Example:</strong></p>
+<p><em>Suppose that a financial institution has agreed to pay 6-month EURIBOR and receive 8% per annum (with semiannual compounding) on a notional principal of €100 million. The swap has a remaining life of 1.5 years. The EURIBOR rates with continuous compunding for 6-month, 12-month, and 18-month maturities are 10%, 10.5%, and 11%, respectively.</em></p>
+<section id="Valuation-in-terms-of-bond-prices">
+<h3>Valuation in terms of bond prices<a class="headerlink" href="#Valuation-in-terms-of-bond-prices" title="Link to this heading"></a></h3>
+<p><strong>Fixed Leg</strong></p>
+<p>The fixed-rate bond has three payment dates in 6 months, 12 months, and 18 months with a cashflow of €4 million at the first two payment dates and a cashflow of €4 million plus the notional of €100 million at the last payment date. These cashflows have to be discounted using the given EURIBOR rates and subsequently summed up to receive the present value of the fixed leg.</p>
+<p><strong>Floating Leg</strong></p>
+<p>The floating leg bond is worth the notional immediately after an interest payment because at this time, the bond is a “fair deal” where the borower pays EURIBOR for earch subsequent accrual period. Consequently, immediately before a payment, the bond is worth the notional plus the accrued interest. Also, this cashflow has to be discounted using the given EURIBOR rate.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Fixed Leg</span>
+<span class="n">time_to_maturity</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">]</span>
+<span class="n">cf_fix</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">104</span><span class="p">]</span>
+<span class="n">libor_rates</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.105</span><span class="p">,</span> <span class="mf">0.11</span><span class="p">]</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">lr</span> <span class="o">*</span> <span class="n">tm</span><span class="p">)</span> <span class="k">for</span> <span class="n">lr</span><span class="p">,</span> <span class="n">tm</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">libor_rates</span><span class="p">,</span> <span class="n">time_to_maturity</span><span class="p">)]</span>
+
+<span class="n">pv_cf_fix</span> <span class="o">=</span> <span class="p">[</span><span class="n">cf</span> <span class="o">*</span> <span class="n">d</span> <span class="k">for</span> <span class="n">cf</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">cf_fix</span><span class="p">,</span> <span class="n">df</span><span class="p">)]</span>
+
+<span class="n">B_fix</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">pv_cf_fix</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Fixed Leg Value = </span><span class="si">{</span><span class="n">B_fix</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+
+<span class="c1"># Floating Leg</span>
+<span class="n">floating_rate</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">libor_rates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># libor rate has to be converted from contiuous compounding to semiannual comp.</span>
+<span class="n">cf_float</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">+</span> <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">floating_rate</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span> <span class="c1"># 1/2 of converted libor_rate as semiannual payment</span>
+<span class="n">pv_cf_float</span> <span class="o">=</span> <span class="n">cf_float</span> <span class="o">*</span> <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># discounted with 3-month libor rate</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Floating Leg Value = </span><span class="si">{</span><span class="n">pv_cf_float</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+
+<span class="c1"># Interest Rate Swap Valuation (from a fixed-rate payer&#39;s perspective)</span>
+<span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="n">pv_cf_float</span> <span class="o">-</span> <span class="n">B_fix</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Interest Rate Swap Value = </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Fixed Leg Value = 95.58716101349117
+Floating Leg Value = 100.00000000000001
+Interest Rate Swap Value = 4.412838986508845
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[76]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pv_cf_float</span><span class="o">/</span><span class="n">B_fix</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[76]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+1.0461656036199884
+</pre></div></div>
+</div>
+</section>
+<section id="Valuation-in-terms-of-forward-rate-agreements">
+<h3>Valuation in terms of forward rate agreements<a class="headerlink" href="#Valuation-in-terms-of-forward-rate-agreements" title="Link to this heading"></a></h3>
+<p>As before, the value of the interest rate swap is given as the difference between the present value of the fixed and the floating leg.</p>
+<p><strong>Fixed Leg</strong></p>
+<p>The present value of the fixed leg is given by:</p>
+<div class="math notranslate nohighlight">
+\[PV_{fixed}(t) = rN\sum_{i=1}^n\tau_iD_i\]</div>
+<p>with <span class="math notranslate nohighlight">\(t\)</span> as the valuation date, <span class="math notranslate nohighlight">\(r\)</span> as the interest rate of the fixed leg, <span class="math notranslate nohighlight">\(N\)</span> as the notional principal, <span class="math notranslate nohighlight">\(i\)</span> as the <span class="math notranslate nohighlight">\(i^{th}\)</span> cashflow, <span class="math notranslate nohighlight">\(\tau_i\)</span> as the accrual period for the <span class="math notranslate nohighlight">\(i^{th}\)</span> cashflow and <span class="math notranslate nohighlight">\(D_i\)</span> as the discount factor of the <span class="math notranslate nohighlight">\(i^{th}\)</span> period.</p>
+<p><strong>Floating Leg</strong></p>
+<p>The present value of the float leg is given by:</p>
+<div class="math notranslate nohighlight">
+\[PV_{floating}(t)=N\sum_{i=1}^n(F_i+s)\tau_iD_i\]</div>
+<p>with <span class="math notranslate nohighlight">\(F_i\)</span> as the simply compounded forward rate defined as <span class="math notranslate nohighlight">\(\frac{1}{\tau_i}(\frac{D_{i-1}}{D_i}-1)\)</span>, <span class="math notranslate nohighlight">\(s\)</span> as the floating spread and the rest defined as before.</p>
+<p>Note that the discount factors used for the forward rate can be different from the discount factor used to discount the cashflows. Also, a different discount factors from the fixed leg are theoretically possible.</p>
+<p>The following code manually calculates the value of the interest-rate swap. Thereby, the formula for the floating leg assuming that there is no spread <span class="math notranslate nohighlight">\(s\)</span> is simplified as follows:</p>
+<p><span class="math">\begin{align}
+PV_{floating}(t) & =N\sum_{i=1}^n\frac{1}{\tau_i}(\frac{D_{i-1}}{D_i}-1)\tau_iD_i \\
+& =N\sum_{i=1}^n(\frac{D_{i-1}}{D_i}-1)D_i \\
+& =N\sum_{i=1}^n(D_{i-1}-{D_i}) \\
+& =N\cdot[(D_0-D_1)+(D_1-D_2)+ ... +(D_{n-2}-D_{n-1})+(D_{n-1}-D_n)] \\
+& =N\cdot(D_0-D_n)
+\end{align}</span></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[77]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ttm</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">]</span>
+<span class="n">rates</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.105</span><span class="p">,</span> <span class="mf">0.11</span><span class="p">]</span>
+<span class="n">yf</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">1.25</span><span class="p">]</span>
+<span class="n">r</span> <span class="o">=</span> <span class="mf">0.08</span>
+<span class="n">N</span> <span class="o">=</span> <span class="mi">100</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">r</span> <span class="o">*</span> <span class="n">tm</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span><span class="p">,</span> <span class="n">tm</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rates</span><span class="p">,</span> <span class="n">ttm</span><span class="p">)]</span>
+
+<span class="n">PV_fix</span> <span class="o">=</span> <span class="n">r</span> <span class="o">*</span> <span class="n">N</span> <span class="o">*</span> <span class="p">((</span><span class="n">ttm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">ttm</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ttm</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">df</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">ttm</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">ttm</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">df</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;PV fixed leg =&#39;</span><span class="p">,</span><span class="n">PV_fix</span><span class="p">)</span>
+
+<span class="n">PV_fl</span> <span class="o">=</span> <span class="n">N</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PV floating leg = </span><span class="si">{</span><span class="n">PV_fl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Interest rate swap value = </span><span class="si">{</span><span class="n">PV_fl</span><span class="o">-</span><span class="n">PV_fix</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="c1"># PV fixed leg = 10.797790604699582</span>
+<span class="c1"># PV floating leg = 15.210629591208413</span>
+<span class="c1"># Interest rate swap value = 4.412838986508831</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+PV fixed leg = 10.797790604699582
+PV floating leg = 15.210629591208413
+Interest rate swap value = 4.412838986508831
+</pre></div></div>
+</div>
+<p>The following code shows the manual calculation of the example as it is done by Hull:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[78]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ttm</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">]</span>
+<span class="n">rates</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.105</span><span class="p">,</span> <span class="mf">0.11</span><span class="p">]</span>
+<span class="n">N</span> <span class="o">=</span> <span class="mi">100</span> <span class="c1"># Notional</span>
+<span class="n">m</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># compounding frequency</span>
+
+<span class="n">ref_date</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2017</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="n">days_to_maturity</span> <span class="o">=</span> <span class="p">[</span><span class="mi">180</span><span class="p">,</span> <span class="mi">360</span><span class="p">,</span> <span class="mi">540</span><span class="p">]</span>
+<span class="n">dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">ref_date</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">]</span>
+
+<span class="c1"># discount factors from constant rate</span>
+<span class="n">df</span> <span class="o">=</span> <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">r</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rates</span><span class="p">,</span> <span class="n">ttm</span><span class="p">)]</span>
+
+<span class="c1"># Fixed leg</span>
+<span class="n">fix_cf</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">pv_fix</span> <span class="o">=</span> <span class="p">[</span><span class="n">cf</span> <span class="o">*</span> <span class="n">d</span> <span class="k">for</span> <span class="n">cf</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">fix_cf</span><span class="p">,</span> <span class="n">df</span><span class="p">)]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Present value fixed leg = </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">pv_fix</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="c1"># Floating leg</span>
+<span class="n">floatrates</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span> <span class="o">*</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">rates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">m</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">rates</span><span class="p">)):</span>
+    <span class="n">contrate</span> <span class="o">=</span> <span class="p">((</span><span class="n">rates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">ttm</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">rates</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">ttm</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">ttm</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">ttm</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">floatrates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span> <span class="o">*</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">contrate</span> <span class="o">/</span> <span class="n">m</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="n">float_cf</span> <span class="o">=</span> <span class="p">[</span><span class="n">fr</span> <span class="o">*</span> <span class="n">N</span> <span class="o">/</span> <span class="n">m</span> <span class="k">for</span> <span class="n">fr</span> <span class="ow">in</span> <span class="n">floatrates</span><span class="p">]</span>
+<span class="n">float_pv</span> <span class="o">=</span> <span class="p">[</span><span class="n">cf</span> <span class="o">*</span> <span class="n">d</span> <span class="k">for</span> <span class="n">cf</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">float_cf</span><span class="p">,</span> <span class="n">df</span><span class="p">)]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Present value floating leg = </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">float_pv</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="c1"># Net Cash-Flow</span>
+<span class="n">net_CF</span> <span class="o">=</span> <span class="p">[</span><span class="n">fl</span> <span class="o">-</span> <span class="n">fx</span> <span class="k">for</span> <span class="n">fl</span><span class="p">,</span> <span class="n">fx</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">float_cf</span><span class="p">,</span> <span class="n">fix_cf</span><span class="p">)]</span>
+<span class="n">pv_net_cf</span> <span class="o">=</span> <span class="p">[</span><span class="n">cf</span> <span class="o">*</span> <span class="n">d</span> <span class="k">for</span> <span class="n">cf</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">net_CF</span><span class="p">,</span> <span class="n">df</span><span class="p">)]</span>
+<span class="n">value</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">pv_net_cf</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Interest rate swap value = </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="c1"># Present value fixed leg = 10.797790604699582</span>
+<span class="c1"># Present value floating leg = 15.210629591208427</span>
+<span class="c1"># Interest rate swap value = 4.412838986508847</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Present value fixed leg = 10.797790604699582
+Present value floating leg = 15.210629591208429
+Interest rate swap value = 4.412838986508847
+</pre></div></div>
+</div>
+</section>
+<section id="Valuation-using-the-interest-rate-swap-specification">
+<h3>Valuation using the interest rate swap specification<a class="headerlink" href="#Valuation-using-the-interest-rate-swap-specification" title="Link to this heading"></a></h3>
+<p>The pyvacon interest rate swap specification uses the valuation in terms of forward rate agreements. In order to price an interest rate swap, we need to create the necessary market data and setup the specification and pricing data.</p>
+<section id="Create-the-necessary-market-data">
+<h4>Create the necessary market data<a class="headerlink" href="#Create-the-necessary-market-data" title="Link to this heading"></a></h4>
+<p>As a first step, we need to create a discount curve containing the discount factors to derive the present values of both, the fixed and the floating leg. Here, we use this discount curve to derive the forward rate discount factors as well. Theoretically, we could also use different discount curves for the fixed and floating legs as well as for the forward rates.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[79]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Discount curve - we use these discount factors to get the present values of both the fixed and floating leg as well as</span>
+
+<span class="n">object_id</span> <span class="o">=</span> <span class="s2">&quot;TEST_DC&quot;</span>
+<span class="n">refdatedc</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2017</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">days_to_maturity</span> <span class="o">=</span> <span class="p">[</span><span class="mi">180</span><span class="p">,</span> <span class="mi">360</span><span class="p">,</span> <span class="mi">540</span><span class="p">]</span>
+<span class="n">dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">refdatedc</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">]</span>
+<span class="c1"># discount factors from constant rate</span>
+<span class="n">rates</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.10</span><span class="p">,</span> <span class="mf">0.105</span><span class="p">,</span> <span class="mf">0.11</span><span class="p">]</span>
+<span class="n">df</span> <span class="o">=</span> <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">r</span> <span class="o">*</span> <span class="n">d</span> <span class="o">/</span> <span class="mi">360</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rates</span><span class="p">,</span> <span class="n">days_to_maturity</span><span class="p">)]</span>
+<span class="n">dc</span> <span class="o">=</span> <span class="n">DiscountCurve</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">object_id</span><span class="p">,</span> <span class="n">refdate</span><span class="o">=</span><span class="n">refdatedc</span><span class="p">,</span> <span class="n">dates</span><span class="o">=</span><span class="n">dates</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">InterpolationType</span><span class="o">.</span><span class="n">LINEAR</span><span class="p">,</span> <span class="n">extrapolation</span><span class="o">=</span><span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">LINEAR</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[80]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># #test market data</span>
+<span class="c1"># ref_date = dt.datetime(2019, 8, 31)</span>
+<span class="c1"># dates = [dt.datetime(2019, 8, 31), dt.datetime(2020, 8, 31)]</span>
+<span class="c1"># df = [1.0, 0.9900633419771339]</span>
+<span class="c1"># dc = DiscountCurve(id=object_id, refdate=refdatedc, dates=dates, df=df, interpolation=InterpolationType.LINEAR, extrapolation=ExtrapolationType.LINEAR)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Setup-the-specification">
+<h4>Setup the specification<a class="headerlink" href="#Setup-the-specification" title="Link to this heading"></a></h4>
+<p>Here, we need to provide the start-, end-, and pay-dates for the different accrual periods. The floating leg additionally needs a reset date vector. Moreover, we need to define a vector of notionals since if needed, each accrual period may have a different notional. However, if the vector if of length 1, the same notional is applied to all periods.</p>
+<p>Having defined the relevant information, we are able to create the fixed- and floating leg. The fixed leg needs to be provided with the fixed rate; the float leg requires information about an eventual spread. Afterwards, the interest rate swap specification can be set.</p>
+</section>
+</section>
+<section id="Setting-up-an-interest-rate-swap">
+<h3>Setting up an interest rate swap<a class="headerlink" href="#Setting-up-an-interest-rate-swap" title="Link to this heading"></a></h3>
+<p>A plain vanilla interest rate swap is a financial contract in which a stream of fixed payments is exchanged for floating payments linked to a reference index. The par rate (r) of a swap is the fixed rate under which the value of the two streams (legs) is equal:</p>
+<div class="math notranslate nohighlight">
+\[r \cdot \sum_{i=1}^n dcf_{i} \cdot P(0,t_{i} ) = \sum_{k=1}^m F_{k} \cdot dcf_{k} \cdot P(0,t_{k})\]</div>
+<p>where <span class="math notranslate nohighlight">\(t_{i}\)</span>, <span class="math notranslate nohighlight">\(i=1,..,n\)</span> and <span class="math notranslate nohighlight">\(t_{k}\)</span>, <span class="math notranslate nohighlight">\(i=1,..,m\)</span> are the payment structures of the fixed and floating legs, and <span class="math notranslate nohighlight">\(P(0,t_{i/k})\)</span> are the corresponding discount factors, <span class="math notranslate nohighlight">\(dcf_{i/k}\)</span> is the day count fraction for the period <span class="math notranslate nohighlight">\([t_{(i/k-1)},t_{i/k}]\)</span>, and <span class="math notranslate nohighlight">\(F_{k}\)</span> is the expected value of underlying reference rate for the period <span class="math notranslate nohighlight">\([t_{(k-1)},t_{k}]\)</span>.</p>
+<p>The standard payment frequency of the fixed leg depends on the currency of the swap as well as the tenor of the underlying. In the EUR market swaps are usually quoted with annual fixed payments.</p>
+<p>The payment frequency of the floating leg usually coincides with the tenor of the underlying reference index. In some currencies, however, the floating rate can be compounded and payed out at less frequent intervals (e.g. CAD).</p>
+<p>In the context of pyvacon an IRS can be defined using an InterestRateSwapSpecification.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[81]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># # Create the vectors defining the statdates, enddates, paydates and reset dates</span>
+<span class="n">days_to_maturity</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">360</span><span class="p">,</span> <span class="mi">540</span><span class="p">]</span>
+<span class="n">dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2017</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">]</span>
+
+<span class="n">startdates</span> <span class="o">=</span> <span class="n">dates</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">enddates</span> <span class="o">=</span> <span class="n">dates</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+<span class="n">paydates</span> <span class="o">=</span> <span class="n">enddates</span>
+<span class="n">resetdates</span> <span class="o">=</span> <span class="n">startdates</span>
+<span class="n">refdate</span> <span class="o">=</span> <span class="n">dates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+
+<span class="n">fixed_leg</span> <span class="o">=</span> <span class="n">IrFixedLegSpecification</span><span class="p">(</span><span class="n">fixed_rate</span> <span class="o">=</span> <span class="mf">0.08</span><span class="p">,</span> <span class="n">obj_id</span> <span class="o">=</span> <span class="s1">&#39;dummy_fixed_leg&#39;</span><span class="p">,</span> <span class="n">notional</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span>
+                                    <span class="n">start_dates</span><span class="o">=</span><span class="n">startdates</span><span class="p">,</span> <span class="n">end_dates</span><span class="o">=</span><span class="n">enddates</span><span class="p">,</span> <span class="n">pay_dates</span><span class="o">=</span><span class="n">paydates</span><span class="p">,</span> <span class="n">currency</span><span class="o">=</span><span class="s1">&#39;EUR&#39;</span><span class="p">,</span> <span class="n">day_count_convention</span><span class="o">=</span><span class="s1">&#39;Act360&#39;</span><span class="p">)</span>
+
+<span class="n">spread</span> <span class="o">=</span> <span class="mf">0.00</span>
+
+
+<span class="n">ns</span> <span class="o">=</span> <span class="n">ConstNotionalStructure</span><span class="p">(</span><span class="mf">100.0</span><span class="p">)</span>
+
+<span class="n">float_leg</span> <span class="o">=</span><span class="n">IrFloatLegSpecification</span><span class="p">(</span><span class="n">obj_id</span> <span class="o">=</span> <span class="s1">&#39;dummy_float_leg&#39;</span><span class="p">,</span> <span class="n">notional</span> <span class="o">=</span> <span class="n">ns</span><span class="p">,</span> <span class="n">reset_dates</span><span class="o">=</span><span class="n">resetdates</span><span class="p">,</span> <span class="n">start_dates</span><span class="o">=</span><span class="n">startdates</span><span class="p">,</span> <span class="n">end_dates</span><span class="o">=</span><span class="n">enddates</span><span class="p">,</span>
+                                   <span class="n">rate_start_dates</span><span class="o">=</span><span class="n">startdates</span><span class="p">,</span> <span class="n">rate_end_dates</span><span class="o">=</span><span class="n">enddates</span><span class="p">,</span> <span class="n">pay_dates</span><span class="o">=</span><span class="n">paydates</span><span class="p">,</span> <span class="n">currency</span> <span class="o">=</span> <span class="s2">&quot;EUR&quot;</span><span class="p">,</span>
+                                   <span class="n">udl_id</span><span class="o">=</span><span class="s2">&quot;test_udl_id&quot;</span><span class="p">,</span> <span class="n">fixing_id</span><span class="o">=</span><span class="s2">&quot;test_fixing_id&quot;</span><span class="p">,</span> <span class="n">day_count_convention</span><span class="o">=</span><span class="s2">&quot;Act360&quot;</span><span class="p">,</span> <span class="n">spread</span><span class="o">=</span><span class="n">spread</span><span class="p">)</span>
+
+<span class="n">maturity_date</span> <span class="o">=</span> <span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">600</span><span class="p">)</span>
+
+<span class="n">ir_swap</span> <span class="o">=</span> <span class="n">InterestRateSwapSpecification</span><span class="p">(</span><span class="n">obj_id</span><span class="o">=</span><span class="s2">&quot;dummy_swap&quot;</span><span class="p">,</span> <span class="n">notional</span><span class="o">=</span><span class="n">ns</span><span class="p">,</span> <span class="n">issue_date</span><span class="o">=</span><span class="n">refdate</span><span class="p">,</span> <span class="n">maturity_date</span><span class="o">=</span><span class="n">maturity_date</span><span class="p">,</span>
+                                        <span class="n">pay_leg</span><span class="o">=</span><span class="n">fixed_leg</span><span class="p">,</span> <span class="n">receive_leg</span><span class="o">=</span><span class="n">float_leg</span><span class="p">,</span><span class="n">currency</span><span class="o">=</span><span class="s1">&#39;EUR&#39;</span><span class="p">,</span> <span class="n">day_count_convention</span><span class="o">=</span><span class="s2">&quot;Act360&quot;</span><span class="p">,</span>
+                                        <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;DBK&quot;</span><span class="p">,</span> <span class="n">securitization_level</span><span class="o">=</span><span class="s2">&quot;COLLATERALIZED&quot;</span>
+                                        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="Setup-the-pricing-data">
+<h4>Setup the pricing data<a class="headerlink" href="#Setup-the-pricing-data" title="Link to this heading"></a></h4>
+<p>A product may be priced in two different ways: One may either fill the respective pricing data needed for a special pricer (which inherits from th BasePricingData) and use the respective price method where just the pricing data is given. Another possibility is to use the price-method where the storages are given. In this case, the pricer will fill the needed pricing data according to the underlying and other data as specified in the product specification.</p>
+<p><strong>Here we show the approach explicitely setting the pricing data.</strong></p>
+<p>The pricing data needs the following information:</p>
+<ul class="simple">
+<li><p>A discount curve for the pay- and receive leg</p></li>
+<li><p>A discount curve for the floating leg (here the receiving leg)</p></li>
+<li><p>A pricer</p></li>
+<li><p>A pricing request</p></li>
+<li><p>A valuation date</p></li>
+<li><p>The created interest rate swap specification</p></li>
+<li><p>An eventual FX-rate for the pay- and receive leg</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="n">pay_leg_pricing_data</span> <span class="o">=</span> <span class="n">InterestRateSwapLegPricingData_rivapy</span><span class="p">(</span>
+    <span class="n">spec</span><span class="o">=</span><span class="n">ir_swap</span><span class="o">.</span><span class="n">get_pay_leg</span><span class="p">(),</span>
+    <span class="n">discount_curve</span><span class="o">=</span><span class="n">dc</span><span class="p">,</span>
+    <span class="n">forward_curve</span><span class="o">=</span><span class="n">dc</span><span class="p">,</span>
+    <span class="n">fixing_map</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">fx_rate</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">weight</span><span class="o">=-</span><span class="mf">1.0</span>
+<span class="p">)</span>
+
+<span class="n">rec_leg_pricing_data</span> <span class="o">=</span> <span class="n">InterestRateSwapFloatLegPricingData_rivapy</span><span class="p">(</span>
+    <span class="n">spec</span><span class="o">=</span><span class="n">ir_swap</span><span class="o">.</span><span class="n">get_receive_leg</span><span class="p">(),</span>
+    <span class="n">discount_curve</span><span class="o">=</span><span class="n">dc</span><span class="p">,</span>
+    <span class="n">forward_curve</span><span class="o">=</span><span class="n">dc</span><span class="p">,</span>
+    <span class="n">fixing_map</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">fixing_grace_period</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">fixing_curve</span><span class="o">=</span><span class="n">dc</span><span class="p">,</span>
+    <span class="n">fx_rate</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">weight</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+
+<span class="n">pricing_data_all</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">pricing_data_all</span><span class="p">[</span><span class="s1">&#39;discount_curve_pay_leg&#39;</span><span class="p">]</span> <span class="o">=</span><span class="n">dc</span>
+<span class="n">pricing_data_all</span><span class="p">[</span><span class="s1">&#39;discount_curve_receive_leg&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">dc</span>
+<span class="n">pricing_data_all</span><span class="p">[</span><span class="s1">&#39;fixing_curve_pay_leg&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">dc</span>
+<span class="n">pricing_data_all</span><span class="p">[</span><span class="s1">&#39;fixing_curve_receive_leg&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">dc</span>
+<span class="n">pricing_data_all</span><span class="p">[</span><span class="s1">&#39;fx_fwd_curve_pay_leg&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">dc</span>
+<span class="n">pricing_data_all</span><span class="p">[</span><span class="s1">&#39;fx_fwd_curve_receive_leg&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">dc</span>
+<span class="n">pricing_data_all</span><span class="p">[</span><span class="s1">&#39;pricing_param&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;fixing_grace_period&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+<span class="n">pricing_data_all</span><span class="p">[</span><span class="s1">&#39;fixing_map&#39;</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span>
+<span class="n">pricing_data_all</span><span class="p">[</span><span class="s1">&#39;fx_pay_leg&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">1.0</span>
+<span class="n">pricing_data_all</span><span class="p">[</span><span class="s1">&#39;fx_receive_leg&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">1.0</span>
+
+<span class="n">ir_swap_pr</span> <span class="o">=</span> <span class="n">InterestRateSwapPricingRequest</span><span class="p">()</span>
+<br/><br/></pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[83]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ir_swap_pricing_data</span> <span class="o">=</span> <span class="n">InterestRateSwapPricingData_rivapy</span><span class="p">(</span>
+    <span class="n">spec</span><span class="o">=</span><span class="n">ir_swap</span><span class="p">,</span>
+    <span class="n">val_date</span><span class="o">=</span><span class="n">ref_date</span><span class="p">,</span>
+    <span class="n">pricing_request</span> <span class="o">=</span> <span class="n">ir_swap_pr</span><span class="p">,</span>
+    <span class="n">pricer</span><span class="o">=</span><span class="s2">&quot;InterestRateSwapPricer&quot;</span><span class="p">,</span>
+    <span class="n">ccy</span><span class="o">=</span><span class="s1">&#39;EUR&#39;</span><span class="p">,</span>
+    <span class="n">leg_pricing_data</span><span class="o">=</span><span class="n">pricing_data_all</span> <span class="c1"># previousl this heald the pricingData objects for each leg...</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Pricing">
+<h4>Pricing<a class="headerlink" href="#Pricing" title="Link to this heading"></a></h4>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[84]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># tic = dt.datetime.now()</span>
+<span class="c1"># pr = price(ir_swap_pricing_data)</span>
+<span class="c1"># print(f&#39;runtime: {dt.datetime.now() - tic}&#39;)</span>
+<span class="c1"># pr.getPrice()</span>
+
+
+<span class="n">tic</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+<span class="n">pr</span> <span class="o">=</span> <span class="n">ir_swap_pricing_data</span><span class="o">.</span><span class="n">price</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;runtime: </span><span class="si">{</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">tic</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Price: </span><span class="si">{</span><span class="n">pr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># runtime: 0:00:00.000938</span>
+<span class="c1"># 4.412838984470563</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;rivapy.marketdata.curves.DiscountCurve object at 0x00000219816C7680&gt;
+runtime: 0:00:00.001991
+Price: 4.522463649728445
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="Further-Example">
+<h3>Further Example<a class="headerlink" href="#Further-Example" title="Link to this heading"></a></h3>
+<section id="id1">
+<h4>Create the necessary market data<a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
+<p>This time, we distinguish between the discount curve used to discount the cashflows to present values and a discount curve for the calculation of the forward interest rates which we use as fixing curve.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[85]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refdatedc</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2017</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">days_to_maturity</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">365</span><span class="p">,</span> <span class="mi">720</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">365</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">365</span><span class="p">,</span> <span class="mi">10</span> <span class="o">*</span> <span class="mi">365</span><span class="p">]</span>
+<span class="n">dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">refdatedc</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">]</span>
+
+<span class="c1"># Discount curve</span>
+<span class="n">object_id</span> <span class="o">=</span> <span class="s2">&quot;TEST_DC&quot;</span>
+<span class="n">dsc_rate</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="n">df</span> <span class="o">=</span> <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">d</span> <span class="o">/</span> <span class="mf">365.0</span> <span class="o">*</span> <span class="n">dsc_rate</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">]</span>
+<span class="n">dc</span> <span class="o">=</span> <span class="n">DiscountCurve</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">object_id</span><span class="p">,</span> <span class="n">refdate</span><span class="o">=</span><span class="n">refdatedc</span><span class="p">,</span> <span class="n">dates</span><span class="o">=</span><span class="n">dates</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+
+<span class="c1"># Fixing curves</span>
+<span class="n">object_id</span> <span class="o">=</span> <span class="s2">&quot;TEST_fwd_&quot;</span>
+<span class="n">fwd_rate</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;3m&#39;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span> <span class="s1">&#39;6m&#39;</span><span class="p">:</span> <span class="mf">0.052</span><span class="p">}</span>
+<span class="n">fwd_df</span> <span class="o">=</span> <span class="p">{</span><span class="n">t</span><span class="p">:</span> <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">d</span> <span class="o">/</span> <span class="mf">365.0</span> <span class="o">*</span> <span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">fwd_rate</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<span class="n">fwd_dc</span> <span class="o">=</span> <span class="p">{</span><span class="n">t</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">object_id</span> <span class="o">+</span> <span class="n">t</span><span class="p">,</span> <span class="n">refdate</span><span class="o">=</span><span class="n">refdatedc</span><span class="p">,</span> <span class="n">dates</span><span class="o">=</span><span class="n">dates</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">fwd_df</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<br/><br/></pre></div>
+</div>
+</div>
+</section>
+<section id="id2">
+<h4>Setup the specification<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<p>In our example we are using one fixed leg and one floating leg (with just two payment and fixing dates) The swap needs to get vectors with start, end, and payment dates (floater additionally need a rest date vector). The i-th accrual period is defined by the i-th entry of start and end vectors. Note that this kind of swap has only floating legs with floating rate period equal to accrual period.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[86]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create the vectors defining the statdates, enddates, paydates and reset dates</span>
+<span class="n">days_to_maturity</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">360</span><span class="p">,</span> <span class="mi">540</span><span class="p">]</span>
+<span class="n">dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2017</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">]</span>
+
+<span class="n">startdates</span> <span class="o">=</span> <span class="n">dates</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">enddates</span> <span class="o">=</span> <span class="n">dates</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+<span class="n">paydates</span> <span class="o">=</span> <span class="n">enddates</span>
+<span class="n">resetdates</span> <span class="o">=</span> <span class="n">startdates</span>
+<span class="n">refdate</span> <span class="o">=</span> <span class="n">dates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># We need a vector of notionals since if needed, each accrual period may have a different notional</span>
+<span class="c1"># However, if the vector is of length 1 the same notional is applied to all periods</span>
+
+<span class="n">notionals</span> <span class="o">=</span> <span class="n">ConstNotionalStructure</span><span class="p">(</span><span class="mf">100.0</span><span class="p">)</span>
+
+<span class="n">fixedleg</span> <span class="o">=</span> <span class="n">IrFixedLegSpecification</span><span class="p">(</span><span class="mf">0.03</span><span class="p">,</span> <span class="s2">&quot;fixed_leg&quot;</span><span class="p">,</span> <span class="n">notionals</span><span class="p">,</span> <span class="n">startdates</span><span class="p">,</span> <span class="n">enddates</span><span class="p">,</span> <span class="n">paydates</span><span class="p">,</span><span class="s1">&#39;EUR&#39;</span><span class="p">,</span> <span class="s1">&#39;Act365Fixed&#39;</span><span class="p">)</span>
+<span class="n">spread</span> <span class="o">=</span> <span class="mf">0.00</span>
+<span class="n">floatleg</span> <span class="o">=</span> <span class="n">IrFloatLegSpecification</span><span class="p">(</span><span class="s2">&quot;float_leg&quot;</span><span class="p">,</span> <span class="n">notionals</span><span class="p">,</span> <span class="n">resetdates</span><span class="p">,</span> <span class="n">startdates</span><span class="p">,</span> <span class="n">enddates</span><span class="p">,</span><span class="n">startdates</span><span class="p">,</span> <span class="n">enddates</span><span class="p">,</span> <span class="n">paydates</span><span class="p">,</span><span class="s1">&#39;EUR&#39;</span><span class="p">,</span>
+                                   <span class="s2">&quot;dummy_udl&quot;</span><span class="p">,</span> <span class="s2">&quot;dummy_fixing_id&quot;</span><span class="p">,</span> <span class="s1">&#39;Act365Fixed&#39;</span><span class="p">,</span><span class="s1">&#39;Act365Fixed&#39;</span><span class="p">,</span> <span class="n">spread</span><span class="p">)</span>
+
+<span class="n">ir_swap</span> <span class="o">=</span> <span class="n">InterestRateSwapSpecification</span><span class="p">(</span><span class="s1">&#39;TEST_SWAP&#39;</span><span class="p">,</span> <span class="n">notionals</span><span class="p">,</span> <span class="n">refdate</span><span class="p">,</span> <span class="n">paydates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">fixedleg</span><span class="p">,</span> <span class="n">floatleg</span><span class="p">,</span> <span class="s2">&quot;EUR&quot;</span><span class="p">,</span>
+                                        <span class="n">day_count_convention</span><span class="o">=</span><span class="s2">&quot;Act365Fixed&quot;</span><span class="p">,</span>
+                                        <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;DBK&quot;</span><span class="p">,</span> <span class="n">securitization_level</span><span class="o">=</span><span class="s2">&quot;COLLATERALIZED&quot;</span>
+                                        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Setup-the-pricer-object">
+<h4>Setup the pricer object<a class="headerlink" href="#Setup-the-pricer-object" title="Link to this heading"></a></h4>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[87]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ir_pricer</span> <span class="o">=</span> <span class="n">InterestRateSwapPricer</span><span class="p">(</span>
+    <span class="n">val_date</span><span class="o">=</span><span class="n">refdate</span><span class="p">,</span>
+    <span class="n">spec</span><span class="o">=</span><span class="n">ir_swap</span><span class="p">,</span>
+    <span class="n">discount_curve_pay_leg</span><span class="o">=</span><span class="n">dc</span><span class="p">,</span>
+    <span class="n">discount_curve_receive_leg</span><span class="o">=</span><span class="n">dc</span><span class="p">,</span>
+    <span class="n">fixing_curve_pay_leg</span><span class="o">=</span><span class="n">dc</span><span class="p">,</span>
+    <span class="n">fixing_curve_receive_leg</span><span class="o">=</span><span class="n">fwd_dc</span><span class="p">[</span><span class="s1">&#39;6m&#39;</span><span class="p">],</span>
+    <span class="n">fx_fwd_curve_pay_leg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">fx_fwd_curve_receive_leg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">pricing_request</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">pricing_param</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;fixing_grace_period&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">},</span>
+<span class="p">)</span>
+<br/><br/></pre></div>
+</div>
+</div>
+</section>
+<section id="id3">
+<h4>Pricing<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[88]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tic</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+<span class="n">pr</span> <span class="o">=</span> <span class="n">ir_pricer</span><span class="o">.</span><span class="n">price</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;runtime: </span><span class="si">{</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">tic</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pr</span><span class="p">)</span>
+
+<span class="c1"># runtime: 0:00:00.013420</span>
+<span class="c1"># 3.3213902674791154</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+runtime: 0:00:00.007013
+3.3213902680066774
+</pre></div></div>
+</div>
+</section>
+</section>
+</section>
+<section id="Tenor-Basis-Swap">
+<h2>Tenor Basis Swap<a class="headerlink" href="#Tenor-Basis-Swap" title="Link to this heading"></a></h2>
+<p>There are two types of tenor basis swaps:</p>
+<ul class="simple">
+<li><p>In most currencies, a tenor basis swap consists of two float legs (e.g. 3M-USD-Libor vs 6M-USD-Libor) where the on the leg with the shorter tenor (in this case the 3M leg) there is an additional spread (the “basis”).</p></li>
+<li><p>In EUR, a the “basis” is quoted as the difference of swap rates between two vanilla swaps with different float leg tenor (e.g. [swap rate of 6M-Euribor-Swap] - [swap rate of 3M-Euribor-Swap]). This is equivalent to a swap with three legs:</p>
+<ul>
+<li><p>a floating leg which pays 3M-Euribor</p></li>
+<li><p>a floating leg which receives 6M-Euribor</p></li>
+<li><p>a fixed leg which pays the basis (usually annually)</p></li>
+</ul>
+</li>
+</ul>
+<p>In either case, if the discount curve and one of the forward (projection) curve are known, a strip of tenor basis swap quotes can be used to bootstrap the other forward curve.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[89]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up curves</span>
+<span class="c1"># Discount curve</span>
+<span class="n">object_id</span> <span class="o">=</span> <span class="s2">&quot;TEST_DC&quot;</span>
+<span class="n">dsc_rate</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="n">df</span> <span class="o">=</span> <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">d</span> <span class="o">/</span> <span class="mf">365.0</span> <span class="o">*</span> <span class="n">dsc_rate</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">]</span>
+<span class="n">dc</span> <span class="o">=</span> <span class="n">DiscountCurve</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">object_id</span><span class="p">,</span> <span class="n">refdate</span><span class="o">=</span><span class="n">refdatedc</span><span class="p">,</span> <span class="n">dates</span><span class="o">=</span><span class="n">dates</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">interpolation</span> <span class="o">=</span> <span class="n">InterpolationType</span><span class="o">.</span><span class="n">LINEAR_LOG</span><span class="p">,</span> <span class="n">extrapolation</span><span class="o">=</span><span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">LINEAR_LOG</span><span class="p">)</span>
+
+<span class="c1"># Fixing curves</span>
+<span class="n">object_id</span> <span class="o">=</span> <span class="s2">&quot;TEST_fwd_&quot;</span>
+<span class="n">fwd_rate</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;3m&#39;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span> <span class="s1">&#39;6m&#39;</span><span class="p">:</span> <span class="mf">0.052</span><span class="p">}</span>
+<span class="n">fwd_df</span> <span class="o">=</span> <span class="p">{</span><span class="n">t</span><span class="p">:</span> <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">d</span> <span class="o">/</span> <span class="mf">365.0</span> <span class="o">*</span> <span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">fwd_rate</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<span class="n">fwd_dc</span> <span class="o">=</span> <span class="p">{</span><span class="n">t</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">object_id</span> <span class="o">+</span> <span class="n">t</span><span class="p">,</span> <span class="n">refdate</span><span class="o">=</span><span class="n">refdatedc</span><span class="p">,</span> <span class="n">dates</span><span class="o">=</span><span class="n">dates</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">interpolation</span> <span class="o">=</span> <span class="n">InterpolationType</span><span class="o">.</span><span class="n">LINEAR_LOG</span><span class="p">,</span> <span class="n">extrapolation</span><span class="o">=</span><span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">LINEAR_LOG</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">fwd_df</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[90]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># set up two payer swaps (receive 3m/6m-Euribor, pay fixed)</span>
+<span class="n">refdate</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2017</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">days</span> <span class="o">=</span> <span class="mi">720</span>
+<span class="n">tenor_in_days</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;3m&#39;</span><span class="p">:</span> <span class="mi">90</span><span class="p">,</span> <span class="s1">&#39;6m&#39;</span><span class="p">:</span> <span class="mi">180</span><span class="p">,</span> <span class="s1">&#39;12m&#39;</span><span class="p">:</span> <span class="mi">360</span><span class="p">}</span>
+<span class="n">spread</span> <span class="o">=</span> <span class="mf">0.002</span>
+<span class="n">swap_rate_3m</span> <span class="o">=</span> <span class="mf">.03</span>
+<span class="n">swap_rate_6m</span> <span class="o">=</span> <span class="n">swap_rate_3m</span> <span class="o">+</span> <span class="n">spread</span>
+<span class="n">swap_rates</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;3m&#39;</span><span class="p">:</span> <span class="n">swap_rate_3m</span><span class="p">,</span> <span class="s1">&#39;6m&#39;</span><span class="p">:</span> <span class="n">swap_rate_6m</span><span class="p">}</span>
+<span class="n">days_to_maturity</span> <span class="o">=</span> <span class="p">{</span><span class="n">t</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">days</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tenor_days</span><span class="p">))</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">tenor_days</span> <span class="ow">in</span> <span class="n">tenor_in_days</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<span class="n">notionals</span> <span class="o">=</span> <span class="n">ConstNotionalStructure</span><span class="p">(</span><span class="mf">100.0</span><span class="p">)</span>
+<span class="n">ccy</span> <span class="o">=</span> <span class="s1">&#39;EUR&#39;</span>
+<span class="n">swaps</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">swap_pricer</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">t_fix</span> <span class="o">=</span> <span class="s1">&#39;12m&#39;</span>
+<span class="n">dates_fix</span> <span class="o">=</span> <span class="p">[</span><span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">[</span><span class="n">t_fix</span><span class="p">]]</span>
+
+<span class="k">for</span> <span class="n">t_fl</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;3m&#39;</span><span class="p">,</span> <span class="s1">&#39;6m&#39;</span><span class="p">]:</span>
+<span class="c1"># set up specification</span>
+    <span class="n">tenor_days_fl</span> <span class="o">=</span> <span class="n">tenor_in_days</span><span class="p">[</span><span class="n">t_fl</span><span class="p">]</span>
+    <span class="n">dates_fl</span> <span class="o">=</span> <span class="p">[</span><span class="n">refdate</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">days_to_maturity</span><span class="p">[</span><span class="n">t_fl</span><span class="p">]]</span>
+
+
+    <span class="n">fixedleg</span> <span class="o">=</span> <span class="n">IrFixedLegSpecification</span><span class="p">(</span><span class="n">swap_rates</span><span class="p">[</span><span class="n">t_fl</span><span class="p">],</span> <span class="s2">&quot;fixed_leg&quot;</span><span class="p">,</span> <span class="n">notionals</span><span class="p">,</span> <span class="n">dates_fix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dates_fix</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">dates_fix</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span><span class="n">ccy</span><span class="p">,</span> <span class="s1">&#39;Act365Fixed&#39;</span><span class="p">)</span>
+
+    <span class="n">floatleg</span> <span class="o">=</span> <span class="n">IrFloatLegSpecification</span><span class="p">(</span><span class="s2">&quot;float_leg&quot;</span><span class="p">,</span> <span class="n">notionals</span><span class="p">,</span> <span class="n">dates_fl</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dates_fl</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dates_fl</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">dates_fl</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dates_fl</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">dates_fl</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span><span class="n">ccy</span><span class="p">,</span>
+                                    <span class="s2">&quot;dummy_udl&quot;</span><span class="p">,</span> <span class="s2">&quot;dummy_fixing_id&quot;</span><span class="p">,</span> <span class="s1">&#39;Act365Fixed&#39;</span><span class="p">,</span><span class="s1">&#39;Act365Fixed&#39;</span><span class="p">,</span> <span class="n">spread</span><span class="p">)</span>
+
+    <span class="n">swaps</span><span class="p">[</span><span class="n">t_fl</span><span class="p">]</span> <span class="o">=</span> <span class="n">InterestRateSwapSpecification</span><span class="p">(</span><span class="s1">&#39;TEST_SWAP&#39;</span><span class="p">,</span> <span class="n">notionals</span><span class="p">,</span> <span class="n">refdate</span><span class="p">,</span> <span class="n">paydates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">fixedleg</span><span class="p">,</span> <span class="n">floatleg</span><span class="p">,</span> <span class="s2">&quot;EUR&quot;</span><span class="p">,</span>
+                                            <span class="n">day_count_convention</span><span class="o">=</span><span class="s2">&quot;Act365Fixed&quot;</span><span class="p">,</span>
+                                            <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;DBK&quot;</span><span class="p">,</span> <span class="n">securitization_level</span><span class="o">=</span><span class="s2">&quot;COLLATERALIZED&quot;</span>
+                                            <span class="p">)</span>
+
+
+    <span class="c1">#set up pricing data</span>
+    <span class="n">swap_pricer</span><span class="p">[</span><span class="n">t_fl</span><span class="p">]</span> <span class="o">=</span> <span class="n">ir_pricer</span> <span class="o">=</span> <span class="n">InterestRateSwapPricer</span><span class="p">(</span>
+                <span class="n">val_date</span><span class="o">=</span><span class="n">refdate</span><span class="p">,</span>
+                <span class="n">spec</span><span class="o">=</span><span class="n">swaps</span><span class="p">[</span><span class="n">t_fl</span><span class="p">],</span>
+                <span class="n">discount_curve_pay_leg</span><span class="o">=</span><span class="n">dc</span><span class="p">,</span>
+                <span class="n">discount_curve_receive_leg</span><span class="o">=</span><span class="n">dc</span><span class="p">,</span>
+                <span class="n">fixing_curve_pay_leg</span><span class="o">=</span><span class="n">dc</span><span class="p">,</span>
+                <span class="n">fixing_curve_receive_leg</span><span class="o">=</span><span class="n">fwd_dc</span><span class="p">[</span><span class="n">t_fl</span><span class="p">],</span>
+                <span class="n">fx_fwd_curve_pay_leg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">fx_fwd_curve_receive_leg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">pricing_request</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">pricing_param</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;fixing_grace_period&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">},</span>
+            <span class="p">)</span>
+<br/><br/><br/><br/><br/></pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[91]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Price the swaps</span>
+<span class="n">price_3m</span> <span class="o">=</span> <span class="n">swap_pricer</span><span class="p">[</span><span class="s1">&#39;3m&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">price</span><span class="p">()</span>
+<span class="n">price_6m</span> <span class="o">=</span> <span class="n">swap_pricer</span><span class="p">[</span><span class="s1">&#39;6m&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">price</span><span class="p">()</span>
+
+<span class="n">price_diff</span> <span class="o">=</span> <span class="n">price_6m</span> <span class="o">-</span> <span class="n">price_3m</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;3m payer swap: </span><span class="si">{</span><span class="n">price_3m</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;6m payer swap: </span><span class="si">{</span><span class="n">price_6m</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Difference: </span><span class="si">{</span><span class="n">price_diff</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+3m payer swap: 4.373913684160208
+6m payer swap: 4.433019638823725
+Difference: 0.05910595466351687
+</pre></div></div>
+</div>
+<hr class="docutils" />
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[92]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up basis swap</span>
+
+<span class="n">float_leg_3m</span> <span class="o">=</span> <span class="n">swaps</span><span class="p">[</span><span class="s1">&#39;3m&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_float_leg</span><span class="p">()</span>
+<span class="n">float_leg_6m</span> <span class="o">=</span> <span class="n">swaps</span><span class="p">[</span><span class="s1">&#39;6m&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_float_leg</span><span class="p">()</span>
+<span class="n">spread_leg</span> <span class="o">=</span> <span class="n">IrFixedLegSpecification</span><span class="p">(</span><span class="n">spread</span><span class="p">,</span> <span class="s1">&#39;spread_leg&#39;</span><span class="p">,</span><span class="n">notionals</span><span class="p">,</span> <span class="n">dates_fix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dates_fix</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">dates_fix</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">ccy</span><span class="p">,</span>
+                                   <span class="s1">&#39;Act365Fixed&#39;</span><span class="p">)</span>
+
+<span class="c1">#basis_swap = InterestRateBasisSwapSpecification(&#39;xx&#39;, &#39;dummy_issuer&#39;, &#39;COLLATERALIZED&#39;, ccy, dates_fix[-1], float_leg_6m, float_leg_3m, spread_leg)</span>
+<span class="n">basis_swap</span> <span class="o">=</span> <span class="n">InterestRateBasisSwapSpecification</span><span class="p">(</span>
+            <span class="n">obj_id</span><span class="o">=</span><span class="s2">&quot;basis_3m_6m&quot;</span><span class="p">,</span>
+            <span class="n">notional</span><span class="o">=</span><span class="n">notionals</span><span class="p">,</span>
+            <span class="n">issue_date</span><span class="o">=</span><span class="n">refdate</span><span class="p">,</span>
+            <span class="n">maturity_date</span><span class="o">=</span><span class="n">refdate</span> <span class="o">+</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">years</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">pay_leg</span><span class="o">=</span><span class="n">float_leg_3m</span><span class="p">,</span>
+            <span class="n">receive_leg</span><span class="o">=</span><span class="n">float_leg_6m</span><span class="p">,</span>
+            <span class="n">spread_leg</span><span class="o">=</span><span class="n">spread_leg</span><span class="p">,</span>
+            <span class="n">currency</span><span class="o">=</span><span class="n">ccy</span><span class="p">,</span>
+            <span class="n">day_count_convention</span><span class="o">=</span><span class="s2">&quot;Act365Fixed&quot;</span><span class="p">,</span>
+            <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;dummy_issuer&quot;</span><span class="p">,</span>
+            <span class="n">securitization_level</span><span class="o">=</span><span class="s2">&quot;COLLATERALIZED&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+<br/><br/></pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[93]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fair_bs_spread</span> <span class="o">=</span> <span class="n">InterestRateSwapPricer</span><span class="o">.</span><span class="n">compute_basis_spread</span><span class="p">(</span>
+            <span class="n">ref_date</span><span class="o">=</span><span class="n">refdate</span><span class="p">,</span>
+            <span class="n">discount_curve</span><span class="o">=</span><span class="n">dc</span><span class="p">,</span>
+            <span class="n">payLegFixingCurve</span><span class="o">=</span><span class="n">fwd_dc</span><span class="p">[</span><span class="s1">&#39;3m&#39;</span><span class="p">],</span>
+            <span class="n">receiveLegFixingCurve</span><span class="o">=</span><span class="n">fwd_dc</span><span class="p">[</span><span class="s1">&#39;6m&#39;</span><span class="p">],</span>
+            <span class="n">pay_leg</span><span class="o">=</span> <span class="n">basis_swap</span><span class="o">.</span><span class="n">get_pay_leg</span><span class="p">(),</span>
+            <span class="n">receive_leg</span><span class="o">=</span> <span class="n">basis_swap</span><span class="o">.</span><span class="n">get_receive_leg</span><span class="p">(),</span>
+            <span class="n">spread_leg</span><span class="o">=</span> <span class="n">basis_swap</span><span class="o">.</span><span class="n">get_spread_leg</span><span class="p">(),</span>
+
+            <span class="n">pricing_params</span><span class="o">=</span> <span class="p">{</span><span class="s2">&quot;fixing_grace_period&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;set_rate&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;desired_rate&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[94]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;3m/6m basis swap fair spread: </span><span class="si">{</span><span class="n">fair_bs_spread</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+3m/6m basis swap fair spread: 0.002304096556289179
+</pre></div></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="deposits_fras.html" class="btn btn-neutral float-left" title="Deposits and FRAs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../tools/daycounter_rollconventions_schedules.html" class="btn btn-neutral float-right" title="Day Counter, Roll Conventions and Schedules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

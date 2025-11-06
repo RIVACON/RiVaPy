@@ -1,0 +1,865 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pricer &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=d2ebc91c" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.svg"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Tools" href="../rivapy.tools.html" />
+    <link rel="prev" title="PricingRequest" href="pricing_request.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Module Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../marketdata/index.html">Market Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../marketdata_tools/index.html">Market Data Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../instruments/index.html">Instruments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../models/index.html">Models</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Pricing</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pricing_request.html">PricingRequest</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Pricer</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bonds">Bonds</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#forward-rate-agreement">Forward Rate Agreement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#deposits">Deposits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#interest-rate-swap">Interest Rate Swap</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../rivapy.tools.html">Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rivapy.interfaces.html">Interfaces</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../search.html">Search Page</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module Documentation</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Pricing</a></li>
+      <li class="breadcrumb-item active">Pricer</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/rivapy/pricing/pricer.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pricer">
+<h1>Pricer<a class="headerlink" href="#pricer" title="Link to this heading"></a></h1>
+<section id="bonds">
+<h2>Bonds<a class="headerlink" href="#bonds" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.pricing.bond_pricing.DeterministicCashflowPricer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.pricing.bond_pricing.</span></span><span class="sig-name descname"><span class="pre">DeterministicCashflowPricer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DeterministicCashflowBondSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwd_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/pricing/bond_pricing.html#DeterministicCashflowPricer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.bond_pricing.DeterministicCashflowPricer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Deterministic cashflow pricer utilities.</p>
+<p>This class provides static and instance helpers for pricing deterministic cashflow
+instruments (fixed- and floating-rate bonds, deposits, zero-coupon instruments).
+It contains methods to generate expected cashflows, discount them, compute PVs,
+yields, z-spreads and duration measures.</p>
+<p>Initialize the DeterministicCashflowPricer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val_date</strong> (<em>datetime</em>) – The valuation date.</p></li>
+<li><p><strong>spec</strong> (<em>DeterministicCashflowBondSpecification</em>) – The specification of the cashflow instrument.</p></li>
+<li><p><strong>discount_curve</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – The discount curve to use for pricing.</p></li>
+<li><p><strong>fwd_curve</strong> (<em>Union</em><em>[</em><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – The forward curve to use for pricing. Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.pricing.bond_pricing.DeterministicCashflowPricer.cashflows">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cashflows</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.cashflows" title="Link to this definition"></a></dt>
+<dd><p>Get the cashflows of the instrument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The cashflows of the instrument.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cashflow</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.bond_pricing.DeterministicCashflowPricer.clean_price">
+<span class="sig-name descname"><span class="pre">clean_price</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/bond_pricing.html#DeterministicCashflowPricer.clean_price"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.clean_price" title="Link to this definition"></a></dt>
+<dd><p>Get the clean price of the bond.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The clean price of the bond.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.bond_pricing.DeterministicCashflowPricer.compute_yield">
+<span class="sig-name descname"><span class="pre">compute_yield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_dirty_price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/bond_pricing.html#DeterministicCashflowPricer.compute_yield"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.compute_yield" title="Link to this definition"></a></dt>
+<dd><p>Compute the yield of the bond.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target_dirty_price</strong> (<em>float</em>) – The target dirty price.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The computed yield.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.bond_pricing.DeterministicCashflowPricer.dirty_price">
+<span class="sig-name descname"><span class="pre">dirty_price</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/bond_pricing.html#DeterministicCashflowPricer.dirty_price"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.dirty_price" title="Link to this definition"></a></dt>
+<dd><p>Get the dirty price of the bond.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The dirty price of the bond.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.bond_pricing.DeterministicCashflowPricer.expected_cashflows">
+<span class="sig-name descname"><span class="pre">expected_cashflows</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/bond_pricing.html#DeterministicCashflowPricer.expected_cashflows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.expected_cashflows" title="Link to this definition"></a></dt>
+<dd><p>Get the expected cashflows of the instrument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The expected cashflows of the instrument.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[Tuple[datetime, float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_accrued_interest">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_accrued_interest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">specification</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DeterministicCashflowBondSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trade_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwd_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/bond_pricing.html#DeterministicCashflowPricer.get_accrued_interest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_accrued_interest" title="Link to this definition"></a></dt>
+<dd><p>Get the accrued interest for a given instrument specification.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>specification</strong> (<em>DeterministicCashflowBondSpecification</em>) – The bond specification.</p></li>
+<li><p><strong>val_date</strong> (<em>datetime.date</em><em> or </em><em>datetime</em><em>, </em><em>optional</em>) – The valuation date. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The accrued interest.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_compute_yield">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_compute_yield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_dirty_price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specification</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DeterministicCashflowBondSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cashflows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwd_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/bond_pricing.html#DeterministicCashflowPricer.get_compute_yield"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_compute_yield" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_dirty_price">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_dirty_price</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specification</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DeterministicCashflowBondSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwd_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/bond_pricing.html#DeterministicCashflowPricer.get_dirty_price"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_dirty_price" title="Link to this definition"></a></dt>
+<dd><p>Compute the dirty price (present value including accrued interest) of a bond.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val_date</strong> (<em>date</em><em> | </em><em>datetime</em>) – Valuation date.</p></li>
+<li><p><strong>specification</strong> (<em>DeterministicCashflowBondSpecification</em>) – Instrument specification.</p></li>
+<li><p><strong>discount_curve</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – Curve used for discounting.</p></li>
+<li><p><strong>fwd_curve</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a><em>, </em><em>optional</em>) – Forward curve for floating-rate cashflows.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dirty price (PV of future cashflows after val_date).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_expected_cashflows">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_expected_cashflows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec:</span> <span class="pre">~rivapy.instruments.bond_specifications.DeterministicCashflowBondSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_date:</span> <span class="pre">~.datetime.date</span> <span class="pre">|</span> <span class="pre">~datetime.datetime</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwd_curve:</span> <span class="pre">~rivapy.marketdata.curves.DiscountCurve</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/bond_pricing.html#DeterministicCashflowPricer.get_expected_cashflows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_expected_cashflows" title="Link to this definition"></a></dt>
+<dd><p>Calculate the expected cashflows for a deterministic cashflow instrument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spec</strong> (<em>DeterministicCashflowBondSpecification</em>) – The instrument specification containing schedule, notional, coupon type, etc.</p></li>
+<li><p><strong>val_date</strong> (<em>datetime.date</em><em> or </em><em>datetime</em><em>, </em><em>optional</em>) – The valuation date, required for floating rate calculation. Defaults to None.</p></li>
+<li><p><strong>curve</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a><em>, </em><em>optional</em>) – The forward curve used for floating rate calculation. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A sorted list of tuples, each containing the payment date and cashflow amount.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[Tuple[datetime, float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_float_rate">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_float_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">specification:</span> <span class="pre">~rivapy.instruments.bond_specifications.DeterministicCashflowBondSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_date:</span> <span class="pre">~.datetime.date</span> <span class="pre">|</span> <span class="pre">~datetime.datetime</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d1:</span> <span class="pre">~.datetime.date</span> <span class="pre">|</span> <span class="pre">~datetime.datetime</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2:</span> <span class="pre">~.datetime.date</span> <span class="pre">|</span> <span class="pre">~datetime.datetime</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curve:</span> <span class="pre">~rivapy.marketdata.curves.DiscountCurve</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/bond_pricing.html#DeterministicCashflowPricer.get_float_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_float_rate" title="Link to this definition"></a></dt>
+<dd><p>Get the floating rate for a given period.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>specification</strong> (<em>DeterministicCashflowBondSpecification</em>) – The bond or instrument specification containing index, margin, calendar, and conventions.</p></li>
+<li><p><strong>val_date</strong> (<em>datetime.date</em><em> or </em><em>datetime</em><em>, </em><em>optional</em>) – The valuation date as of which forward rates are calculated. Defaults to None.</p></li>
+<li><p><strong>d1</strong> (<em>datetime.date</em><em> or </em><em>datetime</em><em>, </em><em>optional</em>) – The start date of the interest period. Defaults to None.</p></li>
+<li><p><strong>d2</strong> (<em>datetime.date</em><em> or </em><em>datetime</em><em>, </em><em>optional</em>) – The end date of the interest period. Defaults to None.</p></li>
+<li><p><strong>curve</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a><em>, </em><em>optional</em>) – The forward curve used for forward rate calculation. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The floating rate for the given period, including margin.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_pv_cashflows">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_pv_cashflows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specification</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DeterministicCashflowBondSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwd_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cashflows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/bond_pricing.html#DeterministicCashflowPricer.get_pv_cashflows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_pv_cashflows" title="Link to this definition"></a></dt>
+<dd><p>Discount and sum cashflows to obtain present value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val_date</strong> (<em>date</em><em> | </em><em>datetime</em>) – Valuation date used for discounting.</p></li>
+<li><p><strong>specification</strong> (<em>DeterministicCashflowBondSpecification</em>) – Instrument specification.</p></li>
+<li><p><strong>discount_curve</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – Curve used to obtain discount factors.</p></li>
+<li><p><strong>fwd_curve</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a><em>, </em><em>optional</em>) – Forward curve used for floating-rate cashflows.</p></li>
+<li><p><strong>cashflows</strong> (<em>List</em><em>[</em><em>(</em><em>date</em><em>, </em><em>amount</em><em>)</em><em>]</em><em>, </em><em>optional</em>) – Precomputed cashflows; if not
+provided they will be generated from the specification.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Present value obtained by discounting future cashflows occurring after val_date.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_z_spread">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_z_spread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_dirty_price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specification</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DeterministicCashflowBondSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cashflows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwd_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/bond_pricing.html#DeterministicCashflowPricer.get_z_spread"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.get_z_spread" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.bond_pricing.DeterministicCashflowPricer.macaulay_duration">
+<span class="sig-name descname"><span class="pre">macaulay_duration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/bond_pricing.html#DeterministicCashflowPricer.macaulay_duration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.macaulay_duration" title="Link to this definition"></a></dt>
+<dd><p>Compute the Macaulay duration for the instrument.</p>
+<p>Macaulay duration is the weighted average time until cashflows are received,
+weighted by the present value of the cashflows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Macaulay duration expressed in the same time units used by day count.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.bond_pricing.DeterministicCashflowPricer.modified_duration">
+<span class="sig-name descname"><span class="pre">modified_duration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_dirty_price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/bond_pricing.html#DeterministicCashflowPricer.modified_duration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.modified_duration" title="Link to this definition"></a></dt>
+<dd><p>Compute the modified duration for the instrument.</p>
+<p>Modified duration approximates the percentage price change for a unit change
+in yield and is computed from the Macaulay duration and yield.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target_dirty_price</strong> (<em>float</em><em>, </em><em>optional</em>) – Dirty price used for yield inversion.
+Defaults to 100.0.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Modified duration.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.bond_pricing.DeterministicCashflowPricer.pv_cashflows">
+<span class="sig-name descname"><span class="pre">pv_cashflows</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/bond_pricing.html#DeterministicCashflowPricer.pv_cashflows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.pv_cashflows" title="Link to this definition"></a></dt>
+<dd><p>Get the present value of the cashflows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The present value of the cashflows.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.bond_pricing.DeterministicCashflowPricer.z_spread">
+<span class="sig-name descname"><span class="pre">z_spread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_dirty_price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/bond_pricing.html#DeterministicCashflowPricer.z_spread"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.bond_pricing.DeterministicCashflowPricer.z_spread" title="Link to this definition"></a></dt>
+<dd><p>Compute the z-spread of the bond.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target_dirty_price</strong> (<em>float</em>) – The target dirty price.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The computed z-spread.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="forward-rate-agreement">
+<h2>Forward Rate Agreement<a class="headerlink" href="#forward-rate-agreement" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.pricing.fra_pricing.ForwardRateAgreementPricer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.pricing.fra_pricing.</span></span><span class="sig-name descname"><span class="pre">ForwardRateAgreementPricer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fra_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../instruments/rate.html#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification" title="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification"><span class="pre">ForwardRateAgreementSpecification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/pricing/fra_pricing.html#ForwardRateAgreementPricer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.fra_pricing.ForwardRateAgreementPricer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Initializes the FRA pricer with valuation date, FRA specification, discount curve and forward curve.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val_date</strong> (<em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – specific date for which the value of the financial instrument is calculated.</p></li>
+<li><p><strong>fra_spec</strong> (<a class="reference internal" href="../instruments/rate.html#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification" title="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification"><em>ForwardRateAgreementSpecification</em></a>) – Specification object with FRA specific parameters.</p></li>
+<li><p><strong>discount_curve</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – Discount curve used for discounting.</p></li>
+<li><p><strong>forward_curve</strong><strong>(</strong><strong>)</strong> – from underlying index…</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.fra_pricing.ForwardRateAgreementPricer.compute_fair_rate">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_fair_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specification</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../instruments/rate.html#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification" title="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification"><span class="pre">ForwardRateAgreementSpecification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/pricing/fra_pricing.html#ForwardRateAgreementPricer.compute_fair_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.fra_pricing.ForwardRateAgreementPricer.compute_fair_rate" title="Link to this definition"></a></dt>
+<dd><p>Computes the fair rate such that the when used in the specification of the FRA gives a net value of zero.
+A discount curve is given, from which the Forward Rate is determined between the two dates.
+Assuming simple compounding
+Forward rate = (DF_1/DF_2 -1 )/ time_interval</p>
+<blockquote>
+<div><p>= (1 /FWD_DF -1 )/ time_interval</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val_date</strong> (<em>_Union</em><em>[</em><em>datetime</em><em>, </em><em>date</em><em>]</em>) – specific date as of which the value of the financial instrument is calculated.</p></li>
+<li><p><strong>forward_curve</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – Forward curve used for projecting rates</p></li>
+<li><p><strong>rate_start_date</strong> (<em>_Union</em><em>[</em><em>datetime</em><em>, </em><em>date</em><em>]</em>) – start date for the forward period</p></li>
+<li><p><strong>rate_end_date</strong> (<em>_Union</em><em>[</em><em>datetime</em><em>, </em><em>date</em><em>]</em>) – end date for the forward period</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.fra_pricing.ForwardRateAgreementPricer.expected_cashflows">
+<span class="sig-name descname"><span class="pre">expected_cashflows</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/pricing/fra_pricing.html#ForwardRateAgreementPricer.expected_cashflows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.fra_pricing.ForwardRateAgreementPricer.expected_cashflows" title="Link to this definition"></a></dt>
+<dd><p>Calculate expected cashflows for the FRA specification.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of tuples containing payment dates and amounts.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[Tuple[datetime, float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.fra_pricing.ForwardRateAgreementPricer.get_expected_cashflows">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_expected_cashflows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">specification:</span> <span class="pre">~rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_date:</span> <span class="pre">~.datetime.date</span> <span class="pre">|</span> <span class="pre">~datetime.datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwdcurve:</span> <span class="pre">~rivapy.marketdata.curves.DiscountCurve</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/fra_pricing.html#ForwardRateAgreementPricer.get_expected_cashflows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.fra_pricing.ForwardRateAgreementPricer.get_expected_cashflows" title="Link to this definition"></a></dt>
+<dd><p>Calculate expected cashflows for the FRA specification based on the valuation date and discount curve.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>specification</strong> (<a class="reference internal" href="../instruments/rate.html#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification" title="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification"><em>ForwardRateAgreementSpecification</em></a>) – The FRA specification.</p></li>
+<li><p><strong>val_date</strong> (<em>_Union</em><em>[</em><em>datetime.date</em><em>, </em><em>datetime</em><em>]</em>) – The data as of which the cashflows are calculated.</p></li>
+<li><p><strong>fwdcurve</strong> (<em>_Union</em><em>[</em><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a><em>, </em><em>None</em><em>]</em>) – The forward curve.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of tuples containing payment dates and amounts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[Tuple[datetime, float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.fra_pricing.ForwardRateAgreementPricer.get_price">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_price</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_date:</span> <span class="pre">~.datetime.date</span> <span class="pre">|</span> <span class="pre">~datetime.datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specification:</span> <span class="pre">~rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve:</span> <span class="pre">~rivapy.marketdata.curves.DiscountCurve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward_curve:</span> <span class="pre">~rivapy.marketdata.curves.DiscountCurve</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/fra_pricing.html#ForwardRateAgreementPricer.get_price"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.fra_pricing.ForwardRateAgreementPricer.get_price" title="Link to this definition"></a></dt>
+<dd><p>Calculate the present value of the specified FRA given a discount curve and forward curve</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val_date</strong> (<em>_Union</em><em>[</em><em>datetime.date</em><em>, </em><em>datetime</em><em>]</em>) – The valuation date.</p></li>
+<li><p><strong>specification</strong> (<a class="reference internal" href="../instruments/rate.html#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification" title="rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification"><em>ForwardRateAgreementSpecification</em></a>) – The FRA specification.</p></li>
+<li><p><strong>discount_curve</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – The discount curve.</p></li>
+<li><p><strong>forward_curve</strong> (<em>_Union</em><em>[</em><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a><em>, </em><em>None</em><em>]</em>) – The forward curve.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The present value of the FRA.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.fra_pricing.ForwardRateAgreementPricer.price">
+<span class="sig-name descname"><span class="pre">price</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/pricing/fra_pricing.html#ForwardRateAgreementPricer.price"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.fra_pricing.ForwardRateAgreementPricer.price" title="Link to this definition"></a></dt>
+<dd><p>Calculate the present value of the specified FRA given a discount curve and forward curve</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>present value of a deposit based on simple compounding</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="deposits">
+<h2>Deposits<a class="headerlink" href="#deposits" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.pricing.deposit_pricing.DepositPricer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.pricing.deposit_pricing.</span></span><span class="sig-name descname"><span class="pre">DepositPricer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deposit_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../instruments/credit.html#rivapy.instruments.deposit_specifications.DepositSpecification" title="rivapy.instruments.deposit_specifications.DepositSpecification"><span class="pre">DepositSpecification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/pricing/deposit_pricing.html#DepositPricer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.deposit_pricing.DepositPricer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rivapy.pricing.bond_pricing.DeterministicCashflowPricer" title="rivapy.pricing.bond_pricing.DeterministicCashflowPricer"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeterministicCashflowPricer</span></code></a></p>
+<p>Create a pricer for a deposit instrument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val_date</strong> (<em>date</em><em> | </em><em>datetime</em>) – Valuation date used for pricing.</p></li>
+<li><p><strong>deposit_spec</strong> (<a class="reference internal" href="../instruments/credit.html#rivapy.instruments.deposit_specifications.DepositSpecification" title="rivapy.instruments.deposit_specifications.DepositSpecification"><em>DepositSpecification</em></a>) – Deposit specification containing schedule
+and contractual parameters.</p></li>
+<li><p><strong>discount_curve</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – Discount curve used for discounting cashflows.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.deposit_pricing.DepositPricer.expected_cashflows">
+<span class="sig-name descname"><span class="pre">expected_cashflows</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/deposit_pricing.html#DepositPricer.expected_cashflows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.deposit_pricing.DepositPricer.expected_cashflows" title="Link to this definition"></a></dt>
+<dd><p>Return expected cashflows for the configured deposit and valuation date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of (pay_date, amount) tuples.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[Tuple[datetime, float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.deposit_pricing.DepositPricer.get_expected_cashflows">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_expected_cashflows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">specification:</span> <span class="pre">~rivapy.instruments.deposit_specifications.DepositSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_date:</span> <span class="pre">~.datetime.date</span> <span class="pre">|</span> <span class="pre">~datetime.datetime</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/deposit_pricing.html#DepositPricer.get_expected_cashflows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.deposit_pricing.DepositPricer.get_expected_cashflows" title="Link to this definition"></a></dt>
+<dd><p>Static helper: get expected cashflows for a deposit specification.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>specification</strong> (<a class="reference internal" href="../instruments/credit.html#rivapy.instruments.deposit_specifications.DepositSpecification" title="rivapy.instruments.deposit_specifications.DepositSpecification"><em>DepositSpecification</em></a>) – The deposit specification.</p></li>
+<li><p><strong>val_date</strong> (<em>date</em><em> | </em><em>datetime</em><em>, </em><em>optional</em>) – Valuation date to use. If <code class="docutils literal notranslate"><span class="pre">None</span></code>,
+the specification’s default behavior is used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of (pay_date, amount) tuples.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[Tuple[datetime, float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.deposit_pricing.DepositPricer.get_implied_simply_compounded_rate">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_implied_simply_compounded_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specification</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../instruments/credit.html#rivapy.instruments.deposit_specifications.DepositSpecification" title="rivapy.instruments.deposit_specifications.DepositSpecification"><span class="pre">DepositSpecification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/deposit_pricing.html#DepositPricer.get_implied_simply_compounded_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.deposit_pricing.DepositPricer.get_implied_simply_compounded_rate" title="Link to this definition"></a></dt>
+<dd><p>Compute the implied simply compounded rate that sets deposit PV to zero.</p>
+<p>The implementation assumes simple compounding: D(t) = 1 / (1 + rate * dt).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val_date</strong> (<em>date</em><em> | </em><em>datetime</em>) – Valuation date.</p></li>
+<li><p><strong>specification</strong> (<a class="reference internal" href="../instruments/credit.html#rivapy.instruments.deposit_specifications.DepositSpecification" title="rivapy.instruments.deposit_specifications.DepositSpecification"><em>DepositSpecification</em></a>) – Deposit specification with start/end dates
+and day count convention.</p></li>
+<li><p><strong>discount_curve</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – Discount curve used to obtain forward discount
+factor between start and end.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The implied simply compounded rate.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">discount_curve</span></code> is not an instance of DiscountCurve.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.deposit_pricing.DepositPricer.get_price">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_price</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specification</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../instruments/credit.html#rivapy.instruments.deposit_specifications.DepositSpecification" title="rivapy.instruments.deposit_specifications.DepositSpecification"><span class="pre">DepositSpecification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/deposit_pricing.html#DepositPricer.get_price"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.deposit_pricing.DepositPricer.get_price" title="Link to this definition"></a></dt>
+<dd><p>Calculate present value of a deposit using the provided discount curve.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val_date</strong> (<em>date</em><em> | </em><em>datetime</em>) – Valuation date.</p></li>
+<li><p><strong>specification</strong> (<a class="reference internal" href="../instruments/credit.html#rivapy.instruments.deposit_specifications.DepositSpecification" title="rivapy.instruments.deposit_specifications.DepositSpecification"><em>DepositSpecification</em></a>) – Deposit contract specification.</p></li>
+<li><p><strong>discount_curve</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – Discount curve used for discounting.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Present value (PV) computed from discounted expected cashflows.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.deposit_pricing.DepositPricer.implied_simply_compounded_rate">
+<span class="sig-name descname"><span class="pre">implied_simply_compounded_rate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/deposit_pricing.html#DepositPricer.implied_simply_compounded_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.deposit_pricing.DepositPricer.implied_simply_compounded_rate" title="Link to this definition"></a></dt>
+<dd><p>Return the implied simply compounded rate for the configured deposit.</p>
+<p>The implied simply compounded rate is the rate that makes the deposit’s PV
+equal to zero under a simple-compounding assumption.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Implied simply compounded rate.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.deposit_pricing.DepositPricer.price">
+<span class="sig-name descname"><span class="pre">price</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/deposit_pricing.html#DepositPricer.price"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.deposit_pricing.DepositPricer.price" title="Link to this definition"></a></dt>
+<dd><p>Return the present value of the configured deposit using the provided curves.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Present value.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="interest-rate-swap">
+<h2>Interest Rate Swap<a class="headerlink" href="#interest-rate-swap" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.pricing.interest_rate_swap_pricing.</span></span><span class="sig-name descname"><span class="pre">InterestRateSwapPricer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../instruments/rate.html#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification" title="rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification"><span class="pre">InterestRateSwapSpecification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve_pay_leg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve_receive_leg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixing_curve_pay_leg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixing_curve_receive_leg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fx_fwd_curve_pay_leg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fx_fwd_curve_receive_leg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pricing_request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">InterestRateSwapPricingRequest</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pricing_param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixing_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FixingTable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fx_pay_leg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fx_receive_leg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/pricing/interest_rate_swap_pricing.html#InterestRateSwapPricer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Initializes the Interest Rate Swap Pricer with all required curves, specifications, and parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val_date</strong> (<em>date</em><em> | </em><em>datetime</em>) – The valuation date for pricing the swap. This is the anchor date for all time-dependent calculations.</p></li>
+<li><p><strong>spec</strong> (<a class="reference internal" href="../instruments/rate.html#rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification" title="rivapy.instruments.ir_swap_specification.InterestRateSwapSpecification"><em>InterestRateSwapSpecification</em></a>) – The swap’s structural details (legs, notionals, schedules, etc.).</p></li>
+<li><p><strong>discount_curve_pay_leg</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – Discount curve used to present value the pay leg.</p></li>
+<li><p><strong>discount_curve_receive_leg</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – Discount curve used to present value the receive leg.</p></li>
+<li><p><strong>fixing_curve_pay_leg</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – Curve used to forecast forward rates for the pay leg (typically for floating legs).</p></li>
+<li><p><strong>fixing_curve_receive_leg</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – Curve used to forecast forward rates for the receive leg.</p></li>
+<li><p><strong>fx_fwd_curve_pay_leg</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – FX forward curve to convert the pay leg currency to the pricing currency (if applicable).</p></li>
+<li><p><strong>fx_fwd_curve_receive_leg</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – FX forward curve to convert the receive leg currency to the pricing currency.</p></li>
+<li><p><strong>pricing_request</strong> (<em>InterestRateSwapPricingRequest</em>) – Contains the pricing type, metrics requested (e.g., PV), and other flags. Not yet used properly</p></li>
+<li><p><strong>pricing_param</strong> (<em>Dict</em><em>, </em><em>optional</em>) – Additional pricing parameters, such as day count conventions, compounding rules, etc.</p></li>
+<li><p><strong>fixing_map</strong> (<em>FixingTable</em><em>, </em><em>optional</em>) – Historical fixings for floating legs that reference past periods.</p></li>
+<li><p><strong>fx_pay_leg</strong> (<em>float</em><em>, </em><em>optional</em>) – FX rate multiplier to convert the pay leg currency to base. Default is 1.0 (i.e., same currency).</p></li>
+<li><p><strong>fx_receive_leg</strong> (<em>float</em><em>, </em><em>optional</em>) – FX rate multiplier to convert the receive leg currency to base. Default is 1.0.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.compute_basis_spread">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_basis_spread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">payLegFixingCurve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiveLegFixingCurve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pay_leg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">IrFloatLegSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receive_leg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">IrFloatLegSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spread_leg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">IrFixedLegSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixing_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FixingTable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pricing_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'fixing_grace_period':</span> <span class="pre">0.0}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/interest_rate_swap_pricing.html#InterestRateSwapPricer.compute_basis_spread"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.compute_basis_spread" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.compute_swap_rate">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_swap_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixing_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">float_leg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">IrFloatLegSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_leg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">IrFixedLegSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixing_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FixingTable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pricing_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'fixing_grace_period':</span> <span class="pre">0.0}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/interest_rate_swap_pricing.html#InterestRateSwapPricer.compute_swap_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.compute_swap_rate" title="Link to this definition"></a></dt>
+<dd><dl>
+<dt>To calculate the fair swap rate, i.e. the fixed rate(r*) such that</dt><dd><blockquote>
+<div><p>PV_fixed(r*) = PV_float</p>
+</div></blockquote>
+<dl class="simple">
+<dt>where</dt><dd><p>PV_fixed(r*) = r* * Annuity</p>
+</dd>
+<dt>where</dt><dd><p>Annuity = sum(notional_i * DF_i * YF_i*)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>Fast path for OIS floating leg: use analytical OIS formula
+so we do not simulate daily compounding each time inside the solver.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ref_date</strong> (<em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – reference date</p></li>
+<li><p><strong>discount_curve</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – discoutn curve to determine present value</p></li>
+<li><p><strong>fixing_curve</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – curve used for fwd rates for the floating leg</p></li>
+<li><p><strong>float_leg</strong> (<em>IrFloatLegSpecification</em>) – IR swap float leg specification</p></li>
+<li><p><strong>fixed_leg</strong> (<em>IrFixedLegSpecification</em>) – IR swap fix leg specification</p></li>
+<li><p><strong>fixing_map</strong> (<em>FixingTable</em><em>, </em><em>optional</em>) – historical fixing data (TODO). Defaults to None.</p></li>
+<li><p><strong>fixing_grace_period</strong> (<em>int</em><em>, </em><em>optional</em>) – . Defaults to 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>fair rate for the swap</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.compute_swap_rate_ois_analytical">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_swap_rate_ois_analytical</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">float_leg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">IrOISLegSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_leg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">IrFixedLegSpecification</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/pricing/interest_rate_swap_pricing.html#InterestRateSwapPricer.compute_swap_rate_ois_analytical"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.compute_swap_rate_ois_analytical" title="Link to this definition"></a></dt>
+<dd><p>Computes the fair (par) fixed rate for an Overnight Indexed Swap (OIS)
+using an analytical shortcut based on discount factors.</p>
+<p>This method assumes that the floating leg is a compounded overnight leg
+and that, under standard OIS discounting, the present value of the floating
+leg can be derived directly from the discount curve without simulating
+daily compounding. Much faster than simulating daily compounding for each.
+[<a class="reference external" href="https://btrm.org/wp-content/uploads/2024/03/BTRM-WP15_SOFR-OIS-Curve-Construction_Dec-2020.pdf">https://btrm.org/wp-content/uploads/2024/03/BTRM-WP15_SOFR-OIS-Curve-Construction_Dec-2020.pdf</a>]</p>
+<p>The par OIS rate is computed as:</p>
+<blockquote>
+<div><p>R = (sum_i N_i * [P(T_i) - P(T_{i+1})]) / (sum_i N_i * alpha_i * P(T_{i+1}))</p>
+</div></blockquote>
+<dl class="simple">
+<dt>where:</dt><dd><ul class="simple">
+<li><p>P(T_i): discount factor at period start/end,</p></li>
+<li><p>alpha_i: accrual year fraction on the fixed leg,</p></li>
+<li><p>N_i: notional applicable for that period.</p></li>
+</ul>
+</dd>
+<dt>Assumptions:</dt><dd><ul class="simple">
+<li><p>The floating leg is fully collateralized and discounted on the
+same OIS curve.</p></li>
+<li><p>The compounded overnight rate is implied by the discount factors.</p></li>
+<li><p>No spread, lag, or convexity correction is applied.</p></li>
+<li><p>Notionals and accrual conventions are consistent with the given curves.</p></li>
+<li><p>Forward curve is used only for projected notionals or FX conversions,
+not for rate projection.</p></li>
+<li><p>The fixed leg is currently not explictily used as it assumes that it has
+the same notional structure and payment dates as the floating leg, which
+usually the case.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If the computed annuity (denominator) is zero,
+    indicating invalid leg setup or inconsistent inputs.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The par fixed rate that equates PV_fixed = PV_float (analytical) (as a decimal, e.g. 0.025 for 2.5%).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.compute_swap_spread">
+<span class="sig-name descname"><span class="pre">compute_swap_spread</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/pricing/interest_rate_swap_pricing.html#InterestRateSwapPricer.compute_swap_spread"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.compute_swap_spread" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.price">
+<span class="sig-name descname"><span class="pre">price</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/pricing/interest_rate_swap_pricing.html#InterestRateSwapPricer.price"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.price" title="Link to this definition"></a></dt>
+<dd><p>price a full swap, with a pay leg and a receive leg in the context of
+pricing container and pricer having been initlialized with required inputs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.price_leg">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">price_leg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fxForward_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.curves.DiscountCurve"><span class="pre">DiscountCurve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">IrFixedLegSpecification</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">IrFloatLegSpecification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixing_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FixingTable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixing_grace_period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pricing_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'desired_rate':</span> <span class="pre">1.0,</span> <span class="pre">'set_rate':</span> <span class="pre">False}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/pricing/interest_rate_swap_pricing.html#InterestRateSwapPricer.price_leg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.price_leg" title="Link to this definition"></a></dt>
+<dd><p>Price a leg of a IR swap making distinctions for floating and fixed legs as well as OIS legs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val_date</strong> (<em>_type_</em>) – Valuation date</p></li>
+<li><p><strong>discount_curve</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – discount curve for discounting cashflows</p></li>
+<li><p><strong>forward_curve</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – forward curve for the forward rate calculations</p></li>
+<li><p><strong>fxForward_curve</strong> (<a class="reference internal" href="../marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve" title="rivapy.marketdata.DiscountCurve"><em>DiscountCurve</em></a>) – fx forward curve for currency conversions for applicable instruments (not yet implemented)</p></li>
+<li><p><strong>spec</strong> (<em>_Union</em><em>[</em><em>IrFixedLegSpecification</em><em>, </em><em>IrFloatLegSpecification</em><em>]</em>) – Specification object for the leg to be priced</p></li>
+<li><p><strong>fixing_map</strong> (<em>FixingTable</em><em>, </em><em>optional</em>) – Historical fixing data (not yet implemented). Defaults to None.</p></li>
+<li><p><strong>fixing_grace_period</strong> (<em>float</em><em>, </em><em>optional</em>) – . Defaults to 0.</p></li>
+<li><p><strong>pricing_params</strong> (<em>_type_</em><em>, </em><em>optional</em>) – Additional parameters needed for swap pricing. Defaults to {“set_rate”: False, “desired_rate”: 1.0}.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if unknown leg type is passed</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>return the aggregated Present value of the  leg of the swap.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.price_leg_pricing_data">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">price_leg_pricing_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pricing_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../rivapy.pricing.html#rivapy.pricing.pricing_data.InterestRateSwapLegPricingData_rivapy" title="rivapy.pricing.pricing_data.InterestRateSwapLegPricingData_rivapy"><span class="pre">InterestRateSwapLegPricingData_rivapy</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/pricing/interest_rate_swap_pricing.html#InterestRateSwapPricer.price_leg_pricing_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.pricing.interest_rate_swap_pricing.InterestRateSwapPricer.price_leg_pricing_data" title="Link to this definition"></a></dt>
+<dd><p>Pricing a single Leg using Pricing Data architecture (not yet fully integrated, to be done once architecture clarified)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val_date</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>pricing_data</strong> (<a class="reference internal" href="../rivapy.pricing.html#rivapy.pricing.pricing_data.InterestRateSwapLegPricingData" title="rivapy.pricing.pricing_data.InterestRateSwapLegPricingData"><em>InterestRateSwapLegPricingData</em></a>) – float leg or base leg pricing data …</p></li>
+<li><p><strong>param</strong> (<em>_type_</em>) – extra parameters (not yet used)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – _description_</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_description_</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pricing_request.html" class="btn btn-neutral float-left" title="PricingRequest" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../rivapy.tools.html" class="btn btn-neutral float-right" title="Tools" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

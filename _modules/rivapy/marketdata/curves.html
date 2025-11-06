@@ -88,11 +88,18 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">dateutil.relativedelta</span> <span class="k">as</span> <span class="nn">relativedelta</span>
+
+<span class="kn">from</span> <span class="nn">rivapy.marketdata._logger</span> <span class="kn">import</span> <span class="n">logger</span>
+
+
 <span class="kn">import</span> <span class="nn">rivapy.tools.interfaces</span> <span class="k">as</span> <span class="nn">interfaces</span>
 <span class="kn">import</span> <span class="nn">rivapy.tools._validators</span> <span class="k">as</span> <span class="nn">validators</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="c1"># from rivapy.tools.interpolate import Interpolator</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">timedelta</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
@@ -103,12 +110,15 @@
 
 <span class="kn">from</span> <span class="nn">rivapy.tools.enums</span> <span class="kn">import</span> <span class="n">DayCounterType</span><span class="p">,</span> <span class="n">InterpolationType</span><span class="p">,</span> <span class="n">ExtrapolationType</span>
 <span class="kn">from</span> <span class="nn">rivapy.tools.enums</span> <span class="kn">import</span> <span class="n">EnergyTimeGridStructure</span> <span class="k">as</span> <span class="n">etgs</span>
-<span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">DayCounter</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">DayCounter</span><span class="p">,</span> <span class="n">_date_to_datetime</span>
 <span class="kn">from</span> <span class="nn">rivapy.marketdata.factory</span> <span class="kn">import</span> <span class="n">create</span> <span class="k">as</span> <span class="n">_create</span>
 <span class="kn">from</span> <span class="nn">rivapy.marketdata_tools.pfc_shaper</span> <span class="kn">import</span> <span class="n">PFCShaper</span>
 <span class="kn">from</span> <span class="nn">rivapy.marketdata_tools.pfc_shifter</span> <span class="kn">import</span> <span class="n">PFCShifter</span>
 <span class="kn">from</span> <span class="nn">rivapy.tools.scheduler</span> <span class="kn">import</span> <span class="n">SimpleSchedule</span><span class="p">,</span> <span class="n">OffPeakSchedule</span><span class="p">,</span> <span class="n">PeakSchedule</span><span class="p">,</span> <span class="n">BaseSchedule</span>
 <span class="kn">from</span> <span class="nn">rivapy.instruments.energy_futures_specifications</span> <span class="kn">import</span> <span class="n">EnergyFutureSpecifications</span>
+
+<span class="kn">from</span> <span class="nn">rivapy.tools.interpolate</span> <span class="kn">import</span> <span class="n">Interpolator</span>
+
 
 <span class="kn">from</span> <span class="nn">rivapy</span> <span class="kn">import</span> <span class="n">_pyvacon_available</span>
 
@@ -153,7 +163,8 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span> <span class="o">=</span> <span class="n">refdate</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="c1"># self.refdate = datetime(refdate, 0, 0, 0) # old version syntax??</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">refdate</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">refdate</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">refdate</span><span class="o">.</span><span class="n">day</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interpolation</span><span class="p">,</span> <span class="n">InterpolationType</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Interpolation is not of type enums.InterpolationType&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span> <span class="o">=</span> <span class="n">interpolation</span>
@@ -161,6 +172,7 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Extrapolation is not of type enums.ExtrapolationType&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">extrapolation</span> <span class="o">=</span> <span class="n">extrapolation</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">daycounter</span><span class="p">,</span> <span class="n">DayCounterType</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">daycounter</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Daycounter is not of type enums.DaycounterType&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">daycounter</span> <span class="o">=</span> <span class="n">daycounter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
@@ -200,17 +212,77 @@
         <span class="k">return</span> <span class="n">y</span></div>
 
 
+    <span class="c1"># Change the name with value once full pyvacon dependencies are removed throughout rivapy</span>
 <div class="viewcode-block" id="DiscountCurve.value">
 <a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve.value">[docs]</a>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">payment_dates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annual_payment_frequency</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return discount factor for a given date</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            refdate (Union[date, datetime]): The reference date. If the reference date is in the future (compared to the curves reference date), the forward discount factor will be returned.</span>
-<span class="sd">            d (Union[date, datetime]): The date for which the discount factor will be returned</span>
+<span class="sd">            refdate (Union[date, datetime]): The reference date. If the reference date is in the future</span>
+<span class="sd">                                            (compared to the curves reference date), the forward discount</span>
+<span class="sd">                                            factor will be returned.</span>
+<span class="sd">            d (Union[date, datetime]): The date for which the discount factor will be returned. Assumption</span>
+<span class="sd">                                        is that the day given already follows correct business logic</span>
+<span class="sd">                                        (e.g., roll convention)</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            float: discount factor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># {</span>
+        <span class="c1"># 	Analytics_ASSERT(calcDate == validFrom_, &quot;given calcdate must equal refdate of curve&quot;);</span>
+        <span class="c1"># 	double t = nP_.dc-&gt;yf(validFrom_, date);</span>
+        <span class="c1"># 	return nP_.interp-&gt;compute(t);</span>
+        <span class="c1"># }</span>
+
+        <span class="c1"># check valid dates</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>  <span class="c1"># handling date object -&gt; datetime</span>
+            <span class="n">refdate</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">refdate</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The given reference date is before the curves reference date.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># get yearfrac, taking into account DCC</span>
+        <span class="n">dcc</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">daycounter</span><span class="p">)</span>
+
+        <span class="n">yf_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">payment_dates</span><span class="p">,</span> <span class="n">annual_payment_frequency</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dates</span><span class="p">()</span>
+        <span class="p">]</span>  <span class="c1"># list(dcc.yf(self.refdate, self.get_dates()))</span>
+        <span class="n">df_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_df</span><span class="p">()]</span>
+
+        <span class="c1"># interpolate/extrapolate given a chosen method</span>
+        <span class="n">interp</span> <span class="o">=</span> <span class="n">Interpolator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">extrapolation</span><span class="p">)</span>
+
+        <span class="c1"># temp testing delete when working</span>
+        <span class="c1"># print(self.extrapolation)</span>
+        <span class="c1"># print(f&quot;x_data: {yf_list}&quot;)</span>
+        <span class="c1"># print(f&quot;y_data: {df_list}&quot;)</span>
+        <span class="c1"># print(f&quot;x_target: {dcc.yf(self.refdate,d)}&quot;)</span>
+        <span class="c1"># print(dcc.yf(refdate, d))</span>
+
+        <span class="c1"># give FWD value if given refdate is greater than curves reference date</span>
+        <span class="k">if</span> <span class="n">refdate</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">:</span>
+            <span class="n">df1</span> <span class="o">=</span> <span class="n">interp</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">yf_list</span><span class="p">,</span> <span class="n">df_list</span><span class="p">,</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="n">refdate</span><span class="p">,</span> <span class="n">payment_dates</span><span class="p">,</span> <span class="n">annual_payment_frequency</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">extrapolation</span><span class="p">)</span>
+            <span class="n">df2</span> <span class="o">=</span> <span class="n">interp</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">yf_list</span><span class="p">,</span> <span class="n">df_list</span><span class="p">,</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">payment_dates</span><span class="p">,</span> <span class="n">annual_payment_frequency</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">extrapolation</span><span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df2</span> <span class="o">/</span> <span class="n">df1</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># this also co ers the case if refdates are the same, and avoids division by zero</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">interp</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">yf_list</span><span class="p">,</span> <span class="n">df_list</span><span class="p">,</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">payment_dates</span><span class="p">,</span> <span class="n">annual_payment_frequency</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">extrapolation</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="DiscountCurve.value_rate">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve.value_rate">[docs]</a>
+    <span class="k">def</span> <span class="nf">value_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return continuously compounded zero rate for a given date</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            refdate (Union[date, datetime]): The reference date. If the reference date is in the future (compared to the curves reference date), the forward rate will be returned.</span>
+<span class="sd">            d (Union[date, datetime]): The date for which the continuously compounded zero rate will be returned.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float: continuously compounded zero rate</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
             <span class="n">refdate</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -218,21 +290,169 @@
             <span class="n">d</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">refdate</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The given reference date is before the curves reference date.&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span></div>
+        <span class="n">r</span> <span class="o">=</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span> <span class="o">/</span> <span class="n">DayCounter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">daycounter</span><span class="p">)</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">r</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_DiscountCurve</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span>
-                <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dates</span><span class="p">()],</span>
-                <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_df</span><span class="p">()],</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">daycounter</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">extrapolation</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span>
+<div class="viewcode-block" id="DiscountCurve.value_yf">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve.value_yf">[docs]</a>
+    <span class="k">def</span> <span class="nf">value_yf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">yf</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return discount factor for a given yearfrac as of the curve&#39;s reference date.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            yf (float): The year fraction for which the discount factor will be returned.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: discount factor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># get yearfrac, taking into account DCC</span>
+        <span class="n">dcc</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">daycounter</span><span class="p">)</span>
+
+        <span class="n">yf_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dates</span><span class="p">()]</span>  <span class="c1"># list(dcc.yf(self.refdate, self.get_dates()))</span>
+        <span class="n">df_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_df</span><span class="p">()]</span>
+
+        <span class="c1"># interpolate/extrapolate given a chosen method</span>
+        <span class="n">interp</span> <span class="o">=</span> <span class="n">Interpolator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">extrapolation</span><span class="p">)</span>
+
+        <span class="c1"># temp testing delete when working</span>
+        <span class="c1"># print(self.extrapolation)</span>
+        <span class="c1"># print(f&quot;x_data: {yf_list}&quot;)</span>
+        <span class="c1"># print(f&quot;y_data: {df_list}&quot;)</span>
+        <span class="c1"># print(f&quot;x_target: {dcc.yf(self.refdate,d)}&quot;)</span>
+        <span class="c1"># print(dcc.yf(refdate, d))</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">interp</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">yf_list</span><span class="p">,</span> <span class="n">df_list</span><span class="p">,</span> <span class="n">yf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">extrapolation</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="DiscountCurve.value_fwd">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve.value_fwd">[docs]</a>
+    <span class="k">def</span> <span class="nf">value_fwd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d1</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d2</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return forward discount factor for a given date (without dependencies from pyvacon)</span>
+
+<span class="sd">        The `value_fwd()` method has been updated to support forward valuation scenarios</span>
+<span class="sd">        (`val_date &gt; refdate`) by rebasing the curve from its construction date to the new</span>
+<span class="sd">        valuation date.</span>
+
+<span class="sd">        The rebasement follows the relationship:</span>
+
+<span class="sd">            DF(val_date, t) = DF(refdate, t) / DF(refdate, val_date)</span>
+
+<span class="sd">        This adjustment ensures that discount factors and forward rates remain consistent</span>
+<span class="sd">        across time, even when the valuation date is later than the curve’s reference date.</span>
+
+<span class="sd">        This approach aligns with market-standard practices for OIS and collateralized</span>
+<span class="sd">        discounting frameworks, where forward discounting must be time-consistent with</span>
+<span class="sd">        the curve’s anchor date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            refdate (Union[date, datetime]): The reference date. If the reference date is in the future</span>
+<span class="sd">                                            (compared to the curves reference date), the forward discount</span>
+<span class="sd">                                            factor will be returned.</span>
+<span class="sd">            d (Union[date, datetime]): The date for which the discount factor will be returned. Assumption</span>
+<span class="sd">                                        is that the day given already follows correct business logic</span>
+<span class="sd">                                        (e.g., roll convention)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: discount factor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># double DiscountCurve::valueFwd(</span>
+        <span class="c1"># 	const boost::posix_time::ptime &amp;valDate,</span>
+        <span class="c1"># 	const boost::posix_time::ptime&amp; d1,</span>
+        <span class="c1"># 	const boost::posix_time::ptime&amp; d2) const</span>
+        <span class="c1"># {</span>
+        <span class="c1"># 	Analytics_ASSERT(d2 &gt;= d1, &quot;first date &quot; &lt;&lt; boost::posix_time::to_iso_string(d1)</span>
+        <span class="c1"># 		&lt;&lt; &quot; must be less or equal to the second date &quot; &lt;&lt; boost::posix_time::to_iso_string(d2));</span>
+        <span class="c1"># 	double df1 = value(valDate, d1);</span>
+        <span class="c1"># 	double df2 = value(valDate, d2);</span>
+        <span class="c1"># 	return df2 / df1;</span>
+        <span class="c1"># }</span>
+
+        <span class="c1"># check valid dates</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">date</span><span class="p">):</span>  <span class="c1"># handling date object -&gt; datetime</span>
+            <span class="n">val_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">date</span><span class="p">):</span>
+            <span class="n">d1</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="n">date</span><span class="p">):</span>
+            <span class="n">d2</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">val_date</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The given value date is before the curves reference date.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># get yearfrac, taking into account DCC</span>
+        <span class="n">dcc</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">daycounter</span><span class="p">)</span>
+
+        <span class="n">yf_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dates</span><span class="p">()]</span>  <span class="c1"># list(dcc.yf(self.refdate, self.get_dates()))</span>
+        <span class="n">df_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_df</span><span class="p">()]</span>
+
+        <span class="c1"># DEBUG TODO REMOVE</span>
+        <span class="c1"># print(&quot;Debugging value_fwd: x (yearfrac), then y (df) lists&quot;)</span>
+        <span class="c1"># print(yf_list)</span>
+        <span class="c1"># print(df_list)</span>
+
+        <span class="c1"># interpolate/extrapolate given a chosen method</span>
+        <span class="n">interp</span> <span class="o">=</span> <span class="n">Interpolator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">extrapolation</span><span class="p">)</span>
+
+        <span class="c1"># temp testing delete when working</span>
+        <span class="c1"># print(self.extrapolation)</span>
+        <span class="c1"># print(f&quot;x_data: {yf_list}&quot;)</span>
+        <span class="c1"># print(f&quot;y_data: {df_list}&quot;)</span>
+        <span class="c1"># print(f&quot;x_target: {dcc.yf(self.refdate,d)}&quot;)</span>
+        <span class="c1"># print(dcc.yf(refdate, d))</span>
+
+        <span class="c1"># give FWD value if given refdate is greater than curves reference date</span>
+        <span class="c1"># df1 = interp.interp(yf_list, df_list, dcc.yf(val_date, d1), self.extrapolation)</span>
+        <span class="c1"># df2 = interp.interp(yf_list, df_list, dcc.yf(val_date, d2), self.extrapolation)</span>
+
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d1</span><span class="p">)</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d2</span><span class="p">)</span>
+        <span class="n">df1</span> <span class="o">=</span> <span class="n">interp</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">yf_list</span><span class="p">,</span> <span class="n">df_list</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">extrapolation</span><span class="p">)</span>
+        <span class="n">df2</span> <span class="o">=</span> <span class="n">interp</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">yf_list</span><span class="p">,</span> <span class="n">df_list</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">extrapolation</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">val_date</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">:</span>
+            <span class="n">xval</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="n">val_date</span><span class="p">)</span>
+            <span class="n">df_val</span> <span class="o">=</span> <span class="n">interp</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">yf_list</span><span class="p">,</span> <span class="n">df_list</span><span class="p">,</span> <span class="n">xval</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">extrapolation</span><span class="p">)</span>
+            <span class="c1"># rebase curve to val_date</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">val_date</span><span class="si">}</span><span class="s2"> &gt; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="si">}</span><span class="s2">: forward valuation&quot;</span><span class="p">)</span>
+            <span class="n">df1</span> <span class="o">/=</span> <span class="n">df_val</span>
+            <span class="n">df2</span> <span class="o">/=</span> <span class="n">df_val</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df2</span> <span class="o">/</span> <span class="n">df1</span>
+
+        <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="DiscountCurve.value_fwd_rate">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve.value_fwd_rate">[docs]</a>
+    <span class="k">def</span> <span class="nf">value_fwd_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d1</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d2</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return forward continuously compounded zero rate for a given date</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            refdate (Union[date, datetime]): The reference date. If the reference date is in the future (compared to the curves reference date), the forward rate will be returned.</span>
+<span class="sd">            d1 (Union[date, datetime]): The start date of the period for which the forward continuously compounded zero rate will be returned.</span>
+<span class="sd">            d2 (Union[date, datetime]): The end date of the period for which the forward continuously compounded zero rate will be returned.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float: forward continuously compounded zero rate</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="n">refdate</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="n">d1</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="n">d2</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">refdate</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The given reference date is before the curves reference date.&quot;</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value_fwd</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">))</span> <span class="o">/</span> <span class="n">DayCounter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">daycounter</span><span class="p">)</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">r</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">refdate</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">d</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># directly return the zero rate for a given yearfrac t</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value_yf</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="o">/</span> <span class="n">t</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># return the zero rate for a given date d and reference date refdate</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_rate</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DiscountCurve.plot">
 <a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurve.plot">[docs]</a>
@@ -243,15 +463,24 @@
 <span class="sd">        Args:</span>
 <span class="sd">            days (int, optional): The number of days between two plotted rates/discount factors. Defaults to 10.</span>
 <span class="sd">            discount_factors (bool, optional): If True, discount factors will be plotted, otherwise the rates. Defaults to False.</span>
-<span class="sd">            **kwargs: optional arguments that will be directly passed to the matplotlib plto function</span>
+<span class="sd">            **kwargs: optional arguments that will be directly passed to the matplotlib plot function</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dates</span><span class="p">()</span>
         <span class="n">dates_new</span> <span class="o">=</span> <span class="p">[</span><span class="n">dates</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">dates</span><span class="p">)):</span>
             <span class="k">while</span> <span class="n">dates_new</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">days</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">dates</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
                 <span class="n">dates_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dates_new</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">days</span><span class="p">))</span>
-        <span class="n">dates_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates_new</span><span class="p">]</span>
+            <span class="n">dates_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dates</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="c1"># TODO: consider how best to deal with pyvacon version vs rivapy version</span>
+        <span class="c1"># if self._pyvacon_obj is None:</span>
+        <span class="c1">#    values = [self.value(self.refdate, d) for d in dates_new]</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#    values = [self.value(self.refdate, d) for d in dates_new]</span>
+        <span class="c1">##values = [self.value(self.refdate, d) for d in dates_new]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates_new</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates_new</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">discount_factors</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)):</span>
@@ -261,6 +490,84 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dates_new</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 </div>
 
+
+
+<span class="k">class</span> <span class="nc">FlatDiscountCurve</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">BaseDatedCurve</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A simple discount curve implementation based on a single flat interest rate.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">valuation_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">flat_rate</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+        <span class="n">curve_data</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">day_counter_type</span><span class="p">:</span> <span class="n">DayCounterType</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">Act365Fixed</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the flat discount curve.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            valuation_date (Union[date, datetime]): The valuation date of the curve.</span>
+<span class="sd">            flat_rate (Optional[float], optional): The flat interest rate used for discounting. Defaults to 0.05.</span>
+<span class="sd">            curve_data (Any, optional): Placeholder for more complex curve data (not used in this implementation). Defaults to None.</span>
+<span class="sd">            day_counter_type (DayCounterType, optional): The day count convention for calculating year fractions. Defaults to DayCounterType.Act365Fixed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valuation_date</span> <span class="o">=</span> <span class="n">valuation_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flat_rate</span> <span class="o">=</span> <span class="n">flat_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_curve_data</span> <span class="o">=</span> <span class="n">curve_data</span>  <span class="c1"># Placeholder for more complex curve data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_day_counter</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="n">day_counter_type</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">valuation_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The valuation date of the curve as a datetime object.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valuation_date</span>
+
+    <span class="nd">@valuation_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">valuation_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_valuation_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_discount_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">spread</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the discount factor from the valuation date to a target date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_date (Union[date, datetime]): The date to which to discount.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The discount factor. Returns 0.0 if the target date is before the valuation date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">val_date_dt</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">valuation_date</span><span class="p">)</span>
+        <span class="n">target_date_dt</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">target_date</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">target_date_dt</span> <span class="o">&lt;</span> <span class="n">val_date_dt</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+        <span class="n">time_to_maturity_years</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_day_counter</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">val_date_dt</span><span class="p">,</span> <span class="n">target_date_dt</span><span class="p">)</span>
+        <span class="n">rate_to_use</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flat_rate</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flat_rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">0.02</span>  <span class="c1"># Fallback if flat_rate is None</span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">rate_to_use</span> <span class="o">+</span> <span class="n">spread</span><span class="p">)</span> <span class="o">**</span> <span class="n">time_to_maturity_years</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">target_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">spread</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the discount factor from a reference date to a target date.</span>
+<span class="sd">        For this simple implementation, the reference date must be the curve&#39;s valuation date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ref_date (datetime): The reference date (must match the curve&#39;s valuation date).</span>
+<span class="sd">            target_date (datetime): The date to which to discount.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the reference date does not match the curve&#39;s valuation date.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The discount factor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Ensure ref_date matches the curve&#39;s valuation_date for this simple implementation</span>
+        <span class="k">if</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">ref_date</span><span class="p">)</span><span class="o">.</span><span class="n">date</span><span class="p">()</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">valuation_date</span><span class="o">.</span><span class="n">date</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reference date </span><span class="si">{</span><span class="n">ref_date</span><span class="si">}</span><span class="s2"> does not match DiscountCurve valuation date </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">valuation_date</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_discount_factor</span><span class="p">(</span><span class="n">target_date</span><span class="p">,</span> <span class="n">spread</span><span class="o">=</span><span class="n">spread</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flat_rate</span>
 
 
 <div class="viewcode-block" id="NelsonSiegel">
@@ -398,13 +705,25 @@
             <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ConstantRate</span><span class="p">(</span><span class="n">rate</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.005</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)))</span>
         <span class="k">return</span> <span class="n">result</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<div class="viewcode-block" id="ConstantRate.value">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.ConstantRate.value">[docs]</a>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="n">refdate</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span>
+        <span class="n">yf</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="n">DayCounterType</span><span class="o">.</span><span class="n">Act365Fixed</span><span class="p">)</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">r</span> <span class="o">*</span> <span class="n">yf</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span></div>
 
 
 
 <span class="k">class</span> <span class="nc">LinearRate</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortterm_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">longterm_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">max_maturity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortterm_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">longterm_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">max_maturity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span> <span class="n">min_maturity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Continuously compounded linearly interpolated rate object that can be used  in conjunction with :class:`rivapy.marketdata.DiscountCurveParametrized`.</span>
 
 <span class="sd">        Args:</span>
@@ -413,9 +732,10 @@
 <span class="sd">            max_maturity (float): AFer this timepoint constant extrapolation is applied.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shortterm_rate</span> <span class="o">=</span> <span class="n">shortterm_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_maturity</span> <span class="o">=</span> <span class="n">min_maturity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">longterm_rate</span> <span class="o">=</span> <span class="n">longterm_rate</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_maturity</span> <span class="o">=</span> <span class="n">max_maturity</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_coeff</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">longterm_rate</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortterm_rate</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_maturity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_coeff</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">longterm_rate</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortterm_rate</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_maturity</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_maturity</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
@@ -431,10 +751,32 @@
     <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;shortterm_rate&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortterm_rate</span><span class="p">,</span> <span class="s2">&quot;longterm_rate&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">longterm_rate</span><span class="p">,</span> <span class="s2">&quot;max_maturity&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_maturity</span><span class="p">}</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_maturity</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortterm_rate</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coeff</span> <span class="o">*</span> <span class="n">t</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">longterm_rate</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="n">refdate</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">Interpolator</span><span class="p">(</span><span class="n">InterpolationType</span><span class="o">.</span><span class="n">LINEAR</span><span class="p">,</span> <span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">CONSTANT</span><span class="p">)</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">min_maturity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_maturity</span><span class="p">],</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">shortterm_rate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">longterm_rate</span><span class="p">],</span>
+            <span class="n">DayCounter</span><span class="p">(</span><span class="n">DayCounterType</span><span class="o">.</span><span class="n">Act365Fixed</span><span class="p">)</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">),</span>
+            <span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">CONSTANT</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">yf</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="n">DayCounterType</span><span class="o">.</span><span class="n">Act365Fixed</span><span class="p">)</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">r</span> <span class="o">*</span> <span class="n">yf</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">value_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="n">refdate</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span> <span class="o">/</span> <span class="n">DayCounter</span><span class="p">(</span><span class="n">DayCounterType</span><span class="o">.</span><span class="n">Act365Fixed</span><span class="p">)</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">r</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Interpolator</span><span class="p">(</span><span class="n">InterpolationType</span><span class="o">.</span><span class="n">LINEAR</span><span class="p">,</span> <span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">CONSTANT</span><span class="p">)</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">min_maturity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_maturity</span><span class="p">],</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">shortterm_rate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">longterm_rate</span><span class="p">],</span> <span class="n">t</span><span class="p">,</span> <span class="n">ExtrapolationType</span><span class="o">.</span><span class="n">CONSTANT</span>
+        <span class="p">)</span>
 
 
 <div class="viewcode-block" id="NelsonSiegelSvensson">
@@ -524,6 +866,15 @@
     <span class="k">def</span> <span class="nf">value_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="o">.</span><span class="n">value_rate</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">value_rate</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">value_rate</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">value_fwd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d1</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d2</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return forward discount factor for a given date&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d2</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">value_fwd_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d1</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d2</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return forward continuously compounded zero rate for a given date&quot;&quot;&quot;</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value_fwd</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">))</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">r</span>
+
     <span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="c1"># TODO unittests</span>
         <span class="k">return</span> <span class="n">DiscountCurveComposition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
@@ -576,6 +927,31 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Missing implementation of to_dict() in parametrization of type &quot;</span> <span class="o">+</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rate_parametrization</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;obj_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_id</span><span class="p">,</span> <span class="s2">&quot;refdate&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">,</span> <span class="s2">&quot;rate_parametrization&quot;</span><span class="p">:</span> <span class="n">parametrization</span><span class="p">}</span>
 
+<div class="viewcode-block" id="DiscountCurveParametrized.value_fwd">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurveParametrized.value_fwd">[docs]</a>
+    <span class="k">def</span> <span class="nf">value_fwd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d1</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d2</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return forward discount factor for a given date</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            refdate (Union[date, datetime]): The reference date. If the reference date is in the future (compared to the curves reference date), the forward discount factor will be returned.</span>
+<span class="sd">            d1 (Union[date, datetime]): The start date of the forward period</span>
+<span class="sd">            d2 (Union[date, datetime]): The end date of the forward period</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float: forward rate</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="n">refdate</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="n">d1</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="n">d2</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">refdate</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The given reference date is before the curves reference date.&quot;</span><span class="p">)</span>
+        <span class="n">yf1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d1</span><span class="p">)</span>
+        <span class="n">yf2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">yf2</span> <span class="o">/</span> <span class="n">yf1</span></div>
+
+
 <div class="viewcode-block" id="DiscountCurveParametrized.value">
 <a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurveParametrized.value">[docs]</a>
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -595,7 +971,7 @@
         <span class="k">if</span> <span class="n">refdate</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The given reference date is before the curves reference date.&quot;</span><span class="p">)</span>
         <span class="n">yf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">rate_parametrization</span><span class="p">(</span><span class="n">yf</span><span class="p">)</span> <span class="o">*</span> <span class="n">yf</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">rate_parametrization</span><span class="p">(</span><span class="n">yf</span><span class="p">,</span> <span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="o">*</span> <span class="n">yf</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DiscountCurveParametrized.value_rate">
@@ -617,7 +993,31 @@
         <span class="k">if</span> <span class="n">refdate</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The given reference date is before the curves reference date.&quot;</span><span class="p">)</span>
         <span class="n">yf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate_parametrization</span><span class="p">(</span><span class="n">yf</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate_parametrization</span><span class="p">(</span><span class="n">yf</span><span class="p">,</span> <span class="n">refdate</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DiscountCurveParametrized.value_fwd_rate">
+<a class="viewcode-back" href="../../../rivapy/marketdata/discountcurves.html#rivapy.marketdata.DiscountCurveParametrized.value_fwd_rate">[docs]</a>
+    <span class="k">def</span> <span class="nf">value_fwd_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refdate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d1</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">d2</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return forward continuously compounded zero rate for a given date</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            refdate (Union[date, datetime]): The reference date. If the reference date is in the future (compared to the curves reference date), the forward rate will be returned.</span>
+<span class="sd">            d1 (Union[date, datetime]): The start date of the period for which the forward continuously compounded zero rate will be returned.</span>
+<span class="sd">            d2 (Union[date, datetime]): The end date of the period for which the forward continuously compounded zero rate will be returned.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float: forward continuously compounded zero rate</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="n">refdate</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="n">d1</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="n">d2</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">refdate</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">refdate</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The given reference date is before the curves reference date.&quot;</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value_fwd</span><span class="p">(</span><span class="n">refdate</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">))</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">r</span></div>
 
 
     <span class="nd">@staticmethod</span>

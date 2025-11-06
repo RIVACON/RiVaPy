@@ -82,47 +82,61 @@
              
   <h1>Source code for rivapy.pricing.pricing_data</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Iterable</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span> 
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">dateutil.relativedelta</span> <span class="kn">import</span> <span class="n">relativedelta</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">_IntEnum</span>
 
 <span class="kn">from</span> <span class="nn">rivapy</span> <span class="kn">import</span> <span class="n">_pyvacon_available</span>
+
 <span class="k">if</span> <span class="n">_pyvacon_available</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">pyvacon</span> <span class="k">as</span> <span class="nn">_pyvacon</span>
 
 
 <span class="kn">from</span> <span class="nn">rivapy.instruments</span> <span class="kn">import</span> <span class="n">CDSSpecification</span>
 
-<span class="kn">from</span> <span class="nn">rivapy.marketdata</span> <span class="kn">import</span> <span class="n">DiscountCurve</span><span class="p">,</span> <span class="n">SurvivalCurve</span> 
+<span class="kn">from</span> <span class="nn">rivapy.marketdata</span> <span class="kn">import</span> <span class="n">DiscountCurve</span><span class="p">,</span> <span class="n">SurvivalCurve</span>
 <span class="kn">from</span> <span class="nn">rivapy.tools.interfaces</span> <span class="kn">import</span> <span class="n">BaseDatedCurve</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span> <span class="k">as</span> <span class="n">_Union</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span><span class="p">,</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">rivapy.instruments.bond_specifications</span> <span class="kn">import</span> <span class="n">BondBaseSpecification</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.deposit_specifications</span> <span class="kn">import</span> <span class="n">DepositSpecification</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.fra_specifications</span> <span class="kn">import</span> <span class="n">ForwardRateAgreementSpecification</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.ir_swap_specification</span> <span class="kn">import</span> <span class="n">InterestRateSwapSpecification</span><span class="p">,</span> <span class="n">IrFixedLegSpecification</span><span class="p">,</span> <span class="n">IrFloatLegSpecification</span>
 <span class="kn">from</span> <span class="nn">rivapy.tools._converter</span> <span class="kn">import</span> <span class="n">_add_converter</span>
 <span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">_date_to_datetime</span>
-<span class="kn">from</span> <span class="nn">rivapy.pricing.pricing_request</span> <span class="kn">import</span> <span class="n">PricingRequest</span><span class="p">,</span> <span class="n">BondPricingRequest</span>
+<span class="kn">from</span> <span class="nn">rivapy.pricing.pricing_request</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">PricingRequest</span><span class="p">,</span>
+    <span class="n">BondPricingRequest</span><span class="p">,</span>
+    <span class="n">DepositPricingRequest</span><span class="p">,</span>
+    <span class="n">ForwardRateAgreementPricingRequest</span><span class="p">,</span>
+    <span class="n">InterestRateSwapPricingRequest</span><span class="p">,</span>
+<span class="p">)</span>
 
+<span class="kn">from</span> <span class="nn">rivapy.pricing.factory</span> <span class="kn">import</span> <span class="n">_factory</span>
 
+<span class="c1"># from rivapy.pricing.deposit_pricing import DepositPricer</span>
+<span class="c1"># from rivapy.pricing.fra_pricing import ForwardRateAgreementPricer</span>
 
-
-
-<span class="k">class</span> <span class="nc">CDSPricingData</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">val_date</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">survival_curve</span><span class="p">,</span> <span class="n">recovery_curve</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">val_date</span> <span class="o">=</span> <span class="n">val_date</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span> <span class="o">=</span> <span class="n">discount_curve</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span> <span class="o">=</span> <span class="n">survival_curve</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">recovery_curve</span> <span class="o">=</span> <span class="n">recovery_curve</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_pricer_type</span> <span class="o">=</span> <span class="s1">&#39;ISDA&#39;</span>
-        
-    <span class="k">def</span> <span class="nf">price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">pass</span>
+<span class="c1"># double declaration</span>
+<span class="c1"># class CDSPricingData:</span>
+<span class="c1">#    def __init__(self, spec, val_date, discount_curve, survival_curve, recovery_curve=None):</span>
+<span class="c1">#        self.spec = spec</span>
+<span class="c1">#        self.val_date = val_date</span>
+<span class="c1">#        self.discount_curve = discount_curve</span>
+<span class="c1">#        self.survival_curve = survival_curve</span>
+<span class="c1">#        self.recovery_curve = recovery_curve</span>
+<span class="c1">#        self._pricer_type = &#39;ISDA&#39;</span>
+<span class="c1">#</span>
+<span class="c1">#    def price(self):</span>
+<span class="c1">#        pass</span>
 
 <span class="k">if</span> <span class="n">_pyvacon_available</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">pyvacon.pyvacon_swig</span> <span class="k">as</span> <span class="nn">_analytics</span>
+
     <span class="n">BondPricingParameter</span> <span class="o">=</span> <span class="n">_add_converter</span><span class="p">(</span><span class="n">_analytics</span><span class="o">.</span><span class="n">BondPricingParameter</span><span class="p">)</span>
     <span class="c1"># getPricingData = _converter(_analytics.getPricingData)</span>
 <span class="k">else</span><span class="p">:</span>
+
 <div class="viewcode-block" id="BondPricingParameter">
 <a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.BondPricingParameter">[docs]</a>
     <span class="k">class</span> <span class="nc">BondPricingParameter</span><span class="p">:</span>
@@ -133,9 +147,7 @@
 <div class="viewcode-block" id="BasePricingData">
 <a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.BasePricingData">[docs]</a>
 <span class="k">class</span> <span class="nc">BasePricingData</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pricer</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                 <span class="n">pricing_request</span><span class="p">:</span> <span class="n">PricingRequest</span>
-                 <span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pricer</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pricing_request</span><span class="p">:</span> <span class="n">PricingRequest</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pricer</span> <span class="o">=</span> <span class="n">pricer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pricing_request</span> <span class="o">=</span> <span class="n">pricing_request</span>
         <span class="c1"># TODO: analyse if simulationData is needed (here)</span>
@@ -168,7 +180,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            PricingRequest: Configured pricing request.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pricing_request</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pricing_request</span>
 
     <span class="nd">@pricing_request</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">pricing_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pricing_request</span><span class="p">:</span> <span class="n">PricingRequest</span><span class="p">):</span>
@@ -185,10 +197,19 @@
 <div class="viewcode-block" id="BondPricingData">
 <a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.BondPricingData">[docs]</a>
 <span class="k">class</span> <span class="nc">BondPricingData</span><span class="p">(</span><span class="n">BasePricingData</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bond</span><span class="p">:</span> <span class="n">BondBaseSpecification</span><span class="p">,</span> <span class="n">valuation_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span> <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
-                 <span class="n">fixing_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">BondPricingParameter</span><span class="p">,</span> <span class="n">pricing_request</span><span class="p">:</span> <span class="n">BondPricingRequest</span><span class="p">,</span>
-                 <span class="n">pricer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;BondPricer&#39;</span><span class="p">,</span> <span class="n">past_fixing</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">survival_curve</span><span class="p">:</span> <span class="n">SurvivalCurve</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">recovery_curve</span><span class="p">:</span> <span class="n">BaseDatedCurve</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">bond</span><span class="p">:</span> <span class="n">BondBaseSpecification</span><span class="p">,</span>
+        <span class="n">valuation_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">fixing_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="n">BondPricingParameter</span><span class="p">,</span>
+        <span class="n">pricing_request</span><span class="p">:</span> <span class="n">BondPricingRequest</span><span class="p">,</span>
+        <span class="n">pricer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;BondPricer&quot;</span><span class="p">,</span>
+        <span class="n">past_fixing</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">survival_curve</span><span class="p">:</span> <span class="n">SurvivalCurve</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">recovery_curve</span><span class="p">:</span> <span class="n">BaseDatedCurve</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">pricer</span><span class="p">,</span> <span class="n">pricing_request</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__bond</span> <span class="o">=</span> <span class="n">bond</span>  <span class="c1"># spec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">valuation_date</span> <span class="o">=</span> <span class="n">valuation_date</span>  <span class="c1"># valDate</span>
@@ -261,7 +282,6 @@
 
 
 
-
 <div class="viewcode-block" id="ResultType">
 <a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.ResultType">[docs]</a>
 <span class="k">class</span> <span class="nc">ResultType</span><span class="p">(</span><span class="n">_IntEnum</span><span class="p">):</span>
@@ -272,6 +292,7 @@
     <span class="n">RHO</span> <span class="o">=</span> <span class="mi">4</span>
     <span class="n">VEGA</span> <span class="o">=</span> <span class="mi">5</span>
     <span class="n">VANNA</span> <span class="o">=</span> <span class="mi">6</span></div>
+
 
 
 <div class="viewcode-block" id="PricingResults">
@@ -290,7 +311,8 @@
 </div>
 
 
-<span class="k">def</span> <span class="nf">_create_pricing_request</span><span class="p">(</span><span class="n">pr_dict</span> <span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ResultType</span><span class="p">]):</span>
+
+<span class="k">def</span> <span class="nf">_create_pricing_request</span><span class="p">(</span><span class="n">pr_dict</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ResultType</span><span class="p">]):</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">PricingRequest</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">pr_dict</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">d</span> <span class="ow">is</span> <span class="n">ResultType</span><span class="o">.</span><span class="n">DELTA</span> <span class="ow">or</span> <span class="n">d</span> <span class="ow">is</span> <span class="n">ResultType</span><span class="o">.</span><span class="n">GAMMA</span><span class="p">:</span>
@@ -305,10 +327,11 @@
             <span class="n">result</span><span class="o">.</span><span class="n">setVanna</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">result</span>
 
+
 <div class="viewcode-block" id="Black76PricingData">
 <a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.Black76PricingData">[docs]</a>
 <span class="k">class</span> <span class="nc">Black76PricingData</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">vol_surface</span><span class="p">,</span> <span class="n">pricing_request</span> <span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ResultType</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">vol_surface</span><span class="p">,</span> <span class="n">pricing_request</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ResultType</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for Black76PricingDate</span>
 
 <span class="sd">        Args:</span>
@@ -318,7 +341,7 @@
 <span class="sd">            vol_surface ([type]): Volatility surface.</span>
 <span class="sd">            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">val_date</span> <span class="o">=</span> <span class="n">val_date</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span> <span class="o">=</span> <span class="n">discount_curve</span>
@@ -343,11 +366,21 @@
         <span class="k">return</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">BasePricer</span><span class="o">.</span><span class="n">price</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">())</span></div>
 </div>
 
-        
+
+
 <div class="viewcode-block" id="AmericanPdePricingData">
 <a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.AmericanPdePricingData">[docs]</a>
 <span class="k">class</span> <span class="nc">AmericanPdePricingData</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">vol_surface</span><span class="p">,</span> <span class="n">pricing_request</span> <span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ResultType</span><span class="p">],</span> <span class="n">time_steps_year</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span> <span class="n">spot_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">val_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+        <span class="n">spec</span><span class="p">,</span>
+        <span class="n">discount_curve</span><span class="p">,</span>
+        <span class="n">vol_surface</span><span class="p">,</span>
+        <span class="n">pricing_request</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ResultType</span><span class="p">],</span>
+        <span class="n">time_steps_year</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
+        <span class="n">spot_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for AmericanPdePricingDate</span>
 
 <span class="sd">        Args:</span>
@@ -359,7 +392,7 @@
 <span class="sd">            time_steps_year (int, optional): [description]. Defaults to 60.</span>
 <span class="sd">            spot_steps (int, optional): [description]. Defaults to 200.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">val_date</span> <span class="o">=</span> <span class="n">val_date</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span> <span class="o">=</span> <span class="n">discount_curve</span>
@@ -368,8 +401,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">time_steps_year</span> <span class="o">=</span> <span class="n">time_steps_year</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spot_steps</span> <span class="o">=</span> <span class="n">spot_steps</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
-    
-    
+
     <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">LocalVolPdePricingData</span><span class="p">()</span>
@@ -378,9 +410,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">dsc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">param</span> <span class="o">=</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">PdePricingParameter</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">param</span><span class="o">.</span><span class="n">nTimeStepsPerYear</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_steps_year</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">param</span><span class="o">.</span><span class="n">nSpotSteps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spot_steps</span>   
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">param</span><span class="o">.</span><span class="n">nSpotSteps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spot_steps</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">vol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_surface</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">pricingRequest</span> <span class="o">=</span> <span class="n">_create_pricing_request</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pricing_request</span><span class="p">)</span>   
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">pricingRequest</span> <span class="o">=</span> <span class="n">_create_pricing_request</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pricing_request</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span>
 
 <div class="viewcode-block" id="AmericanPdePricingData.price">
@@ -390,85 +422,88 @@
 </div>
 
 
-    
+
 <div class="viewcode-block" id="CDSPricingData">
 <a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.CDSPricingData">[docs]</a>
 <span class="k">class</span> <span class="nc">CDSPricingData</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">CDSSpecification</span><span class="p">,</span> <span class="n">val_date</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">survival_curve</span><span class="p">,</span> 
-                <span class="n">recovery_curve</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">integration_step</span> <span class="o">=</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">)):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">CDSSpecification</span><span class="p">,</span> <span class="n">val_date</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">survival_curve</span><span class="p">,</span> <span class="n">recovery_curve</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">integration_step</span><span class="o">=</span><span class="n">relativedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">val_date</span> <span class="o">=</span> <span class="n">val_date</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span> <span class="o">=</span> <span class="n">discount_curve</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span> <span class="o">=</span> <span class="n">survival_curve</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">recovery_curve</span> <span class="o">=</span> <span class="n">recovery_curve</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_pricer_type</span> <span class="o">=</span> <span class="s1">&#39;ISDA&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pricer_type</span> <span class="o">=</span> <span class="s2">&quot;ISDA&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">integration_step</span> <span class="o">=</span> <span class="n">integration_step</span>
-        
-    <span class="k">def</span> <span class="nf">_pv_protection_leg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">valuation_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">integration_stepsize</span><span class="p">:</span> <span class="n">relativedelta</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">_pv_protection_leg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">valuation_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">integration_stepsize</span><span class="p">:</span> <span class="n">relativedelta</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="n">prev_date</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">protection_start</span><span class="p">)</span>
         <span class="n">current_date</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">prev_date</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">integration_step</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">)</span>
         <span class="n">pv_protection</span> <span class="o">=</span> <span class="mf">0.0</span>
-        
+
         <span class="k">while</span> <span class="n">current_date</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">:</span>
-            <span class="n">default_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">prev_date</span><span class="p">)</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">current_date</span><span class="p">)</span>
+            <span class="n">default_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">prev_date</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">current_date</span><span class="p">)</span>
             <span class="n">recovery</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">recovery</span>
             <span class="k">if</span> <span class="n">recovery</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">recovery_curve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">recovery</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recovery_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">current_date</span><span class="p">)</span> 
-            <span class="n">pv_protection</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">current_date</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">recovery</span><span class="p">)</span> <span class="o">*</span> <span class="n">default_prob</span>
+                <span class="n">recovery</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recovery_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">current_date</span><span class="p">)</span>
+            <span class="n">pv_protection</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">current_date</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">recovery</span><span class="p">)</span> <span class="o">*</span> <span class="n">default_prob</span>
             <span class="n">prev_date</span> <span class="o">=</span> <span class="n">current_date</span>
             <span class="n">current_date</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">integration_step</span>
-            
+
         <span class="k">if</span> <span class="n">prev_date</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span> <span class="ow">and</span> <span class="n">current_date</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">:</span>
-            <span class="n">default_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">prev_date</span><span class="p">)</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">)</span>
+            <span class="n">default_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">prev_date</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">)</span>
             <span class="n">recovery</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">recovery</span>
             <span class="k">if</span> <span class="n">recovery</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">recovery_curve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">recovery</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recovery_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">)</span> 
-            <span class="n">pv_protection</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">recovery</span><span class="p">)</span> <span class="o">*</span> <span class="n">default_prob</span>
-            
+                <span class="n">recovery</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recovery_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">)</span>
+            <span class="n">pv_protection</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">recovery</span><span class="p">)</span> <span class="o">*</span> <span class="n">default_prob</span>
+
         <span class="k">return</span> <span class="n">pv_protection</span>
 
-    <span class="k">def</span> <span class="nf">_pv_premium_leg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">valuation_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">_pv_premium_leg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">valuation_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
         <span class="n">premium_period_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">protection_start</span>
-        <span class="n">risk_adj_factor_premium</span><span class="o">=</span><span class="mi">0</span>  
-        <span class="n">accrued</span> <span class="o">=</span> <span class="mi">0</span>      
-        <span class="c1">#TODO include daycounter into CDSSpecification</span>
+        <span class="n">risk_adj_factor_premium</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">accrued</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># TODO include daycounter into CDSSpecification</span>
         <span class="n">dc</span> <span class="o">=</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">definition</span><span class="o">.</span><span class="n">DayCounter</span><span class="p">(</span><span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">definition</span><span class="o">.</span><span class="n">DayCounter</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">Act365Fixed</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">premium_payment</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">premium_pay_dates</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">premium_payment</span> <span class="o">&gt;=</span> <span class="n">valuation_date</span><span class="p">:</span>
                 <span class="n">period_length</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">premium_period_start</span><span class="p">,</span> <span class="n">premium_payment</span><span class="p">)</span>
                 <span class="n">survival_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">premium_payment</span><span class="p">)</span>
                 <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">premium_payment</span><span class="p">)</span>
-                <span class="n">risk_adj_factor_premium</span> <span class="o">+=</span> <span class="n">period_length</span><span class="o">*</span><span class="n">survival_prob</span><span class="o">*</span><span class="n">df</span>
-                <span class="n">default_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">premium_period_start</span><span class="p">)</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">premium_payment</span><span class="p">)</span>
-                <span class="n">accrued</span> <span class="o">+=</span> <span class="n">period_length</span><span class="o">*</span><span class="n">default_prob</span><span class="o">*</span><span class="n">df</span>
+                <span class="n">risk_adj_factor_premium</span> <span class="o">+=</span> <span class="n">period_length</span> <span class="o">*</span> <span class="n">survival_prob</span> <span class="o">*</span> <span class="n">df</span>
+                <span class="n">default_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">premium_period_start</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span>
+                    <span class="n">valuation_date</span><span class="p">,</span> <span class="n">premium_payment</span>
+                <span class="p">)</span>
+                <span class="n">accrued</span> <span class="o">+=</span> <span class="n">period_length</span> <span class="o">*</span> <span class="n">default_prob</span> <span class="o">*</span> <span class="n">df</span>
                 <span class="n">premium_period_start</span> <span class="o">=</span> <span class="n">premium_payment</span>
         <span class="k">return</span> <span class="n">risk_adj_factor_premium</span><span class="p">,</span> <span class="n">accrued</span>
 
 <div class="viewcode-block" id="CDSPricingData.par_spread">
 <a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.CDSPricingData.par_spread">[docs]</a>
-    <span class="k">def</span> <span class="nf">par_spread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">valuation_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">integration_stepsize</span><span class="p">:</span> <span class="n">relativedelta</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">par_spread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">valuation_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">integration_stepsize</span><span class="p">:</span> <span class="n">relativedelta</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="n">prev_date</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">protection_start</span><span class="p">)</span>
         <span class="n">current_date</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">prev_date</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">integration_step</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">)</span>
         <span class="n">pv_protection</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">premium_period_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">protection_start</span>
-        <span class="n">risk_adj_factor_premium</span><span class="o">=</span><span class="mi">0</span>  
-        <span class="n">accrued</span> <span class="o">=</span> <span class="mi">0</span> 
+        <span class="n">risk_adj_factor_premium</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">accrued</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="k">while</span> <span class="n">current_date</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">:</span>
-            <span class="n">default_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">prev_date</span><span class="p">)</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">current_date</span><span class="p">)</span>
+            <span class="n">default_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">prev_date</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">current_date</span><span class="p">)</span>
             <span class="n">recovery</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">recovery</span>
             <span class="k">if</span> <span class="n">recovery</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">recovery_curve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">recovery</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recovery_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">current_date</span><span class="p">)</span> 
-            <span class="n">pv_protection</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">current_date</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">recovery</span><span class="p">)</span> <span class="o">*</span> <span class="n">default_prob</span>
+                <span class="n">recovery</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recovery_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">current_date</span><span class="p">)</span>
+            <span class="n">pv_protection</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">current_date</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">recovery</span><span class="p">)</span> <span class="o">*</span> <span class="n">default_prob</span>
             <span class="n">prev_date</span> <span class="o">=</span> <span class="n">current_date</span>
             <span class="n">current_date</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">integration_step</span>
-            
+
         <span class="k">if</span> <span class="n">prev_date</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span> <span class="ow">and</span> <span class="n">current_date</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">:</span>
-            <span class="n">default_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">prev_date</span><span class="p">)</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">)</span>
+            <span class="n">default_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">prev_date</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">)</span>
             <span class="n">recovery</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">recovery</span>
             <span class="k">if</span> <span class="n">recovery</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">recovery_curve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">recovery</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recovery_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">)</span> 
-            <span class="n">pv_protection</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">recovery</span><span class="p">)</span> <span class="o">*</span> <span class="n">default_prob</span>
+                <span class="n">recovery</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recovery_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">)</span>
+            <span class="n">pv_protection</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">expiry</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">recovery</span><span class="p">)</span> <span class="o">*</span> <span class="n">default_prob</span>
 
         <span class="n">dc</span> <span class="o">=</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">definition</span><span class="o">.</span><span class="n">DayCounter</span><span class="p">(</span><span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">definition</span><span class="o">.</span><span class="n">DayCounter</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">Act365Fixed</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">premium_payment</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">premium_pay_dates</span><span class="p">:</span>
@@ -476,16 +511,18 @@
                 <span class="n">period_length</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">premium_period_start</span><span class="p">,</span> <span class="n">premium_payment</span><span class="p">)</span>
                 <span class="n">survival_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">premium_payment</span><span class="p">)</span>
                 <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">premium_payment</span><span class="p">)</span>
-                <span class="n">risk_adj_factor_premium</span> <span class="o">+=</span> <span class="n">period_length</span><span class="o">*</span><span class="n">survival_prob</span><span class="o">*</span><span class="n">df</span>
-                <span class="n">default_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">premium_period_start</span><span class="p">)</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">premium_payment</span><span class="p">)</span>
-                <span class="n">accrued</span> <span class="o">+=</span> <span class="n">period_length</span><span class="o">*</span><span class="n">default_prob</span><span class="o">*</span><span class="n">df</span>
+                <span class="n">risk_adj_factor_premium</span> <span class="o">+=</span> <span class="n">period_length</span> <span class="o">*</span> <span class="n">survival_prob</span> <span class="o">*</span> <span class="n">df</span>
+                <span class="n">default_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">valuation_date</span><span class="p">,</span> <span class="n">premium_period_start</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_curve</span><span class="o">.</span><span class="n">value</span><span class="p">(</span>
+                    <span class="n">valuation_date</span><span class="p">,</span> <span class="n">premium_payment</span>
+                <span class="p">)</span>
+                <span class="n">accrued</span> <span class="o">+=</span> <span class="n">period_length</span> <span class="o">*</span> <span class="n">default_prob</span> <span class="o">*</span> <span class="n">df</span>
                 <span class="n">premium_period_start</span> <span class="o">=</span> <span class="n">premium_payment</span>
 
-        <span class="n">PV_accrued</span><span class="o">=</span><span class="p">((</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">accrued</span><span class="p">)</span>
-        <span class="n">PV_premium</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">risk_adj_factor_premium</span>
-        <span class="n">PV_protection</span><span class="o">=</span><span class="p">(((</span><span class="mi">1</span><span class="o">-</span><span class="n">recovery</span><span class="p">))</span><span class="o">*</span><span class="n">pv_protection</span><span class="p">)</span>
-        
-        <span class="n">par_spread_i</span><span class="o">=</span><span class="p">(</span><span class="n">PV_protection</span><span class="p">)</span><span class="o">/</span><span class="p">((</span><span class="n">PV_premium</span><span class="o">+</span><span class="n">PV_accrued</span><span class="p">))</span>
+        <span class="n">PV_accrued</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">accrued</span>
+        <span class="n">PV_premium</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">risk_adj_factor_premium</span>
+        <span class="n">PV_protection</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">recovery</span><span class="p">))</span> <span class="o">*</span> <span class="n">pv_protection</span>
+
+        <span class="n">par_spread_i</span> <span class="o">=</span> <span class="p">(</span><span class="n">PV_protection</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="n">PV_premium</span> <span class="o">+</span> <span class="n">PV_accrued</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">par_spread_i</span></div>
 
 
@@ -494,15 +531,471 @@
     <span class="k">def</span> <span class="nf">price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">pv_protection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pv_protection_leg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">integration_step</span><span class="p">)</span>
         <span class="n">pr_results</span> <span class="o">=</span> <span class="n">PricingResults</span><span class="p">()</span>
-        <span class="n">pr_results</span><span class="o">.</span><span class="n">pv_protection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">notional</span><span class="o">*</span><span class="n">pv_protection</span>
+        <span class="n">pr_results</span><span class="o">.</span><span class="n">pv_protection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">notional</span> <span class="o">*</span> <span class="n">pv_protection</span>
         <span class="n">premium_leg</span><span class="p">,</span> <span class="n">accrued</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pv_premium_leg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">val_date</span><span class="p">)</span>
-        <span class="n">pr_results</span><span class="o">.</span><span class="n">premium_leg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">premium</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">notional</span><span class="o">*</span><span class="n">premium_leg</span>
-        <span class="n">pr_results</span><span class="o">.</span><span class="n">accrued</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">premium</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">notional</span><span class="o">*</span><span class="n">accrued</span>
-        <span class="n">pr_results</span><span class="o">.</span><span class="n">par_spread</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">par_spread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">integration_step</span><span class="p">)</span>
-        <span class="n">pr_results</span><span class="o">.</span><span class="n">set_price</span><span class="p">(</span><span class="n">pr_results</span><span class="o">.</span><span class="n">pv_protection</span><span class="o">-</span><span class="n">pr_results</span><span class="o">.</span><span class="n">premium_leg</span><span class="o">-</span><span class="n">pr_results</span><span class="o">.</span><span class="n">accrued</span><span class="p">)</span>
+        <span class="n">pr_results</span><span class="o">.</span><span class="n">premium_leg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">premium</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">notional</span> <span class="o">*</span> <span class="n">premium_leg</span>
+        <span class="n">pr_results</span><span class="o">.</span><span class="n">accrued</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">premium</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">notional</span> <span class="o">*</span> <span class="n">accrued</span>
+        <span class="n">pr_results</span><span class="o">.</span><span class="n">par_spread</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">par_spread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">integration_step</span><span class="p">)</span>
+        <span class="n">pr_results</span><span class="o">.</span><span class="n">set_price</span><span class="p">(</span><span class="n">pr_results</span><span class="o">.</span><span class="n">pv_protection</span> <span class="o">-</span> <span class="n">pr_results</span><span class="o">.</span><span class="n">premium_leg</span> <span class="o">-</span> <span class="n">pr_results</span><span class="o">.</span><span class="n">accrued</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pr_results</span></div>
 </div>
 
+
+
+<div class="viewcode-block" id="AnalyticSwaptionPricingData">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.AnalyticSwaptionPricingData">[docs]</a>
+<span class="k">class</span> <span class="nc">AnalyticSwaptionPricingData</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">vol_cube</span><span class="p">,</span> <span class="n">pricing_request</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ResultType</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for AnalyticSwaptionPricingData</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date ([datetime]): Valuation date.</span>
+<span class="sd">            spec: Swaptions specification</span>
+<span class="sd">            discount_curve: Discount curve.</span>
+<span class="sd">            vol_cube: Volatility cube.</span>
+<span class="sd">            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">val_date</span> <span class="o">=</span> <span class="n">val_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span> <span class="o">=</span> <span class="n">discount_curve</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vol_cube</span> <span class="o">=</span> <span class="n">vol_cube</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pricing_request</span> <span class="o">=</span> <span class="n">pricing_request</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">AnalyticSwaptionPricingData</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">valDate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_date</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">dsc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">volCube</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_cube</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">pricingRequest</span> <span class="o">=</span> <span class="n">_create_pricing_request</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pricing_request</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">pricer</span> <span class="o">=</span> <span class="s2">&quot;AnalyticSwaptionPricer&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span>
+
+<div class="viewcode-block" id="AnalyticSwaptionPricingData.price">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.AnalyticSwaptionPricingData.price">[docs]</a>
+    <span class="k">def</span> <span class="nf">price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">BasePricer</span><span class="o">.</span><span class="n">price</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">())</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="AnalyticCapPricingData">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.AnalyticCapPricingData">[docs]</a>
+<span class="k">class</span> <span class="nc">AnalyticCapPricingData</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">vol_surface</span><span class="p">,</span> <span class="n">pricing_request</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ResultType</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for AnalyticCapPricingData</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date ([datetime]): Valuation date.</span>
+<span class="sd">            spec: Specification</span>
+<span class="sd">            discount_curve: Discount curve.</span>
+<span class="sd">            vol_surface ([type]): Volatility surface.</span>
+<span class="sd">            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">val_date</span> <span class="o">=</span> <span class="n">val_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span> <span class="o">=</span> <span class="n">discount_curve</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vol_surface</span> <span class="o">=</span> <span class="n">vol_surface</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pricing_request</span> <span class="o">=</span> <span class="n">pricing_request</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">AnalyticCapPricingData</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">valDate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_date</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">dscCurve</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">volSurface</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_surface</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">pricingRequest</span> <span class="o">=</span> <span class="n">_create_pricing_request</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pricing_request</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">pricer</span> <span class="o">=</span> <span class="s2">&quot;AnalyticCapPricer&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span>
+
+<div class="viewcode-block" id="AnalyticCapPricingData.price">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.AnalyticCapPricingData.price">[docs]</a>
+    <span class="k">def</span> <span class="nf">price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">BasePricer</span><span class="o">.</span><span class="n">price</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">())</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="InterestRateSwapPricingData">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.InterestRateSwapPricingData">[docs]</a>
+<span class="k">class</span> <span class="nc">InterestRateSwapPricingData</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val_date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">ccy</span><span class="p">,</span> <span class="n">leg_pricing_data</span><span class="p">,</span> <span class="n">pricing_request</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ResultType</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for AnalyticCapPricingData</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date ([datetime]): Valuation date.</span>
+<span class="sd">            spec: Specification</span>
+<span class="sd">            discount_curve: Discount curve.</span>
+<span class="sd">            vol_surface ([type]): Volatility surface.</span>
+<span class="sd">            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">val_date</span> <span class="o">=</span> <span class="n">val_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ccy</span> <span class="o">=</span> <span class="n">ccy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leg_pricing_data</span> <span class="o">=</span> <span class="n">leg_pricing_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pricing_request</span> <span class="o">=</span> <span class="n">pricing_request</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">InterestRateSwapPricingData</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">pricer</span> <span class="o">=</span> <span class="s2">&quot;InterestRateSwapPricer&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">pricingRequest</span> <span class="o">=</span> <span class="n">_create_pricing_request</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pricing_request</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">valDate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_date</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">setCurr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ccy</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">leg_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">leg_pricing_data</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">addLegData</span><span class="p">(</span><span class="n">leg_data</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span>
+
+<div class="viewcode-block" id="InterestRateSwapPricingData.price">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.InterestRateSwapPricingData.price">[docs]</a>
+    <span class="k">def</span> <span class="nf">price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">BasePricer</span><span class="o">.</span><span class="n">price</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">())</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="InterestRateSwapLegPricingData">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.InterestRateSwapLegPricingData">[docs]</a>
+<span class="k">class</span> <span class="nc">InterestRateSwapLegPricingData</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">fx_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for AnalyticCapPricingData</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date ([datetime]): Valuation date.</span>
+<span class="sd">            spec: Specification</span>
+<span class="sd">            discount_curve: Discount curve.</span>
+<span class="sd">            vol_surface ([type]): Volatility surface.</span>
+<span class="sd">            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span> <span class="o">=</span> <span class="n">discount_curve</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fx_rate</span> <span class="o">=</span> <span class="n">fx_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">weight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">InterestRateSwapLegPricingData</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">discountCurve</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">fxRate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fx_rate</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span></div>
+
+
+
+<div class="viewcode-block" id="InterestRateSwapFloatLegPricingData">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.InterestRateSwapFloatLegPricingData">[docs]</a>
+<span class="k">class</span> <span class="nc">InterestRateSwapFloatLegPricingData</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">fx_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">fixing_curve</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for AnalyticCapPricingData</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date ([datetime]): Valuation date.</span>
+<span class="sd">            spec: Specification</span>
+<span class="sd">            discount_curve: Discount curve.</span>
+<span class="sd">            vol_surface ([type]): Volatility surface.</span>
+<span class="sd">            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span> <span class="o">=</span> <span class="n">discount_curve</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fixing_curve</span> <span class="o">=</span> <span class="n">fixing_curve</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fx_rate</span> <span class="o">=</span> <span class="n">fx_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">weight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_get_pyvacon_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span> <span class="o">=</span> <span class="n">_pyvacon</span><span class="o">.</span><span class="n">finance</span><span class="o">.</span><span class="n">pricing</span><span class="o">.</span><span class="n">InterestRateSwapFloatLegPricingData</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">discountCurve</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">fixingCurve</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixing_curve</span><span class="o">.</span><span class="n">_get_pyvacon_obj</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">fxRate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fx_rate</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyvacon_obj</span></div>
+
+
+
+<div class="viewcode-block" id="DepositPricingData">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.DepositPricingData">[docs]</a>
+<span class="k">class</span> <span class="nc">DepositPricingData</span><span class="p">(</span><span class="n">BasePricingData</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">deposit</span><span class="p">:</span> <span class="n">DepositSpecification</span><span class="p">,</span>
+        <span class="n">val_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">pricing_request</span><span class="p">:</span> <span class="n">DepositPricingRequest</span><span class="p">,</span>
+        <span class="n">pricer</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="c1"># fixing_curve: DiscountCurve,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># past_fixing: float = None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for DepositPricingData</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            deposit (DepositSpecification): Instrument specific specification class object</span>
+<span class="sd">            valuation_date (_Union[date, datetime]): valuatiton date</span>
+<span class="sd">            pricing_request (DepositPricingRequest): Instrument specific Pricing Request class with the desired output/calculation prameters</span>
+<span class="sd">            pricer (str): chosen pricing algorithm</span>
+<span class="sd">            discount_curve (DiscountCurve): discount curve (i.e. (dates, discountFactors))</span>
+<span class="sd">            parameters (dict): Extra parameters...</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">pricer</span><span class="p">,</span> <span class="n">pricing_request</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">deposit</span>  <span class="c1"># spec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">val_date</span> <span class="o">=</span> <span class="n">val_date</span>  <span class="c1"># valDate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span> <span class="o">=</span> <span class="n">discount_curve</span>  <span class="c1"># discountCurve</span>
+        <span class="k">if</span> <span class="n">parameters</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>  <span class="c1"># param</span>
+
+        <span class="c1"># in the case for floating rate deposits?</span>
+
+    <span class="c1"># self.fixing_curve = fixing_curve  # fixingCurve</span>
+    <span class="c1"># self.past_fixing = past_fixing  # pastFixing</span>
+
+<div class="viewcode-block" id="DepositPricingData.price">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.DepositPricingData.price">[docs]</a>
+    <span class="k">def</span> <span class="nf">price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># obtain correct pricer</span>
+        <span class="n">pricer_obj</span> <span class="o">=</span> <span class="n">_factory</span><span class="p">()[</span><span class="s2">&quot;DepositPricer&quot;</span><span class="p">]</span>
+        <span class="n">pricer</span> <span class="o">=</span> <span class="n">pricer_obj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span><span class="p">)</span>  <span class="c1"># TODO ignore spread curve for now</span>
+        <span class="c1"># pricer = DepositPricer(self.valuation_date, self.__spec, self.discount_curve)</span>
+
+        <span class="c1"># pass correct required pricer information and calculate</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">pricer</span><span class="o">.</span><span class="n">price</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">val</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ForwardRateAgreementPricingData">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.ForwardRateAgreementPricingData">[docs]</a>
+<span class="k">class</span> <span class="nc">ForwardRateAgreementPricingData</span><span class="p">(</span><span class="n">BasePricingData</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">fra</span><span class="p">:</span> <span class="n">ForwardRateAgreementSpecification</span><span class="p">,</span>
+        <span class="n">val_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">pricing_request</span><span class="p">:</span> <span class="n">ForwardRateAgreementPricingRequest</span><span class="p">,</span>
+        <span class="n">pricer</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">forward_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for ForwardrateAgreementPricingData</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fra (ForwardRateAgreementSpecification): Instrument specific specification class object</span>
+<span class="sd">            valuation_date (_Union[date, datetime]): valuatiton date</span>
+<span class="sd">            pricing_request (DepositPricingRequest): Instrument specific Pricing Request class with the desired output/calculation prameters</span>
+<span class="sd">            pricer (str): chosen pricing algorithm</span>
+<span class="sd">            discount_curve (DiscountCurve): discount curve (i.e. (dates, discountFactors))</span>
+<span class="sd">            forward_curve (DiscountCurve): Forward curve (i.e. (dates, forward rate)) #TODO do we implement a ForwardCruve class?</span>
+<span class="sd">            parameters (dict): Extra parameters...</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">pricer</span><span class="p">,</span> <span class="n">pricing_request</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">fra</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">val_date</span> <span class="o">=</span> <span class="n">val_date</span>  <span class="c1"># valDate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span> <span class="o">=</span> <span class="n">discount_curve</span>  <span class="c1"># discountCurve</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forward_curve</span> <span class="o">=</span> <span class="n">forward_curve</span>  <span class="c1"># discountCurve</span>
+        <span class="k">if</span> <span class="n">parameters</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>  <span class="c1"># param</span>
+
+<div class="viewcode-block" id="ForwardRateAgreementPricingData.price">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.ForwardRateAgreementPricingData.price">[docs]</a>
+    <span class="k">def</span> <span class="nf">price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the price of the forward rate agreement.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: _description_</span>
+<span class="sd">            RuntimeError: _description_</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">factory</span> <span class="o">=</span> <span class="n">_factory</span><span class="p">()</span>
+            <span class="k">if</span> <span class="s2">&quot;ForwardRateAgreementPricer&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">factory</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ForwardRateAgreementPricer not found in factory&quot;</span><span class="p">)</span>
+
+            <span class="n">pricer_obj</span> <span class="o">=</span> <span class="n">factory</span><span class="p">[</span><span class="s2">&quot;ForwardRateAgreementPricer&quot;</span><span class="p">]</span>
+            <span class="n">pricer</span> <span class="o">=</span> <span class="n">pricer_obj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">val_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_curve</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">pricer</span><span class="o">.</span><span class="n">price</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error pricing forward rate agreement: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="InterestRateSwapPricingData_rivapy">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.InterestRateSwapPricingData_rivapy">[docs]</a>
+<span class="k">class</span> <span class="nc">InterestRateSwapPricingData_rivapy</span><span class="p">(</span><span class="n">BasePricingData</span><span class="p">):</span>  <span class="c1"># TODO!!!!</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">spec</span><span class="p">:</span> <span class="n">InterestRateSwapSpecification</span><span class="p">,</span>
+        <span class="n">val_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">pricing_request</span><span class="p">:</span> <span class="n">InterestRateSwapPricingRequest</span><span class="p">,</span>
+        <span class="n">pricer</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">ccy</span><span class="p">,</span>
+        <span class="n">leg_pricing_data</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date ([datetime]): Valuation date.</span>
+<span class="sd">            spec: Specification</span>
+<span class="sd">            discount_curve: Discount curve.</span>
+<span class="sd">            vol_surface ([type]): Volatility surface.</span>
+<span class="sd">            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">pricer</span><span class="p">,</span> <span class="n">pricing_request</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">val_date</span> <span class="o">=</span> <span class="n">val_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ccy</span> <span class="o">=</span> <span class="n">ccy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leg_pricing_data</span> <span class="o">=</span> <span class="n">leg_pricing_data</span>
+
+        <span class="c1"># TODO right now leg_pricing_data is expected to have:</span>
+        <span class="c1"># discount_curve_pay_leg: DiscountCurve,</span>
+        <span class="c1"># discount_curve_receive_leg: DiscountCurve,</span>
+        <span class="c1"># fixing_curve_pay_leg: DiscountCurve,</span>
+        <span class="c1"># fixing_curve_receive_leg: DiscountCurve,</span>
+        <span class="c1"># fx_fwd_curve_pay_leg: DiscountCurve, # TODO FxForwardCurve ... do we need anotheer class</span>
+        <span class="c1"># fx_fwd_curve_receive_leg: DiscountCurve,</span>
+        <span class="c1"># pricing_param: Dict = {}, #</span>
+        <span class="c1"># fixing_map : FixingTable = None,</span>
+        <span class="c1"># fx_pay_leg : float = 1.0,</span>
+        <span class="c1"># fx_receive_leg : float = 1.0</span>
+
+        <span class="c1"># unpacking other_pricing_data ...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve_pay_leg</span> <span class="o">=</span> <span class="n">leg_pricing_data</span><span class="p">[</span><span class="s2">&quot;discount_curve_pay_leg&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve_receive_leg</span> <span class="o">=</span> <span class="n">leg_pricing_data</span><span class="p">[</span><span class="s2">&quot;discount_curve_receive_leg&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fixing_curve_pay_leg</span> <span class="o">=</span> <span class="n">leg_pricing_data</span><span class="p">[</span><span class="s2">&quot;fixing_curve_pay_leg&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fixing_curve_receive_leg</span> <span class="o">=</span> <span class="n">leg_pricing_data</span><span class="p">[</span><span class="s2">&quot;fixing_curve_receive_leg&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fx_fwd_curve_pay_leg</span> <span class="o">=</span> <span class="n">leg_pricing_data</span><span class="p">[</span><span class="s2">&quot;fx_fwd_curve_pay_leg&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fx_fwd_curve_receive_leg</span> <span class="o">=</span> <span class="n">leg_pricing_data</span><span class="p">[</span><span class="s2">&quot;fx_fwd_curve_receive_leg&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pricing_param</span> <span class="o">=</span> <span class="n">leg_pricing_data</span><span class="p">[</span><span class="s2">&quot;pricing_param&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fixing_map</span> <span class="o">=</span> <span class="n">leg_pricing_data</span><span class="p">[</span><span class="s2">&quot;fixing_map&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fx_pay_leg</span> <span class="o">=</span> <span class="n">leg_pricing_data</span><span class="p">[</span><span class="s2">&quot;fx_pay_leg&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fx_receive_leg</span> <span class="o">=</span> <span class="n">leg_pricing_data</span><span class="p">[</span><span class="s2">&quot;fx_receive_leg&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="InterestRateSwapPricingData_rivapy.price">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.InterestRateSwapPricingData_rivapy.price">[docs]</a>
+    <span class="k">def</span> <span class="nf">price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Obtain correct pricer, right now it is hardcoded for simplicity # TODO</span>
+        <span class="n">pricer_obj</span> <span class="o">=</span> <span class="n">_factory</span><span class="p">()[</span><span class="s2">&quot;InterestRateSwapPricer&quot;</span><span class="p">]</span>  <span class="c1"># not working for some reason?</span>
+        <span class="c1"># from rivapy.pricing.interest_rate_swap_pricing import InterestRateSwapPricer</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">discount_curve_pay_leg</span><span class="p">)</span>
+        <span class="c1"># pricer = InterestRateSwapPricer(</span>
+        <span class="n">pricer</span> <span class="o">=</span> <span class="n">pricer_obj</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">val_date</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span>
+            <span class="n">discount_curve_pay_leg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">discount_curve_pay_leg</span><span class="p">,</span>
+            <span class="n">discount_curve_receive_leg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">discount_curve_receive_leg</span><span class="p">,</span>
+            <span class="n">fixing_curve_pay_leg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fixing_curve_pay_leg</span><span class="p">,</span>
+            <span class="n">fixing_curve_receive_leg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fixing_curve_receive_leg</span><span class="p">,</span>
+            <span class="n">fx_fwd_curve_pay_leg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fx_fwd_curve_pay_leg</span><span class="p">,</span>
+            <span class="n">fx_fwd_curve_receive_leg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fx_fwd_curve_receive_leg</span><span class="p">,</span>
+            <span class="n">pricing_request</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pricing_request</span><span class="p">,</span>
+            <span class="n">pricing_param</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pricing_param</span><span class="p">,</span>
+            <span class="n">fixing_map</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fixing_map</span><span class="p">,</span>
+            <span class="n">fx_pay_leg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fx_pay_leg</span><span class="p">,</span>
+            <span class="n">fx_receive_leg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fx_receive_leg</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># pass correct required pricer information and calculate</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">pricer</span><span class="o">.</span><span class="n">price</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">val</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="InterestRateSwapLegPricingData_rivapy">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.InterestRateSwapLegPricingData_rivapy">[docs]</a>
+<span class="k">class</span> <span class="nc">InterestRateSwapLegPricingData_rivapy</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">spec</span><span class="p">,</span>
+        <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">forward_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">fixing_map</span><span class="p">,</span>
+        <span class="n">desired_rate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fx_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date ([datetime]): Valuation date.</span>
+<span class="sd">            spec: Specification</span>
+<span class="sd">            discount_curve: Discount curve.</span>
+<span class="sd">            vol_surface ([type]): Volatility surface.</span>
+<span class="sd">            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">discount_curve</span> <span class="o">=</span> <span class="n">discount_curve</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forward_curve</span> <span class="o">=</span> <span class="n">forward_curve</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fixing_map</span> <span class="o">=</span> <span class="n">fixing_map</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
+        <span class="k">if</span> <span class="n">fx_rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># where to use?</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fx_rate</span> <span class="o">=</span> <span class="n">fx_rate</span>
+        <span class="k">if</span> <span class="n">weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># where to use?</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">weight</span>
+        <span class="k">if</span> <span class="n">desired_rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">desired_rate</span> <span class="o">=</span> <span class="n">desired_rate</span></div>
+
+
+
+<div class="viewcode-block" id="InterestRateSwapFloatLegPricingData_rivapy">
+<a class="viewcode-back" href="../../../rivapy/rivapy.pricing.html#rivapy.pricing.pricing_data.InterestRateSwapFloatLegPricingData_rivapy">[docs]</a>
+<span class="k">class</span> <span class="nc">InterestRateSwapFloatLegPricingData_rivapy</span><span class="p">(</span><span class="n">InterestRateSwapLegPricingData_rivapy</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">spec</span><span class="p">,</span>
+        <span class="n">discount_curve</span><span class="p">,</span>
+        <span class="n">forward_curve</span><span class="p">,</span>
+        <span class="n">fixing_map</span><span class="p">,</span>
+        <span class="n">fixing_grace_period</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">spread</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fx_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fixing_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            val_date ([datetime]): Valuation date.</span>
+<span class="sd">            spec: Specification</span>
+<span class="sd">            discount_curve: Discount curve.</span>
+<span class="sd">            vol_surface ([type]): Volatility surface.</span>
+<span class="sd">            pricing_request (Iterable[ResultType]): Pricing request. Can be selected from rivapy.pricing.ResultType.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># HERE the FX_RATE is ACTUALLY THE SPREAD</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">discount_curve</span><span class="p">,</span> <span class="n">forward_curve</span><span class="p">,</span> <span class="n">fixing_map</span><span class="p">,</span> <span class="n">fx_rate</span><span class="o">=</span><span class="n">fx_rate</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fixing_curve</span> <span class="o">=</span> <span class="n">fixing_curve</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fixing_grace_period</span> <span class="o">=</span> <span class="n">fixing_grace_period</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spread</span> <span class="o">=</span> <span class="n">spread</span></div>
 
 </pre></div>
 

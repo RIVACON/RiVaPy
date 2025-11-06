@@ -165,7 +165,7 @@ The timegrid includes the dates of the discount curve. Here either the discount 
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>days</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of days between two plotted rates/discount factors. Defaults to 10.</p></li>
 <li><p><strong>discount_factors</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, discount factors will be plotted, otherwise the rates. Defaults to False.</p></li>
-<li><p><strong>**kwargs</strong> – optional arguments that will be directly passed to the matplotlib plto function</p></li>
+<li><p><strong>**kwargs</strong> – optional arguments that will be directly passed to the matplotlib plot function</p></li>
 </ul>
 </dd>
 </dl>
@@ -173,13 +173,17 @@ The timegrid includes the dates of the discount curve. Here either the discount 
 
 <dl class="py method">
 <dt class="sig sig-object py" id="rivapy.marketdata.DiscountCurve.value">
-<span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata/curves.html#DiscountCurve.value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.DiscountCurve.value" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payment_dates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annual_payment_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata/curves.html#DiscountCurve.value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.DiscountCurve.value" title="Link to this definition"></a></dt>
 <dd><p>Return discount factor for a given date</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>refdate</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The reference date. If the reference date is in the future (compared to the curves reference date), the forward discount factor will be returned.</p></li>
-<li><p><strong>d</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The date for which the discount factor will be returned</p></li>
+<li><p><strong>refdate</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The reference date. If the reference date is in the future
+(compared to the curves reference date), the forward discount
+factor will be returned.</p></li>
+<li><p><strong>d</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The date for which the discount factor will be returned. Assumption
+is that the day given already follows correct business logic
+(e.g., roll convention)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -187,6 +191,99 @@ The timegrid includes the dates of the discount curve. Here either the discount 
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata.DiscountCurve.value_fwd">
+<span class="sig-name descname"><span class="pre">value_fwd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata/curves.html#DiscountCurve.value_fwd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.DiscountCurve.value_fwd" title="Link to this definition"></a></dt>
+<dd><p>Return forward discount factor for a given date (without dependencies from pyvacon)</p>
+<p>The <cite>value_fwd()</cite> method has been updated to support forward valuation scenarios
+(<cite>val_date &gt; refdate</cite>) by rebasing the curve from its construction date to the new
+valuation date.</p>
+<p>The rebasement follows the relationship:</p>
+<blockquote>
+<div><p>DF(val_date, t) = DF(refdate, t) / DF(refdate, val_date)</p>
+</div></blockquote>
+<p>This adjustment ensures that discount factors and forward rates remain consistent
+across time, even when the valuation date is later than the curve’s reference date.</p>
+<p>This approach aligns with market-standard practices for OIS and collateralized
+discounting frameworks, where forward discounting must be time-consistent with
+the curve’s anchor date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>refdate</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The reference date. If the reference date is in the future
+(compared to the curves reference date), the forward discount
+factor will be returned.</p></li>
+<li><p><strong>d</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The date for which the discount factor will be returned. Assumption
+is that the day given already follows correct business logic
+(e.g., roll convention)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>discount factor</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata.DiscountCurve.value_fwd_rate">
+<span class="sig-name descname"><span class="pre">value_fwd_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata/curves.html#DiscountCurve.value_fwd_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.DiscountCurve.value_fwd_rate" title="Link to this definition"></a></dt>
+<dd><p>Return forward continuously compounded zero rate for a given date</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>refdate</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The reference date. If the reference date is in the future (compared to the curves reference date), the forward rate will be returned.</p></li>
+<li><p><strong>d1</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The start date of the period for which the forward continuously compounded zero rate will be returned.</p></li>
+<li><p><strong>d2</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The end date of the period for which the forward continuously compounded zero rate will be returned.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>forward continuously compounded zero rate</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata.DiscountCurve.value_rate">
+<span class="sig-name descname"><span class="pre">value_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata/curves.html#DiscountCurve.value_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.DiscountCurve.value_rate" title="Link to this definition"></a></dt>
+<dd><p>Return continuously compounded zero rate for a given date</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>refdate</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The reference date. If the reference date is in the future (compared to the curves reference date), the forward rate will be returned.</p></li>
+<li><p><strong>d</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The date for which the continuously compounded zero rate will be returned.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>continuously compounded zero rate</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata.DiscountCurve.value_yf">
+<span class="sig-name descname"><span class="pre">value_yf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata/curves.html#DiscountCurve.value_yf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.DiscountCurve.value_yf" title="Link to this definition"></a></dt>
+<dd><p>Return discount factor for a given yearfrac as of the curve’s reference date.
+:param yf: The year fraction for which the discount factor will be returned.
+:type yf: float</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>discount factor</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -312,6 +409,11 @@ The timegrid includes the dates of the discount curve. Here either the discount 
 <dd class="field-odd"><p><strong>rate</strong> (<em>float</em>) – The constant rate.</p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata.ConstantRate.value">
+<span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata/curves.html#ConstantRate.value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.ConstantRate.value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <section id="id3">
@@ -344,6 +446,48 @@ The timegrid includes the dates of the discount curve. Here either the discount 
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>discount factor</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata.DiscountCurveParametrized.value_fwd">
+<span class="sig-name descname"><span class="pre">value_fwd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata/curves.html#DiscountCurveParametrized.value_fwd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.DiscountCurveParametrized.value_fwd" title="Link to this definition"></a></dt>
+<dd><p>Return forward discount factor for a given date</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>refdate</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The reference date. If the reference date is in the future (compared to the curves reference date), the forward discount factor will be returned.</p></li>
+<li><p><strong>d1</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The start date of the forward period</p></li>
+<li><p><strong>d2</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The end date of the forward period</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>forward rate</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata.DiscountCurveParametrized.value_fwd_rate">
+<span class="sig-name descname"><span class="pre">value_fwd_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">refdate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata/curves.html#DiscountCurveParametrized.value_fwd_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata.DiscountCurveParametrized.value_fwd_rate" title="Link to this definition"></a></dt>
+<dd><p>Return forward continuously compounded zero rate for a given date</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>refdate</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The reference date. If the reference date is in the future (compared to the curves reference date), the forward rate will be returned.</p></li>
+<li><p><strong>d1</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The start date of the period for which the forward continuously compounded zero rate will be returned.</p></li>
+<li><p><strong>d2</strong> (<em>Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em>) – The end date of the period for which the forward continuously compounded zero rate will be returned.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>forward continuously compounded zero rate</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>

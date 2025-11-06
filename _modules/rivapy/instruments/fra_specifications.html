@@ -1,0 +1,807 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rivapy.instruments.fra_specifications &mdash; rivapy  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=d2ebc91c" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.svg"/>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/index.html">Notebook Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rivapy/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sample_data/index.html">Sample and Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../search.html">Search Page</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">rivapy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rivapy.instruments.fra_specifications</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rivapy.instruments.fra_specifications</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">rivapy.instruments._logger</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span> <span class="k">as</span> <span class="n">_abstractmethod</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span> <span class="k">as</span> <span class="n">_List</span><span class="p">,</span> <span class="n">Union</span> <span class="k">as</span> <span class="n">_Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span> <span class="k">as</span> <span class="n">_Optional</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">dateutil.relativedelta</span> <span class="kn">import</span> <span class="n">relativedelta</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.holidays_compat</span> <span class="kn">import</span> <span class="n">HolidayBase</span> <span class="k">as</span> <span class="n">_HolidayBase</span><span class="p">,</span> <span class="n">ECB</span> <span class="k">as</span> <span class="n">_ECB</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments.components</span> <span class="kn">import</span> <span class="n">Issuer</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Period</span><span class="p">,</span>
+    <span class="n">Schedule</span><span class="p">,</span>
+    <span class="n">_date_to_datetime</span><span class="p">,</span>
+    <span class="n">_datetime_to_date_list</span><span class="p">,</span>
+    <span class="n">_term_to_period</span><span class="p">,</span>
+    <span class="n">roll_day</span><span class="p">,</span>
+    <span class="n">calc_start_day</span><span class="p">,</span>
+    <span class="n">serialize_date</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.enums</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DayCounterType</span><span class="p">,</span>
+    <span class="n">RollConvention</span><span class="p">,</span>
+    <span class="n">SecuritizationLevel</span><span class="p">,</span>
+    <span class="n">Currency</span><span class="p">,</span>
+    <span class="n">Rating</span><span class="p">,</span>
+    <span class="n">Instrument</span><span class="p">,</span>
+    <span class="n">InterestRateIndex</span><span class="p">,</span>
+    <span class="n">get_index_by_alias</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools._validators</span> <span class="kn">import</span> <span class="n">_check_positivity</span><span class="p">,</span> <span class="n">_check_start_before_end</span><span class="p">,</span> <span class="n">_string_to_calendar</span><span class="p">,</span> <span class="n">_is_ascending_date_list</span>
+<span class="kn">import</span> <span class="nn">rivapy.tools.interfaces</span> <span class="k">as</span> <span class="nn">interfaces</span>
+
+
+<div class="viewcode-block" id="ForwardRateAgreementSpecification">
+<a class="viewcode-back" href="../../../rivapy/instruments/rate.html#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification">[docs]</a>
+<span class="k">class</span> <span class="nc">ForwardRateAgreementSpecification</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">trade_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">notional</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">end_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">udlID</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">rate_start_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">rate_end_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">maturity_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">ThirtyU360</span><span class="p">,</span>
+        <span class="n">business_day_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">RollConvention</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">FOLLOWING</span><span class="p">,</span>
+        <span class="n">rate_day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">ThirtyU360</span><span class="p">,</span>
+        <span class="n">rate_business_day_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">RollConvention</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">FOLLOWING</span><span class="p">,</span>
+        <span class="n">calendar</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_HolidayBase</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">currency</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Currency</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;EUR&quot;</span><span class="p">,</span>
+        <span class="c1"># ex_settle: int =0,</span>
+        <span class="n">payment_days</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">spot_days</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">start_period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># _Optional[_Union[Period, str]] = None,</span>
+        <span class="n">end_period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ir_index</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">issuer</span><span class="p">:</span> <span class="n">_Optional</span><span class="p">[</span><span class="n">_Union</span><span class="p">[</span><span class="n">Issuer</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">securitization_level</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">SecuritizationLevel</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+        <span class="n">rating</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Rating</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for Forward Rate Agreement specification.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            obj_id (str): (Preferably) Unique label of the FRA</span>
+<span class="sd">            trade_date (_Union[date, datetime]): FRA Trade date.</span>
+<span class="sd">            maturity_date (_Union[date, datetime]): FRA&#39;s maturity/expiry date. Must lie after the trade_date.</span>
+<span class="sd">            notional (float, optional): Fra&#39;s notional/face value. Must be positive.</span>
+<span class="sd">            rate (float): Agreed upon forward rate, a.k.a. FRA rate.</span>
+<span class="sd">            start_date (_Union[date, datetime]): start date of the interest rate (FRA_rate) reference period from which interest is accrued.</span>
+<span class="sd">            end_date (_Union[date, datetime]): end date of the interest rate (FRA_rate) reference period from which interest is accrued.</span>
+<span class="sd">            udlID (str): ID of the underlying Index rate used for the floating rate for fixing.</span>
+<span class="sd">            rate_start_date (_Union[date, datetime]): start date of fixing period for the floating rate</span>
+<span class="sd">            rate_end_date (_Union[date, datetime]): end date of fixing period for the floating rate</span>
+<span class="sd">            day_count_convention (Union[DayCounter, str], optional): Day count convention for determining period</span>
+<span class="sd">                                                                     length. Defaults to DayCounter.ThirtyU360.</span>
+<span class="sd">            business_day_convention (Union[RollConvention, str], optional): Set of rules defining the adjustment of</span>
+<span class="sd">                                                                            days to ensure each date being a business</span>
+<span class="sd">                                                                            day with respect to a given holiday</span>
+<span class="sd">                                                                            calendar. Defaults to</span>
+<span class="sd">                                                                            RollConvention.FOLLOWING</span>
+<span class="sd">            rate_day_count_convention (Union[DayCounter, str], optional): Day count convention for determining period</span>
+<span class="sd">                                                                     length. Defaults to DayCounter.ThirtyU360.</span>
+<span class="sd">            rate_business_day_convention (Union[RollConvention, str], optional): Set of rules defining the adjustment of</span>
+<span class="sd">                                                                            days to ensure each date being a business</span>
+<span class="sd">                                                                            day with respect to a given holiday</span>
+<span class="sd">                                                                            calendar. Defaults to</span>
+<span class="sd">                                                                            RollConvention.FOLLOWING</span>
+<span class="sd">            calendar (Union[HolidayBase, str], optional): Holiday calendar defining the bank holidays of a country or</span>
+<span class="sd">                                                          province (but not all non-business days as for example</span>
+<span class="sd">                                                          Saturdays and Sundays).</span>
+<span class="sd">                                                          Defaults (through constructor) to holidays.ECB</span>
+<span class="sd">                                                          (= Target2 calendar) between start_day and end_day.</span>
+<span class="sd">            currency (str, optional): Currency as alphabetic, Defaults to &#39;EUR&#39;.</span>
+<span class="sd">            payment_days (int): Number of days for payment after the start date. Defaults to 0.</span>
+<span class="sd">            spot_days (int): time difference between fixing date and start dategiven in days.</span>
+<span class="sd">            start_period (int): forward start period given in months e.g. 1 from 1Mx4M</span>
+<span class="sd">            end_period (int): forward end period given in months e.g. 4 from 1Mx4M</span>
+<span class="sd">            ir_index (str): ID of the underlying Index rate used for the floating rate for fixing.</span>
+<span class="sd">            issuer (str, optional): Name/id of issuer. Defaults to None.</span>
+<span class="sd">            securitization_level (_Union[SecuritizationLevel, str], optional): Securitization level. Defaults to None.</span>
+<span class="sd">            rating (_Union[Rating, str]): Paper rating.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># positional arguments</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obj_id</span> <span class="o">=</span> <span class="n">obj_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trade_date</span> <span class="o">=</span> <span class="n">trade_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span> <span class="o">=</span> <span class="n">notional</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rate</span> <span class="o">=</span> <span class="n">rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span> <span class="o">=</span> <span class="n">start_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span> <span class="o">=</span> <span class="n">end_date</span>
+        <span class="k">if</span> <span class="n">maturity_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_maturity_date</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_maturity_date</span> <span class="o">=</span> <span class="n">maturity_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_udlID</span> <span class="o">=</span> <span class="n">udlID</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rate_start_date</span> <span class="o">=</span> <span class="n">rate_start_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rate_end_date</span> <span class="o">=</span> <span class="n">rate_end_date</span>
+        <span class="c1"># optional arguments</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_day_count_convention</span> <span class="o">=</span> <span class="n">day_count_convention</span>  <span class="c1"># TODO: correct syntax with setter?? HN</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_business_day_convention</span> <span class="o">=</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">business_day_convention</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rate_day_count_convention</span> <span class="o">=</span> <span class="n">rate_day_count_convention</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rate_business_day_convention</span> <span class="o">=</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">rate_business_day_convention</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">calendar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_calendar</span> <span class="o">=</span> <span class="n">_ECB</span><span class="p">(</span><span class="n">years</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="n">trade_date</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">end_date</span><span class="o">.</span><span class="n">year</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_calendar</span> <span class="o">=</span> <span class="n">_string_to_calendar</span><span class="p">(</span><span class="n">calendar</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_currency</span> <span class="o">=</span> <span class="n">currency</span>
+        <span class="c1"># self.ex_settle = ex_settle</span>
+        <span class="c1"># self.trade_settle = trade_settle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixing_date</span> <span class="o">=</span> <span class="n">calc_start_day</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">spot_days</span><span class="si">}</span><span class="s2">D&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_business_day_convention</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calendar</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spot_days</span> <span class="o">=</span> <span class="n">spot_days</span>
+
+        <span class="c1"># if start_period is not None:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_period</span> <span class="o">=</span> <span class="n">start_period</span>
+
+        <span class="c1"># if end_period is not None:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_period</span> <span class="o">=</span> <span class="n">end_period</span>
+
+        <span class="k">if</span> <span class="n">ir_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ir_index</span> <span class="o">=</span> <span class="n">ir_index</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_index</span> <span class="o">=</span> <span class="n">get_index_by_alias</span><span class="p">(</span><span class="n">ir_index</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_indexdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">if</span> <span class="n">issuer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_issuer</span> <span class="o">=</span> <span class="n">issuer</span>
+        <span class="k">if</span> <span class="n">securitization_level</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">securitization_level</span> <span class="o">=</span> <span class="n">securitization_level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rating</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">rating</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_payment_days</span> <span class="o">=</span> <span class="n">payment_days</span>
+
+        <span class="c1"># give dates where applicable as optional, if not given, calculate based on spot lag, index spot lag, and forward period YMxZM (e.g. 1Mx4M)</span>
+        <span class="c1"># e.g. for trade date D1 and spotLag, S1, and start_period = 1Mx4M</span>
+        <span class="c1"># start_date = D1 + S1 + 1Month # this is the date it starts accruing interest</span>
+        <span class="c1"># but how much interest? -&gt; the pre-agreed FRA rate, fixed</span>
+        <span class="c1"># how is it settled? -&gt; at settledate=start date, and using</span>
+        <span class="c1"># The floating rate index (e.g., LIBOR, SOFR, EURIBOR) used to determine the settlement amoun</span>
+        <span class="c1"># This is determined at the fixing_date ( usually spot lag before, e.g. 2 days)</span>
+
+        <span class="c1"># if trade date, spotlag, startperiod,endperiod give, then recalcualte start_datet etc...</span>
+        <span class="k">if</span> <span class="n">trade_date</span> <span class="ow">and</span> <span class="n">spot_days</span> <span class="ow">and</span> <span class="n">start_period</span> <span class="ow">and</span> <span class="n">end_period</span><span class="p">:</span>
+            <span class="n">spot_date</span> <span class="o">=</span> <span class="n">roll_day</span><span class="p">(</span>
+                <span class="n">day</span><span class="o">=</span><span class="n">trade_date</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">spot_days</span><span class="p">),</span>  <span class="c1"># need holiday</span>
+                <span class="n">calendar</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">calendar</span><span class="p">,</span>
+                <span class="n">business_day_convention</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rate_business_day_convention</span><span class="p">,</span>
+                <span class="n">start_day</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span> <span class="o">=</span> <span class="n">roll_day</span><span class="p">(</span>
+                <span class="n">day</span><span class="o">=</span><span class="n">spot_date</span> <span class="o">+</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">months</span><span class="o">=</span><span class="n">start_period</span><span class="p">),</span>  <span class="c1"># need holiday</span>
+                <span class="n">calendar</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">calendar</span><span class="p">,</span>
+                <span class="n">business_day_convention</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rate_business_day_convention</span><span class="p">,</span>
+                <span class="n">start_day</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>  <span class="c1"># spot_date + start_period #need roll convention: ddc, bdc, holiday, date</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span> <span class="o">=</span> <span class="n">roll_day</span><span class="p">(</span>
+                <span class="n">day</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">start_date</span> <span class="o">+</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">months</span><span class="o">=</span><span class="n">end_period</span> <span class="o">-</span> <span class="n">start_period</span><span class="p">),</span>  <span class="c1"># need holiday</span>
+                <span class="n">calendar</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">calendar</span><span class="p">,</span>
+                <span class="n">business_day_convention</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rate_business_day_convention</span><span class="p">,</span>
+                <span class="n">start_day</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>  <span class="c1"># start_date + end_period #need roll convention: ddc, bdc, holiday, date</span>
+
+        <span class="c1"># VALIDATE DATES</span>
+        <span class="c1"># TODO:         self._validate_derived_issued_instrument()</span>
+
+<div class="viewcode-block" id="ForwardRateAgreementSpecification._create_sample">
+<a class="viewcode-back" href="../../../rivapy/instruments/rate.html#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification._create_sample">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span>
+        <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ref_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">issuers</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sec_levels</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">currencies</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_List</span><span class="p">[</span><span class="s2">&quot;ForwardRateAgreementSpecification&quot;</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a random sample of multiple instruments of this type with varied specification parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n_samples (int): The number of desired sample objects</span>
+<span class="sd">            seed (int, optional): Seed number to allow repeated result. Defaults to None.</span>
+<span class="sd">            ref_date (_type_, optional): Reference date . Defaults to None.</span>
+<span class="sd">            issuers (_List[str], optional): list of issuers. Defaults to None.</span>
+<span class="sd">            sec_levels (_List[str], optional): list of possible securitization levels. Defaults to None.</span>
+<span class="sd">            currencies (_List[str], optional): list of possible currencies used. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _List[ForwardRateAgreementSpecification]: where each entry is a dict representing with the information needed to specify an instrument.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ref_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ref_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ref_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">ref_date</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">issuers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">issuers</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Issuer_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">n_samples</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">currencies</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">currencies</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Currency</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sec_levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sec_levels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">SecuritizationLevel</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
+            <span class="n">days</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">15.0</span> <span class="o">*</span> <span class="mf">365.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">trade_date</span> <span class="o">=</span> <span class="n">ref_date</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=-</span><span class="mi">365</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+            <span class="n">maturity_date</span> <span class="o">=</span> <span class="n">ref_date</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">days</span><span class="p">)</span>
+            <span class="n">start_date</span> <span class="o">=</span> <span class="n">ref_date</span> <span class="o">+</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">months</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+            <span class="n">end_date</span> <span class="o">=</span> <span class="n">start_date</span> <span class="o">+</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">months</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">]))</span>
+            <span class="c1"># spot_days=2, fixing pre_lag =2</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">ForwardRateAgreementSpecification</span><span class="p">(</span>
+                    <span class="n">obj_id</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Deposit_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">trade_date</span><span class="o">=</span><span class="n">trade_date</span><span class="p">,</span>
+                    <span class="n">maturity_date</span><span class="o">=</span><span class="n">maturity_date</span><span class="p">,</span>
+                    <span class="n">notional</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mf">100.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="mf">10_000.0</span><span class="p">,</span> <span class="mf">100_0000.0</span><span class="p">]),</span>
+                    <span class="n">rate</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]),</span>
+                    <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+                    <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
+                    <span class="n">udlID</span><span class="o">=</span><span class="s2">&quot;dummy_underlying_index&quot;</span><span class="p">,</span>
+                    <span class="n">rate_start_date</span><span class="o">=</span><span class="n">start_date</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+                    <span class="n">rate_end_date</span><span class="o">=</span><span class="n">end_date</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+                    <span class="c1"># &quot;day_count_convention&quot;: self.day_count_convention, #TODO</span>
+                    <span class="c1"># &quot;business_day_convention&quot;: self.business_day_convention,</span>
+                    <span class="c1"># &quot;rate_day_count_convention&quot;: self.rate_day_count_convention,</span>
+                    <span class="c1"># &quot;rate_business_day_convention&quot;: self.rate_business_day_convention,</span>
+                    <span class="n">calendar</span><span class="o">=</span><span class="n">_ECB</span><span class="p">(</span><span class="n">years</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="n">trade_date</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">maturity_date</span><span class="o">.</span><span class="n">year</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
+                    <span class="n">currency</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">currencies</span><span class="p">),</span>
+                    <span class="c1"># &quot;spot_days&quot;: self.spot_days, # not needed if start dates given</span>
+                    <span class="c1"># &quot;start_period&quot;: self.start_period,</span>
+                    <span class="c1"># &quot;end_period&quot;: self.end_period,</span>
+                    <span class="n">issuer</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">issuers</span><span class="p">),</span>
+                    <span class="n">securitization_level</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">sec_levels</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_validate_derived_issued_instrument</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__trade_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__maturity_date</span> <span class="o">=</span> <span class="n">_check_start_before_end</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__trade_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__maturity_date</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;obj_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_id</span><span class="p">,</span>
+            <span class="s2">&quot;trade_date&quot;</span><span class="p">:</span> <span class="n">serialize_date</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trade_date</span><span class="p">),</span>
+            <span class="s2">&quot;maturity_date&quot;</span><span class="p">:</span> <span class="n">serialize_date</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maturity_date</span><span class="p">),</span>
+            <span class="s2">&quot;notional&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">notional</span><span class="p">,</span>
+            <span class="s2">&quot;rate&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">,</span>
+            <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="n">serialize_date</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="p">),</span>
+            <span class="s2">&quot;end_date&quot;</span><span class="p">:</span> <span class="n">serialize_date</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end_date</span><span class="p">),</span>
+            <span class="s2">&quot;udlID&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">udlID</span><span class="p">,</span>
+            <span class="s2">&quot;rate_start_date&quot;</span><span class="p">:</span> <span class="n">serialize_date</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rate_start_date</span><span class="p">),</span>
+            <span class="s2">&quot;rate_end_date&quot;</span><span class="p">:</span> <span class="n">serialize_date</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rate_end_date</span><span class="p">),</span>
+            <span class="s2">&quot;day_count_convention&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">day_count_convention</span><span class="p">,</span>
+            <span class="s2">&quot;business_day_convention&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">business_day_convention</span><span class="p">,</span>
+            <span class="s2">&quot;rate_day_count_convention&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate_day_count_convention</span><span class="p">,</span>
+            <span class="s2">&quot;rate_business_day_convention&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate_business_day_convention</span><span class="p">,</span>
+            <span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calendar</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">calendar</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">),</span>
+            <span class="s2">&quot;currency&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span><span class="p">,</span>
+            <span class="s2">&quot;payment_days&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">payment_days</span><span class="p">,</span>
+            <span class="s2">&quot;spot_days&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">spot_days</span><span class="p">,</span>
+            <span class="s2">&quot;start_period&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_period</span><span class="p">,</span>
+            <span class="s2">&quot;end_period&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_period</span><span class="p">,</span>
+            <span class="s2">&quot;issuer&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">issuer</span><span class="p">,</span>
+            <span class="s2">&quot;securitization_level&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">securitization_level</span><span class="p">,</span>
+            <span class="s2">&quot;rating&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rating</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+<div class="viewcode-block" id="ForwardRateAgreementSpecification.get_schedule">
+<a class="viewcode-back" href="../../../rivapy/instruments/rate.html#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.get_schedule">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Schedule</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the schedule of the accrual periods of the instrument.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Schedule</span><span class="p">(</span>
+            <span class="n">start_day</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span><span class="p">,</span>
+            <span class="n">end_day</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span><span class="p">,</span>
+            <span class="n">time_period</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_frequency</span><span class="p">,</span>
+            <span class="n">backwards</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">stub_type_is_Long</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">business_day_convention</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">business_day_convention</span><span class="p">,</span>
+            <span class="n">roll_convention</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">calendar</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_calendar</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+        <span class="c1"># region properties</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">calendar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calender used for this instrument</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calendar</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">issuer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for instrument&#39;s issuer.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Instrument&#39;s issuer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_issuer</span>
+
+    <span class="nd">@issuer</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">issuer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for instrument&#39;s issuer.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            issuer(str): Issuer of the instrument.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_issuer</span> <span class="o">=</span> <span class="n">issuer</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">udlID</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for ID of the instruments underlying.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Instrument&#39;s udlID.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_udlID</span>
+
+    <span class="nd">@udlID</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">udlID</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">udlID</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for ID of the instruments underlying.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            udlID(str): udlID of the instrument.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_udlID</span> <span class="o">=</span> <span class="n">udlID</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rating</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Getter for instrument&#39;s rating.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: instrument&#39;s rating</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rating</span>
+
+    <span class="nd">@rating</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">rating</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rating</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Rating</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rating</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">rating</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">securitization_level</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for instrument&#39;s securitisation level.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Instrument&#39;s securitisation level.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_securitization_level</span>
+
+    <span class="nd">@securitization_level</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">securitization_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">securitisation_level</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">SecuritizationLevel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_securitization_level</span> <span class="o">=</span> <span class="n">SecuritizationLevel</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">securitisation_level</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for instrument&#39;s rate.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Instrument&#39;s rate.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rate</span>
+
+    <span class="nd">@rate</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for instrument&#39;s rate.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            (float): interest rate of the instrument.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rate</span> <span class="o">=</span> <span class="n">rate</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">trade_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for FRA&#39;s issue date.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            date: FRA&#39;s issue date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trade_date</span>
+
+    <span class="nd">@trade_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">trade_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trade_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for FRA&#39;s issue date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            issue (Union[datetime, date]): FRA&#39;s issue date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trade_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">trade_date</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">start_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for FRA&#39;s start date.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            date: FRA&#39;s start date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span>
+
+    <span class="nd">@start_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">start_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for FRA&#39;s start date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            start_date (Union[datetime, date]): FRA&#39;s start date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">end_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for FRA&#39;s end date.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            date: FRA&#39;s end date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span>
+
+    <span class="nd">@end_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">end_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for FRA&#39;s end date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            end_date (Union[datetime, date]): FRA&#39;s end date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rate_start_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for FRA&#39;s underlying rate start date.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            date: FRA&#39;s underlaying rate start date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rate_start_date</span>
+
+    <span class="nd">@start_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">rate_start_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for FRA&#39;s underlying rate start date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            start_date (Union[datetime, date]): FRA&#39;s underlaying rate start date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rate_start_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rate_end_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for FRA&#39;s underlying rate end date.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            date: FRA&#39;s underlying rate end date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rate_end_date</span>
+
+    <span class="nd">@end_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">rate_end_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for FRA&#39;s underlying rate end date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            end_date (Union[datetime, date]): FRA&#39;s underlying rate end date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rate_end_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">maturity_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for FRA&#39;s maturity date.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            date: FRA&#39;s maturity date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maturity_date</span>
+
+    <span class="nd">@maturity_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">maturity_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maturity_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for FRA&#39;s maturity date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            maturity_date (Union[datetime, date]): FRA&#39;s maturity date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_maturity_date</span> <span class="o">=</span> <span class="n">_date_to_datetime</span><span class="p">(</span><span class="n">maturity_date</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">currency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for FRA&#39;s currency.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: FRA&#39;s  currency code</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_currency</span>
+
+    <span class="nd">@currency</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">currency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_currency</span> <span class="o">=</span> <span class="n">Currency</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">currency</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">notional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for FRA&#39;s face value.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: FRA&#39;s face value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span>
+
+    <span class="nd">@notional</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">notional</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notional</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span> <span class="o">=</span> <span class="n">_check_positivity</span><span class="p">(</span><span class="n">notional</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">day_count_convention</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for FRA&#39;s day count convention.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: FRA&#39;s day count convention.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_day_count_convention</span>
+
+    <span class="nd">@day_count_convention</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">day_count_convention</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_day_count_convention</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">day_count_convention</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rate_day_count_convention</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for FRA&#39;s underlying rate&#39;s day count convention.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: FRA&#39;s underlying rate&#39;s day count convention.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rate_day_count_convention</span>
+
+    <span class="nd">@rate_day_count_convention</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">rate_day_count_convention</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rate_day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rate_day_count_convention</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">rate_day_count_convention</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">business_day_convention</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for FRA&#39;s underlying rate&#39;s business_day_convention.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: FRA&#39;s underlying rate&#39;s business_day_convention.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_business_day_convention</span>
+
+    <span class="nd">@business_day_convention</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">business_day_convention</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">business_day_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_business_day_convention</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">business_day_convention</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rate_business_day_convention</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for FRA&#39;s underlying rate&#39;s business_day_convention.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: FRA&#39;s underlying rate&#39;s business_day_convention.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rate_business_day_convention</span>
+
+    <span class="nd">@rate_business_day_convention</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">rate_business_day_convention</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">business_day_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Setter for FRA&#39;s underlying rate&#39;s business_day_convention.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rate_business_day_convention</span> <span class="o">=</span> <span class="n">DayCounterType</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">business_day_convention</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">spot_days</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Getter for the spot lag given in days</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spot_days</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">start_period</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Getter for the start period, given in Months</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_period</span>
+
+    <span class="nd">@start_period</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">start_period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_period</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;setter for the start period, given in Months</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_period</span> <span class="o">=</span> <span class="n">start_period</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">end_period</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Getter for the spot lag</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_period</span>
+
+    <span class="nd">@end_period</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">end_period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end_period</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;setter for the end period, given in Months</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_period</span> <span class="o">=</span> <span class="n">end_period</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Getter for the underlying Index rate used for the floating rate for fixing.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span>
+
+    <span class="nd">@index</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index</span> <span class="o">=</span> <span class="n">index</span>
+
+<div class="viewcode-block" id="ForwardRateAgreementSpecification.ins_type">
+<a class="viewcode-back" href="../../../rivapy/instruments/rate.html#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.ins_type">[docs]</a>
+    <span class="k">def</span> <span class="nf">ins_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return instrument type</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Instrument: Forward rate agreement</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Instrument</span><span class="o">.</span><span class="n">FRA</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">payment_days</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Getter for the number of settlement days.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Number of settlement days.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_payment_days</span>
+
+    <span class="nd">@payment_days</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">payment_days</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payment_days</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_payment_days</span> <span class="o">=</span> <span class="n">payment_days</span>
+
+    <span class="c1"># temp placeholder</span>
+<div class="viewcode-block" id="ForwardRateAgreementSpecification.get_end_date">
+<a class="viewcode-back" href="../../../rivapy/instruments/rate.html#rivapy.instruments.fra_specifications.ForwardRateAgreementSpecification.get_end_date">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_end_date</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">maturity_date</span></div>
+</div>
+
+
+    <span class="c1"># endregion</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

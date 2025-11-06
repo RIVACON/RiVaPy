@@ -82,30 +82,34 @@
              
   <h1>Source code for rivapy.instruments.components</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span> <span class="k">as</span> <span class="n">_Union</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span> <span class="k">as</span> <span class="n">_Union</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">date</span>
 <span class="kn">import</span> <span class="nn">rivapy.tools.interfaces</span> <span class="k">as</span> <span class="nn">interfaces</span>
-<span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">_date_to_datetime</span>
+<span class="kn">from</span> <span class="nn">rivapy.tools.datetools</span> <span class="kn">import</span> <span class="n">_date_to_datetime</span><span class="p">,</span> <span class="n">Period</span>
 <span class="kn">from</span> <span class="nn">rivapy.tools._validators</span> <span class="kn">import</span> <span class="n">_check_positivity</span><span class="p">,</span> <span class="n">_check_relation</span><span class="p">,</span> <span class="n">_is_chronological</span>
 <span class="kn">from</span> <span class="nn">rivapy.tools.enums</span> <span class="kn">import</span> <span class="n">DayCounterType</span><span class="p">,</span> <span class="n">Rating</span><span class="p">,</span> <span class="n">Sector</span><span class="p">,</span> <span class="n">Country</span><span class="p">,</span> <span class="n">ESGRating</span>
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">from</span> <span class="nn">rivapy.instruments._logger</span> <span class="kn">import</span> <span class="n">logger</span>
 
 
 <span class="k">class</span> <span class="nc">Coupon</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">accrual_start</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
-                 <span class="n">accrual_end</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
-                 <span class="n">payment_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
-                 <span class="n">day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-                 <span class="n">annualised_fixed_coupon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                 <span class="n">fixing_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
-                 <span class="n">floating_period_start</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
-                 <span class="n">floating_period_end</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
-                 <span class="n">floating_spread</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-                 <span class="n">floating_rate_cap</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e10</span><span class="p">,</span>
-                 <span class="n">floating_rate_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1e10</span><span class="p">,</span>
-                 <span class="n">floating_reference_index</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;dummy_reference_index&#39;</span><span class="p">,</span>
-                 <span class="n">amortisation_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">accrual_start</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">accrual_end</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">payment_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">day_count_convention</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">DayCounterType</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">annualised_fixed_coupon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">fixing_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">floating_period_start</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">floating_period_end</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">],</span>
+        <span class="n">floating_spread</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">floating_rate_cap</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e10</span><span class="p">,</span>
+        <span class="n">floating_rate_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1e10</span><span class="p">,</span>
+        <span class="n">floating_reference_index</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dummy_reference_index&quot;</span><span class="p">,</span>
+        <span class="n">amortisation_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="c1"># accrual start and end date as well as payment date</span>
         <span class="k">if</span> <span class="n">_is_chronological</span><span class="p">(</span><span class="n">accrual_start</span><span class="p">,</span> <span class="p">[</span><span class="n">accrual_end</span><span class="p">],</span> <span class="n">payment_date</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__accrual_start</span> <span class="o">=</span> <span class="n">accrual_start</span>
@@ -125,9 +129,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__floating_rate_floor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__floating_rate_cap</span> <span class="o">=</span> <span class="n">_check_relation</span><span class="p">(</span><span class="n">floating_rate_floor</span><span class="p">,</span> <span class="n">floating_rate_cap</span><span class="p">)</span>
 
         <span class="c1"># reference index for fixing floating rates</span>
-        <span class="k">if</span> <span class="n">floating_reference_index</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">floating_reference_index</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
             <span class="c1"># do not leave reference index empty as this causes pricer to ignore floating rate coupons!</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">floating_reference_index</span> <span class="o">=</span> <span class="s1">&#39;dummy_reference_index&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">floating_reference_index</span> <span class="o">=</span> <span class="s2">&quot;dummy_reference_index&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__floating_reference_index</span> <span class="o">=</span> <span class="n">floating_reference_index</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__amortisation_factor</span> <span class="o">=</span> <span class="n">_check_positivity</span><span class="p">(</span><span class="n">amortisation_factor</span><span class="p">)</span>
@@ -136,13 +140,9 @@
 <div class="viewcode-block" id="Issuer">
 <a class="viewcode-back" href="../../../rivapy/instruments/components.html#rivapy.instruments.components.Issuer">[docs]</a>
 <span class="k">class</span> <span class="nc">Issuer</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                 <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                 <span class="n">rating</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Rating</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-                 <span class="n">esg_rating</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">ESGRating</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-                 <span class="n">country</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Country</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-                 <span class="n">sector</span><span class="p">:</span> <span class="n">Sector</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rating</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Rating</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">esg_rating</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">ESGRating</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">country</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Country</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">sector</span><span class="p">:</span> <span class="n">Sector</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__obj_id</span> <span class="o">=</span> <span class="n">obj_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__rating</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">rating</span><span class="p">)</span>
@@ -153,11 +153,15 @@
 <div class="viewcode-block" id="Issuer._create_sample">
 <a class="viewcode-back" href="../../../rivapy/instruments/components.html#rivapy.instruments.components.Issuer._create_sample">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">issuer</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
-                    <span class="n">rating_probs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
-                    <span class="n">country_probs</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="n">sector_probs</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="n">esg_rating_probs</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span> <span class="p">)</span><span class="o">-&gt;</span><span class="n">List</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span>
+        <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">issuer</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">rating_probs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">country_probs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sector_probs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">esg_rating_probs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Just sample some test data</span>
 
 <span class="sd">        Args:</span>
@@ -177,51 +181,82 @@
         <span class="n">ratings</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Rating</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">rating_probs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ratings</span><span class="p">)</span> <span class="o">!=</span> <span class="n">rating_probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Number of rating probabilities must equal number of ratings&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Number of rating probabilities must equal number of ratings&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">rating_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ratings</span><span class="p">,)))</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">ratings</span><span class="p">)</span>
+            <span class="n">rating_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span>
+                        <span class="n">ratings</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">ratings</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">country_probs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Country</span><span class="p">)</span> <span class="o">!=</span> <span class="n">country_probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Number of country probabilities must equal number of countries&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Number of country probabilities must equal number of countries&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">country_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">Country</span><span class="p">,)))</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">Country</span><span class="p">)</span>
+            <span class="n">country_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span>
+                        <span class="n">Country</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">Country</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">sector_probs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Sector</span><span class="p">)</span> <span class="o">!=</span> <span class="n">sector_probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Number of sector probabilities must equal number of sectors&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Number of sector probabilities must equal number of sectors&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">sector_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">Sector</span><span class="p">,)))</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">Sector</span><span class="p">)</span>
+            <span class="n">sector_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span>
+                        <span class="n">Sector</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">Sector</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">esg_rating_probs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ESGRating</span><span class="p">)</span> <span class="o">!=</span> <span class="n">esg_rating_probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Number of ESG rating probabilities must equal number of ESG ratings&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Number of ESG rating probabilities must equal number of ESG ratings&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">esg_rating_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ESGRating</span><span class="p">,)))</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">ESGRating</span><span class="p">)</span>
+            <span class="n">esg_rating_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span>
+                        <span class="n">ESGRating</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">ESGRating</span><span class="p">)</span>
 
-        
-            
         <span class="n">esg_ratings</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ESGRating</span><span class="p">)</span>
         <span class="n">sectors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Sector</span><span class="p">)</span>
         <span class="n">country</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Country</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">issuer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">issuer</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Issuer_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)]</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="n">n_samples</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">n_samples</span> <span class="o">!=</span>  <span class="nb">len</span><span class="p">(</span><span class="n">issuer</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot create data since length of issuer list does not equal number of samples. Set n_namples to None.&#39;</span><span class="p">)</span>
+            <span class="n">issuer</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Issuer_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)]</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">n_samples</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">n_samples</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">issuer</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot create data since length of issuer list does not equal number of samples. Set n_namples to None.&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Issuer</span><span class="p">(</span><span class="s1">&#39;Issuer_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">issuer</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">ratings</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">rating_probs</span><span class="p">),</span> 
-                        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">esg_ratings</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">esg_rating_probs</span><span class="p">),</span> 
-                        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">country</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">country_probs</span><span class="p">),</span>
-                        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">sectors</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">sector_probs</span><span class="p">)))</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Issuer</span><span class="p">(</span>
+                    <span class="s2">&quot;Issuer_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                    <span class="n">issuer</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">ratings</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">rating_probs</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">esg_ratings</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">esg_rating_probs</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">country</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">country_probs</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">sectors</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">sector_probs</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
 
     <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;obj_id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_id</span><span class="p">,</span> 
-                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;rating&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rating</span><span class="p">,</span>
-                <span class="s1">&#39;esg_rating&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">esg_rating</span><span class="p">,</span> 
-                <span class="s1">&#39;country&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">country</span><span class="p">,</span> <span class="s1">&#39;sector&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sector</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;obj_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_id</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;rating&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rating</span><span class="p">,</span>
+            <span class="s2">&quot;esg_rating&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">esg_rating</span><span class="p">,</span>
+            <span class="s2">&quot;country&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">country</span><span class="p">,</span>
+            <span class="s2">&quot;sector&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sector</span><span class="p">,</span>
+        <span class="p">}</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">obj_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -261,7 +296,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            rating: Rating of issuer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__rating</span> <span class="o">=</span><span class="n">Rating</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">rating</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rating</span> <span class="o">=</span> <span class="n">Rating</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">rating</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">esg_rating</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -304,7 +339,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sector</span>
 
     <span class="nd">@sector</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">sector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sector</span><span class="p">:</span><span class="n">_Union</span><span class="p">[</span><span class="n">Sector</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">sector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sector</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">Sector</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Setter for issuer&#39;s sector.</span>
 
@@ -314,6 +349,696 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__sector</span> <span class="o">=</span> <span class="n">Sector</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">sector</span><span class="p">)</span></div>
 
 
+
+<span class="k">class</span> <span class="nc">CashFlow</span><span class="p">:</span>
+    <span class="c1"># goal is to define a dynamically growing class that is still able to use</span>
+    <span class="c1"># type validation and dot-access e.g. class.variable</span>
+    <span class="c1"># the point for dynamically growing is to allow for flexibility of future development and use cases</span>
+    <span class="c1"># In the end, it might be better to just define clearly the CashFlow class with</span>
+    <span class="c1"># strict attributes ... #TODO</span>
+
+    <span class="c1"># Define expected types here</span>
+    <span class="c1"># Can be expanded when we know for sure which features we want to ensure typing for</span>
+    <span class="n">_schema</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+        <span class="s2">&quot;end_date&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+        <span class="s2">&quot;ccy&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s2">&quot;amortization&quot;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="s2">&quot;prepayment_risk&quot;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">val</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;overwritting default getter for dynamically growing one</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): name of the the desired attribute</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AttributeError: attribute name not included</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Any: value of the desired attribute</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; object has no attribute &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;overwriting default setter for dynamically growing one</span>
+<span class="sd">        which also checks for expected type validation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): new name for desired attribute</span>
+<span class="sd">            value (Any): value to be stored in desired attribute</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: For known attributes defined in schema, raise error if type mismatch for value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;val&quot;</span><span class="p">,</span> <span class="s2">&quot;_attributes&quot;</span><span class="p">}:</span>  <span class="c1"># avoid infinite recursion</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>  <span class="c1"># use the the normal attribute storage from base class</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># logic for new attirbute storage</span>
+            <span class="n">expected_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># if it doesnt exist, can attempt to set new attribute</span>
+            <span class="k">if</span> <span class="n">expected_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">expected_type</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Attribute &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; must be of type </span><span class="si">{</span><span class="n">expected_type</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="fm">__delattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; object has no attribute &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__dir__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;overwritten in order to show dynamically stored attributes as well.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__dir__</span><span class="p">()</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_create_sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a sample of random ``CashFlow`` objects.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[CashFlow]: List of sampled ``CashFlow`` objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
+            <span class="n">cashflow_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">10000</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;val&quot;</span><span class="p">:</span> <span class="n">cashflow_val</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;val&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">val</span><span class="p">,</span>
+            <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">class</span> <span class="nc">NotionalStructure</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for notional structures.&quot;&quot;&quot;</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_amount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;here, period is the INDEX that maps to the notional amount&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">get_pay_date_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;get the notional exchange date at the beginning of the period</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            period (int): is the index of the period</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">          the date of notional exchange at the beginning of the period,</span>
+<span class="sd">                or None if there is no notional exchange at the beginning</span>
+<span class="sd">                of the period</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">get_pay_date_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;get the notional exchange date at the end of the period</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            period (int): is the index of the period</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">          the date of notional exchange at the beginning of the period,</span>
+<span class="sd">                or None if there is no notional exchange at the beginning</span>
+<span class="sd">                of the period</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">get_amount_per_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">:</span> <span class="n">date</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">get_amortization_schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="n">return_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="n">return_dict</span>
+
+
+<span class="k">class</span> <span class="nc">ConstNotionalStructure</span><span class="p">(</span><span class="n">NotionalStructure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Constant notional means that it does not change over the lifetime.</span>
+<span class="sd">    Meaning that there are no notional cashflows as well, inflow or outflow.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        NotionalStructure (_type_): _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notional</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for a notional structure with a constant notional.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            notional (float): _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span> <span class="o">=</span> <span class="p">[</span><span class="n">notional</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># region properties</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">notional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span>
+
+    <span class="nd">@notional</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">notional</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notional</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">notional</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">start_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span>
+
+    <span class="nd">@start_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">start_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span> <span class="o">=</span> <span class="n">start_date</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">end_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span>
+
+    <span class="nd">@end_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">end_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span> <span class="o">=</span> <span class="n">end_date</span>
+
+    <span class="c1"># endregion</span>
+
+    <span class="c1"># region class methods</span>
+    <span class="k">def</span> <span class="nf">get_amount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the value of the notional.</span>
+
+<span class="sd">        Note: Kept list structure to stay consistent with other notional structures.</span>
+<span class="sd">        However, expectation is that of only one entry in this list.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            period (int): index rerferencing to a specific period of rolled out notional</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: notional value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">period</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;ConstNotionalStructure only has one period with constant notional.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_amount_per_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;If the notional structure is constant, we expect the size to be 1.</span>
+<span class="sd">        Otherwise, return the amount of notional time stamps used.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_amortizations_by_index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+
+    <span class="k">def</span> <span class="nf">get_amortization_schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return amortization schedule as list of (date, amount) or None if end dates are missing.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Optional[List[Tuple[date, float]]]: amortization schedule or None when end dates are not set</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_end_date&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># use plural message to be consistent with other notional structures</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;End dates of notional structure are not set.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="n">return_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;notional&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">return_dict</span>
+
+    <span class="c1"># endregion</span>
+
+
+<span class="k">class</span> <span class="nc">LinearNotionalStructure</span><span class="p">(</span><span class="n">NotionalStructure</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_notional</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">end_notional</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for a linear notional structure</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            start_notional (float): notional at the beginning of the structure</span>
+<span class="sd">            end_notional (float): notional at the end of the structure, set to start_notional if not provided</span>
+<span class="sd">            n_steps (int): number of steps to linearly interpolate between start and end notional, results in n_steps amortizations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">n_steps</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;n_steps must be at least 1&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start_notional</span><span class="p">,</span> <span class="n">end_notional</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_notional</span> <span class="o">=</span> <span class="n">start_notional</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_notional</span> <span class="o">=</span> <span class="n">end_notional</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_steps</span> <span class="o">=</span> <span class="n">n_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dates</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># region properties</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_steps</span>
+
+    <span class="nd">@n_steps</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">n_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_steps</span> <span class="o">=</span> <span class="n">n_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start_notional</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_notional</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">))</span>
+        <span class="c1"># print(self._notional)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">start_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span>
+
+    <span class="nd">@start_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">start_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span> <span class="o">=</span> <span class="n">start_date</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">end_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span>
+
+    <span class="nd">@end_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">end_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span> <span class="o">=</span> <span class="n">end_date</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">notional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span>
+
+    <span class="nd">@notional</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">notional</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notional</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span> <span class="o">=</span> <span class="n">notional</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_notional</span> <span class="o">=</span> <span class="n">notional</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_notional</span> <span class="o">=</span> <span class="n">notional</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">start_notional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_notional</span>
+
+    <span class="nd">@start_notional</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">start_notional</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_notional</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_notional</span> <span class="o">=</span> <span class="n">start_notional</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start_notional</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_notional</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_steps</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">end_notional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_notional</span>
+
+    <span class="nd">@end_notional</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">end_notional</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end_notional</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_notional</span> <span class="o">=</span> <span class="n">end_notional</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start_notional</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_notional</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_steps</span><span class="p">))</span>
+
+    <span class="c1"># endregion</span>
+
+    <span class="c1"># region class methods</span>
+
+    <span class="k">def</span> <span class="nf">get_amount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">period</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">[</span><span class="n">period</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_amount_per_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Start or end dates of notional structure are not set.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">date</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Date is after end date of notional structure&quot;</span><span class="p">)</span>
+        <span class="n">earlier_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span> <span class="k">if</span> <span class="n">d</span> <span class="o">&lt;=</span> <span class="n">date</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">earlier_dates</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Date is before start date of notional structure&quot;</span><span class="p">)</span>
+        <span class="c1"># Find the last one and return its index</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">earlier_dates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+
+    <span class="k">def</span> <span class="nf">get_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the number of notionals</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_amortizations_by_index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a list of tuples (index, notional) representing the amortizations by index.&quot;&quot;&quot;</span>
+        <span class="n">amortizations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_notional</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_notional</span><span class="p">)]</span>
+        <span class="c1"># compute the per-step change between consecutive notionals</span>
+        <span class="n">per_step_change</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="c1"># The tests expect an entry for each step index (1..n) repeating the per-step change</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+            <span class="n">amortizations</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">per_step_change</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">amortizations</span>
+
+    <span class="k">def</span> <span class="nf">get_amortization_schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a list of tuples (date, notional) representing the amortization schedule.&quot;&quot;&quot;</span>
+        <span class="n">schedule</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;End dates of notional structure are not set.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">laenge</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">)</span>
+            <span class="c1"># print(laenge)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_notional</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_notional</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">)):</span>
+                    <span class="n">change</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">n1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="n">n2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">schedule</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">change</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">schedule</span>
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="c1"># TODO fill out more</span>
+        <span class="n">return_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;notional&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">return_dict</span>
+
+    <span class="c1"># endregion</span>
+
+
+<span class="k">class</span> <span class="nc">VariableNotionalStructure</span><span class="p">(</span><span class="n">NotionalStructure</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notionals</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">pay_date_start</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span> <span class="n">pay_date_end</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for a variable notional structure</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            notionals (list[float]): values for each period, referenced by index and matched to the pay_date_start/end</span>
+<span class="sd">            pay_date_start (list[datetime]): start date of the payment period</span>
+<span class="sd">            pay_date_end (list[datetime]): end date of the payment period</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span> <span class="o">=</span> <span class="n">notionals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pay_date_start</span> <span class="o">=</span> <span class="n">pay_date_start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pay_date_end</span> <span class="o">=</span> <span class="n">pay_date_end</span>
+
+    <span class="k">def</span> <span class="nf">get_amount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">period</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">[</span><span class="n">period</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_pay_date_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pay_date_start</span><span class="p">[</span><span class="n">period</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_pay_date_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pay_date_end</span><span class="p">[</span><span class="n">period</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the number of notionals</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="c1"># TODO fill out more</span>
+        <span class="n">return_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;notional&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">,</span>
+            <span class="s2">&quot;pay_date_start&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pay_date_start</span><span class="p">,</span>
+            <span class="s2">&quot;pay_date_end&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pay_date_end</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">return_dict</span>
+
+
+<span class="k">class</span> <span class="nc">ResettingNotionalStructure</span><span class="p">(</span><span class="n">NotionalStructure</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ref_currency</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">fx_fixing_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">notionals</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+        <span class="n">pay_date_start</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">pay_date_end</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+        <span class="n">fixing_dates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Notional is recalculated/reset dynamically based on underlying referenced by fx_fixing_id at specific datets (fixing_dates)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ref_currency (str): Currency of the reference</span>
+<span class="sd">            fx_fixing_id (str): Id of the fixing</span>
+<span class="sd">            notionals (list[float]): notional values</span>
+<span class="sd">            pay_date_start (list[datetime]): start of accrual period for that notional</span>
+<span class="sd">            pay_date_end (list[datetime]): end of accrual period for that notional</span>
+<span class="sd">            fixing_dates (list[datetime]): date at which notional is reset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ref_currency</span> <span class="o">=</span> <span class="n">ref_currency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fx_fixing_id</span> <span class="o">=</span> <span class="n">fx_fixing_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span> <span class="o">=</span> <span class="n">notionals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pay_date_start</span> <span class="o">=</span> <span class="n">pay_date_start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pay_date_end</span> <span class="o">=</span> <span class="n">pay_date_end</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixing_date</span> <span class="o">=</span> <span class="n">fixing_dates</span>
+
+    <span class="k">def</span> <span class="nf">get_amount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">[</span><span class="n">period</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_pay_date_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pay_date_start</span><span class="p">[</span><span class="n">period</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_pay_date_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pay_date_end</span><span class="p">[</span><span class="n">period</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_fixing_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fixing_date</span><span class="p">[</span><span class="n">period</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_reference_currency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ref_currency</span>
+
+    <span class="k">def</span> <span class="nf">get_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the number of notionals</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="c1"># TODO fill out more</span>
+        <span class="n">return_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;notional&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notional</span><span class="p">,</span>
+            <span class="s2">&quot;pay_date_start&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pay_date_start</span><span class="p">,</span>
+            <span class="s2">&quot;pay_date_end&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pay_date_end</span><span class="p">,</span>
+            <span class="s2">&quot;ref_currency&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ref_currency</span><span class="p">,</span>
+            <span class="s2">&quot;fx_fixing_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fx_fixing_id</span><span class="p">,</span>
+            <span class="s2">&quot;fixing_date&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fixing_date</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">return_dict</span>
+
+
+<span class="k">class</span> <span class="nc">AmortizationScheme</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">FactoryObject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract base class for amortization schemes.</span>
+<span class="sd">    - none --&gt; constant --&gt; ConstNotionalStructure</span>
+<span class="sd">    - linear --&gt; linear amortization --&gt; LinearNotionalStructure</span>
+<span class="sd">    - variable --&gt; variable amortization --&gt; VariableNotionalStructure</span>
+<span class="sd">        - requires list of percentages and periods/dates(!?)</span>
+<span class="sd">        - requires consistency of dates to instrument dates at least regarding start and end date of the instrument</span>
+<span class="sd">        - requires implementation of abstract methods</span>
+<span class="sd">    - methods: get_amortization_periods, get_amortization_percentages_per_period, get_total_amortization_percentage, _to_dict, etc.</span>
+<span class="sd">    - subclasses implement specific schemes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_total_amortization</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_from_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;AmortizationScheme&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create an AmortizationScheme object from a string representation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (str): String representation of the AmortizationScheme.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            AmortizationScheme: The created AmortizationScheme object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">LinearAmortizationScheme</span><span class="p">()</span>  <span class="c1"># default to  single step</span>
+        <span class="k">elif</span> <span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;constant&quot;</span> <span class="ow">or</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ZeroAmortizationScheme</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown AmortizationScheme type: </span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">LinearAmortizationScheme</span><span class="p">(</span><span class="n">AmortizationScheme</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total_amortization</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for a linear amortization scheme</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n_steps (int): number of steps to linearly amortize the notional</span>
+<span class="sd">            total_amortization (float): total amortization percentage (default is 100.0)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">n_steps</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;n_steps must be at least 1&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_n_steps</span> <span class="o">=</span> <span class="n">n_steps</span>
+        <span class="k">if</span> <span class="n">total_amortization</span> <span class="o">&lt;</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">total_amortization</span> <span class="o">&gt;</span> <span class="mf">100.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;total_amortization must be between 0.0 and 100.0&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_total_amortization</span> <span class="o">=</span> <span class="n">total_amortization</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_steps</span>
+
+    <span class="nd">@n_steps</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">n_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">n_steps</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;n_steps must be at least 1&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_n_steps</span> <span class="o">=</span> <span class="n">n_steps</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">total_amortization</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_amortization</span>
+
+    <span class="nd">@total_amortization</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">total_amortization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total_amortization</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">total_amortization</span> <span class="o">&lt;</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">total_amortization</span> <span class="o">&gt;</span> <span class="mf">100.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;total_amortization must be between 0.0 and 100.0&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_total_amortization</span> <span class="o">=</span> <span class="n">total_amortization</span>
+
+    <span class="k">def</span> <span class="nf">get_total_amortization</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_amortization</span>
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="c1"># TODO fill out more</span>
+        <span class="n">return_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;n_steps&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_steps</span><span class="p">,</span>
+            <span class="s2">&quot;total_amortization&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_amortization</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">return_dict</span>
+
+
+<span class="k">class</span> <span class="nc">ZeroAmortizationScheme</span><span class="p">(</span><span class="n">AmortizationScheme</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for a constant amortization scheme (no amortization)&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_total_amortization</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="c1"># @property</span>
+    <span class="c1"># def total_amortization(self) -&gt; float:</span>
+    <span class="c1">#     return self._total_percentage</span>
+
+    <span class="c1"># @total_amortization.setter</span>
+    <span class="c1"># def total_amortization(self, total_percentage: float):</span>
+    <span class="c1">#     if total_percentage &lt; 0.0 or total_percentage &gt; 100.0:</span>
+    <span class="c1">#         raise ValueError(&quot;total_percentage must be between 0.0 and 100.0&quot;)</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         self._total_percentage = total_percentage</span>
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="n">return_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;total_amortization&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_percentage</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">return_dict</span>
+
+    <span class="k">def</span> <span class="nf">get_total_amortization</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+
+
+<span class="k">class</span> <span class="nc">VariableAmortizationScheme</span><span class="p">(</span><span class="n">AmortizationScheme</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amortization_amounts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">terms</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Period</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for a variable amortization scheme</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            amortization_amounts (List[float]): amounts of amortizations, given as percentages (0-100)</span>
+<span class="sd">            terms (List[Period], optional): periods at which&#39;s end amortizations occur.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">amortization_amounts</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">terms</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">terms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Length of amortization_amounts must equal length of terms&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">amortization_amounts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">100.0</span> <span class="ow">or</span> <span class="nb">sum</span><span class="p">(</span><span class="n">amortization_amounts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Sum of amortization amounts cannot exceed 100.0 or be negative.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_amortization_amounts</span> <span class="o">=</span> <span class="n">amortization_amounts</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_terms</span> <span class="o">=</span> <span class="n">terms</span>
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="c1"># TODO fill out more</span>
+        <span class="n">return_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;amortization_amounts&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_amortization_amounts</span><span class="p">,</span>
+            <span class="s2">&quot;terms&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_terms</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">return_dict</span>
+
+    <span class="k">def</span> <span class="nf">get_nr_of_amortization_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_amortization_amounts</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_total_amortization</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_amortization_amounts</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">components_main</span><span class="p">():</span>
+    <span class="n">notional</span> <span class="o">=</span> <span class="n">LinearNotionalStructure</span><span class="p">(</span><span class="mi">1000000</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># print(&quot;Initial notional amounts:&quot;, notional._start_notional, &quot;to&quot;, notional._end_notional)</span>
+    <span class="c1"># print(&quot;Notional amounts over time:&quot;, notional._notional)</span>
+    <span class="c1"># print(&quot;Notional size:&quot;, notional.get_size())</span>
+    <span class="c1"># print(&quot;Amortization schedule:&quot;, notional.get_amortizations_by_index())</span>
+    <span class="c1"># print(&quot;Amortization schedule:&quot;, notional.get_amortization_schedule())</span>
+
+    <span class="c1"># notional_const = ConstNotionalStructure(500000)</span>
+    <span class="c1"># print(&quot;Constant notional amount:&quot;, notional_const._notional[0])</span>
+    <span class="c1"># print(&quot;Notional over time:&quot;, notional_const._notional)</span>
+    <span class="c1"># print(&quot;Notional size:&quot;, notional_const.get_size())</span>
+    <span class="c1"># print(&quot;Amortization schedule:&quot;, notional_const.get_amortizations_by_index())</span>
+    <span class="c1"># print(&quot;Amortization schedule:&quot;, notional_const.get_amortization_schedule())</span>
+
+    <span class="c1"># amort_1 = LinearAmortizationScheme(0.85, 4)</span>
+    <span class="c1"># print(&quot;Linear amortization total percentage:&quot;, amort_1.get_total_amortization())</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">components_main</span><span class="p">()</span>
 </pre></div>
 
            </div>

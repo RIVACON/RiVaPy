@@ -24,7 +24,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Interfaces" href="rivapy.interfaces.html" />
-    <link rel="prev" title="PricingRequest" href="pricing/pricing_request.html" /> 
+    <link rel="prev" title="Pricer" href="pricing/pricer.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -153,7 +153,7 @@
 <dd><p>Creates a Period from a string</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>period</strong> (<em>str</em>) – The string defining the period. The string must be defined by the number of days/months/years followed by one of the letters ‘Y’/’M’/’D’, i.e. ‘6M’ means 6 months.</p>
+<dd class="field-odd"><p><strong>period</strong> (<em>str</em>) – The string defining the period. The string must be defined by the number of days/months/years followed by one of the letters ‘Y’/’M’/’D’, i.e. ‘6M’ means 6 months, or ‘O/N’, or ‘T/N’.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The resulting period</p>
@@ -204,8 +204,8 @@
 <h3>Schedules<a class="headerlink" href="#schedules" title="Link to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="rivapy.tools.Schedule">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.</span></span><span class="sig-name descname"><span class="pre">Schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_day</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_day</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rivapy.tools.Period" title="rivapy.tools.datetools.Period"><span class="pre">Period</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backwards</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stub</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">business_day_convention</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rivapy.tools.enums.RollConvention" title="rivapy.tools.enums.RollConvention"><span class="pre">RollConvention</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">RollConvention.MODIFIED_FOLLOWING</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calendar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">HolidayBase</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivapy/tools/datetools.html#Schedule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.tools.Schedule" title="Link to this definition"></a></dt>
-<dd><p>A schedule is a list of dates, e.g. of coupon payments, fixings, etc., which is defined by its fist (= start
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.tools.</span></span><span class="sig-name descname"><span class="pre">Schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_day</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_day</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rivapy.tools.Period" title="rivapy.tools.datetools.Period"><span class="pre">Period</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backwards</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stub_type_is_Long</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">business_day_convention</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rivapy.tools.enums.RollConvention" title="rivapy.tools.enums.RollConvention"><span class="pre">RollConvention</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">RollConvention.MODIFIED_FOLLOWING</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calendar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">HolidayBase</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll_convention</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RollRule</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">RollRule.NONE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settle_days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivapy/tools/datetools.html#Schedule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.tools.Schedule" title="Link to this definition"></a></dt>
+<dd><p>A schedule is a list of dates, e.g. of coupon payments, fixings, etc., which is defined by its first (= start
 day) and last (= end day) day, by its distance between two consecutive dates (= time period) and by the
 procedure for rolling out the schedule, more precisely by the direction (backwards/forwards) and the dealing
 with incomplete periods (stubs). Moreover, the schedule ensures to comply to business day conventions with
@@ -218,8 +218,8 @@ respect to a specified holiday calendar.</p>
 <li><p><strong>time_period</strong> (<em>_Union</em><em>[</em><a class="reference internal" href="#rivapy.tools.Period" title="rivapy.tools.Period"><em>Period</em></a><em>, </em><em>str</em><em>]</em>) – Time distance between two consecutive dates.</p></li>
 <li><p><strong>backwards</strong> (<em>bool</em><em>, </em><em>optional</em>) – Defines direction for rolling out the schedule. True means the schedule will be
 rolled out (backwards) from end day to start day. Defaults to True.</p></li>
-<li><p><strong>stub</strong> (<em>bool</em><em>, </em><em>optional</em>) – Defines if the first/last period is accepted (True), even though it is shorter than
-the others, or if it remaining days are added to the neighbouring period (False).
+<li><p><strong>stub_type_is_Long</strong> (<em>bool</em><em>, </em><em>optional</em>) – Defines if a stub period is accepted (False) to be shorter than
+the others, or if its remaining days are added to the neighbouring period (True).
 Defaults to True.</p></li>
 <li><p><strong>business_day_convention</strong> (<em>_Union</em><em>[</em><a class="reference internal" href="#rivapy.tools.enums.RollConvention" title="rivapy.tools.enums.RollConvention"><em>RollConvention</em></a><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Set of rules defining the adjustment of
 days to ensure each date being a business
@@ -231,12 +231,15 @@ province (but not all non-business days as for example
 Saturdays and Sundays).
 Defaults (through constructor) to holidays.ECB
 (= Target2 calendar) between start_day and end_day.</p></li>
+<li><p><strong>roll_convention</strong> (<em>_Union</em><em>[</em><em>RollRule</em><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Defines the roll convention for the schedule.</p></li>
+<li><p><strong>settle_days</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of days for settlement. Defaults to 0.</p></li>
+<li><p><strong>ref_date</strong> (<em>_Optional</em><em>[</em><em>_Union</em><em>[</em><em>date</em><em>, </em><em>datetime</em><em>]</em><em>]</em>) – Reference date for the schedule. If provided, the schedule will be shortened and include the dates that are after the reference date plus the immediate date before it.</p></li>
 </ul>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rivapy.tools</span> <span class="kn">import</span> <span class="n">schedule</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rivapy.tools</span> <span class="kn">import</span> <span class="n">Schedule</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">21</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2021</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">21</span><span class="p">),</span> <span class="n">Period</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">RollConvention</span><span class="o">.</span><span class="n">UNADJUSTED</span><span class="p">,</span> <span class="n">holidays_de</span><span class="p">)</span><span class="o">.</span><span class="n">generate_dates</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span>
 <span class="go">       [date(2020, 8, 21), date(2020, 11, 21), date(2021, 2, 21), date(2021, 5, 21), date(2021, 8, 21)])</span>
 </pre></div>
@@ -290,7 +293,7 @@ False, if rolled out from start day to end day.</p>
 <dt class="sig sig-object py" id="rivapy.tools.Schedule.generate_dates">
 <span class="sig-name descname"><span class="pre">generate_dates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ends_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">date</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/rivapy/tools/datetools.html#Schedule.generate_dates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.tools.Schedule.generate_dates" title="Link to this definition"></a></dt>
 <dd><p>Generate list of schedule days according to the schedule specification, in particular with regards to business
-day convention and calendar given.</p>
+day convention, roll_convention and calendar given.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>ends_only</strong> (<em>bool</em>) – Flag to indicate if period beginnings shall be included, e.g. for defining accrual
@@ -301,6 +304,17 @@ periods: True, if only period ends shall be included, e.g. for defining payment 
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List[date]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rivapy.tools.Schedule.roll_convention">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">roll_convention</span></span><a class="headerlink" href="#rivapy.tools.Schedule.roll_convention" title="Link to this definition"></a></dt>
+<dd><p>Getter for schedule’s roll convention.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Roll convention of specified schedule.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -317,9 +331,9 @@ periods: True, if only period ends shall be included, e.g. for defining payment 
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="rivapy.tools.Schedule.stub">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stub</span></span><a class="headerlink" href="#rivapy.tools.Schedule.stub" title="Link to this definition"></a></dt>
-<dd><p>Getter for potential existence of short periods (stubs).</p>
+<dt class="sig sig-object py" id="rivapy.tools.Schedule.stub_type_is_Long">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stub_type_is_Long</span></span><a class="headerlink" href="#rivapy.tools.Schedule.stub_type_is_Long" title="Link to this definition"></a></dt>
+<dd><p>Getter for potential existence of shlong periods (stub_type_is_long).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>True, if a shorter period is allowed.
@@ -564,7 +578,7 @@ By default, the resulting datetime points are timezone-naive. See documentation 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="rivapy.tools.enums.InterpolationType.LINEAR_LOG">
-<span class="sig-name descname"><span class="pre">LINEAR_LOG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LINEARLOG'</span></em><a class="headerlink" href="#rivapy.tools.enums.InterpolationType.LINEAR_LOG" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">LINEAR_LOG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LINEAR_LOG'</span></em><a class="headerlink" href="#rivapy.tools.enums.InterpolationType.LINEAR_LOG" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -578,13 +592,18 @@ By default, the resulting datetime points are timezone-naive. See documentation 
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.ExtrapolationType.CONSTANT_DF">
+<span class="sig-name descname"><span class="pre">CONSTANT_DF</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CONSTANT_DF'</span></em><a class="headerlink" href="#rivapy.tools.enums.ExtrapolationType.CONSTANT_DF" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="rivapy.tools.enums.ExtrapolationType.LINEAR">
 <span class="sig-name descname"><span class="pre">LINEAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LINEAR'</span></em><a class="headerlink" href="#rivapy.tools.enums.ExtrapolationType.LINEAR" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="rivapy.tools.enums.ExtrapolationType.LINEAR_LOG">
-<span class="sig-name descname"><span class="pre">LINEAR_LOG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LINEARLOG'</span></em><a class="headerlink" href="#rivapy.tools.enums.ExtrapolationType.LINEAR_LOG" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">LINEAR_LOG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LINEAR_LOG'</span></em><a class="headerlink" href="#rivapy.tools.enums.ExtrapolationType.LINEAR_LOG" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -713,6 +732,16 @@ By default, the resulting datetime points are timezone-naive. See documentation 
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.DayCounterType.ActActICMA">
+<span class="sig-name descname"><span class="pre">ActActICMA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ActActICMA'</span></em><a class="headerlink" href="#rivapy.tools.enums.DayCounterType.ActActICMA" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rivapy.tools.enums.DayCounterType.Thirty360ISDA">
+<span class="sig-name descname"><span class="pre">Thirty360ISDA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'30360ISDA'</span></em><a class="headerlink" href="#rivapy.tools.enums.DayCounterType.Thirty360ISDA" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="rivapy.tools.enums.DayCounterType.ThirtyE360">
 <span class="sig-name descname"><span class="pre">ThirtyE360</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'30E360'</span></em><a class="headerlink" href="#rivapy.tools.enums.DayCounterType.ThirtyE360" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -781,7 +810,7 @@ By default, the resulting datetime points are timezone-naive. See documentation 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="pricing/pricing_request.html" class="btn btn-neutral float-left" title="PricingRequest" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pricing/pricer.html" class="btn btn-neutral float-left" title="Pricer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="rivapy.interfaces.html" class="btn btn-neutral float-right" title="Interfaces" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
