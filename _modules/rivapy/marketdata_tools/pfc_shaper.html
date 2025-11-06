@@ -124,30 +124,86 @@
 <div class="viewcode-block" id="PFCShaper.calibrate">
 <a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShaper.calibrate">[docs]</a>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">def</span> <span class="nf">calibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calibration of the shaping model</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            np.ndarray: Numpy array containing the fit.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">calibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calibration of the shaping model&quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="PFCShaper.apply">
 <a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShaper.apply">[docs]</a>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apply_schedule</span><span class="p">:</span> <span class="n">SimpleSchedule</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apply_schedule</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Applies the model on a schedule in order to generate a shape for future dates.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            apply_schedule (SimpleSchedule): Schedule object in order to generate a shape for future dates.</span>
+<span class="sd">            apply_schedule (List[dt.datetime]): List of datetimes in order to generate a shape for future dates.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
 
-    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">def</span> <span class="nf">_set_regression_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_regression_parameters</span> <span class="o">=</span> <span class="n">params</span>
+    <span class="k">def</span> <span class="nf">_preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spot</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">remove_outlier</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">lower_quantile</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">upper_quantile</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Preprocess spot price data by ensuring hourly continuity, interpolating missing values,</span>
+<span class="sd">        and optionally removing outliers based on normalized yearly values.</span>
+
+<span class="sd">        This method performs the following steps:</span>
+<span class="sd">          1. Aggregates duplicate timestamps by taking the mean of their values.</span>
+<span class="sd">          2. Reindexes the time series to ensure a continuous hourly frequency and</span>
+<span class="sd">             linearly interpolates missing values.</span>
+<span class="sd">          3. If `remove_outlier=True`, normalizes the time series on a yearly basis and</span>
+<span class="sd">             removes data points outside the specified quantile range.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            spot (pd.DataFrame): Raw spot price data indexed by datetime. The first column</span>
+<span class="sd">                is assumed to contain the price values.</span>
+<span class="sd">            remove_outlier (bool): Whether to remove outliers after normalization.</span>
+<span class="sd">            lower_quantile (float): Lower quantile threshold (e.g., 0.01) used for outlier removal.</span>
+<span class="sd">            upper_quantile (float): Upper quantile threshold (e.g., 0.99) used for outlier removal.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: A cleaned and time-continuous spot price time series, with optional</span>
+<span class="sd">            outliers removed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># remove duplicate hours by replacing these with their mean</span>
+        <span class="n">spot</span> <span class="o">=</span> <span class="n">spot</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+        <span class="c1"># include missing hours</span>
+        <span class="n">full_idx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">spot</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">end</span><span class="o">=</span><span class="n">spot</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">freq</span><span class="o">=</span><span class="s2">&quot;h&quot;</span><span class="p">)</span>
+        <span class="n">spot</span> <span class="o">=</span> <span class="n">spot</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">full_idx</span><span class="p">)</span>
+        <span class="n">spot</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;date&quot;</span>
+        <span class="n">spot</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">spot</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">remove_outlier</span><span class="p">:</span>
+
+            <span class="n">yearly_normalized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_year</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">spot</span><span class="p">)</span>
+
+            <span class="n">q_lower</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">yearly_normalized</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">lower_quantile</span><span class="p">)</span>
+            <span class="n">q_upper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">yearly_normalized</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">upper_quantile</span><span class="p">)</span>
+
+            <span class="n">remove_ids</span> <span class="o">=</span> <span class="n">yearly_normalized</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">yearly_normalized</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">q_lower</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">yearly_normalized</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">q_upper</span><span class="p">),</span> <span class="p">:]</span><span class="o">.</span><span class="n">index</span>
+            <span class="n">spot</span> <span class="o">=</span> <span class="n">spot</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">spot</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">remove_ids</span><span class="p">),</span> <span class="p">:]</span>
+        <span class="k">return</span> <span class="n">spot</span>
+
+    <span class="k">def</span> <span class="nf">_normalize_year</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Normalize time series values by their yearly mean.</span>
+
+<span class="sd">        This method computes the mean value for each calendar year and divides all data</span>
+<span class="sd">        points within that year by the corresponding annual mean. The result is a</span>
+<span class="sd">        year-normalized time series where each year has an average value of 1.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): A DataFrame indexed by datetime, containing one or more</span>
+<span class="sd">                numeric columns to be normalized.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: A DataFrame where the values of each year have been normalized</span>
+<span class="sd">            relative to their annual mean.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">yearly_mean</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s2">&quot;YE&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="s2">&quot;mean&quot;</span><span class="p">)</span>
+
+        <span class="n">normalized</span> <span class="o">=</span> <span class="n">df</span> <span class="o">/</span> <span class="n">yearly_mean</span>
+        <span class="k">return</span> <span class="n">normalized</span>
 
 <div class="viewcode-block" id="PFCShaper.normalize_shape">
 <a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.PFCShaper.normalize_shape">[docs]</a>
@@ -175,16 +231,9 @@
         <span class="n">datetime_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
 
         <span class="c1"># yearly normalization</span>
-        <span class="k">def</span> <span class="nf">_normalize_year</span><span class="p">(</span><span class="n">shape</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">datetime_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-            <span class="n">base_y</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s2">&quot;YE&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-            <span class="n">_shape</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">base_y</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y&quot;</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
-
-            <span class="n">shape_df</span> <span class="o">=</span> <span class="n">_shape</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">shape_df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">datetime_list</span>
-            <span class="k">return</span> <span class="n">shape_df</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">shape_df</span> <span class="o">=</span> <span class="n">_normalize_year</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">datetime_list</span><span class="o">=</span><span class="n">datetime_list</span><span class="p">)</span>
+            <span class="n">shape_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_year</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">shape_df</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># the normalization through the normalization_config is done in different parts</span>
@@ -225,7 +274,7 @@
             <span class="c1"># the remaining shape is normalized on a yearly basis</span>
             <span class="n">leftover_shape</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">shape</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">normalized_datetimes</span><span class="p">),</span> <span class="p">:]</span>
             <span class="n">leftover_datetime</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">leftover_shape</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-            <span class="n">yearly_normalized_shape</span> <span class="o">=</span> <span class="n">_normalize_year</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">leftover_shape</span><span class="p">,</span> <span class="n">datetime_list</span><span class="o">=</span><span class="n">leftover_datetime</span><span class="p">)</span>
+            <span class="n">yearly_normalized_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_year</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">leftover_shape</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">normalized_shapes</span> <span class="o">+</span> <span class="p">[</span><span class="n">yearly_normalized_shape</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
@@ -235,23 +284,28 @@
 
 
 
-<div class="viewcode-block" id="CategoricalRegression">
-<a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.CategoricalRegression">[docs]</a>
-<span class="k">class</span> <span class="nc">CategoricalRegression</span><span class="p">(</span><span class="n">PFCShaper</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Linear regression model using categorical predictor variables to construct a PFC shape.</span>
+<div class="viewcode-block" id="SimpleCategoricalRegression">
+<a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.SimpleCategoricalRegression">[docs]</a>
+<span class="k">class</span> <span class="nc">SimpleCategoricalRegression</span><span class="p">(</span><span class="n">PFCShaper</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Linear regression model using categorical predictor variables to construct a PFC shape.</span>
 
 <span class="sd">    .. math::</span>
 
-<span class="sd">        S(t) = S_0 + \\sum^{23}_{i=1}\\beta^h_i\\cdot\\mathbb{I}_{h(t)=i} + \\beta^d\\cdot\\mathbb{I}_{d(t)=1}  + \\beta^H\\cdot\\mathbb{I}_{H(t)=1} + \\sum^{12}_{i=2}\\beta^m_i\\cdot\\mathbb{I}_{m(t)=i}</span>
+<span class="sd">        s(t) = s_0 + \sum^{23}_{i=1}\beta^h_i\cdot\mathbb{I}_{h(t)=i} + \beta^d\cdot\mathbb{I}_{d(t)=1}  + \beta^H\cdot\mathbb{I}_{H(t)=1} + \sum^{12}_{i=2}\beta^m_i\cdot\mathbb{I}_{m(t)=i}</span>
 
-<span class="sd">    Where:</span>
+<span class="sd">    where:</span>
 
-<span class="sd">    - :math:`S_0`: Spot price level</span>
-<span class="sd">    - :math:`\\mathbb{I}_x = \\begin{cases} 1, &amp; \\text{if the } x \\text{ expression renders true} \\\\ 0, &amp; \\text{if the } x \\text{ expression renders false} \\end{cases}`</span>
-<span class="sd">    - :math:`h(t)`: Hour of t</span>
-<span class="sd">    - :math:`d(t) = \\begin{cases} 1, &amp; \\text{if t is a weekday} \\\\ 0, &amp; \\text{if t is a day on a weekend} \\end{cases}`</span>
-<span class="sd">    - :math:`H(t) = \\begin{cases} 1, &amp; \\text{if t public holidy} \\\\ 0, &amp; \\text{if t is not a public holiday} \\end{cases}`</span>
-<span class="sd">    - :math:`m(t)`: Month of t</span>
+<span class="sd">    :math:`s_0`: Shape level level</span>
+
+<span class="sd">    :math:`\mathbb{I}_x = \begin{cases} 1, &amp; \text{if the } x \text{ expression renders true} \\ 0, &amp; \text{if the } x \text{ expression renders false} \end{cases}`</span>
+
+<span class="sd">    :math:`h(t)`: Hour of t</span>
+
+<span class="sd">    :math:`d(t) = \begin{cases} 1, &amp; \text{if t is a weekday} \\ 0, &amp; \text{if t is a day on a weekend} \end{cases}`</span>
+
+<span class="sd">    :math:`H(t) = \begin{cases} 1, &amp; \text{if t public holidy} \\ 0, &amp; \text{if t is not a public holiday} \end{cases}`</span>
+
+<span class="sd">    :math:`m(t)`: Month of t</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        spot_prices (pd.DataFrame): Data used to calibrate the shaping model.</span>
@@ -260,6 +314,9 @@
 <span class="sd">            Here ``D`` defines the number of days at the beginning of the shape over which the individual mean is normalized to one.</span>
 <span class="sd">            ``W`` defines the number of weeks at the beginning of the shape over which the individual mean is normalized to one.</span>
 <span class="sd">            ``ME`` defines the number of months at the beginning of the shape over which the individual mean is normalized to one. The remaining shape is then normalized over the individual years.Defaults to None.</span>
+<span class="sd">        remove_outlier (bool): Wether to remove outliers for the seasonality shape regression. Defaults to False.</span>
+<span class="sd">        lower_quantile (float): Lower quantile for outlier detection. Defauls to 0.005.</span>
+<span class="sd">        upper_quantile (float): Upper quantile for outlier detection. Defaults to 0.995.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -267,8 +324,14 @@
         <span class="n">spot_prices</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
         <span class="n">holiday_calendar</span><span class="p">:</span> <span class="n">holidays</span><span class="o">.</span><span class="n">HolidayBase</span><span class="p">,</span>
         <span class="n">normalization_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;W&quot;</span><span class="p">,</span> <span class="s2">&quot;M&quot;</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">remove_outlier</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">lower_quantile</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.005</span><span class="p">,</span>
+        <span class="n">upper_quantile</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.995</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">spot_prices</span><span class="o">=</span><span class="n">spot_prices</span><span class="p">,</span> <span class="n">holiday_calendar</span><span class="o">=</span><span class="n">holiday_calendar</span><span class="p">,</span> <span class="n">normalization_config</span><span class="o">=</span><span class="n">normalization_config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_outlier</span> <span class="o">=</span> <span class="n">remove_outlier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lower_quantile</span> <span class="o">=</span> <span class="n">lower_quantile</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">upper_quantile</span> <span class="o">=</span> <span class="n">upper_quantile</span>
 
     <span class="k">def</span> <span class="nf">_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datetimes_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Transforms a list of datetimes in a numpy array which can then be used for the linear regression.</span>
@@ -298,29 +361,371 @@
         <span class="n">month</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">_datetime_series</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;month&quot;</span><span class="p">,</span> <span class="n">drop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">)</span>
 
         <span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">_datetime_series</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">offset</span><span class="p">,</span> <span class="n">weekday</span><span class="p">,</span> <span class="n">holiday</span><span class="p">,</span> <span class="n">hours</span><span class="p">,</span> <span class="n">month</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">offset</span><span class="p">,</span> <span class="n">weekday</span><span class="p">,</span> <span class="n">holiday</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">hours</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_set_regression_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_set_regression_parameters</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+<div class="viewcode-block" id="SimpleCategoricalRegression.calibrate">
+<a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.SimpleCategoricalRegression.calibrate">[docs]</a>
+    <span class="k">def</span> <span class="nf">calibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">spot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spot_prices</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">spot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess</span><span class="p">(</span><span class="n">spot</span><span class="o">=</span><span class="n">spot</span><span class="p">,</span> <span class="n">remove_outlier</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">remove_outlier</span><span class="p">,</span> <span class="n">lower_quantile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lower_quantile</span><span class="p">,</span> <span class="n">upper_quantile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">upper_quantile</span><span class="p">)</span>
+
+        <span class="n">spot_normalized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_year</span><span class="p">(</span><span class="n">spot</span><span class="p">)</span>
+        <span class="n">data_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="p">(</span><span class="n">datetimes_list</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spot_prices</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_regression_parameters</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">data_array</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">data_array</span><span class="p">)</span> <span class="o">@</span> <span class="n">data_array</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">spot_normalized</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+        <span class="c1"># fit = data_array @ self._regression_parameters</span>
+
+        <span class="c1"># df = pd.DataFrame(fit.squeeze(), index=spot.index, columns=[&quot;shape&quot;])</span>
+        <span class="c1"># return self._normalize_year(df)</span>
+
+<div class="viewcode-block" id="SimpleCategoricalRegression.apply">
+<a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.SimpleCategoricalRegression.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apply_schedule</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="n">data_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="p">(</span><span class="n">datetimes_list</span><span class="o">=</span><span class="n">apply_schedule</span><span class="p">)</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">data_array</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regression_parameters</span>
+
+        <span class="n">shape_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="n">shape</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()},</span> <span class="n">index</span><span class="o">=</span><span class="n">apply_schedule</span><span class="p">)</span>
+        <span class="n">shape_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_shape</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape_df</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">shape_df</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_to_dict</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="CategoricalRegression">
+<a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.CategoricalRegression">[docs]</a>
+<span class="k">class</span> <span class="nc">CategoricalRegression</span><span class="p">(</span><span class="n">PFCShaper</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Linear regression model using categorical predictor variables to construct a PFC shape.</span>
+<span class="sd">    We follow the methodology in:</span>
+<span class="sd">    </span>
+<span class="sd">    https://cem-a.org/wp-content/uploads/2019/10/A-Structureal-Model-for-Electricity-Forward-Prices.pdf</span>
+<span class="sd">    </span>
+<span class="sd">    https://ieeexplore.ieee.org/document/6607349</span>
+<span class="sd">    </span>
+<span class="sd">    https://www.researchgate.net/publication/229051446_Robust_Calculation_and_Parameter_Estimation_of_the_Hourly_Price_Forward_Curve</span>
+
+<span class="sd">    We create a regression model for bot the seasonality shape and the intra day shape. For the regression model of the seasonality shape, </span>
+<span class="sd">    the days are split into weekday, Saturdays and Sundays. Public holidays are considered as Sundays while bridge days are expected to behave like Saturdays.</span>
+<span class="sd">    Afterwards, weekdays are split into clusters representing the month they are in, while Saturdays and Sundays are assigned to clusters reaching over three months.</span>
+<span class="sd">    For the regression model of the intra day shape we keep the seasonality clusters but add a hourly cluster for each individual hour such that the</span>
+<span class="sd">    total number of intra day clusters becomes #Season Clusters * 24.</span>
+<span class="sd">    </span>
+<span class="sd">    .. math::</span>
+<span class="sd">        \begin{aligned}</span>
+<span class="sd">            y_\text{season}(d) &amp;= \frac{\frac{1}{24}\sum_{i=1}^{24}h_i^d}{\frac{1}{N_y}\sum_{i=1}^{N_y} h_i^y} \\</span>
+<span class="sd">            \hat{y}_\text{season}(d) &amp; =\beta^{0}_\text{season} + \sum_{c \in C^\text{season}}\beta^c\cdot\mathbb{I}_{\text{Cluster}(d)=c} \\</span>
+<span class="sd">            y_\text{id}(h,d) &amp;= \frac{h_i^d}{\frac{1}{24}\sum_{i=1}^{24}h_i^d} \\</span>
+<span class="sd">            \hat{y}_\text{id}(h,d) &amp; =\beta^{0}_\text{id} + \sum_{c \in C^\text{id}}\beta^c\cdot\mathbb{I}_{\text{Cluster}(h)=c} \\</span>
+<span class="sd">            s(h,d) &amp;= \hat{y}_\text{id}(h,d)\cdot\hat{y}_\text{season}(d)</span>
+<span class="sd">        \end{aligned}</span>
+<span class="sd">    </span>
+<span class="sd">    where:</span>
+<span class="sd">    </span>
+<span class="sd">    :math:`h_i^d`: i-th hour of d-th day</span>
+<span class="sd">    </span>
+<span class="sd">    :math:`h_i^y`: i-th hour of the year y</span>
+<span class="sd">    </span>
+<span class="sd">    :math:`N_y`: number of days in year y</span>
+<span class="sd">    </span>
+<span class="sd">    :math:`C^\text{season}`: set of all clusters for the seasonality shape</span>
+<span class="sd">    </span>
+<span class="sd">    :math:`C^\text{id}`: set of all clusters for the intra day shape</span>
+<span class="sd">    </span>
+<span class="sd">    :math:`\text{Cluster}(X)`: returns the cluster of X</span>
+
+<span class="sd">    :math:`\mathbb{I}_x = \begin{cases}</span>
+<span class="sd">    1, &amp; \text{if the } x \text{ expression renders true}\\</span>
+<span class="sd">    0, &amp; \text{if the } x \text{ expression renders false}</span>
+<span class="sd">    \end{cases}`</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        spot_prices (pd.DataFrame): Data used to calibrate the shaping model.</span>
+<span class="sd">        holiday_calendar (holidays.HolidayBase): Calendar object to obtain country specific holidays.</span>
+<span class="sd">        normalization_config (Optional[Dict[Literal[&quot;D&quot;, &quot;W&quot;, &quot;ME&quot;], Optional[int]]], optional): A dictionary configurating the shape normalization periods.</span>
+<span class="sd">            Here ``D`` defines the number of days at the beginning of the shape over which the individual mean is normalized to one.</span>
+<span class="sd">            ``W`` defines the number of weeks at the beginning of the shape over which the individual mean is normalized to one.</span>
+<span class="sd">            ``ME`` defines the number of months at the beginning of the shape over which the individual mean is normalized to one. The remaining shape is then normalized over the individual years.Defaults to None.</span>
+<span class="sd">        remove_outlier_season (bool): Wether to remove outliers for the seasonality shape regression. Defaults to False.</span>
+<span class="sd">        remove_outlier_id (bool): Wether to remove outliers for the intra day shape regression. Defaults to False.</span>
+<span class="sd">        lower_quantile_season (float): Lower quantile for outlier detection. Defauls to 0.005.</span>
+<span class="sd">        upper_quantile_season (float): Upper quantile for outlier detection. Defaults to 0.995.</span>
+<span class="sd">        lower_quantile_id (float): Lower quantile for outlier detection. Defauls to 0.005.</span>
+<span class="sd">        upper_quantile_id (float): Upper quantile for outlier detection. Defaults to 0.995.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">spot_prices</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">holiday_calendar</span><span class="p">:</span> <span class="n">holidays</span><span class="o">.</span><span class="n">HolidayBase</span><span class="p">,</span>
+        <span class="n">normalization_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;W&quot;</span><span class="p">,</span> <span class="s2">&quot;M&quot;</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">remove_outlier_season</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">remove_outlier_id</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">lower_quantile_season</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.005</span><span class="p">,</span>
+        <span class="n">upper_quantile_season</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.995</span><span class="p">,</span>
+        <span class="n">lower_quantile_id</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.005</span><span class="p">,</span>
+        <span class="n">upper_quantile_id</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.995</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">spot_prices</span><span class="o">=</span><span class="n">spot_prices</span><span class="p">,</span> <span class="n">holiday_calendar</span><span class="o">=</span><span class="n">holiday_calendar</span><span class="p">,</span> <span class="n">normalization_config</span><span class="o">=</span><span class="n">normalization_config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_outlier_season</span> <span class="o">=</span> <span class="n">remove_outlier_season</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_outlier_id</span> <span class="o">=</span> <span class="n">remove_outlier_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lower_quantile_season</span> <span class="o">=</span> <span class="n">lower_quantile_season</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">upper_quantile_season</span> <span class="o">=</span> <span class="n">upper_quantile_season</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lower_quantile_id</span> <span class="o">=</span> <span class="n">lower_quantile_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">upper_quantile_id</span> <span class="o">=</span> <span class="n">upper_quantile_id</span>
+
+    <span class="k">def</span> <span class="nf">_create_cluster_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">day_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">],</span> <span class="n">use_hours</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a DataFrame containing the clusters for the regression models.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            day_list (List[dt.datetime]): List of datetimes for which a clustering should be performed</span>
+<span class="sd">            use_hours (bool, optional): Wether to extend the clustering to include hours. Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">holidays_list</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">holiday_calendar</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="n">cluster_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">day_list</span><span class="p">)</span>
+
+        <span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;year&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cluster_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">year</span>
+        <span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cluster_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">month</span>
+        <span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;day&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cluster_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">day</span>
+        <span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;weekday&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cluster_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">weekday</span>
+
+        <span class="k">if</span> <span class="n">use_hours</span><span class="p">:</span>
+            <span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;hour&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cluster_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">hour</span>
+
+        <span class="c1"># get holidays and bridge days</span>
+        <span class="n">temp_cluster_df</span> <span class="o">=</span> <span class="n">cluster_df</span><span class="p">[[</span><span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">,</span> <span class="s2">&quot;day&quot;</span><span class="p">,</span> <span class="s2">&quot;weekday&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+        <span class="n">temp_cluster_df</span><span class="p">[</span><span class="s2">&quot;holiday&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">temp_cluster_df</span><span class="p">[</span><span class="s2">&quot;bridge&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">temp_cluster_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">temp_cluster_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">holidays_list</span><span class="p">),</span> <span class="s2">&quot;holiday&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="n">is_monday_bridge</span> <span class="o">=</span> <span class="p">(</span><span class="n">temp_cluster_df</span><span class="o">.</span><span class="n">index</span> <span class="o">+</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">holidays_list</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">temp_cluster_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">weekday</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">is_friday_bridge</span> <span class="o">=</span> <span class="p">(</span><span class="n">temp_cluster_df</span><span class="o">.</span><span class="n">index</span> <span class="o">-</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">holidays_list</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">temp_cluster_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">weekday</span> <span class="o">==</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">temp_cluster_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">is_friday_bridge</span> <span class="o">|</span> <span class="n">is_monday_bridge</span><span class="p">,</span> <span class="s2">&quot;bridge&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="n">cluster_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">cluster_df</span><span class="p">,</span> <span class="n">temp_cluster_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">,</span> <span class="s2">&quot;day&quot;</span><span class="p">,</span> <span class="s2">&quot;weekday&quot;</span><span class="p">])</span>
+        <span class="c1"># cluster_df.set_index(day_list, inplace=True)</span>
+        <span class="n">cluster_df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">day_list</span>
+
+        <span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;day_indicator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">cluster_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">cluster_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">weekday</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;day_indicator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">cluster_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">cluster_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">weekday</span> <span class="o">==</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;day_indicator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">cluster_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">cluster_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">weekday</span> <span class="o">==</span> <span class="mi">6</span><span class="p">,</span> <span class="s2">&quot;day_indicator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+
+        <span class="n">cluster_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;holiday&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;day_indicator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="n">cluster_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;bridge&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;day_indicator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="n">cluster_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">cluster_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">12</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cluster_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">day</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="mi">24</span><span class="p">,</span> <span class="mi">31</span><span class="p">]))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cluster_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">weekday</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">),</span> <span class="s2">&quot;day_indicator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="n">cluster_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;cluster&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">cluster_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;day_indicator&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;cluster&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cluster_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;day_indicator&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">]</span>
+
+        <span class="n">weekend_cluster_month</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">]]</span>
+        <span class="c1"># weekend_cluster_month = [[1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11], [12]]</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">day_indicator</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">month_lst</span> <span class="ow">in</span> <span class="n">weekend_cluster_month</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">cluster_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;day_indicator&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">day_indicator</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">month_lst</span><span class="p">)),</span> <span class="s2">&quot;cluster&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">cluster_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;day_indicator&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">day_indicator</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">month_lst</span><span class="p">)),</span> <span class="s2">&quot;cluster&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">count</span>
+
+        <span class="k">if</span> <span class="n">use_hours</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__add_hours_cluster</span><span class="p">(</span>
+                <span class="n">df</span><span class="o">=</span><span class="n">cluster_df</span><span class="p">,</span>
+                <span class="n">clusters_clmn</span><span class="o">=</span><span class="s2">&quot;cluster&quot;</span><span class="p">,</span>
+                <span class="n">hours_clmn</span><span class="o">=</span><span class="s2">&quot;hour&quot;</span><span class="p">,</span>
+                <span class="n">unique_clusters</span><span class="o">=</span><span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;cluster&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">(),</span>
+                <span class="n">unique_hours</span><span class="o">=</span><span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;hour&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">(),</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cluster_df</span>
+
+    <span class="k">def</span> <span class="nf">__add_hours_cluster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">clusters_clmn</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">hours_clmn</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unique_clusters</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">unique_hours</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add hourly clustering in the `cluster_hours` column of the provided DataFrame</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): DataFrame containing the infos needed for an hourly clustering.</span>
+<span class="sd">            clusters_clmn (str): Column containing the seasonality clusters</span>
+<span class="sd">            hours_clmn (str): Columns containing the hours</span>
+<span class="sd">            unique_clusters (List[int]): List of all clusters</span>
+<span class="sd">            unique_hours (List[int]): List of all hourly clusters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;cluster_hours&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">cluster</span> <span class="ow">in</span> <span class="n">unique_clusters</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">hour</span> <span class="ow">in</span> <span class="n">unique_hours</span><span class="p">:</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="n">clusters_clmn</span><span class="p">]</span> <span class="o">==</span> <span class="n">cluster</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">hours_clmn</span><span class="p">]</span> <span class="o">==</span> <span class="n">hour</span><span class="p">),</span> <span class="s2">&quot;cluster_hours&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">count</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">_create_one_hot_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">clusters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">max_clusters</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">adjust_clusters</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">offset_col</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a matrix for a one hot encoding of a clusters pandas Series.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            rows (int): Number of data points</span>
+<span class="sd">            clusters (pd.Series): Series containing the cluster for each data point</span>
+<span class="sd">            max_clusters (int): Total number of individual clusters</span>
+<span class="sd">            adjust_clusters (bool): Wether to adjust cluster by subtracting each cluster by one.</span>
+<span class="sd">            offset_col (bool): Wether to use the last column as an intercept for the regression model.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">one_hot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">max_clusters</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">adjust_clusters</span><span class="p">:</span>
+            <span class="n">cluster_series</span> <span class="o">=</span> <span class="n">clusters</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cluster_series</span> <span class="o">=</span> <span class="n">clusters</span>
+
+        <span class="n">one_hot</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">rows</span><span class="p">),</span> <span class="n">cluster_series</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">offset_col</span><span class="p">:</span>
+            <span class="n">one_hot</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">one_hot</span> <span class="o">=</span> <span class="n">one_hot</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">one_hot</span>
+
+    <span class="k">def</span> <span class="nf">_preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spot</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="c1"># remove duplicate hours by replacing these with their mean</span>
+        <span class="n">spot</span> <span class="o">=</span> <span class="n">spot</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+        <span class="c1"># include missing hours</span>
+        <span class="n">full_idx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">spot</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">end</span><span class="o">=</span><span class="n">spot</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">freq</span><span class="o">=</span><span class="s2">&quot;h&quot;</span><span class="p">)</span>
+        <span class="n">spot</span> <span class="o">=</span> <span class="n">spot</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">full_idx</span><span class="p">)</span>
+        <span class="n">spot</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;date&quot;</span>
+        <span class="n">spot</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">spot</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">spot</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_remove_outliers</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">value_clmn</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">grouping_clmn</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">lower_quantile</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">upper_quantile</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove outliers from a DataFrame based on quantile thresholds within groups.</span>
+
+<span class="sd">        This function applies a quantile-based filter to the values in `value_clmn` for each</span>
+<span class="sd">        unique category defined in `grouping_clmn`. For each group, values below the</span>
+<span class="sd">        `lower_quantile` or above the `upper_quantile` are considered outliers and removed.</span>
+<span class="sd">        The filtered rows are then returned as a cleaned DataFrame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): Input DataFrame containing the data.</span>
+<span class="sd">            value_clmn (str): Name of the column containing the numerical values to evaluate for outliers.</span>
+<span class="sd">            grouping_clmn (str): Name of the column used to group the data before applying the quantile filter.</span>
+<span class="sd">            lower_quantile (float): Lower quantile threshold (e.g., 0.05). Values below this quantile are removed.</span>
+<span class="sd">            upper_quantile (float): Upper quantile threshold (e.g., 0.95). Values above this quantile are removed.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: A DataFrame containing only the data points within the specified quantile bounds for each group.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">remove_outliers</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">lower_quantile</span><span class="o">=</span><span class="n">lower_quantile</span><span class="p">,</span> <span class="n">upper_quantile</span><span class="o">=</span><span class="n">upper_quantile</span><span class="p">):</span>
+            <span class="n">lower_bound</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">lower_quantile</span><span class="p">)</span>
+            <span class="n">upper_bound</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">upper_quantile</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">series</span><span class="p">[(</span><span class="n">series</span> <span class="o">&gt;=</span> <span class="n">lower_bound</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">series</span> <span class="o">&lt;=</span> <span class="n">upper_bound</span><span class="p">)]</span>
+
+        <span class="n">keep_ids</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">grouping_clmn</span><span class="p">,</span> <span class="n">group_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="n">value_clmn</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">remove_outliers</span><span class="p">)</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">df_clean</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">keep_ids</span><span class="p">),</span> <span class="p">:]</span>
+        <span class="k">return</span> <span class="n">df_clean</span>
 
 <div class="viewcode-block" id="CategoricalRegression.calibrate">
 <a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.CategoricalRegression.calibrate">[docs]</a>
-    <span class="k">def</span> <span class="nf">calibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="n">data_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="p">(</span><span class="n">datetimes_list</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spot_prices</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_regression_parameters</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">data_array</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">data_array</span><span class="p">)</span> <span class="o">@</span> <span class="n">data_array</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">spot_prices</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">calibrate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">spot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spot_prices</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">spot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess</span><span class="p">(</span><span class="n">spot</span><span class="o">=</span><span class="n">spot</span><span class="p">)</span>
+
+        <span class="n">cluster_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_cluster_df</span><span class="p">(</span><span class="n">spot</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">use_hours</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">season_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_year</span><span class="p">(</span><span class="n">spot</span><span class="p">)</span>
+        <span class="n">season_shape</span> <span class="o">=</span> <span class="n">season_shape</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s2">&quot;D&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+
+        <span class="n">cluster_df_daily</span> <span class="o">=</span> <span class="n">cluster_df</span><span class="p">[[</span><span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">,</span> <span class="s2">&quot;day&quot;</span><span class="p">,</span> <span class="s2">&quot;weekday&quot;</span><span class="p">,</span> <span class="s2">&quot;day_indicator&quot;</span><span class="p">,</span> <span class="s2">&quot;cluster&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+        <span class="n">calib_season_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">season_shape</span><span class="p">,</span> <span class="n">cluster_df_daily</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_outlier_season</span><span class="p">:</span>
+            <span class="n">value_clmn</span> <span class="o">=</span> <span class="n">calib_season_df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">calib_season_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_remove_outliers</span><span class="p">(</span>
+                <span class="n">df</span><span class="o">=</span><span class="n">calib_season_df</span><span class="p">,</span>
+                <span class="n">value_clmn</span><span class="o">=</span><span class="n">value_clmn</span><span class="p">,</span>
+                <span class="n">grouping_clmn</span><span class="o">=</span><span class="s2">&quot;cluster&quot;</span><span class="p">,</span>
+                <span class="n">lower_quantile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lower_quantile_season</span><span class="p">,</span>
+                <span class="n">upper_quantile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">upper_quantile_season</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__max_cluster</span> <span class="o">=</span> <span class="n">calib_season_df</span><span class="p">[</span><span class="s2">&quot;cluster&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+        <span class="n">season_one_hot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_one_hot_matrix</span><span class="p">(</span>
+            <span class="n">rows</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">calib_season_df</span><span class="p">),</span>
+            <span class="n">clusters</span><span class="o">=</span><span class="n">calib_season_df</span><span class="p">[</span><span class="s2">&quot;cluster&quot;</span><span class="p">],</span>
+            <span class="n">max_clusters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__max_cluster</span><span class="p">,</span>
+            <span class="n">adjust_clusters</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># since clusters do not start at 0</span>
+            <span class="n">offset_col</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># since we would ignore the last column because it is obsolete due to our categorical variables,</span>
+            <span class="c1"># we actually set it all to 1 to account for the offset in our regression model</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">data_array</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regression_parameters</span></div>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_season_regression_params</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">season_one_hot</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">season_one_hot</span><span class="p">)</span> <span class="o">@</span> <span class="n">season_one_hot</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">calib_season_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">id_shape</span> <span class="o">=</span> <span class="n">spot</span> <span class="o">/</span> <span class="n">spot</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s2">&quot;D&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="s2">&quot;mean&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+
+        <span class="n">calib_id_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">id_shape</span><span class="p">,</span> <span class="n">cluster_df</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_outlier_id</span><span class="p">:</span>
+            <span class="n">value_clmn</span> <span class="o">=</span> <span class="n">calib_id_df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">calib_id_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_remove_outliers</span><span class="p">(</span>
+                <span class="n">df</span><span class="o">=</span><span class="n">calib_id_df</span><span class="p">,</span>
+                <span class="n">grouping_clmn</span><span class="o">=</span><span class="s2">&quot;cluster_hours&quot;</span><span class="p">,</span>
+                <span class="n">value_clmn</span><span class="o">=</span><span class="n">value_clmn</span><span class="p">,</span>
+                <span class="n">lower_quantile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lower_quantile_id</span><span class="p">,</span>
+                <span class="n">upper_quantile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">upper_quantile_id</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__max_hour_clusters</span> <span class="o">=</span> <span class="n">calib_id_df</span><span class="p">[</span><span class="s2">&quot;cluster_hours&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+        <span class="n">id_one_hot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_one_hot_matrix</span><span class="p">(</span>
+            <span class="n">rows</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">calib_id_df</span><span class="p">),</span>
+            <span class="n">clusters</span><span class="o">=</span><span class="n">calib_id_df</span><span class="p">[</span><span class="s2">&quot;cluster_hours&quot;</span><span class="p">],</span>
+            <span class="n">max_clusters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__max_hour_clusters</span><span class="p">,</span>
+            <span class="n">adjust_clusters</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">offset_col</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id_regression_params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">id_one_hot</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">id_one_hot</span><span class="p">)</span> <span class="o">@</span> <span class="n">id_one_hot</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">calib_id_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="CategoricalRegression.apply">
 <a class="viewcode-back" href="../../../rivapy/marketdata_tools/power.html#rivapy.marketdata_tools.CategoricalRegression.apply">[docs]</a>
-    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apply_schedule</span><span class="p">:</span> <span class="n">SimpleSchedule</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="n">apply_schedule_datetime_list</span> <span class="o">=</span> <span class="n">apply_schedule</span><span class="o">.</span><span class="n">get_schedule</span><span class="p">()</span>
-        <span class="n">data_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="p">(</span><span class="n">datetimes_list</span><span class="o">=</span><span class="n">apply_schedule_datetime_list</span><span class="p">)</span>
-        <span class="n">shape</span> <span class="o">=</span> <span class="n">data_array</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regression_parameters</span>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apply_schedule</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="n">cluster_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_cluster_df</span><span class="p">(</span><span class="n">apply_schedule</span><span class="p">,</span> <span class="n">use_hours</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">shape_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="n">shape</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()},</span> <span class="n">index</span><span class="o">=</span><span class="n">apply_schedule_datetime_list</span><span class="p">)</span>
+        <span class="n">season_one_hot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_one_hot_matrix</span><span class="p">(</span>
+            <span class="n">rows</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">cluster_df</span><span class="p">),</span>
+            <span class="n">clusters</span><span class="o">=</span><span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;cluster&quot;</span><span class="p">],</span>
+            <span class="n">max_clusters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__max_cluster</span><span class="p">,</span>
+            <span class="n">adjust_clusters</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">offset_col</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">id_one_hot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_one_hot_matrix</span><span class="p">(</span>
+            <span class="n">rows</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">cluster_df</span><span class="p">),</span>
+            <span class="n">clusters</span><span class="o">=</span><span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;cluster_hours&quot;</span><span class="p">],</span>
+            <span class="n">max_clusters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__max_hour_clusters</span><span class="p">,</span>
+            <span class="n">adjust_clusters</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">offset_col</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">season_fit</span> <span class="o">=</span> <span class="n">season_one_hot</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">_season_regression_params</span>
+        <span class="n">id_fit</span> <span class="o">=</span> <span class="n">id_one_hot</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id_regression_params</span>
+
+        <span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;shape&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">season_fit</span> <span class="o">*</span> <span class="n">id_fit</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+        <span class="n">cluster_df</span><span class="p">[</span><span class="s2">&quot;shape&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_year</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">cluster_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;shape&quot;</span><span class="p">])</span>
+        <span class="n">shape_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">cluster_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;shape&quot;</span><span class="p">])</span>
         <span class="n">shape_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_shape</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape_df</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">shape_df</span></div>
 
