@@ -2307,7 +2307,7 @@ class TestBSBootstrap(unittest.TestCase):
         logger.debug(f" TBS starting bootstrapper of {len(df_ins_tbs)} instruments")
         curve_6m = bootstrap_curve(
             ref_date=refDate,
-            curve_id="OIS_estr",
+            curve_id="euribor_6m",
             day_count_convention=df_ins_tbs["DayCountFixed"].tolist()[0],  # taken the first entry and assume is valid for all other deposits
             instruments=ins_spec_tbs,
             quotes=ins_quotes_tbs,

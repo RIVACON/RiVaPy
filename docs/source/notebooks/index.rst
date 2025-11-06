@@ -19,9 +19,7 @@ Models
 
 Pricing
 -------
-.. nbgallery::
-   pricing/green_ppa_expected_value.ipynb   
-   pricing/green_ppa_deep_hedging.ipynb
+
    
 Financial Instruments
 ------------------------
