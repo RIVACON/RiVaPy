@@ -3,7 +3,7 @@ import pandas as pd
 from enum import Enum
 from datetime import datetime, date
 from typing import List as _List, Tuple as _Tuple, Union as _Union
-from holidays import HolidayBase as _HolidayBase, country_holidays as _CountryHoliday
+from rivapy.tools.holidays_compat import HolidayBase as _HolidayBase, country_holidays as _CountryHoliday
 from holidays.utils import list_supported_countries as _list_supported_countries
 
 # from iso4217parse import \
@@ -43,24 +43,23 @@ def _check_positivity(value: float) -> float:
     if value > 0.0:
         return value
     else:
-        raise Exception(str(value) + " must be positive!")
+        raise ValueError(str(value) + " must be positive!")
 
 
-# def check_non_negativity(value: float
-#                          ) -> float:
-#     """
-#     Checks if value is non-negative.
-#
-#     Args:
-#         value (float): value to be checked for non-negativity.
-#
-#     Returns:
-#         float: non-negative value
-#     """
-#     if value < 0.0:
-#         raise Exception(str(value) + ' must not be negative!')
-#     else:
-#         return value
+def _check_non_negativity(value: float) -> float:
+    """
+    Checks if value is non-negative.
+
+    Args:
+        value (float): value to be checked for non-negativity.
+
+    Returns:
+        float: non-negative value
+    """
+    if value < 0.0:
+        raise ValueError(str(value) + " must not be negative!")
+    else:
+        return value
 
 
 def _check_relation(less: float, more: float) -> _Tuple[float, float]:
@@ -171,6 +170,26 @@ def _is_chronological(
         return True
 
 
+def _check_start_at_or_before_end(start: _Union[date, datetime], end: _Union[date, datetime]) -> _Tuple[date, date]:
+    """
+    Converts the two input dates from datetime to date format it necessary and checks if the first date is earlier
+    than the second one.
+
+    Args:
+        start (_Union[date, datetime]): Start date
+        end (_Union[date, datetime]): End date
+
+    Returns:
+        Tuple[date, date]: start date, end date
+    """
+    start_date = _date_to_datetime(start)
+    end_date = _date_to_datetime(end)
+    if start_date <= end_date:
+        return start_date, end_date
+    else:
+        raise Exception("'" + str(start) + "' must be earlier than '" + str(end) + "'!")
+
+
 def check_start_before_end(start: _Union[date, datetime], end: _Union[date, datetime]) -> _Tuple[date, date]:
     """
     Converts the two input dates from datetime to date format it necessary and checks if the first date is earlier
@@ -258,3 +277,13 @@ def _check_pandas_index_for_datetime(dataframe: pd.DataFrame):
             raise TypeError("The index of the DataFrame is not of type pd.DatetimeIndex!")
     else:
         raise TypeError(f"The argument is not of type pd.DataFrame!")
+
+
+def print_member_values(obj):
+    print(f"Inspecting instance of {type(obj).__name__}:\n")
+    for attr in dir(obj):
+        if attr.startswith("_"):
+            continue  # Skip private and built-in attributes
+        value = getattr(obj, attr)
+        if not callable(value):
+            print(f"{attr}: {value}")

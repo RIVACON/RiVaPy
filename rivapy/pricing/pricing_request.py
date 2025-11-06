@@ -2,28 +2,39 @@
 
 
 from datetime import date, datetime
-from typing import  List as _List, Union as _Union
+from typing import List as _List, Union as _Union
 from rivapy.tools.interfaces import FactoryObject
 from rivapy.tools.datetools import _date_to_datetime as datetime_to_date, _datetime_to_date_list as datetime_to_date_list
 
 
 class PricingRequestBase(FactoryObject):
 
-    _keys = ['theo_val', 'paths_udl', 'cf_expected', 'cf_paths']
-    
+    _keys = ["theo_val", "paths_udl", "cf_expected", "cf_paths"]
+
     def __init__(self, **kwargs):
-        #validate the given keys
+        # validate the given keys
         for key in kwargs.keys():
             if key not in PricingRequestBase._keys:
                 raise ValueError("Unknown key '{}'".format(key))
-            #set the attributes
+            # set the attributes
             setattr(self, key, kwargs[key])
 
     def _to_dict(self) -> dict:
         return self.__dict__
 
+
+class DepositPricingRequest(PricingRequestBase):
+
+    def __init__(self, theo_val: bool, cf_paths: bool = False, cf_expected: bool = False):
+        """Configuration of set of information to be calculated for the Deposit's price.
+        Restrict the general PricingRequest to the sub-set relevant for the pricing of deposits.
+        """
+
+        super().__init__(theo_val=theo_val, cf_paths=cf_paths, cf_expected=cf_expected)
+
+
 class GreenPPAPricingRequest(PricingRequestBase):
-    def __init__(self, theo_val: bool, cf_paths: bool=False, cf_expected: bool=False):
+    def __init__(self, theo_val: bool = False, cf_paths: bool = False, cf_expected: bool = False):
         """PricingRequest for Green PPA pricing.
 
         Args:
@@ -31,7 +42,7 @@ class GreenPPAPricingRequest(PricingRequestBase):
             cf_expected (bool, optional): If True, the paths of the simulated :term:`Cash flow` is returned. Defaults to False.
         """
         super().__init__(theo_val=theo_val, cf_expected=cf_expected, cf_paths=cf_paths)
-   
+
 
 class PricingRequest:
     # def __init__(self, calc_delta_gamma: bool = False, calc_cross_gamma: bool = True, calc_clean_price: bool = False,
@@ -107,16 +118,34 @@ class PricingRequest:
     #         calc_macaulay_duration (bool, optional): Flag determining if the instrument's Macaulay duration shall be
     #                                                  calculated within the pricing routine. Defaults to False.
     #     """
-    def __init__(self, calc_delta_gamma: bool = None, calc_cross_gamma: bool = None, calc_clean_price: bool = None,
-                 calc_rho: bool = None, rho_scale: float = None, calc_vega: bool = None, vega_scale: float = None,
-                 calc_cross_volga: bool = None, calc_vanna: bool = None, calc_theta: bool = None,
-                 theta_scale: float = None, calc_spline: bool = None, calc_grid_sizes: bool = None,
-                 calc_implied_volatility: bool = None, management_delta_limit: float = None,
-                 calc_pricing_data: bool = None, calc_expected_cashflows: bool = None,
-                 calc_simulation_data: bool = None, calc_additional_information: bool = None,
-                 calc_z_spread: bool = None, calc_yield_to_maturity: bool = None, calc_convexity: bool = None,
-                 max_expected_cashflow_date: _Union[date, datetime] = None,
-                 cashflow_times: _List[_Union[date, datetime]] = None, calc_macaulay_duration: bool = None):
+    def __init__(
+        self,
+        calc_delta_gamma: bool = None,
+        calc_cross_gamma: bool = None,
+        calc_clean_price: bool = None,
+        calc_rho: bool = None,
+        rho_scale: float = None,
+        calc_vega: bool = None,
+        vega_scale: float = None,
+        calc_cross_volga: bool = None,
+        calc_vanna: bool = None,
+        calc_theta: bool = None,
+        theta_scale: float = None,
+        calc_spline: bool = None,
+        calc_grid_sizes: bool = None,
+        calc_implied_volatility: bool = None,
+        management_delta_limit: float = None,
+        calc_pricing_data: bool = None,
+        calc_expected_cashflows: bool = None,
+        calc_simulation_data: bool = None,
+        calc_additional_information: bool = None,
+        calc_z_spread: bool = None,
+        calc_yield_to_maturity: bool = None,
+        calc_convexity: bool = None,
+        max_expected_cashflow_date: _Union[date, datetime] = None,
+        cashflow_times: _List[_Union[date, datetime]] = None,
+        calc_macaulay_duration: bool = None,
+    ):
         """
         Defines the set of information, e.g. sensitivities, cashflow information, etc., to be calculated together with
         the instrument's price in the context of pricing. For some sensitivities the shift parameter for calculating
@@ -251,7 +280,7 @@ class PricingRequest:
         if calc_rho is not None:
             if isinstance(calc_rho, bool):
                 self.__calc_rho = calc_rho
-                if self._calc_rho & ~hasattr(self, 'rho_scale'):
+                if self._calc_rho & ~hasattr(self, "rho_scale"):
                     self.rho_scale = 0.0001
             else:
                 raise TypeError("'" + str(calc_rho) + "' must be of type bool!")
@@ -263,11 +292,11 @@ class PricingRequest:
     @_rho_scale.setter
     def _rho_scale(self, rho_scale: float):
         if rho_scale is not None:
-            if isinstance(rho_scale, float):
-                self.__rho_scale = rho_scale
+            if isinstance(rho_scale, (int, float)):
+                self.__rho_scale = float(rho_scale)
                 self.calc_rho = True
             else:
-                raise TypeError("'" + str(rho_scale) + "' must be of type float!")
+                raise TypeError("'" + str(rho_scale) + "' must be a number (int or float)!")
 
     @property
     def _calc_vega(self):
@@ -278,7 +307,7 @@ class PricingRequest:
         if calc_vega is not None:
             if isinstance(calc_vega, bool):
                 self.__calc_vega = calc_vega
-                if self._calc_vega & ~hasattr(self, 'vega_scale'):
+                if self._calc_vega & ~hasattr(self, "vega_scale"):
                     self.vega_scale = 0.01
             else:
                 raise TypeError("'" + str(calc_vega) + "' must be of type bool!")
@@ -290,11 +319,11 @@ class PricingRequest:
     @_vega_scale.setter
     def _vega_scale(self, vega_scale: float):
         if vega_scale is not None:
-            if isinstance(vega_scale, float):
-                self.__vega_scale = vega_scale
+            if isinstance(vega_scale, (int, float)):
+                self.__vega_scale = float(vega_scale)
                 self.calc_vega = True
             else:
-                raise TypeError("'" + str(vega_scale) + "' must be of type float!")
+                raise TypeError("'" + str(vega_scale) + "' must be a number (int or float)!")
 
     @property
     def _calc_cross_volga(self):
@@ -307,7 +336,7 @@ class PricingRequest:
                 self.__calc_cross_volga = calc_cross_volga
                 if self._calc_cross_volga:
                     self.calc_vega = True
-                    if not hasattr(self, 'vega_scale'):
+                    if not hasattr(self, "vega_scale"):
                         self.vega_scale = 0.01
             else:
                 raise TypeError("'" + str(calc_cross_volga) + "' must be of type bool!")
@@ -323,7 +352,7 @@ class PricingRequest:
                 self.__calc_vanna = calc_vanna
                 if self._calc_vanna:
                     self.calc_vega = True
-                    if not hasattr(self, 'vega_scale'):
+                    if not hasattr(self, "vega_scale"):
                         self.vega_scale = 0.01
             else:
                 raise TypeError("'" + str(calc_vanna) + "' must be of type bool!")
@@ -337,7 +366,7 @@ class PricingRequest:
         if calc_theta is not None:
             if isinstance(calc_theta, bool):
                 self.__calc_theta = calc_theta
-                if self._calc_theta & ~hasattr(self, 'theta_scale'):
+                if self._calc_theta & ~hasattr(self, "theta_scale"):
                     self.theta_scale = 1.0
             else:
                 raise TypeError("'" + str(calc_theta) + "' must be of type bool!")
@@ -349,11 +378,11 @@ class PricingRequest:
     @_theta_scale.setter
     def _theta_scale(self, theta_scale: float):
         if theta_scale is not None:
-            if isinstance(theta_scale, float):
-                self.__theta_scale = theta_scale
+            if isinstance(theta_scale, (int, float)):
+                self.__theta_scale = float(theta_scale)
                 self.calc_theta = True
             else:
-                raise TypeError("'" + str(theta_scale) + "' must be of type float!")
+                raise TypeError("'" + str(theta_scale) + "' must be a number (int or float)!")
 
     @property
     def _calc_spline(self):
@@ -406,10 +435,10 @@ class PricingRequest:
     @_calc_pricing_data.setter
     def _calc_pricing_data(self, calc_pricing_data: bool):
         if calc_pricing_data is not None:
-            if isinstance(calc_pricing_data, float):
+            if isinstance(calc_pricing_data, bool):
                 self.__calc_pricing_data = calc_pricing_data
             else:
-                raise TypeError("'" + str(calc_pricing_data) + "' must be of type float!")
+                raise TypeError("'" + str(calc_pricing_data) + "' must be of type bool!")
 
     @property
     def _calc_expected_cashflows(self):
@@ -482,7 +511,7 @@ class PricingRequest:
                 self.__calc_convexity = calc_convexity
                 if self._calc_convexity:
                     self.calc_rho = True
-                    if not hasattr(self, 'rho_scale'):
+                    if not hasattr(self, "rho_scale"):
                         self.rho_scale = 0.0001
             else:
                 raise TypeError("'" + str(calc_convexity) + "' must be of type bool!")
@@ -506,9 +535,7 @@ class PricingRequest:
     @_cashflow_times.setter
     def _cashflow_times(self, cashflow_times: _List[_Union[date, datetime]]):
         if cashflow_times is not None:
-            if isinstance(cashflow_times, list) & (
-                    isinstance(cashflow_times[0], datetime) | isinstance(cashflow_times[0], date)
-            ):
+            if isinstance(cashflow_times, list) & (isinstance(cashflow_times[0], datetime) | isinstance(cashflow_times[0], date)):
                 self.__cashflow_times = datetime_to_date_list(cashflow_times)
             else:
                 raise TypeError("'" + str(cashflow_times) + "' must be of type list of datetime or date!")
@@ -527,18 +554,57 @@ class PricingRequest:
 
 
 class BondPricingRequest(PricingRequest):
-    def __init__(self, calc_clean_price: bool = False, calc_rho: bool = False, rho_scale: float = None,
-                 calc_theta: bool = False, theta_scale: float = None, calc_yield_to_maturity: bool = False,
-                 calc_convexity: bool = False, calc_macaulay_duration: bool = False):  # TODO: clarify why no z-spread
+    def __init__(
+        self,
+        calc_clean_price: bool = False,
+        calc_rho: bool = False,
+        rho_scale: float = None,
+        calc_theta: bool = False,
+        theta_scale: float = None,
+        calc_yield_to_maturity: bool = False,
+        calc_convexity: bool = False,
+        calc_macaulay_duration: bool = False,
+        calc_z_spread: bool = False,
+    ):
         """
         Configuration of set of information to be calculated together with the bond's dirty price. In restricts the
         general PricingRequest to the sub-set relevant for the pricing of bonds.
         """
-        PricingRequest.__init__(self, calc_clean_price=calc_clean_price, calc_rho=calc_rho, rho_scale=rho_scale,
-                                calc_theta=calc_theta, theta_scale=theta_scale,
-                                calc_yield_to_maturity=calc_yield_to_maturity, calc_convexity=calc_convexity,
-                                calc_macaulay_duration=calc_macaulay_duration)
+        PricingRequest.__init__(
+            self,
+            calc_clean_price=calc_clean_price,
+            calc_rho=calc_rho,
+            rho_scale=rho_scale,
+            calc_theta=calc_theta,
+            theta_scale=theta_scale,
+            calc_yield_to_maturity=calc_yield_to_maturity,
+            calc_convexity=calc_convexity,
+            calc_macaulay_duration=calc_macaulay_duration,
+            calc_z_spread=calc_z_spread,
+        )
 
 
-if __name__ == '__main__':
+class ForwardRateAgreementPricingRequest(PricingRequest):
+
+    def __init__(self):
+        """Configuration of set of information to be calculated for the Forward Rate Agreement's price.
+        Restrict the general PricingRequest to the sub-set relevant for the pricing of FRAs.
+        """
+
+        # super.__init__(self)
+        pass
+
+
+class InterestRateSwapPricingRequest(PricingRequest):
+
+    def __init__(self):
+        """Configuration of set of information to be calculated for the Swap's price.
+        Restrict the general PricingRequest to the sub-set relevant for the pricing of swaps.
+        """
+
+        # super.__init__(self)
+        pass
+
+
+if __name__ == "__main__":
     bond_pricing_request = BondPricingRequest()

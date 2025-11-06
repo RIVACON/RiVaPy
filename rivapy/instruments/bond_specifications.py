@@ -1,26 +1,77 @@
-from abc import  abstractmethod as _abstractmethod
-from typing import List as _List, Union as _Union, Tuple
+import abc
 import numpy as np
-from datetime import datetime, date, timedelta
-from holidays import HolidayBase as _HolidayBase, ECB as _ECB
-from rivapy.tools.datetools import Period, Schedule, _date_to_datetime, _datetime_to_date_list, _term_to_period
-from rivapy.tools.enums import DayCounterType, RollConvention, SecuritizationLevel, Currency, Rating
-from rivapy.tools._validators import _check_positivity, _check_start_before_end,  _string_to_calendar, _is_ascending_date_list
+from rivapy.instruments._logger import logger
+from rivapy.instruments.components import (
+    AmortizationScheme,
+    ZeroAmortizationScheme,
+    Issuer,
+    LinearAmortizationScheme,
+    LinearNotionalStructure,
+    VariableAmortizationScheme,
+)
+from rivapy.marketdata.fixing_table import FixingTable
 import rivapy.tools.interfaces as interfaces
-from rivapy.tools.datetools import Period, Schedule
+from scipy.optimize import brentq
+
+from collections import defaultdict
+from typing import Dict, Tuple, List as _List, Union as _Union, Optional as _Optional
+from dateutil.relativedelta import relativedelta
+from rivapy.tools.enums import Currency, Rating, SecuritizationLevel, RollConvention, InterestRateIndex, get_index_by_alias
+from rivapy.tools.datetools import _date_to_datetime, Schedule, Period, DayCounterType, DayCounter, _string_to_period
+from rivapy.instruments.components import NotionalStructure, ConstNotionalStructure, VariableNotionalStructure  # , ResettingNotionalStructure
+from rivapy.tools._validators import (
+    _check_positivity,
+    _check_start_before_end,
+    _string_to_calendar,
+    _check_start_at_or_before_end,
+    _check_non_negativity,
+    _is_ascending_date_list,
+)
+from datetime import datetime, date, timedelta
+from rivapy.tools.datetools import (
+    _term_to_period,
+    calc_end_day,
+    calc_start_day,
+    roll_day,
+    next_or_previous_business_day,
+    is_business_day,
+    RollRule,
+    serialize_date,
+)
+from rivapy.tools.holidays_compat import HolidayBase as _HolidayBase, ECB as _ECB
+
+# placeholder
+from rivapy.marketdata.curves import DiscountCurve
 
 
 class BondBaseSpecification(interfaces.FactoryObject):
+    """Base class for bond-like instrument specifications.
 
-    def __init__(self,
-                 obj_id: str,
-                 issue_date: _Union[date, datetime],
-                 maturity_date: _Union[date, datetime],
-                 currency: _Union[Currency, str] = 'EUR',
-                 notional: float = 100.0,
-                 issuer: str = None,
-                 securitization_level: _Union[SecuritizationLevel, str] = SecuritizationLevel.NONE,
-                 rating: _Union[Rating, str] = Rating.NONE):
+    This class implements common properties shared by bonds, deposits and other
+    deterministic cashflow instruments such as issue/maturity dates, notional
+    handling, currency and basic validation. Subclasses should implement
+    instrument-specific schedule and cashflow behaviour.
+    """
+
+    # ToDo: amend setter and property to handle float vs notional structure upon initialization, focus on Const and Linear, and variable with provided %-vector (as in FBG)
+    # ToDo: amend setter and property to handle amortization scheme upon initialization
+    # ToDo: adjust getCashFlows methods in derived classes accordingly
+    def __init__(
+        self,
+        obj_id: str,
+        issue_date: _Union[date, datetime],
+        maturity_date: _Union[date, datetime],
+        currency: _Union[Currency, str] = "EUR",
+        notional: _Union[NotionalStructure, float] = 100.0,
+        amortization_scheme: _Optional[_Union[str, AmortizationScheme]] = None,
+        issuer: str = None,
+        securitization_level: _Union[SecuritizationLevel, str] = "NONE",
+        rating: _Union[Rating, str] = "NONE",
+        day_count_convention: _Union[DayCounterType, str] = "ACT360",
+        business_day_convention: _Union[RollConvention, str] = "ModifiedFollowing",
+        roll_convention: _Union[RollRule, str] = "NONE",
+        calendar: _Union[_HolidayBase, str] = _ECB(),
+    ):
         """Base bond specification.
 
         Args:
@@ -35,65 +86,171 @@ class BondBaseSpecification(interfaces.FactoryObject):
         """
         self.obj_id = obj_id
         if issuer is not None:
-            self.issuer = issuer
+            self._issuer = issuer
+        else:
+            self._issuer = "Unknown"
         if securitization_level is not None:
-            self.securitization_level = securitization_level
-        self.issue_date = issue_date
-        self.maturity_date = maturity_date
-        self.currency = currency
-        self.notional = notional
-        self.rating = Rating.to_string(rating)
+            self._securitization_level = securitization_level
+        self._issue_date = issue_date
+        self._maturity_date = maturity_date
+        self._currency = currency
+        self._amortization_scheme = self.set_amortization_scheme(amortization_scheme)
+        # pass the resolved amortization scheme (object) to set_notional_structure
+        self._notional = self.set_notional_structure(notional, self._amortization_scheme)
+        self._rating = Rating.to_string(rating)
+        self._day_count_convention = day_count_convention
+        self._business_day_convention = business_day_convention
+        self._roll_convention = roll_convention
+        self._calendar = calendar
         # validate dates
         self._validate_derived_issued_instrument()
 
+    def set_amortization_scheme(self, amortization_scheme) -> AmortizationScheme:
+        """Resolve an amortization scheme descriptor into an AmortizationScheme.
+
+        Accepts one of:
+          - None: returns a ZeroAmortizationScheme
+          - str: resolves the identifier via AmortizationScheme._from_string
+          - AmortizationScheme instance: returned unchanged
+
+        Args:
+            amortization_scheme (None | str | AmortizationScheme): descriptor.
+
+        Returns:
+            AmortizationScheme: concrete amortization scheme object.
+
+        Raises:
+            ValueError: if the provided argument type is not supported.
+        """
+        if amortization_scheme is None:
+            return ZeroAmortizationScheme()
+        elif isinstance(amortization_scheme, str):
+            return AmortizationScheme._from_string(amortization_scheme.lower())
+        elif isinstance(amortization_scheme, AmortizationScheme):
+            return amortization_scheme
+        else:
+            raise ValueError("Invalid amortization scheme provided.")
+
+    def set_notional_structure(self, notional, amortization_scheme) -> NotionalStructure:
+        """Create or validate the notional structure for this instrument.
+
+        The function accepts numeric notionals (int/float) and converts them to
+        a concrete NotionalStructure (constant, linear, or variable) depending
+        on the provided amortization scheme. If a NotionalStructure instance is
+        provided it is validated / passed through.
+
+        Args:
+            notional (NotionalStructure | int | float): notional or notional descriptor.
+            amortization_scheme (AmortizationScheme | None): resolved amortization scheme
+                that controls which notional structure is appropriate.
+
+        Returns:
+            NotionalStructure: instance representing the instrument notional.
+
+        Raises:
+            ValueError: when inputs cannot be converted into a valid notional structure.
+        """
+        if amortization_scheme is None:
+            if isinstance(notional, _Union[int, float]):
+                return ConstNotionalStructure(_check_positivity(notional))
+            elif isinstance(notional, NotionalStructure):
+                return notional
+            raise ValueError("Invalid notional structure provided.")
+        elif isinstance(amortization_scheme, ZeroAmortizationScheme):
+            # accept ints and floats for numeric notional values
+            if isinstance(notional, (_Union[int, float])):
+                return ConstNotionalStructure(_check_positivity(notional))
+            elif isinstance(notional, ConstNotionalStructure):
+                return notional
+            else:
+                logger.warning("Amortization scheme is Const but notional is not ConstNotionalStructure. Using provided notional structure.")
+                return notional
+        elif isinstance(amortization_scheme, LinearAmortizationScheme):
+            # accept ints and floats for numeric notional values
+            if isinstance(notional, (_Union[int, float])):
+                return LinearNotionalStructure(_check_positivity(notional))
+            elif isinstance(notional, ConstNotionalStructure):
+                logger.warning("Amortization scheme is Linear but notional is ConstNotionalStructure. Converting to LinearNotionalStructure.")
+                return LinearNotionalStructure(notional.get_amount(0))
+            elif isinstance(notional, (LinearNotionalStructure, VariableNotionalStructure)):
+                logger.warning(
+                    "Amortization scheme is Linear but notional is alredy LinearNotionalStructure or VariableNotionalStructure. Using provided notional structure."
+                )
+                return notional
+        elif isinstance(amortization_scheme, VariableAmortizationScheme):
+            logger.warning("Variable amortization scheme is not implemented. Retuning notional as is.")
+            if isinstance(notional, (_Union[int, float])):
+                return ConstNotionalStructure(_check_positivity(notional))
+            else:
+                return notional
+
     @staticmethod
-    def _create_sample(n_samples: int, seed: int = None, ref_date = None, 
-                    issuers: _List[str]= None,
-                    sec_levels: _List[str]=None,
-                    currencies: _List[str]= None)->_List[dict]:
+    def _create_sample(
+        n_samples: int, seed: int = None, ref_date=None, issuers: _List[str] = None, sec_levels: _List[str] = None, currencies: _List[str] = None
+    ) -> _List[dict]:
+        """Create a small list of example bond specifications for testing.
+
+        This helper generates a list of dictionaries that mimic the kwargs used
+        to construct bond specifications. It is intended for internal testing
+        and examples only.
+
+        Args:
+            n_samples (int): Number of sample entries to generate.
+            seed (int, optional): RNG seed for reproducible samples.
+            ref_date (date | datetime, optional): Reference date for issue/maturity generation.
+            issuers (List[str], optional): Optional pool of issuer names to sample from.
+            sec_levels (List[str], optional): Optional securitization levels to sample from.
+            currencies (List[str], optional): Optional currencies to sample from.
+
+        Returns:
+            List[dict]: List of parameter dictionaries usable to create bond specs.
+        """
         if seed is not None:
             np.random.seed(seed)
         if ref_date is None:
             ref_date = datetime.now()
-        else: 
+        else:
             ref_date = _date_to_datetime(ref_date)
         if issuers is None:
-            issuers = ['Issuer_'+str(i) for i in range(int(n_samples/2))]
+            issuers = ["Issuer_" + str(i) for i in range(int(n_samples / 2))]
         result = []
         if currencies is None:
             currencies = list(Currency)
         if sec_levels is None:
             sec_levels = list(SecuritizationLevel)
         for _ in range(n_samples):
-            days = int(15.0*365.0*np.random.beta(2.0,2.0)) + 1
+            days = int(15.0 * 365.0 * np.random.beta(2.0, 2.0)) + 1
             issue_date = ref_date + timedelta(days=np.random.randint(low=-365, high=0))
             result.append(
                 {
-                'issue_date': issue_date,
-                'maturity_date': ref_date + timedelta(days=days),
-                'currency':np.random.choice(currencies),
-                'notional': np.random.choice([100.0, 1000.0, 10_000.0, 100_0000.0]),
-                'issuer': np.random.choice(issuers),
-                'securitization_level': np.random.choice(sec_levels)
+                    "issue_date": issue_date,
+                    "maturity_date": ref_date + timedelta(days=days),
+                    "currency": np.random.choice(currencies),
+                    "notional": np.random.choice([100.0, 1000.0, 10_000.0, 100_0000.0]),
+                    "issuer": np.random.choice(issuers),
+                    "securitization_level": np.random.choice(sec_levels),
                 }
             )
         return result
 
     def _validate_derived_issued_instrument(self):
-        self.__issue_date, self.__maturity_date = _check_start_before_end(self.__issue_date, self.__maturity_date)
+        self._issue_date, self._maturity_date = _check_start_before_end(self._issue_date, self._maturity_date)
 
-    def _to_dict(self)->dict:        
+    def _to_dict(self) -> dict:
         result = {
-            'obj_id': self.obj_id, 'issuer':self.issuer, 
-            'securitization_level': self.securitization_level,
-            'issue_date': self.issue_date, 'maturity_date':self.maturity_date, 
-            'currency': self.currency, 'notional': self.notional, 
-            'rating': self.rating
+            "obj_id": self.obj_id,
+            "issuer": self.issuer,
+            "securitization_level": self.securitization_level,
+            "issue_date": serialize_date(self.issue_date),
+            "maturity_date": serialize_date(self.maturity_date),
+            "currency": self.currency,
+            "notional": self.notional,
+            "rating": self.rating,
         }
         return result
 
-    #region properties
-    
+    # region properties
+
     @property
     def issuer(self) -> str:
         """
@@ -102,7 +259,7 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Returns:
             str: Instrument's issuer.
         """
-        return self.__issuer
+        return self._issuer
 
     @issuer.setter
     def issuer(self, issuer: str):
@@ -112,15 +269,15 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Args:
             issuer(str): Issuer of the instrument.
         """
-        self.__issuer = issuer
+        self._issuer = issuer
 
     @property
-    def rating(self)->str:
-        return self.__rating
+    def rating(self) -> str:
+        return self._rating
 
     @rating.setter
-    def rating(self, rating:_Union[Rating, str])->str:
-        self.__rating = Rating.to_string(rating)
+    def rating(self, rating: _Union[Rating, str]) -> str:
+        self._rating = Rating.to_string(rating)
 
     @property
     def securitization_level(self) -> str:
@@ -130,11 +287,13 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Returns:
             str: Instrument's securitisation level.
         """
-        return self.__securitization_level
+        if isinstance(self._securitization_level, SecuritizationLevel):
+            return self._securitization_level.value
+        return self._securitization_level
 
     @securitization_level.setter
-    def securitization_level(self, securitisation_level:  _Union[SecuritizationLevel, str]):
-        self.__securitization_level = SecuritizationLevel.to_string(securitisation_level)
+    def securitization_level(self, securitisation_level: _Union[SecuritizationLevel, str]):
+        self._securitization_level = SecuritizationLevel.to_string(securitisation_level)
 
     @property
     def issue_date(self) -> date:
@@ -144,7 +303,7 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Returns:
             date: Bond's issue date.
         """
-        return self.__issue_date
+        return self._issue_date
 
     @issue_date.setter
     def issue_date(self, issue_date: _Union[datetime, date]):
@@ -154,7 +313,7 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Args:
             issue_date (Union[datetime, date]): Bond's issue date.
         """
-        self.__issue_date = _date_to_datetime(issue_date)
+        self._issue_date = _date_to_datetime(issue_date)
 
     @property
     def maturity_date(self) -> date:
@@ -164,7 +323,7 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Returns:
             date: Bond's maturity date.
         """
-        return self.__maturity_date
+        return self._maturity_date
 
     @maturity_date.setter
     def maturity_date(self, maturity_date: _Union[datetime, date]):
@@ -174,7 +333,7 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Args:
             maturity_date (Union[datetime, date]): Bond's maturity date.
         """
-        self.__maturity_date = _date_to_datetime(maturity_date)
+        self._maturity_date = _date_to_datetime(maturity_date)
 
     @property
     def currency(self) -> str:
@@ -184,634 +343,1256 @@ class BondBaseSpecification(interfaces.FactoryObject):
         Returns:
             str: Bond's ISO 4217 currency code
         """
-        return self.__currency
+        return self._currency
 
     @currency.setter
-    def currency(self, currency:str):
-        self.__currency = Currency.to_string(currency)
+    def currency(self, currency: str):
+        self._currency = Currency.to_string(currency)
 
     @property
-    def notional(self) -> float:
+    def notional(self) -> NotionalStructure:
         """
         Getter for bond's face value.
 
         Returns:
             float: Bond's face value.
         """
-        return self.__notional
+        return self._notional
 
     @notional.setter
     def notional(self, notional):
-        self.__notional = _check_positivity(notional)
+        if isinstance(notional, NotionalStructure):
+            self._notional = notional
+        else:
+            self._notional = ConstNotionalStructure(_check_positivity(notional))
 
-    #endregion
- 
-class ZeroCouponBondSpecification(BondBaseSpecification):
-    def __init__(self,
-                 obj_id: str,
-                 issue_date: _Union[date, datetime],
-                 maturity_date: _Union[date, datetime],
-                 currency: str = 'EUR',
-                 notional: float = 100.0,
-                 issuer: str = None,
-                securitization_level: _Union[SecuritizationLevel, str] = None,
-                 rating: _Union[Rating, str] = Rating.NONE):
-        """Zero coupon bond specification.
-
-        Args:
-            obj_id (str): (Preferably) Unique label of the bond, e.g. ISIN.
-            issue_date (_Union[date, datetime]): Date of bond issuance.
-            maturity_date (_Union[date, datetime]): Bond's maturity/expiry date. Must lie after the issue_date.
-            currency (str, optional): Currency as alphabetic, Defaults to 'EUR'.
-            notional (float, optional): Bond's notional/face value. Must be positive. Defaults to 100.0.
-            issuer (str, optional): Name/id of issuer. Defaults to None.
-            securitization_level (_Union[SecuritizationLevel, str], optional): Securitization level. Defaults to None.
-            rating (_Union[Rating, str]): Paper rating.
+    @property
+    def day_count_convention(self) -> str:
         """
-        super().__init__(obj_id,
-                         issue_date,
-                         maturity_date,
-                         currency,
-                         notional,
-                         issuer,
-                         securitization_level)
-
-    @staticmethod
-    def _create_sample(n_samples: int, seed: int = None, ref_date = None, 
-                        issuers: _List[str]= None, sec_levels: _List[str]=None,
-                    currencies: _List[str]= None):
-        specs = BondBaseSpecification._create_sample(**locals())
-        result = []
-        for i, b in enumerate(specs):
-            result.append(ZeroCouponBondSpecification('ZC_BND_'+str(i), **b))
-        return result
-    
-    def _validate_derived_bond(self):
-        pass
-
-    def _validate_derived_issued_instrument(self):
-        pass
-
-    def expected_cashflows(self)->_List[Tuple[datetime, float]]:
-        """Return a list of all expected cashflows (here only the final notional) together with their payment date.
+        Getter for instruments's day count convention.
 
         Returns:
-            _List[Tuple[datetime, float]]: The resulting list of all cashflows.
+            str: instruments's day count convention.
         """
-        return [(self.maturity_date, self.notional)]
+        return self._day_count_convention
 
-    
-    
-class PlainVanillaCouponBondSpecification(BondBaseSpecification):
-    def __init__(self,
-                 obj_id: str,
-                 issue_date: _Union[date, datetime],
-                 maturity_date: _Union[date, datetime],
-                 accrual_start: _Union[date, datetime],
-                 coupon_freq: str,
-                 coupon: float,
-                 currency: str = 'EUR',
-                 notional: float = 100.0,
-                 issuer: str = None,
-                  securitization_level: _Union[SecuritizationLevel, str] = None,
-                  stub: bool = True,
-                  rating: _Union[Rating, str] = Rating.NONE):
-        """PlainVanillaCouponBond specification.
+    @day_count_convention.setter
+    def day_count_convention(self, dcc: _Union[DayCounterType, str]):
+        self._day_count_convention = DayCounterType.to_string(dcc)
 
-        Args:
-            obj_id (str): (Preferably) Unique label of the bond, e.g. ISIN.
-            issue_date (_Union[date, datetime]): Date of bond issuance.
-            maturity_date (_Union[date, datetime]): Bond's maturity/expiry date. Must lie after the issue_date.
-            first_coupondate (_Union[date, datetime]): The first coupon date.
-            coupon_freq (str): Frequency of coupons. Defaults to '1Y' for yearly. Internally, the method :func:`rivapy.tools.Period.from_string` is used, see the definition of valid strings there.     
-            coupon (float): Coupon as relative number (multiplied internaly by notional to get absolute cashflow).
-            currency (str, optional): Currency as alphabetic, Defaults to 'EUR'.
-            notional (float, optional): Bond's notional/face value. Must be positive. Defaults to 100.0.
-            issuer (str, optional): Name/id of issuer. Defaults to None.
-            securitization_level (_Union[SecuritizationLevel, str], optional): Securitization level. Defaults to None.
-            rating ( _Union[Rating, str]): Paper rating.
+    @property
+    def business_day_convention(self) -> str:
         """
-        super().__init__(obj_id,
-                         issue_date,
-                         maturity_date,
-                         currency,
-                         notional,
-                         issuer,
-                         securitization_level, 
-                         rating)
-
-        self.accrual_start = accrual_start
-        self.coupon_freq = coupon_freq
-        self.coupon = coupon
-        self.stub = stub
-
-    def expected_cashflows(self)->_List[Tuple[datetime, float]]:
-        """Return a list of all expected cashflows (final notional and coupons) together with their payment date.
+        Getter for FRA's day count convention.
 
         Returns:
-            _List[Tuple[datetime, float]]: The resulting list of all cashflows.
+            str: FRA's day count convention.
         """
-        #if self.coupon_freq != 'Y':
-        #    raise Exception('Cannot calc cashflows for other than yearly coupons. Missing transformation from yearly coupon to .... ')
-        period = Period.from_string(self.coupon_freq)
-        coupon_multiplier = 1.0
-        if period.years > 0:
-            coupon_multiplier = period.years
-        elif period.months > 0:
-            coupon_multiplier = period.months/12.0
-        elif period.days > 0:
-            coupon_multiplier = period.days/365.0
-        schedule = Schedule(self.accrual_start, self.maturity_date, period, stub=self.stub).generate_dates(ends_only=True)
-        result = [(d, self.coupon*coupon_multiplier*self.notional) for d in schedule]
-        result.insert(0, (self.accrual_start, 0.0))# the first entry of this schedule is the accrual start which has a cashflow of zero and is just used for accrual calculation
-        result.append((self.maturity_date, self.notional))
-        return result
+        return self._business_day_convention
 
+    @business_day_convention.setter
+    def business_day_convention(self, business_day_convention: _Union[RollConvention, str]):
+        # business_day_convention represents a RollConvention; normalize accordingly
+        self._business_day_convention = RollConvention.to_string(business_day_convention)
+
+    @property
+    def roll_convention(self) -> str:
+        """
+        Getter for the roll convention used for business day adjustment.
+
+        Returns:
+            str: The roll convention used for business day adjustment.
+        """
+        return self._roll_convention
+
+    @roll_convention.setter
+    def roll_convention(self, roll_convention: _Union[RollRule, str]):
+        """
+        Setter for the roll convention used for business day adjustment.
+
+        Args:
+            roll_convention (_Union[RollRule, str]): The roll convention used for business day adjustment.
+        """
+        self._roll_convention = RollRule.to_string(roll_convention)
+
+    @property
+    def calendar(self):
+        """
+        Getter for the calendar used for business day adjustment.
+
+        Returns:
+            The calendar used for business day adjustment.
+        """
+        return self._calendar
+
+    @calendar.setter
+    def calendar(self, calendar: _Union[_HolidayBase, str]):
+        """
+        Setter for the calendar used for business day adjustment.
+
+        Args:
+            calendar (_Union[_HolidayBase, str]): The calendar used for business day adjustment.
+        """
+        if isinstance(calendar, str) and calendar.upper() == "TARGET":
+            self._calendar = _ECB()
+        else:
+            self._calendar = _string_to_calendar(calendar)
+
+    # endregion
+
+    def notional_amount(self, index: _Union[date, datetime, int] = None) -> float:
+        """Get the notional amount at a specific date.
+
+        Args:
+            index (_Union[date, datetime, int]): The index for which to get the notional amount, may be a date or an integer index. If None, returns the full notional structure.
+
+        Returns:
+            float: The notional amount at the specified index.
+        """
+        if index is not None:
+            if isinstance(index, int):
+                return self._notional.get_amount(index)
+            else:
+                return self._notional.get_amount_per_date(_date_to_datetime(index))
+        else:
+            return self._notional.get_amount(index)
+
+
+class DeterministicCashflowBondSpecification(BondBaseSpecification):
+    """Specification for instruments that produce deterministic cashflows.
+
+    This class centralizes fields and behaviours common to instruments whose
+    cashflows can be determined deterministically from the specification
+    (for example fixed-rate bonds, floating-rate notes and zero-coupon bonds).
+
+    Responsibilities
+        - Hold instrument conventions (frequency, day-count, business-day rules).
+        - Manage notional / amortization schemes.
+        - Create and adjust accrual/payment schedules (via :class:`Schedule` / :func:`roll_day`).
+
+    Notes
+        - Subclasses typically call ``super().__init__(...)`` with their specific
+          defaults (coupon, margin, index, etc.).
+        - Dates are normalized to datetimes internally; callers can pass
+          ``datetime`` or ``date`` objects.
+    """
+
+    def __init__(
+        self,
+        obj_id: str,
+        issue_date: _Union[date, datetime],
+        maturity_date: _Union[date, datetime],
+        notional: _Union[NotionalStructure, float] = 100.0,
+        frequency: _Optional[_Union[Period, str]] = None,
+        issue_price: _Optional[float] = None,
+        ir_index: _Union[InterestRateIndex, str] = None,
+        index: _Optional[_Union[InterestRateIndex, str]] = None,
+        currency: _Union[Currency, str] = Currency.EUR,
+        notional_exchange: bool = True,
+        coupon: float = 0.0,
+        margin: float = 0.0,
+        amortization_scheme: _Optional[_Union[str, AmortizationScheme]] = None,
+        day_count_convention: _Union[DayCounterType, str] = "ACT360",
+        business_day_convention: _Union[RollConvention, str] = "ModifiedFollowing",
+        roll_convention: _Union[RollRule, str] = "NONE",
+        calendar: _Union[_HolidayBase, str] = _ECB(),
+        coupon_type: str = "fix",
+        payment_days: int = 0,
+        spot_days: int = 2,
+        pays_in_arrears: bool = True,
+        issuer: _Optional[_Union[Issuer, str]] = None,
+        rating: _Union[Rating, str] = "NONE",
+        securitization_level: _Union[SecuritizationLevel, str] = "NONE",
+        backwards=True,
+        stub_type_is_Long=True,
+        last_fixing: _Optional[float] = None,
+        fixings: _Optional[FixingTable] = None,
+        adjust_start_date: bool = True,
+        adjust_end_date: bool = False,
+        adjust_schedule: bool = True,
+        adjust_accruals: bool = True,
+    ):
+        """Create a deterministic cashflow bond specification.
+
+        Args:
+            obj_id (str): Unique identifier for the object.
+            issue_date (date | datetime): Issue date for the instrument. Corresponds to the ``start date´´ of the first accrual period if ``adjust_start_date`` is False.
+            maturity_date (date | datetime): Maturity date for the instrument. Will be rolled to a business day acc. to business day convention.
+                The unrolled maturity date corresponds to the ``end date´´ of the last accrual period if ``adjust_end_date`` is False.
+            notional (NotionalStructure | float, optional): Notional or a notional structure. Defaults to 100.0.
+            frequency (Period | str, optional): Payment frequency (e.g. '1Y', '6M'). When None, frequency may be derived from an index.
+            issue_price (float, optional): Issue price for priced instruments. Defaults to None.
+            ir_index (InterestRateIndex | str, optional): Internal index reference (enum or alias).
+            index (InterestRateIndex | str, optional): External index alias used for fixings.
+            currency (Currency | str, optional): Currency code or enum. Defaults to 'EUR'.
+            notional_exchange (bool, optional): If True notional is exchanged at maturity. Defaults to True.
+            coupon (float, optional): Fixed coupon rate. Defaults to 0.0.
+            margin (float, optional): Floating leg spread (for floaters). Defaults to 0.0.
+            amortization_scheme (str | AmortizationScheme, optional): Amortization descriptor or object.
+            day_count_convention (DayCounterType | str, optional): Day count convention. Defaults to 'ACT360'.
+            business_day_convention (RollConvention | str, optional): Business-day adjustment rule. Defaults to 'ModifiedFollowing'.
+            roll_convention (RollRule | str, optional): Roll convention for schedule generation. Defaults to 'NONE'.
+            calendar (HolidayBase | str, optional): Holiday calendar used for adjustments. Defaults to ECB calendar.
+            coupon_type (str, optional): 'fix'|'float'|'zero'. Defaults to 'fix'.
+            payment_days (int, optional): Payment lag in days. Defaults to 0.
+            spot_days (int, optional): Spot settlement days. Defaults to 2.
+            pays_in_arrears (bool, optional): If True coupon is paid in arrears. Defaults to True.
+            issuer (Issuer | str, optional): Issuer identifier. Defaults to None.
+            rating (Rating | str, optional): Issuer or instrument rating. Defaults to 'NONE'.
+            securitization_level (SecuritizationLevel | str, optional): Securitization level. Defaults to 'NONE'.
+            backwards (bool, optional): Generate schedule backwards. Defaults to True.
+            stub_type_is_Long (bool, optional): Use long stub when generating schedule. Defaults to True.
+            last_fixing (float, optional): Last known fixing. Defaults to None.
+            fixings (FixingTable, optional): Fixing table for historical fixings. Defaults to None.
+            adjust_start_date (bool, optional): Adjust the start date to a business day acc. to business day convention. Defaults to True.
+            adjust_end_date (bool, optional): Adjust the end date to a business day acc. to business day convention. Defaults to False.
+            adjust_schedule (bool, optional): Adjust generated schedule dates to business days. Defaults to True.
+            adjust_accruals (bool, optional): Adjust schedule dates to business days. Defaults to True. if ``adjust_schedule`` is True also accrual dates are adjusted.
+
+        Raises:
+            ValueError: on invalid argument combinations or types (validated by :meth:`_validate`).
+        """
+        super().__init__(
+            obj_id,
+            issue_date,
+            _date_to_datetime(maturity_date),
+            Currency.to_string(currency),
+            notional,
+            amortization_scheme,
+            issuer,
+            securitization_level,
+            Rating.to_string(rating),
+            day_count_convention,
+            business_day_convention,
+            roll_convention,
+            calendar,
+        )
+        if not is_business_day(issue_date, calendar) and adjust_start_date:
+            self._start_date = roll_day(issue_date, calendar=calendar, business_day_convention=business_day_convention)
+        else:
+            self._start_date = issue_date
+        if not is_business_day(maturity_date, calendar) and adjust_end_date:
+            self._end_date = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
+        else:
+            self._end_date = maturity_date
+        if not is_business_day(maturity_date, calendar):
+            self._maturity_date = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
+
+        if issue_price is not None:
+            self._issue_price = _check_non_negativity(issue_price)
+        else:
+            self._issue_price = None
+        self._coupon = coupon
+        self._margin = margin
+        self._frequency = frequency
+        self._ir_index = ir_index
+        self._index = index
+        self._coupon_type = coupon_type
+        self._notional_exchange = notional_exchange
+        self._payment_days = payment_days
+        self._spot_days = spot_days
+        self._pays_in_arrears = pays_in_arrears
+        self._backwards = backwards
+        self._stub_type_is_Long = stub_type_is_Long
+        self._last_fixing = last_fixing
+        self._fixings = fixings
+        self._schedule = None
+        self._nr_annual_payments = None
+        self._dates = None
+        self._accrual_dates = None
+        self._adjust_start_date = adjust_start_date
+        self._adjust_end_date = adjust_end_date
+        self._adjust_schedule = adjust_schedule
+        self._adjust_accruals = adjust_accruals
+        self._validate()
+
+    # region properties
+
+    @property
+    def coupon(self) -> float:
+        """
+        Getter for instrument's coupon.
+
+        Returns:
+            float: Instrument's coupon.
+        """
+        return self._coupon
+
+    @coupon.setter
+    def coupon(self, rate: float):
+        """
+        Setter for instrument's rate.
+
+        Args:
+            rate(float): interest rate of the instrument.
+        """
+        self._rate = rate
+
+    @property
+    def start_date(self) -> datetime.date:
+        """
+        Getter for deposit's start date.
+
+        Returns:
+            date: deposit's start date.
+        """
+        return self._start_date
+
+    @start_date.setter
+    def start_date(self, start_date: _Union[date, datetime]):
+        """
+        Setter for deposit's start date.
+
+        Args:
+            start_date (Union[datetime, date]): deposit's start date.
+        """
+        self._start_date = _date_to_datetime(start_date)
+
+    @property
+    def end_date(self) -> datetime:
+        """
+        Getter for deposit's end date.
+
+        Returns:
+            date: deposit's end date.
+        """
+        return self._end_date
+
+    @end_date.setter
+    def end_date(self, end_date: _Union[date, datetime]):
+        """
+        Setter for deposit's end date.
+
+        Args:
+            end_date (Union[datetime, date]): deposit's end date.
+        """
+        if not isinstance(end_date, (date, datetime)):
+            raise TypeError("end_date must be a datetime or date object.")
+        self._end_date = _date_to_datetime(end_date)
+
+    @property
+    def frequency(self) -> Period:
+        """
+        Getter for instrument's payment frequency.
+
+        Returns:
+            Period: instrument's payment frequency.
+        """
+        return self._frequency
+
+    @frequency.setter
+    def frequency(self, frequency: _Union[Period, str]):
+        """
+        Setter for instrument's payment frequency.
+
+        Args:
+            frequency (Union[Period, str]): instrument's payment frequency.
+        """
+        self._frequency = _term_to_period(frequency)
+
+    @property
+    def issue_price(self) -> _Optional[float]:
+        """The bond's issue price as a float."""
+        return getattr(self, "_issue_price", None)
+
+    @issue_price.setter
+    def issue_price(self, issue_price: _Union[float, str]):
+        self._issue_price = _check_non_negativity(issue_price)
+
+    @property
+    def notional_exchange(self):
+        return self._notional_exchange
+
+    @notional_exchange.setter
+    def notional_exchange(self, notional_exchange: bool):
+        self._notional_exchange = notional_exchange
+
+    @property
+    def payment_days(self) -> int:
+        """
+        Getter for the number of payment days.
+
+        Returns:
+            int: Number of payment days.
+        """
+        return self._payment_days
+
+    @payment_days.setter
+    def payment_days(self, payment_days: int):
+        """
+        Setter for the number of payment days.
+
+        Args:
+            payment_days (int): Number of payment days.
+        """
+        if not isinstance(payment_days, int) or payment_days < 0:
+            raise ValueError("payment days must be a non-negative integer.")
+        self._payment_days = payment_days
+
+    @property
+    def pays_in_arrears(self) -> bool:
+        """
+        Getter for the pays_in_arrears flag.
+
+        Returns:
+            bool: True if the instrument pays in arrears, False otherwise.
+        """
+        return self._pays_in_arrears
+
+    @pays_in_arrears.setter
+    def pays_in_arrears(self, pays_in_arrears: bool):
+        """
+        Setter for the pays_in_arrears flag.
+
+        Args:
+            pays_in_arrears (bool): True if the instrument pays in arrears, False otherwise.
+        """
+        if not isinstance(pays_in_arrears, bool):
+            raise ValueError("pays_in_arrears must be a boolean value.")
+        self._pays_in_arrears = pays_in_arrears
+
+    @property
+    def coupon_type(self) -> str:
+        """
+        Getter for the coupon type of the instrument.
+
+        Returns:
+            str: The coupon type of the instrument.
+        """
+        return self._coupon_type
+
+    @coupon_type.setter
+    def coupon_type(self, coupon_type: str):
+        """
+        Setter for the coupon type of the instrument.
+
+        Args:
+            coupon_type (str): The coupon type of the instrument.
+        """
+        if not isinstance(coupon_type, str):
+            raise ValueError("Coupon type must be a string.")
+        self._coupon_type = coupon_type
+
+    @property
+    def backwards(self) -> bool:
+        """
+        Getter for the backwards flag.
+
+        Returns:
+            bool: True if the schedule is generated backwards, False otherwise.
+        """
+        return self._backwards
+
+    @backwards.setter
+    def backwards(self, backwards: bool):
+        """
+        Setter for the backwards flag.
+
+        Args:
+            backwards (bool): True if the schedule is generated backwards, False otherwise.
+        """
+        if not isinstance(backwards, bool):
+            raise ValueError("Backwards must be a boolean value.")
+        self._backwards = backwards
+
+    @property
+    def stub_type_is_Long(self) -> bool:
+        """
+        Getter for the stub type flag.
+
+        Returns:
+            bool: True if the stub type is long, False otherwise.
+        """
+        return self._stub_type_is_Long
+
+    @stub_type_is_Long.setter
+    def stub_type_is_Long(self, stub_type_is_Long: bool):
+        """
+        Setter for the stub type flag.
+
+        Args:
+            stub_type_is_Long (bool): True if the stub type is long, False otherwise.
+        """
+        if not isinstance(stub_type_is_Long, bool):
+            raise ValueError("Stub type must be a boolean value.")
+        self._stub_type_is_Long = stub_type_is_Long
+
+    @property
+    def spot_days(self) -> int:
+        """
+        Getter for the number of spot days.
+
+        Returns:
+            int: Number of spot days.
+        """
+        return self._spot_days
+
+    @spot_days.setter
+    def spot_days(self, spot_days: int):
+        """
+        Setter for the number of spot days.
+
+        Args:
+            spot_days (int): Number of spot days.
+        """
+        if not isinstance(spot_days, int) or spot_days < 0:
+            raise ValueError("Spot days must be a non-negative integer.")
+        self._spot_days = spot_days
+
+    @property
+    def last_fixing(self) -> _Optional[float]:
+        """
+        Getter for the last fixing value.
+
+        Returns:
+            _Optional[float]: The last fixing value, or None if not set.
+        """
+        return self._last_fixing
+
+    @last_fixing.setter
+    def last_fixing(self, last_fixing: _Optional[float]):
+        """
+        Setter for the last fixing value.
+
+        Args:
+            last_fixing (_Optional[float]): The last fixing value, or None if not set.
+        """
+        if last_fixing is not None and not isinstance(last_fixing, (float, int)):
+            raise ValueError("Last fixing must be a float or None.")
+        self._last_fixing = float(last_fixing) if last_fixing is not None else None
+
+    @property
+    def nr_annual_payments(self) -> _Optional[float]:
+        """
+        Getter for the number of annual payments.
+
+        Returns:
+            _Optional[float]: The number of annual payments, or None if frequency is not set.
+        """
+        if self._nr_annual_payments is None:
+            self._nr_annual_payments = self.get_nr_annual_payments()
+        return self._nr_annual_payments
+
+    @nr_annual_payments.setter
+    def nr_annual_payments(self, value: _Optional[float]):
+        """
+        Setter for the number of annual payments.
+
+        Args:
+            value (_Optional[float]): The number of annual payments, or None if frequency is not set.
+        """
+        if value is not None and (not isinstance(value, (float, int)) or value <= 0):
+            raise ValueError("Number of annual payments must be a positive float or None.")
+        self._nr_annual_payments = float(value) if value is not None else None
+
+    @property
+    def schedule(self) -> Schedule:
+        """
+        Getter for the dates of the instrument.
+
+        Returns:
+            Schedule: The schedule of the instrument.
+        """
+        return self.get_schedule()
+
+    @schedule.setter
+    def schedule(self, schedule: Schedule):
+        """
+        Setter for the dates of the instrument.
+
+        Args:
+            schedule (Schedule): The schedule of the instrument.
+        """
+        if not isinstance(schedule, Schedule):
+            raise ValueError("Schedule must be a Schedule object.")
+        self._schedule = schedule
+
+    @property
+    def dates(self) -> _List[datetime]:
+        """
+        Getter for the dates of the instrument that mark start and end dates of the accrual periods.
+
+        Returns:
+            _List[datetime]: The dates of the instrument.
+        """
+        if self._dates is None:
+            # Try to get schedule, fallback to empty list if not possible
+            try:
+                schedule = self._schedule if self._schedule is not None else self.get_schedule()
+                if schedule is not None:
+                    if self._adjust_schedule == False:
+                        self._dates = schedule._roll_out(
+                            from_=self._start_date if not self._backwards else self._end_date,
+                            to_=self._end_date if not self._backwards else self._start_date,
+                            term=_term_to_period(self._frequency),
+                            long_stub=self._stub_type_is_Long,
+                            backwards=self._backwards,
+                            roll_convention_=self._roll_convention,
+                        )
+                    else:
+                        self._dates = schedule.generate_dates(False)
+                    if self._adjust_accruals:
+                        rolled = [roll_day(d, self._calendar, self._business_day_convention) for d in self._dates]
+                    else:
+                        rolled = self._dates
+                    self._accrual_dates = rolled
+                    if isinstance(self._notional, LinearNotionalStructure):
+                        self._notional.n_steps = len(self._dates)
+                        self._notional._notional = list(
+                            np.linspace(self._notional.start_notional, self._notional.end_notional, self._notional.n_steps)
+                        )
+                        self._notional.start_date = rolled[:-1]
+                        self._notional.end_date = rolled[1:]
+                else:
+                    self._dates = []
+                    self._accrual_dates = []
+            except Exception as e:
+                # Optionally log the error here
+                self._dates = []
+        return self._dates if self._dates is not None else []
+
+    @dates.setter
+    def dates(self, dates: _List[datetime]):
+        """
+        Setter for the dates of the instrument that mark start and end dates of the accrual periods.
+
+        Args:
+            dates (_List[datetime]): The dates of the instrument.
+        """
+        if not _is_ascending_date_list(dates):
+            raise ValueError("Dates must be a list of ascending datetime objects.")
+        self._dates = dates
+
+    @property
+    def accrual_dates(self) -> _List[datetime]:
+        """
+        Getter for the accrual dates of the instrument that mark start and end dates of the accrual periods.
+
+        Returns:
+            _List[datetime]: The accrual dates of the instrument.
+        """
+        if self._accrual_dates is None:
+            _ = self.dates  # Trigger dates property to populate accrual_dates
+        return self._accrual_dates if self._accrual_dates is not None else []
+
+    @accrual_dates.setter
+    def accrual_dates(self, accrual_dates: _List[datetime]):
+        """
+        Setter for the accrual dates of the instrument that mark start and end dates of the accrual periods.
+
+        Args:
+            accrual_dates (_List[datetime]): The accrual dates of the instrument.
+        """
+        if not _is_ascending_date_list(accrual_dates):
+            raise ValueError("Accrual dates must be a list of ascending datetime objects.")
+        self._accrual_dates = accrual_dates
+
+    @property
+    def index(self) -> float:
+        """
+        Getter for instrument's index.
+
+        Returns:
+            float: Instrument's index.
+        """
+        return self._index
+
+    @index.setter
+    def index(self, index: _Union[InterestRateIndex, str]):
+        """
+        Setter for instrument's index.
+
+        Args:
+            index (_Union[InterestRateIndex, str]): instrument's index.
+        """
+        self._index = index
+        self._ir_index = index if isinstance(index, InterestRateIndex) else get_index_by_alias(index)
+        self._frequency = self._ir_index.value.tenor
+
+    @property
+    def ir_index(self) -> InterestRateIndex:
+        """
+        Getter for instrument's interest rate index.
+
+        Returns:
+            InterestRateIndex: Instrument's interest rate index.
+        """
+        return self._ir_index
+
+    @ir_index.setter
+    def ir_index(self, ir_index: InterestRateIndex):
+        """
+        Setter for instrument's interest rate index.
+
+        Args:
+            ir_index (InterestRateIndex): Instrument's interest rate index.
+        """
+        self._ir_index = ir_index
+
+    @property
+    def adjust_start_date(self) -> bool:
+        return self._adjust_start_date
+
+    @adjust_start_date.setter
+    def adjust_start_date(self, value: bool):
+        self._adjust_start_date = value
+        if not is_business_day(self._issue_date, self._calendar) and self._adjust_start_date:
+            # fix typo: use _issue_date (datetime) not _issuedate
+            self._start_date = roll_day(self._issue_date, calendar=self._calendar, business_day_convention=self._business_day_convention)
+
+    @property
+    def adjust_end_date(self) -> bool:
+        return self._adjust_end_date
+
+    @adjust_end_date.setter
+    def adjust_end_date(self, value: bool):
+        self._adjust_end_date = value
+        if not is_business_day(self._maturity_date, self._calendar) and self._adjust_end_date:
+            self._end_date = roll_day(self._maturity_date, calendar=self._calendar, business_day_convention=self._business_day_convention)
+
+    @property
+    def adjust_schedule(self) -> bool:
+        return self._adjust_schedule
+
+    @adjust_schedule.setter
+    def adjust_schedule(self, value: bool):
+        self._adjust_schedule = value
+
+    @property
+    def adjust_accruals(self) -> bool:
+        return self._adjust_accruals
+
+    @adjust_accruals.setter
+    def adjust_accruals(self, value: bool):
+        self._adjust_accruals = value
+
+    # endregion
+
+    def _validate(self):
+        """Validates the parameters of the instrument."""
+        _check_start_before_end(self._start_date, self._end_date)
+        # _check_start_at_or_before_end(self._end_date, self._maturity_date) # TODO special case modified following BCC
+        _check_non_negativity(self._payment_days)
+        _check_non_negativity(self._spot_days)
+        if not isinstance(self._calendar, (_HolidayBase, str)):
+            raise ValueError("Calendar must be a HolidayBase or string.")
+
+    def get_schedule(self) -> Schedule:
+        """Return a configured :class:`Schedule` for the instrument.
+
+        The returned Schedule is constructed from the instrument's start/end
+        dates, frequency/tenor, stub and roll conventions and calendar.
+
+        Returns:
+            Schedule: schedule object configured for this instrument.
+        """
+        return Schedule(
+            start_day=self._start_date,
+            end_day=self._end_date,
+            time_period=_string_to_period(self._frequency),
+            backwards=self._backwards,
+            stub_type_is_Long=self._stub_type_is_Long,
+            business_day_convention=self._business_day_convention,
+            roll_convention=self._roll_convention,
+            calendar=self._calendar,
+        )
+
+    def get_nr_annual_payments(self) -> float:
+        """Compute the (approximate) number of annual payments implied by frequency.
+
+        Returns:
+            float: number of payments per year implied by the frequency. If
+                frequency is not set 0.0 is returned.
+
+        Raises:
+            ValueError: if the frequency resolves to a non-positive period.
+        """
+        if self._frequency is None:
+            logger.warning("Frequency is not set. Returning 0.")
+            return 0.0
+        freq = _string_to_period(self._frequency)
+        if freq.years > 0 or freq.months > 0 or freq.days > 0:
+            nr = 12.0 / (freq.years * 12 + freq.months + freq.days * 12 / 365.0)
+        else:
+            raise ValueError("Frequency must be positive.")
+        if nr.is_integer() is False:
+            logger.warning("Number of annual payments is not a whole number but a decimal.")
+        return nr
+
+    @abc.abstractmethod
     def _to_dict(self) -> dict:
-        result = {
-            'accrual_start': self.accrual_start,
-            'coupon_freq' : self.coupon_freq,
-            'coupon' : self.coupon,
-            }
-        result.update(super(PlainVanillaCouponBondSpecification, self)._to_dict())
-        return result
-    
-    @staticmethod
-    def _create_sample(n_samples: int, seed: int = None, ref_date = None, 
-                        issuers: _List[str]= None, sec_levels: _List[str]=None,
-                    currencies: _List[str]= None):
-        specs = BondBaseSpecification._create_sample(**locals())
-        result = []
-        coupons = np.arange(0.0, 0.09, 0.0025)
-        for i, b in enumerate(specs):
-            b['coupon_freq'] = np.random.choice(['3M', '6M', '9M', '1Y'], p=[0.1,0.4,0.1,0.4])
-            issue_date = b['issue_date']
-            b['accrual_start'] = issue_date + timedelta(days=np.random.randint(low=0, high=10))
-            b['coupon'] = np.random.choice(coupons)
-            result.append(PlainVanillaCouponBondSpecification('BND_PV_'+str(i), **b))
-        return result
-
-class FixedRateBondSpecification(BondBaseSpecification):
-    def __init__(self,
-                 obj_id: str,
-                 issue_date: _Union[date, datetime],
-                 maturity_date: _Union[date, datetime],
-                 coupon_payment_dates: _List[_Union[date, datetime]],
-                 coupons: _List[float],
-                currency: str = 'EUR',
-                 notional: float = 100.0,
-                 issuer: str = None,
-                 securitization_level: _Union[SecuritizationLevel, str] = None,
-                 rating: _Union[Rating, str] = Rating.NONE):
-        """
-        Fixed rate bond specification by providing coupons and coupon payment dates directly.
-
-        Args:
-            coupon_payment_dates (List[Union[date, datetime]]): List of annualised coupon payment dates.
-            coupons (List[float]): List of annualised coupon amounts as fraction of notional.
-        """
-        super().__init__(obj_id, issue_date, maturity_date, currency, notional, issuer, securitization_level, rating)
-        self.__coupon_payment_dates = coupon_payment_dates
-        self.__coupons = coupons
-        # validation of dates' consistency
-        if not _is_ascending_date_list(issue_date, coupon_payment_dates, maturity_date):
-            raise Exception("Inconsistent combination of issue date '" + str(issue_date)
-                            + "', payment dates '" + str(coupon_payment_dates)
-                            + "', and maturity date '" + str(maturity_date) + "'.")
-            # TODO: Clarify if inconsistency should be shown explicitly.
-        if len(coupon_payment_dates) == len(coupons):
-            self.__coupons = coupons
-        else:
-            raise Exception('Number of coupons ' + str(coupons) +
-                            ' is not equal to number of coupon payment dates ' + str(coupon_payment_dates))
-
-    
-    @staticmethod
-    def _create_sample(n_samples: int, seed: int = None, ref_date = None, issuers: _List[str]= None):
-        specs = BondBaseSpecification._create_sample(**locals())
-        result = []
-        coupons = np.arange(0.01, 0.09, 0.005)
-        for i, b in enumerate(specs):
-            issue_date = b['issue_date']
-            n_coupons = np.random.randint(low=1, high=20)
-            days_coupon_period = np.random.choice([90.0,180.0,365.0], p=[0.2,0.2,0.6])
-            b['coupon_payment_dates'] = [issue_date+timedelta(days=(i+1)*days_coupon_period) for i in range(n_coupons)]
-            coupon = np.random.choice(coupons)
-            b['coupons'] = [coupon]*n_coupons
-            b['maturity_date'] = b['coupon_payment_dates'][-1]
-            result.append(FixedRateBondSpecification('BND_FR_'+str(i), **b))
-        return result
-
-    def _validate_derived_bond(self):
-        self.__coupon_payment_dates = _datetime_to_date_list(self.__coupon_payment_dates)
-        # validation of dates' consistency
-        if not _is_ascending_date_list(self.__issue_date, self.__coupon_payment_dates, self.__maturity_date):
-            raise Exception("Inconsistent combination of issue date '" + str(self.__issue_date)
-                            + "', payment dates '" + str(self.__coupon_payment_dates)
-                            + "', and maturity date '" + str(self.__maturity_date) + "'.")
-            # TODO: Clarify if inconsistency should be shown explicitly.
-        if len(self.__coupon_payment_dates) != len(self.__coupons):
-            raise Exception('Number of coupons ' + str(self.__coupons) +
-                            ' is not equal to number of coupon payment dates ' + str(self.__coupon_payment_dates))
-    
-    def _validate_derived_issued_instrument(self):
         pass
 
-    
-    def _to_dict(self)->dict:
-        result = {
-            'coupon_payment_dates': self.__coupon_payment_dates,
-            'coupons' : self.__coupons 
-            }
-        result.update(super(FixedRateBondSpecification, self)._to_dict())
+
+class FixedRateBondSpecification(DeterministicCashflowBondSpecification):
+    """Specification for fixed-rate bonds.
+
+    Stores coupon, frequency and other fixed-rate specific settings and
+    delegates schedule construction to the base class behaviour.
+    """
+
+    def __init__(
+        self,
+        obj_id: str,
+        notional: _Union[NotionalStructure, float],
+        currency: _Union[Currency, str],
+        issue_date: _Union[date, datetime],
+        maturity_date: _Union[date, datetime],
+        coupon: float,
+        frequency: _Union[Period, str],
+        amortization_scheme: _Optional[_Union[str, AmortizationScheme]] = None,
+        business_day_convention: RollConvention = "ModifiedFollowing",
+        issuer: _Optional[_Union[Issuer, str]] = None,
+        securitization_level: _Optional[_Union[SecuritizationLevel, str]] = "NONE",
+        rating: _Optional[_Union[Rating, str]] = "NONE",
+        day_count_convention: _Union[DayCounterType, str] = "ActActICMA",
+        spot_days: int = 2,
+        calendar: _Optional[_Union[_HolidayBase, str]] = _ECB(),
+        stub_type_is_Long: bool = True,
+        adjust_start_date: bool = True,
+        adjust_end_date: bool = False,
+    ):
+        """Create a fixed-rate bond specification.
+
+        Args:
+            obj_id (str): Unique identifier for the bond.
+            notional (NotionalStructure | float): Notional or notional structure.
+            currency (Currency | str): Currency code or enum.
+            issue_date (date | datetime): Issue date of the bond.
+            maturity_date (date | datetime): Maturity date of the bond.
+            coupon (float): Fixed coupon rate (decimal, e.g. 0.03 for 3%).
+            frequency (Period | str): Payment frequency (tenor) for coupons.
+            amortization_scheme (str | AmortizationScheme, optional): Amortization descriptor or object.
+            business_day_convention (RollConvention | str, optional): Business day convention used for schedule adjustments.
+            issuer (Issuer | str, optional): Issuer identifier.
+            securitization_level (SecuritizationLevel | str, optional): Securitization level.
+            rating (Rating | str, optional): Instrument rating.
+            day_count_convention (DayCounterType | str, optional): Day count convention for accruals.
+            spot_days (int, optional): Spot settlement days. Defaults to 2.
+            calendar (HolidayBase | str, optional): Calendar used for business-day adjustments.
+            stub_type_is_Long (bool, optional): Use long stub when generating schedule. Defaults to True.
+            adjust_start_date (bool, optional): Adjust start date to business day. Defaults to True.
+            adjust_end_date (bool, optional): Adjust end date to business day. Defaults to False.
+        """
+        super().__init__(
+            obj_id=obj_id,
+            spot_days=spot_days,
+            issue_date=issue_date,
+            maturity_date=maturity_date,
+            notional=notional,
+            amortization_scheme=amortization_scheme,
+            currency=currency,
+            coupon=coupon,
+            coupon_type="fix",
+            frequency=frequency,
+            day_count_convention=day_count_convention,
+            business_day_convention=business_day_convention,
+            payment_days=0,
+            stub_type_is_Long=stub_type_is_Long,
+            issuer=issuer,
+            rating=rating,
+            securitization_level=securitization_level,
+            calendar=calendar,
+            adjust_start_date=adjust_start_date,
+            adjust_end_date=adjust_end_date,
+        )
+
+    @staticmethod
+    def _create_sample(n_samples: int, seed: int = None):
+        """Return a list of example FixedRateBondSpecification instances.
+
+        Args:
+            n_samples (int): Number of sample instances to create.
+            seed (int, optional): RNG seed for reproducibility.
+
+        Returns:
+            List[FixedRateBondSpecification]: Example fixed-rate bonds.
+        """
+        result = []
+        if seed is not None:
+            np.random.seed(seed)
+
+        issue_date = datetime(2025, 1, 1)
+        maturity_date = datetime(2027, 1, 1)
+        notional = 100.0
+        currency = Currency.EUR
+        securitization_level = SecuritizationLevel.SUBORDINATED
+        daycounter = DayCounterType.ACT_ACT
+        for i in range(n_samples):
+            coupon = np.random.choice([0.0, 0.01, 0.03, 0.05])
+            period = np.random.choice(["1Y", "6M", "3M"])
+            result.append(
+                FixedRateBondSpecification(
+                    obj_id=f"ID_{i}",
+                    notional=notional,
+                    frequency=period,
+                    currency=currency,
+                    issue_date=issue_date,
+                    maturity_date=maturity_date,
+                    coupon=coupon,
+                    securitization_level=securitization_level,
+                    day_count_convention=daycounter,
+                )
+            )
         return result
 
-    @classmethod
-    def from_master_data(cls,
-                         obj_id: str,
-                         issue_date: _Union[date, datetime],
-                         maturity_date: _Union[date, datetime],
-                         coupon: float,
-                         tenor: _Union[Period, str],
-                         backwards: bool = True,
-                         stub: bool = False,
-                         business_day_convention: _Union[RollConvention, str] = RollConvention.FOLLOWING,
-                         calendar: _Union[_HolidayBase, str] = None,
-                         currency: str = 'EUR',
-                         notional: float = 100.0,
-                         issuer: str = None,
-                         securitisation_level: _Union[SecuritizationLevel, str] = None):
+    def _to_dict(self) -> Dict:
+        """Serialize the fixed-rate bond specification to a dictionary.
+
+        Returns:
+            Dict: JSON-serializable representation of the specification.
         """
-        Fixed rate bond specification based on bond's master data.
+        dict = {
+            "obj_id": self.obj_id,
+            "issuer": self._issuer,
+            "securitization_level": self._securitization_level,
+            "issue_date": serialize_date(self._issue_date),
+            "maturity_date": serialize_date(self._maturity_date),
+            "currency": self._currency,
+            "notional": self._notional,
+            "rating": self._rating,
+            "frequency": self._frequency,
+            "day_count_convention": self._day_count_convention,
+            "business_day_convention": self._business_day_convention,
+            "coupon": self._coupon,
+            "spot_days": self._spot_days,
+            "calendar": getattr(self._calendar, "name", self._calendar.__class__.__name__),
+            "adjust_start_date": self._adjust_start_date,
+            "adjust_end_date": self._adjust_end_date,
+        }
+        return dict
+
+
+class ZeroBondSpecification(DeterministicCashflowBondSpecification):
+    """Specification for zero-coupon bonds.
+
+    Zero bonds have a single payout at maturity; this class wires the base
+    behaviour to use coupon_type 'zero' and appropriate notional handling.
+    """
+
+    def __init__(
+        self,
+        obj_id: str,
+        notional: float,
+        currency: _Union[Currency, str],
+        issue_date: _Union[date, datetime],
+        maturity_date: _Union[date, datetime],
+        amortization_scheme: _Optional[_Union[str, AmortizationScheme]] = None,
+        issue_price: float = 100.0,
+        calendar: _Optional[_Union[_HolidayBase, str]] = _ECB(),
+        business_day_convention: RollConvention = "ModifiedFollowing",
+        issuer: _Optional[_Union[Issuer, str]] = None,
+        securitization_level: _Optional[_Union[SecuritizationLevel, str]] = "NONE",
+        rating: _Optional[_Union[Rating, str]] = "NONE",
+        adjust_start_date: bool = True,
+        adjust_end_date: bool = True,
+    ):
+        """Create a zero-coupon bond specification.
 
         Args:
-            # TODO: How can we avoid repeating ourselves here?
-            obj_id (str): (Preferably) Unique label of the bond, e.g. ISIN.
-            issue_date (Union[date, datetime]): Date of bond issuance.
-            maturity_date (Union[date, datetime]): Bond's maturity/expiry date. Must lie after the issue_date.
-
-            coupon (float): Annualised coupon amount as fraction of notional, e.g. 0.0125 for fixed rate coupon of
-                            1.25%.
-            tenor: (Union[period, str]): Time distance between two coupon payment dates.
-            backwards (bool, optional): Defines direction for rolling out the schedule. True means the schedule will be
-                                        rolled out (backwards) from maturity date to issue date. Defaults to True.
-            stub (bool, optional): Defines if the first/last period is accepted (True), even though it is shorter than
-                                   the others, or if it remaining days are added to the neighbouring period (False).
-                                   Defaults to True.
-            business_day_convention (Union[RollConvention, str], optional): Set of rules defining the adjustment of
-                                                                            days to ensure each date being a business
-                                                                            day with respect to a given holiday
-                                                                            calendar. Defaults to
-                                                                            RollConvention.FOLLOWING
-            calendar (Union[HolidayBase, str], optional): Holiday calendar defining the bank holidays of a country or
-                                                           province (but not all non-business days as for example
-                                                           Saturdays and Sundays).
-                                                           Defaults (through constructor) to holidays.ECB
-                                                           (= Target2 calendar) between start_day and end_day.
-            # TODO: How can we avoid repeating ourselves here?
-            currency (str, optional): Currency as alphabetic  according to iso
-                                                            currency code ISO 4217
-                                                            (cf. https://www.iso.org/iso-4217-currency-codes.html).
-                                                            Defaults to 'EUR'.
-            notional (float, optional): Bond's notional/face value. Must be positive. Defaults to 100.0.
-            issuer (str, optional): Issuer of the instrument. Defaults to None.
-            securitisation_level (Union[SecuritizationLevel, str], optional): Securitisation level of the instrument.
-                                                                              Defaults to None.
-
-        Returns:
-            FixedRateBond: Corresponding fixed rate bond with already generated schedule for coupon payments.
+            obj_id (str): Unique identifier for the bond.
+            notional (float): Notional amount.
+            currency (Currency | str): Currency code or enum.
+            issue_date (date | datetime): Issue date.
+            maturity_date (date | datetime): Maturity date.
+            amortization_scheme (str | AmortizationScheme, optional): Amortization descriptor or object.
+            issue_price (float, optional): Issue price. Defaults to 100.0.
+            calendar (HolidayBase | str, optional): Holiday calendar used for adjustments.
+            business_day_convention (RollConvention | str, optional): Business-day adjustment convention.
+            issuer (Issuer | str, optional): Issuer id.
+            securitization_level (SecuritizationLevel | str, optional): Securitization level.
+            rating (Rating | str, optional): Instrument rating.
+            adjust_start_date (bool, optional): Adjust start date to business day. Defaults to True.
+            adjust_end_date (bool, optional): Adjust end date to business day. Defaults to True.
         """
-        coupon = _check_positivity(coupon)
-        tenor = _term_to_period(tenor)
-        business_day_convention = RollConvention.to_string(business_day_convention)
-        if calendar is None:
-            calendar = _ECB(years=range(issue_date.year, maturity_date.year + 1))
-        else:
-            calendar = _string_to_calendar(calendar)
-        schedule = Schedule(issue_date, maturity_date, tenor, backwards, stub, business_day_convention, calendar)
-        coupon_payment_dates = schedule.generate_dates(True)
-        coupons = [coupon] * len(coupon_payment_dates)
-        securitisation_level = SecuritizationLevel.to_string(securitisation_level)
-        return FixedRateBondSpecification(obj_id, issue_date, maturity_date, coupon_payment_dates, coupons, currency, notional,
-                             issuer, securitisation_level)
+        if not is_business_day(maturity_date, calendar):
+            maturity_date = roll_day(maturity_date, calendar=calendar, business_day_convention=business_day_convention)
+        super().__init__(
+            obj_id=obj_id,
+            issue_date=issue_date,
+            maturity_date=maturity_date,
+            notional=notional,
+            amortization_scheme=amortization_scheme,
+            issue_price=issue_price,
+            currency=currency,
+            business_day_convention=business_day_convention,
+            coupon_type="zero",
+            issuer=issuer,
+            rating=rating,
+            securitization_level=securitization_level,
+            calendar=calendar,
+            adjust_start_date=adjust_start_date,
+            adjust_end_date=adjust_end_date,
+        )
 
-    @property
-    def coupon_payment_dates(self) -> _List[date]:
-        """
-        Getter for payment dates for fixed coupons.
-
-        Returns:
-            List[date]: List of dates for fixed coupon payments.
-        """
-        return self.__coupon_payment_dates
-
-    @property
-    def coupons(self) -> _List[float]:
-        """
-        Getter for fixed coupon payments.
-
-        Returns:
-            List[float]: List of coupon amounts expressed as annualised fractions of bond's face value.
-        """
-        return self.__coupons
-
-class FloatingRateNoteSpecification(BondBaseSpecification):
-    def __init__(self, 
-                 obj_id: str,
-                 issue_date: _Union[date, datetime],
-                 maturity_date: _Union[date, datetime],
-                 coupon_period_dates: _List[_Union[date, datetime]],
-                 day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
-                 spreads: _List[float] = None,
-                 reference_index: str = 'dummy_curve',
-                 currency: str = 'EUR',
-                 notional: float = 100.0,
-                 issuer: str = None,
-                 securitisation_level: _Union[SecuritizationLevel, str] = None):
-        """
-        Floating rate note specification by providing coupon periods directly.
+    @staticmethod
+    def _create_sample(n_samples: int, seed: int = None):
+        """Return a list of example ZeroBondSpecification instances.
 
         Args:
-            coupon_period_dates (List[_Union[date, datetime]): Floating rate note's coupon periods, i.e. beginning and
-                                                               ends of the accrual periods for the floating rate coupon
-                                                               payments.
-            day_count_convention (Union[DayCounter, str], optional): Day count convention for determining period
-                                                                     length. Defaults to DayCounter.ThirtyU360.
-            spreads (List[float], optional): List of spreads added to the floating rates derived from fixing the
-                                             reference curve as fraction of notional. Defaults to None.
-            reference_index (str, optional): Floating rate note underlying reference curve used for fixing the floating
-                                             rate coupon amounts. Defaults to 'dummy_curve'.
-                                             Note: A reference curve could also be provided later at the pricing stage.
-        """
-        #super().__init__(obj_id, issue_date, maturity_date, currency, notional, issuer, securitisation_level)
-        BondBaseSpecification.__init__(self, obj_id, issue_date, maturity_date, currency, notional, issuer, securitisation_level)
-        self.__coupon_period_dates = _datetime_to_date_list(coupon_period_dates)
-        # validation of dates' consistency
-        if not _is_ascending_date_list(issue_date, coupon_period_dates, maturity_date, False):
-            raise Exception("Inconsistent combination of issue date '" + str(issue_date)
-                            + "', payment dates '" + str(coupon_period_dates)
-                            + "', and maturity date '" + str(maturity_date) + "'.")
-            # TODO: Clarify if inconsistency should be shown explicitly.
-        self.__day_count_convention = DayCounterType.to_string(day_count_convention)
-        if spreads is None:
-            self.__spreads = [0.0] * (len(coupon_period_dates) - 1)
-        elif len(spreads) == len(coupon_period_dates) - 1:
-            self.__spreads = spreads
-        else:
-            raise Exception('Number of spreads ' + str(spreads) +
-                            ' does not fit to number of coupon periods ' + str(coupon_period_dates))
-        if reference_index == '':
-            # do not leave reference curve empty as this causes pricer to ignore floating rate coupons!
-            self.__reference_index = 'dummy_curve'
-        else:
-            self.__reference_index = reference_index
+            n_samples (int): Number of sample instances to create.
+            seed (int, optional): RNG seed for reproducibility.
 
-    @classmethod
-    def from_master_data(cls, 
-                         obj_id: str,
-                         issue_date: _Union[date, datetime],
-                         maturity_date: _Union[date, datetime],
-                         tenor: _Union[Period, str],
-                         backwards: bool = True,
-                         stub: bool = False,
-                         business_day_convention: _Union[RollConvention, str] = RollConvention.FOLLOWING,
-                         calendar: _Union[_HolidayBase, str] = None,
-                         day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
-                         spread: float = 0.0,
-                         reference_index: str = 'dummy_curve',
-                         currency: str = 'EUR',
-                         notional: float = 100.0,
-                         issuer: str = None,
-                         securitisation_level: _Union[SecuritizationLevel, str] = None):
+        Returns:
+            List[ZeroBondSpecification]: Example zero-coupon bonds.
         """
-        Floating rate note specification based on master data.
+        result = []
+        if seed is not None:
+            np.random.seed(seed)
+        issue_date = datetime(2025, 1, 1)
+        maturity_date = datetime(2027, 1, 1)
+        notional = 100.0
+        currency = Currency.EUR
+        securitization_level = SecuritizationLevel.SUBORDINATED
+        for i in range(n_samples):
+            issue_price = np.random.choice([90.0, 95.0, 99.0])
+            m = np.random.choice([0, 12, 6, 3])
+            result.append(
+                ZeroBondSpecification(
+                    obj_id=f"ID_{i}",
+                    notional=notional,
+                    issue_price=issue_price,
+                    currency=currency,
+                    issue_date=issue_date,
+                    maturity_date=maturity_date + relativedelta(months=m),
+                    securitization_level=securitization_level,
+                )
+            )
+        return result
+
+    def _to_dict(self) -> Dict:
+        """Serialize the zero-coupon bond specification to a dictionary.
+
+        Returns:
+            Dict: JSON-serializable representation of the specification.
+        """
+        dict = {
+            "obj_id": self.obj_id,
+            "issuer": self._issuer,
+            "securitization_level": self._securitization_level,
+            "issue_date": serialize_date(self._issue_date),
+            "maturity_date": serialize_date(self._maturity_date),
+            "currency": self._currency,
+            "notional": self._notional,
+            "issue_price": self._issue_price,
+            "rating": self._rating,
+            "business_day_convention": self._business_day_convention,
+            "calendar": getattr(self._calendar, "name", self._calendar.__class__.__name__),
+        }
+        return dict
+
+
+class FloatingRateBondSpecification(DeterministicCashflowBondSpecification):
+    """Specification for floating-rate bonds.
+
+    Supports providing the floating index via enum, string alias or explicit
+    index object. The class derives payment frequency from the index when
+    available and wires fixings/first fixing date handling used by the pricer.
+    """
+
+    def __init__(
+        self,
+        obj_id: str,
+        notional: _Union[NotionalStructure, float],
+        currency: _Union[Currency, str],
+        issue_date: _Union[date, datetime],
+        maturity_date: _Union[date, datetime],
+        margin: float,
+        frequency: _Optional[_Union[Period, str]] = None,
+        amortization_scheme: _Optional[_Union[str, AmortizationScheme]] = None,
+        index: _Optional[_Union[InterestRateIndex, str]] = None,
+        business_day_convention: _Optional[RollConvention] = None,
+        day_count_convention: _Optional[DayCounterType] = None,
+        issuer: _Optional[_Union[Issuer, str]] = None,
+        securitization_level: _Optional[_Union[SecuritizationLevel, str]] = "NONE",
+        rating: _Optional[_Union[Rating, str]] = "NONE",
+        fixings: _Optional[FixingTable] = None,
+        spot_days: int = 2,
+        calendar: _Optional[_Union[_HolidayBase, str]] = None,
+        stub_type_is_Long: bool = True,
+        adjust_start_date: bool = True,
+        adjust_end_date: bool = False,
+        adjust_schedule: bool = False,
+        adjust_accruals: bool = True,
+    ):
+        """Create a floating-rate bond specification.
+
+        Either ``index`` or ``frequency`` must be provided. If ``index`` is
+        supplied and contains convention information, frequency, calendar and
+        day-count are inferred from it unless explicitly overridden.
 
         Args:
-            # TODO: How can we avoid repeating ourselves here?
-            obj_id (str): (Preferably) Unique label of the bond, e.g. ISIN.
-            issue_date (Union[date, datetime]): Date of bond issuance.
-            maturity_date (Union[date, datetime]): Bond's maturity/expiry date. Must lie after the issue_date.
+            obj_id (str): Unique identifier for the bond.
+            notional (NotionalStructure | float): Notional or notional structure.
+            currency (Currency | str): Currency code or enum.
+            issue_date (date | datetime): Issue date.
+            maturity_date (date | datetime): Maturity date.
+            margin (float): Spread added to the floating index (decimal).
+            frequency (Period | str, optional): Payment frequency. May be inferred from index.
+            amortization_scheme (str | AmortizationScheme, optional): Amortization descriptor or object.
+            index (InterestRateIndex | str, optional): Index alias or enum used for fixings.
+            business_day_convention (RollConvention | str, optional): Business day convention.
+            day_count_convention (DayCounterType | str, optional): Day count convention.
+            issuer (Issuer | str, optional): Issuer identifier.
+            securitization_level (SecuritizationLevel | str, optional): Securitization level.
+            rating (Rating | str, optional): Instrument rating.
+            fixings (FixingTable, optional): Fixing table for historical fixings.
+            spot_days (int, optional): Spot settlement days. Defaults to 2.
+            calendar (HolidayBase | str, optional): Holiday calendar. May be inferred from index.
+            stub_type_is_Long (bool, optional): Use long stub when generating schedule. Defaults to True.
+            adjust_start_date (bool, optional): Adjust start date to business day. Defaults to True.
+            adjust_end_date (bool, optional): Adjust end date to business day. Defaults to False.
+            adjust_schedule (bool, optional): Adjust schedule dates to business days. Defaults to False.
+            adjust_accruals (bool, optional): Adjust accrual dates to business days. Defaults to True.
 
-            tenor: (Union[period, str]): Time distance between two coupon payment dates.
-            backwards (bool, optional): Defines direction for rolling out the schedule. True means the schedule will be
-                                        rolled out (backwards) from maturity date to issue date. Defaults to True.
-            stub (bool, optional): Defines if the first/last period is accepted (True), even though it is shorter than
-                                   the others, or if it remaining days are added to the neighbouring period (False).
-                                   Defaults to True.
-            business_day_convention (Union[RollConvention, str], optional): Set of rules defining the adjustment of
-                                                                            days to ensure each date being a business
-                                                                            day with respect to a given holiday
-                                                                            calendar. Defaults to
-                                                                            RollConvention.FOLLOWING
-            calendar (Union[HolidayBase, str], optional): Holiday calendar defining the bank holidays of a country or
-                                                          province (but not all non-business days as for example
-                                                          Saturdays and Sundays).
-                                                          Defaults (through constructor) to holidays.ECB
-                                                          (= Target2 calendar) between start_day and end_day.
-            # TODO: How can we avoid repeating ourselves here?
-            day_count_convention (Union[DayCounter, str], optional): Day count convention for determining period
-                                                                     length. Defaults to DayCounter.ThirtyU360.
-            spread (float, optional): Spread added to floating rate derived from fixing the reference curve as fraction
-                                      of notional, i.e. 0.0025 for 25 basis points. Defaults to 0.0.
-            reference_index (str, optional): Floating rate note underlying reference curve used for fixing the floating
-                                             rate coupon amounts. Defaults to 'dummy_curve'.
-                                             Note: A reference curve could also be provided later at the pricing stage.
-            currency (str, optional): Currency as alphabetic code according to iso
-                                                            currency code ISO 4217
-                                                            (cf. https://www.iso.org/iso-4217-currency-codes.html).
-                                                            Defaults to 'EUR'.
-            notional (float, optional): Bond's notional/face value. Must be positive. Defaults to 100.0.
-            issuer (str, optional): Issuer of the instrument. Defaults to None.
-            securitisation_level (Union[SecuritizationLevel, str], optional): Securitisation level of the instrument.
-                                                                             Defaults to None.
-        Returns:
-            FloatingRateNote: Corresponding floating rate note with already generated schedule for coupon payments.
+        Raises:
+            ValueError: If neither index nor frequency is provided.
         """
-        tenor = _term_to_period(tenor)
-        business_day_convention = RollConvention.to_string(business_day_convention)
-        if calendar is None:
-            calendar = _ECB(years=range(issue_date.year, maturity_date.year + 1))
+
+        if index is None and frequency is None:
+            raise ValueError("Either index or frequency must be provided for a floating rate bond.")
+        elif index is not None:
+            if isinstance(index, str):
+                # get_index_by_alias will raise if alias unknown
+                ir_index = get_index_by_alias(index)
+            else:
+                ir_index = index
+            # if not explicitly provided, extract conventions from index
+            if business_day_convention is None:
+                business_day_convention = ir_index.value.business_day_convention
+            if day_count_convention is None:
+                day_count_convention = ir_index.value.day_count_convention
+            if frequency is None:
+                frequency = ir_index.value.tenor
+            if calendar is None:
+                if ir_index.value.calendar.upper() == "TARGET":
+                    calendar = _ECB()
+                else:
+                    calendar = ir_index.value.calendar
         else:
-            calendar = _string_to_calendar(calendar)
-        schedule = Schedule(issue_date, maturity_date, tenor, backwards, stub, business_day_convention, calendar)
-        coupon_period_dates = schedule.generate_dates(False)
-        spreads = [spread] * (len(coupon_period_dates) - 1)
-        return FloatingRateNoteSpecification(obj_id, issue_date, maturity_date, coupon_period_dates, day_count_convention, spreads,
-                                reference_index, currency, notional, issuer, securitisation_level)
+            # no index info given, rely on provided frequency or use default conventions
+            frequency = frequency
+            ir_index = None
+            business_day_convention = "ModifiedFollowing" if business_day_convention is None else business_day_convention
+            day_count_convention = "ACT360" if day_count_convention is None else day_count_convention
+            calendar = calendar if calendar is not None else _ECB()
 
-    @property
-    def coupon_period_dates(self) -> _List[date]:
-        """
-        Getter for accrual periods for floating rate coupons.
-        
-        Returns:
-            List[date]: List of accrual periods for floating rate coupons.
-        """
-        return self.__coupon_period_dates
+        super().__init__(
+            obj_id=obj_id,
+            fixings=fixings,
+            spot_days=spot_days,
+            issue_date=issue_date,
+            maturity_date=maturity_date,
+            notional=notional,
+            amortization_scheme=amortization_scheme,
+            currency=currency,
+            margin=margin,
+            coupon_type="float",
+            frequency=frequency,
+            index=index,
+            ir_index=ir_index,
+            day_count_convention=day_count_convention,
+            business_day_convention=business_day_convention,
+            notional_exchange=True,
+            payment_days=0,
+            stub_type_is_Long=stub_type_is_Long,
+            issuer=issuer,
+            rating=rating,
+            securitization_level=securitization_level,
+            calendar=calendar,
+            adjust_start_date=adjust_start_date,
+            adjust_end_date=adjust_end_date,
+            adjust_schedule=adjust_schedule,
+            adjust_accruals=adjust_accruals,
+        )
 
-    @property
-    def daycount_convention(self) -> str:
-        """
-        Getter for bond's day count convention.
-        
-        Returns:
-            str: Bond's day count convention. 
-        """
-        return self.__day_count_convention
-
-    @daycount_convention.setter
-    def daycount_convention(self, day_count_convention: _Union[DayCounterType, str])-> str:
-        self.__day_count_convention = DayCounterType.to_string(day_count_convention)
-
-    @property
-    def spreads(self) -> _List[float]:
-        """
-        Getter for spreads added to the floating rates determined by fixing of reference index.
-        
-        Returns:
-            List[float]: List of spreads added to the floating rates determined by fixing of reference index.
-        """
-        return self.__spreads
-
-    @property
-    def reference_index(self) -> str:
-        """
-        Getter for reference index for fixing floating rates.
-
-        Returns:
-            str: Reference index for fixing floating rates.
-        """
-        return self.__reference_index
-
-
-class FixedToFloatingRateNoteSpecification(FixedRateBondSpecification, FloatingRateNoteSpecification):
-    def __init__(self,
-                 obj_id: str,
-                 issue_date: _Union[date, datetime],
-                 maturity_date: _Union[date, datetime],
-                 coupon_payment_dates: _List[_Union[date, datetime]],
-                 coupons: _List[float],
-                 coupon_period_dates: _List[_Union[date, datetime]],
-                 day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
-                 spreads: _List[float] = None,
-                 reference_index: str = 'dummy_curve',
-                 currency: str = 'EUR',
-                 notional: float = 100.0,
-                 issuer: str = None,
-                 securitisation_level: _Union[SecuritizationLevel, str] = None):
-        """
-        Fixed-to-floating rate note specification by providing fixed rate coupons and fixed rate coupon payment dates
-        as well as floating rate coupon periods directly.
-        """
-        # TODO FIX THIS CLASS!!!!!!!!!!!!!!!!
-        raise Exception('Not working properly, @Stefan: Please fix me!!!!')
-        FixedRateBondSpecification.__init__(self, obj_id, issue_date, maturity_date, coupon_payment_dates, coupons,
-                               currency, notional, issuer, securitisation_level)
-
-        FloatingRateNoteSpecification.__init__(self, obj_id, issue_date, maturity_date, coupon_period_dates,
-                                  day_count_convention, spreads, reference_index, currency, notional, issuer,
-                                  securitisation_level)
-
-    @classmethod
-    def from_master_data(cls, obj_id: str,
-                         issue_date: _Union[date, datetime],
-                         fixed_to_float_date: _Union[date, datetime],
-                         maturity_date: _Union[date, datetime],
-                         coupon: float,
-                         tenor_fixed: _Union[Period, str],
-                         tenor_float: _Union[Period, str],
-                         backwards_fixed: bool = True,
-                         backwards_float: bool = True,
-                         stub_fixed: bool = False,
-                         stub_float: bool = False,
-                         business_day_convention_fixed: _Union[RollConvention, str] = RollConvention.FOLLOWING,
-                         business_day_convention_float: _Union[RollConvention, str] = RollConvention.FOLLOWING,
-                         calendar_fixed: _Union[_HolidayBase, str] = None,
-                         calendar_float: _Union[_HolidayBase, str] = None,
-                         day_count_convention: _Union[DayCounterType, str] = DayCounterType.ThirtyU360,
-                         spread: float = 0.0,
-                         reference_index: str = 'dummy_curve',
-                         currency: _Union[str, int] = 'EUR',
-                         notional: float = 100.0,
-                         issuer: str = None,
-                         securitisation_level: _Union[SecuritizationLevel, str] = None):
-        """
-        Fixed-to-floating rate note specification based on master data.
+    @staticmethod
+    def _create_sample(n_samples: int, seed: int = None):
+        """Return a list of example FloatingRateBondSpecification instances.
 
         Args:
-            # TODO: How can we avoid repeating ourselves here?
-            obj_id (str): (Preferably) Unique label of the bond, e.g. ISIN.
-            issue_date (_Union[date, datetime]): Date of bond issuance.
-            fixed_to_float_date (_Union[date, datetime]): Date where fixed schedule changes into floating one.
-            maturity_date (_Union[date, datetime]): Bond's maturity/expiry date. Must lie after the issue_date.
-            coupon (float): Annualised coupon amount as fraction of notional, e.g. 0.0125 for fixed rate coupon of
-                            1.25%.
-            tenor_fixed (_Union[period, str]): Time distance between two fixed rate coupon payment dates.
-            tenor_float (_Union[period, str]): Time distance between two floating rate coupon payment dates.
-            backwards_fixed (bool, optional): Defines direction for rolling out the schedule for the fixed rate part.
-                                              True means the schedule will be rolled out (backwards) from maturity date
-                                              to issue date. Defaults to True.
-            backwards_float (bool, optional): Defines direction for rolling out the schedule for the floating rate part.
-                                              True means the schedule will be rolled out (backwards) from maturity date
-                                              to issue date. Defaults to True.
-            stub_fixed (bool, optional): Defines if the first/last period is accepted (True) in the fixed rate schedule,
-                                         even though it is shorter than the others, or if it remaining days are added to
-                                         the neighbouring period (False). Defaults to True.
-            stub_float (bool, optional): Defines if the first/last period is accepted (True) in the float rate schedule,
-                                         even though it is shorter than the others, or if it remaining days are added to
-                                         the neighbouring period (False). Defaults to True.
-            business_day_convention_fixed (_Union[RollConvention, str], optional): Set of rules defining the adjustment
-                                                                                   of days to ensure each date in the
-                                                                                   fixed rate schedule being a business
-                                                                                   day with respect to a given holiday
-                                                                                   calendar. Defaults to
-                                                                                   RollConvention.FOLLOWING
-            business_day_convention_float (_Union[RollConvention, str], optional): Set of rules defining the adjustment
-                                                                                   of days to ensure each date in the
-                                                                                   float rate schedule being a business
-                                                                                   day with respect to a given holiday
-                                                                                   calendar. Defaults to
-                                                                                   RollConvention.FOLLOWING
-            calendar_fixed (_Union[__HolidayBase, str], optional): Holiday calendar defining the bank holidays of a
-                                                                  country or province (but not all non-business days as
-                                                                  for example Saturdays and Sundays).
-                                                                  Defaults (through constructor) to holidays.ECB
-                                                                  (= Target2 calendar) between start_day and end_day.
-            calendar_float (_Union[__HolidayBase, str], optional): Holiday calendar defining the bank holidays of a
-                                                                  country or province (but not all non-business days as
-                                                                  for example Saturdays and Sundays).
-                                                                  Defaults (through constructor) to holidays.ECB
-                                                                  (= Target2 calendar) between start_day and end_day.
-            day_count_convention (_Union[DayCounter, str], optional): Day count convention for determining period
-                                                                      length.Defaults to DayCounter.ThirtyU360.
-            spread (float, optional): Spread added to floating rate derived from fixing the reference curve as fraction
-                                      of notional, i.e. 0.0025 for 25 basis points. Defaults to 0.0.
-            reference_index (str, optional): Floating rate note underlying reference curve used for fixing the floating
-                                             rate coupon amounts. Defaults to 'dummy_curve'.
-                                             Note: A reference curve could also be provided later at the pricing stage.
-            currency (str, optional): Currency as alphabeticcode according to iso currency code
-                                                   ISO 4217 (cf. https://www.iso.org/iso-4217-currency-codes.html).
-                                                   Defaults to 'EUR'.
-            notional (float, optional): Bond's notional/face value. Must be positive. Defaults to 100.0.
-            issuer (str, optional): Issuer of the instrument. Defaults to None.
-            securitisation_level (_Union[SecuritizationLevel, str], optional): Securitisation level of the instrument.
-                                                                               Defaults to None.
+            n_samples (int): Number of sample instances to create.
+            seed (int, optional): RNG seed for reproducibility.
 
         Returns:
-            FixedToFloatingRateNote: Corresponding fixed-to-floating rate note with already generated schedules for
-                                     fixed rate and floating rate coupon payments.
+            List[FloatingRateBondSpecification]: Example floating-rate bonds.
         """
-        fixed_rate_part = FixedRateBondSpecification.from_master_data(obj_id, issue_date, fixed_to_float_date, coupon, tenor_fixed,
-                                                         backwards_fixed, stub_fixed, business_day_convention_fixed,
-                                                         calendar_fixed, currency, notional, issuer,
-                                                         securitisation_level)
-        floating_rate_part = FloatingRateNoteSpecification.from_master_data(obj_id, fixed_to_float_date, maturity_date, tenor_float,
-                                                               backwards_float, stub_float,
-                                                               business_day_convention_float, calendar_float,
-                                                               day_count_convention, spread, reference_index, currency,
-                                                               notional, issuer, securitisation_level)
-        return FixedToFloatingRateNoteSpecification(obj_id, issue_date, maturity_date, fixed_rate_part.coupon_payment_dates,
-                                       fixed_rate_part.coupons, floating_rate_part.coupon_period_dates,
-                                       day_count_convention, floating_rate_part.spreads, reference_index, currency,
-                                       notional, issuer, securitisation_level)
-        
+        result = []
+        if seed is not None:
+            np.random.seed(seed)
+
+        issue_date = datetime(2025, 1, 1)
+        maturity_date = datetime(2027, 1, 1)
+        notional = 100.0
+        currency = Currency.EUR
+        fixings = FixingTable()
+        securitization_level = SecuritizationLevel.SUBORDINATED
+        daycounter = "ACT_ACT"
+        for i in range(n_samples):
+            margin = np.random.choice([0.0, 1, 3, 5])
+            period = np.random.choice(["1Y", "6M", "3M"])
+            result.append(
+                FloatingRateBondSpecification(
+                    obj_id=f"ID_{i}",
+                    notional=notional,
+                    frequency=period,
+                    currency=currency,
+                    issue_date=issue_date,
+                    maturity_date=maturity_date,
+                    margin=margin,
+                    securitization_level=securitization_level,
+                    day_count_convention=daycounter,
+                    fixings=fixings,
+                )
+            )
+        return result
+
+    def _to_dict(self) -> Dict:
+        """Serialize the floating-rate bond specification to a dictionary.
+
+        Returns:
+            Dict: JSON-serializable representation of the specification.
+        """
+        dict = {
+            "obj_id": self.obj_id,
+            "issuer": self._issuer,
+            "securitization_level": self._securitization_level,
+            "issue_date": serialize_date(self._issue_date),
+            "maturity_date": serialize_date(self._maturity_date),
+            "currency": self._currency,
+            "notional": self._notional,
+            "rating": self._rating,
+            "frequency": self._frequency,
+            "day_count_convention": self._day_count_convention,
+            "business_day_convention": self._business_day_convention,
+            "fixings": self._fixings._to_dict() if isinstance(self._fixings, FixingTable) else self._fixings,
+            "ir_index": self._ir_index,
+            "index": self._index,
+            "margin": self._margin,
+            "spot_days": self._spot_days,
+            "calendar": getattr(self._calendar, "name", self._calendar.__class__.__name__),
+            "adjust_start_date": self._adjust_start_date,
+            "adjust_end_date": self._adjust_end_date,
+        }
+        return dict
+
+
+def bonds_main():
+    # zero coupon bond
+    zero_coupon_bond = ZeroBondSpecification(
+        obj_id="US500769CH58",
+        issue_price=85.0,
+        issue_date=datetime(2007, 6, 29),
+        maturity_date=datetime(2037, 6, 29),
+        currency="USD",
+        notional=1000,
+        issuer="KfW",
+        securitization_level=SecuritizationLevel.SENIOR_UNSECURED,
+    )
+    # print("Zero Coupon Bond Specification:")
+    # print(zero_coupon_bond._to_dict())
+    # print(zero_coupon_bond.notional_amount())
+
+
+if __name__ == "__main__":
+    bonds_main()

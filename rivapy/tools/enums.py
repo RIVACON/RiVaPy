@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from enum import Enum as _Enum, unique as _unique
-from rivapy import _pyvacon_available
+from dataclasses import dataclass
+from typing import List
+
 
 """
 
@@ -27,13 +29,23 @@ class _MyEnum(_Enum):
             str: _description_
         """
 
-        def has_value(cls, value):
-            return value in cls._value2member_map_
-
+        # Accept either the enum's stored value (e.g. 'Act360') or its name/key (e.g. 'ACT360')
+        # Matching is case-insensitive for robustness.
         if isinstance(value, str):
-            if not cls.has_value(value):
-                raise Exception("Unknown  " + cls.__name__ + ": " + value)
-            return value
+            v = value.strip()
+            # direct match against stored values (exact)
+            for member in cls:
+                if v == member.value:
+                    return member.value
+            # exact name/key match
+            if v in cls.__members__:
+                return cls[v].value
+            # case-insensitive match against names or values
+            uv = v.upper()
+            for member in cls:
+                if uv == member.name.upper() or uv == str(member.value).upper():
+                    return member.value
+            raise Exception("Unknown " + cls.__name__ + ": " + value)
         if isinstance(value, cls):
             return value.value
         raise Exception("Given value " + str(value) + " does not belong to enum " + cls.__name__)
@@ -56,43 +68,45 @@ class _MyIntEnum(_Enum):
             str: _description_
         """
 
-        def has_value(cls, value):
-            return value in cls._value2member_map_
-
+        # Accept either the enum name (string) or integer value. Return the enum NAME as string.
         if isinstance(value, str):
-            cls[value]  # check if the string exists as key
-            return value
+            v = value.strip()
+            # direct name/key match
+            if v in cls.__members__:
+                return v
+            # case-insensitive name match
+            uv = v.upper()
+            for member in cls:
+                if uv == member.name.upper():
+                    return member.name
+            raise Exception("Unknown " + cls.__name__ + ": " + value)
         elif isinstance(value, int):
-            return cls._value2member_map_[value].name
+            try:
+                return cls(value).name
+            except Exception:
+                raise Exception("Unknown " + cls.__name__ + ": " + str(value))
         if isinstance(value, cls):
             return value.name
         raise Exception("Given value " + str(value) + " does not belong to enum " + cls.__name__)
 
 
-if _pyvacon_available:
-    from pyvacon.finance.definition import DayCounter as _DayCounter
+@_unique
+class InterpolationType(_MyEnum):
+    CONSTANT = "CONSTANT"
+    LINEAR = "LINEAR"
+    LINEAR_LOG = "LINEAR_LOG"
+    CONSTRAINED_SPLINE = "CONSTRAINED_SPLINE"
+    HAGAN = "HAGAN"
+    HAGAN_DF = "HAGAN_DF"
 
-    DayCounterType = _DayCounter.Type
 
-    from pyvacon.numerics.interpolation import InterpolationType
-    from pyvacon.numerics.extrapolation import ExtrapolationType
-else:
-
-    @_unique
-    class InterpolationType(_MyEnum):
-        CONSTANT = "CONSTANT"
-        LINEAR = "LINEAR"
-        LINEAR_LOG = "LINEARLOG"
-        CONSTRAINED_SPLINE = "CONSTRAINED_SPLINE"
-        HAGAN = "HAGAN"
-        HAGAN_DF = "HAGAN_DF"
-
-    @_unique
-    class ExtrapolationType(_MyEnum):
-        NONE = "NONE"
-        CONSTANT = "CONSTANT"
-        LINEAR = "LINEAR"
-        LINEAR_LOG = "LINEARLOG"
+@_unique
+class ExtrapolationType(_MyEnum):
+    NONE = "NONE"
+    CONSTANT = "CONSTANT"
+    CONSTANT_DF = "CONSTANT_DF"
+    LINEAR = "LINEAR"
+    LINEAR_LOG = "LINEAR_LOG"
 
 
 @_unique
@@ -190,13 +204,16 @@ class RollConvention(_MyEnum):
     UNADJUSTED = "Unadjusted"
 
 
-# class RollConvention:
-#     FOLLOWING = 'Following'
-#     MODIFIED_FOLLOWING = 'ModifiedFollowing'
-#     MODIFIED_FOLLOWING_EOM = 'ModifiedFollowingEOM'
-#     PRECEDING = 'Preceding'
-#     MODIFIED_PRECEDING = 'ModifiedPreceding'
-#     UNADJUSTED = 'Unadjusted'
+@_unique
+class RollRule(_MyEnum):
+    """Roll Rules are used for calculating daten when building a schedule and, therefore, rolling forward (or backward) dates by periods or frequencies"""
+
+    NONE = "NONE"  # no roll rule applied,  day of a month drifts if adjustments are made acc. to bdc, i.e. the anchor date changes
+    EOM = "EOM"  # rolls from month end to month end, ambiguous days are adjusted to the end of the month, i.e. Mar 30,
+    DOM = "DOM"  # rolls from a specific day of month to the same day of month, ambiguous days are adjusted to the same day of month, i.e. Mar 30,
+    IMM = "IMM"  # rolls to the third Wednesday of the month, i.e. Mar 30, rolls to Mar 20, if Mar 20 is a weekend, it rolls to Mar 22
+
+
 @_unique
 class DayCounterType(_MyEnum):
     ACT_ACT = "ActAct"
@@ -205,6 +222,8 @@ class DayCounterType(_MyEnum):
     ThirtyU360 = "30U360"
     ThirtyE360 = "30E360"
     ACT252 = "Act252"
+    Thirty360ISDA = "30360ISDA"
+    ActActICMA = "ActActICMA"
 
 
 @_unique
@@ -481,3 +500,117 @@ class Country(_MyEnum):
     GB = "GB"
     JP = "JP"
     CN = "CN"
+
+
+class IrLegType(_MyEnum):
+    """Enums object for the type of interest rate swap legs."""
+
+    FIXED = "FIXED"
+    FLOAT = "FLOAT"
+    OIS = "OIS"
+
+    @staticmethod
+    def from_string(s: str) -> str:
+        s = s.upper()
+        if s in (IrLegType.FIXED, IrLegType.FLOAT, IrLegType.OIS):
+            return s
+        raise ValueError(f"Unknown leg type '{s}'")
+
+    # @staticmethod
+    # def to_string(cls, value: str) -> str:
+    #     return value.upper()
+
+
+class Instrument(_MyEnum):
+    """Enums object for the type of instrument."""
+
+    IRS = "IRS"
+    TBS = "TBS"
+    BS = "BS"
+    DEPOSIT = "DEPOSIT"
+    OIS = "OIS"
+    FRA = "FRA"
+    FXF = "FXF"
+
+
+@dataclass(frozen=True)
+class IRIndexMetadata:
+    name: str
+    currency: str
+    tenor: str
+    spot_days: int
+    business_day_convention: str
+    day_count_convention: str
+    roll_convention: str
+    calendar: str
+    aliases: List[str]
+
+
+class InterestRateIndex(_MyEnum):
+    EUR1M = IRIndexMetadata(
+        name="EURIBOR 1M",
+        currency="EUR",
+        tenor="1M",
+        spot_days=2,
+        business_day_convention="ModifiedFollowing",
+        day_count_convention="ACT360",
+        roll_convention="EOM",
+        calendar="TARGET",
+        aliases=["EUR1M", " EUR 1M", "EURIBOR 1M"],
+    )
+    EUR3M = IRIndexMetadata(
+        name="EURIBOR 3M",
+        currency="EUR",
+        tenor="3M",
+        spot_days=2,
+        business_day_convention="ModifiedFollowing",
+        day_count_convention="ACT360",
+        roll_convention="EOM",
+        calendar="TARGET",
+        aliases=["EUR3M", " EUR 3M", "EURIBOR 3M", "EURIBOR_3M"],
+    )
+    EUR6M = IRIndexMetadata(
+        name="EURIBOR 6M",
+        currency="EUR",
+        tenor="6M",
+        spot_days=2,
+        business_day_convention="ModifiedFollowing",
+        day_count_convention="ACT360",
+        roll_convention="EOM",
+        calendar="TARGET",
+        aliases=["EUR6M", "EUR 6M", "EURIBOR 6M"],
+    )
+    EUR12M = IRIndexMetadata(
+        name="EURIBOR 12M",
+        currency="EUR",
+        tenor="12M",
+        spot_days=2,
+        business_day_convention="ModifiedFollowing",
+        day_count_convention="ACT360",
+        roll_convention="EOM",
+        calendar="TARGET",
+        aliases=["EUR12M", "EUR 12M", "EURIBOR 12M", "EUR1Y", "EUR_1Y", "EURIBOR_1Y"],
+    )
+    ESTR = IRIndexMetadata(
+        name="€STR",
+        currency="EUR",
+        tenor="O/N",
+        spot_days=0,
+        business_day_convention="Following",
+        day_count_convention="ACT360",
+        roll_convention="None",
+        calendar="TARGET",
+        aliases=["EURSTR", "EUR STR", "€STR", "EUR1D", "EUR O/N"],
+    )
+
+
+def get_index_by_alias(alias: str) -> InterestRateIndex:
+    alias = alias.strip().upper()
+    for index in InterestRateIndex:
+        value = index.value
+        aliases = [a.upper() for a in value.aliases]
+        if alias in aliases or alias == index.name.upper():
+            print("erfolgreich")
+            str = index.value.name
+            return index
+    raise ValueError(f"Unknown index alias: {alias}")
