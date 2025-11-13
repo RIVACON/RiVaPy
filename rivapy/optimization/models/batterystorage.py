@@ -260,9 +260,9 @@ def backward(
 
         base_dispatch_action = base_dispatch[t]
 
-        discharge_price = eff_out * ask_price * max_capacity / 100.0
-        charge_price_volume = (1 / eff_in) * bid_price * max_capacity / 100.0
-        charge_price = bid_price * max_capacity / 100.0
+        discharge_price = eff_out * bid_price  # * max_capacity  # / 100.0
+        charge_price_volume = (1 / eff_in) * ask_price  # * max_capacity  # / 100.0
+        charge_price = ask_price  # * max_capacity  # / 100.0
 
         for state_id in _range_states:
             state = states[state_id]
@@ -406,8 +406,8 @@ def backward(
                         if np.abs((end_state - state)) <= np.abs(dsptch_min_action):
                             value = value_matrix[t + 1, end_state_id, charge_id] + np.abs((end_state - state)) * discharge_price
 
-                        if min_value < value:
-                            min_value = value
+                            if min_value < value:
+                                min_value = value
 
                 value_matrix[t, state_id, charge_id] = min_value
 
@@ -499,9 +499,9 @@ def forward(
         bid_price = bid_prices[t - 1]
         ask_price = ask_prices[t - 1]
 
-        discharge_price = eff_out * ask_price * max_capacity / 100.0
-        charge_price_volume = (1 / eff_in) * bid_price * max_capacity / 100.0
-        charge_price = bid_price * max_capacity / 100.0
+        discharge_price = eff_out * bid_price  # * max_capacity  # / 100.0
+        charge_price_volume = (1 / eff_in) * ask_price  # * max_capacity  # / 100.0
+        charge_price = ask_price  # * max_capacity  # / 100.0
 
         prev_state = state_choices[t - 1]
         prev_charge = charges_choices[t - 1]
@@ -570,6 +570,7 @@ def forward(
                 chosen_state = next_state
                 chosen_action = action
                 chosen_charge = next_charge
+                print("TEST 1", value, next_state, action, next_charge)
 
         dsptch_max_action = min(base_dispatch_action + max_action, max_action)
         dsptch_min_action = max(base_dispatch_action + min_action, min_action)
@@ -604,6 +605,7 @@ def forward(
                     chosen_state = next_state
                     chosen_action = action
                     chosen_charge = next_charge
+                    print("TEST 2", value, next_state, action, next_charge)
 
         # Check if continuous action could empty the storage
         if np.abs((min_state - prev_state)) <= np.abs(dsptch_min_action):
@@ -630,6 +632,7 @@ def forward(
                 chosen_state = next_state
                 chosen_action = action
                 chosen_charge = next_charge
+                print("TEST 3", value, next_state, action, next_charge)
 
         # Check if maxing out the max_charges is optimal (consider state of charge)
         if (max_charge - prev_charge <= dsptch_max_action * eff_in) and (prev_state + (max_charge - prev_charge) * eff_in <= max_state):
@@ -659,6 +662,7 @@ def forward(
                 chosen_state = next_state
                 chosen_action = action
                 chosen_charge = next_charge
+                print("TEST 4", value, next_state, action, next_charge)
 
         # check if reaching the end state is possible and optimal
         if end_state is not None:
@@ -693,6 +697,7 @@ def forward(
                             chosen_state = next_state
                             chosen_action = action
                             chosen_charge = next_charge
+                            print("TEST 5", value, next_state, action, next_charge)
 
             elif end_state < prev_state:
                 if np.abs((end_state - prev_state)) <= np.abs(dsptch_min_action):
@@ -719,10 +724,14 @@ def forward(
                         chosen_state = next_state
                         chosen_action = action
                         chosen_charge = next_charge
+                        print("TEST 6", value, next_state, action, next_charge)
 
         state_choices[t] = chosen_state
         charges_choices[t] = chosen_charge
         action_choices[t - 1] = chosen_action
+
+        print("FINAL", best_value, chosen_state, chosen_charge, chosen_action)
+        print("#########################################################################################")
 
         if chosen_action > 0:
             objective[t - 1] = chosen_action * (-1) * charge_price
@@ -731,9 +740,9 @@ def forward(
 
         # print(print_value)
 
-    state_choices *= max_capacity / 100.0
-    charges_choices *= max_capacity / 100.0
-    action_choices *= max_capacity / 100.0
+    # state_choices *= max_capacity  # / 100.0
+    # charges_choices *= max_capacity  # / 100.0
+    # action_choices *= max_capacity  # / 100.0
 
     return state_choices, charges_choices, action_choices, objective
 
@@ -898,6 +907,7 @@ class BatteryStorage:
             tolerance=self._tolerance,
         )
 
+        self._value_matrix = value_matrix
         self.__optimized = True
 
     def create_output(self) -> pd.DataFrame:
