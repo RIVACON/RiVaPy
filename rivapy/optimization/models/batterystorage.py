@@ -12,6 +12,22 @@ print(f"USE NUMBA: {USE_NUMBA}")
 
 
 def _default_decorator(func: Callable):
+    """Return a no-op decorator that simply calls the wrapped function.
+
+    This helper is used when numba is disabled so that the same @njit
+    decorator API can be used without compiling the function.
+
+    Parameters
+    ----------
+    func : Callable
+        The function to wrap.
+
+    Returns
+    -------
+    Callable
+        A wrapper that forwards arguments to `func` and returns its result.
+    """
+
     def _wraper(*args, **kwargs):
         return func(*args, **kwargs)
 
@@ -19,6 +35,25 @@ def _default_decorator(func: Callable):
 
 
 def njit(func: Callable):
+    """Conditional decorator that uses Numba's `njit` when available.
+
+    When `USE_NUMBA` is True the function is compiled with `numba.njit`.
+    Otherwise a lightweight wrapper is returned that preserves the
+    original call semantics but does not perform compilation. This allows
+    the same decorated functions to work in both development and
+    production environments where Numba may not be available.
+
+    Parameters
+    ----------
+    func : Callable
+        The function to decorate.
+
+    Returns
+    -------
+    Callable
+        Either the numba-jitted function or a plain wrapper.
+    """
+
     if USE_NUMBA:
         return numba_njit(func)
     else:
@@ -43,6 +78,51 @@ def _value_wrapper(
     penalty: float,
     tolerance: float,
 ) -> float:
+    """Evaluate a candidate next state/charge and return its value.
+
+    This wrapper performs basic feasibility checks (state and charge
+    bounds and maximum charge) and converts an action into an immediate
+    reward according to the `mode` (charge/discharge/idle). It then
+    delegates to the internal value interpolation routine `__value` to
+    obtain the continuation value from the value matrix and returns the
+    total value (continuation + immediate reward).
+
+    Parameters
+    ----------
+    state, charge : float
+        Candidate next state-of-charge and cumulative charge.
+    action : float
+        The action applied (positive => charging, negative =>
+        discharging).
+    max_state, min_state : float
+        Allowed state-of-charge bounds.
+    discharge_gain : float
+        Effective price received when discharging (including efficiency).
+    charge_costs : float
+        Effective cost to charge (including efficiency).
+    t : int
+        Time index for looking up values in `value_matrix` (next step).
+    states : np.ndarray
+        Grid of state-of-charge values.
+    max_charges : np.ndarray
+        Grid of cumulative charge values.
+    max_charge : float
+        Maximum value in `max_charges`.
+    value_matrix : np.ndarray
+        Precomputed value-to-go matrix with shape (T, n_states, n_charges).
+    mode : int
+        Mode indicator: 1 -> charging, -1 -> discharging, 0 -> idle.
+    penalty : float
+        Value returned for infeasible states.
+    tolerance : float
+        Numerical tolerance used when comparing to grid values.
+
+    Returns
+    -------
+    float
+        The total value (continuation value + immediate reward) or
+        `penalty` if infeasible or undefined.
+    """
 
     if state < min_state or state > max_state:
         value = penalty
@@ -86,6 +166,38 @@ def __value(
     penalty: float,
     tolerance: float,
 ) -> float:
+    """Interpolate the continuation value from the value matrix.
+
+    Performs 0D/1D/2D interpolation depending on whether `state` and
+    `charge` lie exactly on the respective grids. If any of the corner
+    grid points involved in a 2D interpolation are flagged with
+    `penalty`, `penalty` is returned to indicate infeasibility.
+
+    Parameters
+    ----------
+    state, charge : float
+        Query point in the 2D grid (state x charge).
+    t : int
+        Time index to use for the lookup in `value_matrix`.
+    states : np.ndarray
+        1D grid of state values.
+    max_charges : np.ndarray
+        1D grid of charge-cumulative values.
+    value_matrix : np.ndarray
+        The value-to-go matrix of shape (T, n_states, n_charges).
+    reward : float
+        Immediate reward to add to the interpolated continuation value.
+    penalty : float
+        Penalty value used to indicate infeasible entries.
+    tolerance : float
+        Numerical tolerance used for equality checks.
+
+    Returns
+    -------
+    float
+        Interpolated continuation value plus `reward`, or `penalty` if
+        interpolation touches infeasible grid points.
+    """
 
     idx_state = np.searchsorted(states, state)
 
@@ -175,6 +287,13 @@ def __linear_interpolate_charge(
     penalty: float,
     tolerance: float,
 ) -> float:
+    """Linearly interpolate value along the `charge` axis for a fixed state.
+
+    If either end point used for interpolation is `penalty`, `penalty`
+    is returned. A simple linear interpolation (m*x+b) is performed and
+    the immediate `reward` is added before returning the result.
+    """
+
     if ceil_idx == 0:
         floor_idx = ceil_idx
         ceil_idx = ceil_idx + 1
@@ -200,6 +319,13 @@ def __linear_interpolate_state(
     penalty: float,
     tolerance: float,
 ) -> float:
+    """Linearly interpolate value along the `state` axis for a fixed charge.
+
+    Works analogously to `__linear_interpolate_charge` but interpolates
+    over the `states` axis. Returns `penalty` if any interpolation
+    endpoint is infeasible.
+    """
+
     if ceil_idx == 0:
         floor_idx = ceil_idx
         ceil_idx = ceil_idx + 1
@@ -228,6 +354,45 @@ def backward(
     penalty: float = -1e12,
     tolerance: float = 1e-8,
 ):
+    """Perform the dynamic programming backward pass.
+
+    Computes the value-to-go matrix over the time horizon by iterating
+    backwards from the final time step and taking the optimal action at
+    each grid point (state x charge). The returned `value_matrix` has
+    shape `(T, n_states, n_charges)` and uses `penalty` for infeasible
+    combinations.
+
+    Parameters
+    ----------
+    eff_in, eff_out : float
+        Charging and discharging efficiencies.
+    max_capacity : float
+        Maximum energy capacity (not directly used by the DP grid but
+        provided for API consistency).
+    states : np.ndarray
+        State-of-charge grid.
+    actions : np.ndarray
+        Discrete actions (positive charge, negative discharge).
+    bid_prices, ask_prices : np.ndarray
+        Price series used to compute rewards when discharging/charging.
+    max_charges : np.ndarray
+        Grid of cumulative charge values.
+    base_dispatch : np.ndarray
+        Base dispatch offset applied to actions for each time step.
+    end_state : Optional[float]
+        If provided, the DP will enforce the final state by seeding the
+        value matrix accordingly.
+    penalty : float
+        Penalty value used to mark infeasible/forbidden states.
+    tolerance : float
+        Numerical tolerance used in grid comparisons.
+
+    Returns
+    -------
+    np.ndarray
+        Value-to-go matrix with shape `(T, len(states), len(max_charges))`.
+    """
+
     T = len(bid_prices)
 
     max_state = np.max(states)
@@ -433,6 +598,44 @@ def forward(
     penalty: float = -1e12,
     tolerance: float = 1e-8,
 ):
+    """Perform the forward (policy extraction) pass using a value matrix.
+
+    Starting from an initial state (or inferred best initial state) this
+    routine walks forward in time, choosing the action that maximizes
+    the value-to-go (using interpolation when necessary). It returns
+    arrays of chosen states, charge cycles, actions and the objective
+    (per-step values).
+
+    Parameters
+    ----------
+    eff_in, eff_out : float
+        Charging and discharging efficiencies.
+    max_capacity : float
+        Maximum capacity (kept for compatibility with the DP API).
+    value_matrix : np.ndarray
+        The precomputed value-to-go matrix from `backward`.
+    states, actions, bid_prices, ask_prices, max_charges, base_dispatch : np.ndarray
+        Grids and price series used to evaluate actions.
+    start_state : Optional[float]
+        If provided, the forward pass will start from this state.
+    start_charges : Optional[int]
+        If provided, the forward pass will start from this cumulative charge.
+    end_state : Optional[float]
+        If provided, used for feasibility checks (not strictly required).
+    penalty : float
+        Penalty value used in interpolation checks.
+    tolerance : float
+        Numerical tolerance used for grid comparisons.
+
+    Returns
+    -------
+    tuple
+        `(state_choices, charges_choices, action_choices, objective)`,
+        where `state_choices` and `charges_choices` are arrays of length
+        `T`, and `action_choices` and `objective` are arrays of length
+        `T-1`.
+    """
+
     T = len(bid_prices)
 
     state_choices = np.zeros(T, dtype=np.float32)
@@ -748,6 +951,21 @@ def forward(
 
 
 class BatteryStorage:
+    """Optimize battery storage operation via dynamic programming.
+
+    The `BatteryStorage` class wraps the backward and forward dynamic
+    programming routines to compute an optimal charge/discharge policy
+    over a given price series and discrete state/action grids.
+
+    Typical usage:
+        bs = BatteryStorage(...)
+        bs.optimize()
+        out = bs.create_output()
+        dispatch = bs.get_dispatch()
+
+    Attributes populated after `optimize()`:
+        `_state_choices`, `_charges_choices`, `_action_choices`, `_objective`, `_value_matrix`
+    """
 
     def __init__(
         self,
@@ -771,6 +989,36 @@ class BatteryStorage:
         penalty: float = -1e12,
         tolerance: float = 1e-8,
     ):
+        """Initialize the `BatteryStorage` optimizer.
+
+        Parameters
+        ----------
+        eff_in, eff_out : float
+            Charging/discharging efficiencies (fractions in (0,1]).
+        max_capacity : float
+            Maximum storage capacity (for API compatibility).
+        bid_prices, ask_prices : np.ndarray
+            Price series used to compute revenue and costs.
+        states : np.ndarray
+            Grid of discretized state-of-charge values.
+        actions : np.ndarray
+            Discrete action set (positive charge, negative discharge).
+        max_charges : np.ndarray
+            Grid of cumulative charge values used for interpolation.
+        base_dispatch : Optional[np.ndarray]
+            Optional per-timestep offset added to actions.
+        start_state, start_charges, end_state : Optional[float|int]
+            Optional boundary conditions for the forward/backward passes.
+        precompile : bool
+            If True a short precompile run of the DP routines is executed
+            to warm up numba compilation (when enabled).
+        precompile_timefraction : float
+            Fraction of the time series used for the precompile run.
+        penalty : float
+            Large negative penalty value to mark infeasible states.
+        tolerance : float
+            Numerical tolerance for grid comparisons.
+        """
         self._eff_in = eff_in
         self._eff_out = eff_out
         self._max_capacity = max_capacity
@@ -820,6 +1068,14 @@ class BatteryStorage:
         self.__optimized: bool = False
 
     def __precompile(self, precompile_timefraction: float):
+        """Run a short DP pass to precompile jitted functions (if any).
+
+        This speeds up later calls when Numba is enabled by running the
+        DP routines on a small fraction of the time series. The helper
+        `state_check` is used to translate optional start/end states to
+        values used for the precompile run.
+        """
+
         def state_check(state: Optional[Union[float, int]], value: float):
             if state is None:
                 return None
@@ -874,6 +1130,14 @@ class BatteryStorage:
         )
 
     def optimize(self):
+        """Run the full optimization (backward + forward passes).
+
+        After calling `optimize()` the instance will have the following
+        attributes set: `_value_matrix`, `_state_choices`,
+        `_charges_choices`, `_action_choices`, and `_objective`. The
+        boolean flag `__optimized` is set to True on success.
+        """
+
         value_matrix = backward(
             eff_in=self._eff_in,
             eff_out=self._eff_out,
@@ -911,6 +1175,14 @@ class BatteryStorage:
         self.__optimized = True
 
     def create_output(self) -> pd.DataFrame:
+        """Return a `pandas.DataFrame` with optimization results.
+
+        The returned DataFrame contains columns: `Bid Price`, `Ask Price`,
+        `SOC`, `ChargeCycle`, `Charging`, and `Value`. `create_output()`
+        requires that `optimize()` has been called first; otherwise a
+        `ValueError` is raised.
+        """
+
         if not self.__optimized:
             raise ValueError("Not able to create an output. Consider running the optimization routine first!")
 
@@ -932,6 +1204,16 @@ class BatteryStorage:
         return pd.DataFrame(data_dict)
 
     def get_dispatch(self) -> np.ndarray:
+        """Return the per-timestep action choices (dispatch) array.
+
+        Returns
+        -------
+        np.ndarray
+            Action choices of length `T-1` (per time-step), populated by
+            `optimize()`. Accessing this before `optimize()` may raise
+            `AttributeError`.
+        """
+
         return self._action_choices
 
 
