@@ -4,7 +4,7 @@ from scipy.optimize import brentq
 from rivapy.tools.enums import DayCounterType, InterestRateIndex
 from rivapy.tools.interfaces import BaseDatedCurve
 from rivapy.instruments.bond_specifications import DeterministicCashflowBondSpecification, FloatingRateBondSpecification
-from rivapy.marketdata.curves import DiscountCurveComposition
+from rivapy.marketdata.curves import DiscountCurveComposition, FlatDiscountCurve
 from rivapy.marketdata import DiscountCurveParametrized, ConstantRate
 from rivapy.pricing.pricing_request import PricingRequest
 from rivapy.instruments._logger import logger
@@ -402,18 +402,23 @@ class DeterministicCashflowPricer:
         cashflows: _Union[List[Tuple[datetime, float]], None] = None,
         fwd_curve: _Union[DiscountCurve, None] = None,
     ) -> float:
-        logger.info("Start computing bond z-spread for bond " + specification.obj_id + ", dirty price: " + str(target_dirty_price))
+        logger.info("Start computing bond yield " + specification.obj_id + ", dirty price: " + str(target_dirty_price))
         if cashflows is None:
             cashflows = DeterministicCashflowPricer.get_expected_cashflows(specification, val_date, fwd_curve=fwd_curve)
 
         def target_function(r: float) -> float:
-            dc = ConstantRate(r)
+            dc = DiscountCurveParametrized(
+                "",
+                ref_date=val_date,
+                rate_parametrization=ConstantRate(r),
+                comp_freq=specification.get_nr_annual_payments(),
+            )
             price = DeterministicCashflowPricer.get_pv_cashflows(val_date, specification, dc, cashflows=cashflows)
             logger.debug("Target function called with r: " + str(r) + ", price: " + str(price) + ", target_dirty_price: " + str(target_dirty_price))
             return price - target_dirty_price
 
         result = brentq(target_function, -0.2, 1.5, full_output=False)
-        logger.info("Finished computing bond z-spread")
+        logger.info("Finished computing bond yield")
         return result
 
     @staticmethod

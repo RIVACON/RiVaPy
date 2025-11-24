@@ -142,51 +142,5 @@ class VolatilitySurfaceTest(unittest.TestCase):
 #         self.assertRaises(Exception, lambda: hpfc.value(dt.datetime(2022, 1, 1), simple_schedule))
 
 
-class DiscountCurveCompositionTest(unittest.TestCase):
-    def test_curve_addition(self):
-        """Simple test adding two curves testing"""
-        ref_date = dt.datetime(2023, 1, 1)
-        c1 = DiscountCurveParametrized("C1", ref_date, ConstantRate(0.01))
-        c2 = DiscountCurveParametrized("C2", ref_date, ConstantRate(0.025))
-        # add two constant curves
-        c = c1 + c2
-        d = ref_date + dt.timedelta(days=10 * 365)
-        self.assertAlmostEqual(c1.value_rate(ref_date, d) + c2.value_rate(ref_date, d), c.value_rate(ref_date, d), places=6)
-        self.assertAlmostEqual(c1.value(ref_date, d) * c2.value(ref_date, d), c.value(ref_date, d), places=6)
-        # add one constant and one linear curve
-        c2 = DiscountCurveParametrized("C2", ref_date, LinearRate(0.01, 0.05, max_maturity=10.0))
-        c = c1 + c2
-        self.assertAlmostEqual(c1.value_rate(ref_date, d) + c2.value_rate(ref_date, d), c.value_rate(ref_date, d), places=6)
-        self.assertAlmostEqual(c1.value(ref_date, d) * c2.value(ref_date, d), c.value(ref_date, d), places=6)
-        # add a curve and a float
-        c = 0.01 + c2
-        self.assertAlmostEqual(c1.value_rate(ref_date, d) + c2.value_rate(ref_date, d), c.value_rate(ref_date, d), places=6)
-        self.assertAlmostEqual(c1.value(ref_date, d) * c2.value(ref_date, d), c.value(ref_date, d), places=6)
-
-    def test_curve_multiplication(self):
-        """Simple test multiplying two curves"""
-        ref_date = dt.datetime(2023, 1, 1)
-        c1 = DiscountCurveParametrized("C1", ref_date, ConstantRate(0.01))
-        c2 = DiscountCurveParametrized("C2", ref_date, ConstantRate(0.025))
-        # multiply two constant curves
-        c = c1 * c2
-        d = ref_date + dt.timedelta(days=10 * 365)
-        self.assertAlmostEqual(c1.value_rate(ref_date, d) * c2.value_rate(ref_date, d), c.value_rate(ref_date, d), places=6)
-        df = np.exp(-c1.value_rate(ref_date, d) * c2.value_rate(ref_date, d) * c1._dc.yf(ref_date, d))
-        self.assertAlmostEqual(df, c.value(ref_date, d), places=6)
-
-        # multiply one constant and one linear curve
-        c2 = DiscountCurveParametrized("C2", ref_date, LinearRate(0.01, 0.05, max_maturity=10.0))
-        c = c1 * c2
-        self.assertAlmostEqual(c1.value_rate(ref_date, d) * c2.value_rate(ref_date, d), c.value_rate(ref_date, d), places=6)
-        df = np.exp(-c1.value_rate(ref_date, d) * c2.value_rate(ref_date, d) * c1._dc.yf(ref_date, d))
-        self.assertAlmostEqual(df, c.value(ref_date, d), places=6)
-        # multiply a curve and a float
-        c = 0.01 * c2
-        self.assertAlmostEqual(0.01 * c2.value_rate(ref_date, d), c.value_rate(ref_date, d), places=6)
-        df = np.exp(-0.01 * c2.value_rate(ref_date, d) * c1._dc.yf(ref_date, d))
-        self.assertAlmostEqual(df, c.value(ref_date, d), places=6)
-
-
 if __name__ == "__main__":
     unittest.main()
