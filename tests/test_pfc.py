@@ -6,7 +6,7 @@ import numpy as np
 import datetime as dt
 from rivapy.tools.scheduler import SimpleSchedule, OffPeakSchedule, PeakSchedule, GasSchedule, BaseSchedule
 from rivapy.marketdata_tools import PFCShifter
-from rivapy.marketdata_tools.pfc_shaper import PFCShaper, CategoricalRegression
+from rivapy.marketdata_tools.pfc_shaper import PFCShaper, CategoricalRegression, SimpleCategoricalRegression
 from rivapy.instruments.energy_futures_specifications import EnergyFutureSpecifications
 from rivapy.sample_data.dummy_power_spot_price import spot_price_model
 from rivapy.marketdata.curves import EnergyPriceForwardCurve
@@ -173,77 +173,84 @@ class TestPFCShaper(unittest.TestCase):
 
         apply_schedule = SimpleSchedule(start=dt.datetime(2025, 1, 1), end=dt.datetime(2026, 1, 1), freq="h")
 
-        pfc_shaper = CategoricalRegression(spot_prices=spot_prices, holiday_calendar=holiday_calendar)
-        pfc_fit = pfc_shaper.calibrate()
+        for regression_obj in [CategoricalRegression, SimpleCategoricalRegression]:
+            pfc_shaper = regression_obj(spot_prices=spot_prices, holiday_calendar=holiday_calendar)
+            pfc_shaper.calibrate()
+            pfc_fit = pfc_shaper.apply(spot_prices.index)
 
-        self.assertLess(np.sum((spot_prices.values - pfc_fit)) ** 2, 10 ** (-5))
+            self.assertLess(np.sum((spot_prices.values / np.mean(spot_prices.values) - pfc_fit.to_numpy())) ** 2, 10 ** (-5))
 
-        pfc_rollout = pfc_shaper.apply(apply_schedule=apply_schedule)
-        spot_prices_rollout = np.array(list(map(lambda x: spot_price_model(x, **parameter_dict), apply_schedule.get_schedule())))
+            pfc_rollout = pfc_shaper.apply(apply_schedule=apply_schedule.get_schedule())
+            spot_prices_rollout = np.array(list(map(lambda x: spot_price_model(x, **parameter_dict), apply_schedule.get_schedule())))
 
-        self.assertLess(np.sum((spot_prices_rollout / np.mean(spot_prices_rollout) - pfc_rollout.values)) ** 2, 10 ** (-5))
+            self.assertLess(np.sum((spot_prices_rollout / np.mean(spot_prices_rollout) - pfc_rollout.values)) ** 2, 10 ** (-5))
 
     def test_normalization_with_config(self):
         normalization_config = {"D": 2, "W": 2, "ME": 1}
         holiday_calendar = holidays.country_holidays("DE", years=[2024, 2025, 2026])
 
-        pfc_shaper = CategoricalRegression(
-            spot_prices=self.example_spot_price_data, holiday_calendar=holiday_calendar, normalization_config=normalization_config
-        )
-
         apply_schedule = BaseSchedule(start=dt.datetime(2025, 12, 31), end=dt.datetime(2027, 1, 1))
 
-        pfc_spot = pfc_shaper.calibrate()
-        pfc_shape = pfc_shaper.apply(apply_schedule=apply_schedule)
+        for regression_obj in [CategoricalRegression, SimpleCategoricalRegression]:
+            pfc_shaper = regression_obj(
+                spot_prices=self.example_spot_price_data, holiday_calendar=holiday_calendar, normalization_config=normalization_config
+            )
+            pfc_shaper.calibrate()
+            pfc_shape = pfc_shaper.apply(apply_schedule=apply_schedule.get_schedule())
 
-        self.assertLess(np.abs(pfc_shape.loc[pfc_shape.index < dt.datetime(2026, 1, 1), :].mean().iloc[0] - 1.0), 10 ** (-5))
+            self.assertLess(np.abs(pfc_shape.loc[pfc_shape.index < dt.datetime(2026, 1, 1), :].mean().iloc[0] - 1.0), 10 ** (-5))
 
-        self.assertLess(
-            np.abs(pfc_shape.loc[(dt.datetime(2026, 1, 1) <= pfc_shape.index) & (pfc_shape.index < dt.datetime(2026, 1, 2)), :].mean().iloc[0] - 1.0),
-            10 ** (-5),
-        )
+            self.assertLess(
+                np.abs(
+                    pfc_shape.loc[(dt.datetime(2026, 1, 1) <= pfc_shape.index) & (pfc_shape.index < dt.datetime(2026, 1, 2)), :].mean().iloc[0] - 1.0
+                ),
+                10 ** (-5),
+            )
 
-        self.assertLess(
-            np.abs(pfc_shape.loc[(dt.datetime(2026, 1, 2) <= pfc_shape.index) & (pfc_shape.index < dt.datetime(2026, 1, 5)), :].mean().iloc[0] - 1.0),
-            10 ** (-5),
-        )
+            self.assertLess(
+                np.abs(
+                    pfc_shape.loc[(dt.datetime(2026, 1, 2) <= pfc_shape.index) & (pfc_shape.index < dt.datetime(2026, 1, 5)), :].mean().iloc[0] - 1.0
+                ),
+                10 ** (-5),
+            )
 
-        self.assertLess(
-            np.abs(
-                pfc_shape.loc[(dt.datetime(2026, 1, 5) <= pfc_shape.index) & (pfc_shape.index < dt.datetime(2026, 1, 12)), :].mean().iloc[0] - 1.0
-            ),
-            10 ** (-5),
-        )
+            self.assertLess(
+                np.abs(
+                    pfc_shape.loc[(dt.datetime(2026, 1, 5) <= pfc_shape.index) & (pfc_shape.index < dt.datetime(2026, 1, 12)), :].mean().iloc[0] - 1.0
+                ),
+                10 ** (-5),
+            )
 
-        self.assertLess(
-            np.abs(
-                pfc_shape.loc[(dt.datetime(2026, 1, 12) <= pfc_shape.index) & (pfc_shape.index < dt.datetime(2026, 2, 1)), :].mean().iloc[0] - 1.0
-            ),
-            10 ** (-5),
-        )
+            self.assertLess(
+                np.abs(
+                    pfc_shape.loc[(dt.datetime(2026, 1, 12) <= pfc_shape.index) & (pfc_shape.index < dt.datetime(2026, 2, 1)), :].mean().iloc[0] - 1.0
+                ),
+                10 ** (-5),
+            )
 
-        self.assertLess(
-            np.abs(pfc_shape.loc[(dt.datetime(2026, 2, 1) <= pfc_shape.index) & (pfc_shape.index < dt.datetime(2027, 1, 1)), :].mean().iloc[0] - 1.0),
-            10 ** (-5),
-        )
+            self.assertLess(
+                np.abs(
+                    pfc_shape.loc[(dt.datetime(2026, 2, 1) <= pfc_shape.index) & (pfc_shape.index < dt.datetime(2027, 1, 1)), :].mean().iloc[0] - 1.0
+                ),
+                10 ** (-5),
+            )
 
     def test_normalization_without_config(self):
-
         holiday_calendar = holidays.country_holidays("DE", years=[2024, 2025, 2026])
-
-        pfc_shaper = CategoricalRegression(spot_prices=self.example_spot_price_data, holiday_calendar=holiday_calendar)
-
         apply_schedule = BaseSchedule(start=dt.datetime(2025, 12, 31), end=dt.datetime(2027, 1, 1))
+        for regression_obj in [CategoricalRegression, SimpleCategoricalRegression]:
+            pfc_shaper = regression_obj(spot_prices=self.example_spot_price_data, holiday_calendar=holiday_calendar)
+            pfc_shaper.calibrate()
+            pfc_shape = pfc_shaper.apply(apply_schedule=apply_schedule.get_schedule())
 
-        pfc_spot = pfc_shaper.calibrate()
-        pfc_shape = pfc_shaper.apply(apply_schedule=apply_schedule)
+            self.assertLess(np.abs(pfc_shape.loc[pfc_shape.index < dt.datetime(2026, 1, 1), :].mean().iloc[0] - 1.0), 10 ** (-5))
 
-        self.assertLess(np.abs(pfc_shape.loc[pfc_shape.index < dt.datetime(2026, 1, 1), :].mean().iloc[0] - 1.0), 10 ** (-5))
-
-        self.assertLess(
-            np.abs(pfc_shape.loc[(dt.datetime(2026, 1, 1) <= pfc_shape.index) & (pfc_shape.index < dt.datetime(2027, 1, 1)), :].mean().iloc[0] - 1.0),
-            10 ** (-5),
-        )
+            self.assertLess(
+                np.abs(
+                    pfc_shape.loc[(dt.datetime(2026, 1, 1) <= pfc_shape.index) & (pfc_shape.index < dt.datetime(2027, 1, 1)), :].mean().iloc[0] - 1.0
+                ),
+                10 ** (-5),
+            )
 
 
 class TestEnergyPriceForwardCurve(unittest.TestCase):
