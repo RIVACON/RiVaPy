@@ -126,7 +126,7 @@ class ForwardRateAgreementPricer:
     def compute_fair_rate(
         val_date: _Union[datetime, date],
         specification: ForwardRateAgreementSpecification,
-        forward_curve: DiscountCurve,
+        discount_curve: DiscountCurve,
     ):
         """Computes the fair rate such that the when used in the specification of the FRA gives a net value of zero.
         A discount curve is given, from which the Forward Rate is determined between the two dates.
@@ -147,9 +147,9 @@ class ForwardRateAgreementPricer:
         rate_start_date = specification._rate_start_date
         rate_end_date = specification._rate_end_date
 
-        dcc = DayCounter(forward_curve.daycounter)
+        dcc = DayCounter(discount_curve.daycounter)
         yf = dcc.yf(rate_start_date, rate_end_date)
-        fwd_df = forward_curve.value_fwd(val_date, rate_start_date, rate_end_date)  # REF DATE is =
+        fwd_df = discount_curve.value_fwd(val_date, rate_start_date, rate_end_date)  # REF DATE is =
 
         fair_rate = (1.0 / fwd_df - 1) / yf
 

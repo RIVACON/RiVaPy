@@ -707,6 +707,120 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
         self.assertAlmostEqual(model_quotes[1], quotes[1], delta=1e-8)
         self.assertAlmostEqual(model_quotes[2], quotes[2], delta=1e-8)
 
+    def test_fra_irs_combination_forward_curve(self):
+        """Here we test the case where a discount curve is GIVEN, and that we want the FRA to also contribute to the fwd curve"""
+        # Deposit, FRA, IRS in sequence
+        # d1 = self.ref_date + timedelta(days=182)
+        # d2 = self.ref_date + timedelta(days=365)
+        # d3 = self.ref_date + timedelta(days=730)
+
+        ref_date = datetime(2023, 1, 28)
+        # start_date = datetime(2023, 7, 28)
+        # end_date = datetime(2023, 10, 28)
+
+        d1 = datetime(2023, 7, 28)
+        d2 = datetime(2023, 10, 28)
+        d3 = datetime(2024, 10, 28)
+
+        fra = fra = ForwardRateAgreementSpecification(
+            obj_id="dummy_id",
+            trade_date=ref_date,
+            # maturity_date=mat_date,
+            notional=1_000_000.0,
+            rate=0.025,
+            start_date=d1,
+            end_date=d2,
+            udlID="dummy_underlying_index",
+            rate_start_date=d1,
+            rate_end_date=d2,
+            day_count_convention=self.day_count,
+            rate_day_count_convention=self.day_count,
+            currency="EUR",
+            spot_days=1,
+            payment_days=1,
+            issuer="dummy_issuer",
+            securitization_level="NONE",
+        )
+        # IRS 1Y from d2 to d3
+        ns = ConstNotionalStructure(1_000_000.0)
+        pay_dates = [d3]
+        fixed_leg = IrFixedLegSpecification(
+            fixed_rate=0.03,
+            obj_id="fixed_leg",
+            notional=ns,
+            start_dates=[d2],
+            end_dates=[d3],
+            pay_dates=pay_dates,
+            currency="EUR",
+            day_count_convention=self.day_count,
+        )
+        float_leg = IrFloatLegSpecification(
+            obj_id="float_leg",
+            notional=ns,
+            reset_dates=[d2],
+            start_dates=[d2],
+            end_dates=[d3],
+            rate_start_dates=[d2],
+            rate_end_dates=[d3],
+            pay_dates=pay_dates,
+            currency="EUR",
+            udl_id="EURIBOR6M",
+            fixing_id="EURIBOR6M",
+            day_count_convention=self.day_count,
+            rate_day_count_convention=self.day_count,
+            spread=0.0,
+        )
+        irs = InterestRateSwapSpecification(
+            obj_id="swap1",
+            notional=ns,
+            issue_date=d2,
+            maturity_date=d3,
+            pay_leg=fixed_leg,
+            receive_leg=float_leg,
+            currency="EUR",
+            day_count_convention=self.day_count,
+        )
+
+        instruments = [fra, irs]
+        quotes = [0.025, 0.03]
+
+        days_to_maturity = [180, 360, 540]
+        dates = [ref_date + timedelta(days=d) for d in days_to_maturity]
+        # discount factors from constant rate
+        rates = [0.10, 0.105, 0.11]
+        df = [math.exp(-r * d / 360) for r, d in zip(rates, days_to_maturity)]
+
+        dc = DiscountCurve("bootstrappedDC", ref_date, dates, df, self.interp, self.extrap, self.day_count)
+        curve = bootstrap_curve(
+            ref_date=ref_date,
+            curve_id=self.curve_id,
+            day_count_convention=self.day_count,
+            instruments=instruments,
+            quotes=quotes,
+            interpolation_type=self.interp,
+            extrapolation_type=self.extrap,
+            curves={"discount_curve": dc},
+        )
+        self.assertIsInstance(curve, DiscountCurve)
+        # self.assertIn(d1, curve.get_dates()) # was the end date for the deposits that we removed for this test
+        self.assertIn(d2, curve.get_dates())
+        self.assertIn(d3, curve.get_dates())
+
+        # test that it reproduces the model quotes
+        model_quotes = []
+        # pricing_params = {"fixing_grace_period": 0.0, "set_rate": True, "desired_rate": 1.0}
+        curves_dict = {"discount_curve": dc, "fixing_curve": curve}
+
+        for i in range(len(instruments)):
+
+            model_quote = get_quote(ref_date, instruments[i], curves_dict, {"flag_multi_curve": True})
+            # print(model_quote)
+            model_quotes.append(model_quote)
+
+        self.assertAlmostEqual(model_quotes[0], quotes[0], delta=1e-8)
+        self.assertAlmostEqual(model_quotes[1], quotes[1], delta=1e-8)
+        # self.assertAlmostEqual(model_quotes[2], quotes[2], delta=1e-8)
+
     def test_many_instruments(self):
         """Case where lots of instruments are given"""
         # calculation date
@@ -1371,7 +1485,7 @@ class TestBootstrapCurveInstruments(unittest.TestCase):
                 interpolation_type=self.interp,
                 extrapolation_type=self.extrap,
             )
-        self.assertIn("Deposits cannot be used in multicurve bootstrapping", str(cm.exception))
+        self.assertIn("Deposits cannot be used in multi-curve bootstrapping", str(cm.exception))
 
 
 class TestAutomaticInstrumentCreation(unittest.TestCase):

@@ -112,47 +112,58 @@ def bootstrap_curve(
         instruments_by_date[end_date] = (quotes[i], inst)
 
     #############################################################
-    # base curve creatiion check #TODO think about improving how to handle input curves if given for multicurve bootstrapping
-    # given instrument types, check for required curves
-
+    # Determine instrument types provided
     logger.info("Determine instrument types provided")
-    ins_types = []
-    flag_irs_bootstrapped_as_fwd = False
-    for inst in instruments:
-        ins_type = inst.ins_type()
-        if ins_type not in ins_types:
-            ins_types.append(ins_type)
+    ins_types = set(inst.ins_type() for inst in instruments)
+    has_fra = Instrument.FRA in ins_types
+    has_irs = Instrument.IRS in ins_types
+    has_bs = Instrument.BS in ins_types
+    has_deposit = Instrument.DEPOSIT in ins_types
 
-    logger.info("Toggle single/multi curve bootstrapping")
+    # Determine single vs multi-curve bootstrap
     if "discount_curve" not in curves:
+        # Single-curve bootstrap: create discount curve from instruments
         flag_multi_curve = False
         curves["discount_curve"] = DiscountCurve(
-            "dummy_id_discount", ref_date, yc_dates, dfs, interpolation_type, extrapolation_type, day_count_convention
+            "bootstrapped_discount",
+            ref_date,
+            yc_dates,
+            dfs,
+            interpolation_type,
+            extrapolation_type,
+            day_count_convention,
         )
-        # this means this is the target output curve
-    else:  # This means the discount curve was given. We therefore want to output a FORWARD curve, e.g. 3M, 6M,...
+        # Forward curve for IRS = discount curve (if any IRS present)
+        flag_irs_bootstrapped_as_fwd = has_irs or has_bs
+        if flag_irs_bootstrapped_as_fwd:
+            curves["fixing_curve"] = curves["discount_curve"]
+
+    else:
+        # Multi-curve bootstrap: discount curve is provided, we bootstrap forward curve
         flag_multi_curve = True
 
-    # cannot multicurve bootstrap with deposits involved
+        # FRAs and IRS will build forward curve
+        if "fixing_curve" not in curves:
+            # Create empty forward curve placeholder
+            curves["fixing_curve"] = DiscountCurve(
+                "bootstrapped_forward",
+                ref_date,
+                yc_dates,
+                dfs,  # optionally start with empty DFs
+                interpolation_type,
+                extrapolation_type,
+                day_count_convention,
+            )
+        flag_irs_bootstrapped_as_fwd = False
 
-    if Instrument.DEPOSIT in ins_types and flag_multi_curve == True:
-        raise Exception("Deposits cannot be used in multicurve bootstrapping")
+    # Sanity checks
+    if has_deposit and flag_multi_curve:
+        raise Exception("Deposits cannot be used in multi-curve bootstrapping")
 
-    if Instrument.IRS or Instrument.BS in ins_types:
-        # check if curves has a fixing curve
-        if "fixing_curve" in curves:
-            if not isinstance(curves["fixing_curve"], DiscountCurve):
-                raise Exception("Fixing curve is not of type DiscountCurve")
-
-        else:
-            logger.info("IRS swap present but no fixing curve provided, will use bootstrapped curve in place")
-            flag_irs_bootstrapped_as_fwd = True
-            if flag_multi_curve:
-                curves["fixing_curve"] = DiscountCurve(
-                    "dummy_id_fixing", ref_date, yc_dates, dfs, interpolation_type, extrapolation_type, day_count_convention
-                )
-            else:
-                curves["fixing_curve"] = curves["discount_curve"]
+    # Logging
+    logger.info(f"Bootstrap mode: {'multi-curve' if flag_multi_curve else 'single-curve'}")
+    logger.info(f"Instruments present: {ins_types}")
+    logger.info(f"IRS uses bootstrapped curve as forward: {flag_irs_bootstrapped_as_fwd}")
 
     #############################################################
     # # start with loglinear interpolation to obtain good initial values for all dates
@@ -264,7 +275,7 @@ def bootstrap_curve(
             raise Exception(f"Initial bootstrap failed at {end_date}: {str(e)}")
 
     # In principle, this will have produced a curve. It can be improved upon with refinement
-
+    logger.info("Initial curve produce")
     #############################################################
     # Iterative refinement with real interpolator
     # this is to improve the values for the whole curve, as each subsequent point is dependant on the previous ones
@@ -316,8 +327,10 @@ def bootstrap_curve(
             yc = DiscountCurve("dummy_id", ref_date, yc_dates, dfs, interpolation_type, extrapolation_type, day_count_convention)
 
             # Multi-curve logic possible logic and single curve
+            bootstrap_context = {}  # only need to do one time for base and epsilon
             if flag_multi_curve:
                 # This is a forward curve — use Given discount curve for discounting
+                bootstrap_context["flag_multi_curve"] = True
                 curves["fixing_curve"] = yc
                 # Keep discount_curve unchanged
             else:
@@ -326,7 +339,7 @@ def bootstrap_curve(
                 if flag_irs_bootstrapped_as_fwd:  # if it is an irs instrument that needs the forward curve as well as it was not provided
                     curves["fixing_curve"] = yc
 
-            q_model = get_quote(ref_date, inst, curves)  # this curves dict needs to have the updated YC
+            q_model = get_quote(ref_date, inst, curves, bootstrap_context)  # this curves dict needs to have the updated YC
 
             epsilon = 1e-6
             dfs_perturbed = dfs.copy()
@@ -346,9 +359,12 @@ def bootstrap_curve(
                 if flag_irs_bootstrapped_as_fwd:  # if it is an irs instrument that needs the forward curve as well as it was not provided
                     curves["fixing_curve"] = yc_perturbed
 
-            q_model_eps = get_quote(ref_date, inst, curves)
+            q_model_eps = get_quote(ref_date, inst, curves, bootstrap_context)
 
             dq = (q_model_eps - q_model) / epsilon
+            # print(f"dq: {dq}")
+            # print(f"yf: {dcc.yf(ref_date, end_date)}")
+            # print(f"df: {dfs[i]}")
             dr = abs((quote - q_model) / (dq * dcc.yf(ref_date, end_date) * dfs[i]))
             max_diff = max(max_diff, dr)
 
@@ -426,9 +442,10 @@ def error_fn(
     # here reference date is used as placeholder
     yc = DiscountCurve("bootstrappedYC", ref_date, yc_dates, df_tmp, interpolation_type, extrapolation_type, day_count_convention)
     curves_copy = curves.copy()
-
+    bootstrap_context = {}
     # Multi-curve logic possible logic and ssingle curve
     if flag_multi_curve:
+        bootstrap_context["flag_multi_curve"] = True
         # This is a forward curve — use Given discount curve for discounting
         curves_copy["fixing_curve"] = yc
         # Keep discount_curve unchanged
@@ -439,7 +456,7 @@ def error_fn(
         if flag_irs_bootstrapped_as_fwd:  # if it is an irs instrument that needs the forward curve as well or TBS
             curves_copy["fixing_curve"] = yc
 
-    calc_quote = get_quote(ref_date, instrument_spec, curves_copy)
+    calc_quote = get_quote(ref_date, instrument_spec, curves_copy, bootstrap_context)
 
     # # DEBUG statement
     # print("----------------")
@@ -503,6 +520,7 @@ def get_quote(
         DepositSpecification, ForwardRateAgreementSpecification, InterestRateSwapSpecification, InterestRateBasisSwapSpecification
     ],
     curve_dict: dict,
+    bootstrap_context=None,
 ):
     """Get the instrument specific fair quote calculation result to be used in the bootstrapper.
 
@@ -524,9 +542,13 @@ def get_quote(
         quote = DepositPricer.get_implied_simply_compounded_rate(ref_date, instrument_spec, discount_curve)  # TODO assumes no spread curve for now
 
     elif instrument_spec.ins_type() == Instrument.FRA:
-
-        curve_used = curve_dict["discount_curve"]
-        quote = ForwardRateAgreementPricer.compute_fair_rate(ref_date, instrument_spec, forward_curve=curve_used)
+        if bootstrap_context is None or bootstrap_context["flag_multi_curve"] == False:
+            # single curve case
+            curve_used = curve_dict["discount_curve"]
+        else:
+            # multicurve, where discount given, FRA builds forward
+            curve_used = curve_dict["fixing_curve"]
+        quote = ForwardRateAgreementPricer.compute_fair_rate(ref_date, instrument_spec, discount_curve=curve_used)
 
     elif instrument_spec.ins_type() == Instrument.IRS:
 
