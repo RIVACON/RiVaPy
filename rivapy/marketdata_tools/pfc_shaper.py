@@ -310,19 +310,19 @@ class CategoricalRegression(PFCShaper):
     .. math::
         \begin{aligned}
             y_\text{season}(d) &= \frac{\frac{1}{24}\sum_{i=1}^{24}h_i^d}{\frac{1}{N_y}\sum_{i=1}^{N_y} h_i^y} \\
-            \hat{y}_\text{season}(d) & =\beta^{0}_\text{season} + \sum_{c \in C^\text{season}}\beta^c\cdot\mathbb{I}_{\text{Cluster}(d)=c} \\
-            y_\text{id}(h,d) &= \frac{h_i^d}{\frac{1}{24}\sum_{i=1}^{24}h_i^d} \\
-            \hat{y}_\text{id}(h,d) & =\beta^{0}_\text{id} + \sum_{c \in C^\text{id}}\beta^c\cdot\mathbb{I}_{\text{Cluster}(h)=c} \\
-            s(h,d) &= \hat{y}_\text{id}(h,d)\cdot\hat{y}_\text{season}(d)
+            \hat{y}_\text{season}(d) & =\beta^{0}_\text{season} + \sum_{c \in C^\text{season}}\beta^c_{\text{season}}\cdot\mathbb{I}_{\text{Cluster}(d)=c} \\
+            y_\text{id}(h_i,d) &= \frac{h_i^d}{\frac{1}{24}\sum_{i=1}^{24}h_i^d} \\
+            \hat{y}_\text{id}(h,d) & =\beta^{0}_\text{id} + \sum_{c \in C^\text{id}}\beta^c\cdot\mathbb{I}_{\text{Cluster}(h_i^d)=c} \\
+            s(h_i,d) &= \hat{y}_\text{id}(h_i,d)\cdot\hat{y}_\text{season}(d)
         \end{aligned}
     
     where:
     
     :math:`h_i^d`: i-th hour of d-th day
     
-    :math:`h_i^y`: i-th hour of the year y
+    :math:`h_i^y`: i-th hour of the year :math:`y`
     
-    :math:`N_y`: number of days in year y
+    :math:`N_y`: number of days in year :math:`y`
     
     :math:`C^\text{season}`: set of all clusters for the seasonality shape
     
@@ -614,6 +614,331 @@ class CategoricalRegression(PFCShaper):
 
         cluster_df["shape"] = (season_fit * id_fit).squeeze()
         cluster_df["shape"] = self._normalize_year(df=cluster_df.loc[:, "shape"])
+        shape_df = pd.DataFrame(cluster_df.loc[:, "shape"])
+        shape_df = self.normalize_shape(shape=shape_df)
+        return shape_df
+
+    def _to_dict(self):
+        return super()._to_dict()
+
+
+class CategoricalFourierShaper(PFCShaper):
+    r"""Linear regression model using categorical predictor variables to construct a PFC shape.
+    We follow the methodology in:
+    
+    https://cem-a.org/wp-content/uploads/2019/10/A-Structureal-Model-for-Electricity-Forward-Prices.pdf
+    
+    https://ieeexplore.ieee.org/document/6607349
+    
+    https://www.researchgate.net/publication/229051446_Robust_Calculation_and_Parameter_Estimation_of_the_Hourly_Price_Forward_Curve
+
+    We create a regression model for bot the seasonality shape and the intra day shape. For the regression model of the seasonality shape, 
+    the days are split into weekday, Saturdays and Sundays. Public holidays are considered as Sundays while bridge days are expected to behave like Saturdays.
+    Afterwards, weekdays are split into clusters representing the month they are in, while Saturdays and Sundays are assigned to clusters reaching over three months.
+    For the regression model of the intra day shape we use a fourier series to model periodicities over each hour in a year. This way we can model the solar dip over the year more reliably.
+    
+    .. math::
+        \begin{aligned}
+            y_\text{season}(d) &= \frac{\frac{1}{24}\sum_{i=1}^{24}h_i^d}{\frac{1}{N_y}\sum_{i=1}^{N_y} h_i^y} \\
+            \hat{y}_\text{season}(d) & =\beta^{0}_\text{season} + \sum_{c \in C^\text{season}}\beta^c_{\text{season}}\cdot\mathbb{I}_{\text{Cluster}(d)=c} \\
+            y_\text{id}(h_i,d) &= \frac{h_i^d}{\frac{1}{N_y}\sum_{i=1}^{N_y} h_i^y} \\
+            \hat{y}_\text{id}(h_i,d) & =\beta^{0,H(h_i^d)}_\text{id} + \sum_{k=1}^{K}\beta^{k,H(h_i^d)}_\text{id}\cdot\left(\sin(2\pi k\cdot t(h_i^d)) + \cos(2\pi k\cdot t(h_i^d))\right)\\
+            s(h_i,d) &= \hat{y}_\text{id}(h_i,d)\cdot\hat{y}_\text{season}(d)
+        \end{aligned}
+    
+    where:
+    
+    :math:`h_i^d`: i-th hour of d-th day
+    
+    :math:`h_i^y`: i-th hour of the year :math:`y`
+    
+    :math:`N_y`: number of days in year :math:`y`
+    
+    :math:`H(h_i^d)`: hour (0-23) of :math:`h_i^d` independent of the day 
+    
+    :math:`t(h_i^d)`: function which returns a number between [0,1] depending on the position of :math:`h_i^d` in the respecitve year
+    
+    :math:`C^\text{season}`: set of all clusters for the seasonality shape
+    
+    :math:`K`: number of fourier partials
+    
+    :math:`\text{Cluster}(X)`: returns the cluster of X
+
+    :math:`\mathbb{I}_x = \begin{cases}
+    1, & \text{if the } x \text{ expression renders true}\\
+    0, & \text{if the } x \text{ expression renders false}
+    \end{cases}`
+
+    Args:
+        spot_prices (pd.DataFrame): Data used to calibrate the shaping model.
+        holiday_calendar (holidays.HolidayBase): Calendar object to obtain country specific holidays.
+        normalization_config (Optional[Dict[Literal["D", "W", "ME"], Optional[int]]], optional): A dictionary configurating the shape normalization periods.
+            Here ``D`` defines the number of days at the beginning of the shape over which the individual mean is normalized to one.
+            ``W`` defines the number of weeks at the beginning of the shape over which the individual mean is normalized to one.
+            ``ME`` defines the number of months at the beginning of the shape over which the individual mean is normalized to one. The remaining shape is then normalized over the individual years. Defaults to None.
+        k_fourier (int): Number of partial sums for the fourier series .Defaults to 2.
+        remove_outlier_season (bool): Wether to remove outliers for the seasonality shape regression. Defaults to False.
+        remove_outlier_id (bool): Wether to remove outliers for the intra day shape regression. Defaults to False.
+        lower_quantile_season (float): Lower quantile for outlier detection. Defauls to 0.005.
+        upper_quantile_season (float): Upper quantile for outlier detection. Defaults to 0.995.
+        lower_quantile_id (float): Lower quantile for outlier detection. Defauls to 0.005.
+        upper_quantile_id (float): Upper quantile for outlier detection. Defaults to 0.995.
+    """
+
+    def __init__(
+        self,
+        spot_prices: pd.DataFrame,
+        holiday_calendar: holidays.HolidayBase,
+        normalization_config: Optional[Dict[Literal["D", "W", "M"], Optional[int]]] = None,
+        k_fourier: int = 2,
+        remove_outlier_season: bool = True,
+        remove_outlier_id: bool = True,
+        lower_quantile_season: float = 0.005,
+        upper_quantile_season: float = 0.995,
+        lower_quantile_id: float = 0.005,
+        upper_quantile_id: float = 0.995,
+    ):
+        super().__init__(spot_prices=spot_prices, holiday_calendar=holiday_calendar, normalization_config=normalization_config)
+        self.k_fourier = k_fourier
+
+        self.remove_outlier_season = remove_outlier_season
+        self.remove_outlier_id = remove_outlier_id
+        self.lower_quantile_season = lower_quantile_season
+        self.upper_quantile_season = upper_quantile_season
+        self.lower_quantile_id = lower_quantile_id
+        self.upper_quantile_id = upper_quantile_id
+
+    def _create_cluster_df(self, day_list: List[dt.datetime], use_hours: bool = False):
+        holidays_list = pd.to_datetime(list(self.holiday_calendar.keys()))
+        cluster_df = pd.DataFrame(index=day_list)
+
+        cluster_df["year"] = cluster_df.index.year
+        cluster_df["month"] = cluster_df.index.month
+        cluster_df["day"] = cluster_df.index.day
+        cluster_df["weekday"] = cluster_df.index.weekday
+
+        if use_hours:
+            cluster_df["hour"] = cluster_df.index.hour
+
+        # get holidays and bridge days
+        temp_cluster_df = cluster_df[["year", "month", "day", "weekday"]].drop_duplicates().sort_index()
+        temp_cluster_df["holiday"] = 0
+        temp_cluster_df["bridge"] = 0
+        temp_cluster_df.loc[temp_cluster_df.index.isin(holidays_list), "holiday"] = 1
+
+        is_monday_bridge = (temp_cluster_df.index + pd.Timedelta(days=1)).isin(holidays_list) & (temp_cluster_df.index.weekday == 0)
+        is_friday_bridge = (temp_cluster_df.index - pd.Timedelta(days=1)).isin(holidays_list) & (temp_cluster_df.index.weekday == 4)
+        temp_cluster_df.loc[is_friday_bridge | is_monday_bridge, "bridge"] = 1
+
+        cluster_df = pd.merge(cluster_df, temp_cluster_df, on=["year", "month", "day", "weekday"])
+        # cluster_df.set_index(day_list, inplace=True)
+        cluster_df.index = day_list
+
+        cluster_df["day_indicator"] = 0
+        cluster_df.loc[cluster_df.index.weekday < 5, "day_indicator"] = 1
+        cluster_df.loc[cluster_df.index.weekday == 5, "day_indicator"] = 2
+        cluster_df.loc[cluster_df.index.weekday == 6, "day_indicator"] = 3
+
+        cluster_df.loc[cluster_df["holiday"] == 1, "day_indicator"] = 3
+        cluster_df.loc[cluster_df["bridge"] == 1, "day_indicator"] = 2
+
+        cluster_df.loc[(cluster_df.index.month == 12) & (cluster_df.index.day.isin([24, 31])) & (cluster_df.index.weekday < 5), "day_indicator"] = 2
+
+        cluster_df.loc[:, "cluster"] = 0
+        cluster_df.loc[cluster_df["day_indicator"] == 1, "cluster"] = cluster_df.loc[cluster_df["day_indicator"] == 1, "month"]
+
+        weekend_cluster_month = [[1, 2, 12], [3, 4, 5], [6, 7, 8], [9, 10, 11]]
+        count = cluster_df["month"].max()
+
+        for day_indicator in [2, 3]:
+            for month_lst in weekend_cluster_month:
+                if not len(cluster_df.loc[(cluster_df["day_indicator"] == day_indicator) & (cluster_df["month"].isin(month_lst)), "cluster"]) == 0:
+                    count += 1
+                    cluster_df.loc[(cluster_df["day_indicator"] == day_indicator) & (cluster_df["month"].isin(month_lst)), "cluster"] = count
+
+        if use_hours:
+            self.__add_hours_cluster(
+                df=cluster_df,
+                clusters_clmn="cluster",
+                hours_clmn="hour",
+                unique_clusters=cluster_df["cluster"].unique(),
+                unique_hours=cluster_df["hour"].unique(),
+            )
+
+        return cluster_df
+
+    def __add_hours_cluster(self, df: pd.DataFrame, clusters_clmn: str, hours_clmn: str, unique_clusters: List[int], unique_hours: List[int]):
+        df["cluster_hours"] = 0
+        count = 1
+        for cluster in unique_clusters:
+            for hour in unique_hours:
+                df.loc[(df[clusters_clmn] == cluster) & (df[hours_clmn] == hour), "cluster_hours"] = count
+                count += 1
+
+    def _create_one_hot_matrix(self, rows: int, clusters: pd.Series, max_clusters: int, adjust_clusters: bool, offset_col: bool):
+        one_hot = np.zeros(shape=(rows, max_clusters))
+        if adjust_clusters:
+            cluster_series = clusters - 1
+        else:
+            cluster_series = clusters
+
+        one_hot[np.arange(rows), cluster_series] = 1
+
+        if offset_col:
+            one_hot[:, -1] = 1
+        else:
+            one_hot = one_hot[:, :-1]
+
+        return one_hot
+
+    def times_to_zero_one(self, h: pd.DatetimeIndex):
+        """
+        Convert any time point into the corresponding fraction w.r.t. the
+        beginning of the year it belongs to.
+        1st of January are always zeros, while 31th of December can be
+        1 / 365 or 1/366 according to the year.
+        The idea is to map any year to [0,1), on which the seasonality
+        curve, periodic on [0,1], is fitted.
+
+        """
+        if not isinstance(h, pd.DatetimeIndex):
+            raise TypeError("index must be of type pd.DatetimeIndex")
+        if len(h) < 1:
+            raise ValueError("index must contain at least one value!")
+        # Build a DataFrame where each point is the start of the year
+        # w.r.t. each date in h
+        start_of_years = pd.to_datetime(h.year.astype(str) + "-01-01 00:00:00").tz_localize(h.tz)
+        # Build a DataFrame where each point is the start of the year
+        # w.r.t. each date in h
+        end_of_years = pd.to_datetime((h.year + 1).astype(str) + "-01-01 00:00:00").tz_localize(h.tz)
+        # Compute then the fractions, using pandas vectorization
+        result = np.array((h - start_of_years) / (end_of_years - start_of_years))
+        # Internal sanity check: all points must lie in [0, 1)
+        assert all(result < 1.0) and all(result >= 0.0)
+        return result
+
+    def _preprocess(self, spot: pd.DataFrame) -> pd.DataFrame:
+        # remove duplicate hours by replacing these with their mean
+        spot = spot.groupby(level=0).mean()
+
+        # include missing hours
+        full_idx = pd.date_range(start=spot.index.min(), end=spot.index.max(), freq="h")
+        spot = spot.reindex(full_idx)
+        spot.index.name = "date"
+        spot.iloc[:, 0] = spot.iloc[:, 0].interpolate(method="linear")
+        return spot
+
+    @staticmethod
+    def _remove_outliers(df: pd.DataFrame, value_clmn: str, grouping_clmn: str, lower_quantile: float, upper_quantile: float):
+        def remove_outliers(series, lower_quantile=lower_quantile, upper_quantile=upper_quantile):
+            lower_bound = series.quantile(lower_quantile)
+            upper_bound = series.quantile(upper_quantile)
+            return series[(series >= lower_bound) & (series <= upper_bound)]
+
+        keep_ids = df.groupby(grouping_clmn, group_keys=False)[value_clmn].apply(remove_outliers).index
+        df_clean = df.loc[df.index.isin(keep_ids), :]
+        return df_clean
+
+    def calibrate(
+        self,
+    ):
+        spot = self.spot_prices.copy()
+        spot = self._preprocess(spot=spot)
+
+        cluster_df = self._create_cluster_df(spot.index, use_hours=True)
+
+        season_shape = self._normalize_year(spot)
+        season_shape = season_shape.resample("D").mean().dropna()
+
+        cluster_df_daily = cluster_df[["year", "month", "day", "weekday", "day_indicator", "cluster"]].drop_duplicates().sort_index()
+        calib_season_df = pd.merge(season_shape, cluster_df_daily, left_index=True, right_index=True)
+
+        if self.remove_outlier_season:
+            value_clmn = calib_season_df.columns[0]
+            calib_season_df = self._remove_outliers(
+                df=calib_season_df,
+                value_clmn=value_clmn,
+                grouping_clmn="cluster",
+                lower_quantile=self.lower_quantile_season,
+                upper_quantile=self.upper_quantile_season,
+            )
+
+        self.__max_cluster = calib_season_df["cluster"].max()
+
+        season_one_hot = self._create_one_hot_matrix(
+            rows=len(calib_season_df),
+            clusters=calib_season_df["cluster"],
+            max_clusters=self.__max_cluster,
+            adjust_clusters=True,  # since clusters do not start at 0
+            offset_col=True,  # since we would ignore the last column because it is obsolete due to our categorical variables,
+            # we actually set it all to 1 to account for the offset in our regression model
+        )
+
+        self._season_regression_params = (
+            np.linalg.inv(season_one_hot.T @ season_one_hot) @ season_one_hot.T @ calib_season_df.iloc[:, 0].to_numpy().reshape(-1, 1)
+        )
+
+        id_shape = self._normalize_year(spot)
+
+        calib_id_df = pd.merge(id_shape, cluster_df, left_index=True, right_index=True)
+        calib_id_df["t"] = self.times_to_zero_one(calib_id_df.index)
+
+        if self.remove_outlier_id:
+            value_clmn = calib_id_df.columns[0]
+            calib_id_df = self._remove_outliers(
+                df=calib_id_df,
+                grouping_clmn="hour",
+                value_clmn=value_clmn,
+                lower_quantile=self.lower_quantile_id,
+                upper_quantile=self.upper_quantile_id,
+            )
+
+        self._id_params = {}
+        for h in calib_id_df["hour"].unique():
+            x = calib_id_df.loc[calib_id_df["hour"] == h, "t"].to_numpy().reshape(-1, 1)
+            y = calib_id_df.loc[calib_id_df["hour"] == h, :].iloc[:, 0].to_numpy().reshape(-1, 1)
+            m = self.k_fourier * 2 + 1
+            x_fit = np.zeros((x.shape[0], m))
+            fourier_parts = []
+            for k in np.arange(start=1, stop=self.k_fourier + 1):
+                fourier_parts.append(np.sin(2 * k * np.pi * x))
+                fourier_parts.append(np.cos(2 * k * np.pi * x))
+
+            x_fit[:, :-1] = np.concatenate(fourier_parts, axis=1)
+            x_fit[:, -1] = 1.0
+            self._id_params[h] = np.linalg.pinv(x_fit) @ y
+
+    def apply(self, apply_schedule: List[dt.datetime]) -> pd.DataFrame:
+        cluster_df = self._create_cluster_df(apply_schedule, use_hours=True)
+
+        cluster_df["t"] = self.times_to_zero_one(cluster_df.index)
+
+        season_one_hot = self._create_one_hot_matrix(
+            rows=len(cluster_df),
+            clusters=cluster_df["cluster"],
+            max_clusters=self.__max_cluster,
+            adjust_clusters=True,
+            offset_col=True,
+        )
+
+        season_fit = season_one_hot @ self._season_regression_params
+        self._season_fit = season_fit
+
+        cluster_df["id_fit"] = 0.0
+        for h in cluster_df["hour"].unique():
+            x = cluster_df.loc[cluster_df["hour"] == h, "t"].to_numpy().reshape(-1, 1)
+            x_fit = np.zeros((x.shape[0], 5))
+            m = self.k_fourier * 2 + 1
+            x_fit = np.zeros((x.shape[0], m))
+            fourier_parts = []
+            for k in np.arange(start=1, stop=self.k_fourier + 1):
+                fourier_parts.append(np.sin(2 * k * np.pi * x))
+                fourier_parts.append(np.cos(2 * k * np.pi * x))
+            x_fit[:, :-1] = np.concatenate(fourier_parts, axis=1)
+            x_fit[:, -1] = 1.0
+            cluster_df.loc[cluster_df["hour"] == h, "id_fit"] = (x_fit @ self._id_params[h]).squeeze()
+
+        cluster_df["shape"] = season_fit.squeeze() * cluster_df["id_fit"].to_numpy()
         shape_df = pd.DataFrame(cluster_df.loc[:, "shape"])
         shape_df = self.normalize_shape(shape=shape_df)
         return shape_df

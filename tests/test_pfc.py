@@ -6,7 +6,7 @@ import numpy as np
 import datetime as dt
 from rivapy.tools.scheduler import SimpleSchedule, OffPeakSchedule, PeakSchedule, GasSchedule, BaseSchedule
 from rivapy.marketdata_tools import PFCShifter
-from rivapy.marketdata_tools.pfc_shaper import PFCShaper, CategoricalRegression, SimpleCategoricalRegression
+from rivapy.marketdata_tools.pfc_shaper import PFCShaper, CategoricalRegression, SimpleCategoricalRegression, CategoricalFourierShaper
 from rivapy.instruments.energy_futures_specifications import EnergyFutureSpecifications
 from rivapy.sample_data.dummy_power_spot_price import spot_price_model
 from rivapy.marketdata.curves import EnergyPriceForwardCurve
@@ -173,7 +173,7 @@ class TestPFCShaper(unittest.TestCase):
 
         apply_schedule = SimpleSchedule(start=dt.datetime(2025, 1, 1), end=dt.datetime(2026, 1, 1), freq="h")
 
-        for regression_obj in [CategoricalRegression, SimpleCategoricalRegression]:
+        for regression_obj in [CategoricalRegression, SimpleCategoricalRegression, CategoricalFourierShaper]:
             pfc_shaper = regression_obj(spot_prices=spot_prices, holiday_calendar=holiday_calendar)
             pfc_shaper.calibrate()
             pfc_fit = pfc_shaper.apply(spot_prices.index)
@@ -191,7 +191,7 @@ class TestPFCShaper(unittest.TestCase):
 
         apply_schedule = BaseSchedule(start=dt.datetime(2025, 12, 31), end=dt.datetime(2027, 1, 1))
 
-        for regression_obj in [CategoricalRegression, SimpleCategoricalRegression]:
+        for regression_obj in [CategoricalRegression, SimpleCategoricalRegression, CategoricalFourierShaper]:
             pfc_shaper = regression_obj(
                 spot_prices=self.example_spot_price_data, holiday_calendar=holiday_calendar, normalization_config=normalization_config
             )
@@ -238,7 +238,7 @@ class TestPFCShaper(unittest.TestCase):
     def test_normalization_without_config(self):
         holiday_calendar = holidays.country_holidays("DE", years=[2024, 2025, 2026])
         apply_schedule = BaseSchedule(start=dt.datetime(2025, 12, 31), end=dt.datetime(2027, 1, 1))
-        for regression_obj in [CategoricalRegression, SimpleCategoricalRegression]:
+        for regression_obj in [CategoricalRegression, SimpleCategoricalRegression, CategoricalFourierShaper]:
             pfc_shaper = regression_obj(spot_prices=self.example_spot_price_data, holiday_calendar=holiday_calendar)
             pfc_shaper.calibrate()
             pfc_shape = pfc_shaper.apply(apply_schedule=apply_schedule.get_schedule())
