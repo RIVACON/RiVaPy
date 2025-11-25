@@ -26,3 +26,8 @@ Shaping
    :members:
    :undoc-members:
    :show-inheritance:
+
+.. autoclass:: rivapy.marketdata_tools.CategoricalFourierShaper
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -310,19 +310,19 @@ class CategoricalRegression(PFCShaper):
     .. math::
         \begin{aligned}
             y_\text{season}(d) &= \frac{\frac{1}{24}\sum_{i=1}^{24}h_i^d}{\frac{1}{N_y}\sum_{i=1}^{N_y} h_i^y} \\
-            \hat{y}_\text{season}(d) & =\beta^{0}_\text{season} + \sum_{c \in C^\text{season}}\beta^c\cdot\mathbb{I}_{\text{Cluster}(d)=c} \\
-            y_\text{id}(h,d) &= \frac{h_i^d}{\frac{1}{24}\sum_{i=1}^{24}h_i^d} \\
-            \hat{y}_\text{id}(h,d) & =\beta^{0}_\text{id} + \sum_{c \in C^\text{id}}\beta^c\cdot\mathbb{I}_{\text{Cluster}(h)=c} \\
-            s(h,d) &= \hat{y}_\text{id}(h,d)\cdot\hat{y}_\text{season}(d)
+            \hat{y}_\text{season}(d) & =\beta^{0}_\text{season} + \sum_{c \in C^\text{season}}\beta^c_{\text{season}}\cdot\mathbb{I}_{\text{Cluster}(d)=c} \\
+            y_\text{id}(h_i,d) &= \frac{h_i^d}{\frac{1}{24}\sum_{i=1}^{24}h_i^d} \\
+            \hat{y}_\text{id}(h,d) & =\beta^{0}_\text{id} + \sum_{c \in C^\text{id}}\beta^c\cdot\mathbb{I}_{\text{Cluster}(h_i^d)=c} \\
+            s(h_i,d) &= \hat{y}_\text{id}(h_i,d)\cdot\hat{y}_\text{season}(d)
         \end{aligned}
     
     where:
     
     :math:`h_i^d`: i-th hour of d-th day
     
-    :math:`h_i^y`: i-th hour of the year y
+    :math:`h_i^y`: i-th hour of the year :math:`y`
     
-    :math:`N_y`: number of days in year y
+    :math:`N_y`: number of days in year :math:`y`
     
     :math:`C^\text{season}`: set of all clusters for the seasonality shape
     
@@ -623,9 +623,51 @@ class CategoricalRegression(PFCShaper):
 
 
 class CategoricalFourierShaper(PFCShaper):
-    r"""
+    r"""Linear regression model using categorical predictor variables to construct a PFC shape.
+    We follow the methodology in:
+    
+    https://cem-a.org/wp-content/uploads/2019/10/A-Structureal-Model-for-Electricity-Forward-Prices.pdf
+    
+    https://ieeexplore.ieee.org/document/6607349
+    
+    https://www.researchgate.net/publication/229051446_Robust_Calculation_and_Parameter_Estimation_of_the_Hourly_Price_Forward_Curve
 
+    We create a regression model for bot the seasonality shape and the intra day shape. For the regression model of the seasonality shape, 
+    the days are split into weekday, Saturdays and Sundays. Public holidays are considered as Sundays while bridge days are expected to behave like Saturdays.
+    Afterwards, weekdays are split into clusters representing the month they are in, while Saturdays and Sundays are assigned to clusters reaching over three months.
+    For the regression model of the intra day shape we use a fourier series to model periodicities over each hour in a year. This way we can model the solar dip over the year more reliably.
+    
+    .. math::
+        \begin{aligned}
+            y_\text{season}(d) &= \frac{\frac{1}{24}\sum_{i=1}^{24}h_i^d}{\frac{1}{N_y}\sum_{i=1}^{N_y} h_i^y} \\
+            \hat{y}_\text{season}(d) & =\beta^{0}_\text{season} + \sum_{c \in C^\text{season}}\beta^c_{\text{season}}\cdot\mathbb{I}_{\text{Cluster}(d)=c} \\
+            y_\text{id}(h_i,d) &= \frac{h_i^d}{\frac{1}{N_y}\sum_{i=1}^{N_y} h_i^y} \\
+            \hat{y}_\text{id}(h_i,d) & =\beta^{0,H(h_i^d)}_\text{id} + \sum_{k=1}^{K}\beta^{k,H(h_i^d)}_\text{id}\cdot\left(\sin(2\pi k\cdot t(h_i^d)) + \cos(2\pi k\cdot t(h_i^d))\right)\\
+            s(h_i,d) &= \hat{y}_\text{id}(h_i,d)\cdot\hat{y}_\text{season}(d)
+        \end{aligned}
+    
+    where:
+    
+    :math:`h_i^d`: i-th hour of d-th day
+    
+    :math:`h_i^y`: i-th hour of the year :math:`y`
+    
+    :math:`N_y`: number of days in year :math:`y`
+    
+    :math:`H(h_i^d)`: hour (0-23) of :math:`h_i^d` independent of the day 
+    
+    :math:`t(h_i^d)`: function which returns a number between [0,1] depending on the position of :math:`h_i^d` in the respecitve year
+    
+    :math:`C^\text{season}`: set of all clusters for the seasonality shape
+    
+    :math:`K`: number of fourier partials
+    
+    :math:`\text{Cluster}(X)`: returns the cluster of X
 
+    :math:`\mathbb{I}_x = \begin{cases}
+    1, & \text{if the } x \text{ expression renders true}\\
+    0, & \text{if the } x \text{ expression renders false}
+    \end{cases}`
 
     Args:
         spot_prices (pd.DataFrame): Data used to calibrate the shaping model.
@@ -633,7 +675,14 @@ class CategoricalFourierShaper(PFCShaper):
         normalization_config (Optional[Dict[Literal["D", "W", "ME"], Optional[int]]], optional): A dictionary configurating the shape normalization periods.
             Here ``D`` defines the number of days at the beginning of the shape over which the individual mean is normalized to one.
             ``W`` defines the number of weeks at the beginning of the shape over which the individual mean is normalized to one.
-            ``ME`` defines the number of months at the beginning of the shape over which the individual mean is normalized to one. The remaining shape is then normalized over the individual years.Defaults to None.
+            ``ME`` defines the number of months at the beginning of the shape over which the individual mean is normalized to one. The remaining shape is then normalized over the individual years. Defaults to None.
+        k_fourier (int): Number of partial sums for the fourier series .Defaults to 2.
+        remove_outlier_season (bool): Wether to remove outliers for the seasonality shape regression. Defaults to False.
+        remove_outlier_id (bool): Wether to remove outliers for the intra day shape regression. Defaults to False.
+        lower_quantile_season (float): Lower quantile for outlier detection. Defauls to 0.005.
+        upper_quantile_season (float): Upper quantile for outlier detection. Defaults to 0.995.
+        lower_quantile_id (float): Lower quantile for outlier detection. Defauls to 0.005.
+        upper_quantile_id (float): Upper quantile for outlier detection. Defaults to 0.995.
     """
 
     def __init__(
@@ -890,8 +939,9 @@ class CategoricalFourierShaper(PFCShaper):
             cluster_df.loc[cluster_df["hour"] == h, "id_fit"] = (x_fit @ self._id_params[h]).squeeze()
 
         cluster_df["shape"] = season_fit.squeeze() * cluster_df["id_fit"].to_numpy()
-        cluster_df["shape"] = self._normalize_year(df=cluster_df.loc[:, "shape"])
-        return pd.DataFrame(cluster_df.loc[:, "shape"])
+        shape_df = pd.DataFrame(cluster_df.loc[:, "shape"])
+        shape_df = self.normalize_shape(shape=shape_df)
+        return shape_df
 
     def _to_dict(self):
         return super()._to_dict()
