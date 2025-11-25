@@ -319,15 +319,15 @@ total number of intra day clusters becomes #Season Clusters * 24.</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{aligned}
     y_\text{season}(d) &amp;= \frac{\frac{1}{24}\sum_{i=1}^{24}h_i^d}{\frac{1}{N_y}\sum_{i=1}^{N_y} h_i^y} \\
-    \hat{y}_\text{season}(d) &amp; =\beta^{0}_\text{season} + \sum_{c \in C^\text{season}}\beta^c\cdot\mathbb{I}_{\text{Cluster}(d)=c} \\
-    y_\text{id}(h,d) &amp;= \frac{h_i^d}{\frac{1}{24}\sum_{i=1}^{24}h_i^d} \\
-    \hat{y}_\text{id}(h,d) &amp; =\beta^{0}_\text{id} + \sum_{c \in C^\text{id}}\beta^c\cdot\mathbb{I}_{\text{Cluster}(h)=c} \\
-    s(h,d) &amp;= \hat{y}_\text{id}(h,d)\cdot\hat{y}_\text{season}(d)
+    \hat{y}_\text{season}(d) &amp; =\beta^{0}_\text{season} + \sum_{c \in C^\text{season}}\beta^c_{\text{season}}\cdot\mathbb{I}_{\text{Cluster}(d)=c} \\
+    y_\text{id}(h_i,d) &amp;= \frac{h_i^d}{\frac{1}{24}\sum_{i=1}^{24}h_i^d} \\
+    \hat{y}_\text{id}(h,d) &amp; =\beta^{0}_\text{id} + \sum_{c \in C^\text{id}}\beta^c\cdot\mathbb{I}_{\text{Cluster}(h_i^d)=c} \\
+    s(h_i,d) &amp;= \hat{y}_\text{id}(h_i,d)\cdot\hat{y}_\text{season}(d)
 \end{aligned}\end{split}\]</div>
 <p>where:</p>
 <p><span class="math notranslate nohighlight">\(h_i^d\)</span>: i-th hour of d-th day</p>
-<p><span class="math notranslate nohighlight">\(h_i^y\)</span>: i-th hour of the year y</p>
-<p><span class="math notranslate nohighlight">\(N_y\)</span>: number of days in year y</p>
+<p><span class="math notranslate nohighlight">\(h_i^y\)</span>: i-th hour of the year <span class="math notranslate nohighlight">\(y\)</span></p>
+<p><span class="math notranslate nohighlight">\(N_y\)</span>: number of days in year <span class="math notranslate nohighlight">\(y\)</span></p>
 <p><span class="math notranslate nohighlight">\(C^\text{season}\)</span>: set of all clusters for the seasonality shape</p>
 <p><span class="math notranslate nohighlight">\(C^\text{id}\)</span>: set of all clusters for the intra day shape</p>
 <p><span class="math notranslate nohighlight">\(\text{Cluster}(X)\)</span>: returns the cluster of X</p>
@@ -416,6 +416,89 @@ Here <code class="docutils literal notranslate"><span class="pre">D</span></code
 <dt class="sig sig-object py" id="rivapy.marketdata_tools.SimpleCategoricalRegression.calibrate">
 <span class="sig-name descname"><span class="pre">calibrate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shaper.html#SimpleCategoricalRegression.calibrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.SimpleCategoricalRegression.calibrate" title="Link to this definition"></a></dt>
 <dd><p>Calibration of the shaping model</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rivapy.marketdata_tools.CategoricalFourierShaper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rivapy.marketdata_tools.</span></span><span class="sig-name descname"><span class="pre">CategoricalFourierShaper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spot_prices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">holiday_calendar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">HolidayBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'D'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'W'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'M'</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_fourier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_outlier_season</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_outlier_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_quantile_season</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_quantile_season</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.995</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_quantile_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_quantile_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.995</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shaper.html#CategoricalFourierShaper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.CategoricalFourierShaper" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rivapy.marketdata_tools.PFCShaper" title="rivapy.marketdata_tools.pfc_shaper.PFCShaper"><code class="xref py py-class docutils literal notranslate"><span class="pre">PFCShaper</span></code></a></p>
+<p>Linear regression model using categorical predictor variables to construct a PFC shape.
+We follow the methodology in:</p>
+<p><a class="reference external" href="https://cem-a.org/wp-content/uploads/2019/10/A-Structureal-Model-for-Electricity-Forward-Prices.pdf">https://cem-a.org/wp-content/uploads/2019/10/A-Structureal-Model-for-Electricity-Forward-Prices.pdf</a></p>
+<p><a class="reference external" href="https://ieeexplore.ieee.org/document/6607349">https://ieeexplore.ieee.org/document/6607349</a></p>
+<p><a class="reference external" href="https://www.researchgate.net/publication/229051446_Robust_Calculation_and_Parameter_Estimation_of_the_Hourly_Price_Forward_Curve">https://www.researchgate.net/publication/229051446_Robust_Calculation_and_Parameter_Estimation_of_the_Hourly_Price_Forward_Curve</a></p>
+<p>We create a regression model for bot the seasonality shape and the intra day shape. For the regression model of the seasonality shape,
+the days are split into weekday, Saturdays and Sundays. Public holidays are considered as Sundays while bridge days are expected to behave like Saturdays.
+Afterwards, weekdays are split into clusters representing the month they are in, while Saturdays and Sundays are assigned to clusters reaching over three months.
+For the regression model of the intra day shape we use a fourier series to model periodicities over each hour in a year. This way we can model the solar dip over the year more reliably.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{aligned}
+    y_\text{season}(d) &amp;= \frac{\frac{1}{24}\sum_{i=1}^{24}h_i^d}{\frac{1}{N_y}\sum_{i=1}^{N_y} h_i^y} \\
+    \hat{y}_\text{season}(d) &amp; =\beta^{0}_\text{season} + \sum_{c \in C^\text{season}}\beta^c_{\text{season}}\cdot\mathbb{I}_{\text{Cluster}(d)=c} \\
+    y_\text{id}(h_i,d) &amp;= \frac{h_i^d}{\frac{1}{N_y}\sum_{i=1}^{N_y} h_i^y} \\
+    \hat{y}_\text{id}(h_i,d) &amp; =\beta^{0,H(h_i^d)}_\text{id} + \sum_{k=1}^{K}\beta^{k,H(h_i^d)}_\text{id}\cdot\left(\sin(2\pi k\cdot t(h_i^d)) + \cos(2\pi k\cdot t(h_i^d))\right)\\
+    s(h_i,d) &amp;= \hat{y}_\text{id}(h_i,d)\cdot\hat{y}_\text{season}(d)
+\end{aligned}\end{split}\]</div>
+<p>where:</p>
+<p><span class="math notranslate nohighlight">\(h_i^d\)</span>: i-th hour of d-th day</p>
+<p><span class="math notranslate nohighlight">\(h_i^y\)</span>: i-th hour of the year <span class="math notranslate nohighlight">\(y\)</span></p>
+<p><span class="math notranslate nohighlight">\(N_y\)</span>: number of days in year <span class="math notranslate nohighlight">\(y\)</span></p>
+<p><span class="math notranslate nohighlight">\(H(h_i^d)\)</span>: hour (0-23) of <span class="math notranslate nohighlight">\(h_i^d\)</span> independent of the day</p>
+<p><span class="math notranslate nohighlight">\(t(h_i^d)\)</span>: function which returns a number between [0,1] depending on the position of <span class="math notranslate nohighlight">\(h_i^d\)</span> in the respecitve year</p>
+<p><span class="math notranslate nohighlight">\(C^\text{season}\)</span>: set of all clusters for the seasonality shape</p>
+<p><span class="math notranslate nohighlight">\(K\)</span>: number of fourier partials</p>
+<p><span class="math notranslate nohighlight">\(\text{Cluster}(X)\)</span>: returns the cluster of X</p>
+<p><span class="math notranslate nohighlight">\(\mathbb{I}_x = \begin{cases}
+1, &amp; \text{if the } x \text{ expression renders true}\\
+0, &amp; \text{if the } x \text{ expression renders false}
+\end{cases}\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spot_prices</strong> (<em>pd.DataFrame</em>) – Data used to calibrate the shaping model.</p></li>
+<li><p><strong>holiday_calendar</strong> (<em>holidays.HolidayBase</em>) – Calendar object to obtain country specific holidays.</p></li>
+<li><p><strong>normalization_config</strong> (<em>Optional</em><em>[</em><em>Dict</em><em>[</em><em>Literal</em><em>[</em><em>&quot;D&quot;</em><em>, </em><em>&quot;W&quot;</em><em>, </em><em>&quot;ME&quot;</em><em>]</em><em>, </em><em>Optional</em><em>[</em><em>int</em><em>]</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – A dictionary configurating the shape normalization periods.
+Here <code class="docutils literal notranslate"><span class="pre">D</span></code> defines the number of days at the beginning of the shape over which the individual mean is normalized to one.
+<code class="docutils literal notranslate"><span class="pre">W</span></code> defines the number of weeks at the beginning of the shape over which the individual mean is normalized to one.
+<code class="docutils literal notranslate"><span class="pre">ME</span></code> defines the number of months at the beginning of the shape over which the individual mean is normalized to one. The remaining shape is then normalized over the individual years. Defaults to None.</p></li>
+<li><p><strong>k_fourier</strong> (<em>int</em>) – Number of partial sums for the fourier series .Defaults to 2.</p></li>
+<li><p><strong>remove_outlier_season</strong> (<em>bool</em>) – Wether to remove outliers for the seasonality shape regression. Defaults to False.</p></li>
+<li><p><strong>remove_outlier_id</strong> (<em>bool</em>) – Wether to remove outliers for the intra day shape regression. Defaults to False.</p></li>
+<li><p><strong>lower_quantile_season</strong> (<em>float</em>) – Lower quantile for outlier detection. Defauls to 0.005.</p></li>
+<li><p><strong>upper_quantile_season</strong> (<em>float</em>) – Upper quantile for outlier detection. Defaults to 0.995.</p></li>
+<li><p><strong>lower_quantile_id</strong> (<em>float</em>) – Lower quantile for outlier detection. Defauls to 0.005.</p></li>
+<li><p><strong>upper_quantile_id</strong> (<em>float</em>) – Upper quantile for outlier detection. Defaults to 0.995.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata_tools.CategoricalFourierShaper.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">apply_schedule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shaper.html#CategoricalFourierShaper.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.CategoricalFourierShaper.apply" title="Link to this definition"></a></dt>
+<dd><p>Applies the model on a schedule in order to generate a shape for future dates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>apply_schedule</strong> (<em>List</em><em>[</em><em>dt.datetime</em><em>]</em>) – List of datetimes in order to generate a shape for future dates.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata_tools.CategoricalFourierShaper.calibrate">
+<span class="sig-name descname"><span class="pre">calibrate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shaper.html#CategoricalFourierShaper.calibrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.CategoricalFourierShaper.calibrate" title="Link to this definition"></a></dt>
+<dd><p>Calibration of the shaping model</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rivapy.marketdata_tools.CategoricalFourierShaper.times_to_zero_one">
+<span class="sig-name descname"><span class="pre">times_to_zero_one</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v2.3.3)"><span class="pre">DatetimeIndex</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rivapy/marketdata_tools/pfc_shaper.html#CategoricalFourierShaper.times_to_zero_one"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivapy.marketdata_tools.CategoricalFourierShaper.times_to_zero_one" title="Link to this definition"></a></dt>
+<dd><p>Convert any time point into the corresponding fraction w.r.t. the
+beginning of the year it belongs to.
+1st of January are always zeros, while 31th of December can be
+1 / 365 or 1/366 according to the year.
+The idea is to map any year to [0,1), on which the seasonality
+curve, periodic on [0,1], is fitted.</p>
 </dd></dl>
 
 </dd></dl>
