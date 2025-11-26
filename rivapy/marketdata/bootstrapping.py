@@ -75,6 +75,7 @@ def bootstrap_curve(
     Returns:
         DiscountCurve: bootstrapped discount curve
     """
+    # print("USING BOOTSTRAPPER V1----------------########################------------")  # DEBUG and REMOVE
     logger.info("Starting bootstrapper.")
 
     # Sanity checks:

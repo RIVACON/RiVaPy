@@ -11,3 +11,4 @@ sandbox/green_ppa/logs/*
 .vscode/launch.json
 dist/
 *.egg-info/
+tests/rivapy_test.log
