@@ -7,6 +7,7 @@ from rivapy.marketdata._logger import logger
 
 ##########
 # Modules
+import copy
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 from typing import Union as _Union, List as _List
@@ -74,6 +75,7 @@ def bootstrap_curve(
     Returns:
         DiscountCurve: bootstrapped discount curve
     """
+    # print("USING BOOTSTRAPPER V1----------------########################------------")  # DEBUG and REMOVE
     logger.info("Starting bootstrapper.")
 
     # Sanity checks:
@@ -90,14 +92,37 @@ def bootstrap_curve(
         logger.info("* curves dictionary provided, will bootstrap forward curve")
 
     #############################################################
-    # initialize: # alternatively..
+    # initialize:
     logger.info("discount curve value init")
+
     yc_dates = [ref_date]
     dfs = [1.0]
+
+    #############################################################
+    # NEW FEATURE: Handle curve extension via curves["initial_curve"] - if provided
+    # useful for using e.g. TBS to extend existing curves
+    initial_curve = None
+    initial_dates_set = set()
+    if curves is not None and "initial_curve" in curves and curves["initial_curve"] is not None:
+        initial_curve = curves["initial_curve"]
+        if not isinstance(initial_curve, DiscountCurve):
+            raise Exception("initial_curve must be a DiscountCurve instance")
+        ic_dates = initial_curve.get_dates()
+        ic_dfs = initial_curve.get_df()
+        if len(ic_dates) == 0 or len(ic_dfs) == 0:
+            raise Exception("initial_curve must contain at least one date and discount factor")
+        for d, df in zip(ic_dates, ic_dfs):
+            if d <= ref_date:
+                continue
+            yc_dates.append(d)
+            dfs.append(df)
+            initial_dates_set.add(d)
+        logger.info(f"Prepopulated curve with {len(initial_dates_set)} initial points from initial_curve.")
+
+    # init DCC
+    dcc = DayCounter(day_count_convention)
     if isinstance(day_count_convention, str):  # normalizes type
         day_count_convention = DayCounterType(day_count_convention)
-
-    dcc = DayCounter(day_count_convention)
 
     #############################################################
     # Sort instruments # Obtain dates
@@ -111,60 +136,81 @@ def bootstrap_curve(
             raise Exception(f"Duplicate expiry date found: {end_date}")
         instruments_by_date[end_date] = (quotes[i], inst)
 
+    if initial_dates_set:
+        filtered_instruments_by_date = {}
+        for d, val in instruments_by_date.items():
+            if d in initial_dates_set:
+                logger.info(f"Skipping instrument at {d} because it exists in initial_curve.")
+                continue
+            filtered_instruments_by_date[d] = val
+        instruments_by_date = filtered_instruments_by_date
+
     #############################################################
-    # base curve creatiion check #TODO think about improving how to handle input curves if given for multicurve bootstrapping
-    # given instrument types, check for required curves
-
+    # Determine instrument types provided
     logger.info("Determine instrument types provided")
-    ins_types = []
-    flag_irs_bootstrapped_as_fwd = False
-    for inst in instruments:
-        ins_type = inst.ins_type()
-        if ins_type not in ins_types:
-            ins_types.append(ins_type)
+    ins_types = set(inst.ins_type() for inst in instruments)
+    has_fra = Instrument.FRA in ins_types
+    has_irs = Instrument.IRS in ins_types
+    has_bs = Instrument.BS in ins_types
+    has_deposit = Instrument.DEPOSIT in ins_types
 
-    logger.info("Toggle single/multi curve bootstrapping")
+    # Determine single vs multi-curve bootstrap
     if "discount_curve" not in curves:
+        # Single-curve bootstrap: create discount curve from instruments
         flag_multi_curve = False
         curves["discount_curve"] = DiscountCurve(
-            "dummy_id_discount", ref_date, yc_dates, dfs, interpolation_type, extrapolation_type, day_count_convention
+            "bootstrapped_discount",
+            ref_date,
+            yc_dates,
+            dfs,
+            interpolation_type,
+            extrapolation_type,
+            day_count_convention,
         )
-        # this means this is the target output curve
-    else:  # This means the discount curve was given. We therefore want to output a FORWARD curve, e.g. 3M, 6M,...
+        # Forward curve for IRS = discount curve (if any IRS present)
+        flag_irs_bootstrapped_as_fwd = has_irs or has_bs
+        if flag_irs_bootstrapped_as_fwd:
+            curves["fixing_curve"] = curves["discount_curve"]
+
+    else:
+        # Multi-curve bootstrap: discount curve is provided, we bootstrap forward curve
         flag_multi_curve = True
 
-    # cannot multicurve bootstrap with deposits involved
+        # FRAs and IRS will build forward curve
+        if "fixing_curve" not in curves:
+            # Create empty forward curve placeholder
+            curves["fixing_curve"] = DiscountCurve(
+                "bootstrapped_forward",
+                ref_date,
+                yc_dates,
+                dfs,  # optionally start with empty DFs
+                interpolation_type,
+                extrapolation_type,
+                day_count_convention,
+            )
+        flag_irs_bootstrapped_as_fwd = False
 
-    if Instrument.DEPOSIT in ins_types and flag_multi_curve == True:
-        raise Exception("Deposits cannot be used in multicurve bootstrapping")
+    # Sanity checks
+    if has_deposit and flag_multi_curve:
+        raise Exception("Deposits cannot be used in multi-curve bootstrapping")
 
-    if Instrument.IRS or Instrument.BS in ins_types:
-        # check if curves has a fixing curve
-        if "fixing_curve" in curves:
-            if not isinstance(curves["fixing_curve"], DiscountCurve):
-                raise Exception("Fixing curve is not of type DiscountCurve")
-
-        else:
-            logger.info("IRS swap present but no fixing curve provided, will use bootstrapped curve in place")
-            flag_irs_bootstrapped_as_fwd = True
-            if flag_multi_curve:
-                curves["fixing_curve"] = DiscountCurve(
-                    "dummy_id_fixing", ref_date, yc_dates, dfs, interpolation_type, extrapolation_type, day_count_convention
-                )
-            else:
-                curves["fixing_curve"] = curves["discount_curve"]
+    # Logging
+    logger.info(f"Bootstrap mode: {'multi-curve' if flag_multi_curve else 'single-curve'}")
+    logger.info(f"Instruments present: {ins_types}")
+    logger.info(f"IRS uses bootstrapped curve as forward: {flag_irs_bootstrapped_as_fwd}")
 
     #############################################################
     # # start with loglinear interpolation to obtain good initial values for all dates
-    # this means i have to pass into the rror function the interpolation types desired which is different
-    # from the inter and extra type we want for the final discount curve
-    # bootstrap loop over ordered expiry dates which is also sorted here
 
     lower = 1.0e-5  # initial bracket values for brentq
     upper = 5.0
 
     logger.info("Sort instruments by date and start bootstrapping")
     for end_date in sorted(instruments_by_date):
+        # If end_date already exists (from initial_curve), skip solving it
+        # if end_date in yc_dates:
+        #     logger.info(f"Skipping instrument at {end_date}: already present in initial_curve.")
+        #     continue
         quote, inst = instruments_by_date[end_date]  # use the market quote to compare with brentq
         yc_dates.append(end_date)  # next date
         prev_df = dfs[-1]  # previous discount factor for bracket search
@@ -198,30 +244,30 @@ def bootstrap_curve(
             # print("---- DEBUG START for end_date:", end_date, "quote(raw):", quote)
             # print("prev_df (guess):", prev_df)
 
-            # Evaluate error_fn at a few DF points (inside realistic DF support (1e-8, 1.0]))
-            test_dfs = [max(1e-10, prev_df * 0.5), max(1e-10, prev_df * 0.9), min(0.9999999, prev_df * 1.0), min(0.9999999, prev_df * 1.1)]
-            for td in test_dfs:
-                try:
-                    val = error_fn(
-                        td,
-                        -1,
-                        dfs,
-                        yc_dates,
-                        inst,
-                        ref_date,
-                        quote,
-                        curves,
-                        # InterpolationType.HAGAN_DF,
-                        # ExtrapolationType.CONSTANT_DF,
-                        InterpolationType.LINEAR_LOG,
-                        ExtrapolationType.LINEAR_LOG,
-                        day_count_convention,
-                        flag_irs_bootstrapped_as_fwd,
-                        flag_multi_curve,
-                    )
-                except Exception as e:
-                    val = f"EXC:{e}"
-                # print(f"error_fn({td:.12f}) = {val}")
+            # # Evaluate error_fn at a few DF points (inside realistic DF support (1e-8, 1.0]))
+            # test_dfs = [max(1e-10, prev_df * 0.5), max(1e-10, prev_df * 0.9), min(0.9999999, prev_df * 1.0), min(0.9999999, prev_df * 1.1)]
+            # for td in test_dfs:
+            #     try:
+            #         val = error_fn(
+            #             td,
+            #             -1,
+            #             dfs,
+            #             yc_dates,
+            #             inst,
+            #             ref_date,
+            #             quote,
+            #             curves,
+            #             # InterpolationType.HAGAN_DF,
+            #             # ExtrapolationType.CONSTANT_DF,
+            #             InterpolationType.LINEAR_LOG,
+            #             ExtrapolationType.LINEAR_LOG,
+            #             day_count_convention,
+            #             flag_irs_bootstrapped_as_fwd,
+            #             flag_multi_curve,
+            #         )
+            #     except Exception as e:
+            #         val = f"EXC:{e}"
+            # print(f"error_fn({td:.12f}) = {val}")
 
             # Also quickly check the sign/units of quote here:
             # print("Raw quote value (from market):", quote, "— are these bps? If so, convert: quote = quote*1e-4")
@@ -264,7 +310,7 @@ def bootstrap_curve(
             raise Exception(f"Initial bootstrap failed at {end_date}: {str(e)}")
 
     # In principle, this will have produced a curve. It can be improved upon with refinement
-
+    logger.info("Initial curve produced")
     #############################################################
     # Iterative refinement with real interpolator
     # this is to improve the values for the whole curve, as each subsequent point is dependant on the previous ones
@@ -273,11 +319,17 @@ def bootstrap_curve(
     logger.info("Iterative refinement step")
     max_diff = 0.0
     iteration = 0
+    # --- NEW: map end_date to correct index in dfs --- for the case of extension via initial_curve creating offset
+    end_date_to_index = {d: yc_dates.index(d) for d in yc_dates if d in instruments_by_date}
     while iteration < max_iterations and (max_diff > tolerance or iteration == 0):
 
         total_evals = 0  #
 
-        for i, end_date in enumerate(sorted(instruments_by_date), start=1):  # iterate through all end dates
+        # for i, end_date in enumerate(sorted(instruments_by_date), start=1):  # iterate through all end dates
+
+        # --- Use only end_dates from instruments_by_date, get correct dfs index ---
+        for end_date in sorted(instruments_by_date):  # iterate through all end dates
+            i = end_date_to_index[end_date]  # <--- CHANGED: dynamically compute index instead of enumerate
             quote, inst = instruments_by_date[end_date]  # use the quote to compare with brentq
 
             ARGS = (
@@ -309,15 +361,20 @@ def bootstrap_curve(
 
         max_diff = 0.0
         # Convergence check
-        for i, end_date in enumerate(sorted(instruments_by_date), start=1):
+        # for i, end_date in enumerate(sorted(instruments_by_date), start=1):
+        for end_date in sorted(instruments_by_date):
+            i = end_date_to_index[end_date]  # <--- CHANGED: use mapped index
+
             # calculate derivative dq/dr using finite differences
             # (q=quote, r=zero rate)
             quote, inst = instruments_by_date[end_date]
             yc = DiscountCurve("dummy_id", ref_date, yc_dates, dfs, interpolation_type, extrapolation_type, day_count_convention)
 
             # Multi-curve logic possible logic and single curve
+            bootstrap_context = {}  # only need to do one time for base and epsilon
             if flag_multi_curve:
                 # This is a forward curve — use Given discount curve for discounting
+                bootstrap_context["flag_multi_curve"] = True
                 curves["fixing_curve"] = yc
                 # Keep discount_curve unchanged
             else:
@@ -326,7 +383,7 @@ def bootstrap_curve(
                 if flag_irs_bootstrapped_as_fwd:  # if it is an irs instrument that needs the forward curve as well as it was not provided
                     curves["fixing_curve"] = yc
 
-            q_model = get_quote(ref_date, inst, curves)  # this curves dict needs to have the updated YC
+            q_model = get_quote(ref_date, inst, curves, bootstrap_context)  # this curves dict needs to have the updated YC
 
             epsilon = 1e-6
             dfs_perturbed = dfs.copy()
@@ -346,9 +403,12 @@ def bootstrap_curve(
                 if flag_irs_bootstrapped_as_fwd:  # if it is an irs instrument that needs the forward curve as well as it was not provided
                     curves["fixing_curve"] = yc_perturbed
 
-            q_model_eps = get_quote(ref_date, inst, curves)
+            q_model_eps = get_quote(ref_date, inst, curves, bootstrap_context)
 
             dq = (q_model_eps - q_model) / epsilon
+            # print(f"dq: {dq}")
+            # print(f"yf: {dcc.yf(ref_date, end_date)}")
+            # print(f"df: {dfs[i]}")
             dr = abs((quote - q_model) / (dq * dcc.yf(ref_date, end_date) * dfs[i]))
             max_diff = max(max_diff, dr)
 
@@ -421,12 +481,12 @@ def error_fn(
     Returns:
         float: difference between target quote and calculated quote
     """
-    df_tmp = dfs.copy()
+    df_tmp = copy.deepcopy(dfs)
     df_tmp[index] = df_val
     # here reference date is used as placeholder
     yc = DiscountCurve("bootstrappedYC", ref_date, yc_dates, df_tmp, interpolation_type, extrapolation_type, day_count_convention)
-    curves_copy = curves.copy()
-
+    curves_copy = copy.deepcopy(curves)
+    bootstrap_context = {"flag_multi_curve": flag_multi_curve}
     # Multi-curve logic possible logic and ssingle curve
     if flag_multi_curve:
         # This is a forward curve — use Given discount curve for discounting
@@ -439,7 +499,7 @@ def error_fn(
         if flag_irs_bootstrapped_as_fwd:  # if it is an irs instrument that needs the forward curve as well or TBS
             curves_copy["fixing_curve"] = yc
 
-    calc_quote = get_quote(ref_date, instrument_spec, curves_copy)
+    calc_quote = get_quote(ref_date, instrument_spec, curves_copy, bootstrap_context)
 
     # # DEBUG statement
     # print("----------------")
@@ -503,6 +563,7 @@ def get_quote(
         DepositSpecification, ForwardRateAgreementSpecification, InterestRateSwapSpecification, InterestRateBasisSwapSpecification
     ],
     curve_dict: dict,
+    bootstrap_context=None,
 ):
     """Get the instrument specific fair quote calculation result to be used in the bootstrapper.
 
@@ -524,9 +585,13 @@ def get_quote(
         quote = DepositPricer.get_implied_simply_compounded_rate(ref_date, instrument_spec, discount_curve)  # TODO assumes no spread curve for now
 
     elif instrument_spec.ins_type() == Instrument.FRA:
-
-        curve_used = curve_dict["discount_curve"]
-        quote = ForwardRateAgreementPricer.compute_fair_rate(ref_date, instrument_spec, forward_curve=curve_used)
+        if bootstrap_context is None or bootstrap_context.get("flag_multi_curve", False) == False:
+            # single curve case
+            curve_used = curve_dict["discount_curve"]
+        else:
+            # multicurve, where discount given, FRA builds forward
+            curve_used = curve_dict["fixing_curve"]
+        quote = ForwardRateAgreementPricer.compute_fair_rate(ref_date, instrument_spec, discount_curve=curve_used)
 
     elif instrument_spec.ins_type() == Instrument.IRS:
 
@@ -546,11 +611,6 @@ def get_quote(
         quote = InterestRateSwapPricer.compute_swap_rate(ref_date, yc_discount, yc_forward, float_leg, fixed_leg, fixing_table, pricing_params)
 
     elif instrument_spec.ins_type() == Instrument.BS:  #  basis swap # E.g. tenor basis swap
-        # 	return InterestRateSwapPricer::computeBasisSpread(
-        # refDate, ycDiscount, ycFwdReceive, ycFwdPay,
-        # basisSwap->getReceiveLeg(), basisSwap->getPayLeg(), basisSwap->getSpreadLeg(),
-        # std::make_shared<const FixingTable>(),
-        # std::make_shared<const InterestRateSwapPricingParameter>()
 
         yc_discount = curve_dict["discount_curve"]
         yc_forward = curve_dict["fixing_curve"]  # THIS IS THE CURVE TO BE SOLVED
@@ -583,42 +643,6 @@ def get_quote(
             fixing_map=fixing_table,
             pricing_params=pricing_params,
         )
-
-        # discount_curve: DiscountCurve,
-        # payLegFixingCurve: DiscountCurve,
-        # receiveLegFixingCurve: DiscountCurve,
-
-        # TODO NEED TO HANDLE WHICH SITUATION WE ARE IN in case which curves are given etc...
-        # HERE IS THE GENRAL GET QUOTE ARGUMENTS
-        #         double YieldCurveBootstrapper::getQuote(const boost::posix_time::ptime& refDate,
-        # 	const std::shared_ptr<const BaseSpecification>& instrument,
-        # 	const std::shared_ptr<const DiscountCurve>& yc,
-        # 	const std::shared_ptr<const DiscountCurve>& discountCurve,
-        # 	const std::shared_ptr<const DiscountCurve>& basisCurve)
-        # {
-        # WHAT TO DO IN CASE OF BASIS SWAP
-        # 	const std::shared_ptr<const InterestRateBasisSwapSpecification> basisSwap = std::dynamic_pointer_cast<const InterestRateBasisSwapSpecification>(instrument);
-        # 	if (basisSwap != nullptr) {
-        # 		if (basisCurve != nullptr) {
-        # 			if (discountCurve != nullptr)
-        # 				return InterestRateSwapPricer::computeBasisSpread(
-        # 					refDate, discountCurve, yc, basisCurve,
-        # 					basisSwap->getReceiveLeg(), basisSwap->getPayLeg(), basisSwap->getSpreadLeg(),
-        # 					std::make_shared<const FixingTable>(),
-        # 					std::make_shared<const InterestRateSwapPricingParameter>()
-        # 				);
-        # 			else
-        # 				return InterestRateSwapPricer::computeBasisSpread(
-        # 					refDate, yc, yc, basisCurve,
-        # 					basisSwap->getReceiveLeg(), basisSwap->getPayLeg(), basisSwap->getSpreadLeg(),
-        # 					std::make_shared<const FixingTable>(),
-        # 					std::make_shared<const InterestRateSwapPricingParameter>()
-        # 				);
-        # 		}
-        # 		else {
-        # 			Analytics_FAIL("Missing basis curve for pricing basis swap");
-        # 		}
-        # 	}
 
     # # DEBUG
     # print(f"Calculated quote for {instrument_spec.ins_type()} is {quote}")
