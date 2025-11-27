@@ -225,7 +225,7 @@
     <span class="k">def</span> <span class="nf">compute_fair_rate</span><span class="p">(</span>
         <span class="n">val_date</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">],</span>
         <span class="n">specification</span><span class="p">:</span> <span class="n">ForwardRateAgreementSpecification</span><span class="p">,</span>
-        <span class="n">forward_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
+        <span class="n">discount_curve</span><span class="p">:</span> <span class="n">DiscountCurve</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Computes the fair rate such that the when used in the specification of the FRA gives a net value of zero.</span>
 <span class="sd">        A discount curve is given, from which the Forward Rate is determined between the two dates.</span>
@@ -246,9 +246,9 @@
         <span class="n">rate_start_date</span> <span class="o">=</span> <span class="n">specification</span><span class="o">.</span><span class="n">_rate_start_date</span>
         <span class="n">rate_end_date</span> <span class="o">=</span> <span class="n">specification</span><span class="o">.</span><span class="n">_rate_end_date</span>
 
-        <span class="n">dcc</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="n">forward_curve</span><span class="o">.</span><span class="n">daycounter</span><span class="p">)</span>
+        <span class="n">dcc</span> <span class="o">=</span> <span class="n">DayCounter</span><span class="p">(</span><span class="n">discount_curve</span><span class="o">.</span><span class="n">daycounter</span><span class="p">)</span>
         <span class="n">yf</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">yf</span><span class="p">(</span><span class="n">rate_start_date</span><span class="p">,</span> <span class="n">rate_end_date</span><span class="p">)</span>
-        <span class="n">fwd_df</span> <span class="o">=</span> <span class="n">forward_curve</span><span class="o">.</span><span class="n">value_fwd</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">rate_start_date</span><span class="p">,</span> <span class="n">rate_end_date</span><span class="p">)</span>  <span class="c1"># REF DATE is =</span>
+        <span class="n">fwd_df</span> <span class="o">=</span> <span class="n">discount_curve</span><span class="o">.</span><span class="n">value_fwd</span><span class="p">(</span><span class="n">val_date</span><span class="p">,</span> <span class="n">rate_start_date</span><span class="p">,</span> <span class="n">rate_end_date</span><span class="p">)</span>  <span class="c1"># REF DATE is =</span>
 
         <span class="n">fair_rate</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">fwd_df</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">yf</span>
 

@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_63755a12c658f778_interest_rate_swap_pricing_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.12.0">coverage.py v7.12.0</a>,
-            created at 2025-11-25 16:42 +0000
+            created at 2025-11-27 14:00 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -208,7 +208,7 @@
     <p class="run"><span class="n"><a id="t126" href="#t126">126</a></span><span class="t">    <span class="key">def</span> <span class="nam">compute_fair_rate</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t127" href="#t127">127</a></span><span class="t">        <span class="nam">val_date</span><span class="op">:</span> <span class="nam">_Union</span><span class="op">[</span><span class="nam">datetime</span><span class="op">,</span> <span class="nam">date</span><span class="op">]</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t128" href="#t128">128</a></span><span class="t">        <span class="nam">specification</span><span class="op">:</span> <span class="nam">ForwardRateAgreementSpecification</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t129" href="#t129">129</a></span><span class="t">        <span class="nam">forward_curve</span><span class="op">:</span> <span class="nam">DiscountCurve</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t129" href="#t129">129</a></span><span class="t">        <span class="nam">discount_curve</span><span class="op">:</span> <span class="nam">DiscountCurve</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t130" href="#t130">130</a></span><span class="t">    <span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t131" href="#t131">131</a></span><span class="t">        <span class="str">"""Computes the fair rate such that the when used in the specification of the FRA gives a net value of zero.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t132" href="#t132">132</a></span><span class="t"><span class="str">        A discount curve is given, from which the Forward Rate is determined between the two dates.</span>&nbsp;</span><span class="r"></span></p>
@@ -229,9 +229,9 @@
     <p class="run"><span class="n"><a id="t147" href="#t147">147</a></span><span class="t">        <span class="nam">rate_start_date</span> <span class="op">=</span> <span class="nam">specification</span><span class="op">.</span><span class="nam">_rate_start_date</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t148" href="#t148">148</a></span><span class="t">        <span class="nam">rate_end_date</span> <span class="op">=</span> <span class="nam">specification</span><span class="op">.</span><span class="nam">_rate_end_date</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t149" href="#t149">149</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t150" href="#t150">150</a></span><span class="t">        <span class="nam">dcc</span> <span class="op">=</span> <span class="nam">DayCounter</span><span class="op">(</span><span class="nam">forward_curve</span><span class="op">.</span><span class="nam">daycounter</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t150" href="#t150">150</a></span><span class="t">        <span class="nam">dcc</span> <span class="op">=</span> <span class="nam">DayCounter</span><span class="op">(</span><span class="nam">discount_curve</span><span class="op">.</span><span class="nam">daycounter</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t151" href="#t151">151</a></span><span class="t">        <span class="nam">yf</span> <span class="op">=</span> <span class="nam">dcc</span><span class="op">.</span><span class="nam">yf</span><span class="op">(</span><span class="nam">rate_start_date</span><span class="op">,</span> <span class="nam">rate_end_date</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t152" href="#t152">152</a></span><span class="t">        <span class="nam">fwd_df</span> <span class="op">=</span> <span class="nam">forward_curve</span><span class="op">.</span><span class="nam">value_fwd</span><span class="op">(</span><span class="nam">val_date</span><span class="op">,</span> <span class="nam">rate_start_date</span><span class="op">,</span> <span class="nam">rate_end_date</span><span class="op">)</span>  <span class="com"># REF DATE is =</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t152" href="#t152">152</a></span><span class="t">        <span class="nam">fwd_df</span> <span class="op">=</span> <span class="nam">discount_curve</span><span class="op">.</span><span class="nam">value_fwd</span><span class="op">(</span><span class="nam">val_date</span><span class="op">,</span> <span class="nam">rate_start_date</span><span class="op">,</span> <span class="nam">rate_end_date</span><span class="op">)</span>  <span class="com"># REF DATE is =</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t153" href="#t153">153</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t154" href="#t154">154</a></span><span class="t">        <span class="nam">fair_rate</span> <span class="op">=</span> <span class="op">(</span><span class="num">1.0</span> <span class="op">/</span> <span class="nam">fwd_df</span> <span class="op">-</span> <span class="num">1</span><span class="op">)</span> <span class="op">/</span> <span class="nam">yf</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t155" href="#t155">155</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -245,7 +245,7 @@
             <a class="nav" href="z_63755a12c658f778_interest_rate_swap_pricing_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.12.0">coverage.py v7.12.0</a>,
-            created at 2025-11-25 16:42 +0000
+            created at 2025-11-27 14:00 +0000
         </p>
     </div>
 </footer>
