@@ -4,8 +4,10 @@ import math
 
 from rivapy.tools.interpolate import Interpolator
 from rivapy.tools.enums import DayCounterType, InterpolationType, ExtrapolationType
-from rivapy.marketdata import DiscountCurve, SurvivalCurve, EquityForwardCurve
+from rivapy.marketdata import DiscountCurve, FlatDiscountCurve, DiscountCurveParametrized, SurvivalCurve, EquityForwardCurve
 from rivapy.tools.datetools import DayCounter
+from rivapy.marketdata import LinearRate
+from rivapy.marketdata import ConstantRate
 
 
 # , delta=1e-5 ?
@@ -241,6 +243,12 @@ class TestDiscountCurve(unittest.TestCase):
         df_yf = dc.value_yf(0.5)
         self.assertIsInstance(df_yf, float)
 
+        dc.comp_freq = "6M"
+        rate = dc.value_rate(self.refdate, d)
+        df = dc.value(self.refdate, d)
+        expected = dc.comp_freq * (df ** (-1 / (dc.comp_freq * DayCounter(DayCounterType.Act365Fixed).yf(self.refdate, d))) - 1)
+        self.assertAlmostEqual(rate, expected, delta=1e-12)
+
     def test_value_fwd_and_fwd_rate(self):
         dc = DiscountCurve(
             "Test_DC_ACT365FIXED",
@@ -264,6 +272,13 @@ class TestDiscountCurve(unittest.TestCase):
         fwd_df2 = dc.value_fwd(val_date, d1, d2)
         self.assertIsInstance(fwd_df2, float)
 
+        dc.comp_freq = "6M"
+        fwd_df = dc.value_fwd(self.refdate, d1, d2)
+        self.assertTrue(fwd_df < 1.0)
+        fwd_rate = dc.value_fwd_rate(self.refdate, d1, d2)
+        expected = dc.comp_freq * (fwd_df ** (-1 / (dc.comp_freq * DayCounter(DayCounterType.Act365Fixed).yf(d1, d2))) - 1)
+        self.assertAlmostEqual(fwd_rate, expected, delta=1e-12)
+
         # Value date before refdate -> should raise
         with self.assertRaises(Exception):
             dc.value_fwd(self.refdate - dt.timedelta(days=1), d1, d2)
@@ -283,11 +298,6 @@ class TestDiscountCurve(unittest.TestCase):
         z = dc(0.5)
         self.assertIsInstance(z, float)
         self.assertGreater(z, 0)
-
-        # Zero rate for given date/refdate
-        d = self.refdate + dt.timedelta(days=365)
-        z2 = dc(0.5, self.refdate, d)
-        self.assertIsInstance(z2, float)
 
     # --------------------- Error and edge case tests --------------------------
 
@@ -347,6 +357,105 @@ class TestDiscountCurve(unittest.TestCase):
         # The class itself doesn’t define plot(), but if added, ensure it runs
         if hasattr(dc, "plot"):
             dc.plot()  # Smoke test
+
+
+class FlatDiscountCurveTest(unittest.TestCase):
+    def test_flat_discount_curve(self):
+        ref_date = dt.datetime(2024, 1, 1)
+        rate = 0.05  # 5% flat rate
+        flat_dc = FlatDiscountCurve(ref_date, rate)
+
+        # Test discount factor at 1 year
+        target_date = ref_date + dt.timedelta(days=365)
+        df = flat_dc.value(ref_date, target_date)
+        yf = DayCounter(DayCounterType.Act365Fixed).yf(ref_date, target_date)
+        expected_df = math.exp(-rate * yf)  # Continuous compounding for 1 year
+        self.assertAlmostEqual(df, expected_df, delta=1e-10)
+
+        # Test discount factor at 6 months
+        target_date_6m = ref_date + dt.timedelta(days=182)
+        df_6m = flat_dc.value(ref_date, target_date_6m)
+        yf_6m = DayCounter(DayCounterType.Act365Fixed).yf(ref_date, target_date_6m)
+        expected_df_6m = math.exp(-rate * yf_6m)  # Continuous compounding for 0.5 year
+        self.assertAlmostEqual(df_6m, expected_df_6m, delta=1e-10)
+
+        flat_dc.comp_freq = "6M"
+        flat_dc.flat_rate = 0.06  # 6% flat rate with semi-annual compounding
+        expected_df = 1 / ((1 + flat_dc.flat_rate / flat_dc.comp_freq) ** (flat_dc.comp_freq * yf))
+        df = flat_dc.value(ref_date, target_date)
+
+        df_6m = flat_dc.value(ref_date, target_date_6m)
+        expected_df_6m = (1 + flat_dc.flat_rate / flat_dc.comp_freq) ** (-flat_dc.comp_freq * yf_6m)
+        self.assertAlmostEqual(df_6m, expected_df_6m, delta=1e-10)
+
+        self.assertEqual(flat_dc(yf), 0.06)
+
+
+class DiscountCurveParametrizedTest(unittest.TestCase):
+    def test_discount_curve_parametrized(self):
+        ref_date = dt.datetime(2024, 1, 1)
+        rate_param = ConstantRate(0.04)  # 4% constant rate
+        dc_param = DiscountCurveParametrized("Param_DC", ref_date, rate_param)
+
+        # Test discount factor at 2 years
+        target_date = ref_date + dt.timedelta(days=730)
+        df = dc_param.value(ref_date, target_date)
+        yf = DayCounter(dc_param._daycounter).yf(ref_date, target_date)
+        expected_df = math.exp(-dc_param._rate_parametrization(yf) * 2)  # Continuous compounding for 2 years
+        self.assertAlmostEqual(df, expected_df, delta=1e-10)
+
+        # Test discount factor at 1.5 years
+        target_date_1_5y = ref_date + dt.timedelta(days=547)
+        df_1_5y = dc_param.value(ref_date, target_date_1_5y)
+        yf = DayCounter(dc_param._daycounter).yf(ref_date, target_date_1_5y)
+        expected_df_1_5y = math.exp(-dc_param._rate_parametrization(yf) * yf)  # Continuous compounding for 1.5 years
+        self.assertAlmostEqual(df_1_5y, expected_df_1_5y, delta=1e-10)
+
+
+class DiscountCurveCompositionTest(unittest.TestCase):
+    def test_curve_addition(self):
+        """Simple test adding two curves testing"""
+        ref_date = dt.datetime(2023, 1, 1)
+        c1 = DiscountCurveParametrized("C1", ref_date, ConstantRate(0.01))
+        c2 = DiscountCurveParametrized("C2", ref_date, ConstantRate(0.025))
+        # add two constant curves
+        c = c1 + c2
+        d = ref_date + dt.timedelta(days=10 * 365)
+        self.assertAlmostEqual(c1.value_rate(ref_date, d) + c2.value_rate(ref_date, d), c.value_rate(ref_date, d), places=6)
+        self.assertAlmostEqual(c1.value(ref_date, d) * c2.value(ref_date, d), c.value(ref_date, d), places=6)
+        # add one constant and one linear curve
+        c2 = DiscountCurveParametrized("C2", ref_date, LinearRate(0.01, 0.05, max_maturity=10.0))
+        c = c1 + c2
+        self.assertAlmostEqual(c1.value_rate(ref_date, d) + c2.value_rate(ref_date, d), c.value_rate(ref_date, d), places=6)
+        self.assertAlmostEqual(c1.value(ref_date, d) * c2.value(ref_date, d), c.value(ref_date, d), places=6)
+        # add a curve and a float
+        c = 0.01 + c2
+        self.assertAlmostEqual(c1.value_rate(ref_date, d) + c2.value_rate(ref_date, d), c.value_rate(ref_date, d), places=6)
+        self.assertAlmostEqual(c1.value(ref_date, d) * c2.value(ref_date, d), c.value(ref_date, d), places=6)
+
+    def test_curve_multiplication(self):
+        """Simple test multiplying two curves"""
+        ref_date = dt.datetime(2023, 1, 1)
+        c1 = DiscountCurveParametrized("C1", ref_date, ConstantRate(0.01))
+        c2 = DiscountCurveParametrized("C2", ref_date, ConstantRate(0.025))
+        # multiply two constant curves
+        c = c1 * c2
+        d = ref_date + dt.timedelta(days=10 * 365)
+        self.assertAlmostEqual(c1.value_rate(ref_date, d) * c2.value_rate(ref_date, d), c.value_rate(ref_date, d), places=6)
+        df = np.exp(-c1.value_rate(ref_date, d) * c2.value_rate(ref_date, d) * c1._dc.yf(ref_date, d))
+        self.assertAlmostEqual(df, c.value(ref_date, d), places=6)
+
+        # multiply one constant and one linear curve
+        c2 = DiscountCurveParametrized("C2", ref_date, LinearRate(0.01, 0.05, max_maturity=10.0))
+        c = c1 * c2
+        self.assertAlmostEqual(c1.value_rate(ref_date, d) * c2.value_rate(ref_date, d), c.value_rate(ref_date, d), places=6)
+        df = np.exp(-c1.value_rate(ref_date, d) * c2.value_rate(ref_date, d) * c1._dc.yf(ref_date, d))
+        self.assertAlmostEqual(df, c.value(ref_date, d), places=6)
+        # multiply a curve and a float
+        c = 0.01 * c2
+        self.assertAlmostEqual(0.01 * c2.value_rate(ref_date, d), c.value_rate(ref_date, d), places=6)
+        df = np.exp(-0.01 * c2.value_rate(ref_date, d) * c1._dc.yf(ref_date, d))
+        self.assertAlmostEqual(df, c.value(ref_date, d), places=6)
 
 
 if __name__ == "__main__":

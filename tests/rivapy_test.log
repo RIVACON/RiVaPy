@@ -1,0 +1,215 @@
+2025-11-23 00:26:45,940 - rivapy.tools - WARNING - Found start date 2023-12-31 00:00:00 such that calc_end_day(start_date, ...) == end_day, but start date is not a business day in the given calendar.
+2025-11-23 00:26:45,942 - rivapy.instruments - ERROR - End dates of notional structure are not set.
+2025-11-23 00:26:45,942 - rivapy.tools - WARNING - Found start date 2023-12-31 00:00:00 such that calc_end_day(start_date, ...) == end_day, but start date is not a business day in the given calendar.
+2025-11-23 00:26:45,942 - rivapy.instruments - ERROR - End dates of notional structure are not set.
+2025-11-23 00:26:45,942 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676515418570666
+2025-11-23 00:26:45,942 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9214497170399171
+2025-11-23 00:26:45,942 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9214497170399171
+2025-11-23 00:26:45,942 - rivapy.instruments - INFO - Start computing bond yield PV_BOND, dirty price: 101.59047799847662
+2025-11-23 00:26:45,942 - rivapy.tools - WARNING - Found start date 2023-12-31 00:00:00 such that calc_end_day(start_date, ...) == end_day, but start date is not a business day in the given calendar.
+2025-11-23 00:26:45,942 - rivapy.instruments - ERROR - End dates of notional structure are not set.
+2025-11-23 00:26:45,942 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 1.1622905149690195
+2025-11-23 00:26:45,942 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 1.453751626344002
+2025-11-23 00:26:45,942 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 1.453751626344002
+2025-11-23 00:26:45,942 - rivapy.instruments - DEBUG - Target function called with r: -0.2, price: 158.4553733409653, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,942 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.5392614021764246
+2025-11-23 00:26:45,942 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.21516373837478941
+2025-11-23 00:26:45,945 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.21516373837478941
+2025-11-23 00:26:45,945 - rivapy.instruments - DEBUG - Target function called with r: 1.5, price: 25.288499540235016, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,945 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.7521457217816301
+2025-11-23 00:26:45,945 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.49233814640975
+2025-11-23 00:26:45,945 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.49233814640975
+2025-11-23 00:26:45,945 - rivapy.instruments - DEBUG - Target function called with r: 0.5259337050060016, price: 55.4562339819319, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,945 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.8839820813816095
+2025-11-23 00:26:45,945 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.7358033876989392
+2025-11-23 00:26:45,945 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.7358033876989392
+2025-11-23 00:26:45,946 - rivapy.instruments - DEBUG - Target function called with r: 0.20078144747265714, price: 81.67926611529666, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,946 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9881000423775804
+2025-11-23 00:26:45,946 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9706567930142648
+2025-11-23 00:26:45,946 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9706567930142648
+2025-11-23 00:26:45,946 - rivapy.instruments - DEBUG - Target function called with r: 0.017921026070907203, price: 106.8594634783857, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,946 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9638289220012869
+2025-11-23 00:26:45,947 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9124204447801206
+2025-11-23 00:26:45,947 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9124204447801206
+2025-11-23 00:26:45,947 - rivapy.instruments - DEBUG - Target function called with r: 0.056184781168721866, price: 100.6232913119191, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,947 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9674960827468282
+2025-11-23 00:26:45,947 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9210814751121322
+2025-11-23 00:26:45,947 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9210814751121322
+2025-11-23 00:26:45,947 - rivapy.instruments - DEBUG - Target function called with r: 0.050250340373885344, price: 101.55103530050803, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,947 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676515950069692
+2025-11-23 00:26:45,948 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.921449842953173
+2025-11-23 00:26:45,948 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.921449842953173
+2025-11-23 00:26:45,948 - rivapy.instruments - DEBUG - Target function called with r: 0.049999914428231616, price: 101.59049148511802, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,948 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676515418402318
+2025-11-23 00:26:45,948 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.921449717000035
+2025-11-23 00:26:45,948 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.921449717000035
+2025-11-23 00:26:45,948 - rivapy.instruments - DEBUG - Target function called with r: 0.050000000027104426, price: 101.59047799420483, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,948 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676515418570664
+2025-11-23 00:26:45,948 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.921449717039917
+2025-11-23 00:26:45,948 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.921449717039917
+2025-11-23 00:26:45,948 - rivapy.instruments - DEBUG - Target function called with r: 0.05000000000000027, price: 101.59047799847663, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,948 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676515418564453
+2025-11-23 00:26:45,948 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9214497170384452
+2025-11-23 00:26:45,948 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9214497170384452
+2025-11-23 00:26:45,948 - rivapy.instruments - DEBUG - Target function called with r: 0.05000000000100029, price: 101.59047799831897, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,948 - rivapy.instruments - INFO - Finished computing bond yield
+2025-11-23 00:26:45,949 - rivapy.tools - WARNING - Found start date 2023-12-31 00:00:00 such that calc_end_day(start_date, ...) == end_day, but start date is not a business day in the given calendar.
+2025-11-23 00:26:45,949 - rivapy.instruments - ERROR - End dates of notional structure are not set.
+2025-11-23 00:26:45,949 - rivapy.instruments - INFO - Start computing bond yield PV_BOND, dirty price: 101.59047799847662
+2025-11-23 00:26:45,949 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 1.1622905149690195
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 1.453751626344002
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 1.453751626344002
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Target function called with r: -0.2, price: 158.4553733409653, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.5392614021764246
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.21516373837478941
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.21516373837478941
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Target function called with r: 1.5, price: 25.288499540235016, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.7521457217816301
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.49233814640975
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.49233814640975
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Target function called with r: 0.5259337050060016, price: 55.4562339819319, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.8839820813816095
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.7358033876989392
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.7358033876989392
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Target function called with r: 0.20078144747265714, price: 81.67926611529666, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9881000423775804
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9706567930142648
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9706567930142648
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Target function called with r: 0.017921026070907203, price: 106.8594634783857, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9638289220012869
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9124204447801206
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9124204447801206
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Target function called with r: 0.056184781168721866, price: 100.6232913119191, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9674960827468282
+2025-11-23 00:26:45,950 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9210814751121322
+2025-11-23 00:26:45,951 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9210814751121322
+2025-11-23 00:26:45,951 - rivapy.instruments - DEBUG - Target function called with r: 0.050250340373885344, price: 101.55103530050803, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,951 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676515950069692
+2025-11-23 00:26:45,951 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.921449842953173
+2025-11-23 00:26:45,951 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.921449842953173
+2025-11-23 00:26:45,951 - rivapy.instruments - DEBUG - Target function called with r: 0.049999914428231616, price: 101.59049148511802, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,951 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676515418402318
+2025-11-23 00:26:45,951 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.921449717000035
+2025-11-23 00:26:45,951 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.921449717000035
+2025-11-23 00:26:45,951 - rivapy.instruments - DEBUG - Target function called with r: 0.050000000027104426, price: 101.59047799420483, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,951 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676515418570664
+2025-11-23 00:26:45,951 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.921449717039917
+2025-11-23 00:26:45,951 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.921449717039917
+2025-11-23 00:26:45,951 - rivapy.instruments - DEBUG - Target function called with r: 0.05000000000000027, price: 101.59047799847663, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,951 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676515418564453
+2025-11-23 00:26:45,951 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9214497170384452
+2025-11-23 00:26:45,951 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9214497170384452
+2025-11-23 00:26:45,951 - rivapy.instruments - DEBUG - Target function called with r: 0.05000000000100029, price: 101.59047799831897, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,952 - rivapy.instruments - INFO - Finished computing bond yield
+2025-11-23 00:26:45,952 - rivapy.instruments - INFO - Start computing macaulay duration for bond PV_BOND
+2025-11-23 00:26:45,952 - rivapy.tools - WARNING - Found start date 2023-12-31 00:00:00 such that calc_end_day(start_date, ...) == end_day, but start date is not a business day in the given calendar.
+2025-11-23 00:26:45,952 - rivapy.instruments - ERROR - End dates of notional structure are not set.
+2025-11-23 00:26:45,953 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676515418570666
+2025-11-23 00:26:45,953 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9214497170399171
+2025-11-23 00:26:45,953 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9214497170399171
+2025-11-23 00:26:45,953 - rivapy.instruments - INFO - Finished computing macaulay duration for bond PV_BOND, macaulay_duration: 1.6263474925462504
+2025-11-23 00:26:45,953 - rivapy.instruments - INFO - Start computing z-spread for bond PV_BOND, dirty price: 101.59047799847662
+2025-11-23 00:26:45,953 - rivapy.instruments - ERROR - To compute z-spread with floating rate bonds, cashflows, or fwd_curve must be provided to calculate cashflows.
+2025-11-23 00:26:45,953 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 1.1157572316241158
+2025-11-23 00:26:45,953 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 1.3132401662829534
+2025-11-23 00:26:45,953 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 1.3132401662829534
+2025-11-23 00:26:45,953 - rivapy.instruments - DEBUG - Target function called with r: -0.2, price: 143.4690036178307, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,953 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.5321120041477357
+2025-11-23 00:26:45,953 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.20813689302884447
+2025-11-23 00:26:45,954 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.20813689302884447
+2025-11-23 00:26:45,954 - rivapy.instruments - DEBUG - Target function called with r: 1.5, price: 24.51493378876735, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,954 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.7790157149291188
+2025-11-23 00:26:45,954 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.5372645105446998
+2025-11-23 00:26:45,954 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.5372645105446998
+2025-11-23 00:26:45,954 - rivapy.instruments - DEBUG - Target function called with r: 0.3984956517688449, price: 60.30785218183908, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,954 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9093628449302448
+2025-11-23 00:26:45,954 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.7894892466092873
+2025-11-23 00:26:45,954 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.7894892466092873
+2025-11-23 00:26:45,954 - rivapy.instruments - DEBUG - Target function called with r: 0.10139211702672507, price: 87.44318511862639, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,954 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.976694480825994
+2025-11-23 00:26:45,954 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9430217890075057
+2025-11-23 00:26:45,954 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9430217890075057
+2025-11-23 00:26:45,954 - rivapy.instruments - DEBUG - Target function called with r: -0.014392051753629329, price: 103.90076024991806, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,954 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9664970471422473
+2025-11-23 00:26:45,955 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9187171214614707
+2025-11-23 00:26:45,955 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9187171214614707
+2025-11-23 00:26:45,955 - rivapy.instruments - DEBUG - Target function called with r: 0.0018615037062241074, price: 101.29778298916565, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,955 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676305161414847
+2025-11-23 00:26:45,955 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9213999074772619
+2025-11-23 00:26:45,955 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9213999074772619
+2025-11-23 00:26:45,955 - rivapy.instruments - DEBUG - Target function called with r: 3.385248606597286e-05, price: 101.58514286581993, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,955 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676515428295996
+2025-11-23 00:26:45,955 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9214497193438684
+2025-11-23 00:26:45,955 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9214497193438684
+2025-11-23 00:26:45,955 - rivapy.instruments - DEBUG - Target function called with r: -1.565785886954447e-09, price: 101.59047824525419, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,955 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676515418570248
+2025-11-23 00:26:45,955 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9214497170398182
+2025-11-23 00:26:45,955 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9214497170398182
+2025-11-23 00:26:45,955 - rivapy.instruments - DEBUG - Target function called with r: 6.7282763194419e-14, price: 101.59047799846603, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,956 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.967651541857646
+2025-11-23 00:26:45,956 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9214497170412899
+2025-11-23 00:26:45,956 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9214497170412899
+2025-11-23 00:26:45,956 - rivapy.instruments - DEBUG - Target function called with r: -9.32717236805581e-13, price: 101.59047799862368, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,956 - rivapy.instruments - INFO - Finished computing z-spread.
+2025-11-23 00:26:45,957 - rivapy.instruments - INFO - Start computing macaulay duration for bond PV_BOND
+2025-11-23 00:26:45,958 - rivapy.tools - WARNING - Found start date 2023-12-31 00:00:00 such that calc_end_day(start_date, ...) == end_day, but start date is not a business day in the given calendar.
+2025-11-23 00:26:45,958 - rivapy.instruments - ERROR - End dates of notional structure are not set.
+2025-11-23 00:26:45,958 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676515418570666
+2025-11-23 00:26:45,958 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9214497170399171
+2025-11-23 00:26:45,958 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9214497170399171
+2025-11-23 00:26:45,958 - rivapy.instruments - INFO - Finished computing macaulay duration for bond PV_BOND, macaulay_duration: 1.6263474925462504
+2025-11-23 00:26:45,958 - rivapy.instruments - INFO - Start computing modified duration for bond PV_BOND
+2025-11-23 00:26:45,958 - rivapy.instruments - INFO - Start computing macaulay duration for bond PV_BOND
+2025-11-23 00:26:45,958 - rivapy.tools - WARNING - Found start date 2023-12-31 00:00:00 such that calc_end_day(start_date, ...) == end_day, but start date is not a business day in the given calendar.
+2025-11-23 00:26:45,958 - rivapy.instruments - ERROR - End dates of notional structure are not set.
+2025-11-23 00:26:45,958 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676515418570666
+2025-11-23 00:26:45,958 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9214497170399171
+2025-11-23 00:26:45,958 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9214497170399171
+2025-11-23 00:26:45,958 - rivapy.instruments - INFO - Finished computing macaulay duration for bond PV_BOND, macaulay_duration: 1.6263474925462504
+2025-11-23 00:26:45,958 - rivapy.instruments - INFO - Start computing bond yield PV_BOND, dirty price: 101.59047799847662
+2025-11-23 00:26:45,958 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 1.1622905149690195
+2025-11-23 00:26:45,958 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 1.453751626344002
+2025-11-23 00:26:45,962 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 1.453751626344002
+2025-11-23 00:26:45,963 - rivapy.instruments - DEBUG - Target function called with r: -0.2, price: 158.4553733409653, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,963 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.5392614021764246
+2025-11-23 00:26:45,963 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.21516373837478941
+2025-11-23 00:26:45,963 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.21516373837478941
+2025-11-23 00:26:45,963 - rivapy.instruments - DEBUG - Target function called with r: 1.5, price: 25.288499540235016, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,963 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.7521457217816301
+2025-11-23 00:26:45,964 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.49233814640975
+2025-11-23 00:26:45,964 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.49233814640975
+2025-11-23 00:26:45,964 - rivapy.instruments - DEBUG - Target function called with r: 0.5259337050060016, price: 55.4562339819319, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,964 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.8839820813816095
+2025-11-23 00:26:45,964 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.7358033876989392
+2025-11-23 00:26:45,964 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.7358033876989392
+2025-11-23 00:26:45,964 - rivapy.instruments - DEBUG - Target function called with r: 0.20078144747265714, price: 81.67926611529666, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,964 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9881000423775804
+2025-11-23 00:26:45,964 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9706567930142648
+2025-11-23 00:26:45,965 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9706567930142648
+2025-11-23 00:26:45,965 - rivapy.instruments - DEBUG - Target function called with r: 0.017921026070907203, price: 106.8594634783857, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,965 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9638289220012869
+2025-11-23 00:26:45,965 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9124204447801206
+2025-11-23 00:26:45,965 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9124204447801206
+2025-11-23 00:26:45,965 - rivapy.instruments - DEBUG - Target function called with r: 0.056184781168721866, price: 100.6232913119191, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,965 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9674960827468282
+2025-11-23 00:26:45,965 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9210814751121322
+2025-11-23 00:26:45,966 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9210814751121322
+2025-11-23 00:26:45,966 - rivapy.instruments - DEBUG - Target function called with r: 0.050250340373885344, price: 101.55103530050803, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,966 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676515950069692
+2025-11-23 00:26:45,966 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.921449842953173
+2025-11-23 00:26:45,966 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.921449842953173
+2025-11-23 00:26:45,966 - rivapy.instruments - DEBUG - Target function called with r: 0.049999914428231616, price: 101.59049148511802, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,966 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676515418402318
+2025-11-23 00:26:45,966 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.921449717000035
+2025-11-23 00:26:45,966 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.921449717000035
+2025-11-23 00:26:45,967 - rivapy.instruments - DEBUG - Target function called with r: 0.050000000027104426, price: 101.59047799420483, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,967 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676515418570664
+2025-11-23 00:26:45,967 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.921449717039917
+2025-11-23 00:26:45,967 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.921449717039917
+2025-11-23 00:26:45,967 - rivapy.instruments - DEBUG - Target function called with r: 0.05000000000000027, price: 101.59047799847663, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,967 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2024-01-02 00:00:00, df: 0.9676515418564453
+2025-11-23 00:26:45,967 - rivapy.instruments - DEBUG - Cashflow 5.000000000000004, date: 2025-01-02 00:00:00, df: 0.9214497170384452
+2025-11-23 00:26:45,967 - rivapy.instruments - DEBUG - Cashflow 100.0, date: 2025-01-02 00:00:00, df: 0.9214497170384452
+2025-11-23 00:26:45,967 - rivapy.instruments - DEBUG - Target function called with r: 0.05000000000100029, price: 101.59047799831897, target_dirty_price: 101.59047799847662
+2025-11-23 00:26:45,968 - rivapy.instruments - INFO - Finished computing bond yield
+2025-11-23 00:26:45,968 - rivapy.instruments - INFO - Finished computing modified duration for bond PV_BOND, modified_duration: 1.5489023738535714
